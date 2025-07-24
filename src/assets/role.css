@@ -1,0 +1,184 @@
+/* Role selection shared style */
+@import "tailwindcss";
+
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f6f7fb;
+  padding: 0;
+  margin: 0;
+}
+
+.login-card {
+  display: flex;
+  width: 900px;
+  max-width: 95%;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+/* Left branding panel */
+.login-card-left {
+  flex: 1;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+}
+
+.branding {
+  text-align: left;
+}
+
+.branding h2 {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.branding p {
+  font-size: 16px;
+  color: #ddd;
+}
+
+/* Right role selection form */
+.login-right {
+  flex: 1.5;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-box {
+  width: 100%;
+  max-width: 360px;
+  
+}
+
+.form-box h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.form-box p {
+  font-size: 14px;
+  margin-bottom:5px;
+  color: #666;
+}
+
+.role-options {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.role-box {
+  flex: 1;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 15px 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #fff;
+  text-align: center;
+}
+
+.role-icon{
+  padding: 10px;
+}
+.role-box:hover {
+  border-color: #0d0e2f;
+}
+
+.role-box.selected {
+  border: 2px solid #0d0e2f;
+  background-color: #f0f3ff;
+}
+
+.role-box p {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+
+.error-text{
+  color: red!important;
+}
+/* Continue Button */
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #0f1533;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+}
+
+.login-btn:hover {
+  background-color: #1a1c3a;
+}
+
+/* Back link */
+.signup-link {
+  font-size: 14px;
+  margin-top: 10px;
+  color: #555;
+}
+
+.signup-link span {
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.signup-link span:hover {
+  text-decoration: underline;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .login-container{
+    height: 100vh;
+  }
+  .login-card {
+    flex-direction: column;
+    height: auto;
+    margin: 20px 0;
+  }
+
+  .login-card-left {
+    padding: 30px 20px;
+    text-align: center;
+  }
+
+  .branding h2 {
+    font-size: 24px;
+  }
+
+  .branding p {
+    font-size: 14px;
+  }
+
+  .login-right {
+    padding: 30px 20px;
+  }
+
+  .role-options {
+    justify-content: center;
+    gap: 10px;
+  }
+}
