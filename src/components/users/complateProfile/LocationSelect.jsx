@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Select, Input  } from "antd";
+import postalRegexList from './postalRegex.json'
+
+const { Option } = Select;
 
 export default function LocationSelect({ onChange }) {
   const [countries, setCountries] = useState([]);
@@ -9,15 +13,33 @@ export default function LocationSelect({ onChange }) {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [zipError, setZipError] = useState("");
 
   const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
   const [error, setError] = useState({ countries: "", states: "", cities: "" });
+
+
+   const getRegexForCountry = (iso) => {
+    const entry = postalRegexList.find(e => e.ISO === iso);
+    return entry?.Regex ? new RegExp(entry.Regex) : null;
+  };
+
+  const validateZip = (iso, code) => {
+    if (!code) return "";
+    const regex = getRegexForCountry(iso);
+    return regex ? (regex.test(code.trim()) ? "" : `Invalid ZIP/PIN for ${iso}`) : "";
+  };
+
+
+
 
   const countryAPI = "https://countriesnow.space/api/v0.1/countries/positions";
   const stateAPI = "https://countriesnow.space/api/v0.1/countries/states";
   const cityAPI = "https://countriesnow.space/api/v0.1/countries/state/cities";
 
-  // Fetch countries on mount
+
+
   useEffect(() => {
     setLoading(prev => ({ ...prev, countries: true }));
     axios.get(countryAPI)
@@ -29,7 +51,6 @@ export default function LocationSelect({ onChange }) {
       .finally(() => setLoading(prev => ({ ...prev, countries: false })));
   }, []);
 
-  // Fetch states on country change
   useEffect(() => {
     if (!selectedCountry) {
       setStates([]);
@@ -47,7 +68,6 @@ export default function LocationSelect({ onChange }) {
       .finally(() => setLoading(prev => ({ ...prev, states: false })));
   }, [selectedCountry]);
 
-  // Fetch cities on state change
   useEffect(() => {
     if (!selectedCountry || !selectedState) {
       setCities([]);
@@ -67,95 +87,122 @@ export default function LocationSelect({ onChange }) {
       .finally(() => setLoading(prev => ({ ...prev, cities: false })));
   }, [selectedState]);
 
-  // Send selected values to parent
+
+    useEffect(() => {
+    const iso = countries.find(c => c.name === selectedCountry)?.iso2;
+    setZipError(validateZip(iso, zipCode));
+  }, [zipCode, selectedCountry, countries]);
+
   useEffect(() => {
     if (onChange) {
       onChange({
         country: selectedCountry,
         state: selectedState,
         city: selectedCity,
+        zipCode, zipError
       });
     }
-  }, [selectedCountry, selectedState, selectedCity]);
+  }, [selectedCountry, selectedState, selectedCity, zipCode, zipError]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-      {/* Country Select */}
-      <div className="w-full">
-        <label htmlFor="country" className="block mb-1">Country</label>
-        <select
-          id="country"
-          value={selectedCountry}
-          onChange={(e) => {
-            setSelectedCountry(e.target.value);
+      {/* Country */}
+      <div>
+        <label className="block mb-1">Country</label>
+        <Select
+        size="large"
+          showSearch
+          placeholder="Select Country"
+          value={selectedCountry || undefined}
+          onChange={(value) => {
+            setSelectedCountry(value);
             setSelectedState("");
             setSelectedCity("");
           }}
-          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          loading={loading.countries}
+          style={{ width: "100%" }}
+          optionFilterProp="children"
+          filterOption={(input, option) =>
+            option?.children?.toLowerCase().includes(input.toLowerCase())
+          }
         >
-          <option value="">Select Country</option>
-          {loading.countries ? (
-            <option>Loading...</option>
-          ) : (
-            countries.map((country) => (
-              <option key={country.name} value={country.name}>
-                {country.name}
-              </option>
-            ))
-          )}
-        </select>
+          {countries.map((country) => (
+            <Option key={country.name} value={country.name}>
+              {country.name}
+            </Option>
+          ))}
+        </Select>
         {error.countries && <p className="text-red-500 text-sm mt-1">{error.countries}</p>}
       </div>
 
-      {/* State Select */}
-      <div className="w-full">
-        <label htmlFor="state" className="block mb-1">State</label>
-        <select
-          id="state"
-          value={selectedState}
-          onChange={(e) => {
-            setSelectedState(e.target.value);
+      {/* State */}
+      <div>
+        <label className="block mb-1">State</label>
+        <Select
+          showSearch
+          size="large"
+          placeholder="Select State"
+          value={selectedState || undefined}
+          onChange={(value) => {
+            setSelectedState(value);
             setSelectedCity("");
           }}
-          disabled={!selectedCountry || loading.states}
-          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+          loading={loading.states}
+          disabled={!selectedCountry}
+          style={{ width: "100%" }}
+          optionFilterProp="children"
+          filterOption={(input, option) =>
+            option?.children?.toLowerCase().includes(input.toLowerCase())
+          }
         >
-          <option value="">Select State</option>
-          {loading.states ? (
-            <option>Loading...</option>
-          ) : (
-            states.map((state) => (
-              <option key={state.name} value={state.name}>
-                {state.name}
-              </option>
-            ))
-          )}
-        </select>
+          {states.map((state) => (
+            <Option key={state.name} value={state.name}>
+              {state.name}
+            </Option>
+          ))}
+        </Select>
         {error.states && <p className="text-red-500 text-sm mt-1">{error.states}</p>}
       </div>
 
-      {/* City Select */}
-      <div className="w-full ">
-        <label htmlFor="city" className="block mb-1">City</label>
-        <select
-          id="city"
-          value={selectedCity}
-          onChange={(e) => setSelectedCity(e.target.value)}
-          disabled={!selectedState || loading.cities}
-          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+      {/* City */}
+      <div>
+        <label className="block mb-1">City</label>
+        <Select
+          showSearch
+          size="large"
+          placeholder="Select City"
+          value={selectedCity || undefined}
+          onChange={setSelectedCity}
+          loading={loading.cities}
+          disabled={!selectedState}
+          style={{ width: "100%" }}
+          optionFilterProp="children"
+          filterOption={(input, option) =>
+            option?.children?.toLowerCase().includes(input.toLowerCase())
+          }
+          dropdownStyle={{ maxHeight: 200 }} // custom height of dropdown
         >
-          <option value="">Select City</option>
-          {loading.cities ? (
-            <option>Loading...</option>
-          ) : (
-            cities.map((city, i) => (
-              <option key={i} value={city}>
-                {city}
-              </option>
-            ))
-          )}
-        </select>
+          {cities.map((city, i) => (
+            <Option key={i} value={city}>
+              {city}
+            </Option>
+          ))}
+        </Select>
         {error.cities && <p className="text-red-500 text-sm mt-1">{error.cities}</p>}
+      </div>
+
+      {/* ZIP Input */}
+      <div className="md:col-span-3">
+        <label className="block mb-1">ZIP / PIN Code</label>
+        <Input
+          value={zipCode}
+          onChange={e => setZipCode(e.target.value)}
+          size="large"
+          className="rounded-xl"
+          status={zipError ? "error" : ""}
+          placeholder="Enter ZIP or PIN"
+        />
+        {zipError && <p className="text-red-500 text-sm mt-1">{zipError}</p>}
       </div>
     </div>
   );
