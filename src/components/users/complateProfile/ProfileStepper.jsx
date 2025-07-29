@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Steps } from 'antd';
 import { PersonalDetails } from './PersonalDetails';
 import { ProfileHeader } from './ProfileHeader';
@@ -8,6 +8,7 @@ import { SocialMediaDetails } from './SocialMediaDetails';
 import { CategorySelector } from './CategorySelector';
 import PortfolioUploader from './PortfolioUploader.JSX';
 import PaymentDetailsForm from './PaymentDetailsForm';
+import ThankYouScreen from './ThankYouScreen';
 
 export const ProfileStepper = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -22,8 +23,20 @@ export const ProfileStepper = () => {
     }
     if (index + 1 < steps.length) {
       setCurrentStep(index + 1);
+    } else {
+      // All steps completed – navigate to thank you screen
+      setCurrentStep("thankyou");
     }
   };
+
+  useEffect(() => {
+    const stored = localStorage.getItem('completedSteps');
+    if (stored) setCompletedSteps(JSON.parse(stored));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('completedSteps', JSON.stringify(completedSteps));
+  }, [completedSteps]);
 
   const steps = [
     {
@@ -32,19 +45,19 @@ export const ProfileStepper = () => {
     },
     {
       title: 'Social Media Links',
-      component: <SocialMediaDetails onNext={() => markStepComplete(1)} />,
+      component: <SocialMediaDetails onNext={() => markStepComplete(1)} onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} />,
     },
     {
       title: 'Categories and Interests',
-      component: <CategorySelector onNext={() => markStepComplete(2)}/>
+      component: <CategorySelector onNext={() => markStepComplete(2)} onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} />
     },
     {
       title: 'Portfolio and Work Samples',
-      component: <PortfolioUploader onNext={() => markStepComplete(3)}/>
+      component: <PortfolioUploader onNext={() => markStepComplete(3)} onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} />
     },
     {
       title: 'Payment Information',
-      component: <PaymentDetailsForm onNext={() => markStepComplete(4)}/>
+      component: <PaymentDetailsForm onNext={() => markStepComplete(4)} onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} />
     },
   ];
 
@@ -65,9 +78,8 @@ export const ProfileStepper = () => {
 
       {/* Mobile Sidebar - pure, no overlay */}
       <div
-        className={`sm:hidden fixed top-[55px] left-0 h-full w-90 bg-white z-30 transition-transform duration-300 ease-in-out shadow-lg ${
-          isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`sm:hidden fixed top-[55px] left-0 h-full w-90 bg-white z-30 transition-transform duration-300 ease-in-out shadow-lg ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         <div className="p-5">
           <div className="flex justify-between items-center mb-4">
@@ -97,19 +109,28 @@ export const ProfileStepper = () => {
             <Steps
               current={currentStep}
               direction="vertical"
-              items={steps.map((s) => ({ title: s.title }))}
+              items={steps.map((s, index) => ({
+                title: s.title,
+                status:
+                  completedSteps[index]
+                    ? 'finish'
+                    : index === currentStep
+                      ? 'process'
+                      : 'wait',
+              }))}
               onChange={(step) => {
                 if (completedSteps[step] || step <= currentStep) {
                   setCurrentStep(step);
                 }
               }}
             />
+
           </div>
         </div>
 
         {/* Step Content */}
         <div className="w-full sm:w-2/3 lg:w-3/4 p-3">
-          {steps[currentStep].component}
+          {currentStep === 'thankyou' ? <ThankYouScreen /> : steps[currentStep].component}
         </div>
       </div>
     </>

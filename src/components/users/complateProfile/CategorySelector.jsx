@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Button } from 'antd';
+import React, { useState, useEffect } from 'react';
 import { CheckOutlined } from '@ant-design/icons';
 
 const categories = [
@@ -15,14 +14,37 @@ const categories = [
 
 export const CategorySelector = ({ onBack, onNext }) => {
   const [selected, setSelected] = useState([]);
+  const [error, setError] = useState(false);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("selectedCategories");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setSelected(parsed);
+        }
+      } catch (e) {
+        console.error("Failed to parse saved categories", e);
+      }
+    }
+  }, []);
 
   const toggleCategory = (key) => {
     setSelected((prev) =>
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
     );
+    setError(false);
   };
 
   const handleSubmit = () => {
+    if (selected.length === 0) {
+      setError(true);
+      return;
+    }
+    localStorage.setItem("selectedCategories", JSON.stringify(selected)); // ✅ Save
+    setError(false);
     console.log('Selected Categories:', selected);
     if (onNext) onNext();
   };
@@ -59,24 +81,27 @@ export const CategorySelector = ({ onBack, onNext }) => {
         ))}
       </div>
 
-      {/* Buttons */}
-      
+      {error && (
+        <div className="text-red-500 text-sm font-base">
+          Please select at least one category to continue.
+        </div>
+      )}
 
-      <div className="flex flex-col sm:flex-row items-center gap-4 mt-8">
-          <button
+      {/* Buttons */}
+      <div className="flex flex-col sm:flex-row items-center gap-4 ">
+        <button
           onClick={onBack}
-          className="mt-6 bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
+          className="bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
         >
           Back
         </button>
-          <button
+        <button
           onClick={handleSubmit}
-          disabled={selected.length === 0}
-          className="mt-6 bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] transition-colors"
+          className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
         >
           Continue
         </button>
-        </div>
+      </div>
     </div>
   );
 };

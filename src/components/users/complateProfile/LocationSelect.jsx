@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Select, Input  } from "antd";
+import { Select, Input } from "antd";
 import postalRegexList from './postalRegex.json'
 
 const { Option } = Select;
 
-export default function LocationSelect({ onChange }) {
+export default function LocationSelect({ onChange,  showErrors = false }) {
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
@@ -20,7 +20,7 @@ export default function LocationSelect({ onChange }) {
   const [error, setError] = useState({ countries: "", states: "", cities: "" });
 
 
-   const getRegexForCountry = (iso) => {
+  const getRegexForCountry = (iso) => {
     const entry = postalRegexList.find(e => e.ISO === iso);
     return entry?.Regex ? new RegExp(entry.Regex) : null;
   };
@@ -88,29 +88,37 @@ export default function LocationSelect({ onChange }) {
   }, [selectedState]);
 
 
-    useEffect(() => {
+  useEffect(() => {
     const iso = countries.find(c => c.name === selectedCountry)?.iso2;
     setZipError(validateZip(iso, zipCode));
   }, [zipCode, selectedCountry, countries]);
 
-  useEffect(() => {
-    if (onChange) {
-      onChange({
-        country: selectedCountry,
-        state: selectedState,
-        city: selectedCity,
-        zipCode, zipError
-      });
-    }
-  }, [selectedCountry, selectedState, selectedCity, zipCode, zipError]);
+ useEffect(() => {
+  if (onChange) {
+    onChange({
+      country: selectedCountry,
+      state: selectedState,
+      city: selectedCity,
+      zipCode,
+      zipError,
+      errors: {
+        countryError: !selectedCountry ? 'Country is required' : '',
+        stateError: !selectedState ? 'State is required' : '',
+        // Allow cities to be optional
+        zipError: zipError || ''
+      }
+    });
+  }
+}, [selectedCountry, selectedState, selectedCity, zipCode, zipError]);
+
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Country */}
       <div>
         <label className="block mb-1">Country</label>
         <Select
-        size="large"
+          size="large"
           showSearch
           placeholder="Select Country"
           value={selectedCountry || undefined}
@@ -132,7 +140,7 @@ export default function LocationSelect({ onChange }) {
             </Option>
           ))}
         </Select>
-        {error.countries && <p className="text-red-500 text-sm mt-1">{error.countries}</p>}
+        {showErrors && error.countries && <p className="text-red-500 text-sm mt-1">{error.countries}</p>}
       </div>
 
       {/* State */}
@@ -140,6 +148,7 @@ export default function LocationSelect({ onChange }) {
         <label className="block mb-1">State</label>
         <Select
           showSearch
+          
           size="large"
           placeholder="Select State"
           value={selectedState || undefined}
@@ -161,7 +170,7 @@ export default function LocationSelect({ onChange }) {
             </Option>
           ))}
         </Select>
-        {error.states && <p className="text-red-500 text-sm mt-1">{error.states}</p>}
+        {showErrors && error.states && <p className="text-red-500 text-sm mt-1">{error.states}</p>}
       </div>
 
       {/* City */}
@@ -188,7 +197,7 @@ export default function LocationSelect({ onChange }) {
             </Option>
           ))}
         </Select>
-        {error.cities && <p className="text-red-500 text-sm mt-1">{error.cities}</p>}
+        {showErrors && error.cities && <p className="text-red-500 text-sm mt-1">{error.cities}</p>}
       </div>
 
       {/* ZIP Input */}
@@ -202,7 +211,7 @@ export default function LocationSelect({ onChange }) {
           status={zipError ? "error" : ""}
           placeholder="Enter ZIP or PIN"
         />
-        {zipError && <p className="text-red-500 text-sm mt-1">{zipError}</p>}
+        {showErrors && zipError && <p className="text-red-500 text-sm mt-1">{zipError}</p>}
       </div>
     </div>
   );
