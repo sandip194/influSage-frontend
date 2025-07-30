@@ -1,11 +1,12 @@
 import React from 'react'
-import { PersonalDetails } from '../users/complateProfile/PersonalDetails';
-import { ProfileStepper } from '../users/complateProfile/ProfileStepper';
+import Sidebar from '../users/deshboardLayout/Sidebar';
+import DeshboardHeader from "../users/deshboardLayout/DeshboardHeader"
+import {AgProfileStepper} from "../users/agencyProfile/AgProfileStepper"
 
 export const Home = () => {
   return (
-    <div>
-      <ProfileStepper/>
+    <div >
+      <AgProfileStepper/>
     </div>
   )
 }

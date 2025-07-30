@@ -6,11 +6,10 @@ const ThankYouScreen = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="flex items-center justify-center ">
-            <div className="bg-white rounded-3xl p-10  text-center w-full">
+        <div className="flex items-center justify-start ">
+            <div className="bg-white rounded-3xl p-10  text-start w-full">
                 <div className="mb-6">
-                    <div className="w-20 h-20 mx-auto flex items-center justify-center rounded-full bg-[#F3F4F6]">
-
+                    <div className="w-20 h-20 flex items-center justify-center rounded-full bg-[#F3F4F6]">
                         <RiVerifiedBadgeLine className='w-10 h-10' />
                     </div>
                 </div>
