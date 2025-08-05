@@ -9,12 +9,24 @@ const platforms = [
     { id: 4, name: "Tiktok", icon: <FaTiktok className="text-xl text-black" /> },
 ];
 
+<<<<<<< HEAD
 
+=======
+// Numeric IDs for influencer ranges
+const influencers = [
+    { id: 1, label: "Nano Influencer (5k - 10k Followers)" },
+    { id: 2, label: "Micro Influencer (10k - 100k Followers)" },
+    { id: 3, label: "Macro Influencer (100k - 1M Followers)" },
+    { id: 4, label: "Mega Influencer (Over 1M Followers)" },
+    { id: 5, label: "All & Any Range" },
+];
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
 
 const PlatformSelector = ({ onBack, onNext }) => {
     const [selectedPlatforms, setSelectedPlatforms] = useState([]);
     const [selectedInfluencers, setSelectedInfluencers] = useState([]);
     const [error, setError] = useState(false)
+<<<<<<< HEAD
     const [influencerTiers, setInfluencerTiers] = useState([
 
         {
@@ -50,6 +62,8 @@ const PlatformSelector = ({ onBack, onNext }) => {
     ]);
 
 
+=======
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
 
     const togglePlatform = (id) => {
         setSelectedPlatforms((prev) =>
@@ -86,6 +100,7 @@ const PlatformSelector = ({ onBack, onNext }) => {
 
 
     useEffect(() => {
+<<<<<<< HEAD
         // TODO: Replace mock influencer tiers with API call
         // axios.get("https://your-api.com/influencer-tiers")
         //     .then(res => {
@@ -97,6 +112,8 @@ const PlatformSelector = ({ onBack, onNext }) => {
         //         console.error("Failed to fetch influencer tiers:", err);
         //     });
 
+=======
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
         const saved = localStorage.getItem("PlatformsAndInfluencers");
         if (saved) {
             try {
@@ -109,6 +126,7 @@ const PlatformSelector = ({ onBack, onNext }) => {
         }
     }, []);
 
+<<<<<<< HEAD
     const formatFollowers = (num) => {
         if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1).replace('.0', '') + 'B';
         if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace('.0', '') + 'M';
@@ -121,6 +139,11 @@ const PlatformSelector = ({ onBack, onNext }) => {
     return (
         <div className="bg-white p-6 rounded-3xl text-inter">
             <h2 className="text-2xl sm:text-3xl font-bold text-[#141843] mb-1">
+=======
+    return (
+        <div className="bg-white p-6 rounded-3xl text-inter">
+            <h2 className="text-2xl font-bold text-[#141843] mb-1">
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
                 Platform & Influencer
             </h2>
             <p className="text-sm text-gray-500 mb-6">
@@ -155,6 +178,7 @@ const PlatformSelector = ({ onBack, onNext }) => {
                     Target Influencer
                 </p>
                 <div className="flex flex-col gap-3">
+<<<<<<< HEAD
                     <div className="flex flex-col gap-3">
                         {influencerTiers.map((tier) => (
                             <label key={tier.id} className="flex items-center gap-3 cursor-pointer">
@@ -176,6 +200,19 @@ const PlatformSelector = ({ onBack, onNext }) => {
                         ))}
                     </div>
 
+=======
+                    {influencers.map((inf) => (
+                        <label key={inf.id} className="flex items-center gap-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={selectedInfluencers.includes(inf.id)}
+                                onChange={() => toggleInfluencer(inf.id)}
+                                className="w-5 h-5 accent-[#141843] rounded"
+                            />
+                            <span className="text-sm text-[#141843]">{inf.label}</span>
+                        </label>
+                    ))}
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
                 </div>
             </div>
 

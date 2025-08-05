@@ -19,6 +19,7 @@ export const BusinessDetails = ({ onNext }) => {
     const [states, setStates] = useState([]);
     const [cities, setCities] = useState([]);
     const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
+<<<<<<< HEAD
     const [companySizes, setCompanySizes] = useState([
 
         {
@@ -53,6 +54,8 @@ export const BusinessDetails = ({ onNext }) => {
         }
     ]);
 
+=======
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
 
     const countryAPI = "https://countriesnow.space/api/v0.1/countries/positions";
     const stateAPI = "https://countriesnow.space/api/v0.1/countries/states";
@@ -164,6 +167,7 @@ export const BusinessDetails = ({ onNext }) => {
     };
 
 
+<<<<<<< HEAD
 
     useEffect(() => {
         // TODO: Replace this mock data with actual API call
@@ -186,6 +190,8 @@ export const BusinessDetails = ({ onNext }) => {
 
 
 
+=======
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
     return (
         <div className="personal-details-container bg-white p-6 rounded-3xl text-inter">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Business Details</h2>
@@ -227,6 +233,7 @@ export const BusinessDetails = ({ onNext }) => {
                 {/* Business Size */}
                 <Form.Item
                     name="businessSize"
+<<<<<<< HEAD
                     label={<b>How Large Is Your Company?</b>}
                     rules={[{ required: true, message: 'Please select your Company Size' }]}
                 >
@@ -243,6 +250,18 @@ export const BusinessDetails = ({ onNext }) => {
                 </Form.Item>
 
 
+=======
+                    label={<b>How Large Is Your Company ?</b>}
+                    rules={[{ required: true, message: 'Please select your Company Size' }]}
+                >
+                    <Select size="large" placeholder="Select Company Size" className="rounded-xl">
+                        <Option value={1}>Small</Option>
+                        <Option value={2}>Mediam</Option>
+                        <Option value={3}>Large</Option>
+                    </Select>
+                </Form.Item>
+
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
                 {/* Address */}
                 <Form.Item
                     name="address"

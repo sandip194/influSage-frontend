@@ -16,55 +16,98 @@ const objectives = [
   {
     id: 1,
     icon: <RiVideoAddLine />,
+<<<<<<< HEAD
     title: "Build Brand Awareness",
     description:
       "Increase overall visibility and recognition of our brand.",
+=======
+    title: "Content Production",
+    description:
+      "Get influencers to create videos or images for your brand and/or post them on their social as Reels, Stories, Feeds, TikToks.",
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
   },
   {
     id: 2,
     icon: <RiGiftLine />,
+<<<<<<< HEAD
     title: "Promote a Product or Service",
     description:
       "Focus on showcasing or launching specific products or services.",
+=======
+    title: "Gifted Products",
+    description:
+      "Gift influencers a product to generate content and promote on their channels.",
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
   },
   {
     id: 3,
     icon: <RiMegaphoneLine />,
+<<<<<<< HEAD
     title: "Drive Website or App Traffic",
     description:
       "Increase visitors to our website or app through influencer campaigns.",
+=======
+    title: "Promotions/Shoutouts",
+    description:
+      "Ask influencers to post existing content of your product on their social channels or give a shout out to your brand and social account.",
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
   },
   {
     id: 4,
     icon: <RiLinksLine />,
+<<<<<<< HEAD
     title: "Generate Sales or Conversions",
     description:
       "Drive purchases, signups, or downloads from influencer referrals.",
+=======
+    title: "Affiliate Marketing",
+    description:
+      "Provide influencers a unique link to promote your product and earn a % of the sales they drive.",
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
   },
   {
     id: 5,
     icon: <RiTrophyLine />,
+<<<<<<< HEAD
     title: "Reach a New Target Audience",
     description:
       "Connect with a specific demographic, niche, or regional audience.",
+=======
+    title: "Giveaways & Contests",
+    description:
+      "Collaborate with influencers to organize giveaways or contests, creating engagement and brand awareness.",
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
   },
   {
     id: 6,
     icon: <RiLiveLine />,
+<<<<<<< HEAD
     title: "Build Social Media Presence",
     description:
       "Grow followers and engagement on our brand’s social channels.",
+=======
+    title: "Live Collaborations",
+    description:
+      "Host live sessions or Q&A sessions with influencers, fostering real-time interaction and engagement.",
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
   },
   {
     id: 7,
     icon: <RiSwapBoxLine />,
+<<<<<<< HEAD
     title: "Get High-Quality Content",
     description:
       "Receive influencer-generated content (photos, videos, testimonials) for our marketing use.",
+=======
+    title: "Barter",
+    description:
+      "Send product to influencers in exchange for promotion. They may also request a fee.",
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
   },
   {
     id: 8,
     icon: <RiVipCrownLine />,
+<<<<<<< HEAD
     title: "Improve Community Engagement",
     description:
       "Boost likes, comments, shares, and overall interaction with our brand.",
@@ -82,6 +125,11 @@ const objectives = [
     title: "Support an Event or Campaign",
     description:
       "Use influencers to promote a launch, festival, pop-up, or online event.",
+=======
+    title: "Brand Ambassadorship",
+    description:
+      "Build long-term partnerships where influencers become brand ambassadors.",
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
   },
 ];
 
@@ -113,13 +161,21 @@ const ObjectiveSelector = ({ onBack, onNext }) => {
 
   return (
     <div className="bg-white p-6 rounded-3xl text-inter">
+<<<<<<< HEAD
       <h2 className="text-2xl sm:text-3xl font-bold text-[#141843] mb-1">Objectives</h2>
+=======
+      <h2 className="text-2xl font-bold text-[#141843] mb-1">Objectives</h2>
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
       <p className="text-sm text-gray-500 mb-6">
         What would you like to achieve with influencer?
       </p>
 
       {/* Objective Grid */}
+<<<<<<< HEAD
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+=======
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
         {objectives.map((obj) => (
           <div
             key={obj.id}

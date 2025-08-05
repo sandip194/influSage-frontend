@@ -4,7 +4,11 @@ import { Link } from 'react-router-dom'
 
 export const ProfileHeader = () => {
   return (
+<<<<<<< HEAD
     <div className="header-container flex items-center h-18 justify-between bg-white p-2 shadow-none border-b border-gray-200 px-8">
+=======
+    <div className="header-container flex items-center justify-between bg-white p-2 shadow-none border-b border-gray-200 px-8">
+>>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
 
         <div className="logo">
 
