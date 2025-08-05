@@ -1,13 +1,8 @@
-<<<<<<< HEAD
 import React, { useState, useEffect, useRef  } from 'react';
-=======
-import React, { useState, useEffect } from 'react';
->>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
 import { CheckOutlined } from '@ant-design/icons';
 
 const categoryTree = [
     {
-<<<<<<< HEAD
         parentcategoryid: 4,
         name: "Business",
         categories: [
@@ -235,63 +230,6 @@ export const CategorySelector = ({ onBack, onNext }) => {
     };
 
     
-=======
-        id: 1,
-        name: 'Beauty',
-        children: [
-            { id: 101, name: 'Skincare' },
-            { id: 102, name: 'Makeup' },
-            { id: 103, name: 'Haircare' },
-            { id: 104, name: 'beauty 02' },
-            { id: 105, name: 'beauty 03' },
-            { id: 106, name: 'beauty 04' },
-        ],
-    },
-    {
-        id: 2,
-        name: 'Technology',
-        children: [
-            { id: 201, name: 'Artificial Intelligence' },
-            { id: 202, name: 'IoT' },
-            { id: 203, name: 'Software Development' },
-        ],
-    },
-    {
-        id: 3,
-        name: 'Fitness',
-        children: [
-            { id: 301, name: 'Yoga' },
-            { id: 302, name: 'Workouts' },
-            { id: 303, name: 'Nutrition' },
-        ],
-    },
-    {
-        id: 4,
-        name: 'Fashon',
-        children: [
-            { id: 401, name: 'Yoga' },
-            { id: 402, name: 'Workouts' },
-            { id: 403, name: 'Nutrition' },
-        ],
-    },
-    {
-        id: 5,
-        name: 'Sports',
-        children: [
-            { id: 501, name: 'Cricket' },
-            { id: 502, name: 'Workouts' },
-            { id: 503, name: 'FootBall' },
-            { id: 503, name: 'Kabbadi' },
-        ],
-    },
-];
-
-export const CategorySelector = ({ onBack, onNext }) => {
-    const [selectedParentId, setSelectedParentId] = useState(categoryTree[0].id); // default to first parent
-    const [selectedChildren, setSelectedChildren] = useState([]);
-    const [error, setError] = useState(false);
-
->>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
     // Load selected children from localStorage
     useEffect(() => {
         const saved = localStorage.getItem('selectedChildCategoryIds');
@@ -322,11 +260,7 @@ export const CategorySelector = ({ onBack, onNext }) => {
         if (onNext) onNext();
     };
 
-<<<<<<< HEAD
     const currentParent = categoryTree.find((cat) => cat.parentcategoryid === selectedParentId);
-=======
-    const currentParent = categoryTree.find((cat) => cat.id === selectedParentId);
->>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
 
     return (
         <div className="bg-white p-6 rounded-3xl  text-inter">
@@ -337,21 +271,12 @@ export const CategorySelector = ({ onBack, onNext }) => {
                 {/* Left: Parent Categories */}
                 <div className="col-span-1 md:col-span-2 lg:col-span-1 border-r pr-4">
                     <h3 className="font-semibold mb-2 text-gray-700">Main Categories</h3>
-<<<<<<< HEAD
                     <ul className="space-y-2 wrap-anywhere">
                         {categoryTree.map((cat) => (
                             <li
                                 key={cat.parentcategoryid}
                                 onClick={() => setSelectedParentId(cat.parentcategoryid)}
                                 className={`cursor-pointer px-3 py-2 text-sm rounded-md hover:bg-gray-100 ${selectedParentId === cat.parentcategoryid ? 'bg-[#121A3F] text-white font-semibold' : 'text-gray-800'
-=======
-                    <ul className="space-y-2">
-                        {categoryTree.map((cat) => (
-                            <li
-                                key={cat.id}
-                                onClick={() => setSelectedParentId(cat.id)}
-                                className={`cursor-pointer px-3 py-2 text-sm rounded-md hover:bg-gray-100 ${selectedParentId === cat.id ? 'bg-[#121A3F] text-white font-semibold' : 'text-gray-800'
->>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
                                     }`}
                             >
                                 {cat.name}
@@ -364,19 +289,11 @@ export const CategorySelector = ({ onBack, onNext }) => {
                 <div className="col-span-1 md:col-span-2 lg:col-span-3">
                     <h3 className="font-semibold mb-3 text-gray-700">Subcategories</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-<<<<<<< HEAD
                         {currentParent?.categories.map((child) => (
                             <div
                                 key={child.id}
                                 onClick={() => toggleChildSelection(child.id)}
                                 className={`relative wrap-anywhere cursor-pointer rounded-lg px-3 py-2 text-sm border transition-all ${selectedChildren.includes(child.id)
-=======
-                        {currentParent?.children.map((child) => (
-                            <div
-                                key={child.id}
-                                onClick={() => toggleChildSelection(child.id)}
-                                className={`relative cursor-pointer rounded-lg px-3 py-2 text-sm border transition-all ${selectedChildren.includes(child.id)
->>>>>>> beea83cd3a90d9af67dc7d3cb750dfde7d150ec3
                                         ? 'bg-[#121A3F] text-white border-[#121A3F]'
                                         : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100'
                                     }`}
