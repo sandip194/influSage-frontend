@@ -36,7 +36,11 @@ const Sidebar = () => {
     }, []);
 
     const generalItems = [
+<<<<<<< HEAD
         { icon: <RiGalleryView2 className="w-5" />, label: "Dashboard", to: "/dashboard" },
+=======
+        { icon: <RiGalleryView2 className="w-5" />, label: "Dashboard", to: "/dashboard", end: true },
+>>>>>>> 6d06ac5 (Latest Code)
         { icon: <RiSearch2Line className="w-5" />, label: "Browse Campaign", to: "/dashboard/browse" },
         { icon: <RiStackLine className="w-5" />, label: "My Campaign", to: "/dashboard/my-campaigns" },
         { icon: <RiMessage3Line className="w-5" />, label: "Messages", to: "/dashboard/messages" },
@@ -87,6 +91,10 @@ const Sidebar = () => {
                     <NavLink
                         key={index}
                         to={item.to}
+<<<<<<< HEAD
+=======
+                        end={item.end}
+>>>>>>> 6d06ac5 (Latest Code)
                         title={!isOpen ? item.label : ""}
                         className={({ isActive }) =>
                             `flex items-center ${isOpen ? "justify-start" : "justify-center"
