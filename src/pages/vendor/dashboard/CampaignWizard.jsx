@@ -1,10 +1,10 @@
 // /src/pages/CreateCampaign.jsx
 import React, { useState, useEffect } from 'react';
-import CampaignExpectationSelector from "./CampaignExpectationSelector"
-import CampaignStep2 from './CampaignStep2';
-import CampaignStep3 from './CampaignStep3';
-import CampaignStep4 from './CampaignStep4';
-import CampaignStep5 from './CampaignStep5';
+import CampaignExpectationSelector from "../../../components/users/vendorCampaign/CampaignExpectationSelector"
+import CampaignStep2 from '../../../components/users/vendorCampaign/CampaignStep2';
+import CampaignStep3 from '../../../components/users/vendorCampaign/CampaignStep3';
+import CampaignStep4 from '../../../components/users/vendorCampaign/CampaignStep4';
+import CampaignStep5 from '../../../components/users/vendorCampaign/CampaignStep5';
 // import more steps as needed
 
 const steps = [
