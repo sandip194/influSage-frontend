@@ -12,8 +12,7 @@ import { VerifyEmailOrMobile } from './components/common/VerifyEmailOrMobile'
 import { ResetPassword } from './components/common/ResetPassword';
 import { Toaster } from 'react-hot-toast';
 import  {ProfileStepper} from "./components/users/complateProfile/ProfileStepper"
-
-
+import { BrowseCampaign } from './components/users/browseCampaign';
 
 const App = () => {
 
@@ -33,7 +32,7 @@ const App = () => {
         <Route path='/verify-email-or-mobile' element={<VerifyEmailOrMobile />} />
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route path='/dashboard' element={<UserDashboard/>}/>
-
+        <Route path='/dashboard/browse' element={<BrowseCampaign />} />
         <Route path='/complate-profile' element={ <ProfileStepper /> }/>
       </Routes>
     </Router>
