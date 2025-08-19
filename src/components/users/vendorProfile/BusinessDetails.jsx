@@ -19,39 +19,7 @@ export const BusinessDetails = ({ onNext }) => {
     const [states, setStates] = useState([]);
     const [cities, setCities] = useState([]);
     const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
-    const [companySizes, setCompanySizes] = useState([
-
-        {
-            id: 5,
-            name: "Global Corporation",
-            minemployees: 10001,
-            maxemployees: null
-        },
-        {
-            id: 4,
-            name: "Enterprise",
-            minemployees: 2001,
-            maxemployees: 10000
-        },
-        {
-            id: 3,
-            name: "Large",
-            minemployees: 501,
-            maxemployees: 2000
-        },
-        {
-            id: 2,
-            name: "Medium",
-            minemployees: 51,
-            maxemployees: 500
-        },
-        {
-            id: 1,
-            name: "Startup/Small",
-            minemployees: 0,
-            maxemployees: 50
-        }
-    ]);
+    const [companySizes, setCompanySizes] = useState([]);
 
 
     const countryAPI = "https://countriesnow.space/api/v0.1/countries/positions";
@@ -62,6 +30,18 @@ export const BusinessDetails = ({ onNext }) => {
         const entry = postalRegexList.find(e => e.ISO === iso);
         return entry?.Regex ? new RegExp(entry.Regex) : null;
     };
+
+    const fatchCompanySizes = async () => {
+        try {
+            const response = await axios.get("vendor/company-sizes")
+            if (response.status === 200) {
+                const data = response.data.companySizes
+                setCompanySizes(data);
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     useEffect(() => {
         setLoading(prev => ({ ...prev, countries: true }));
@@ -89,6 +69,9 @@ export const BusinessDetails = ({ onNext }) => {
 
     // Load form values from localStorage
     useEffect(() => {
+
+        fatchCompanySizes();
+
         const saved = localStorage.getItem('businessDetails');
         if (saved) {
             const parsed = JSON.parse(saved);
@@ -101,8 +84,8 @@ export const BusinessDetails = ({ onNext }) => {
 
             form.setFieldsValue({
                 bussinessName: parsed.bussinessName,
-                businessSize: parsed.businessSize,
-                address: parsed.address,
+                companysizeid: parsed.companysizeid,
+                address1: parsed.address1,
                 country: parsed.location?.country,
                 state: parsed.location?.state,
                 city: parsed.location?.city,
@@ -217,7 +200,7 @@ export const BusinessDetails = ({ onNext }) => {
 
                 {/* Business Name */}
                 <Form.Item
-                    name="bussinessName"
+                    name="businessname"
                     label={<b>Business Name</b>}
                     rules={[{ required: true, message: 'Please enter your Business Name' }]}
                 >
@@ -226,7 +209,7 @@ export const BusinessDetails = ({ onNext }) => {
 
                 {/* Business Size */}
                 <Form.Item
-                    name="businessSize"
+                    name="companysizeid"
                     label={<b>How Large Is Your Company?</b>}
                     rules={[{ required: true, message: 'Please select your Company Size' }]}
                 >
@@ -245,7 +228,7 @@ export const BusinessDetails = ({ onNext }) => {
 
                 {/* Address */}
                 <Form.Item
-                    name="address"
+                    name="address1"
                     label={<b>Business Address</b>}
                     rules={[{ required: true, message: 'Please enter your address' }]}
                 >

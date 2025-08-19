@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { FaInstagram, FaYoutube, FaFacebook, FaTiktok } from "react-icons/fa";
 
@@ -14,39 +15,7 @@ const PlatformSelector = ({ onBack, onNext }) => {
     const [selectedPlatforms, setSelectedPlatforms] = useState([]);
     const [selectedInfluencers, setSelectedInfluencers] = useState([]);
     const [error, setError] = useState(false)
-    const [influencerTiers, setInfluencerTiers] = useState([
-
-        {
-            id: 5,
-            name: "Mega",
-            minfollowers: 1000000,
-            maxfollowers: null
-        },
-        {
-            id: 4,
-            name: "Macro",
-            minfollowers: 100000,
-            maxfollowers: 1000000
-        },
-        {
-            id: 3,
-            name: "Micro",
-            minfollowers: 50000,
-            maxfollowers: 100000
-        },
-        {
-            id: 2,
-            name: "Mini",
-            minfollowers: 10000,
-            maxfollowers: 50000
-        },
-        {
-            id: 1,
-            name: "Nano",
-            minfollowers: 1000,
-            maxfollowers: 10000
-        },
-    ]);
+    const [influencerTiers, setInfluencerTiers] = useState([]);
 
 
 
@@ -83,8 +52,20 @@ const PlatformSelector = ({ onBack, onNext }) => {
         onNext();
     };
 
+    const fatchInfluencerTire = async() => {
+        try {
+            const response = await axios.get("vendor/influencer-tiers")
+            if(response.status === 200){
+                setInfluencerTiers(response.data.influencerTiers)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
 
     useEffect(() => {
+fatchInfluencerTire();
         // TODO: Replace mock influencer tiers with API call
         // axios.get("https://your-api.com/influencer-tiers")
         //     .then(res => {

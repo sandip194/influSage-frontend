@@ -2,12 +2,10 @@ import React from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import  {ProfileStepper} from "./components/users/complateProfile/ProfileStepper"
 import { BrowseCampaign } from './components/users/browseCampaign';
 import './index.css'; // ✅ this imports tailwind styles
 
 
-import { UserDashboard } from './components/users/UserDashboard';
 import { Signup } from './pages/commonPages/Signup';
 import { LoginForm } from './pages/commonPages/Login';
 import { Home } from './components/common/Home';
@@ -16,9 +14,9 @@ import { ForgotPassword } from './pages/commonPages/ForgotPassword';
 import { VerifyEmailOrMobile } from './pages/commonPages/VerifyEmailOrMobile'
 import { ResetPassword } from './pages/commonPages/ResetPassword';
 import { ProfileStepper } from "./pages/influencer/influencerProfileCreation/ProfileStepper"
-import DashboardLayout from './components/users/deshboardLayout/DashboardLayout';
 import CreateCampaign from "./pages/vendor/dashboard/CreateCampaign"
 import CampaignWizard from './pages/vendor/dashboard/CampaignWizard';
+import VenderDashboardLayout from './pages/vendor/dashboard/VenderDashboardLayout';
 
 
 const App = () => {
@@ -37,15 +35,17 @@ const App = () => {
                                 <Route path='/forgot-password' element={<ForgotPassword />} />
                                 <Route path='/verify-email-or-mobile' element={<VerifyEmailOrMobile />} />
                                 <Route path='/reset-password' element={<ResetPassword />} />
-                                <Route path='/dashboard' element={<DashboardLayout />}>
 
+                                
+
+                                {/* Vendor Deshboard */}
+                                <Route path='/vendor-dashboard' element={<VenderDashboardLayout />}>
                                         <Route path='my-campaigns' element={<CreateCampaign />} />
                                         <Route path='my-campaigns/create-campaign' element={<CampaignWizard />} />
                                 </Route>
+
                                 <Route path='/dashboard/browse' element={<BrowseCampaign />} />
                                 <Route path='/complate-profile' element={<ProfileStepper />} />
-
-
                         </Routes>
                 </Router>
         );

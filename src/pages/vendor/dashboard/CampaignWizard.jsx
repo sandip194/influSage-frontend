@@ -5,6 +5,7 @@ import CampaignStep2 from '../../../components/users/vendorCampaign/CampaignStep
 import CampaignStep3 from '../../../components/users/vendorCampaign/CampaignStep3';
 import CampaignStep4 from '../../../components/users/vendorCampaign/CampaignStep4';
 import CampaignStep5 from '../../../components/users/vendorCampaign/CampaignStep5';
+import CampaignReviewStep from '../../../components/users/vendorCampaign/CampaignReviewStep';
 // import more steps as needed
 
 const steps = [
@@ -12,7 +13,8 @@ const steps = [
     { id: 2, component: CampaignStep2 },
     { id: 3, component: CampaignStep3 },
     { id: 4, component: CampaignStep4 },
-    { id: 5, component: CampaignStep5 }
+    { id: 5, component: CampaignStep5 },
+    { id: 6, component: CampaignReviewStep }
     // Add Step3, Step4, etc...
 ];
 
