@@ -1,12 +1,13 @@
-import React from "react";
+import React from 'react';
+import { Outlet } from 'react-router-dom';
 
-const DescriptionLayout = () => {
-  return (
-    <div className="description-layout">
-      <h1>Description Layout</h1>
-      <p>This is where the detailed description of the campaign will be displayed.</p>
-    </div>
-  );
-}
+const DashboardLayout = () => (
+  <div className="dashboard-layout flex">
+    <aside className="w-64 bg-gray-200">Sidebar</aside>
+    <main className="flex-1 p-4">
+      <Outlet />
+    </main>
+  </div>
+);
 
-export default DescriptionLayout;
+export default DashboardLayout;
