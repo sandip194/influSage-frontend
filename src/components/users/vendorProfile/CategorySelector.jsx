@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef  } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CheckOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
@@ -18,21 +18,21 @@ export const CategorySelector = ({ onBack, onNext }) => {
     };
 
     const fatchAllCategories = async () => {
-    try {
-        const response = await axios.get("vendor/vendor-categories");
-        if (response.status === 200) {
-            const data = response.data.categories;
-            setCategoryTree(data)
+        try {
+            const response = await axios.get("vendor/categories");
+            if (response.status === 200) {
+                const data = response.data.categories;
+                setCategoryTree(data)
 
-            if (data.length > 0) {
-                setSelectedParentId(data[0].parentcategoryid);
+                if (data.length > 0) {
+                    setSelectedParentId(data[0].parentcategoryid);
+                }
             }
+        } catch (error) {
+            console.error("Error fetching categories:", error);
         }
-    } catch (error) {
-        console.error("Error fetching categories:", error);
-    }
-};
-    
+    };
+
     // Load selected children from localStorage
     useEffect(() => {
         fatchAllCategories();
@@ -54,15 +54,71 @@ export const CategorySelector = ({ onBack, onNext }) => {
         setError(false);
     };
 
+
+
+    const sendDataToBackend = async (data) => {
+        try {
+            const token = localStorage.getItem("token");
+            const userId = localStorage.getItem("userId");
+
+            const res = await axios.post(
+                "vendor/complete-vendor-profile",
+                {
+                    userid: userId,
+                    categoriesjson: data
+                },
+                {
+                    headers: {
+                        Authorization: "Bearer " + token
+                    }
+                }
+            );
+
+            if (res.status === 200) {
+                console.log("✅ Backend response:", res.data);
+            } else {
+                console.warn("❗ Unexpected response:", res);
+            }
+        } catch (error) {
+            console.error("❌ Error sending data to backend:", error.response?.data || error.message);
+        }
+    };
+
+
     const handleSubmit = () => {
         if (selectedChildren.length === 0) {
             setError(true);
             return;
         }
-        localStorage.setItem('selectedChildCategoryIds', JSON.stringify(selectedChildren));
-        console.log('✅ Saved child category IDs:', selectedChildren);
+
+        const selectedData = [];
+
+        categoryTree.forEach(parent => {
+            const matchedChildren = parent.categories.filter(child =>
+                selectedChildren.includes(child.id)
+            );
+
+            if (matchedChildren.length > 0) {
+                selectedData.push({
+                    parentcategoryid: parent.parentcategoryid,
+                    parentcategoryname: parent.name,
+                    categories: matchedChildren.map(child => ({
+                        categoryid: child.id,
+                        categoryname: child.name
+                    }))
+                });
+            }
+        });
+
+        // sendDataToBackend(selectedData);
+        // Save full data to localStorage or send to server
+        localStorage.setItem('selectedFullCategoryData', JSON.stringify(selectedData));
+
+        console.log('✅ Saved category data:', selectedData);
+
         if (onNext) onNext();
     };
+
 
     const currentParent = categoryTree.find((cat) => cat.parentcategoryid === selectedParentId);
 
@@ -98,8 +154,8 @@ export const CategorySelector = ({ onBack, onNext }) => {
                                 key={child.id}
                                 onClick={() => toggleChildSelection(child.id)}
                                 className={`relative wrap-anywhere cursor-pointer rounded-lg px-3 py-2 text-sm border transition-all ${selectedChildren.includes(child.id)
-                                        ? 'bg-[#121A3F] text-white border-[#121A3F]'
-                                        : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100'
+                                    ? 'bg-[#121A3F] text-white border-[#121A3F]'
+                                    : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100'
                                     }`}
                             >
                                 {child.name}

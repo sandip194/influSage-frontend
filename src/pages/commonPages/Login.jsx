@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios';
 import '../../assets/login.css';
 import googleIcon from '../../assets/icons/google-logo.png';
@@ -14,6 +14,8 @@ export const LoginForm = () => {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
   const [showPassword, setShowPassword] = useState(false); // 👁️ Toggle state
 
+
+  const navigate = useNavigate()
 
   // Load saved email on mount
   useEffect(() => {
@@ -39,7 +41,23 @@ export const LoginForm = () => {
           localStorage.setItem("rememberedPassword", data.password);
         }
         toast.success(res.data.message || "Login successful!");
+
+        // store Role, UserID and token in local storage for now 
+        // we need to chnage this once we start using Redux
+        localStorage.setItem("userId", res.data.id)
+        localStorage.setItem("role", res.data.role)
+        localStorage.setItem("token", res.data.token)
+
+
         // redirect to dashboard, etc.
+        if (res.data.role === 2) {
+          navigate("/complate-vendor-profile")
+        }
+        if (res.data.role === 1) {
+          navigate("/complate-profile")
+        }
+
+
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed!");
@@ -113,7 +131,7 @@ export const LoginForm = () => {
             <span className='text-for-error'>{errors.password?.message}</span>
 
             <div className="form-options">
-              <label><input type="checkbox" {...register('rememberMe')}/> Remember Me</label>
+              <label><input type="checkbox" {...register('rememberMe')} /> Remember Me</label>
               <Link to="/forgot-password" className="forgot-password-link">
                 Forgot Password?
               </Link>

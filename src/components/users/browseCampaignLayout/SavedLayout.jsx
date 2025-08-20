@@ -91,11 +91,10 @@ const SavedLayout = () => {
             key={id}
             onClick={() => handleClick(path)}
             className={`px-4 py-2 rounded-md border border-gray-300 transition
-      ${
-        selectedButton === id
-          ? "bg-[#0f122f] text-white"
-          : "bg-white text-[#141843] hover:bg-gray-100"
-      }`}
+      ${selectedButton === id
+                ? "bg-[#0f122f] text-white"
+                : "bg-white text-[#141843] hover:bg-gray-100"
+              }`}
           >
             {label}
           </button>
@@ -134,11 +133,10 @@ const SavedLayout = () => {
 
         <div className="flex flex-col lg:flex-row gap-6 mt-6">
           <div
-            className={`grid gap-6 flex-1 ${
-              showFilter
-                ? "grid-cols-1 sm:grid-cols-2"
-                : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-            }`}
+            className={`grid gap-6 flex-1 ${showFilter
+              ? "grid-cols-1 sm:grid-cols-2"
+              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+              }`}
           >
             {campaigns.map((campaign) => (
               <div
