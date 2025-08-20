@@ -26,12 +26,16 @@ import { ProfileStepper } from "./pages/influencer/influencerProfileCreation/Pro
 import CreateCampaign from "./pages/vendor/dashboard/CreateCampaign"
 import CampaignWizard from './pages/vendor/dashboard/CampaignWizard';
 import VenderDashboardLayout from './pages/vendor/dashboard/VenderDashboardLayout';
+import { VendorProfileStepper } from './pages/vendor/venderProfileCreation/VendorProfileStepper';
+import DashboardPage from './pages/influencer/dashboard/DashboardPage';
+import VenderDashboardPage from './pages/vendor/dashboard/VenderDashboardPage';
+import BrowseInfluencerPage from './pages/vendor/dashboard/BrowseInfluencerPage';
 
 
 const App = () => {
 
-  axios.defaults.baseURL = "http://localhost:3001"
- return (
+        axios.defaults.baseURL = "http://localhost:3001"
+        return (
                 <Router>
                         {/* <h1 className="text-3xl font-bold text-green-500">Tailwind is Working ✅</h1> */}
                         <Toaster />
@@ -45,10 +49,13 @@ const App = () => {
                                 <Route path='/reset-password' element={<ResetPassword />} />
                                 {/* Influencer Dashboard*/}
                                 <Route path='/dashboard' element={<DashboardLayout />}>
+
+                                        <Route path='' element={<DashboardPage />} />
                                         <Route path='browse' element={<BrowseCampaign />} />
                                         <Route path='browse/applied' element={<AppliedLayout />} />
                                         <Route path='browse/saved' element={<SavedLayout />} />
                                         <Route path='browse/description' element={<DescriptionLayout />} />
+
                                         <Route path='browse/edit' element={<EditLayout />} />
                                         <Route path='browse/apply-now' element={<ApplyNow />} />
                                         
@@ -56,16 +63,19 @@ const App = () => {
                                         <Route path='my-campaigns/details' element={<Details />} />
 
                                 </Route>
-                                
+
 
                                 {/* Vendor Deshboard */}
                                 <Route path='/vendor-dashboard' element={<VenderDashboardLayout />}>
+                                        <Route path='' element={<VenderDashboardPage />} />
+                                        <Route path='browse-influencers' element={<BrowseInfluencerPage />} />
                                         <Route path='my-campaigns' element={<CreateCampaign />} />
                                         <Route path='my-campaigns/create-campaign' element={<CampaignWizard />} />
                                 </Route>
 
                                 <Route path='/dashboard/browse' element={<BrowseCampaign />} />
                                 <Route path='/complate-profile' element={<ProfileStepper />} />
+                                <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
                         </Routes>
                 </Router>
         );

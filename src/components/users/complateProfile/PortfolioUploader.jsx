@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Upload, Form, Input, Button, message } from 'antd';
 import { UploadOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 
@@ -8,30 +8,6 @@ const PortfolioUploader = ({ onBack, onNext }) => {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]);
   const [urls, setUrls] = useState(['']);
-
-  // 🔁 Load data from localStorage
-  useEffect(() => {
-    const savedFiles = localStorage.getItem("portfolioFiles");
-    const savedUrls = localStorage.getItem("portfolioUrls");
-
-    if (savedFiles) {
-      try {
-        const parsedFiles = JSON.parse(savedFiles);
-        setFileList(parsedFiles);
-      } catch (e) {
-        console.error("Invalid saved files", e);
-      }
-    }
-
-    if (savedUrls) {
-      try {
-        const parsedUrls = JSON.parse(savedUrls);
-        if (Array.isArray(parsedUrls)) setUrls(parsedUrls);
-      } catch (e) {
-        console.error("Invalid saved urls", e);
-      }
-    }
-  }, []);
 
   const beforeUpload = (file) => {
     const allowedTypes = [
@@ -83,14 +59,15 @@ const PortfolioUploader = ({ onBack, onNext }) => {
   };
 
   const handleSubmit = () => {
-    const validUrls = urls.filter(url => url.trim());
+    const validUrls = urls.filter(url => /^https?:\/\/.+/.test(url));
+    const hasUploaded = fileList.length > 0 || validUrls.length > 0;
 
-    localStorage.setItem("portfolioFiles", JSON.stringify(fileList));
-    localStorage.setItem("portfolioUrls", JSON.stringify(validUrls));
+    if (!hasUploaded) {
+      message.error('Please upload at least one file or add a valid portfolio URL.');
+      return;
+    }
 
-    console.log('Files:', fileList);
-    console.log('Portfolio URLs:', validUrls);
-
+    // Proceed to next step
     onNext?.({ files: fileList, portfolioUrls: validUrls });
   };
 
@@ -100,15 +77,14 @@ const PortfolioUploader = ({ onBack, onNext }) => {
       <p className="text-gray-600 mb-6 text-sm sm:text-base">Upload your portfolio or recent works</p>
 
       <Form layout="vertical" form={form} onFinish={handleSubmit}>
-        {/* Upload Area */}
         <Form.Item className="mb-6">
           <Dragger
             name="file"
             multiple
-            fileList={[]} // prevent AntD from auto-controlling
+            fileList={[]}
             beforeUpload={(file) => {
               if (beforeUpload(file)) {
-                setFileList([...fileList, { ...file, uid: `${Date.now()}-${file.name}` }]);
+                setFileList(prev => [...prev, file]);
               }
               return false;
             }}
@@ -117,25 +93,24 @@ const PortfolioUploader = ({ onBack, onNext }) => {
             <div className="py-10">
               <UploadOutlined className="text-2xl text-gray-500 mb-2" />
               <p className="font-semibold text-gray-800 text-md">Upload Files</p>
-              <p className="text-gray-500 text-sm">
-                Supported: PNG, JPG, MP4, MOV, PDF, DOC, DOCX under 25MB
-              </p>
+              <p className="text-gray-500 text-sm">Supported: PNG, JPG, MP4, MOV, PDF, DOC, DOCX under 25MB</p>
             </div>
           </Dragger>
         </Form.Item>
 
-        {/* File Preview */}
+        {/* Preview */}
         {fileList.length > 0 && (
           <div className="flex gap-3 overflow-x-auto mb-8 flex-wrap justify-center">
             {fileList.map(file => {
               const isImage = file.type?.startsWith('image/');
-              const previewUrl = URL.createObjectURL(file.originFileObj || file);
+              const previewUrl = file.thumbUrl || file.url || URL.createObjectURL(file);
+
               return (
                 <div key={file.uid} className="relative w-[100px] h-[120px] rounded-lg overflow-hidden">
                   {isImage ? (
                     <img src={previewUrl} alt="preview" className="w-full h-full object-cover rounded-lg" />
                   ) : (
-                    <video src={previewUrl} className="w-full h-full object-cover" />
+                    <video src={previewUrl} className="w-full h-full object-cover" controls />
                   )}
                   <button
                     className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white p-1 rounded-full"
@@ -147,6 +122,7 @@ const PortfolioUploader = ({ onBack, onNext }) => {
                 </div>
               );
             })}
+
           </div>
         )}
 
@@ -163,7 +139,7 @@ const PortfolioUploader = ({ onBack, onNext }) => {
             key={index}
             label={index === 0 ? <span className="font-semibold text-sm text-gray-800">Add Portfolio URL</span> : null}
             validateStatus={url && !/^https?:\/\/.+/.test(url) ? 'warning' : ''}
-            help={url && !/^https?:\/\/.+/.test(url) ? 'Please enter a valid URL (https://...)' : ''}
+            help={url && !/^https?:\/\/.+/.test(url) ? 'Enter a valid URL (https://...)' : ''}
           >
             <Input
               placeholder="https://"

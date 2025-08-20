@@ -1,12 +1,23 @@
 import React from 'react'
-import Sidebar from '../users/deshboardLayout/Sidebar';
-import DeshboardHeader from "../users/deshboardLayout/DeshboardHeader"
-import {VendorProfileStepper} from "../../pages/vendor/venderProfileCreation/VendorProfileStepper"
+import ProfileComplation from '../users/InfluencerDashboardHome/ProfileComplation';
+import CampaignStats from '../users/InfluencerDashboardHome/CampaignStats';
+import EarningsChart from '../users/InfluencerDashboardHome/EarningsChart';
+import EarningsSummarySection from '../users/InfluencerDashboardHome/EarningsSummarySection';
+import PerformanceCard from '../users/InfluencerDashboardHome/PerformanceCard';
+import TodoListCard from '../users/InfluencerDashboardHome/TodoListCard';
+import FeedbackCard from '../users/InfluencerDashboardHome/FeedbackCard';
 
 export const Home = () => {
   return (
-    <div >
-      <VendorProfileStepper/>
+    <div className='bg-gray-100 p-4'>
+      <ProfileComplation />
+      <CampaignStats />
+      <EarningsSummarySection />
+      <div class="flex flex-col md:flex-row gap-4 my-3">
+        <PerformanceCard />
+        <TodoListCard />
+      </div>
+      <FeedbackCard />
     </div>
   )
 }

@@ -31,6 +31,7 @@ const ObjectiveSelector = ({ onBack, onNext }) => {
       setError("Please select one objective to complete your profile.");
       return;
     }
+    console.log(selected)
     setError("");
     localStorage.setItem(STORAGE_KEY, selected.toString());
     onNext();

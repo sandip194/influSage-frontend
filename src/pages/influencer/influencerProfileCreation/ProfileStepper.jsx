@@ -6,7 +6,7 @@ import { RiMenu2Line } from 'react-icons/ri';
 import { PersonalDetails } from '../../../components/users/complateProfile/PersonalDetails';
 import { ProfileHeader } from '../../../components/users/complateProfile/ProfileHeader';
 import { SocialMediaDetails } from '../../../components/users/complateProfile/SocialMediaDetails';
-import { CategorySelector } from '../../../components/users/complateProfile/CategorySelector';
+import { CategorySelector } from '../../../components/users/agencyProfile/CategorySelector';
 import PortfolioUploader from '../../../components/users/complateProfile/PortfolioUploader.JSX';
 import PaymentDetailsForm from '../../../components/users/complateProfile/PaymentDetailsForm';
 import ThankYouScreen from '../../../components/users/complateProfile/ThankYouScreen';

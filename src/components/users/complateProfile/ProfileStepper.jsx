@@ -5,7 +5,7 @@ import { ProfileHeader } from './ProfileHeader';
 import { RiMenu2Line } from 'react-icons/ri';
 import './profile.css';
 import { SocialMediaDetails } from './SocialMediaDetails';
-import { CategorySelector } from './CategorySelector';
+import { CategorySelector } from '../agencyProfile/CategorySelector';
 import PortfolioUploader from './PortfolioUploader.JSX';
 import PaymentDetailsForm from './PaymentDetailsForm';
 import ThankYouScreen from './ThankYouScreen';
