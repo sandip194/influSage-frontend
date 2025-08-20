@@ -183,13 +183,13 @@ const AppliedLayout = () => {
                   ))}
                 </div>
                 <div className="flex items-center justify-between mt-auto gap-4">
-                  <Link to="/dashboard/browse/apply-now" className="flex-1">
+                  <Link to="/dashboard/browse/edit" className="flex-1">
                     <button className="w-full py-2 rounded-3xl bg-[#0f122f] text-white font-semibold hover:bg-[#23265a] transition">
                       Edit Application
                     </button>
                   </Link>
                   <Link
-                    to="/dashboard/browse/description"
+                    to="/dashboard/browse/edit"
                     className="flex-shrink-0"
                   >
                     <div className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition">

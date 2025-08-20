@@ -7,8 +7,11 @@ import {
   RiArrowLeftSLine,
   RiStarLine,
   RiArrowDownSLine,
+  RiMoreFill,
+  RiCalendarLine,
 } from "@remixicon/react";
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
 const Requirements = [
   { label: "Shopify User: ", value: "Yes" },
@@ -71,7 +74,41 @@ const SimilarCampaigns = [
   },
 ];
 
-const DescriptionLayout = () => {
+const Details = () => {
+  const [selected, setSelected] = useState("overview");
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleClick = (path) => {
+    navigate(path);
+  };
+
+  const buttons = [
+    {
+      id: "overview",
+      label: "Overview",
+      path: "/dashboard/my-campaigns/details/",
+    },
+    {
+      id: "activity",
+      label: "Activity",
+      path: "/dashboard/my-campaigns/details/",
+    },
+    {
+      id: "message",
+      label: "Message",
+      path: "/dashboard/my-campaigns/details/",
+    },
+    {
+      id: "files&medis",
+      label: "Files & Media",
+      path: "/dashboard/my-campaigns/details/",
+    },
+  ];
+
+  const selectedButton = buttons.find((b) => location.pathname === b.path)?.id;
+
   return (
     <div className="w-full max-w-7xl mx-auto text-sm overflow-x-hidden">
       <button
@@ -87,6 +124,11 @@ const DescriptionLayout = () => {
           {/* Banner */}
           <div className="bg-white rounded-2xl overflow-hidden">
             <div className="relative h-40">
+              <img
+                src="https://images.pexels.com/photos/33350497/pexels-photo-33350497.jpeg?_gl=1*1dx09le*_ga*MTYyNzc2NDMzNi4xNzM2MTY4MzY0*_ga_8JE65Q40S6*czE3NTU1ODI1NDQkbzIkZzEkdDE3NTU1ODMzNzgkajUyJGwwJGgw"
+                alt="Banner"
+                className="w-full h-28 object-cover"
+              />
               <img
                 src="https://images.pexels.com/photos/25835001/pexels-photo-25835001.jpeg?_gl=1*vflnmv*_ga*MTYyNzc2NDMzNi4xNzM2MTY4MzY0*_ga_8JE65Q40S6*czE3NTU1ODI1NDQkbzIkZzEkdDE3NTU1ODI2ODEkajUwJGwwJGgw"
                 alt="Logo"
@@ -107,14 +149,11 @@ const DescriptionLayout = () => {
 
                 {/* Right: Buttons */}
                 <div className="flex items-center gap-3">
-                  <button className="p-2 rounded-full border border-gray-300 text-gray-500 hover:text-black hover:border-gray-500">
-                    <RiStackLine className="w-4 h-4" />
-                  </button>
-                  <button className="p-2 rounded-full border border-gray-300 text-gray-500 hover:text-black hover:border-gray-500">
-                    <RiMenLine className="w-4 h-4" />
-                  </button>
                   <button className="bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition">
-                    Apply Now
+                    Mark As Complete
+                  </button>
+                  <button className="p-2 rounded-full border border-gray-300 text-gray-500 hover:text-black hover:border-gray-500">
+                    <RiMoreFill className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -158,15 +197,35 @@ const DescriptionLayout = () => {
                 </div>
               </div>
             </div>
-
           </div>
-          <div className="bg-white p-4 rounded-2xl">
+
+          <div className="bg-white p-5 rounded-2xl">
+            {/* Buttons */}
+            <div className="flex flex-wrap gap-3 mb-6">
+              {buttons.map(({ id, label, path }) => (
+                <button
+                  key={id}
+                  onClick={() => handleClick(path)}
+                  className={`px-4 py-2 rounded-md border border-gray-300 transition
+          ${
+            selectedButton === id
+              ? "bg-[#0f122f] text-white"
+              : "bg-white text-[#141843] hover:bg-gray-100"
+          }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <hr className="my-4 border-gray-200" />
+
             {/* Description */}
-            <div className="campaign-description py-4 border-b-1 border-gray-200">
+            <div className="campaign-description border-b border-gray-200">
               <h3 className="font-semibold text-lg mb-2">
                 Campaign Description
               </h3>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-gray-700 leading-relaxed py-4">
                 Lorem Ipsum is simply dummy text of the printing and typesetting
                 industry...
               </p>
@@ -185,18 +244,52 @@ const DescriptionLayout = () => {
                   </li>
                 ))}
               </ul>
+
+              <hr className="my-4 border-gray-200" />
+
+              {/* Tags */}
               <div className="flex flex-wrap gap-2 mt-4">
                 {["Fixed Price", "Expert", "Beauty", "Micro Influencer"].map(
                   (tag, i) => (
                     <span
                       key={i}
-                      className="px-3 py-1 bg-gray-100 rounded-full text-xs"
+                      className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
                     >
                       {tag}
                     </span>
                   )
                 )}
               </div>
+
+              {/* Milestones
+              <h3 className="font-semibold text-base mb-2 my-4">Milestones</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[1, 2].map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="border border-gray-200 rounded-xl p-4 space-y-2"
+                  >
+                    <p className="text-gray-600 text-sm">
+                      Lorem Ipsum is simply dummy text of the printing and
+                      typesetting industry. Read More...
+                    </p>
+                    <hr className="my-2 border-gray-200 my-3" />
+                    <div className="flex items-center text-gray-500 text-sm gap-2">
+                      <RiMoneyDollarCircleLine className="w-4 h-4" />
+                      <span className="text-gray-800 font-medium my-3">
+                        120.25 / Video
+                      </span>
+                    </div>
+                    <div className="flex items-center text-gray-500 text-sm gap-2">
+                      <RiCalendarLine className="w-4 h-4" />
+                      <span className="text-gray-800 font-medium">
+                        11 Jun, 2025
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div> */}
+
             </div>
           </div>
 
@@ -335,4 +428,4 @@ const DescriptionLayout = () => {
   );
 };
 
-export default DescriptionLayout;
+export default Details;

@@ -18,6 +18,9 @@ import DashboardLayout from './components/users/deshboardLayout/DashboardLayout'
 import AppliedLayout from './components/users/browseCampaignLayout/AppliedLayout';
 import SavedLayout from './components/users/browseCampaignLayout/SavedLayout';
 import DescriptionLayout from './components/users/browseCampaignLayout/DescriptionLayout';
+import CampaignsLayout from './components/users/MyCampaignsLayout/CampaignsLayout';
+import Details from './components/users/MyCampaignsLayout/Details';
+import EditLayout from './components/users/browseCampaignLayout/EditLayout';
 import ApplyNow from './components/users/browseCampaignLayout/ApplyNow';
 import { ProfileStepper } from "./pages/influencer/influencerProfileCreation/ProfileStepper"
 import CreateCampaign from "./pages/vendor/dashboard/CreateCampaign"
@@ -41,13 +44,18 @@ const App = () => {
                                 <Route path='/verify-email-or-mobile' element={<VerifyEmailOrMobile />} />
                                 <Route path='/reset-password' element={<ResetPassword />} />
                                 {/* Influencer Dashboard*/}
-<Route path='/dashboard' element={<DashboardLayout />}>
-          <Route path='browse' element={<BrowseCampaign />} />
-          <Route path='browse/applied' element={<AppliedLayout />} />
-          <Route path='browse/saved' element={<SavedLayout />} />
-          <Route path='browse/description' element={<DescriptionLayout />} />
-          <Route path='browse/apply-now' element={<ApplyNow />} />
-        </Route>
+                                <Route path='/dashboard' element={<DashboardLayout />}>
+                                        <Route path='browse' element={<BrowseCampaign />} />
+                                        <Route path='browse/applied' element={<AppliedLayout />} />
+                                        <Route path='browse/saved' element={<SavedLayout />} />
+                                        <Route path='browse/description' element={<DescriptionLayout />} />
+                                        <Route path='browse/edit' element={<EditLayout />} />
+                                        <Route path='browse/apply-now' element={<ApplyNow />} />
+                                        
+                                        <Route path='my-campaigns' element={<CampaignsLayout />} />
+                                        <Route path='my-campaigns/details' element={<Details />} />
+
+                                </Route>
                                 
 
                                 {/* Vendor Deshboard */}
