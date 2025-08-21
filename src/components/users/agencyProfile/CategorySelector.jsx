@@ -19,11 +19,9 @@ export const CategorySelector = ({ onBack, onNext }) => {
         }, 0);
     };
 
-
-
     const fatchAllCategories = async () => {
     try {
-        const response = await axios.get("/user/categories");
+        const response = await axios.get("vendor/categories");
         if (response.status === 200) {
             const data = response.data;
             setCategoryTree(data);

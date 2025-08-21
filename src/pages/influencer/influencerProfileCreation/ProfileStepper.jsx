@@ -6,16 +6,18 @@ import { RiMenu2Line } from 'react-icons/ri';
 import { PersonalDetails } from '../../../components/users/complateProfile/PersonalDetails';
 import { ProfileHeader } from '../../../components/users/complateProfile/ProfileHeader';
 import { SocialMediaDetails } from '../../../components/users/complateProfile/SocialMediaDetails';
-import { CategorySelector } from '../../../components/users/agencyProfile/CategorySelector';
+import { CategorySelector } from '../../../components/users/vendorProfile/CategorySelector';
 import PortfolioUploader from '../../../components/users/complateProfile/PortfolioUploader.JSX';
 import PaymentDetailsForm from '../../../components/users/complateProfile/PaymentDetailsForm';
 import ThankYouScreen from '../../../components/users/complateProfile/ThankYouScreen';
 import "../../../components/users/complateProfile/profile.css"
+import axios from 'axios';
 
 export const ProfileStepper = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [profileData, setProfileData] = useState(null);
 
   const markStepComplete = (index) => {
     const updated = [...completedSteps];
@@ -43,11 +45,11 @@ export const ProfileStepper = () => {
   const steps = [
     {
       title: 'Personal Information',
-      component: <PersonalDetails onNext={() => markStepComplete(0)} />,
+      component: <PersonalDetails data={profileData?.profile} onNext={() => markStepComplete(0)} />,
     },
     {
       title: 'Social Media Links',
-      component: <SocialMediaDetails onNext={() => markStepComplete(1)} onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} />,
+      component: <SocialMediaDetails data={profileData?.social} onNext={() => markStepComplete(1)} onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} />,
     },
     {
       title: 'Categories and Interests',
@@ -62,6 +64,49 @@ export const ProfileStepper = () => {
       component: <PaymentDetailsForm onNext={() => markStepComplete(4)} onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} />
     },
   ];
+
+
+  const getUserProfileCompationData = async () => {
+  try {
+    const token = localStorage.getItem("token")
+    const id = localStorage.getItem('userId')
+    const res = await axios.get(`user/profile/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (res.status === 200) {
+      const parts = res.data.profileParts;
+      setProfileData(parts);
+
+      // Step completion logic
+      const stepsCompletion = [
+        !!parts.profile && Object.keys(parts.profile).length > 0,       // Step 0
+        Array.isArray(parts.social) && parts.social.length > 0,         // Step 1
+        Array.isArray(parts.categories) && parts.categories.length > 0, // Step 2
+        !!parts.portfolio && Object.keys(parts.portfolio).length > 0,   // Step 3
+        !!parts.payment && Object.keys(parts.payment).length > 0        // Step 4
+      ];
+
+      setCompletedSteps(stepsCompletion);
+
+      console.log(profileData)
+
+      // Go to first incomplete step
+      const firstIncomplete = stepsCompletion.findIndex(done => !done);
+      setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "thankyou");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+  useEffect(()=>{
+    getUserProfileCompationData();
+  },[])
 
   return (
     <>

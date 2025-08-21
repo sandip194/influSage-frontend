@@ -1,35 +1,85 @@
 import React, { useEffect } from 'react';
 import { Form, Input } from 'antd';
+import axios from 'axios';
+import { message } from 'antd';
 
-export const SocialMediaDetails = ({ onBack, onNext }) => {
+export const SocialMediaDetails = ({ onBack, onNext, data }) => {
   const [form] = Form.useForm();
 
   const platforms = [
-    { name: 'Instagram', icon: <img src='./public/assets/skill-icons_instagram.png' alt='Instagram-logo' className='w-[24px]' />, field: 'instagram', placeholder: 'Enter Your Instagram link' },
-    { name: 'YouTube', icon: <img src='./public/assets/logos_youtube-icon.png' alt='Youtube-logo' className='w-[24px]' />, field: 'youtube', placeholder: 'Enter Your YouTube link' },
-    { name: 'Facebook', icon: <img src='./public/assets/logos_facebook.png' alt='Facebook-logo' className='w-[24px]' />, field: 'facebook', placeholder: 'Enter Your Facebook link' },
-    { name: 'X', icon: <img src='./public/assets/Group.png' alt='X-logo' className='w-[24px]' />, field: 'x', placeholder: 'Enter Your X link' },
-    { name: 'Tiktok', icon: <img src='./public/assets/logos_tiktok-icon.png' alt='Tiktok-logo' className='w-[24px]' />, field: 'tiktok', placeholder: 'Enter Your Tiktok link' },
-    { name: 'Pinterest', icon: <img src='./public/assets/logos_pinterest.png' alt='Pinterest-logo' className='w-[24px]' />, field: 'pinterest', placeholder: 'Enter Your Pinterest link' },
+    { name: 'Instagram', providerid: 1, icon: <img src='./public/assets/skill-icons_instagram.png' alt='Instagram' className='w-[24px]' />, field: 'instagram', placeholder: 'Enter Your Instagram link' },
+    { name: 'YouTube', providerid: 2, icon: <img src='./public/assets/logos_youtube-icon.png' alt='YouTube' className='w-[24px]' />, field: 'youtube', placeholder: 'Enter Your YouTube link' },
+    { name: 'Facebook', providerid: 3, icon: <img src='./public/assets/logos_facebook.png' alt='Facebook' className='w-[24px]' />, field: 'facebook', placeholder: 'Enter Your Facebook link' },
+    { name: 'X', providerid: 4, icon: <img src='./public/assets/Group.png' alt='X' className='w-[24px]' />, field: 'x', placeholder: 'Enter Your X link' },
+    { name: 'Tiktok', providerid: 5, icon: <img src='./public/assets/logos_tiktok-icon.png' alt='Tiktok' className='w-[24px]' />, field: 'tiktok', placeholder: 'Enter Your Tiktok link' },
+    { name: 'Pinterest', providerid: 6, icon: <img src='./public/assets/logos_pinterest.png' alt='Pinterest' className='w-[24px]' />, field: 'pinterest', placeholder: 'Enter Your Pinterest link' },
   ];
 
-  const onFinish = (values) => {
-    console.log('Form Data:', values);
-    localStorage.setItem("socialLinks", JSON.stringify(values));
-    if (onNext) onNext();
+  const onFinish = async (values) => {
+    try {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+
+      if (!token || !userId) {
+        message.error("User not authenticated.");
+        return;
+      }
+
+      // Transform filled values into required array
+      const socialaccountjson = platforms
+        .filter(p => values[p.field]) // Only filled-in links
+        .map(p => ({
+          providerid: p.providerid,
+          handleslink: values[p.field],
+        }));
+
+      // Optionally store in localStorage
+      localStorage.setItem("socialLinks", JSON.stringify(values));
+
+      const payload = {
+        userid: userId,
+        socialaccountjson,
+      };
+
+      const response = await axios.post(
+        'user/complete-profile', // replace with actual URL
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log('✅ Social media data sent:', response.data);
+      message.success('Social media details submitted!');
+      if (onNext) onNext();
+
+    } catch (error) {
+      console.error('❌ Failed to submit social links:', error);
+      message.error('Failed to submit social links.');
+    }
   };
 
-
   useEffect(() => {
-    const savedValues = localStorage.getItem("socialLinks"); // ✅ correct key
-    if (savedValues) {
-      const parsedValues = JSON.parse(savedValues);
-      console.log(parsedValues)
-      form.setFieldsValue(parsedValues); // ✅ populate form fields
-      console.log(form.getFieldValue("instagram"))
+    console.log(data)
+  if (data && Array.isArray(data)) {
+    const initialValues = {};
 
-    }
-  }, [form]);
+    data.forEach(item => {
+      const matchedPlatform = platforms.find(p => p.providerid === item.providerid);
+      if (matchedPlatform) {
+        initialValues[matchedPlatform.field] = item.handleslink;
+      }
+    });
+
+    form.setFieldsValue(initialValues);
+  }
+}, [data, form]);
+
+
+  
 
   // 🔍 Custom validator to ensure at least one field is filled
   const validateAtLeastOne = (_, value) => {
@@ -58,71 +108,71 @@ export const SocialMediaDetails = ({ onBack, onNext }) => {
                 <span className="hidden md:block text-sm font-medium text-gray-700">{platform.name}</span>
               </div>
               <Form.Item
-                style={{margin:0, width:"100%" }}
+                style={{ margin: 0, width: "100%" }}
                 name={platform.field}
                 rules={[{ type: 'url', message: 'Please enter a valid URL' }]}
               >
-              <Input
-                size="large"
-                placeholder={platform.placeholder}
-                className="flex-1 border-none shadow-none bg-transparent focus:ring-0 focus:outline-none"
-                onChange={() => {
-                  form.validateFields(['atLeastOne']);
-                }}
-              />
-            </Form.Item>
+                <Input
+                  size="large"
+                  placeholder={platform.placeholder}
+                  className="flex-1 border-none shadow-none bg-transparent focus:ring-0 focus:outline-none"
+                  onChange={() => {
+                    form.validateFields(['atLeastOne']);
+                  }}
+                />
+              </Form.Item>
             </div>
-            
+
           ))}
-    </div>
+        </div>
 
-        {/* 🔒 Hidden field to attach custom validator */ }
-  <Form.Item
-    shouldUpdate
-    style={{ margin: 0 }}
-  >
-    {() => {
-      const hasError = form.getFieldError('atLeastOne').length > 0;
+        {/* 🔒 Hidden field to attach custom validator */}
+        <Form.Item
+          shouldUpdate
+          style={{ margin: 0 }}
+        >
+          {() => {
+            const hasError = form.getFieldError('atLeastOne').length > 0;
 
-      return (
-        <>
-          {/* Hidden validation field */}
-          <Form.Item
-            name="atLeastOne"
-            rules={[{ validator: validateAtLeastOne }]}
-            style={{ display: 'none', margin: 0 }}
+            return (
+              <>
+                {/* Hidden validation field */}
+                <Form.Item
+                  name="atLeastOne"
+                  rules={[{ validator: validateAtLeastOne }]}
+                  style={{ display: 'none', margin: 0 }}
+                >
+                  <Input style={{ margin: 0 }} />
+                </Form.Item>
+
+                {/* Manual error message display */}
+                {hasError && (
+                  <div className="text-red-500 text-sm mt-0 mb-0 !important">
+                    {form.getFieldError('atLeastOne')[0]}
+                  </div>
+                )}
+              </>
+            );
+          }}
+        </Form.Item>
+
+
+        {/* Buttons */}
+        <div className="flex flex-row items-center gap-4 ">
+          <button
+            type="button"
+            onClick={onBack}
+            className="bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
           >
-            <Input style={{ margin: 0 }} />
-          </Form.Item>
-
-          {/* Manual error message display */}
-          {hasError && (
-            <div className="text-red-500 text-sm mt-0 mb-0 !important">
-              {form.getFieldError('atLeastOne')[0]}
-            </div>
-          )}
-        </>
-      );
-    }}
-  </Form.Item>
-
-
-  {/* Buttons */ }
-  <div className="flex flex-row items-center gap-4 ">
-    <button
-      type="button"
-      onClick={onBack}
-      className="bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
-    >
-      Back
-    </button>
-    <button
-      type="submit"
-      className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
-    >
-      Continue
-    </button>
-  </div>
+            Back
+          </button>
+          <button
+            type="submit"
+            className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
+          >
+            Continue
+          </button>
+        </div>
       </Form >
     </div >
   );
