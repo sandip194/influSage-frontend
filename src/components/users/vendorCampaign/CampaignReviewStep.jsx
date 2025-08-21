@@ -14,7 +14,7 @@ const Requirements = [
 
 const CampaignReviewStep = () => {
     return (
-        <div className="w-full max-w-7xl mx-auto text-sm overflow-x-hidden">
+        <div className="w-full text-sm overflow-x-hidden">
             <h1 className='text-2xl font-semibold mb-4'>Review Campaign</h1>
             <div className="flex flex-col lg:flex-row gap-4">
                 {/* Left Side */}

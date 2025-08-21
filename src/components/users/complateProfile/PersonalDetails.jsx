@@ -8,7 +8,9 @@ import postalRegexList from './postalRegex.json'
 const { TextArea } = Input;
 const { Option } = Select;
 
-export const PersonalDetails = ({ onNext }) => {
+
+
+export const PersonalDetails = ({ onNext, data }) => {
 
   const [form] = Form.useForm();
   const [preview, setPreview] = useState(null);
@@ -54,28 +56,26 @@ export const PersonalDetails = ({ onNext }) => {
 
   const fileInputRef = useRef();
 
- // Load form values from localStorage
+  // Load form values from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('personalDetails');
-    if (saved) {
-      const parsed = JSON.parse(saved);
+    if (data) {
       form.setFieldsValue({
-        ...parsed,
-        birthDate: parsed.birthDate ? dayjs(parsed.birthDate) : null
+        gender: data.genderid,
+        birthDate: data.dob ? dayjs(data.dob) : null,
+        address: data.address1,
+        country: data.countryname,
+        state: data.statename,
+        bio: data.bio || '',
       });
 
-      setProfileImage(parsed.profileImage || null);
-      setPreview(parsed.preview || null);
-      setSelectedCountry(parsed.country);
-      setSelectedState(parsed.state);
-
-      if (parsed.country) fetchStates(parsed.country);
-      if (parsed.country && parsed.state) fetchCities(parsed.country, parsed.state);
+      // Optionally fetch states and cities if you had location data too
+      // setSelectedCountry(data.country)
+      // fetchStates(data.country)
     } else {
+      // fallback for dev/testing
       form.setFieldsValue({ firstName: 'Sandip', lastName: 'Kumar' });
     }
-  }, [form]);
-
+  }, [data, form]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -91,37 +91,67 @@ export const PersonalDetails = ({ onNext }) => {
     setProfileError('');
   };
 
-
-
   const handleSubmit = async () => {
     try {
       if (!profileImage) {
-        setProfileError("Please Select Profile Image ! Profile Image Is Required")
+        setProfileError("Please Select Profile Image ! Profile Image Is Required");
+        return;
       }
+
       const values = await form.validateFields();
 
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId')
+
+
+      // Format data as per API structure
+      const profilePayload = {
+        userid: userId,
+        profilejson: {
+          genderid: values.gender,
+          dob: values.birthDate.format('DD-MM-YYYY'),
+          address1: values.address,
+          countryname: values.country,
+          statename: values.state,
+          bio: values.bio || '',
+        },
+      };
+
+      // Example API call
+      const response = await axios.post("user/complete-profile", profilePayload, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Auth header
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status === 200) {
+        console.log(response.data)
+      }
+
+      // Save locally (optional)
       const fullData = {
         ...values,
-        birthDate: values.birthDate.format('YYYY-MM-DD'),
+        birthDate: values.birthDate.format('DD-MM-YYYY'),
         location: {
           country: values.country,
           state: values.state,
           city: values.city,
         },
         profileImage,
-        preview 
+        preview,
       };
 
       localStorage.setItem('personalDetails', JSON.stringify(fullData));
 
-      console.log('✅ Submitted data:', fullData);
+      console.log('✅ API Response:', response.data);
       message.success('Form submitted successfully!');
       onNext();
     } catch (errorInfo) {
-      console.log('❌ Validation Failed:', errorInfo);
+      console.log('❌ Validation Failed or API Error:', errorInfo);
+      message.error('Submission failed, please try again.');
     }
   };
-
 
   return (
     <div className="personal-details-container bg-white p-6 rounded-3xl text-inter">
@@ -172,9 +202,9 @@ export const PersonalDetails = ({ onNext }) => {
             rules={[{ required: true, message: 'Please select your gender' }]}
           >
             <Select size="large" placeholder="Select Gender" className="rounded-xl">
-              <Option value="male">Male</Option>
-              <Option value="female">Female</Option>
-              <Option value="other">Other</Option>
+              <Option value={1}>Male</Option>
+              <Option value={2}>Female</Option>
+              <Option value={3}>Other</Option>
             </Select>
           </Form.Item>
 
@@ -187,7 +217,7 @@ export const PersonalDetails = ({ onNext }) => {
             <DatePicker
               size="large"
               className="w-full rounded-xl"
-              format="YYYY-MM-DD"
+              format="DD-MM-YYYY"
               style={{ height: 40 }}
               disabledDate={(current) => current && current > dayjs().endOf('day')}
             />
@@ -292,7 +322,7 @@ export const PersonalDetails = ({ onNext }) => {
 
         {/* ZIP Code */}
         <Form.Item
-        label={<b>ZIP / PIN Code</b>}
+          label={<b>ZIP / PIN Code</b>}
           size="large"
           required
           error="ZIP Or PIN Code Is Required"

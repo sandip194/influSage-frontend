@@ -30,6 +30,7 @@ import { VendorProfileStepper } from './pages/vendor/venderProfileCreation/Vendo
 import DashboardPage from './pages/influencer/dashboard/DashboardPage';
 import VenderDashboardPage from './pages/vendor/dashboard/VenderDashboardPage';
 import BrowseInfluencerPage from './pages/vendor/dashboard/BrowseInfluencerPage';
+import ChatAppPage from './components/chatApp/ChatAppPage';
 
 
 const App = () => {
@@ -58,9 +59,10 @@ const App = () => {
 
                                         <Route path='browse/edit' element={<EditLayout />} />
                                         <Route path='browse/apply-now' element={<ApplyNow />} />
-                                        
+
                                         <Route path='my-campaigns' element={<CampaignsLayout />} />
                                         <Route path='my-campaigns/details' element={<Details />} />
+                                        <Route path='messages' element={<ChatAppPage/>} />
 
                                 </Route>
 
@@ -71,6 +73,7 @@ const App = () => {
                                         <Route path='browse-influencers' element={<BrowseInfluencerPage />} />
                                         <Route path='my-campaigns' element={<CreateCampaign />} />
                                         <Route path='my-campaigns/create-campaign' element={<CampaignWizard />} />
+                                        <Route path='messages' element={<ChatAppPage/>} />
                                 </Route>
 
                                 <Route path='/dashboard/browse' element={<BrowseCampaign />} />

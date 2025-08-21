@@ -60,25 +60,52 @@ export const CategorySelector = ({ onBack, onNext }) => {
         try {
             const token = localStorage.getItem("token");
             const userId = localStorage.getItem("userId");
-
-            const res = await axios.post(
-                "vendor/complete-vendor-profile",
-                {
-                    userid: userId,
-                    categoriesjson: data
-                },
-                {
-                    headers: {
-                        Authorization: "Bearer " + token
+            const role = localStorage.getItem("role");
+            console.log(role)
+            // for Influencer 
+            if (role === "1") {
+                const res = await axios.post(
+                    "user/complete-profile",
+                    {
+                        userid: userId,
+                        categoriesjson: data
+                    },
+                    {
+                        headers: {
+                            Authorization: "Bearer " + token
+                        }
                     }
-                }
-            );
+                );
 
-            if (res.status === 200) {
-                console.log("✅ Backend response:", res.data);
-            } else {
-                console.warn("❗ Unexpected response:", res);
+                if (res.status === 200) {
+                    console.log("✅ Backend response:", res.data);
+                } else {
+                    console.warn("❗ Unexpected response:", res);
+                }
             }
+
+            // for Vendor
+            if (role === "2") {
+                const res = await axios.post(
+                    "vendor/complete-vendor-profile",
+                    {
+                        userid: userId,
+                        categoriesjson: data
+                    },
+                    {
+                        headers: {
+                            Authorization: "Bearer " + token
+                        }
+                    }
+                );
+
+                if (res.status === 200) {
+                    console.log("✅ Backend response:", res.data);
+                } else {
+                    console.warn("❗ Unexpected response:", res);
+                }
+            }
+
         } catch (error) {
             console.error("❌ Error sending data to backend:", error.response?.data || error.message);
         }
@@ -110,7 +137,7 @@ export const CategorySelector = ({ onBack, onNext }) => {
             }
         });
 
-        // sendDataToBackend(selectedData);
+        sendDataToBackend(selectedData);
         // Save full data to localStorage or send to server
         localStorage.setItem('selectedFullCategoryData', JSON.stringify(selectedData));
 
