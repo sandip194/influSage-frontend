@@ -1,5 +1,4 @@
 import {
-  RiCheckboxCircleFill,
   RiMenLine,
   RiMoneyRupeeCircleLine,
   RiStackLine,
@@ -15,40 +14,6 @@ import { Modal, Upload, Input } from "antd";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 const { TextArea } = Input;
 
-const Requirements = [
-  { label: "Shopify User: ", value: "Yes" },
-  {
-    label: "Expectation: ",
-    value:
-      "Post my existing content Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-  },
-  { label: "Due Date: ", value: "11 Jul 2025" },
-  { label: "Ship Products: ", value: "Yes" },
-  { label: "Target Country: ", value: "India" },
-  { label: "Duration: ", value: "2 Months" },
-  { label: "Offers: ", value: "Allow Influencer to make offers" },
-];
-
-const milestones = [
-  {
-    name: "Milestone Name 1",
-    amount: "$12.35",
-    dueDate: "16 Jun 2021, 05:00 PM",
-    status: "Paid",
-  },
-  {
-    name: "Milestone Name 2",
-    amount: "$12.35",
-    dueDate: "16 Jun 2021, 05:00 PM",
-    status: "Paid",
-  },
-  {
-    name: "Milestone Name 3",
-    amount: "$12.35",
-    dueDate: "16 Jun 2021, 05:00 PM",
-    status: "Pending",
-  },
-];
 
 const steps = [
   { name: "Campaign Created", date: "16 Jun 2021, 05:00 PM" },
@@ -56,20 +21,7 @@ const steps = [
   { name: "Campaign Delivered", date: "16 Jun 2021, 05:00 PM" },
 ];
 
-const getStatusColor = (status) => {
-  switch (status) {
-    case "Paid":
-      return "bg-green-100 text-green-600";
-    case "Pending":
-      return "bg-yellow-100 text-yellow-600";
-    case "Overdue":
-      return "bg-red-100 text-red-600";
-    default:
-      return "bg-gray-100 text-gray-600";
-  }
-};
-
-const Details = () => {
+const Activity = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [proposal, setProposal] = useState("");
   const [errors, setErrors] = useState({});
@@ -135,6 +87,57 @@ const Details = () => {
   const handleClick = (path) => {
     navigate(path);
   };
+
+  const activities = [
+    {
+      date: "11 Jul, 2025",
+      items: [
+        {
+          user: "Jane Cooper",
+          avatar: "https://i.pravatar.cc/40?img=1",
+          action: "Added New Files to Instagram Campaign",
+          time: "05:00 PM",
+        },
+        {
+          user: "John Doe",
+          avatar: "https://i.pravatar.cc/40?img=2",
+          action:
+            "released a payment of $100.00 to you for the milestone Instagram Campaign",
+          time: "05:00 PM",
+        },
+        {
+          user: "John Doe",
+          avatar: "https://i.pravatar.cc/40?img=3",
+          action: "activated milestone Short Reel for $30.00",
+          time: "05:00 PM",
+        },
+      ],
+    },
+    {
+      date: "10 Jul, 2025",
+      items: [
+        {
+          user: "Jane Cooper",
+          avatar: "https://i.pravatar.cc/40?img=4",
+          action: "Added New Files to Instagram Campaign",
+          time: "05:00 PM",
+        },
+        {
+          user: "John Doe",
+          avatar: "https://i.pravatar.cc/40?img=5",
+          action:
+            "released a payment of $100.00 to you for the milestone Instagram Campaign",
+          time: "05:00 PM",
+        },
+        {
+          user: "John Doe",
+          avatar: "https://i.pravatar.cc/40?img=6",
+          action: "activated milestone Short Reel for $30.00",
+          time: "05:00 PM",
+        },
+      ],
+    },
+  ];
 
   const buttons = [
     {
@@ -275,108 +278,44 @@ const Details = () => {
 
             <hr className="my-4 border-gray-200" />
 
-            {/* Description */}
-            <div className="campaign-description border-b border-gray-200">
-              <h3 className="font-semibold text-lg mb-2">
-                Campaign Description
-              </h3>
-              <p className="text-gray-700 leading-relaxed py-4">
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry...
-              </p>
-            </div>
+            {/* Activity Section */}
+            <h3 className="font-semibold text-lg mb-4">Activity</h3>
 
-            {/* Requirements */}
-            <div className="requirements py-4 border-b-1 border-gray-200">
-              <h3 className="font-semibold text-lg mb-4">Requirements</h3>
-              <ul className="space-y-2 text-gray-700">
-                {Requirements.map((item, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <RiCheckboxCircleFill />
-                    <span>
-                      {item.label} <strong>{item.value}</strong>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <hr className="my-4 border-gray-200" />
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2 mt-4">
-                {["Fixed Price", "Expert", "Beauty", "Micro Influencer"].map(
-                  (tag, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
-                    >
-                      {tag}
-                    </span>
-                  )
-                )}
-              </div>
-
-              {/* Milestones */}
-              <h3 className="font-semibold text-base mb-2 my-4">Milestones</h3>
-              <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4 my-4">
-                <div className="flex-row items-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Project price</span>
-                  </div>
-                  <p>$195.00</p>
+            {activities.map((activity, idx) => (
+              <div key={idx} className="mb-6">
+                {/* Date Heading */}
+                <div className="flex mb-4">
+                  <p className="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700">
+                    {activity.date}
+                  </p>
                 </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Milestones paid (5)</span>
-                  </div>
-                  <p>$195.00</p>
-                </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Milestones remaining (0)</span>
-                  </div>
-                  <p>$0.00</p>
-                </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Total earnings</span>
-                  </div>
-                  <p>$195.00</p>
-                </div>
-              </div>
-              <div className="relative">
-                {/* Timeline line */}
-                <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
 
-                {milestones.map((m, idx) => (
-                  <div key={idx} className="relative pl-10 pb-6">
-                    {/* Circle timeline */}
-                    <span className="absolute left-0 top-1 text-gray-700">
-                      <RiCheckboxBlankCircleLine size={18} />
-                    </span>
-
-                    {/* Milestone Details */}
-                    <div>
-                      <h4 className="font-semibold text-gray-800">{m.name}</h4>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                        <span className="font-medium">{m.amount}</span>
-                        <span>|</span>
-                        <span>Due On {m.dueDate}</span>
+                {/* Activity Items */}
+                <div className="space-y-4">
+                  {activity.items.map((item, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      {/* Avatar */}
+                      <img
+                        src={item.avatar}
+                        alt={item.user}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      {/* Content */}
+                      <div>
+                        <p className="text-gray-800 text-sm">
+                          <span className="font-semibold">{item.user}</span>{" "}
+                          {item.action}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {item.time}
+                        </p>
                       </div>
-
-                      {/* Status Badge */}
-                      <span
-                        className={`inline-block mt-2 px-2 py-1 text-xs rounded-md font-medium ${getStatusColor(
-                          m.status
-                        )}`}
-                      >
-                        {m.status}
-                      </span>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                  <hr className="border-b border-gray-200 my-4" />
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -429,7 +368,7 @@ const Details = () => {
         </div>
       </div>
 
-      {/* Design Modal */}
+         {/* Design Modal */}
       <Modal
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
@@ -515,8 +454,9 @@ const Details = () => {
           </button>
         </div>
       </Modal>
+
     </div>
   );
 };
 
-export default Details;
+export default Activity;

@@ -19,7 +19,12 @@ import AppliedLayout from './components/users/browseCampaignLayout/AppliedLayout
 import SavedLayout from './components/users/browseCampaignLayout/SavedLayout';
 import DescriptionLayout from './components/users/browseCampaignLayout/DescriptionLayout';
 import CampaignsLayout from './components/users/MyCampaignsLayout/CampaignsLayout';
+import Payment from './components/users/payment/PaymentLayout';
+import Analytics from './components/users/analytics/AnalyticsLayout';
 import Details from './components/users/MyCampaignsLayout/Details';
+import Activity from './components/users/MyCampaignsLayout/Activity';
+import Message from './components/users/MyCampaignsLayout/Message';
+import FilesMedia from './components/users/MyCampaignsLayout/FilesMedia';
 import EditLayout from './components/users/browseCampaignLayout/EditLayout';
 import ApplyNow from './components/users/browseCampaignLayout/ApplyNow';
 import { ProfileStepper } from "./pages/influencer/influencerProfileCreation/ProfileStepper"
@@ -61,6 +66,13 @@ const App = () => {
                                         
                                         <Route path='my-campaigns' element={<CampaignsLayout />} />
                                         <Route path='my-campaigns/details' element={<Details />} />
+                                        <Route path='my-campaigns/activity' element={<Activity />} />
+                                        <Route path='my-campaigns/message' element={<Message />} />
+                                        <Route path='my-campaigns/filesmedia' element={<FilesMedia />} />
+
+                                        <Route path='payment' element={<Payment />} />
+
+                                        <Route path='analytics' element={<Analytics/>} />
 
                                 </Route>
 

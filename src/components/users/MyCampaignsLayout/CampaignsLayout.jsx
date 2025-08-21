@@ -1,8 +1,14 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import {
+  RiMore2Fill,   // similar to FiMoreVertical
+  RiEyeLine,     // similar to FiEye
+  RiCheckboxCircleLine, // similar to FiCheckCircle
+  RiCloseCircleLine,    // similar to FiXCircle
+} from "@remixicon/react";
+
 import { FiMoreVertical, FiEye, FiCheckCircle, FiXCircle } from "react-icons/fi";
 
-// ---------- Sample Data ----------
 const campaigns = [
   {
     id: 1,
@@ -42,7 +48,6 @@ const campaigns = [
   },
 ];
 
-// ---------- Helpers ----------
 const statusStyles = {
   inprogress: "bg-yellow-100 text-yellow-700",
   completed: "bg-green-100 text-green-700",
@@ -55,7 +60,6 @@ const statusLabels = {
   cancelled: "Cancelled",
 };
 
-// ---------- Component ----------
 const CampaignsLayout = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
@@ -72,7 +76,6 @@ const CampaignsLayout = () => {
     { id: "cancelled", label: "Cancelled" },
   ];
 
-  // ---------- Filtering + Search ----------
   const filteredCampaigns = useMemo(() => {
     let data = campaigns;
 
@@ -98,7 +101,7 @@ const CampaignsLayout = () => {
   const totalPages = Math.ceil(filteredCampaigns.length / pageSize);
 
   return (
-    <div className="w-full max-w-7xl mx-auto text-sm px-2 sm:px-4">
+    <div className="w-full text-sm px-2 sm:px-4">
       <h2 className="text-2xl font-bold text-gray-900 mb-2">My Campaigns</h2>
       <p className="mb-6 text-gray-600 text-sm">Your Campaigns Overview</p>
 
@@ -126,7 +129,7 @@ const CampaignsLayout = () => {
       <div className="mb-4">
         <input
           type="text"
-          placeholder="🔍 Search campaigns..."
+          placeholder="Search campaigns..."
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           className="w-full sm:w-72 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#0f122f] focus:outline-none"
@@ -136,8 +139,8 @@ const CampaignsLayout = () => {
       {/* Data Table */}
       <div className="bg-white rounded-xl shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[700px]">
-            <thead className="bg-gray-50 text-gray-700 text-sm uppercase tracking-wide">
+          <table className="w-full text-left min-w-[700px]">
+            <thead className="bg-gray-50 text-gray-700 text-sm tracking-wide">
               <tr>
                 <th className="p-4">Client</th>
                 <th className="p-4">Campaign Name</th>
@@ -149,7 +152,7 @@ const CampaignsLayout = () => {
             </thead>
             <tbody className="text-sm text-gray-700">
               {paginatedData.map((row) => (
-                <tr key={row.id} className="border-t hover:bg-gray-50 transition">
+                <tr key={row.id} className="border-t border-gray-200 hover:bg-gray-50 transition">
                   {/* Client with photo */}
                   <td className="p-4 flex items-center gap-3">
                     <img
@@ -181,7 +184,7 @@ const CampaignsLayout = () => {
                       }
                       className="p-2 rounded-full hover:bg-gray-100"
                     >
-                      <FiMoreVertical className="text-gray-600" />
+                      <RiMore2Fill className="text-gray-600" />
                     </button>
 
                     {menuOpenId === row.id && (
@@ -193,19 +196,19 @@ const CampaignsLayout = () => {
                           }}
                           className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-left"
                         >
-                          <FiEye className="text-gray-500" /> View Details
+                          <RiEyeLine className="text-gray-500" /> View Details
                         </button>
                         <button
                           onClick={() => setMenuOpenId(null)}
                           className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-left"
                         >
-                          <FiCheckCircle className="text-green-600" /> Mark As Complete
+                          <RiCheckboxCircleLine/> Mark As Complete
                         </button>
                         <button
                           onClick={() => setMenuOpenId(null)}
                           className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-left"
                         >
-                          <FiXCircle className="text-red-600" /> Cancel Campaign
+                          <RiCloseCircleLine /> Cancel Campaign
                         </button>
                       </div>
                     )}

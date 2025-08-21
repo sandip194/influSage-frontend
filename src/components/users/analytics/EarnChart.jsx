@@ -10,7 +10,7 @@ import {
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-const EarningsChart = ({ data }) => {
+const EarnChart = ({ data }) => {
   const chartData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     datasets: [
@@ -79,4 +79,4 @@ const EarningsChart = ({ data }) => {
   );
 };
 
-export default EarningsChart;
+export default EarnChart;

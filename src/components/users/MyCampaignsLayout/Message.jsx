@@ -1,5 +1,4 @@
 import {
-  RiCheckboxCircleFill,
   RiMenLine,
   RiMoneyRupeeCircleLine,
   RiStackLine,
@@ -7,48 +6,17 @@ import {
   RiArrowLeftSLine,
   RiMoreFill,
   RiCheckboxBlankCircleLine,
+  RiStarLine,
+  RiEmotionLine,
+  RiAttachment2,
+  RiSendPlane2Line,
   RiChatUploadLine,
   RiDeleteBin6Line,
 } from "@remixicon/react";
 import React, { useState } from "react";
 import { Modal, Upload, Input } from "antd";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation} from "react-router-dom";
 const { TextArea } = Input;
-
-const Requirements = [
-  { label: "Shopify User: ", value: "Yes" },
-  {
-    label: "Expectation: ",
-    value:
-      "Post my existing content Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-  },
-  { label: "Due Date: ", value: "11 Jul 2025" },
-  { label: "Ship Products: ", value: "Yes" },
-  { label: "Target Country: ", value: "India" },
-  { label: "Duration: ", value: "2 Months" },
-  { label: "Offers: ", value: "Allow Influencer to make offers" },
-];
-
-const milestones = [
-  {
-    name: "Milestone Name 1",
-    amount: "$12.35",
-    dueDate: "16 Jun 2021, 05:00 PM",
-    status: "Paid",
-  },
-  {
-    name: "Milestone Name 2",
-    amount: "$12.35",
-    dueDate: "16 Jun 2021, 05:00 PM",
-    status: "Paid",
-  },
-  {
-    name: "Milestone Name 3",
-    amount: "$12.35",
-    dueDate: "16 Jun 2021, 05:00 PM",
-    status: "Pending",
-  },
-];
 
 const steps = [
   { name: "Campaign Created", date: "16 Jun 2021, 05:00 PM" },
@@ -56,20 +24,7 @@ const steps = [
   { name: "Campaign Delivered", date: "16 Jun 2021, 05:00 PM" },
 ];
 
-const getStatusColor = (status) => {
-  switch (status) {
-    case "Paid":
-      return "bg-green-100 text-green-600";
-    case "Pending":
-      return "bg-yellow-100 text-yellow-600";
-    case "Overdue":
-      return "bg-red-100 text-red-600";
-    default:
-      return "bg-gray-100 text-gray-600";
-  }
-};
-
-const Details = () => {
+const Message = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [proposal, setProposal] = useState("");
   const [errors, setErrors] = useState({});
@@ -79,6 +34,10 @@ const Details = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleClick = (path) => {
+    navigate(path);
+  };
 
   const handleUpload = ({ fileList }) => {
     let newErrors = {};
@@ -130,10 +89,6 @@ const Details = () => {
 
     setErrors({});
     setIsModalOpen(false);
-  };
-
-  const handleClick = (path) => {
-    navigate(path);
   };
 
   const buttons = [
@@ -273,108 +228,135 @@ const Details = () => {
               ))}
             </div>
 
-            <hr className="my-4 border-gray-200" />
+            <hr className="border-gray-200" />
 
-            {/* Description */}
-            <div className="campaign-description border-b border-gray-200">
-              <h3 className="font-semibold text-lg mb-2">
-                Campaign Description
-              </h3>
-              <p className="text-gray-700 leading-relaxed py-4">
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry...
-              </p>
-            </div>
-
-            {/* Requirements */}
-            <div className="requirements py-4 border-b-1 border-gray-200">
-              <h3 className="font-semibold text-lg mb-4">Requirements</h3>
-              <ul className="space-y-2 text-gray-700">
-                {Requirements.map((item, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <RiCheckboxCircleFill />
-                    <span>
-                      {item.label} <strong>{item.value}</strong>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <hr className="my-4 border-gray-200" />
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2 mt-4">
-                {["Fixed Price", "Expert", "Beauty", "Micro Influencer"].map(
-                  (tag, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
-                    >
-                      {tag}
-                    </span>
-                  )
-                )}
-              </div>
-
-              {/* Milestones */}
-              <h3 className="font-semibold text-base mb-2 my-4">Milestones</h3>
-              <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4 my-4">
-                <div className="flex-row items-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Project price</span>
+            {/* Message Section */}
+            <div className="bg-white p-4 rounded-2xl mt-4">
+              <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <img
+                    src="https://randomuser.me/api/portraits/men/32.jpg"
+                    alt="User"
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div>
+                    <h3 className="font-semibold text-gray-900">John Doe</h3>
+                    <p className="text-xs text-gray-500">
+                      Last Seen : 45 Mins Ago
+                    </p>
                   </div>
-                  <p>$195.00</p>
                 </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Milestones paid (5)</span>
-                  </div>
-                  <p>$195.00</p>
-                </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Milestones remaining (0)</span>
-                  </div>
-                  <p>$0.00</p>
-                </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Total earnings</span>
-                  </div>
-                  <p>$195.00</p>
+                <div className="flex items-center gap-2">
+                  <RiStarLine className="text-gray-500 w-5 h-5" />
+                  <RiMoreFill className="text-gray-500 w-5 h-5" />
                 </div>
               </div>
-              <div className="relative">
-                {/* Timeline line */}
-                <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
 
-                {milestones.map((m, idx) => (
-                  <div key={idx} className="relative pl-10 pb-6">
-                    {/* Circle timeline */}
-                    <span className="absolute left-0 top-1 text-gray-700">
-                      <RiCheckboxBlankCircleLine size={18} />
-                    </span>
-
-                    {/* Milestone Details */}
-                    <div>
-                      <h4 className="font-semibold text-gray-800">{m.name}</h4>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                        <span className="font-medium">{m.amount}</span>
-                        <span>|</span>
-                        <span>Due On {m.dueDate}</span>
-                      </div>
-
-                      {/* Status Badge */}
-                      <span
-                        className={`inline-block mt-2 px-2 py-1 text-xs rounded-md font-medium ${getStatusColor(
-                          m.status
-                        )}`}
-                      >
-                        {m.status}
-                      </span>
+              {/* Chat Body */}
+              <div className="py-4 space-y-6">
+                {/* Message - Left */}
+                <div className="flex items-start gap-3">
+                  <img
+                    src="https://randomuser.me/api/portraits/men/32.jpg"
+                    alt="John"
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">John Doe</p>
+                    <div className="bg-gray-100 px-4 py-2 rounded-xl inline-block text-gray-800">
+                      Hi How Are You?
                     </div>
+                    <p className="text-[11px] text-gray-400 mt-1">12:28 PM</p>
                   </div>
-                ))}
+                </div>
+
+                {/* Message - Right */}
+                <div className="flex items-end justify-end">
+                  <div className="text-right">
+                    <div className="bg-[#0f122f] text-white px-4 py-2 rounded-xl inline-block">
+                      Nice to Meet you. Let's talk about the project
+                    </div>
+                    <p className="text-[11px] text-gray-400 mt-1">12:28 PM</p>
+                  </div>
+                  <img
+                    src="https://randomuser.me/api/portraits/men/76.jpg"
+                    alt="Me"
+                    className="w-8 h-8 rounded-full ml-2"
+                  />
+                </div>
+
+                {/* Message - Left with image */}
+                <div className="flex items-start gap-3">
+                  <img
+                    src="https://randomuser.me/api/portraits/men/33.jpg"
+                    alt="Sean"
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Sean Smith</p>
+                    <div className="bg-gray-100 p-3 rounded-xl max-w-xs space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <img
+                          src="https://images.pexels.com/photos/3183186/pexels-photo-3183186.jpeg"
+                          className="w-full h-20 object-cover rounded-lg"
+                          alt="attached"
+                        />
+                        <img
+                          src="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg"
+                          className="w-full h-20 object-cover rounded-lg"
+                          alt="attached"
+                        />
+                        <img
+                          src="https://images.pexels.com/photos/374074/pexels-photo-374074.jpeg"
+                          className="w-full h-20 object-cover rounded-lg"
+                          alt="attached"
+                        />
+                        <img
+                          src="https://images.pexels.com/photos/265087/pexels-photo-265087.jpeg"
+                          className="w-full h-20 object-cover rounded-lg"
+                          alt="attached"
+                        />
+                      </div>
+                      <p className="text-gray-800 text-sm mt-2">
+                        Here is the screenshot attached for it
+                      </p>
+                    </div>
+                    <p className="text-[11px] text-gray-400 mt-1">12:28 PM</p>
+                  </div>
+                </div>
+
+                {/* Message - Right */}
+                <div className="flex items-end justify-end">
+                  <div className="text-right">
+                    <div className="bg-[#0f122f] text-white px-4 py-2 rounded-xl inline-block">
+                      Thanks for sharing the details
+                    </div>
+                    <p className="text-[11px] text-gray-400 mt-1">12:28 PM</p>
+                  </div>
+                  <img
+                    src="https://randomuser.me/api/portraits/men/76.jpg"
+                    alt="Me"
+                    className="w-8 h-8 rounded-full ml-2"
+                  />
+                </div>
+              </div>
+
+              {/* Input Box */}
+              <div className="pt-3">
+                <div className="flex items-center bg-gray-100 px-4 py-2 rounded-full">
+                  <input
+                    type="text"
+                    placeholder="Write Your Message"
+                    className="flex-1 bg-transparent focus:outline-none text-sm placeholder-gray-500"
+                  />
+                  <div className="flex items-center gap-3 ml-2">
+                    <RiEmotionLine className="text-gray-500 w-5 h-5 cursor-pointer" />
+                    <RiAttachment2 className="text-gray-500 w-5 h-5 cursor-pointer" />
+                    <button className="bg-[#0f122f] text-white p-2 rounded-full">
+                      <RiSendPlane2Line className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -429,7 +411,7 @@ const Details = () => {
         </div>
       </div>
 
-      {/* Design Modal */}
+         {/* Design Modal */}
       <Modal
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
@@ -515,8 +497,9 @@ const Details = () => {
           </button>
         </div>
       </Modal>
+      
     </div>
   );
 };
 
-export default Details;
+export default Message;

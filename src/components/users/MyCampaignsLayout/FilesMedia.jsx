@@ -1,5 +1,4 @@
 import {
-  RiCheckboxCircleFill,
   RiMenLine,
   RiMoneyRupeeCircleLine,
   RiStackLine,
@@ -7,48 +6,14 @@ import {
   RiArrowLeftSLine,
   RiMoreFill,
   RiCheckboxBlankCircleLine,
+  RiFileDownloadFill,
   RiChatUploadLine,
   RiDeleteBin6Line,
 } from "@remixicon/react";
 import React, { useState } from "react";
 import { Modal, Upload, Input } from "antd";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 const { TextArea } = Input;
-
-const Requirements = [
-  { label: "Shopify User: ", value: "Yes" },
-  {
-    label: "Expectation: ",
-    value:
-      "Post my existing content Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-  },
-  { label: "Due Date: ", value: "11 Jul 2025" },
-  { label: "Ship Products: ", value: "Yes" },
-  { label: "Target Country: ", value: "India" },
-  { label: "Duration: ", value: "2 Months" },
-  { label: "Offers: ", value: "Allow Influencer to make offers" },
-];
-
-const milestones = [
-  {
-    name: "Milestone Name 1",
-    amount: "$12.35",
-    dueDate: "16 Jun 2021, 05:00 PM",
-    status: "Paid",
-  },
-  {
-    name: "Milestone Name 2",
-    amount: "$12.35",
-    dueDate: "16 Jun 2021, 05:00 PM",
-    status: "Paid",
-  },
-  {
-    name: "Milestone Name 3",
-    amount: "$12.35",
-    dueDate: "16 Jun 2021, 05:00 PM",
-    status: "Pending",
-  },
-];
 
 const steps = [
   { name: "Campaign Created", date: "16 Jun 2021, 05:00 PM" },
@@ -56,29 +21,27 @@ const steps = [
   { name: "Campaign Delivered", date: "16 Jun 2021, 05:00 PM" },
 ];
 
-const getStatusColor = (status) => {
-  switch (status) {
-    case "Paid":
-      return "bg-green-100 text-green-600";
-    case "Pending":
-      return "bg-yellow-100 text-yellow-600";
-    case "Overdue":
-      return "bg-red-100 text-red-600";
-    default:
-      return "bg-gray-100 text-gray-600";
-  }
-};
+const files = [
+  { id: 1, name: "Project Doc.pdf", size: "2.4 MB", type: "pdf" },
+  { id: 2, name: "Wireframe.png", size: "2.4 MB", type: "image" },
+  { id: 3, name: "Project Doc.pdf", size: "2.4 MB", type: "pdf" },
+  { id: 4, name: "Wireframe.png", size: "2.4 MB", type: "image" },
+  { id: 5, name: "Wireframe.png", size: "2.4 MB", type: "image" },
+  { id: 6, name: "Project Doc.pdf", size: "2.4 MB", type: "pdf" },
+];
 
-const Details = () => {
+const FilesMedia = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [proposal, setProposal] = useState("");
   const [errors, setErrors] = useState({});
   const [fileList, setFileList] = useState([]);
   const [uploadedFile, setUploadedFile] = useState(null);
-  const [selected, setSelected] = useState("overview");
-
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleClick = (path) => {
+    navigate(path);
+  };
 
   const handleUpload = ({ fileList }) => {
     let newErrors = {};
@@ -132,8 +95,23 @@ const Details = () => {
     setIsModalOpen(false);
   };
 
-  const handleClick = (path) => {
-    navigate(path);
+  const getFileIcon = (type) => {
+    if (type === "pdf")
+      return (
+        <img
+          src="https://img.icons8.com/color/48/000000/pdf.png"
+          alt="pdf"
+          className="w-10 h-10"
+        />
+      );
+    if (type === "image")
+      return (
+        <img
+          src="https://img.icons8.com/color/48/000000/image.png"
+          alt="img"
+          className="w-10 h-10 rounded-md"
+        />
+      );
   };
 
   const buttons = [
@@ -177,12 +155,12 @@ const Details = () => {
           <div className="bg-white rounded-2xl overflow-hidden">
             <div className="relative h-40">
               <img
-                src="https://images.pexels.com/photos/33350497/pexels-photo-33350497.jpeg?_gl=1*1dx09le*_ga*MTYyNzc2NDMzNi4xNzM2MTY4MzY0*_ga_8JE65Q40S6*czE3NTU1ODI1NDQkbzIkZzEkdDE3NTU1ODMzNzgkajUyJGwwJGgw"
+                src="https://images.pexels.com/photos/33350497/pexels-photo-33350497.jpeg"
                 alt="Banner"
                 className="w-full h-28 object-cover"
               />
               <img
-                src="https://images.pexels.com/photos/25835001/pexels-photo-25835001.jpeg?_gl=1*vflnmv*_ga*MTYyNzc2NDMzNi4xNzM2MTY4MzY0*_ga_8JE65Q40S6*czE3NTU1ODI1NDQkbzIkZzEkdDE3NTU1ODI2ODEkajUwJGwwJGgw"
+                src="https://images.pexels.com/photos/25835001/pexels-photo-25835001.jpeg"
                 alt="Logo"
                 className="absolute rounded-full top-18 left-4 w-22 h-22 "
               />
@@ -215,23 +193,23 @@ const Details = () => {
 
               {/* Campaign Details Section */}
               <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4">
-                <div className="flex-row items-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                <div>
+                  <div className="flex gap-2 items-center mb-2 text-gray-400">
                     <RiStackLine className="w-5" />
                     <span>Platform</span>
                   </div>
                   <p>Instagram Reels</p>
                   <p>Youtube Video</p>
                 </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                <div>
+                  <div className="flex gap-2 items-center mb-2 text-gray-400">
                     <RiMoneyRupeeCircleLine className="w-5" />
                     <span>Budget</span>
                   </div>
                   <p>$120-$150/Reel</p>
                 </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                <div>
+                  <div className="flex gap-2 items-center mb-2 text-gray-400">
                     <RiTranslate className="w-5" />
                     <span>Language</span>
                   </div>
@@ -241,14 +219,14 @@ const Details = () => {
                   <p>Maliyalam</p>
                   <p>Telugu</p>
                 </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                <div>
+                  <div className="flex gap-2 items-center mb-2 text-gray-400">
                     <RiMenLine className="w-5" />
                     <span>Gender</span>
                   </div>
                   <p>Male</p>
                   <p>Female</p>
-                  <p>Othere</p>
+                  <p>Other</p>
                 </div>
               </div>
             </div>
@@ -273,106 +251,32 @@ const Details = () => {
               ))}
             </div>
 
-            <hr className="my-4 border-gray-200" />
+            <hr className="border-gray-200" />
 
-            {/* Description */}
-            <div className="campaign-description border-b border-gray-200">
-              <h3 className="font-semibold text-lg mb-2">
-                Campaign Description
-              </h3>
-              <p className="text-gray-700 leading-relaxed py-4">
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry...
-              </p>
-            </div>
-
-            {/* Requirements */}
-            <div className="requirements py-4 border-b-1 border-gray-200">
-              <h3 className="font-semibold text-lg mb-4">Requirements</h3>
-              <ul className="space-y-2 text-gray-700">
-                {Requirements.map((item, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <RiCheckboxCircleFill />
-                    <span>
-                      {item.label} <strong>{item.value}</strong>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <hr className="my-4 border-gray-200" />
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2 mt-4">
-                {["Fixed Price", "Expert", "Beauty", "Micro Influencer"].map(
-                  (tag, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
-                    >
-                      {tag}
-                    </span>
-                  )
-                )}
-              </div>
-
-              {/* Milestones */}
-              <h3 className="font-semibold text-base mb-2 my-4">Milestones</h3>
-              <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4 my-4">
-                <div className="flex-row items-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Project price</span>
-                  </div>
-                  <p>$195.00</p>
-                </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Milestones paid (5)</span>
-                  </div>
-                  <p>$195.00</p>
-                </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Milestones remaining (0)</span>
-                  </div>
-                  <p>$0.00</p>
-                </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Total earnings</span>
-                  </div>
-                  <p>$195.00</p>
-                </div>
-              </div>
-              <div className="relative">
-                {/* Timeline line */}
-                <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
-
-                {milestones.map((m, idx) => (
-                  <div key={idx} className="relative pl-10 pb-6">
-                    {/* Circle timeline */}
-                    <span className="absolute left-0 top-1 text-gray-700">
-                      <RiCheckboxBlankCircleLine size={18} />
-                    </span>
-
-                    {/* Milestone Details */}
-                    <div>
-                      <h4 className="font-semibold text-gray-800">{m.name}</h4>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                        <span className="font-medium">{m.amount}</span>
-                        <span>|</span>
-                        <span>Due On {m.dueDate}</span>
+            {/* Content based on selected button */}
+            <div className="bg-white p-4 rounded-2xl">
+              <h3 className="font-semibold text-lg mb-4">Attachments</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {files.map((file) => (
+                  <div
+                    key={file.id}
+                    className="flex items-center justify-between border border-gray-200 rounded-2xl p-3 hover:shadow-sm transition"
+                  >
+                    {/* File Info */}
+                    <div className="flex items-center gap-3">
+                      {getFileIcon(file.type)}
+                      <div>
+                        <p className="font-medium text-sm text-gray-800">
+                          {file.name}
+                        </p>
+                        <p className="text-xs text-gray-500">{file.size}</p>
                       </div>
-
-                      {/* Status Badge */}
-                      <span
-                        className={`inline-block mt-2 px-2 py-1 text-xs rounded-md font-medium ${getStatusColor(
-                          m.status
-                        )}`}
-                      >
-                        {m.status}
-                      </span>
                     </div>
+
+                    {/* Download Icon */}
+                    <button className="p-2 rounded-full hover:bg-gray-100 transition">
+                      <RiFileDownloadFill className="w-5 h-5 text-gray-600" />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -385,19 +289,19 @@ const Details = () => {
           {/* Campaign Details */}
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="font-semibold text-lg">Campaign Details</h3>
-            <div className="felx py-4 border-b-1 border-gray-200">
+            <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">Campaign Number</p>
               <p>#251HJ8888410Kl</p>
             </div>
-            <div className="felx py-4 border-b-1 border-gray-200">
+            <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">Order By</p>
               <p>Tiktokstar</p>
             </div>
-            <div className="felx py-4 border-b-1 border-gray-200">
+            <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">Delivery Date</p>
               <p>22 June, 2025</p>
             </div>
-            <div className="felx py-4 border-b-1 border-gray-200">
+            <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">Total Price</p>
               <p>250R</p>
             </div>
@@ -519,4 +423,4 @@ const Details = () => {
   );
 };
 
-export default Details;
+export default FilesMedia;
