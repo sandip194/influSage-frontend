@@ -17,7 +17,7 @@ import {
   Space,
   Button,
 } from "antd";
-
+import { Link } from "react-router-dom";
 
 import NotificationDropdown from "./NotificationDropdown";
 import MessageDropdown from "./MessageDropdown";
@@ -30,20 +30,19 @@ const profileMenu = (
       {
         key: "1",
         icon: <UserOutlined />,
-        // label: "My Profile",
-        label: (
-        <a href="/" target="_blank" rel="noopener noreferrer">
-          My Profile
-        </a>
+         label: (
+          <Link to="/dashboard/profile">
+            My Profile
+          </Link>
     ),
       },
       {
         key: "2",
         icon: <SettingOutlined />,
         label: (
-        <a href="/" rel="noopener noreferrer">
-          Settings
-        </a>
+          <Link to="/dashboard/setting">
+            Settings
+          </Link>
     ),
       },
       {
