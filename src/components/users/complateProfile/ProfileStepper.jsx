@@ -10,7 +10,7 @@ import PortfolioUploader from './PortfolioUploader.JSX';
 import PaymentDetailsForm from './PaymentDetailsForm';
 import ThankYouScreen from './ThankYouScreen';
 
-export const ProfileStepper = () => {
+export const Profile = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
