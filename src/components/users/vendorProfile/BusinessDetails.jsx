@@ -2,13 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Form, Input, Select, message } from 'antd';
 import { RiImageAddLine } from 'react-icons/ri';
 import axios from "axios";
-import postalRegexList from '../complateProfile/postalRegex.json'
+import postalRegexList from '../complateProfile/postalRegex.json';
 
 const { TextArea } = Input;
 const { Option } = Select;
 
-export const BusinessDetails = ({ onNext }) => {
-
+export const BusinessDetails = ({ onNext, data = {} }) => {
     const [form] = Form.useForm();
     const [preview, setPreview] = useState(null);
     const [profileImage, setProfileImage] = useState(null);
@@ -21,34 +20,44 @@ export const BusinessDetails = ({ onNext }) => {
     const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
     const [companySizes, setCompanySizes] = useState([]);
 
-
     const countryAPI = "https://countriesnow.space/api/v0.1/countries/positions";
     const stateAPI = "https://countriesnow.space/api/v0.1/countries/states";
     const cityAPI = "https://countriesnow.space/api/v0.1/countries/state/cities";
+
+    const fileInputRef = useRef();
 
     const getRegexForCountry = (iso) => {
         const entry = postalRegexList.find(e => e.ISO === iso);
         return entry?.Regex ? new RegExp(entry.Regex) : null;
     };
 
-    const fatchCompanySizes = async () => {
+    const fetchCompanySizes = async () => {
         try {
-            const response = await axios.get("vendor/company-sizes")
+            const response = await axios.get("vendor/company-sizes");
             if (response.status === 200) {
-                const data = response.data.companySizes
-                setCompanySizes(data);
+                setCompanySizes(response.data.companySizes || []);
             }
         } catch (error) {
-            console.log(error)
+            console.error(error);
         }
-    }
+    };
 
-    useEffect(() => {
-        setLoading(prev => ({ ...prev, countries: true }));
-        axios.get(countryAPI)
-            .then(res => setCountries(res.data.data))
-            .finally(() => setLoading(prev => ({ ...prev, countries: false })));
-    }, []);
+    const fetchCountries = () => {
+    setLoading(prev => ({ ...prev, countries: true }));
+    axios.get(countryAPI)
+        .then(res => {
+            if (res.data?.data) {
+                setCountries(res.data.data); // ✅ 'data' is an array
+            }
+        })
+        .catch((err) => {
+            console.error("❌ Failed to fetch countries:", err);
+        })
+        .finally(() => {
+            setLoading(prev => ({ ...prev, countries: false }));
+        });
+};
+
 
     const fetchStates = (country) => {
         setLoading(prev => ({ ...prev, states: true }));
@@ -64,42 +73,43 @@ export const BusinessDetails = ({ onNext }) => {
             .finally(() => setLoading(prev => ({ ...prev, cities: false })));
     };
 
+    const formatNumberCompact = (num) => {
+        if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace('.0', '') + 'M';
+        if (num >= 1_000) return (num / 1_000).toFixed(1).replace('.0', '') + 'k';
+        return num.toString();
+    };
 
-    const fileInputRef = useRef();
-
-    // Load form values from localStorage
+    // Initialize form and load countries
     useEffect(() => {
+        fetchCompanySizes();
+        fetchCountries(countryAPI);
 
-        fatchCompanySizes();
-
-        const saved = localStorage.getItem('businessDetails');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            console.log(parsed);
-
-            setProfileImage(parsed.profileImage || null);
-            setPreview(parsed.preview || null);
-            setSelectedCountry(parsed.location?.country);
-            setSelectedState(parsed.location?.state);
-
+        if (data) {
             form.setFieldsValue({
-                bussinessName: parsed.bussinessName,
-                companysizeid: parsed.companysizeid,
-                address1: parsed.address1,
-                country: parsed.location?.country,
-                state: parsed.location?.state,
-                city: parsed.location?.city,
-                zipCode: parsed.zipCode,
-                bio: parsed.bio,
+                businessname: data.businessname,
+                companysizeid: data.companysizeid,
+                address1: data.address1,
+                countryname: data.countryname,
+                statename: data.statename,
+                bio: data.bio,
+                zipCode: data.zipCode,
+                city: data.city,
             });
 
-            if (parsed.location?.country) fetchStates(parsed.location.country);
-            if (parsed.location?.country && parsed.location?.state) {
-                fetchCities(parsed.location.country, parsed.location.state);
+            if (data.countryname) {
+                setSelectedCountry(data.countryname);
+                fetchStates(data.countryname);
+            }
+            if (data.countryname && data.statename) {
+                setSelectedState(data.statename);
+                fetchCities(data.countryname, data.statename);
+            }
+
+            if (data.photopath) {
+                setPreview(data.photopath);
             }
         }
-
-    }, [form]);
+    }, [data]);
 
 
     const handleImageChange = (e) => {
@@ -116,57 +126,53 @@ export const BusinessDetails = ({ onNext }) => {
         setProfileError('');
     };
 
-
-
     const handleSubmit = async () => {
         try {
-            if (!profileImage) {
-                setProfileError("Please Select Profile Image ! Profile Image Is Required")
-            }
             const values = await form.validateFields();
 
-            const fullData = {
-                ...values,
-                location: {
-                    country: values.country,
-                    state: values.state,
-                    city: values.city,
-                },
-                profileImage,
-                preview
+            if (!profileImage && !preview) {
+                setProfileError("Please Select Profile Image! Profile Image is required");
+                return;
+            }
+
+            const profilejson = {
+                photopath: preview || null,
+                businessname: values.businessname,
+                companysizeid: values.companysizeid,
+                address1: values.address1,
+                countryname: values.countryname,
+                statename: values.statename,
+                city: values.city,
+                zipCode: values.zipCode,
+                bio: values.bio,
             };
 
-            localStorage.setItem('businessDetails', JSON.stringify(fullData));
+            const payload = {
+                userid: localStorage.getItem("userId"), // or pass as a prop if preferred
+                profilejson,
+            };
 
-            console.log('✅ Submitted data:', fullData);
-            message.success('Form submitted successfully!');
-            onNext();
-        } catch (errorInfo) {
-            console.log('❌ Validation Failed:', errorInfo);
+            const token = localStorage.getItem("token");
+
+            const response = await axios.post("/vendor/complete-vendor-profile", payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (response.status === 200 || response.status === 201) {
+                message.success("Business details updated successfully!");
+                onNext();
+            } else {
+                message.error("Failed to update profile.");
+            }
+
+        } catch (error) {
+            console.error("❌ Validation or API error:", error);
+            message.error("Please correct the form errors.");
         }
     };
-
-
-
-    useEffect(() => {
-        // TODO: Replace this mock data with actual API call
-        // axios.get("https://your-api.com/company-sizes")
-        //     .then(res => {
-        //         if (Array.isArray(res.data.companySizes)) {
-        //             setCompanySizes(res.data.companySizes);
-        //         }
-        //     })
-        //     .catch(err => {
-        //         console.error("Failed to fetch company sizes:", err);
-        //     });
-    }, []);
-
-    const formatNumberCompact = (num) => {
-        if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace('.0', '') + 'M';
-        if (num >= 1_000) return (num / 1_000).toFixed(1).replace('.0', '') + 'k';
-        return num.toString();
-    };
-
 
 
     return (
@@ -194,9 +200,7 @@ export const BusinessDetails = ({ onNext }) => {
                         />
                     </div>
                 </div>
-                {profileError && (
-                    <p className="text-red-500 text-sm mb-3">{profileError}</p>
-                )}
+                {profileError && <p className="text-red-500 text-sm mb-3">{profileError}</p>}
 
                 {/* Business Name */}
                 <Form.Item
@@ -207,7 +211,7 @@ export const BusinessDetails = ({ onNext }) => {
                     <Input size="large" placeholder="Enter your Business Name" className="rounded-xl" />
                 </Form.Item>
 
-                {/* Business Size */}
+                {/* Company Size */}
                 <Form.Item
                     name="companysizeid"
                     label={<b>How Large Is Your Company?</b>}
@@ -225,7 +229,6 @@ export const BusinessDetails = ({ onNext }) => {
                     </Select>
                 </Form.Item>
 
-
                 {/* Address */}
                 <Form.Item
                     name="address1"
@@ -235,13 +238,11 @@ export const BusinessDetails = ({ onNext }) => {
                     <Input size="large" placeholder="Enter your address" className="rounded-xl" />
                 </Form.Item>
 
-                {/* Location */}
+                {/* Country / State / City */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Country */}
                     <Form.Item
                         label={<b>Country</b>}
-                        name="country"
-
+                        name="countryname"
                         rules={[{ required: true, message: 'Please select a country' }]}
                     >
                         <Select
@@ -250,7 +251,7 @@ export const BusinessDetails = ({ onNext }) => {
                             placeholder="Select Country"
                             onChange={(val) => {
                                 setSelectedCountry(val);
-                                form.setFieldsValue({ state: undefined, city: undefined });
+                                form.setFieldsValue({ statename: undefined, city: undefined });
                                 fetchStates(val);
                             }}
                             loading={loading.countries}
@@ -267,10 +268,9 @@ export const BusinessDetails = ({ onNext }) => {
                         </Select>
                     </Form.Item>
 
-                    {/* State */}
                     <Form.Item
                         label={<b>State</b>}
-                        name="state"
+                        name="statename"
                         rules={[{ required: true, message: 'Please select a state' }]}
                     >
                         <Select
@@ -284,10 +284,6 @@ export const BusinessDetails = ({ onNext }) => {
                             }}
                             disabled={!selectedCountry}
                             loading={loading.states}
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                option?.children?.toLowerCase().includes(input.toLowerCase())
-                            }
                         >
                             {states.map((state) => (
                                 <Option key={state.name} value={state.name}>
@@ -297,18 +293,13 @@ export const BusinessDetails = ({ onNext }) => {
                         </Select>
                     </Form.Item>
 
-                    {/* City */}
-                    <Form.Item label={<b>City</b>} name="city">
+                    <Form.Item name="city" label={<b>City</b>}>
                         <Select
                             showSearch
                             size="large"
                             placeholder="Select City"
                             disabled={!selectedState}
                             loading={loading.cities}
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                option?.children?.toLowerCase().includes(input.toLowerCase())
-                            }
                         >
                             {cities.map((city, i) => (
                                 <Option key={i} value={city}>
@@ -322,45 +313,34 @@ export const BusinessDetails = ({ onNext }) => {
                 {/* ZIP Code */}
                 <Form.Item
                     label={<b>ZIP / PIN Code</b>}
-                    size="large"
-                    required
-                    error="ZIP Or PIN Code Is Required"
                     name="zipCode"
-                    rules={[{ required: true, message: 'Please enter your ZIP or PIN Code' },
-                    ({ getFieldValue }) => ({
-                        validator(_, value) {
-                            const iso = countries.find(c => c.name === getFieldValue('country'))?.iso2;
-                            const regex = getRegexForCountry(iso);
-                            if (!value) return Promise.resolve();
-                            if (regex && !regex.test(value.trim())) {
-                                return Promise.reject(new Error('Invalid ZIP/PIN code'));
+                    rules={[
+                        {  message: 'Please enter your ZIP or PIN Code' },
+                        ({ getFieldValue }) => ({
+                            validator(_, value) {
+                                const iso = countries.find(c => c.name === getFieldValue('countryname'))?.iso2;
+                                const regex = getRegexForCountry(iso);
+                                if (!value) return Promise.resolve();
+                                if (regex && !regex.test(value.trim())) {
+                                    return Promise.reject(new Error('Invalid ZIP/PIN code'));
+                                }
+                                return Promise.resolve();
                             }
-                            return Promise.resolve();
-                        }
-                    })
+                        })
                     ]}
-                    className="md:col-span-3"
                 >
                     <Input size="large" placeholder="Enter ZIP or PIN" className="rounded-xl" />
                 </Form.Item>
 
                 {/* Bio */}
-                <Form.Item
-                    name="bio"
-                    label={<b>Bio</b>}
-                >
-                    <TextArea
-                        rows={4}
-                        showCount
-                        maxLength={100}
-                        placeholder="Tell us about your Business..."
-                        className="rounded-xl"
-                    />
+                <Form.Item name="bio" label={<b>Bio</b>}>
+                    <TextArea rows={4} showCount maxLength={100} placeholder="Tell us about your Business..." className="rounded-xl" />
                 </Form.Item>
 
                 {/* Submit Button */}
                 <button
-                    className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
+                    type="button"
+                    className="bg-[#121A3F] text-white cursor-pointer px-8 py-3 rounded-full hover:bg-[#0D132D]"
                     onClick={handleSubmit}
                 >
                     Continue

@@ -5,12 +5,16 @@ import dayjs from 'dayjs';
 import axios from "axios";
 import postalRegexList from './postalRegex.json'
 
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
+
 const { TextArea } = Input;
 const { Option } = Select;
 
 
 
-export const PersonalDetails = ({ onNext, data }) => {
+export const PersonalDetails = ({ onNext, data, onChange }) => {
+
 
   const [form] = Form.useForm();
   const [preview, setPreview] = useState(null);
@@ -58,24 +62,47 @@ export const PersonalDetails = ({ onNext, data }) => {
 
   // Load form values from localStorage
   useEffect(() => {
-    if (data) {
+
+    console.log(data)
+    if (!data || Object.keys(data).length === 0) return;
+    // Check if there is at least one *defined* value in data
+    const hasValidData = data && Object.values(data).some(value => value !== undefined && value !== null);
+
+    if (hasValidData) {
+    
+      const safe = (val) => (val !== null && val !== undefined ? val : undefined);
+
       form.setFieldsValue({
-        gender: data.genderid,
-        birthDate: data.dob ? dayjs(data.dob) : null,
-        address: data.address1,
-        country: data.countryname,
-        state: data.statename,
-        bio: data.bio || '',
+        firstName: safe(data.firstName),
+        lastName: safe(data.lastName),
+        gender: safe(data.genderid),
+        birthDate: data.dob ? dayjs(data.dob) : undefined,
+        address: safe(data.address1),
+        country: safe(data.countryname),
+        state: safe(data.statename),
+        city: safe(data.city),
+        zipCode: safe(data.zipCode),
+        bio: safe(data.bio),
       });
 
-      // Optionally fetch states and cities if you had location data too
-      // setSelectedCountry(data.country)
-      // fetchStates(data.country)
-    } else {
-      // fallback for dev/testing
-      form.setFieldsValue({ firstName: 'Sandip', lastName: 'Kumar' });
+      if (data.countryname) {
+        setSelectedCountry(data.countryname);
+        fetchStates(data.countryname);
+      }
+
+      if (data.countryname && data.statename) {
+        setSelectedState(data.statename);
+        fetchCities(data.countryname, data.statename);
+      }
+
     }
+
+    // Don't touch the form if data is all undefined
   }, [data, form]);
+
+
+
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -114,6 +141,8 @@ export const PersonalDetails = ({ onNext, data }) => {
           countryname: values.country,
           statename: values.state,
           bio: values.bio || '',
+          city: values.city,
+          zipCode: values.zipCode,
         },
       };
 
@@ -142,7 +171,7 @@ export const PersonalDetails = ({ onNext, data }) => {
         preview,
       };
 
-      localStorage.setItem('personalDetails', JSON.stringify(fullData));
+      //localStorage.setItem('personalDetails', JSON.stringify(fullData));
 
       console.log('✅ API Response:', response.data);
       message.success('Form submitted successfully!');
@@ -158,7 +187,12 @@ export const PersonalDetails = ({ onNext, data }) => {
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Personal Details</h2>
       <p className="text-gray-600">Please provide your personal details to complete your profile.</p>
 
-      <Form form={form} layout="vertical" className="mt-6">
+      <Form
+        form={form}
+        layout="vertical"
+        className="mt-6"
+        
+      >
         {/* Profile Image Upload */}
         <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
           <div className="relative m-auto w-30 h-30 rounded-full overflow-hidden bg-[#0D132D0D] hover:opacity-90 cursor-pointer border border-gray-100 group">
@@ -324,10 +358,10 @@ export const PersonalDetails = ({ onNext, data }) => {
         <Form.Item
           label={<b>ZIP / PIN Code</b>}
           size="large"
-          required
+
           error="ZIP Or PIN Code Is Required"
           name="zipCode"
-          rules={[{ required: true, message: 'Please enter your ZIP or PIN Code' },
+          rules={[{ message: 'Please enter your ZIP or PIN Code' },
           ({ getFieldValue }) => ({
             validator(_, value) {
               const iso = countries.find(c => c.name === getFieldValue('country'))?.iso2;

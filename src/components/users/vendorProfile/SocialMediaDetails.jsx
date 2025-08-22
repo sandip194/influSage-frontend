@@ -26,7 +26,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
       }
 
       // Transform filled values into required array
-      const socialaccountjson = platforms
+      const providersjson = platforms
         .filter(p => values[p.field]) // Only filled-in links
         .map(p => ({
           providerid: p.providerid,
@@ -38,11 +38,11 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
 
       const payload = {
         userid: userId,
-        socialaccountjson,
+        providersjson,
       };
 
       const response = await axios.post(
-        'user/complete-profile', // replace with actual URL
+        'vendor/complete-vendor-profile', // replace with actual URL
         payload,
         {
           headers: {
@@ -96,16 +96,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
         form={form}
         layout="vertical"
         onFinish={onFinish}
-        onValuesChange={() => {
-          const values = form.getFieldsValue();
-          const socialData = platforms
-            .filter(p => values[p.field])
-            .map(p => ({
-              providerid: p.providerid,
-              handleslink: values[p.field],
-            }));
-          onChange?.(socialData);
-        }}
+        
       >
 
 

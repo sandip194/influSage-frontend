@@ -8,34 +8,202 @@ import { BusinessDetails } from '../../../components/users/vendorProfile/Busines
 import { CategorySelector } from '../../../components/users/vendorProfile/CategorySelector';
 import PlatformSelector from '../../../components/users/vendorProfile/PlatformSelector';
 import ObjectiveSelector from '../../../components/users/vendorProfile/ObjectiveSelector';
+import axios from 'axios';
+import { SocialMediaDetails } from '../../../components/users/vendorProfile/SocialMediaDetails';
 
 export const VendorProfileStepper = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
+    const [isCompleted, setIsCompleted] = useState(false);
 
-    // Load from localStorage
-    useEffect(() => {
-        const storedSteps = localStorage.getItem("completedSteps");
-        const storedStep = localStorage.getItem("currentStep");
+    const [vendorProfileData, setVendorProfileData] = useState({
+        profile: {},
+        categories: [],
+        providers: [],
+        objectives: [],
+        payment: {}
+    });
 
-        if (storedSteps) {
-            const parsedSteps = JSON.parse(storedSteps);
-            if (Array.isArray(parsedSteps)) {
-                setCompletedSteps(parsedSteps);
+    const updateProfileSection = (sectionKey, newData) => {
+        setVendorProfileData(prev => ({
+            ...prev,
+            [sectionKey]: newData
+        }));
+    };
 
-                // Check if all steps are complete
-                const allDone = parsedSteps.every((val) => val === true);
-                if (allDone) {
-                    setCurrentStep("thankyou");
-                } else if (storedStep !== null) {
-                    const parsedStep = parseInt(storedStep);
-                    if (!isNaN(parsedStep)) setCurrentStep(parsedStep);
+    const isProfileComplete = (profile) => {
+        if (!profile || Object.keys(profile).length === 0) return false;
+
+        const fieldsToCheck = [
+            'photopath', 'genderid', 'dob', 'address1',
+            'countryname', 'statename', 'bio'
+        ];
+
+        return fieldsToCheck.some(field => {
+            const value = profile[field];
+            return value !== null && value !== undefined && value !== '';
+        });
+    };
+
+    const isCategoriesComplete = (categories) =>
+        Array.isArray(categories) && categories.length > 0;
+
+    const isProvidersComplete = (providers) =>
+        Array.isArray(providers) && providers.length > 0;
+
+    const isObjectivesComplete = (objectives) =>
+        Array.isArray(objectives) && objectives.length > 0;
+
+    const isPaymentComplete = (payment) => {
+        if (!payment || Object.keys(payment).length === 0) return false;
+
+        const fieldsToCheck = [
+            'bankcountry', 'bankname', 'accountholdername', 'accountnumber',
+            'bankcode', 'branchaddress', 'contactnumber', 'email',
+            'preferredcurrency', 'taxidentificationnumber'
+        ];
+
+        const hasValidField = fieldsToCheck.some(field => {
+            const val = payment[field];
+            return val !== null && val !== undefined && val !== '';
+        });
+
+        const hasValidPaymentMethod = Array.isArray(payment.paymentmethod) &&
+            payment.paymentmethod.some(pm =>
+                pm.method && pm.paymentdetails
+            );
+
+        return hasValidField || hasValidPaymentMethod;
+    };
+
+   const markStepComplete = (index) => {
+  const updated = [...completedSteps];
+  if (!updated[index]) {
+    updated[index] = true;
+    setCompletedSteps(updated);
+  }
+
+  if (index + 1 < steps.length) {
+    setCurrentStep(index + 1);
+  } else {
+    // Mark profile as complete, but let currentStep go one beyond steps
+    setIsCompleted(true);
+    setCurrentStep(steps.length); // This triggers ThankYouScreen
+  }
+};
+
+
+    const steps = [
+        {
+            title: "Business Information",
+            component: (
+                <BusinessDetails
+                    data={vendorProfileData.profile}
+                    onChange={(updated) => updateProfileSection('profile', updated)}
+                    onNext={() => markStepComplete(0)}
+                />
+            ),
+        },
+        {
+            title: "Categories",
+            component: (
+                <CategorySelector
+                    data={vendorProfileData.categories}
+                    onNext={() => markStepComplete(1)}
+                    onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+                />
+            ),
+        },
+        {
+            title: "Platform And Social",
+            component: (
+                <SocialMediaDetails
+                    data={vendorProfileData.providers}
+                    onNext={() => markStepComplete(2)}
+                    onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+                />
+            ),
+        },
+        {
+            title: "Objectives",
+            component: (
+                <ObjectiveSelector
+                    data={vendorProfileData.objectives}
+                    onNext={() => markStepComplete(3)}
+                    onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+                />
+            ),
+        },
+        {
+            title: "Payment Information",
+            component: (
+                <PaymentDetailsForm
+                    data={vendorProfileData.payment}
+                    onNext={() => markStepComplete(4)}
+                    onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+                />
+            ),
+        },
+    ];
+
+    const getUserProfileCompletionData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const id = localStorage.getItem("userId");
+
+            const res = await axios.get(`vendor/profile/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (res.status === 200) {
+                const data = res?.data;
+                if (!data) {
+                    console.error("❌ No profile data found in response:", res);
+                    return;
+                }
+
+                const parts = {
+                    profile: data.profileParts.p_profile || {},
+                    categories: data.profileParts.p_categories || [],
+                    providers: data.profileParts.p_providers || [],
+                    objectives: data.profileParts.p_objectives || [],
+                    payment: data.profileParts.p_paymentaccounts || {}
+                };
+
+                setVendorProfileData(parts);
+
+                const stepsCompletion = [
+                    isProfileComplete(parts.profile),
+                    isCategoriesComplete(parts.categories),
+                    isProvidersComplete(parts.providers),
+                    isObjectivesComplete(parts.objectives),
+                    isPaymentComplete(parts.payment)
+                ];
+
+                setCompletedSteps(stepsCompletion);
+
+                const firstIncomplete = stepsCompletion.findIndex(done => !done);
+                if (firstIncomplete !== -1) {
+                    setCurrentStep(firstIncomplete);
+                } else {
+                    setIsCompleted(true);
                 }
             }
+        } catch (error) {
+            console.error("❌ Error fetching profile data:", error);
         }
+    };
 
+    useEffect(() => {
+        getUserProfileCompletionData();
+    }, []);
+
+    useEffect(() => {
         setIsHydrated(true);
     }, []);
 
@@ -50,65 +218,6 @@ export const VendorProfileStepper = () => {
             localStorage.setItem("currentStep", currentStep.toString());
         }
     }, [currentStep, isHydrated]);
-
-
-    const markStepComplete = (index) => {
-        const updated = [...completedSteps];
-        if (!updated[index]) {
-            updated[index] = true;
-            setCompletedSteps(updated);
-        }
-
-        // Move to next step or show thankyou
-        if (index + 1 < steps.length) {
-            setCurrentStep(index + 1);
-        } else {
-            setCurrentStep("thankyou");
-        }
-    };
-
-    const steps = [
-        {
-            title: "Business Information",
-            component: <BusinessDetails onNext={() => markStepComplete(0)} />,
-        },
-        {
-            title: "Categories",
-            component: (
-                <CategorySelector
-                    onNext={() => markStepComplete(1)}
-                    onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
-                />
-            ),
-        },
-        {
-            title: "Platform And Influencer",
-            component: (
-                <PlatformSelector
-                    onNext={() => markStepComplete(2)}
-                    onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
-                />
-            ),
-        },
-        {
-            title: "Objectives",
-            component: (
-                <ObjectiveSelector
-                    onNext={() => markStepComplete(3)}
-                    onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
-                />
-            ),
-        },
-        {
-            title: "Payment Information",
-            component: (
-                <PaymentDetailsForm
-                    onNext={() => markStepComplete(4)}
-                    onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
-                />
-            ),
-        },
-    ];
 
     return (
         <>
@@ -177,11 +286,12 @@ export const VendorProfileStepper = () => {
 
                 {/* Step Content */}
                 <div className="w-full md:w-2/3 lg:w-3/4 p-3">
-                    {currentStep === "thankyou" ? (
+                    {isCompleted && currentStep === steps.length ? (
                         <ThankYouScreen />
                     ) : (
-                        steps[currentStep].component
+                        steps[currentStep]?.component
                     )}
+
                 </div>
             </div>
         </>

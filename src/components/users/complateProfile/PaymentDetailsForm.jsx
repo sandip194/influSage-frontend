@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Form,
   Input,
@@ -7,11 +7,12 @@ import {
   Modal,
   Typography,
   message,
-  Row, Col
+  Row,
+  Col,
+  Button,
 } from "antd";
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
-import { useEffect } from "react";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 import axios from "axios";
 
 const { Option } = Select;
@@ -23,84 +24,218 @@ const countries = [
   { code: "GB", name: "United Kingdom" },
 ];
 
-const banksByCountry = {
-  US: [
-    { code: "boa", name: "Bank of America" },
-    { code: "chase", name: "Chase Bank" },
-    { code: "wells", name: "Wells Fargo" },
-  ],
-  IN: [
-    { code: "sbi", name: "State Bank of India" },
-    { code: "icici", name: "ICICI Bank" },
-    { code: "hdfc", name: "HDFC Bank" },
-  ],
-  GB: [
-    { code: "hsbc", name: "HSBC" },
-    { code: "barclays", name: "Barclays" },
-    { code: "lloyds", name: "Lloyds Bank" },
-  ],
-};
-
-const PaymentDetailsForm = ({ onBack, onNext }) => {
+const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
   const [form] = Form.useForm();
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [termsVisible, setTermsVisible] = useState(false);
   const [ifscValid, setIfscValid] = useState(null); // null, true, false
   const [bankDetails, setBankDetails] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
-
+  // Validate IFSC code via Razorpay API and autofill bank name
   const validateIFSC = async (value) => {
-  if (!value || value.length < 5) return;
+    if (!value || value.length < 5) {
+      setIfscValid(null);
+      setBankDetails(null);
+      form.setFieldsValue({ bank: "" });
+      return;
+    }
 
-  try {
-    const response = await axios.get(`https://ifsc.razorpay.com/${value}`);
-    setIfscValid(true);
-    setBankDetails(response.data);
-
-    // Auto-fill bank field
-    form.setFieldsValue({
-      bank: response.data.BANK || 'Unknown Bank',
-    });
-
-  } catch (err) {
-    setIfscValid(false);
-    setBankDetails(null);
-    form.setFieldsValue({ bank: '' });
-  }
-};
-
-
+    try {
+      const response = await axios.get(`https://ifsc.razorpay.com/${value}`);
+      setIfscValid(true);
+      setBankDetails(response.data);
+      form.setFieldsValue({
+        bank: response.data.BANK || "Unknown Bank",
+      });
+    } catch {
+      setIfscValid(false);
+      setBankDetails(null);
+      form.setFieldsValue({ bank: "" });
+    }
+  };
 
   const onCountryChange = (code) => {
     setSelectedCountry(code);
-    form.setFieldsValue({ bank: undefined }); // reset bank on country change
+    form.setFieldsValue({ bank: "" }); // reset bank on country change
   };
 
-  const onFinish = (values) => {
+  // Form validation before submit
+  const validateForm = (values) => {
     if (values.accountNumber !== values.confirmAccountNumber) {
-      message.error("Account number and Confirm Account number do not match");
-      return;
+      message.error("Account numbers do not match");
+      return false;
     }
     if (!values.agree) {
-      message.error("You must agree to the Payment Terms & Conditions");
-      return;
+      message.error("You must agree to the terms");
+      return false;
     }
-    console.log("Form submitted:", values);
-    localStorage.setItem("paymentInfo", JSON.stringify(values));
-
-    if (onNext) onNext();
+    return true;
   };
 
-  useEffect(() => {
-  const saved = localStorage.getItem("paymentInfo");
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    form.setFieldsValue(parsed);
-    if (parsed.ifscCode) {
-      validateIFSC(parsed.ifscCode);
+  // Build payment method array for payload
+  const buildPaymentMethod = (values) => {
+    switch (values.paymentMethod) {
+      case "upi":
+        return [{ method: "UPI", paymentdetails: values.upiId || null }];
+      case "paypal":
+        return [{ method: "PayPal", paymentdetails: values.paypalEmail || null }];
+      case "other":
+        return [{ method: "Other", paymentdetails: values.otherDetails || null }];
+      default:
+        return []; // For bank transfer, no extra payment details
     }
-  }
-}, []);
+  };
+
+  // Format final payload for backend
+  const formatPaymentAccount = (values) => {
+    return {
+      paymentjson: {
+        bankcountry: values.country || null,
+        bankname: values.bank || null,
+        accountholdername: values.accountHolder || null,
+        accountnumber: values.accountNumber || null,
+        bankcode: values.ifscCode || null,
+        branchaddress: values.address || null,
+        contactnumber: values.phone || null,
+        email: values.email || null,
+        preferredcurrency: values.currency || null,
+        taxidentificationnumber: values.taxId || null,
+        paymentmethod: buildPaymentMethod(values),
+      },
+    };
+  };
+
+  // Submit payload to backend
+  const submitToBackend = async (payload) => {
+    setSubmitting(true);
+    try {
+
+      const role = localStorage.getItem("role");
+      console.log(role)
+      // for Influencer 
+      if (role === "1") {
+        const res = await axios.post(
+          "/user/complete-profile",
+          {
+            userid: localStorage.getItem("userId"),
+            ...payload,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        if (res.status === 200) {
+          message.success("Payment details saved!");
+          onChange?.(payload.paymentjson);
+          onNext?.();
+        } else {
+          message.error("Failed to save payment info");
+        }
+      }
+
+      // for Vendor
+      if (role === "2") {
+        const res = await axios.post(
+          "/vendor/complete-vendor-profile",
+          {
+            userid: localStorage.getItem("userId"),
+            ...payload,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        if (res.status === 200) {
+          message.success("Payment details saved!");
+          onChange?.(payload.paymentjson);
+          onNext?.();
+        } else {
+          message.error("Failed to save payment info");
+        }
+      }
+
+
+
+    } catch (err) {
+      console.error(err);
+      message.error("Error submitting payment info");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Called when form is submitted successfully
+  const onFinish = async (values) => {
+    if (!validateForm(values)) return;
+    const payload = formatPaymentAccount(values);
+    await submitToBackend(payload);
+  };
+
+  // Map backend data to form fields on load
+  const mapBackendToFormValues = (data) => {
+    if (!data) return {};
+    const payment = data;
+    const methodObj = payment.paymentmethod?.[0] || {};
+    let paymentMethod = methodObj.method?.toLowerCase() || "bank";
+
+    const decodeHexAccountNumber = (hexString) => {
+      try {
+        const cleanHex = hexString.replace(/\\x/g, "");
+        return cleanHex
+          .match(/.{1,2}/g)
+          .map((byte) => String.fromCharCode(parseInt(byte, 16)))
+          .join("");
+      } catch (e) {
+        return hexString;
+      }
+    };
+
+    return {
+      country: payment.bankcountry || null,
+      bank: payment.bankname || null,
+      accountHolder: payment.accountholdername || null,
+      accountNumber: decodeHexAccountNumber(payment.accountnumber) || null,
+      confirmAccountNumber: decodeHexAccountNumber(payment.accountnumber) || null,
+      ifscCode: payment.bankcode || null,
+      address: payment.branchaddress || null,
+      phone: payment.contactnumber || null,
+      email: payment.email || null,
+      currency: payment.preferredcurrency || null,
+      taxId: payment.taxidentificationnumber || null,
+      paymentMethod,
+      paypalEmail: paymentMethod === "paypal" ? methodObj.paymentdetails : null,
+      upiId: paymentMethod === "upi" ? methodObj.paymentdetails : null,
+      otherDetails: paymentMethod === "other" ? methodObj.paymentdetails : null,
+      agree: true,
+    };
+  };
+
+  // safe one-time form population
+  useEffect(() => {
+    if (!data || Object.keys(data).length === 0) return;
+
+    console.log("first");
+
+    const mappedValues = mapBackendToFormValues(data);
+
+    const hasValidData = Object.values(mappedValues).some(
+      (val) => val !== undefined && val !== null
+    );
+
+    if (hasValidData) {
+      form.setFieldsValue(mappedValues);
+    }
+  }, [data]); // ✅ only run when `data` changes
+
+
+
 
   return (
     <>
@@ -111,10 +246,10 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
         </p>
 
         <Form
-          layout="vertical"
           form={form}
+          layout="vertical"
           onFinish={onFinish}
-          initialValues={{ agree: false }}
+
         >
 
           <Row gutter={16}>
@@ -123,7 +258,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
               <Form.Item
                 label={<b>Country</b>}
                 name="country"
-                rules={[{ required: true, message: "Please select your country" }]}
+                rules={[{ message: "Please select your country" }]}
               >
                 <Select
                   placeholder="Select Country"
@@ -149,7 +284,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
               <Form.Item
                 label={<b>Bank</b>}
                 name="bank"
-                rules={[{ required: true, message: "Bank name will be fetched from IFSC" }]}
+                rules={[{ message: "Bank name will be fetched from IFSC" }]}
               >
                 <Input size="large" placeholder="Enter IFSC to fetch bank" disabled />
               </Form.Item>
@@ -162,7 +297,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
             label={<b>Account Holder’s Name</b>}
             name="accountHolder"
             rules={[
-              { required: true, message: "Enter Account Holder’s Name" },
+              { message: "Enter Account Holder’s Name" },
               { min: 3, message: "Name must be at least 3 characters" },
             ]}
           >
@@ -176,7 +311,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
                 label={<b>Account Number</b>}
                 name="accountNumber"
                 rules={[
-                  { required: true, message: "Enter Account Number" },
+                  { message: "Enter Account Number" },
                   {
                     pattern: /^\d{9,18}$/,
                     message: "Account number must be 9-18 digits"
@@ -192,7 +327,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
               <Form.Item
                 label={<b>Confirm Account Number</b>}
                 name="confirmAccountNumber"
-                rules={[{ required: true, message: "Confirm Account Number" }]}
+                rules={[{ message: "Confirm Account Number" }]}
               >
                 <Input size="large" placeholder="Enter Account Number" />
               </Form.Item>
@@ -205,7 +340,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
               <Form.Item
                 label={<b>IFSC Code</b>}
                 name="ifscCode"
-                rules={[{ required: true, message: "Enter IFSC Code" }]}
+                rules={[{ message: "Enter IFSC Code" }]}
               >
                 <Input
                   size="large"
@@ -243,7 +378,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
                 label="Phone Number"
                 name="phone"
                 rules={[
-                  { required: true, message: 'Please enter your phone number' },
+                  { message: 'Please enter your phone number' },
                   {
                     validator: (_, value) =>
                       value && value.length >= 10
@@ -271,7 +406,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
                 label={<b>Email Address</b>}
                 name="email"
                 rules={[
-                  { required: true, message: "Enter your email" },
+                  { message: "Enter your email" },
                   { type: "email", message: "Invalid email format" },
                 ]}
               >
@@ -284,7 +419,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
           <Form.Item
             label={<b>Address</b>}
             name="address"
-            rules={[{ required: true, message: "Enter your address" }]}
+            rules={[{ message: "Enter your address" }]}
           >
             <Input.TextArea
               rows={3}
@@ -299,7 +434,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
               <Form.Item
                 label={<b>Preferred Currency</b>}
                 name="currency"
-                rules={[{ required: true, message: "Select preferred currency" }]}
+                rules={[{ message: "Select preferred currency" }]}
               >
                 <Select size="large" placeholder="Select currency">
                   <Option value="USD">USD - US Dollar</Option>
@@ -314,7 +449,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
               <Form.Item
                 label={<b>Payment Method</b>}
                 name="paymentMethod"
-                rules={[{ required: true, message: "Select a payment method" }]}
+                rules={[{ message: "Select a payment method" }]}
               >
                 <Select size="large" placeholder="Choose Payment Method">
                   <Option value="bank">Bank Transfer</Option>
@@ -337,7 +472,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
                     label={<b>PayPal Email</b>}
                     name="paypalEmail"
                     rules={[
-                      { required: true, message: "Enter your PayPal email" },
+                      { message: "Enter your PayPal email" },
                       { type: "email", message: "Invalid email" },
                     ]}
                   >
@@ -352,7 +487,7 @@ const PaymentDetailsForm = ({ onBack, onNext }) => {
                     label={<b>UPI ID</b>}
                     name="upiId"
                     rules={[
-                      { required: true, message: "Enter your UPI ID" },
+                      { message: "Enter your UPI ID" },
                       {
                         pattern: /^[\w.-]+@[\w]+$/,
                         message: "Invalid UPI ID format (e.g., name@bank)",

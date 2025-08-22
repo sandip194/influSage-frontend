@@ -7,7 +7,7 @@ import { PersonalDetails } from '../../../components/users/complateProfile/Perso
 import { ProfileHeader } from '../../../components/users/complateProfile/ProfileHeader';
 import { SocialMediaDetails } from '../../../components/users/complateProfile/SocialMediaDetails';
 import { CategorySelector } from '../../../components/users/vendorProfile/CategorySelector';
-import PortfolioUploader from '../../../components/users/complateProfile/PortfolioUploader.JSX';
+import PortfolioUploader from '../../../components/users/complateProfile/PortfolioUploader';
 import PaymentDetailsForm from '../../../components/users/complateProfile/PaymentDetailsForm';
 import ThankYouScreen from '../../../components/users/complateProfile/ThankYouScreen';
 import "../../../components/users/complateProfile/profile.css"
@@ -17,7 +17,86 @@ export const ProfileStepper = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [profileData, setProfileData] = useState(null);
+  const [profileData, setProfileData] = useState({
+    profile: {},
+    social: [],
+    categories: [],
+    portfolio: {},
+    payment: {}
+  });
+
+
+  const updateProfileSection = (sectionKey, newData) => {
+    setProfileData(prev => ({
+      ...prev,
+      [sectionKey]: newData
+    }));
+  };
+
+  const isProfileComplete = (profile) => {
+    // Check if any important profile field is filled
+    if (!profile || Object.keys(profile).length === 0) return false;
+
+    const fieldsToCheck = [
+      'photopath', 'genderid', 'dob', 'address1',
+      'countryname', 'statename', 'bio'
+    ];
+
+    return fieldsToCheck.some(field => {
+      const value = profile[field];
+      return value !== null && value !== undefined && value !== '';
+    });
+  };
+
+  const isSocialComplete = (social) => {
+    // Social should be a non-empty array
+    return Array.isArray(social) && social.length > 0;
+  };
+
+  const isCategoriesComplete = (categories) => {
+    // Categories should be a non-empty array
+    return Array.isArray(categories) && categories.length > 0;
+  };
+
+  const isPortfolioComplete = (portfolio) => {
+    // Portfolio should have at least one meaningful key with a value
+    if (!portfolio || Object.keys(portfolio).length === 0) return false;
+
+    // Check if any field inside portfolio has a non-empty value
+    return Object.values(portfolio).some(value => {
+      return value !== null && value !== undefined && value !== '';
+    });
+  };
+
+  const isPaymentComplete = (payment) => {
+    if (!payment || Object.keys(payment).length === 0) return false;
+
+    // Important payment fields to check:
+    const fieldsToCheck = [
+      'bankcountry',
+      'bankname',
+      'accountholdername',
+      'accountnumber',
+      'bankcode',
+      'branchaddress',
+      'contactnumber',
+      'email',
+      'preferredcurrency',
+      'taxidentificationnumber',
+    ];
+
+    const hasValidField = fieldsToCheck.some(field => {
+      const val = payment[field];
+      return val !== null && val !== undefined && val !== '';
+    });
+
+    // Additionally check paymentmethod array for at least one valid method with details
+    const hasValidPaymentMethod = Array.isArray(payment.paymentmethod) && payment.paymentmethod.some(pm => {
+      return pm.method && pm.method !== null && pm.paymentdetails && pm.paymentdetails !== null;
+    });
+
+    return hasValidField || hasValidPaymentMethod;
+  };
 
   const markStepComplete = (index) => {
     const updated = [...completedSteps];
@@ -38,75 +117,126 @@ export const ProfileStepper = () => {
     if (stored) setCompletedSteps(JSON.parse(stored));
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('completedSteps', JSON.stringify(completedSteps));
-  }, [completedSteps]);
-
   const steps = [
     {
       title: 'Personal Information',
-      component: <PersonalDetails data={profileData?.profile} onNext={() => markStepComplete(0)} />,
+      component: (
+        <PersonalDetails
+          data={profileData.profile}
+          onChange={(updated) => updateProfileSection('profile', updated)}
+          onNext={() => markStepComplete(0)}
+        />
+      )
     },
     {
       title: 'Social Media Links',
-      component: <SocialMediaDetails data={profileData?.social} onNext={() => markStepComplete(1)} onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} />,
+      component: (
+        <SocialMediaDetails
+          data={profileData.social}
+          onChange={(updated) => updateProfileSection('social', updated)}
+          onNext={() => markStepComplete(1)}
+          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+        />
+      )
     },
     {
       title: 'Categories and Interests',
-      component: <CategorySelector onNext={() => markStepComplete(2)} onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} />
-    },
+      component: (
+        <CategorySelector
+          data={profileData.categories} // ✅ pass preloaded categories
+          onNext={() => markStepComplete(2)}
+          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+          onChange={(updated) => updateProfileSection('categories', updated)} // Optional, if you want to sync updated categories
+        />
+      )
+    }
+    ,
     {
       title: 'Portfolio and Work Samples',
-      component: <PortfolioUploader onNext={() => markStepComplete(3)} onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} />
-    },
+      component: (
+        <PortfolioUploader
+          data={profileData.portfolio} // ✅ prefill here
+          onNext={(updated) => {
+            updateProfileSection('portfolio', updated); // save back
+            markStepComplete(3);
+          }}
+          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+        />
+      )
+    }
+    ,
     {
       title: 'Payment Information',
-      component: <PaymentDetailsForm onNext={() => markStepComplete(4)} onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} />
-    },
+      component: (
+        <PaymentDetailsForm
+          data={profileData.payment}
+          onChange={(updated) => updateProfileSection('payment', updated)}
+          onNext={() => markStepComplete(4)}
+          onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
+        />
+      )
+    }
+
   ];
 
 
   const getUserProfileCompationData = async () => {
-  try {
-    const token = localStorage.getItem("token")
-    const id = localStorage.getItem('userId')
-    const res = await axios.get(`user/profile/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    })
+    try {
+      const token = localStorage.getItem("token");
+      const id = localStorage.getItem("userId");
 
-    if (res.status === 200) {
-      const parts = res.data.profileParts;
-      setProfileData(parts);
+      const res = await axios.get(`user/profile/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res.status === 200) {
+        const data = res?.data;
 
-      // Step completion logic
-      const stepsCompletion = [
-        !!parts.profile && Object.keys(parts.profile).length > 0,       // Step 0
-        Array.isArray(parts.social) && parts.social.length > 0,         // Step 1
-        Array.isArray(parts.categories) && parts.categories.length > 0, // Step 2
-        !!parts.portfolio && Object.keys(parts.portfolio).length > 0,   // Step 3
-        !!parts.payment && Object.keys(parts.payment).length > 0        // Step 4
-      ];
+        if (!data) {
+          console.error("❌ No profile data found in response:", res);
+          return;
+        }
 
-      setCompletedSteps(stepsCompletion);
+        let parts = {
+          profile: data.profileParts.p_profile || {},
+          social: data.profileParts.p_socials || [],
+          categories: data.profileParts.p_categories || [],
+          portfolio: Array.isArray(data.profileParts.p_portfolios) ? data.profileParts.p_portfolios[0] : {},
+          payment: data.profileParts.p_paymentaccounts || null,
+        };
 
-      console.log(profileData)
+        console.log(parts)
+        setProfileData(parts);
 
-      // Go to first incomplete step
-      const firstIncomplete = stepsCompletion.findIndex(done => !done);
-      setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "thankyou");
+        // Step completion logic
+        const stepsCompletion = [
+          isProfileComplete(parts.profile),       // Step 0
+          isSocialComplete(parts.social),         // Step 1
+          isCategoriesComplete(parts.categories), // Step 2
+          isPortfolioComplete(parts.portfolio),   // Step 3
+          isPaymentComplete(parts.payment)        // Step 4
+        ];
+
+
+        setCompletedSteps(stepsCompletion);
+
+
+
+        // Navigate to first incomplete step
+        const firstIncomplete = stepsCompletion.findIndex(done => !done);
+        setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "thankyou");
+      }
+    } catch (error) {
+      console.error("❌ Error fetching profile data:", error);
     }
-  } catch (error) {
-    console.log(error);
-  }
-};
+  };
 
 
-  useEffect(()=>{
+  useEffect(() => {
     getUserProfileCompationData();
-  },[])
+  }, [])
 
   return (
     <>

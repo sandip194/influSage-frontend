@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CheckOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
-export const CategorySelector = ({ onBack, onNext }) => {
+export const CategorySelector = ({ onBack, onNext, data }) => {
     const [categoryTree, setCategoryTree] = useState([])
     const [selectedParentId, setSelectedParentId] = useState(null); // default to first parent
     const [selectedChildren, setSelectedChildren] = useState([]);
@@ -36,13 +36,23 @@ export const CategorySelector = ({ onBack, onNext }) => {
     // Load selected children from localStorage
     useEffect(() => {
         fatchAllCategories();
-        const saved = localStorage.getItem('selectedChildCategoryIds');
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed)) setSelectedChildren(parsed);
-            } catch (e) {
-                console.error('Error loading selected categories', e);
+
+        if (data && Array.isArray(data)) {
+            const preselectedIds = data
+                .flatMap(parent => parent.categories)
+                .map(child => child.categoryid);
+
+            setSelectedChildren(preselectedIds);
+        } else {
+            // Fallback to localStorage if needed
+            const saved = localStorage.getItem('selectedChildCategoryIds');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) setSelectedChildren(parsed);
+                } catch (e) {
+                    console.error('Error loading selected categories from localStorage', e);
+                }
             }
         }
     }, []);
@@ -53,8 +63,6 @@ export const CategorySelector = ({ onBack, onNext }) => {
         );
         setError(false);
     };
-
-
 
     const sendDataToBackend = async (data) => {
         try {

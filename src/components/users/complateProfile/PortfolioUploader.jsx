@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Upload, Form, Input, Button, message } from 'antd';
 import { UploadOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import axios from 'axios';
 
 const { Dragger } = Upload;
 
-const PortfolioUploader = ({ onBack, onNext }) => {
+const PortfolioUploader = ({ onBack, onNext, data }) => {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]);
   const [urls, setUrls] = useState(['']);
@@ -58,7 +59,7 @@ const PortfolioUploader = ({ onBack, onNext }) => {
     setUrls(newUrls);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const validUrls = urls.filter(url => /^https?:\/\/.+/.test(url));
     const hasUploaded = fileList.length > 0 || validUrls.length > 0;
 
@@ -67,9 +68,73 @@ const PortfolioUploader = ({ onBack, onNext }) => {
       return;
     }
 
-    // Proceed to next step
-    onNext?.({ files: fileList, portfolioUrls: validUrls });
+    console.log(validUrls)
+    // Build payload
+    const payload = [{
+      filepath: fileList[0]?.url || fileList[0]?.thumbUrl || null, // Could be updated after file upload
+      portfoliourl: validUrls[0] || null
+    }];
+
+    const hasDuplicates = new Set(validUrls).size !== validUrls.length;
+    if (hasDuplicates) {
+      message.error("Please ensure each portfolio URL is unique.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
+
+console.log(payload)
+      const res = await axios.post(
+        "user/complete-profile",
+        {
+          userid: userId,
+          portfoliojson: payload
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (res.status === 200) {
+        message.success("Portfolio submitted successfully!");
+        // Update parent
+        onNext?.(payload[0]); // send single object to ProfileStepper
+      } else {
+        message.error("Something went wrong submitting the portfolio.");
+      }
+    } catch (error) {
+      console.error("❌ Portfolio submit error:", error);
+      message.error("Error submitting portfolio.");
+    }
   };
+
+
+
+
+  useEffect(() => {
+    if (data) {
+      if (data.filepath) {
+        const file = {
+          uid: '-1',
+          name: data.filepath.split('/').pop(),
+          status: 'done',
+          url: data.filepath,
+          type: 'application/pdf' // or guess based on extension if needed
+        };
+        setFileList([file]);
+      }
+
+      if (data.portfoliourl) {
+        setUrls([data.portfoliourl]);
+      }
+    }
+  }, [data]);
+
 
   return (
     <div className="bg-white p-6 rounded-3xl">

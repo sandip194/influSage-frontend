@@ -1,66 +1,75 @@
-import {
-  RiGiftLine,
-  RiLinksLine,
-  RiMegaphoneLine,
-  RiTrophyLine,
-  RiVideoAddLine,
-  RiLiveLine,
-  RiSwapBoxLine,
-  RiVipCrownLine,
-} from "@remixicon/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-const STORAGE_KEY = "selected_objective"; // Store a single ID
+const STORAGE_KEY = "selected_objective"; // optional fallback storage
 
-
-
-const ObjectiveSelector = ({ onBack, onNext }) => {
-  const [selected, setSelected] = useState(null); // now a single value
+const ObjectiveSelector = ({ onBack, onNext, data }) => {
+  const [selected, setSelected] = useState(null);
   const [error, setError] = useState("");
-  const [objectives, setObjectives] = useState([])
-
-
+  const [objectives, setObjectives] = useState([]);
 
   const handleSelection = (id) => {
     setSelected(id);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!selected) {
       setError("Please select one objective to complete your profile.");
       return;
     }
-    console.log(selected)
+
     setError("");
-    localStorage.setItem(STORAGE_KEY, selected.toString());
-    onNext();
+    localStorage.setItem(STORAGE_KEY, selected.toString()); // optional
+
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+
+    const payload = {
+      userid: userId,
+      objectivesjson: [{ objectiveid: selected }],
+    };
+
+    try {
+      const response = await axios.post("vendor/complete-vendor-profile", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("✅ Objective saved:", response.data);
+      onNext?.();
+    } catch (err) {
+      console.error("❌ Failed to save objective:", err);
+      setError("Failed to save your objective. Please try again.");
+    }
   };
 
-
-
-  const fatchAllObjectives = async () => {
+  const fetchAllObjectives = async () => {
     try {
-      const response = await axios.get("vendor/objectives")
+      const response = await axios.get("vendor/objectives");
       if (response.status === 200) {
-        setObjectives(response.data.objectives)
+        setObjectives(response.data.objectives || []);
       }
     } catch (error) {
-      console.log(error)
+      console.error("❌ Failed to fetch objectives:", error);
     }
-  }
-
+  };
 
   useEffect(() => {
+    fetchAllObjectives();
 
-    fatchAllObjectives()
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = parseInt(saved, 10);
-      if (!isNaN(parsed)) setSelected(parsed);
+    if (data && Array.isArray(data) && data.length > 0 && data[0].objectiveid) {
+      setSelected(data[0].objectiveid); // from prop
+    } else {
+      // fallback to localStorage if needed
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed)) setSelected(parsed);
+      }
     }
-  }, []);
-
+  }, [data]);
 
   return (
     <div className="bg-white p-6 rounded-3xl text-inter">
@@ -75,13 +84,11 @@ const ObjectiveSelector = ({ onBack, onNext }) => {
           <div
             key={obj.id}
             onClick={() => handleSelection(obj.id)}
-            className={`border rounded-2xl p-4 cursor-pointer transition hover:shadow-sm ${selected === obj.id
-                ? "border-[#141843] bg-gray-50"
-                : "border-gray-200"
-              }`}
+            className={`border rounded-2xl p-4 cursor-pointer transition hover:shadow-sm ${
+              selected === obj.id ? "border-[#141843] bg-gray-50" : "border-gray-200"
+            }`}
           >
             <div className="flex flex-col items-start gap-3 p-2">
-
               <div>
                 <h3 className="font-bold text-[#141843] mb-1">{obj.name}</h3>
                 <p className="text-sm text-gray-500">{obj.description}</p>
@@ -91,9 +98,7 @@ const ObjectiveSelector = ({ onBack, onNext }) => {
         ))}
       </div>
 
-      {error && (
-        <p className="text-red-600 text-sm mt-4 font-medium">{error}</p>
-      )}
+      {error && <p className="text-red-600 text-sm mt-4 font-medium">{error}</p>}
 
       {/* Navigation Buttons */}
       <div className="mt-8 flex gap-4">
