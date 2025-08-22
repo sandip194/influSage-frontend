@@ -9,7 +9,7 @@ import EarnChart from "./EarnChart";
 import ImpressionChart from "./ImpressionChart";
 import Audience from "./Audience";
 import TopContent from "./TopContent";
-import Table from "./Table"
+import Table from "./Table";
 
 const AnalyticsLayout = ({ balance = 22765, thisMonth = 2765 }) => {
   const contentData = [
@@ -204,18 +204,18 @@ const AnalyticsLayout = ({ balance = 22765, thisMonth = 2765 }) => {
         <TopContent />
       </div>
 
-       <div className="bg-white rounded-2xl shadow-sm p-2 w-full">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">
-            Audience Demographic
+      <div className="bg-white rounded-2xl shadow-sm p-4 w-full">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+          <h2 className="text-lg font-bold text-gray-900">
+            Content Insight
           </h2>
-          <div className="flex space-x-2">
-            <select className="border rounded-full px-3 py-1 text-sm text-gray-600">
+          <div className="flex flex-wrap gap-2">
+            <select className="border rounded-full px-3 py-1.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
               <option>Instagram</option>
               <option>Facebook</option>
               <option>TikTok</option>
             </select>
-            <select className="border rounded-full px-3 py-1 text-sm text-gray-600">
+            <select className="border rounded-full px-3 py-1.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
               <option>Monthly</option>
               <option>Weekly</option>
               <option>Yearly</option>
@@ -226,8 +226,7 @@ const AnalyticsLayout = ({ balance = 22765, thisMonth = 2765 }) => {
 
       <div className="col-span-1 md:col-span-2 my-4">
         <Table />
-      </div> 
-
+      </div>
     </div>
   );
 };

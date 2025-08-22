@@ -36,7 +36,9 @@ import DashboardPage from './pages/influencer/dashboard/DashboardPage';
 import VenderDashboardPage from './pages/vendor/dashboard/VenderDashboardPage';
 import BrowseInfluencerPage from './pages/vendor/dashboard/BrowseInfluencerPage';
 import ChatAppPage from './components/chatApp/ChatAppPage';
-
+import Profile from "./components/users/EditProfile/Profile";
+import EditProfile from "./components/users/EditProfile/editProfile";
+import Settings from "./components/users/Settings/SettingLayout";
 
 const App = () => {
 
@@ -78,6 +80,12 @@ const App = () => {
 
                                         <Route path='messages' element={<ChatAppPage/>} />
 
+                                        <Route path='profile' element={<Profile />} />
+
+                                        <Route path="editProfile" element={<EditProfile />} />
+
+                                        <Route path="setting" element={<Settings/>} />
+                                        
                                 </Route>
 
 

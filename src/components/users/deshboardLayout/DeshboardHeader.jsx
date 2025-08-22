@@ -17,7 +17,7 @@ import {
   Space,
   Button,
 } from "antd";
-
+import { Link } from "react-router-dom";
 
 import NotificationDropdown from "./NotificationDropdown";
 import MessageDropdown from "./MessageDropdown";
@@ -26,16 +26,24 @@ const { Search } = Input;
 
 const profileMenu = (
   <Menu
-    items={[
+    items={[  
       {
         key: "1",
         icon: <UserOutlined />,
-        label: "My Profile",
+         label: (
+          <Link to="/dashboard/profile">
+            My Profile
+          </Link>
+    ),
       },
       {
         key: "2",
         icon: <SettingOutlined />,
-        label: "Settings",
+        label: (
+          <Link to="/dashboard/setting">
+            Settings
+          </Link>
+    ),
       },
       {
         key: "3",

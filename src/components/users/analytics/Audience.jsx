@@ -20,20 +20,22 @@ const AudienceDemographic = () => {
   return (
     <div className="bg-white rounded-2xl shadow-sm p-5 w-full">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Audience Demographic</h2>
-        <div className="flex space-x-2">
-          <select className="border rounded-full px-3 py-1 text-sm text-gray-600">
-            <option>Instagram</option>
-            <option>Facebook</option>
-            <option>TikTok</option>
-          </select>
-          <select className="border rounded-full px-3 py-1 text-sm text-gray-600">
-            <option>Monthly</option>
-            <option>Weekly</option>
-            <option>Yearly</option>
-          </select>
-        </div>
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+          <h2 className="text-lg font-bold text-gray-900">
+            Audience Demographic
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            <select className="border rounded-full px-3 py-1.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              <option>Instagram</option>
+              <option>Facebook</option>
+              <option>TikTok</option>
+            </select>
+            <select className="border rounded-full px-3 py-1.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              <option>Monthly</option>
+              <option>Weekly</option>
+              <option>Yearly</option>
+            </select>
+          </div>
       </div>
 
       <div className="flex space-x-4 text-xs text-gray-600 mb-4">

@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { Modal } from "antd";
 import {
   RiWalletLine,
@@ -6,6 +8,46 @@ import {
   RiMoneyDollarCircleLine,
   RiEyeLine,
 } from "@remixicon/react";
+const generateInvoice = (transaction) => {
+  const doc = new jsPDF();
+
+  // Title
+  doc.setFontSize(16);
+  doc.text("Invoice", 14, 20);
+
+  // Transaction Info
+  doc.setFontSize(12);
+  doc.text(`Order No: ${transaction.orderNo}`, 14, 30);
+  doc.text(`Date: ${transaction.date}`, 14, 38);
+  doc.text(`Client: ${transaction.client || "-"}`, 14, 46);
+  doc.text(`Activity: ${transaction.activity}`, 14, 54);
+  doc.text(`Amount: ${transaction.amount}`, 14, 62);
+
+  // Breakdown table
+  if (transaction.breakdown) {
+    autoTable(doc, {
+      startY: 70,
+      head: [["Date", "Description", "Amount"]],
+      body: transaction.breakdown.map((item) => [
+        item.date,
+        item.description,
+        item.amount,
+      ]),
+    });
+
+    // Net earning
+    if (transaction.netEarning) {
+      const finalY = doc.lastAutoTable.finalY || 80;
+      doc.text(
+        `Net Earning: ${transaction.netEarning}`,
+        14,
+        finalY + 10
+      );
+    }
+  }
+
+  doc.save(`invoice_${transaction.orderNo}.pdf`);
+};
 
 const transactions = [
   {
@@ -298,7 +340,10 @@ const PaymentLayout = () => {
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#1c214f]">
+              <button
+                className="px-4 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#1c214f]"
+                onClick={() => generateInvoice(selectedTransaction)}
+              >
                 Download Invoice
               </button>
             </div>
