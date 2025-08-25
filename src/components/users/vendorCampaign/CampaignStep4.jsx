@@ -34,10 +34,10 @@ const CampaignStep4 = ({ onBack, onNext }) => {
     };
 
     const handleContinue = () => {
-        if (fileList.length === 0) {
-            message.error("Please upload at least one reference file.");
-            return;
-        }
+        // if (fileList.length === 0) {
+        //     message.error("Please upload at least one reference file.");
+        //     return;
+        // }
 
         onNext?.({ files: fileList.map(f => f.file) }); // send raw files to next step
     };

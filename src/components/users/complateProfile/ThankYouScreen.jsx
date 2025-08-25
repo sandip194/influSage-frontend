@@ -23,7 +23,7 @@ const ThankYouScreen = () => {
                     We appreciate your patience!
                 </p>
                 <button
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate('/dashboard')}
                     className="bg-[#121A3F] hover:bg-[#0D132D] text-white font-semibold px-6 py-3 rounded-full shadow-md"
                 >
                     Go To Home
