@@ -59,6 +59,7 @@ export const VerifyEmailOrMobile = () => {
                 localStorage.removeItem('isCreatedNew');
                 localStorage.removeItem('selectedRole');
                 localStorage.removeItem('signupEmail');
+                navigate("/login")
             }
             if (response.status === 400) {
                 toast.error(response.data.message || "Invalid OTP");

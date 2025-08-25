@@ -39,6 +39,8 @@ import ChatAppPage from './components/chatApp/ChatAppPage';
 import Profile from "./components/users/EditProfile/Profile";
 import EditProfile from "./components/users/EditProfile/editProfile";
 import Settings from "./components/users/Settings/SettingLayout";
+import Unauthorized from './pages/commonPages/Unauthorized';
+import PrivateRoute from './routes/PrivateRoute';
 
 const App = () => {
 
@@ -55,52 +57,62 @@ const App = () => {
                                 <Route path='/forgot-password' element={<ForgotPassword />} />
                                 <Route path='/verify-email-or-mobile' element={<VerifyEmailOrMobile />} />
                                 <Route path='/reset-password' element={<ResetPassword />} />
-                                {/* Influencer Dashboard*/}
-                                <Route path='/dashboard' element={<DashboardLayout />}>
+                                <Route path="/unauthorized" element={<Unauthorized />} />
 
-                                        <Route path='' element={<DashboardPage />} />
-                                        <Route path='browse' element={<BrowseCampaign />} />
-                                        <Route path='browse/applied' element={<AppliedLayout />} />
-                                        <Route path='browse/saved' element={<SavedLayout />} />
-                                        <Route path='browse/description' element={<DescriptionLayout />} />
 
-                                        <Route path='browse/edit' element={<EditLayout />} />
-                                        <Route path='browse/apply-now' element={<ApplyNow />} />
 
-                                        <Route path='my-campaigns' element={<CampaignsLayout />} />
-                                        <Route path='my-campaigns/details' element={<Details />} />
 
-                                        <Route path='my-campaigns/activity' element={<Activity />} />
-                                        <Route path='my-campaigns/message' element={<Message />} />
-                                        <Route path='my-campaigns/filesmedia' element={<FilesMedia />} />
+                                <Route element={<PrivateRoute allowedRoles={[1]} />}>
+                                        {/* Influencer Dashboard*/}
+                                        <Route path='/dashboard' element={<DashboardLayout />}>
 
-                                        <Route path='payment' element={<Payment />} />
+                                                <Route path='' element={<DashboardPage />} />
+                                                <Route path='browse' element={<BrowseCampaign />} />
+                                                <Route path='browse/applied' element={<AppliedLayout />} />
+                                                <Route path='browse/saved' element={<SavedLayout />} />
+                                                <Route path='browse/description' element={<DescriptionLayout />} />
 
-                                        <Route path='analytics' element={<Analytics/>} />
+                                                <Route path='browse/edit' element={<EditLayout />} />
+                                                <Route path='browse/apply-now' element={<ApplyNow />} />
 
-                                        <Route path='messages' element={<ChatAppPage/>} />
+                                                <Route path='my-campaigns' element={<CampaignsLayout />} />
+                                                <Route path='my-campaigns/details' element={<Details />} />
 
-                                        <Route path='profile' element={<Profile />} />
+                                                <Route path='my-campaigns/activity' element={<Activity />} />
+                                                <Route path='my-campaigns/message' element={<Message />} />
+                                                <Route path='my-campaigns/filesmedia' element={<FilesMedia />} />
 
-                                        <Route path="editProfile" element={<EditProfile />} />
+                                                <Route path='payment' element={<Payment />} />
 
-                                        <Route path="setting" element={<Settings/>} />
-                                        
+                                                <Route path='analytics' element={<Analytics />} />
+
+                                                <Route path='messages' element={<ChatAppPage />} />
+
+                                                <Route path='profile' element={<Profile />} />
+
+                                                <Route path="editProfile" element={<EditProfile />} />
+
+                                                <Route path="setting" element={<Settings />} />
+
+                                        </Route>
+
+                                        <Route path='/dashboard/browse' element={<BrowseCampaign />} />
+                                        <Route path='/complate-profile' element={<ProfileStepper />} />
                                 </Route>
 
 
-                                {/* Vendor Deshboard */}
-                                <Route path='/vendor-dashboard' element={<VenderDashboardLayout />}>
-                                        <Route path='' element={<VenderDashboardPage />} />
-                                        <Route path='browse-influencers' element={<BrowseInfluencerPage />} />
-                                        <Route path='my-campaigns' element={<CreateCampaign />} />
-                                        <Route path='my-campaigns/create-campaign' element={<CampaignWizard />} />
-                                        <Route path='messages' element={<ChatAppPage/>} />
+                                <Route element={<PrivateRoute allowedRoles={[2]} />}>
+                                        {/* Vendor Deshboard */}
+                                        <Route path='/vendor-dashboard' element={<VenderDashboardLayout />}>
+                                                <Route path='' element={<VenderDashboardPage />} />
+                                                <Route path='browse-influencers' element={<BrowseInfluencerPage />} />
+                                                <Route path='my-campaigns' element={<CreateCampaign />} />
+                                                <Route path='my-campaigns/create-campaign' element={<CampaignWizard />} />
+                                                <Route path='messages' element={<ChatAppPage />} />
+                                        </Route>
+                                        <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
                                 </Route>
 
-                                <Route path='/dashboard/browse' element={<BrowseCampaign />} />
-                                <Route path='/complate-profile' element={<ProfileStepper />} />
-                                <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
                         </Routes>
                 </Router>
         );

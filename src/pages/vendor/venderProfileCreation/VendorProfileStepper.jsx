@@ -78,21 +78,21 @@ export const VendorProfileStepper = () => {
         return hasValidField || hasValidPaymentMethod;
     };
 
-   const markStepComplete = (index) => {
-  const updated = [...completedSteps];
-  if (!updated[index]) {
-    updated[index] = true;
-    setCompletedSteps(updated);
-  }
+    const markStepComplete = (index) => {
+        const updated = [...completedSteps];
+        if (!updated[index]) {
+            updated[index] = true;
+            setCompletedSteps(updated);
+        }
 
-  if (index + 1 < steps.length) {
-    setCurrentStep(index + 1);
-  } else {
-    // Mark profile as complete, but let currentStep go one beyond steps
-    setIsCompleted(true);
-    setCurrentStep(steps.length); // This triggers ThankYouScreen
-  }
-};
+        if (index + 1 < steps.length) {
+            setCurrentStep(index + 1);
+        } else {
+            // Mark profile as complete, but let currentStep go one beyond steps
+            setIsCompleted(true);
+            setCurrentStep(steps.length); // This triggers ThankYouScreen
+        }
+    };
 
 
     const steps = [
@@ -192,7 +192,9 @@ export const VendorProfileStepper = () => {
                     setCurrentStep(firstIncomplete);
                 } else {
                     setIsCompleted(true);
+                    setCurrentStep(steps.length); // ✅ Add this line
                 }
+
             }
         } catch (error) {
             console.error("❌ Error fetching profile data:", error);

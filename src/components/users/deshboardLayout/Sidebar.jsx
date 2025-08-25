@@ -11,6 +11,10 @@ import {
 } from "@remixicon/react";
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../../../features/auth/authSlice";
+
 
 
 const Sidebar = () => {
@@ -29,6 +33,13 @@ const Sidebar = () => {
         }
     };
 
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const handleLogout = () => {
+        dispatch(logout());
+        navigate("/login");
+    };
+
     useEffect(() => {
         handleResize(); // check initially
         window.addEventListener("resize", handleResize);
@@ -36,7 +47,7 @@ const Sidebar = () => {
     }, []);
 
     const generalItems = [
-        { icon: <RiGalleryView2 className="w-5" />, label: "Dashboard", to: "/dashboard", end:true },
+        { icon: <RiGalleryView2 className="w-5" />, label: "Dashboard", to: "/dashboard", end: true },
         { icon: <RiSearch2Line className="w-5" />, label: "Browse Campaign", to: "/dashboard/browse" },
         { icon: <RiStackLine className="w-5" />, label: "My Campaign", to: "/dashboard/my-campaigns" },
         { icon: <RiMessage3Line className="w-5" />, label: "Messages", to: "/dashboard/messages" },
@@ -52,7 +63,7 @@ const Sidebar = () => {
     return (
         <div
             className={`h-screen bg-white text-[#141843] px-3 flex flex-col transition-all duration-300
-      ${isOpen ? "w-64" : "w-16"} relative z-40 shadow-sm`}
+        ${isOpen ? "w-64" : "w-16"} relative z-40 shadow-sm`}
         >
             {/* Header */}
             <div className="flex items-center justify-between py-3 h-18 border-b border-gray-100">
@@ -92,7 +103,7 @@ const Sidebar = () => {
                         className={({ isActive }) =>
                             `flex items-center ${isOpen ? "justify-start" : "justify-center"
                             } mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#141843] 
-      ${isActive ? "bg-[#141843] text-white" : "text-[#141843]"}`
+        ${isActive ? "bg-[#141843] text-white" : "text-[#141843]"}`
                         }
                     >
                         <span className="text-base">{item.icon}</span>
@@ -117,7 +128,7 @@ const Sidebar = () => {
                         className={({ isActive }) =>
                             `flex items-center ${isOpen ? "justify-start" : "justify-center"
                             } mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#141843] 
-      ${isActive ? "bg-[#141843] text-white" : "text-[#141843]"}`
+        ${isActive ? "bg-[#141843] text-white" : "text-[#141843]"}`
                         }
                     >
                         <span className="text-base">{item.icon}</span>
@@ -129,6 +140,7 @@ const Sidebar = () => {
             {/* Logout */}
             <div className="logout-btn mb-2">
                 <button
+                    onClick={handleLogout}
                     title={!isOpen ? "Logout" : ""}
                     className={`flex items-center cursor-pointer ${isOpen ? "justify-between px-6" : "justify-center"
                         } gap-2 w-full  py-2 border border-gray-300 rounded-full hover:bg-gray-100 text-sm`}

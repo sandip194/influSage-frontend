@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios';
@@ -9,8 +10,11 @@ import appleIcon from '../../assets/icons/apple-logo.png';
 import { RiEyeLine, RiEyeOffLine } from '@remixicon/react';
 import { toast } from 'react-hot-toast';
 
+import { setCredentials } from '../../features/auth/authSlice';
+
 
 export const LoginForm = () => {
+    const dispatch = useDispatch();
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
   const [showPassword, setShowPassword] = useState(false); // 👁️ Toggle state
 
@@ -42,11 +46,10 @@ export const LoginForm = () => {
         }
         toast.success(res.data.message || "Login successful!");
 
-        // store Role, UserID and token in local storage for now 
-        // we need to chnage this once we start using Redux
-        localStorage.setItem("userId", res.data.id)
-        localStorage.setItem("role", res.data.role)
-        localStorage.setItem("token", res.data.token)
+        const {id, role, token, firstname, lastname} = res.data
+        console.log(id)
+
+        dispatch(setCredentials({ token, id, role, firstname, lastname }));
 
 
         // redirect to dashboard, etc.

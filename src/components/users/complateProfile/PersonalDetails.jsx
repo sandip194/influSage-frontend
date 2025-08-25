@@ -4,6 +4,7 @@ import { RiImageAddLine } from 'react-icons/ri';
 import dayjs from 'dayjs';
 import axios from "axios";
 import postalRegexList from './postalRegex.json'
+import { useSelector } from 'react-redux';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
@@ -26,6 +27,9 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
+
+  const { token, userId, firstName, lastName } = useSelector(state => state.auth);
+
 
   const countryAPI = "https://countriesnow.space/api/v0.1/countries/positions";
   const stateAPI = "https://countriesnow.space/api/v0.1/countries/states";
@@ -62,19 +66,14 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
 
   // Load form values from localStorage
   useEffect(() => {
-
-    console.log(data)
     if (!data || Object.keys(data).length === 0) return;
-    // Check if there is at least one *defined* value in data
-    const hasValidData = data && Object.values(data).some(value => value !== undefined && value !== null);
+
+    const hasValidData = Object.values(data).some(value => value !== undefined && value !== null);
 
     if (hasValidData) {
-    
       const safe = (val) => (val !== null && val !== undefined ? val : undefined);
 
       form.setFieldsValue({
-        firstName: safe(data.firstName),
-        lastName: safe(data.lastName),
         gender: safe(data.genderid),
         birthDate: data.dob ? dayjs(data.dob) : undefined,
         address: safe(data.address1),
@@ -85,6 +84,11 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
         bio: safe(data.bio),
       });
 
+      // Load profile image preview if provided
+      if (data.photopath && !profileImage) {
+        setPreview('http://localhost:3001/' + data.photopath); // 👈 photopath should be a full image URL
+      }
+
       if (data.countryname) {
         setSelectedCountry(data.countryname);
         fetchStates(data.countryname);
@@ -94,12 +98,17 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
         setSelectedState(data.statename);
         fetchCities(data.countryname, data.statename);
       }
-
     }
-
-    // Don't touch the form if data is all undefined
   }, [data, form]);
 
+
+
+  useEffect(() => {
+    form.setFieldsValue({
+      firstName: firstName,
+      lastName: lastName,
+    })
+  }, [])
 
 
 
@@ -108,70 +117,56 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      setProfileError('Only image files are allowed.');
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/webp']; // Add more if needed
+
+    if (!allowedTypes.includes(file.type)) {
+      setProfileError('Only JPG, JPEG, or WEBP files are allowed. PNG is not allowed.');
+      setProfileImage(null);
+      setPreview(null);
       return;
     }
 
-    setPreview(URL.createObjectURL(file));
-    setProfileImage(file);
     setProfileError('');
+    setProfileImage(file);
+    setPreview(URL.createObjectURL(file));
   };
+
 
   const handleSubmit = async () => {
     try {
-      if (!profileImage) {
-        setProfileError("Please Select Profile Image ! Profile Image Is Required");
+      if (!profileImage && !preview) {
+        setProfileError("Please select profile image! Profile image is required.");
         return;
       }
 
       const values = await form.validateFields();
 
-      const token = localStorage.getItem('token');
-      const userId = localStorage.getItem('userId')
-
-
       // Format data as per API structure
       const profilePayload = {
-        userid: userId,
-        profilejson: {
-          genderid: values.gender,
-          dob: values.birthDate.format('DD-MM-YYYY'),
-          address1: values.address,
-          countryname: values.country,
-          statename: values.state,
-          bio: values.bio || '',
-          city: values.city,
-          zipCode: values.zipCode,
-        },
+        genderid: values.gender,
+        dob: values.birthDate.format('DD-MM-YYYY'),
+        address1: values.address,
+        countryname: values.country,
+        statename: values.state,
+        bio: values.bio || '',
+        city: values.city,
+        zipCode: values.zipCode,
       };
+      const formData = new FormData();
+      formData.append('profilejson', JSON.stringify(profilePayload));
+      formData.append('photo', profileImage);
 
       // Example API call
-      const response = await axios.post("user/complete-profile", profilePayload, {
+      const response = await axios.post("user/complete-profile", formData, {
         headers: {
           Authorization: `Bearer ${token}`, // Auth header
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
       });
 
       if (response.status === 200) {
         console.log(response.data)
       }
-
-      // Save locally (optional)
-      const fullData = {
-        ...values,
-        birthDate: values.birthDate.format('DD-MM-YYYY'),
-        location: {
-          country: values.country,
-          state: values.state,
-          city: values.city,
-        },
-        profileImage,
-        preview,
-      };
-
-      //localStorage.setItem('personalDetails', JSON.stringify(fullData));
 
       console.log('✅ API Response:', response.data);
       message.success('Form submitted successfully!');
@@ -182,6 +177,8 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
     }
   };
 
+
+
   return (
     <div className="personal-details-container bg-white p-6 rounded-3xl text-inter">
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Personal Details</h2>
@@ -191,7 +188,7 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
         form={form}
         layout="vertical"
         className="mt-6"
-        
+
       >
         {/* Profile Image Upload */}
         <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
@@ -205,11 +202,12 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
             )}
             <input
               type="file"
-              accept="image/*"
+              accept=".jpg,.jpeg,.webp" // no .png here
               ref={fileInputRef}
               onChange={handleImageChange}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
+
           </div>
         </div>
         {profileError && (

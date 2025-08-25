@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   BellOutlined,
   MessageOutlined,
@@ -14,59 +14,54 @@ import {
   Avatar,
   Badge,
   Menu,
-  Space,
   Button,
 } from "antd";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../../../features/auth/authSlice";
 
 import NotificationDropdown from "./NotificationDropdown";
 import MessageDropdown from "./MessageDropdown";
 
-const { Search } = Input;
-
-const profileMenu = (
-  <Menu
-    items={[  
-      {
-        key: "1",
-        icon: <UserOutlined />,
-         label: (
-          <Link to="/dashboard/profile">
-            My Profile
-          </Link>
-    ),
-      },
-      {
-        key: "2",
-        icon: <SettingOutlined />,
-        label: (
-          <Link to="/dashboard/setting">
-            Settings
-          </Link>
-    ),
-      },
-      {
-        key: "3",
-        icon: <LogoutOutlined />,
-        label: "Logout",
-        danger: true,
-      },
-    ]}
-  />
-);
-
-const notificationMenu = (
-  <NotificationDropdown/>
-);
-
-const messageMenu = (
-  <MessageDropdown/>
-);
-
 const DeshboardHeader = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
+  const profileMenu = (
+    <Menu
+      items={[
+        {
+          key: "1",
+          icon: <UserOutlined />,
+          label: <Link to="/dashboard/profile">My Profile</Link>,
+        },
+        {
+          key: "2",
+          icon: <SettingOutlined />,
+          label: <Link to="/dashboard/setting">Settings</Link>,
+        },
+        {
+          key: "3",
+          icon: <LogoutOutlined />,
+          label: "Logout",
+          danger: true,
+          onClick: handleLogout,
+        },
+      ]}
+    />
+  );
+
+  const notificationMenu = <NotificationDropdown />;
+  const messageMenu = <MessageDropdown />;
+
   return (
     <div className="w-full flex justify-between items-center p-4 bg-white shadow-sm border-b-1 border-gray-200">
-      {/* Left: Search (hidden on small screens) */}
+      {/* Search Bar */}
       <div className="hidden sm:block w-full max-w-sm">
         <Input
           size="large"
@@ -75,26 +70,15 @@ const DeshboardHeader = () => {
         />
       </div>
 
-      {/* Right: Icons */}
+      {/* Right Side Icons */}
       <div className="flex items-center gap-4">
-        {/* Message Dropdown */}
-        <Dropdown
-          
-          overlay={messageMenu}
-          placement="bottomRight"
-          trigger={["click"]}
-        >
+        <Dropdown overlay={messageMenu} placement="bottomRight" trigger={["click"]}>
           <Badge color="#141843" count={4} offset={[0, 0]}>
             <Button shape="circle" icon={<MessageOutlined />} />
           </Badge>
         </Dropdown>
 
-        {/* Notification Dropdown */}
-        <Dropdown
-          overlay={notificationMenu}
-          placement="bottomRight"
-          trigger={["click"]}
-        >
+        <Dropdown overlay={notificationMenu} placement="bottomRight" trigger={["click"]}>
           <Badge color="#141843" count={9} offset={[0, 0]}>
             <Button shape="circle" icon={<BellOutlined />} />
           </Badge>
@@ -104,10 +88,7 @@ const DeshboardHeader = () => {
         <Dropdown overlay={profileMenu} trigger={["click"]}>
           <div className="flex items-center gap-2 cursor-pointer border border-gray-200 px-3 py-1 rounded-full">
             <Avatar src="https://randomuser.me/api/portraits/men/32.jpg" />
-            <span className="hidden sm:inline text-sm font-medium">
-              Sean Smith
-            </span>
-
+            <span className="hidden sm:inline text-sm font-medium">Sean Smith</span>
             <DownOutlined className="text-xs" />
           </div>
         </Dropdown>

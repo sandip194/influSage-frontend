@@ -13,10 +13,15 @@ import ThankYouScreen from '../../../components/users/complateProfile/ThankYouSc
 import "../../../components/users/complateProfile/profile.css"
 import axios from 'axios';
 
+import { useSelector } from 'react-redux';
+
 export const ProfileStepper = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  const { token, userId } = useSelector(state => state.auth);
+
   const [profileData, setProfileData] = useState({
     profile: {},
     social: [],
@@ -182,10 +187,8 @@ export const ProfileStepper = () => {
 
   const getUserProfileCompationData = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const id = localStorage.getItem("userId");
-
-      const res = await axios.get(`user/profile/${id}`, {
+      console.log(userId, token)
+      const res = await axios.get(`user/profile/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -203,7 +206,7 @@ export const ProfileStepper = () => {
           profile: data.profileParts.p_profile || {},
           social: data.profileParts.p_socials || [],
           categories: data.profileParts.p_categories || [],
-          portfolio: Array.isArray(data.profileParts.p_portfolios) ? data.profileParts.p_portfolios[0] : {},
+          portfolio: data.profileParts.p_portfolios || {},
           payment: data.profileParts.p_paymentaccounts || null,
         };
 
@@ -221,8 +224,6 @@ export const ProfileStepper = () => {
 
 
         setCompletedSteps(stepsCompletion);
-
-
 
         // Navigate to first incomplete step
         const firstIncomplete = stepsCompletion.findIndex(done => !done);

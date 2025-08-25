@@ -3,12 +3,18 @@ import { Upload, Form, Input, Button, message } from 'antd';
 import { UploadOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
+import { useSelector } from 'react-redux';
+
 const { Dragger } = Upload;
 
 const PortfolioUploader = ({ onBack, onNext, data }) => {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]);
-  const [urls, setUrls] = useState(['']);
+  const [existingFiles, setExistingFiles] = useState([]); // files from backend (as URLs)
+  const [portfolioUrl, setPortfolioUrl] = useState('');
+
+  const { token } = useSelector(state => state.auth);
+
 
   const beforeUpload = (file) => {
     const allowedTypes = [
@@ -27,113 +33,109 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
   };
 
   const handleRemove = (uid) => {
-    setFileList(prev => prev.filter(file => file.uid !== uid));
-  };
-
-  const handleUrlChange = (index, e) => {
-    const newUrls = [...urls];
-    newUrls[index] = e.target.value;
-    setUrls(newUrls);
-  };
-
-  const addUrlField = () => {
-    const lastUrl = urls[urls.length - 1];
-    const isValid = /^https?:\/\/.+/.test(lastUrl);
-
-    if (!lastUrl.trim()) {
-      message.warning("Please fill in the current URL before adding another.");
-      return;
+    if (uid.startsWith("existing-")) {
+      setExistingFiles(prev => prev.filter(file => file.uid !== uid));
+    } else {
+      setFileList(prev => prev.filter(file => file.uid !== uid));
     }
-
-    if (!isValid) {
-      message.warning("Please enter a valid URL starting with http:// or https://");
-      return;
-    }
-
-    setUrls([...urls, '']);
   };
 
-  const removeUrlField = (index) => {
-    if (urls.length === 1) return;
-    const newUrls = urls.filter((_, i) => i !== index);
-    setUrls(newUrls);
-  };
 
   const handleSubmit = async () => {
-    const validUrls = urls.filter(url => /^https?:\/\/.+/.test(url));
-    const hasUploaded = fileList.length > 0 || validUrls.length > 0;
+    const hasFiles = fileList.length > 0 || existingFiles.length > 0;
+    const isValidUrl = /^https?:\/\/.+/.test(portfolioUrl);
 
-    if (!hasUploaded) {
+    if (!hasFiles && !isValidUrl) {
       message.error('Please upload at least one file or add a valid portfolio URL.');
       return;
     }
 
-    console.log(validUrls)
-    // Build payload
-    const payload = [{
-      filepath: fileList[0]?.url || fileList[0]?.thumbUrl || null, // Could be updated after file upload
-      portfoliourl: validUrls[0] || null
-    }];
 
-    const hasDuplicates = new Set(validUrls).size !== validUrls.length;
-    if (hasDuplicates) {
-      message.error("Please ensure each portfolio URL is unique.");
-      return;
+    const formData = new FormData();
+
+    if (isValidUrl) {
+      let portfoliojson = {
+        portfoliourl: portfolioUrl,
+        filepaths: [
+          { filepath: null }
+        ]
+      }
+      formData.append("portfoliojson", JSON.stringify(portfoliojson))
     }
+    fileList.forEach(file => {
+      formData.append("portfolioFiles", file); // attach as 'filepaths'
+    });
+    existingFiles.forEach((file, i) => {
+      formData.append(`existingFilepaths[${i}]`, file.url);
+    });
 
     try {
-      const token = localStorage.getItem("token");
-      const userId = localStorage.getItem("userId");
-
-console.log(payload)
-      const res = await axios.post(
-        "user/complete-profile",
-        {
-          userid: userId,
-          portfoliojson: payload
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+      const res = await axios.post("user/complete-profile", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
         }
-      );
+      });
 
       if (res.status === 200) {
         message.success("Portfolio submitted successfully!");
-        // Update parent
-        onNext?.(payload[0]); // send single object to ProfileStepper
+        onNext?.();
       } else {
-        message.error("Something went wrong submitting the portfolio.");
+        message.error("Something went wrong.");
       }
-    } catch (error) {
-      console.error("❌ Portfolio submit error:", error);
-      message.error("Error submitting portfolio.");
+    } catch (err) {
+      console.error("Submit error:", err);
+      message.error("Failed to submit portfolio.");
     }
   };
 
 
 
-
   useEffect(() => {
+    console.log(data)
     if (data) {
-      if (data.filepath) {
-        const file = {
-          uid: '-1',
-          name: data.filepath.split('/').pop(),
-          status: 'done',
-          url: data.filepath,
-          type: 'application/pdf' // or guess based on extension if needed
-        };
-        setFileList([file]);
+      if (data.portfoliourl) {
+        setPortfolioUrl(data.portfoliourl);
       }
 
-      if (data.portfoliourl) {
-        setUrls([data.portfoliourl]);
+      if (Array.isArray(data.filepaths)) {
+        const filesFromBackend = data.filepaths
+          .filter(f => f.filepath)
+          .map((f, index) => {
+            const fullUrl = f.filepath.startsWith('http')
+              ? f.filepath
+              : `http://localhost:3001/${f.filepath.replace(/^\/?/, '')}`; // make sure no double slashes
+
+            const fileName = f.filepath.split('/').pop()?.toLowerCase() || '';
+            const isImage = fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png');
+            const isVideo = fileName.endsWith('.mp4') || fileName.endsWith('.mov');
+            const isPDF = fileName.endsWith('.pdf');
+            const isDoc = fileName.endsWith('.doc') || fileName.endsWith('.docx');
+
+            return {
+              uid: `existing-${index}`,
+              name: fileName,
+              url: fullUrl,
+              status: 'done',
+              type: isImage
+                ? 'image'
+                : isVideo
+                  ? 'video'
+                  : isPDF
+                    ? 'pdf'
+                    : isDoc
+                      ? 'doc'
+                      : 'file',
+            };
+          });
+
+        setExistingFiles(filesFromBackend);
       }
     }
   }, [data]);
+
+
+
 
 
   return (
@@ -164,32 +166,52 @@ console.log(payload)
         </Form.Item>
 
         {/* Preview */}
-        {fileList.length > 0 && (
-          <div className="flex gap-3 overflow-x-auto mb-8 flex-wrap justify-center">
-            {fileList.map(file => {
-              const isImage = file.type?.startsWith('image/');
-              const previewUrl = file.thumbUrl || file.url || URL.createObjectURL(file);
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          {(fileList.concat(existingFiles)).map(file => {
+            const previewUrl = file.thumbUrl || file.url || URL.createObjectURL(file);
 
-              return (
-                <div key={file.uid} className="relative w-[100px] h-[120px] rounded-lg overflow-hidden">
-                  {isImage ? (
-                    <img src={previewUrl} alt="preview" className="w-full h-full object-cover rounded-lg" />
-                  ) : (
-                    <video src={previewUrl} className="w-full h-full object-cover" controls />
-                  )}
-                  <button
-                    className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white p-1 rounded-full"
-                    onClick={() => handleRemove(file.uid)}
-                    type="button"
-                  >
-                    <DeleteOutlined />
-                  </button>
-                </div>
-              );
-            })}
 
-          </div>
-        )}
+            const type = file.type || '';
+            const isImage = type === 'image' || type.startsWith('image/');
+            const isVideo = type === 'video' || type.startsWith('video/');
+            const isPDF = type === 'pdf' || type === 'application/pdf';
+            const isDoc = type === 'doc' || type.includes('msword') || type.includes('officedocument');
+
+
+            return (
+              <div key={file.uid} className="relative w-[100px] h-[120px] rounded-lg overflow-hidden bg-gray-100 items-center justify-center p-2">
+                {isImage ? (
+                  <img src={previewUrl} alt="preview" className="w-full h-full object-cover rounded-lg" />
+                ) : isVideo ? (
+                  <video src={previewUrl} className="w-full h-full object-cover" controls />
+                ) : isPDF ? (
+                  <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 underline">
+                    PDF
+                  </a>
+                ) : isDoc ? (
+                  <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 underline">
+                    DOC
+                  </a>
+                ) : (
+                  <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 underline">
+                    File
+                  </a>
+                )}
+
+                {/* Remove Button */}
+                <button
+                  className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white p-1 rounded-full"
+                  onClick={() => handleRemove(file.uid)}
+                  type="button"
+                >
+                  <DeleteOutlined />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+
 
         {/* Divider */}
         <div className="flex items-center justify-center my-6">
@@ -198,48 +220,20 @@ console.log(payload)
           <span className="border-t border-gray-200 w-full" />
         </div>
 
-        {/* URL Fields */}
-        {urls.map((url, index) => (
-          <Form.Item
-            key={index}
-            label={index === 0 ? <span className="font-semibold text-sm text-gray-800">Add Portfolio URL</span> : null}
-            validateStatus={url && !/^https?:\/\/.+/.test(url) ? 'warning' : ''}
-            help={url && !/^https?:\/\/.+/.test(url) ? 'Enter a valid URL (https://...)' : ''}
-          >
-            <Input
-              placeholder="https://"
-              size="large"
-              value={url}
-              onChange={(e) => handleUrlChange(index, e)}
-              className="rounded-lg"
-              suffix={
-                <div className="flex items-center gap-1">
-                  {urls.length > 1 && (
-                    <Button
-                      type="text"
-                      danger
-                      size="large"
-                      onClick={() => removeUrlField(index)}
-                      className="p-2 bg-gray-100"
-                    >
-                      <DeleteOutlined />
-                    </Button>
-                  )}
-                  {index === urls.length - 1 && (
-                    <Button
-                      type="text"
-                      size="large"
-                      onClick={addUrlField}
-                      className="p-2 bg-gray-100"
-                    >
-                      <PlusOutlined />
-                    </Button>
-                  )}
-                </div>
-              }
-            />
-          </Form.Item>
-        ))}
+        <Form.Item
+          label={<span className="font-semibold text-sm text-gray-800">Portfolio URL</span>}
+          validateStatus={portfolioUrl && !/^https?:\/\/.+/.test(portfolioUrl) ? 'warning' : ''}
+          help={portfolioUrl && !/^https?:\/\/.+/.test(portfolioUrl) ? 'Enter a valid URL (https://...)' : ''}
+        >
+          <Input
+            placeholder="https://"
+            size="large"
+            value={portfolioUrl}
+            onChange={(e) => setPortfolioUrl(e.target.value)}
+            className="rounded-lg"
+          />
+        </Form.Item>
+
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -250,7 +244,7 @@ console.log(payload)
             Back
           </button>
           <button
-            onClick={handleSubmit}
+            htmlType="submit"
             className="bg-[#121A3F] cursor-pointer text-white inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
           >
             Continue

@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CheckOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 export const CategorySelector = ({ onBack, onNext, data }) => {
     const [categoryTree, setCategoryTree] = useState([])
     const [selectedParentId, setSelectedParentId] = useState(null); // default to first parent
     const [selectedChildren, setSelectedChildren] = useState([]);
     const [error, setError] = useState(false);
+
+     const { token, role } = useSelector(state => state.auth);
 
     const parentRefs = useRef({});
 
@@ -66,18 +69,13 @@ export const CategorySelector = ({ onBack, onNext, data }) => {
 
     const sendDataToBackend = async (data) => {
         try {
-            const token = localStorage.getItem("token");
-            const userId = localStorage.getItem("userId");
-            const role = localStorage.getItem("role");
-            console.log(role)
+            const formData = new FormData();
+            formData.append('categoriesjson', JSON.stringify(data));
+   
             // for Influencer 
-            if (role === "1") {
+            if (role === 1) {
                 const res = await axios.post(
-                    "user/complete-profile",
-                    {
-                        userid: userId,
-                        categoriesjson: data
-                    },
+                    "user/complete-profile",formData,
                     {
                         headers: {
                             Authorization: "Bearer " + token
@@ -93,13 +91,10 @@ export const CategorySelector = ({ onBack, onNext, data }) => {
             }
 
             // for Vendor
-            if (role === "2") {
+            if (role === 2) {
                 const res = await axios.post(
                     "vendor/complete-vendor-profile",
-                    {
-                        userid: userId,
-                        categoriesjson: data
-                    },
+                    formData,
                     {
                         headers: {
                             Authorization: "Bearer " + token

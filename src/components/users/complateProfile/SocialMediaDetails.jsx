@@ -2,9 +2,12 @@ import React, { useEffect } from 'react';
 import { Form, Input } from 'antd';
 import axios from 'axios';
 import { message } from 'antd';
+import { useSelector } from 'react-redux';
 
 export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
   const [form] = Form.useForm();
+
+   const { token, userId } = useSelector(state => state.auth);
 
   const platforms = [
     { name: 'Instagram', providerid: 1, icon: <img src='./public/assets/skill-icons_instagram.png' alt='Instagram' className='w-[24px]' />, field: 'instagram', placeholder: 'Enter Your Instagram link' },
@@ -17,8 +20,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
 
   const onFinish = async (values) => {
     try {
-      const token = localStorage.getItem('token');
-      const userId = localStorage.getItem('userId');
+
 
       if (!token || !userId) {
         message.error("User not authenticated.");
@@ -36,14 +38,12 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
       // Optionally store in localStorage
       // localStorage.setItem("socialLinks", JSON.stringify(values));
 
-      const payload = {
-        userid: userId,
-        socialaccountjson,
-      };
+      const formData = new FormData();
+      formData.append('socialaccountjson', JSON.stringify(socialaccountjson));
 
       const response = await axios.post(
         'user/complete-profile', // replace with actual URL
-        payload,
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,

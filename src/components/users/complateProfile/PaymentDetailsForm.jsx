@@ -15,6 +15,8 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import axios from "axios";
 
+import { useSelector } from 'react-redux';
+
 const { Option } = Select;
 const { Link } = Typography;
 
@@ -31,6 +33,9 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
   const [ifscValid, setIfscValid] = useState(null); // null, true, false
   const [bankDetails, setBankDetails] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const { token, role } = useSelector(state => state.auth);
+
 
   // Validate IFSC code via Razorpay API and autofill bank name
   const validateIFSC = async (value) => {
@@ -90,7 +95,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
   // Format final payload for backend
   const formatPaymentAccount = (values) => {
     return {
-      paymentjson: {
+      
         bankcountry: values.country || null,
         bankname: values.bank || null,
         accountholdername: values.accountHolder || null,
@@ -102,28 +107,27 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
         preferredcurrency: values.currency || null,
         taxidentificationnumber: values.taxId || null,
         paymentmethod: buildPaymentMethod(values),
-      },
+      
     };
   };
 
   // Submit payload to backend
   const submitToBackend = async (payload) => {
     setSubmitting(true);
+
+    const formData = new FormData();
+    formData.append('paymentjson', JSON.stringify(payload));
+
     try {
 
-      const role = localStorage.getItem("role");
-      console.log(role)
       // for Influencer 
-      if (role === "1") {
+      if (role === 1) {
         const res = await axios.post(
           "/user/complete-profile",
-          {
-            userid: localStorage.getItem("userId"),
-            ...payload,
-          },
+          formData,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -138,16 +142,13 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
       }
 
       // for Vendor
-      if (role === "2") {
+      if (role === 2) {
         const res = await axios.post(
           "/vendor/complete-vendor-profile",
-          {
-            userid: localStorage.getItem("userId"),
-            ...payload,
-          },
+          formData,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${token})}`,
             },
           }
         );
@@ -160,9 +161,6 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
           message.error("Failed to save payment info");
         }
       }
-
-
-
     } catch (err) {
       console.error(err);
       message.error("Error submitting payment info");
