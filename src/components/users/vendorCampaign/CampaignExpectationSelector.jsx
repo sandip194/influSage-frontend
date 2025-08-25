@@ -1,28 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { Input } from 'antd';
+import React, { useEffect, useState } from "react";
+import { Input } from "antd";
+import axios from "axios";
 
 const options = [
   {
-    id: '1',
-    text: 'Post my existing content (video & Images) on their social media without creating any content on their own',
+    id: "1",
+    text: "Post my existing content (video & Images) on their social media without creating any content on their own",
   },
   {
-    id: '2',
-    text: 'Create content (Video or Images) on their own as well as publishing them on their social media',
+    id: "2",
+    text: "Create content (Video or Images) on their own as well as publishing them on their social media",
   },
   {
-    id: '3',
-    text: 'Only create content (Video or Images) for me.',
+    id: "3",
+    text: "Only create content (Video or Images) for me.",
   },
 ];
 
-const CampaignExpectationSelector = ({ data, onNext }) => {
-  const [selected, setSelected] = useState(data?.contentExpectation || '');
-  const [durationDays, setDurationDays] = useState(data?.durationDays || '');
+const CampaignExpectationSelector = ({ data, onNext, userId }) => {
+  const [selected, setSelected] = useState(data?.contentExpectation || "");
+  const [durationDays, setDurationDays] = useState(data?.durationDays || "");
   const [addLinkToBio, setAddLinkToBio] = useState(
-    typeof data?.addLinkToBio === 'boolean' ? data.addLinkToBio : null
+    typeof data?.addLinkToBio === "boolean" ? data.addLinkToBio : null
   );
 
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({
     contentExpectation: false,
     durationDays: false,
@@ -32,10 +34,10 @@ const CampaignExpectationSelector = ({ data, onNext }) => {
   useEffect(() => {
     if (data?.contentExpectation) setSelected(data.contentExpectation);
     if (data?.durationDays) setDurationDays(data.durationDays);
-    if (typeof data?.addLinkToBio === 'boolean') setAddLinkToBio(data.addLinkToBio);
+    if (typeof data?.addLinkToBio === "boolean") setAddLinkToBio(data.addLinkToBio);
   }, [data]);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const newErrors = {
       contentExpectation: !selected,
       durationDays: !durationDays || isNaN(durationDays) || Number(durationDays) <= 0,
@@ -45,14 +47,39 @@ const CampaignExpectationSelector = ({ data, onNext }) => {
     setErrors(newErrors);
 
     const hasError = Object.values(newErrors).some((e) => e);
-
     if (hasError) return;
 
-    onNext({
-      contentExpectation: selected,
-      durationDays: Number(durationDays),
-      addLinkToBio,
-    });
+    const finalUserId = userId || localStorage.getItem("userId");
+
+    const payload = {
+      userid: finalUserId,
+      p_objectivejson: {
+        objectiveid: selected,
+        postdurationdays: Number(durationDays),
+        isincludevendorprofilelink: addLinkToBio,
+      },
+    };
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+
+      const res = await axios.post("/vendor/create-campaign", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("API Response:", res.data);
+
+      onNext(payload.p_objectivejson);
+    } catch (err) {
+      console.error("API Error:", err.response?.data || err.message);
+      alert("Something went wrong while saving campaign step.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -71,7 +98,7 @@ const CampaignExpectationSelector = ({ data, onNext }) => {
               setErrors((prev) => ({ ...prev, contentExpectation: false }));
             }}
             className={`px-5 py-3 rounded-xl border cursor-pointer ${
-              selected === opt.id ? 'border-gray-800 bg-gray-50' : 'border-gray-200'
+              selected === opt.id ? "border-gray-800 bg-gray-50" : "border-gray-200"
             }`}
           >
             {opt.text}
@@ -113,20 +140,22 @@ const CampaignExpectationSelector = ({ data, onNext }) => {
         Would you like to have influencers add your link in their bio when publishing your campaign?
       </h2>
       <div className="flex gap-4 mb-2">
-        {[{ label: 'Yes', value: true }, { label: 'No', value: false }].map(({ label, value }) => (
-          <button
-            key={label}
-            onClick={() => {
-              setAddLinkToBio(value);
-              setErrors((prev) => ({ ...prev, addLinkToBio: false }));
-            }}
-            className={`border px-6 py-2 rounded-xl capitalize ${
-              addLinkToBio === value ? 'border-[#0D132D] font-semibold' : 'border-gray-300'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+        {[{ label: "Yes", value: true }, { label: "No", value: false }].map(
+          ({ label, value }) => (
+            <button
+              key={label}
+              onClick={() => {
+                setAddLinkToBio(value);
+                setErrors((prev) => ({ ...prev, addLinkToBio: false }));
+              }}
+              className={`border px-6 py-2 rounded-xl capitalize ${
+                addLinkToBio === value ? "border-[#0D132D] font-semibold" : "border-gray-300"
+              }`}
+            >
+              {label}
+            </button>
+          )
+        )}
       </div>
       {errors.addLinkToBio && (
         <div className="text-red-500 text-sm mb-4">Please select Yes or No</div>
@@ -142,9 +171,10 @@ const CampaignExpectationSelector = ({ data, onNext }) => {
         </button>
         <button
           onClick={handleContinue}
-          className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
+          disabled={loading}
+          className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-50"
         >
-          Continue
+          {loading ? "Saving..." : "Continue"}
         </button>
       </div>
     </div>

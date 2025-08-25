@@ -15,7 +15,7 @@ const ThankYouScreen = () => {
             navigate("/dashboard");
         } else if (roleId === 2) {
             navigate("/vendor-dashboard");
-        } 
+        }
     };
 
 
@@ -40,6 +40,7 @@ const ThankYouScreen = () => {
                     onClick={handleGoToHome}
                     className="bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer text-white font-semibold px-6 py-3 rounded-full shadow-md"
                 >
+
                     Go To Home
                 </button>
             </div>
