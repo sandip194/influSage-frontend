@@ -80,7 +80,7 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
         country: safe(data.countryname),
         state: safe(data.statename),
         city: safe(data.city),
-        zipCode: safe(data.zipcode),
+        zipCode: safe(data.zip),
         bio: safe(data.bio),
       });
 
