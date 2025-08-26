@@ -80,7 +80,7 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
         country: safe(data.countryname),
         state: safe(data.statename),
         city: safe(data.city),
-        zipCode: safe(data.zipCode),
+        zipCode: safe(data.zipcode),
         bio: safe(data.bio),
       });
 
@@ -102,13 +102,16 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
   }, [data, form]);
 
 
+useEffect(() => {
+  if (!firstName || !lastName) return;
 
-  useEffect(() => {
-    form.setFieldsValue({
-      firstName: firstName,
-      lastName: lastName,
-    })
-  }, [])
+  form.setFieldsValue({
+    firstName: data?.firstname || firstName,
+    lastName: data?.lastname || lastName,
+  });
+}, [form, data, firstName, lastName]);
+
+
 
 
 
@@ -150,7 +153,7 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
         statename: values.state,
         bio: values.bio || '',
         city: values.city,
-        zipCode: values.zipCode,
+        zip: values.zipCode,
       };
       const formData = new FormData();
       formData.append('profilejson', JSON.stringify(profilePayload));

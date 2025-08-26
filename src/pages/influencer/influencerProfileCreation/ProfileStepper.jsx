@@ -20,7 +20,7 @@ export const ProfileStepper = () => {
   const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  const { token, userId } = useSelector(state => state.auth);
+  const { token, userId} = useSelector(state => state.auth);
 
   const [profileData, setProfileData] = useState({
     profile: {},
@@ -62,16 +62,17 @@ export const ProfileStepper = () => {
     // Categories should be a non-empty array
     return Array.isArray(categories) && categories.length > 0;
   };
-
   const isPortfolioComplete = (portfolio) => {
-    // Portfolio should have at least one meaningful key with a value
-    if (!portfolio || Object.keys(portfolio).length === 0) return false;
+    if (!portfolio || typeof portfolio !== 'object') return false;
 
-    // Check if any field inside portfolio has a non-empty value
-    return Object.values(portfolio).some(value => {
-      return value !== null && value !== undefined && value !== '';
-    });
+    const hasValidUrl = typeof portfolio.portfoliourl === 'string' && portfolio.portfoliourl.trim() !== '';
+
+    const hasValidFilepath = Array.isArray(portfolio.filepaths) &&
+      portfolio.filepaths.some(file => typeof file.filepath === 'string' && file.filepath.trim() !== '');
+
+    return hasValidUrl || hasValidFilepath;
   };
+
 
   const isPaymentComplete = (payment) => {
     if (!payment || Object.keys(payment).length === 0) return false;
@@ -187,7 +188,7 @@ export const ProfileStepper = () => {
 
   const getUserProfileCompationData = async () => {
     try {
-      console.log(userId, token)
+
       const res = await axios.get(`user/profile/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,

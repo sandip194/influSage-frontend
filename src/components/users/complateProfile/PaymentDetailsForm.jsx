@@ -148,7 +148,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
           formData,
           {
             headers: {
-              Authorization: `Bearer ${token})}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );

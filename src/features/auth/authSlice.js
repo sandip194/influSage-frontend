@@ -5,12 +5,14 @@ import Cookies from 'js-cookie';
 const tokenFromCookie = Cookies.get("token");
 const userIdFromCookie = Cookies.get("userId");
 const roleFromCookie = Cookies.get("role");
+const firstNameFromCookie = Cookies.get("firstName")
+const lastNameFromCookie = Cookies.get("lastName")
 
 const initialState = {
   token: tokenFromCookie || null,
   userId: userIdFromCookie ? Number(userIdFromCookie) : null,
-  firstName: null,
-  lastName: null,
+  firstName: firstNameFromCookie || null,
+  lastName: lastNameFromCookie || null,
   role: roleFromCookie ? Number(roleFromCookie) : null,
   user: null
 };
@@ -20,6 +22,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setCredentials: (state, action) => {
+      console.log(action.payload)
       const { token, role, id, firstName, lastName } = action.payload;
       state.token = token;
       state.userId = id;
@@ -30,6 +33,8 @@ const authSlice = createSlice({
       Cookies.set("token", token, { expires: 1 }); // 1 day expiry
       Cookies.set("role", role, { expires: 1 });
       Cookies.set("userId", id)
+      Cookies.set("firstName", firstName)
+      Cookies.set("lastName", lastName)
     },
     setUserProfile: (state, action) => {
       state.user = action.payload;
@@ -41,7 +46,6 @@ const authSlice = createSlice({
       state.firstName = null
       state.lastName = null
       state.role = null
-
 
       // Remove from cookies
       Cookies.remove("token");

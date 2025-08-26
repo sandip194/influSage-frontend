@@ -46,10 +46,10 @@ export const LoginForm = () => {
         }
         toast.success(res.data.message || "Login successful!");
 
-        const {id, role, token, firstname, lastname} = res.data
+        const {id, role, token, firstName, lastName} = res.data
         console.log(id)
 
-        dispatch(setCredentials({ token, id, role, firstname, lastname }));
+        dispatch(setCredentials({ token, id, role, firstName, lastName }));
 
 
         // redirect to dashboard, etc.

@@ -3,6 +3,7 @@ import { Form, Input, Select, message } from 'antd';
 import { RiImageAddLine } from 'react-icons/ri';
 import axios from "axios";
 import postalRegexList from '../complateProfile/postalRegex.json';
+import { useSelector } from 'react-redux';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -19,6 +20,8 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
     const [cities, setCities] = useState([]);
     const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
     const [companySizes, setCompanySizes] = useState([]);
+
+    const { token } = useSelector(state => state.auth);
 
     const countryAPI = "https://countriesnow.space/api/v0.1/countries/positions";
     const stateAPI = "https://countriesnow.space/api/v0.1/countries/states";
@@ -43,20 +46,20 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
     };
 
     const fetchCountries = () => {
-    setLoading(prev => ({ ...prev, countries: true }));
-    axios.get(countryAPI)
-        .then(res => {
-            if (res.data?.data) {
-                setCountries(res.data.data); // ✅ 'data' is an array
-            }
-        })
-        .catch((err) => {
-            console.error("❌ Failed to fetch countries:", err);
-        })
-        .finally(() => {
-            setLoading(prev => ({ ...prev, countries: false }));
-        });
-};
+        setLoading(prev => ({ ...prev, countries: true }));
+        axios.get(countryAPI)
+            .then(res => {
+                if (res.data?.data) {
+                    setCountries(res.data.data); // ✅ 'data' is an array
+                }
+            })
+            .catch((err) => {
+                console.error("❌ Failed to fetch countries:", err);
+            })
+            .finally(() => {
+                setLoading(prev => ({ ...prev, countries: false }));
+            });
+    };
 
 
     const fetchStates = (country) => {
@@ -92,7 +95,7 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
                 countryname: data.countryname,
                 statename: data.statename,
                 bio: data.bio,
-                zipCode: data.zipCode,
+                zipCode: data.zip,
                 city: data.city,
             });
 
@@ -106,8 +109,13 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
             }
 
             if (data.photopath) {
-                setPreview(data.photopath);
+                const fullUrl = data.photopath.startsWith('http')
+                    ? data.photopath
+                    : `http://localhost:3001/${data.photopath.replace(/^\/+/, '')}`;
+
+                setPreview(fullUrl);
             }
+
         }
     }, [data]);
 
@@ -136,28 +144,26 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
             }
 
             const profilejson = {
-                photopath: preview || null,
+                photopath: null,
                 businessname: values.businessname,
                 companysizeid: values.companysizeid,
                 address1: values.address1,
                 countryname: values.countryname,
                 statename: values.statename,
                 city: values.city,
-                zipCode: values.zipCode,
+                zip: values.zipCode,
                 bio: values.bio,
             };
 
-            const payload = {
-                userid: localStorage.getItem("userId"), // or pass as a prop if preferred
-                profilejson,
-            };
 
-            const token = localStorage.getItem("token");
+            const formData = new FormData();
+            formData.append('profilejson', JSON.stringify(profilejson));
+            formData.append('photo', profileImage);
 
-            const response = await axios.post("/vendor/complete-vendor-profile", payload, {
+            const response = await axios.post("/vendor/complete-vendor-profile", formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
+                    'Content-Type': 'multipart/form-data',
                 },
             });
 
@@ -315,7 +321,7 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
                     label={<b>ZIP / PIN Code</b>}
                     name="zipCode"
                     rules={[
-                        {  message: 'Please enter your ZIP or PIN Code' },
+                        { message: 'Please enter your ZIP or PIN Code' },
                         ({ getFieldValue }) => ({
                             validator(_, value) {
                                 const iso = countries.find(c => c.name === getFieldValue('countryname'))?.iso2;

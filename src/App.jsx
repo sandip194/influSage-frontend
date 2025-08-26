@@ -62,8 +62,8 @@ const App = () => {
 
 
 
+                                {/* Influencer Dashboard*/}
                                 <Route element={<PrivateRoute allowedRoles={[1]} />}>
-                                        {/* Influencer Dashboard*/}
                                         <Route path='/dashboard' element={<DashboardLayout />}>
 
                                                 <Route path='' element={<DashboardPage />} />
@@ -101,8 +101,8 @@ const App = () => {
                                 </Route>
 
 
+                                {/* Vendor Deshboard */}
                                 <Route element={<PrivateRoute allowedRoles={[2]} />}>
-                                        {/* Vendor Deshboard */}
                                         <Route path='/vendor-dashboard' element={<VenderDashboardLayout />}>
                                                 <Route path='' element={<VenderDashboardPage />} />
                                                 <Route path='browse-influencers' element={<BrowseInfluencerPage />} />

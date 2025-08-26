@@ -2,9 +2,12 @@ import React, { useEffect } from 'react';
 import { Form, Input } from 'antd';
 import axios from 'axios';
 import { message } from 'antd';
+import { useSelector } from 'react-redux';
 
 export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
   const [form] = Form.useForm();
+
+  const { token } = useSelector(state => state.auth);
 
   const platforms = [
     { name: 'Instagram', providerid: 1, icon: <img src='./public/assets/skill-icons_instagram.png' alt='Instagram' className='w-[24px]' />, field: 'instagram', placeholder: 'Enter Your Instagram link' },
@@ -17,14 +20,6 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
 
   const onFinish = async (values) => {
     try {
-      const token = localStorage.getItem('token');
-      const userId = localStorage.getItem('userId');
-
-      if (!token || !userId) {
-        message.error("User not authenticated.");
-        return;
-      }
-
       // Transform filled values into required array
       const providersjson = platforms
         .filter(p => values[p.field]) // Only filled-in links
@@ -36,14 +31,12 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
       // Optionally store in localStorage
       // localStorage.setItem("socialLinks", JSON.stringify(values));
 
-      const payload = {
-        userid: userId,
-        providersjson,
-      };
 
+      const formData = new FormData();
+      formData.append('providersjson', JSON.stringify(providersjson));
       const response = await axios.post(
         'vendor/complete-vendor-profile', // replace with actual URL
-        payload,
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -96,7 +89,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
         form={form}
         layout="vertical"
         onFinish={onFinish}
-        
+
       >
 
 

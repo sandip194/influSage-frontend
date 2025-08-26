@@ -10,6 +10,7 @@ import PlatformSelector from '../../../components/users/vendorProfile/PlatformSe
 import ObjectiveSelector from '../../../components/users/vendorProfile/ObjectiveSelector';
 import axios from 'axios';
 import { SocialMediaDetails } from '../../../components/users/vendorProfile/SocialMediaDetails';
+import { useSelector } from 'react-redux';
 
 export const VendorProfileStepper = () => {
     const [currentStep, setCurrentStep] = useState(0);
@@ -17,6 +18,8 @@ export const VendorProfileStepper = () => {
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
+
+      const { token, userId} = useSelector(state => state.auth);
 
     const [vendorProfileData, setVendorProfileData] = useState({
         profile: {},
@@ -150,10 +153,8 @@ export const VendorProfileStepper = () => {
 
     const getUserProfileCompletionData = async () => {
         try {
-            const token = localStorage.getItem("token");
-            const id = localStorage.getItem("userId");
 
-            const res = await axios.get(`vendor/profile/${id}`, {
+            const res = await axios.get(`vendor/profile/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',

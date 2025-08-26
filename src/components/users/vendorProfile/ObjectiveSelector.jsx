@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useSelector } from 'react-redux';
 
 const STORAGE_KEY = "selected_objective"; // optional fallback storage
 
@@ -7,6 +8,8 @@ const ObjectiveSelector = ({ onBack, onNext, data }) => {
   const [selected, setSelected] = useState(null);
   const [error, setError] = useState("");
   const [objectives, setObjectives] = useState([]);
+
+  const { token } = useSelector(state => state.auth);
 
   const handleSelection = (id) => {
     setSelected(id);
@@ -19,18 +22,14 @@ const ObjectiveSelector = ({ onBack, onNext, data }) => {
     }
 
     setError("");
-    localStorage.setItem(STORAGE_KEY, selected.toString()); // optional
 
-    const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("userId");
 
-    const payload = {
-      userid: userId,
-      objectivesjson: [{ objectiveid: selected }],
-    };
+
+    const formData = new FormData();
+    formData.append('objectivesjson', JSON.stringify( [{ objectiveid: selected }]));
 
     try {
-      const response = await axios.post("vendor/complete-vendor-profile", payload, {
+      const response = await axios.post("vendor/complete-vendor-profile", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -84,9 +83,8 @@ const ObjectiveSelector = ({ onBack, onNext, data }) => {
           <div
             key={obj.id}
             onClick={() => handleSelection(obj.id)}
-            className={`border rounded-2xl p-4 cursor-pointer transition hover:shadow-sm ${
-              selected === obj.id ? "border-[#141843] bg-gray-50" : "border-gray-200"
-            }`}
+            className={`border rounded-2xl p-4 cursor-pointer transition hover:shadow-sm ${selected === obj.id ? "border-[#141843] bg-gray-50" : "border-gray-200"
+              }`}
           >
             <div className="flex flex-col items-start gap-3 p-2">
               <div>
