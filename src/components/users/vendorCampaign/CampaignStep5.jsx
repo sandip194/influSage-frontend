@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Input, message } from "antd";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const { TextArea } = Input;
 
@@ -25,7 +26,10 @@ const platforms = {
   ],
 };
 
-const CampaignStep5 = ({ onNext, onBack, userId }) => {
+const CampaignStep5 = ({ onNext, onBack }) => {
+  const { userId, token } = useSelector((state) => state.auth);
+
+  // Initialize form state for all platforms
   const [formState, setFormState] = useState(() => {
     const initial = {};
     Object.keys(platforms).forEach((platform) => {
@@ -37,6 +41,7 @@ const CampaignStep5 = ({ onNext, onBack, userId }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // Toggle selection of content type (Post, Story, etc.)
   const toggleContentType = (platform, typeId) => {
     setFormState((prev) => {
       const selected = prev[platform].selectedTypes;
@@ -53,6 +58,7 @@ const CampaignStep5 = ({ onNext, onBack, userId }) => {
     });
   };
 
+  // Handle caption input change
   const handleCaptionChange = (platform, value) => {
     setFormState((prev) => ({
       ...prev,
@@ -60,6 +66,7 @@ const CampaignStep5 = ({ onNext, onBack, userId }) => {
     }));
   };
 
+  // Save content types + captions
   const handleContinue = async () => {
     const newErrors = {};
     let hasError = false;
@@ -77,12 +84,12 @@ const CampaignStep5 = ({ onNext, onBack, userId }) => {
     setErrors(newErrors);
 
     if (hasError) {
-      message.error("Please fill in all required fields.");
+      message.error("Please select at least one type and add a caption for each platform.");
       return;
     }
 
+    // Build API JSON format
     const contenttypejson = [];
-
     Object.entries(formState).forEach(([platform, data]) => {
       data.selectedTypes.forEach((typeId) => {
         contenttypejson.push({
@@ -95,17 +102,14 @@ const CampaignStep5 = ({ onNext, onBack, userId }) => {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
 
-      const payload = {
-        p_userid: userId, // ✅ must be "p_userid"
-        p_contenttypejson: contenttypejson, // ✅ must be "p_contenttypejson"
-      };
+      const fd = new FormData();
+      fd.append("p_userid", userId);
+      fd.append("p_contenttypejson", JSON.stringify(contenttypejson));
 
-      const res = await axios.post("/vendor/create-campaign", payload, {
+      const res = await axios.post("/vendor/create-campaign", fd, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
       });
 
@@ -121,6 +125,7 @@ const CampaignStep5 = ({ onNext, onBack, userId }) => {
     }
   };
 
+  // Render each platform block
   const renderPlatformSection = (platform, types) => {
     const { selectedTypes, caption } = formState[platform];
     const platformErrors = errors[platform] || {};
@@ -138,7 +143,7 @@ const CampaignStep5 = ({ onNext, onBack, userId }) => {
                 type="button"
                 className={`px-6 py-2 rounded-xl cursor-pointer border ${
                   isSelected
-                    ? "border-[#0D132D] font-semibold"
+                    ? "border-[#0D132D] font-semibold bg-gray-100"
                     : "border-gray-300"
                 }`}
               >
@@ -149,9 +154,7 @@ const CampaignStep5 = ({ onNext, onBack, userId }) => {
         </div>
 
         {platformErrors.type && (
-          <p className="text-red-500 text-sm mb-2">
-            Select at least one type
-          </p>
+          <p className="text-red-500 text-sm mb-2">Select at least one type</p>
         )}
 
         <div className="relative">
@@ -161,7 +164,7 @@ const CampaignStep5 = ({ onNext, onBack, userId }) => {
             value={caption}
             onChange={(e) => handleCaptionChange(platform, e.target.value)}
             rows={2}
-            className="rounded-2xl p-2 pr-32"
+            className="rounded-2xl p-2"
           />
         </div>
 
@@ -176,11 +179,12 @@ const CampaignStep5 = ({ onNext, onBack, userId }) => {
 
   return (
     <div className="bg-white p-6 rounded-3xl">
+      <h2 className="text-xl font-bold mb-6">Content Types & Captions</h2>
+
       {Object.entries(platforms).map(([platform, types]) =>
         renderPlatformSection(platform, types)
       )}
 
-      {/* Navigation Buttons */}
       <div className="flex gap-4 mt-6">
         <button
           onClick={onBack}

@@ -1,6 +1,8 @@
+// CampaignStep2.jsx
 import React, { useState, useEffect } from "react";
 import { Select } from "antd";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const { Option } = Select;
 
@@ -25,13 +27,18 @@ const languages = [
 ];
 
 const formatFollowers = (num) => {
-  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1).replace(".0", "") + "B";
-  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(".0", "") + "M";
-  if (num >= 1_000) return (num / 1_000).toFixed(1).replace(".0", "") + "k";
+  if (num >= 1_000_000_000)
+    return (num / 1_000_000_000).toFixed(1).replace(".0", "") + "B";
+  if (num >= 1_000_000)
+    return (num / 1_000_000).toFixed(1).replace(".0", "") + "M";
+  if (num >= 1_000)
+    return (num / 1_000).toFixed(1).replace(".0", "") + "k";
   return num.toString();
 };
 
-const CampaignStep2 = ({ data, onNext, onBack, userId }) => {
+const CampaignStep2 = ({ data, onNext, onBack }) => {
+  const { userId, token } = useSelector((state) => state.auth);
+
   const [errors, setErrors] = useState({
     gender: false,
     shipProducts: false,
@@ -42,7 +49,7 @@ const CampaignStep2 = ({ data, onNext, onBack, userId }) => {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    gender: [],
+    gender: null,
     shipProducts: null,
     targetedInfluencers: [],
     language: [],
@@ -50,21 +57,19 @@ const CampaignStep2 = ({ data, onNext, onBack, userId }) => {
 
   useEffect(() => {
     setFormData({
-      gender: data.gender || [],
-      shipProducts: typeof data.shipProducts === "boolean" ? data.shipProducts : null,
+      gender: data.gender || null,
+      shipProducts:
+        typeof data.shipProducts === "boolean" ? data.shipProducts : null,
       targetedInfluencers: data.targetedInfluencers || [],
       language: data.language || [],
     });
   }, [data]);
 
   const toggleGender = (id) => {
-    setFormData((prev) => {
-      const alreadySelected = prev.gender.includes(id);
-      const updated = alreadySelected
-        ? prev.gender.filter((g) => g !== id)
-        : [...prev.gender, id];
-      return { ...prev, gender: updated };
-    });
+    setFormData((prev) => ({
+      ...prev,
+      gender: prev.gender === id ? null : id,
+    }));
     setErrors((prev) => ({ ...prev, gender: false }));
   };
 
@@ -87,13 +92,16 @@ const CampaignStep2 = ({ data, onNext, onBack, userId }) => {
   };
 
   const handleMultiSelectChange = (field, values) => {
-    setFormData({ ...formData, [field]: values });
+    setFormData((prev) => ({
+      ...prev,
+      [field]: values,
+    }));
     setErrors((prev) => ({ ...prev, [field]: false }));
   };
 
   const handleContinue = async () => {
   const newErrors = {
-    gender: formData.gender.length === 0,
+    gender: !formData.gender,
     shipProducts: formData.shipProducts === null,
     targetedInfluencers: formData.targetedInfluencers.length === 0,
     language: formData.language.length === 0,
@@ -103,30 +111,46 @@ const CampaignStep2 = ({ data, onNext, onBack, userId }) => {
 
   const hasError = Object.values(newErrors).some((e) => e);
   if (hasError) return;
- const finalUserId = userId || localStorage.getItem("userId");
-  const payload = {
-   userid: finalUserId,
-    p_vendorinfojson: {
-      genderid: formData.gender, 
-      isproductshipping: formData.shipProducts,
-      campaigninfluencertiers: formData.targetedInfluencers, 
-      language: formData.language, 
-    },
+
+  // 🔥 Build proper JSON for backend
+  const campaigninfluencertiers = formData.targetedInfluencers.map((id) => {
+    const tier = influencerTiers.find((t) => t.id === id);
+    return {
+      influencertierid: tier.id,
+      influencertiername: tier.name,
+    };
+  });
+
+  const campaignlanguages = formData.language.map((id) => {
+    const lang = languages.find((l) => l.id === id);
+    return {
+      languageid: lang.id,
+      languagename: lang.name,
+    };
+  });
+
+  const p_vendorinfojson = {
+    genderid: formData.gender,
+    isproductshipping: formData.shipProducts,
+    campaigninfluencertiers,
+    campaignlanguages,
   };
 
   try {
     setLoading(true);
-     const token = localStorage.getItem("token");
 
-      const res = await axios.post("/vendor/create-campaign", payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+    const fd = new FormData();
+    fd.append("p_userid", userId);
+    fd.append("p_vendorinfojson", JSON.stringify(p_vendorinfojson));
+
+    const res = await axios.post("/vendor/create-campaign", fd, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     console.log("Saved Step 2:", res.data);
-    onNext(payload.p_vendorinfojson);
+    onNext({ ...data, ...p_vendorinfojson });
   } catch (err) {
     console.error("API Error:", err.response?.data || err.message);
     alert("Failed to save campaign step. Try again.");
@@ -134,7 +158,6 @@ const CampaignStep2 = ({ data, onNext, onBack, userId }) => {
     setLoading(false);
   }
 };
-
 
   return (
     <div className="bg-white p-6 rounded-2xl">
@@ -146,33 +169,49 @@ const CampaignStep2 = ({ data, onNext, onBack, userId }) => {
             key={id}
             onClick={() => toggleGender(id)}
             className={`border px-6 py-2 rounded-xl ${
-              formData.gender.includes(id) ? "border-[#0D132D] font-semibold" : "border-gray-300"
+              formData.gender === id
+                ? "border-[#0D132D] font-semibold"
+                : "border-gray-300"
             }`}
           >
             {label}
           </button>
         ))}
       </div>
-      {errors.gender && <div className="text-red-500 text-sm mb-4">Please select at least one gender</div>}
+      {errors.gender && (
+        <div className="text-red-500 text-sm mb-4">
+          Please select a gender
+        </div>
+      )}
 
       <hr className="my-1 border-gray-200" />
 
       {/* Ship Products */}
-      <h2 className="text-xl font-semibold mb-4">Aiming to ship physical products to influencers?</h2>
+      <h2 className="text-xl font-semibold mb-4">
+        Aiming to ship physical products to influencers?
+      </h2>
       <div className="flex gap-4 mb-2">
-        {[{ label: "Yes", value: true }, { label: "No", value: false }].map(({ label, value }) => (
-          <button
-            key={label}
-            onClick={() => handleShipProducts(value)}
-            className={`border px-6 py-2 rounded-xl capitalize ${
-              formData.shipProducts === value ? "border-[#0D132D] font-semibold" : "border-gray-300"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+        {[{ label: "Yes", value: true }, { label: "No", value: false }].map(
+          ({ label, value }) => (
+            <button
+              key={label}
+              onClick={() => handleShipProducts(value)}
+              className={`border px-6 py-2 rounded-xl capitalize ${
+                formData.shipProducts === value
+                  ? "border-[#0D132D] font-semibold"
+                  : "border-gray-300"
+              }`}
+            >
+              {label}
+            </button>
+          )
+        )}
       </div>
-      {errors.shipProducts && <div className="text-red-500 text-sm mb-4">Please select Yes or No</div>}
+      {errors.shipProducts && (
+        <div className="text-red-500 text-sm mb-4">
+          Please select Yes or No
+        </div>
+      )}
 
       <hr className="my-1 border-gray-200" />
 
@@ -190,7 +229,9 @@ const CampaignStep2 = ({ data, onNext, onBack, userId }) => {
             <span className="text-sm text-[#141843]">
               {tier.name} Influencer (
               {tier.maxfollowers
-                ? `${formatFollowers(tier.minfollowers)} - ${formatFollowers(tier.maxfollowers)}`
+                ? `${formatFollowers(tier.minfollowers)} - ${formatFollowers(
+                    tier.maxfollowers
+                  )}`
                 : `${formatFollowers(tier.minfollowers)}+`}{" "}
               Followers)
             </span>
@@ -198,7 +239,9 @@ const CampaignStep2 = ({ data, onNext, onBack, userId }) => {
         ))}
       </div>
       {errors.targetedInfluencers && (
-        <div className="text-red-500 text-sm mb-4">Please select at least one influencer tier</div>
+        <div className="text-red-500 text-sm mb-4">
+          Please select at least one influencer tier
+        </div>
       )}
 
       <hr className="my-1 border-gray-200" />
@@ -220,8 +263,11 @@ const CampaignStep2 = ({ data, onNext, onBack, userId }) => {
           </Option>
         ))}
       </Select>
+
       {errors.language && (
-        <div className="text-red-500 text-sm mb-4 mt-2">Please select at least one language</div>
+        <div className="text-red-500 text-sm mb-4 mt-2">
+          Please select at least one language
+        </div>
       )}
 
       {/* Navigation Buttons */}

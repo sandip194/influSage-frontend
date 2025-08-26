@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Input } from "antd";
+import { Input, message } from "antd"; 
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const options = [
   {
@@ -17,7 +18,7 @@ const options = [
   },
 ];
 
-const CampaignExpectationSelector = ({ data, onNext, userId }) => {
+const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
   const [selected, setSelected] = useState(data?.contentExpectation || "");
   const [durationDays, setDurationDays] = useState(data?.durationDays || "");
   const [addLinkToBio, setAddLinkToBio] = useState(
@@ -31,6 +32,8 @@ const CampaignExpectationSelector = ({ data, onNext, userId }) => {
     addLinkToBio: false,
   });
 
+  const { token, userId: reduxUserId } = useSelector((state) => state.auth);
+
   useEffect(() => {
     if (data?.contentExpectation) setSelected(data.contentExpectation);
     if (data?.durationDays) setDurationDays(data.durationDays);
@@ -38,49 +41,53 @@ const CampaignExpectationSelector = ({ data, onNext, userId }) => {
   }, [data]);
 
   const handleContinue = async () => {
-    const newErrors = {
-      contentExpectation: !selected,
-      durationDays: !durationDays || isNaN(durationDays) || Number(durationDays) <= 0,
-      addLinkToBio: addLinkToBio === null,
-    };
-
-    setErrors(newErrors);
-
-    const hasError = Object.values(newErrors).some((e) => e);
-    if (hasError) return;
-
-    const finalUserId = userId || localStorage.getItem("userId");
-
-    const payload = {
-      userid: finalUserId,
-      p_objectivejson: {
-        objectiveid: selected,
-        postdurationdays: Number(durationDays),
-        isincludevendorprofilelink: addLinkToBio,
-      },
-    };
-
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-
-      const res = await axios.post("/vendor/create-campaign", payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      console.log("API Response:", res.data);
-
-      onNext(payload.p_objectivejson);
-    } catch (err) {
-      console.error("API Error:", err.response?.data || err.message);
-      alert("Something went wrong while saving campaign step.");
-    } finally {
-      setLoading(false);
-    }
+  const newErrors = {
+    contentExpectation: !selected,
+    durationDays: !durationDays || isNaN(durationDays) || Number(durationDays) <= 0,
+    addLinkToBio: addLinkToBio === null,
   };
+
+  setErrors(newErrors);
+
+  const hasError = Object.values(newErrors).some((e) => e);
+  if (hasError) return;
+
+  const finalUserId = reduxUserId || propUserId;
+
+  if (!token || !finalUserId) {
+    message.error("User not authenticated.");
+    return;
+  }
+
+  const p_objectivejson = {
+    objectiveid: Number(selected),
+    postdurationdays: Number(durationDays),
+    isincludevendorprofilelink: addLinkToBio,
+  };
+
+  try {
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("p_userid", finalUserId);
+    formData.append("p_objectivejson", JSON.stringify(p_objectivejson));
+
+    const res = await axios.post("/vendor/create-campaign", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("API Response:", res.data);
+    onNext(p_objectivejson);
+  } catch (err) {
+    console.error("API Error:", err.response?.data || err.message);
+    message.error("Something went wrong while saving campaign step.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="bg-white p-6 rounded-2xl">

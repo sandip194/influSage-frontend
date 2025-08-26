@@ -2,11 +2,14 @@ import React, { useState } from "react";
 import { Input, Select, DatePicker } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
+import { useSelector } from "react-redux"; 
 
 const { TextArea } = Input;
 const { Option } = Select;
 
-const CampaignStep3 = ({ data = {}, onNext, onBack, userId }) => {
+const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
+  const token = useSelector((state) => state.auth.token); 
+
   const [formData, setFormData] = useState({
     title: data.title || "",
     description: data.description || "",
@@ -14,8 +17,8 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, userId }) => {
     budgetType: data.budgetType || "Fixed Price",
     budgetAmount: data.budgetAmount || "",
     currency: data.currency || "₹",
-    startDate: data.startDate ? dayjs(data.startDate) : null,  
-  endDate: data.endDate ? dayjs(data.endDate) : null,        
+    startDate: data.startDate ? dayjs(data.startDate) : null,
+    endDate: data.endDate ? dayjs(data.endDate) : null,
     aboutBrand: data.aboutBrand || "",
   });
 
@@ -28,51 +31,57 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, userId }) => {
   };
 
   const handleContinue = async () => {
-    const newErrors = {
-      title: !formData.title,
-      description: !formData.description,
-      budgetAmount: !formData.budgetAmount,
-      startDate: !formData.startDate,
-      endDate:
-        !formData.endDate ||
-        (formData.startDate &&
-          dayjs(formData.endDate).isBefore(dayjs(formData.startDate))),
-      aboutBrand: !formData.aboutBrand,
-    };
-
-    setErrors(newErrors);
-    const hasErrors = Object.values(newErrors).some((e) => e);
-    if (hasErrors) return;
-
-   const payload = {
-    campaignjson: {
-        ...formData,
-        startDate: formData.startDate ? formData.startDate.format("YYYY-MM-DD") : null,
-        endDate: formData.endDate ? formData.endDate.format("YYYY-MM-DD") : null,
-    },
-    };
-        
-    try {
-      setLoading(true);
-
-       const token = localStorage.getItem("token");
-
-      const res = await axios.post("/vendor/create-campaign", payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      console.log("Step 3 Saved:", res.data);
-      onNext(payload.campaignjson);
-    } catch (err) {
-      console.error("API Error:", err.response?.data || err.message);
-      alert("Failed to save campaign step. Try again.");
-    } finally {
-      setLoading(false);
-    }
+  const newErrors = {
+    title: !formData.title,
+    description: !formData.description,
+    budgetAmount: !formData.budgetAmount,
+    startDate: !formData.startDate,
+    endDate:
+      !formData.endDate ||
+      (formData.startDate &&
+        dayjs(formData.endDate).isBefore(dayjs(formData.startDate))),
+    aboutBrand: !formData.aboutBrand,
   };
+
+  setErrors(newErrors);
+  const hasErrors = Object.values(newErrors).some((e) => e);
+  if (hasErrors) return;
+
+  const payload = {
+    name: formData.title,
+    description: formData.description,
+    estimatedbudget: parseFloat(formData.budgetAmount),
+    startdate: formData.startDate
+      ? formData.startDate.format("YYYY-MM-DD")
+      : null,
+    enddate: formData.endDate
+      ? formData.endDate.format("YYYY-MM-DD")
+      : null,
+    branddetail: formData.aboutBrand,
+    hashtags: formData.hashtags.map((tag) => ({ hashtag: tag })),
+  };
+
+  try {
+    setLoading(true);
+
+    const fd = new FormData();
+    fd.append("p_campaignjson", JSON.stringify(payload));
+
+    const res = await axios.post("/vendor/create-campaign", fd, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("Step 3 Saved:", res.data);
+    onNext(payload);
+  } catch (err) {
+    console.error("API Error:", err.response?.data || err.message);
+    alert("Failed to save campaign step. Try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="bg-white p-6 rounded-2xl">
@@ -145,26 +154,24 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, userId }) => {
       {/* Duration */}
       <label className="font-semibold block mb-2">Duration</label>
       <div className="flex gap-4 mb-2">
-        {/* Start Date */}
         <DatePicker
           size="large"
           style={{ width: "100%" }}
           format="DD/MM/YYYY"
           placeholder="Start Date"
-          value={formData.startDate ? dayjs(formData.startDate) : null}
+          value={formData.startDate}
           disabledDate={(current) =>
             current && current < dayjs().startOf("day")
           }
           onChange={(date) => handleChange("startDate", date)}
         />
 
-        {/* End Date */}
         <DatePicker
           size="large"
           style={{ width: "100%" }}
           format="DD/MM/YYYY"
           placeholder="End Date"
-          value={formData.endDate ? dayjs(formData.endDate) : null}
+          value={formData.endDate}
           disabledDate={(current) =>
             current &&
             (current < dayjs().startOf("day") ||
