@@ -35,7 +35,7 @@ export const LoginForm = () => {
   }, [setValue]);
 
   const submitHandler = async (data) => {
-    const loadingToast = toast.loading("Logging in...");
+    const loadingToast = toast.loading("Logging in..." , { position: "top-right", });
     try {
 
       const res = await axios.post("/user/login", data);
@@ -44,7 +44,7 @@ export const LoginForm = () => {
           localStorage.setItem('rememberedEmail', data.email);
           localStorage.setItem("rememberedPassword", data.password);
         }
-        toast.success(res.data.message || "Login successful!");
+        toast.success(res.data.message || "Login successful!", { position: "top-right", });
 
         const {id, role, token, firstName, lastName} = res.data
         console.log(id)
@@ -63,7 +63,7 @@ export const LoginForm = () => {
 
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed!");
+      toast.error(error.response?.data?.message || "Login failed!", { position: "top-right", });
     } finally {
       toast.dismiss(loadingToast);
     }

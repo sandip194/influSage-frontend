@@ -38,34 +38,36 @@ const CampaignStep4 = ({ onBack, onNext }) => {
   };
 
   const handleContinue = async () => {
-    if (fileList.length === 0) {
-      message.error("Please upload at least one reference file.");
-      return;
-    }
+  if (fileList.length === 0) {
+    message.error("Please upload at least one reference file.");
+    return;
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const formData = new FormData();
-      fileList.forEach(({ file }) => {
-        formData.append("campaignFiles", file);
-      });
+    const formData = new FormData();
 
-      const res = await axios.post("/vendor/create-campaign", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    fileList.forEach(({ file }) => {
+      formData.append("Files", file); 
+    });
 
-      console.log("Saved Step 4:", res.data);
-      onNext();
-    } catch (err) {
-      console.error("API Error:", err.response?.data || err.message);
-      alert("Failed to save campaign step. Try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const res = await axios.post("/vendor/create-campaign", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    console.log("Saved Step 4:", res.data);
+    onNext();
+  } catch (err) {
+    console.error("API Error:", err.response?.data || err.message);
+    alert("Failed to save campaign step. Try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="bg-white p-6 rounded-3xl">

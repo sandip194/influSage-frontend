@@ -29,7 +29,7 @@ export const LoginForm = () => {
   }, [setValue]);
 
   const submitHandler = async (data) => {
-    const loadingToast = toast.loading("Logging in...");
+    const loadingToast = toast.loading("Logging in...", { position: "top-right", });
     try {
 
       const res = await axios.post("/user/login", data);
@@ -38,7 +38,7 @@ export const LoginForm = () => {
           localStorage.setItem('rememberedEmail', data.email);
           localStorage.setItem("rememberedPassword", data.password);
         }
-        toast.success(res.data.message || "Login successful!");
+        toast.success(res.data.message || "Login successful!" , { position: "top-right", });
         // redirect to dashboard, etc.
       }
     } catch (error) {

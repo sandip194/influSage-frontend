@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Input, message } from "antd";
-import axios from "axios";
 import { useSelector } from "react-redux";
 
 const { TextArea } = Input;
@@ -27,7 +26,7 @@ const platforms = {
 };
 
 const CampaignStep5 = ({ onNext, onBack }) => {
-  const { userId, token } = useSelector((state) => state.auth);
+  const { userId } = useSelector((state) => state.auth);
 
   // Initialize form state for all platforms
   const [formState, setFormState] = useState(() => {
@@ -39,7 +38,6 @@ const CampaignStep5 = ({ onNext, onBack }) => {
   });
 
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
 
   // Toggle selection of content type (Post, Story, etc.)
   const toggleContentType = (platform, typeId) => {
@@ -66,8 +64,8 @@ const CampaignStep5 = ({ onNext, onBack }) => {
     }));
   };
 
-  // Save content types + captions
-  const handleContinue = async () => {
+  // Continue button (validate + pass data to parent, no API call here)
+  const handleContinue = () => {
     const newErrors = {};
     let hasError = false;
 
@@ -88,11 +86,12 @@ const CampaignStep5 = ({ onNext, onBack }) => {
       return;
     }
 
-    // Build API JSON format
+    // Build JSON format to send to parent
     const contenttypejson = [];
     Object.entries(formState).forEach(([platform, data]) => {
       data.selectedTypes.forEach((typeId) => {
         contenttypejson.push({
+          userid: userId,
           platformname: platform,
           contenttypeid: typeId,
           caption: data.caption,
@@ -100,29 +99,8 @@ const CampaignStep5 = ({ onNext, onBack }) => {
       });
     });
 
-    try {
-      setLoading(true);
-
-      const fd = new FormData();
-      fd.append("p_userid", userId);
-      fd.append("p_contenttypejson", JSON.stringify(contenttypejson));
-
-      const res = await axios.post("/vendor/create-campaign", fd, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      message.success("Campaign content saved successfully!");
-      console.log("Step 5 Saved:", res.data);
-
-      onNext?.(contenttypejson);
-    } catch (err) {
-      console.error("Save Error:", err.response?.data || err.message);
-      message.error("Failed to save campaign content.");
-    } finally {
-      setLoading(false);
-    }
+    // ✅ Pass only to parent (final step will submit to API)
+    onNext?.(contenttypejson);
   };
 
   // Render each platform block
@@ -194,10 +172,9 @@ const CampaignStep5 = ({ onNext, onBack }) => {
         </button>
         <button
           onClick={handleContinue}
-          disabled={loading}
-          className="bg-[#121A3F] text-white cursor-pointer px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
+          className="bg-[#121A3F] text-white cursor-pointer px-8 py-3 rounded-full hover:bg-[#0D132D]"
         >
-          {loading ? "Saving..." : "Continue"}
+          Continue
         </button>
       </div>
     </div>

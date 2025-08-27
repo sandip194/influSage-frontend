@@ -11,10 +11,10 @@ export const ForgotPassword = () => {
     try {
       const response = await axios.post('/user/forgot-password', { email: data.email });
       if (response.status === 200) {
-        toast.success(response.data.message || "Reset link sent to your email!");
+        toast.success(response.data.message || "Reset link sent to your email!" , { position: "top-right", });
       }
     } catch (error) {
-      toast.error(error.response.data.message || "Something went wrong!");
+      toast.error(error.response.data.message || "Something went wrong!" , { position: "top-right", });
     }
   };
 

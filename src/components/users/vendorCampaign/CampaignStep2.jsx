@@ -49,19 +49,22 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    gender: null,
-    shipProducts: null,
-    targetedInfluencers: [],
-    language: [],
+    gender: data?.gender ?? null,
+    shipProducts:
+      typeof data?.shipProducts === "boolean" ? data.shipProducts : null,
+    targetedInfluencers: data?.targetedInfluencers ?? [],
+    language: data?.language ?? [],
   });
 
   useEffect(() => {
+    if (!data) return; 
+
     setFormData({
-      gender: data.gender || null,
+      gender: data?.gender ?? null,
       shipProducts:
-        typeof data.shipProducts === "boolean" ? data.shipProducts : null,
-      targetedInfluencers: data.targetedInfluencers || [],
-      language: data.language || [],
+        typeof data?.shipProducts === "boolean" ? data.shipProducts : null,
+      targetedInfluencers: data?.targetedInfluencers ?? [],
+      language: data?.language ?? [],
     });
   }, [data]);
 
@@ -100,64 +103,63 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
   };
 
   const handleContinue = async () => {
-  const newErrors = {
-    gender: !formData.gender,
-    shipProducts: formData.shipProducts === null,
-    targetedInfluencers: formData.targetedInfluencers.length === 0,
-    language: formData.language.length === 0,
-  };
-
-  setErrors(newErrors);
-
-  const hasError = Object.values(newErrors).some((e) => e);
-  if (hasError) return;
-
-  // 🔥 Build proper JSON for backend
-  const campaigninfluencertiers = formData.targetedInfluencers.map((id) => {
-    const tier = influencerTiers.find((t) => t.id === id);
-    return {
-      influencertierid: tier.id,
-      influencertiername: tier.name,
+    const newErrors = {
+      gender: !formData.gender,
+      shipProducts: formData.shipProducts === null,
+      targetedInfluencers: formData.targetedInfluencers.length === 0,
+      language: formData.language.length === 0,
     };
-  });
 
-  const campaignlanguages = formData.language.map((id) => {
-    const lang = languages.find((l) => l.id === id);
-    return {
-      languageid: lang.id,
-      languagename: lang.name,
-    };
-  });
+    setErrors(newErrors);
 
-  const p_vendorinfojson = {
-    genderid: formData.gender,
-    isproductshipping: formData.shipProducts,
-    campaigninfluencertiers,
-    campaignlanguages,
-  };
+    const hasError = Object.values(newErrors).some((e) => e);
+    if (hasError) return;
 
-  try {
-    setLoading(true);
-
-    const fd = new FormData();
-    fd.append("p_userid", userId);
-    fd.append("p_vendorinfojson", JSON.stringify(p_vendorinfojson));
-
-    const res = await axios.post("/vendor/create-campaign", fd, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const campaigninfluencertiers = formData.targetedInfluencers.map((id) => {
+      const tier = influencerTiers.find((t) => t.id === id);
+      return {
+        influencertierid: tier.id,
+        influencertiername: tier.name,
+      };
     });
 
-    console.log("Saved Step 2:", res.data);
-    onNext({ ...data, ...p_vendorinfojson });
-  } catch (err) {
-    console.error("API Error:", err.response?.data || err.message);
-    alert("Failed to save campaign step. Try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+    const campaignlanguages = formData.language.map((id) => {
+      const lang = languages.find((l) => l.id === id);
+      return {
+        languageid: lang.id,
+        languagename: lang.name,
+      };
+    });
+
+    const p_vendorinfojson = {
+      genderid: formData.gender,
+      isproductshipping: formData.shipProducts,
+      campaigninfluencertiers,
+      campaignlanguages,
+    };
+
+    try {
+      setLoading(true);
+
+      const fd = new FormData();
+      fd.append("p_userid", userId);
+      fd.append("p_vendorinfojson", JSON.stringify(p_vendorinfojson));
+
+      const res = await axios.post("/vendor/create-campaign", fd, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Saved Step 2:", res.data);
+      onNext({ ...data, ...p_vendorinfojson });
+    } catch (err) {
+      console.error("API Error:", err.response?.data || err.message);
+      alert("Failed to save campaign step. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-white p-6 rounded-2xl">

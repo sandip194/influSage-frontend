@@ -9,15 +9,8 @@ import FeedbackCard from '../users/InfluencerDashboardHome/FeedbackCard';
 
 export const Home = () => {
   return (
-    <div className='bg-gray-100 p-4'>
-      <ProfileComplation />
-      <CampaignStats />
-      <EarningsSummarySection />
-      <div class="flex flex-col md:flex-row gap-4 my-3">
-        <PerformanceCard />
-        <TodoListCard />
-      </div>
-      <FeedbackCard />
+    <div className='bg-gray-100 p-4 h-screen'>
+     Home Page
     </div>
   )
 }

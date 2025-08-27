@@ -26,11 +26,11 @@ export const ResetPassword = () => {
             console.log("Token from URL:", token);
             const response = await axios.post('/user/reset-password', { password: data.password, token });
             if (response.status === 200) {
-                toast.success(response.data.message || "Password reset successful!");
+                toast.success(response.data.message || "Password reset successful!" , { position: "top-right", });
 navigate('/login');
             }
         } catch (error) {
-            toast.error(error.response.data.message || "Something went wrong!");
+            toast.error(error.response.data.message || "Something went wrong!" , { position: "top-right", });
         }
     }
 

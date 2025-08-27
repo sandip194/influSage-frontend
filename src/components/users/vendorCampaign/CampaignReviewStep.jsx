@@ -1,188 +1,241 @@
-import { RiCheckboxCircleFill, RiDeleteBin6Line, RiFacebookBoxFill, RiInstagramFill, RiMenLine, RiMoneyRupeeCircleLine, RiStackLine, RiTranslate, RiYoutubeFill } from '@remixicon/react';
-import React from 'react'
+import React from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import {
+  RiCheckboxCircleFill,
+  RiDeleteBin6Line,
+  RiFacebookBoxFill,
+  RiInstagramFill,
+  RiMenLine,
+  RiMoneyRupeeCircleLine,
+  RiStackLine,
+  RiTranslate,
+  RiYoutubeFill,
+} from "@remixicon/react";
 
+const CampaignReviewStep = ({ campaignData, onEdit }) => {
+  const { token } = useSelector((state) => state.auth) || {};
 
-const Requirements = [
-    { label: 'Shopify User: ', value: 'Yes' },
-    { label: 'Expectation: ', value: 'Post my existing content Lorem Ipsum is simply dummy text of the printing and typesetting industry...' },
-    { label: 'Due Date: ', value: '11 Jul 2025' },
-    { label: 'Ship Products: ', value: 'Yes' },
-    { label: 'Target Country: ', value: 'India' },
-    { label: 'Duration: ', value: '2 Months' },
-    { label: 'Offers: ', value: 'Allow Influencer to make offers' },
-]
+  // API Call
+  const handleCreateCampaign = async () => {
+    try {
+      const authToken = token || localStorage.getItem("token");
 
-const CampaignReviewStep = () => {
-    return (
-        <div className="w-full text-sm overflow-x-hidden">
-            <h1 className='text-2xl font-semibold mb-4'>Review Campaign</h1>
-            <div className="flex flex-col lg:flex-row gap-4">
-                {/* Left Side */}
-                <div className="flex-1 space-y-4">
-                    {/* Banner */}
-                    <div className="bg-white rounded-2xl overflow-hidden">
-                        <div className="relative h-40">
-                            <img
-                                src="https://images.pexels.com/photos/33350497/pexels-photo-33350497.jpeg?_gl=1*1dx09le*_ga*MTYyNzc2NDMzNi4xNzM2MTY4MzY0*_ga_8JE65Q40S6*czE3NTU1ODI1NDQkbzIkZzEkdDE3NTU1ODMzNzgkajUyJGwwJGgw"
-                                alt="Banner"
-                                className="w-full h-28 object-cover"
-                            />
-                            <img
-                                src="https://images.pexels.com/photos/25835001/pexels-photo-25835001.jpeg?_gl=1*vflnmv*_ga*MTYyNzc2NDMzNi4xNzM2MTY4MzY0*_ga_8JE65Q40S6*czE3NTU1ODI1NDQkbzIkZzEkdDE3NTU1ODI2ODEkajUwJGwwJGgw"
-                                alt="Logo"
-                                className="absolute rounded-full top-18 left-4 w-22 h-22 "
-                            />
-                        </div>
-                        <div className="p-4">
-                            <h2 className="font-semibold text-lg mb-1">Instagram Campaign</h2>
-                            <p className="text-gray-500">Tiktokstar</p>
+      if (!authToken) {
+        toast.error("No token found. Please log in again.", { position: "top-right" });
+        return;
+      }
 
+      const res = await axios.post("/vendor/create-campaign", campaignData, {
+        headers: { Authorization: `Bearer ${authToken}`, "Content-Type": "application/json" },
+      });
 
-                            <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4">
-                                <div className="flex-row items-center gap-2 ">
-                                    <div className='flex gap-2 items-center justify-center mb-2 text-gray-400'>
-                                        <RiStackLine className="w-5" />
-                                        <span> Platforms</span>
-                                    </div>
-                                    <p>Instagram Reels</p>
-                                    <p>Youtube Video</p>
-                                </div>
-                                <div className="flex-row items-center justify-center gap-2 ">
-                                    <div className='flex gap-2 items-center justify-center mb-2 text-gray-400'>
-                                        <RiMoneyRupeeCircleLine className="w-5" />
-                                        <span> Budget </span>
-                                    </div>
-                                    <p>$120/Reel</p>
-                                </div>
-                                <div className="flex-row items-center justify-center gap-2 ">
-                                    <div className='flex gap-2 items-center justify-center mb-2 text-gray-400'>
-                                        <RiTranslate className="w-5" />
-                                        <span> Language </span>
-                                    </div>
-                                    <p>English</p>
-                                    <p>Hindi</p>
-                                    <p>Gujarati</p>
-                                    <p>Maliyalam</p>
-                                    <p>Telugu</p>
-                                </div>
-                                <div className="flex-row items-center justify-center gap-2">
-                                    <div className='flex gap-2 items-center justify-center mb-2 text-gray-400'>
-                                        <RiMenLine className="w-5" />
-                                        <span> Gender </span>
-                                    </div>
-                                    <p>Male</p>
-                                    <p>Female</p>
-                                    <p>Othere</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-2xl">
-                        {/* Description */}
-                        <div className="campaign-description py-4 border-b-1 border-gray-200">
-                            <h3 className="font-semibold text-lg mb-2">Campaign Description</h3>
-                            <p className="text-gray-700 leading-relaxed">
-                                Lorem Ipsum is simply dummy text of the printing and typesetting industry...
-                            </p>
-                        </div>
+      toast.success(res.data.message || "Campaign created successfully!", { position: "top-right" });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to create campaign", { position: "top-right" });
+    }
+  };
 
-                        {/* Requirements */}
-                        <div className="requirements py-4 border-b-1 border-gray-200">
-                            <h3 className="font-semibold text-lg mb-4">Requirements</h3>
-                            <ul className="space-y-2 text-gray-700">
-                                {Requirements.map((item, index) => (
-                                    <li key={index} className="flex items-start gap-2">
-                                        <RiCheckboxCircleFill />
-                                        <span>
-                                            {item.label} <strong>{item.value}</strong>
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                            <div className="flex flex-wrap gap-2 mt-4">
-                                {["Fixed Price", "Expert", "Beauty", "Micro Influencer"].map((tag, i) => (
-                                    <span key={i} className="px-3 py-1 bg-gray-100 rounded-full text-xs">{tag}</span>
-                                ))}
-                            </div>
-                        </div>
+  const profileParts = campaignData?.profileParts || {};
 
-                        {/* References */}
-                        <div className="references py-4 border-b-1 border-gray-200">
-                            <h3 className="font-semibold mb-4 text-lg">References</h3>
-                            <div className="flex gap-4">
-                                {[1, 2, 3].map((item) => (
-                                    <div key={item} className="relative w-48 h-40 rounded-2xl overflow-hidden">
-                                        <img
-                                            src={`https://images.pexels.com/photos/32429493/pexels-photo-32429493.jpeg?_gl=1*bt0pi*_ga*MTYyNzc2NDMzNi4xNzM2MTY4MzY0*_ga_8JE65Q40S6*czE3NTU1OTExMTYkbzMkZzEkdDE3NTU1OTExMjIkajU0JGwwJGgw`}
-                                            alt="Reference"
-                                            className="w-full h-full object-cover"
-                                        />
-                                        <button className="absolute cursor-pointer top-2 right-2 bg-gray-100 bg-opacity-10 text-black p-2 rounded-full">
-                                            <RiDeleteBin6Line className='w-4 h-4' />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+const p_objectivejson = profileParts.p_objectivejson || {};
+const p_vendorinfojson = profileParts.p_vendorinfojson || {};
+const p_campaignjson = profileParts.p_campaignjson || {};
+const p_campaignfilejason = profileParts.p_campaignfilejason || [];
+const p_contenttypejson = profileParts.p_contenttypejson || [];
+
+const platforms = p_contenttypejson.map((p) => p.providername) || [];
+const languages = p_vendorinfojson.campaignlanguages?.map((l) => l.languagename) || [];
+const genders = p_vendorinfojson.genderid === 1 ? ["Male"] : ["Female"];
+const references = p_campaignfilejason.map((f) => f.filepath) || [];
+const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
+
+  return (
+    <div className="w-full text-sm overflow-x-hidden">
+      <h1 className="text-2xl font-semibold mb-4">Review Campaign</h1>
+      <div className="flex flex-col lg:flex-row gap-4">
+        {/* Left Side */}
+        <div className="flex-1 space-y-4">
+          {/* Banner */}
+          <div className="bg-white rounded-2xl overflow-hidden">
+            <div className="relative h-40">
+              <img
+                src={references[0] || ""}
+                alt="Banner"
+                className="w-full h-28 object-cover"
+              />
+              {references[0] && (
+                <img
+                  src={references[0]}
+                  alt="Logo"
+                  className="absolute rounded-full top-16 left-4 w-20 h-20 border-2 border-white shadow-md"
+                />
+              )}
+            </div>
+            <div className="p-4">
+              <h2 className="font-semibold text-lg mb-1">{p_campaignjson.name}</h2>
+              <p className="text-gray-500">{p_campaignjson.branddetail}</p>
+
+              <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4">
+                {/* Platforms */}
+                <div>
+                  <div className="flex gap-2 items-center mb-2 text-gray-400">
+                    <RiStackLine className="w-5" />
+                    <span> Platforms</span>
+                  </div>
+                  {platforms.map((p, i) => (
+                    <p key={i}>{p}</p>
+                  ))}
                 </div>
 
-                {/* Right Side */}
-                <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
-                    {/* Campaign Details */}
-                    <div className="bg-white p-4 rounded-2xl">
-                        <h3 className="font-semibold text-lg">Campaign Details</h3>
-                        <div className="felx py-4 border-b-1 border-gray-200">
-                            <p className='text-sm text-gray-500 mb-1'>Campaign Number</p>
-                            <p>#251HJ8888410Kl</p>
-                        </div>
-                        <div className="felx py-4 border-b-1 border-gray-200">
-                            <p className='text-sm text-gray-500 mb-1'>About Brand</p>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero eveniet magnam, fugit laboriosam aut vel possimus est quidem dolorem, dolores, natus cum in!</p>
-                        </div>
-                        <div className="felx py-4 border-b-1 border-gray-200">
-                            <p className='text-sm text-gray-500 mb-1'>Delivery Date</p>
-                            <p>22 June, 2025</p>
-                        </div>
-                        <div className="felx py-4 border-b-1 border-gray-200">
-                            <p className='text-sm text-gray-500 mb-1'>Total Price</p>
-                            <p>250R</p>
-                        </div>
-                    </div>
-
-                    {/* Platform Info */}
-                    <div className="bg-white p-4 rounded-2xl">
-                        <h3 className="font-semibold text-lg mb-4">Platform</h3>
-                        <ul className="space-y-3">
-                            <li className="flex items-center gap-2">
-                                <RiInstagramFill />
-                                Instagram - Reel
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <RiYoutubeFill />
-                                YouTube - Short Video
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <RiFacebookBoxFill />
-                                Facebook - Post
-                            </li>
-                        </ul>
-                    </div>
-
-
+                {/* Budget */}
+                <div>
+                  <div className="flex gap-2 items-center mb-2 text-gray-400">
+                    <RiMoneyRupeeCircleLine className="w-5" />
+                    <span> Budget </span>
+                  </div>
+                  <p>₹{p_campaignjson.estimatedbudget}</p>
                 </div>
+
+                {/* Languages */}
+                <div>
+                  <div className="flex gap-2 items-center mb-2 text-gray-400">
+                    <RiTranslate className="w-5" />
+                    <span> Language </span>
+                  </div>
+                  {languages.map((l, i) => (
+                    <p key={i}>{l}</p>
+                  ))}
+                </div>
+
+                {/* Gender */}
+                <div>
+                  <div className="flex gap-2 items-center mb-2 text-gray-400">
+                    <RiMenLine className="w-5" />
+                    <span> Gender </span>
+                  </div>
+                  {genders.map((g, i) => (
+                    <p key={i}>{g}</p>
+                  ))}
+                </div>
+              </div>
             </div>
-            {/* Buttons */}
-            <div className="flex max-w-sm gap-3 mt-3">
-                <button className="flex-1 bg-white border border-gray-300 text-gray-800 rounded-md py-2 hover:bg-gray-100">
-                    Edit Campaign
-                </button>
-                <button className="flex-1 bg-gray-900 text-white rounded-md py-2 hover:bg-gray-800">
-                    Create Campaign
-                </button>
+          </div>
+
+          {/* Description + Requirements */}
+          <div className="bg-white p-4 rounded-2xl">
+            <div className="campaign-description py-4 border-b border-gray-200">
+              <h3 className="font-semibold text-lg mb-2">Campaign Description</h3>
+              <p className="text-gray-700 leading-relaxed">{p_campaignjson.description}</p>
             </div>
+
+            {/* Requirements */}
+            <div className="requirements py-4 border-b border-gray-200">
+              <h3 className="font-semibold text-lg mb-4">Requirements</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start gap-2">
+                  <RiCheckboxCircleFill />
+                  <span>
+                    Post Duration: <strong>{p_objectivejson.postdurationdays} days</strong>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <RiCheckboxCircleFill />
+                  <span>
+                    Include Vendor Profile Link:{" "}
+                    <strong>{p_objectivejson.isincludevendorprofilelink ? "Yes" : "No"}</strong>
+                  </span>
+                </li>
+              </ul>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                {tags.map((tag, i) => (
+                  <span key={i} className="px-3 py-1 bg-gray-100 rounded-full text-xs">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* References */}
+            <div className="references py-4 border-b border-gray-200">
+              <h3 className="font-semibold mb-4 text-lg">References</h3>
+              <div className="flex gap-4 flex-wrap">
+                {references.map((ref, i) => (
+                  <div key={i} className="relative w-48 h-40 rounded-2xl overflow-hidden">
+                    <img src={ref} alt="Reference" className="w-full h-full object-cover" />
+                    <button className="absolute top-2 right-2 bg-gray-100 bg-opacity-70 text-black p-2 rounded-full">
+                      <RiDeleteBin6Line className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-    );
-}
 
-export default CampaignReviewStep
+        {/* Right Side */}
+        <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
+          <div className="bg-white p-4 rounded-2xl">
+            <h3 className="font-semibold text-lg">Campaign Details</h3>
+            <div className="py-4 border-b border-gray-200">
+              <p className="text-sm text-gray-500 mb-1">Campaign Number</p>
+              <p>{p_campaignjson.campaignnumber}</p>
+            </div>
+            <div className="py-4 border-b border-gray-200">
+              <p className="text-sm text-gray-500 mb-1">About Brand</p>
+              <p>{p_campaignjson.branddetail}</p>
+            </div>
+            <div className="py-4 border-b border-gray-200">
+              <p className="text-sm text-gray-500 mb-1">Start Date</p>
+              <p>{p_campaignjson.startdate}</p>
+            </div>
+            <div className="py-4 border-b border-gray-200">
+              <p className="text-sm text-gray-500 mb-1">End Date</p>
+              <p>{p_campaignjson.enddate}</p>
+            </div>
+            <div className="py-4 border-b border-gray-200">
+              <p className="text-sm text-gray-500 mb-1">Total Budget</p>
+              <p>₹{p_campaignjson.estimatedbudget}</p>
+            </div>
+          </div>
+
+          {/* Platform Info */}
+          <div className="bg-white p-4 rounded-2xl">
+            <h3 className="font-semibold text-lg mb-4">Platform</h3>
+            <ul className="space-y-3">
+              {p_contenttypejson.map((p, i) => (
+                <li key={i} className="flex items-center gap-2">
+                  {p.providername === "Instagram" && <RiInstagramFill />}
+                  {p.providername === "Facebook" && <RiFacebookBoxFill />}
+                  {p.providername === "YouTube" && <RiYoutubeFill />}
+                  {p.providername} - {p.contenttypes.map((c) => c.contenttypename).join(", ")}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex max-w-sm gap-3 mt-3">
+        <button
+          className="flex-1 bg-white border border-gray-300 text-gray-800 rounded-md py-2 hover:bg-gray-100"
+          onClick={onEdit}
+        >
+          Edit Campaign
+        </button>
+        <button
+          className="flex-1 bg-gray-900 text-white rounded-md py-2 hover:bg-gray-800"
+          onClick={handleCreateCampaign}
+        >
+          Create Campaign
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default CampaignReviewStep;

@@ -55,18 +55,18 @@ export const VerifyEmailOrMobile = () => {
             const response = await axios.post('/user/verify-otp', { email, otp: otpValue });
             if (response.status === 200) {
                 setShowTimer(false)
-                toast.success(response.data.message || "OTP verified successfully!");
+                toast.success(response.data.message || "OTP verified successfully!" , { position: "top-right", });
                 localStorage.removeItem('isCreatedNew');
                 localStorage.removeItem('selectedRole');
                 localStorage.removeItem('signupEmail');
             }
             if (response.status === 400) {
-                toast.error(response.data.message || "Invalid OTP");
+                toast.error(response.data.message || "Invalid OTP" , { position: "top-right", });
                 setError(response.data.message );
             }
         } catch (error) {
             console.error("OTP verification failed:", error);
-            toast.error(error.response?.data?.message || "OTP verification failed. Please try again.");
+            toast.error(error.response?.data?.message || "OTP verification failed. Please try again." , { position: "top-right", });
             setError('OTP verification failed. Please try again.');
         }
     };
@@ -80,11 +80,11 @@ export const VerifyEmailOrMobile = () => {
                 setOtp(['', '', '', '']);
                 setTimer(60);
                 setShowTimer(true);
-                toast.success(response.data.message || "OTP resent successfully!");
+                toast.success(response.data.message || "OTP resent successfully!" , { position: "top-right", });
             }
         } catch (error) {
             console.error("Resending OTP failed:", error);
-            toast.error(error.response?.data?.message || "Failed to resend OTP. Please try again.");
+            toast.error(error.response?.data?.message || "Failed to resend OTP. Please try again." , { position: "top-right" });
             setError('Failed to resend OTP. Please try again.');
         }
     }
@@ -132,11 +132,22 @@ export const VerifyEmailOrMobile = () => {
                             ))}
                         </div>
                         <div className="resend-box flex justify-between items-center ">
-                            <span className='text-sm text-[#6b7280]'>Didnt Get OTP? </span>
-                            <span className='text-sm text-[#2563eb] cursor-pointer' onClick={handleResendOtp}>Resend OTP</span>
+                            <span className='text-sm text-[#6b7280]'>Didn’t Get OTP?</span>
+                            {timer === 0 ? (
+                                <span
+                                className='text-sm text-[#2563eb] cursor-pointer'
+                                onClick={handleResendOtp}
+                                >
+                                Resend OTP
+                                </span>
+                            ) : (
+                                <span className="text-sm text-[#6b7280]">
+                                OTP Expires In : <b>{timer}s</b>
+                                </span>
+                            )}
                         </div>
                         {error && <span className="text-for-error">{error}</span>}
-                        {showTimer && <span>OTP Expires In : <b>{timer}s</b></span>}
+                        {/* {showTimer && <span>OTP Expires In : <b>{timer}s</b></span>} */}
                         <button type='submit' className="login-btn" disabled={timer === 0}>Verify OTP</button>
                     </form>
                     <p className="signup-link" style={{ marginTop: '20px' }}>

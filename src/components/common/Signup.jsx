@@ -15,7 +15,7 @@ export const Signup = () => {
   const navigate = useNavigate();
 
   const submitHandler = async (data) => {
-    const loadingToast = toast.loading('Creating your account...');
+    const loadingToast = toast.loading('Creating your account...' , { position: "top-right", });
     try {
       const role = localStorage.getItem('selectedRole');
       const userEmail = data.email;
@@ -23,7 +23,7 @@ export const Signup = () => {
       // If role is not selected, redirect to role selection
       if (!role) {
         toast.dismiss(loadingToast);
-        toast.error('Please select a role first!');
+        toast.error('Please select a role first!' , { position: "top-right", });
         return navigate('/role');
       }
 
@@ -35,17 +35,17 @@ export const Signup = () => {
 
       if (response.status === 400) {
         console.log("response", response.data.message);
-        toast.error(response.data.message || "Email already exists", { id: loadingToast });
+        toast.error(response.data.message || "Email already exists", { id: loadingToast } , { position: "top-right", });
       }
 
       if (response.status === 200) {
         localStorage.setItem('isCreatedNew', response.data.message);
-        toast.success('Signup successful! Please verify your email or mobile.', { id: loadingToast });
+        toast.success('Signup successful! Please verify your email or mobile.', { id: loadingToast } , { position: "top-right", });
         navigate('/verify-email-or-mobile');
       }
 
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Signup failed. Please try again.", { id: loadingToast });
+      toast.error(error?.response?.data?.message || "Signup failed. Please try again.", { id: loadingToast } , { position: "top-right" });
       console.error("Signup failed:", error);
     }
   };

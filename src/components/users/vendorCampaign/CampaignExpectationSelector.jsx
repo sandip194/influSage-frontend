@@ -5,15 +5,15 @@ import { useSelector } from "react-redux";
 
 const options = [
   {
-    id: "1",
+    id: 1,
     text: "Post my existing content (video & Images) on their social media without creating any content on their own",
   },
   {
-    id: "2",
+    id: 2,
     text: "Create content (Video or Images) on their own as well as publishing them on their social media",
   },
   {
-    id: "3",
+    id: 3,
     text: "Only create content (Video or Images) for me.",
   },
 ];
@@ -60,7 +60,7 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
   }
 
   const p_objectivejson = {
-    objectiveid: Number(selected),
+    objectiveid: selected,
     postdurationdays: Number(durationDays),
     isincludevendorprofilelink: addLinkToBio,
   };
