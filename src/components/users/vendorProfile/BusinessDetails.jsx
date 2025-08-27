@@ -22,6 +22,8 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
     const [cities, setCities] = useState([]);
     const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
     const [companySizes, setCompanySizes] = useState([]);
+    const [existingPhotoPath, setExistingPhotoPath] = useState(null);
+
 
     const { token } = useSelector(state => state.auth);
 
@@ -93,7 +95,7 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
             form.setFieldsValue({
                 businessname: data.businessname,
                 companysizeid: data.companysizeid,
-                phone : data.phonenumber,
+                phone: data.phonenumber,
                 address1: data.address1,
                 countryname: data.countryname,
                 statename: data.statename,
@@ -117,6 +119,7 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
                     : `http://localhost:3001/${data.photopath.replace(/^\/+/, '')}`;
 
                 setPreview(fullUrl);
+                setExistingPhotoPath(data.photopath)
             }
 
         }
@@ -147,10 +150,10 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
             }
 
             const profilejson = {
-                photopath: preview || null,
+                photopath: profileImage ? null : existingPhotoPath,
                 businessname: values.businessname,
                 companysizeid: values.companysizeid,
-                phonenumber : values.phonenumber,
+                phonenumber: values.phonenumber,
                 address1: values.address1,
                 countryname: values.countryname,
                 statename: values.statename,

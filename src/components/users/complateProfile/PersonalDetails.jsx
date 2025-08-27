@@ -29,6 +29,7 @@ export const PersonalDetails = ({ onNext, data }) => {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
+  const [existingPhotoPath, setExistingPhotoPath] = useState(null);
 
   const { token, firstName, lastName } = useSelector(state => state.auth);
 
@@ -103,6 +104,7 @@ export const PersonalDetails = ({ onNext, data }) => {
           : `http://localhost:3001/${data.photopath.replace(/^\/+/, '')}`;
 
         setPreview(fullUrl);
+        setExistingPhotoPath(data.photopath)
       }
     }
   }, [data, form]);
@@ -148,7 +150,7 @@ export const PersonalDetails = ({ onNext, data }) => {
 
       // Format data as per API structure
       const profilePayload = {
-        photopath: preview || null,
+        photopath: profileImage ? null : existingPhotoPath,
         genderid: values.gender,
         dob: values.birthDate.format('DD-MM-YYYY'),
         phonenumber: values.phone,
