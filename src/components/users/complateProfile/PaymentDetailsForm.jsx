@@ -95,19 +95,19 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
   // Format final payload for backend
   const formatPaymentAccount = (values) => {
     return {
-      
-        bankcountry: values.country || null,
-        bankname: values.bank || null,
-        accountholdername: values.accountHolder || null,
-        accountnumber: values.accountNumber || null,
-        bankcode: values.ifscCode || null,
-        branchaddress: values.address || null,
-        contactnumber: values.phone || null,
-        email: values.email || null,
-        preferredcurrency: values.currency || null,
-        taxidentificationnumber: values.taxId || null,
-        paymentmethod: buildPaymentMethod(values),
-      
+
+      bankcountry: values.country || null,
+      bankname: values.bank || null,
+      accountholdername: values.accountHolder || null,
+      accountnumber: values.accountNumber || null,
+      bankcode: values.ifscCode || null,
+      branchaddress: values.address || null,
+      contactnumber: values.phone || null,
+      email: values.email || null,
+      preferredcurrency: values.currency || null,
+      taxidentificationnumber: values.taxId || null,
+      paymentmethod: buildPaymentMethod(values),
+
     };
   };
 
@@ -376,12 +376,19 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
                 label="Phone Number"
                 name="phone"
                 rules={[
-                  { message: 'Please enter your phone number' },
                   {
-                    validator: (_, value) =>
-                      value && value.length >= 10
-                        ? Promise.resolve()
-                        : Promise.reject(new Error('Enter valid phone number')),
+                    validator: (_, value) => {
+                      if (!value || value.trim() === '') {
+                        // If empty, allow it (optional field)
+                        return Promise.resolve();
+                      }
+
+                      if (value.length >= 10) {
+                        return Promise.resolve();
+                      }
+
+                      return Promise.reject(new Error('Enter valid phone number'));
+                    },
                   },
                 ]}
               >
@@ -397,6 +404,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
                   specialLabel=""
                 />
               </Form.Item>
+
             </Col>
             <Col xs={24} sm={12}>
               {/* Email Address */}
@@ -404,7 +412,6 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
                 label={<b>Email Address</b>}
                 name="email"
                 rules={[
-                  { message: "Enter your email" },
                   { type: "email", message: "Invalid email format" },
                 ]}
               >

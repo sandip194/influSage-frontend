@@ -50,23 +50,24 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
       return;
     }
 
-
     const formData = new FormData();
 
-    if (isValidUrl) {
-      let portfoliojson = {
-        portfoliourl: portfolioUrl,
-        filepaths: [
-          { filepath: null }
-        ]
-      }
-      formData.append("portfoliojson", JSON.stringify(portfoliojson))
-    }
+    // Build file paths from existing files
+    const existingFilePaths = existingFiles.map(file => ({
+      filepath: file.url.startsWith('http') ? file.url.replace('http://localhost:3001/', '') : file.url,
+    }));
+
+    // This is the critical part: we always include portfoliojson, whether or not files are added
+    const portfoliojson = {
+      portfoliourl: isValidUrl ? portfolioUrl : null,
+      filepaths: existingFilePaths.length > 0 ? existingFilePaths : [{ filepath: null }],
+    };
+
+    formData.append("portfoliojson", JSON.stringify(portfoliojson));
+
+    // Append new files
     fileList.forEach(file => {
-      formData.append("portfolioFiles", file); // attach as 'filepaths'
-    });
-    existingFiles.forEach((file, i) => {
-      formData.append(`existingFilepaths[${i}]`, file.url);
+      formData.append("portfolioFiles", file);
     });
 
     try {
@@ -83,11 +84,12 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
       } else {
         message.error("Something went wrong.");
       }
-    } catch (err) {
+    } catch (err) { 
       console.error("Submit error:", err);
       message.error("Failed to submit portfolio.");
     }
   };
+
 
 
 

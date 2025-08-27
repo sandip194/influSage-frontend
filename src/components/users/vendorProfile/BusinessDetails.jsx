@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Form, Input, Select, message } from 'antd';
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 import { RiImageAddLine } from 'react-icons/ri';
 import axios from "axios";
 import postalRegexList from '../complateProfile/postalRegex.json';
@@ -20,6 +22,8 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
     const [cities, setCities] = useState([]);
     const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
     const [companySizes, setCompanySizes] = useState([]);
+    const [existingPhotoPath, setExistingPhotoPath] = useState(null);
+
 
     const { token } = useSelector(state => state.auth);
 
@@ -91,6 +95,7 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
             form.setFieldsValue({
                 businessname: data.businessname,
                 companysizeid: data.companysizeid,
+                phone: data.phonenumber,
                 address1: data.address1,
                 countryname: data.countryname,
                 statename: data.statename,
@@ -114,6 +119,7 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
                     : `http://localhost:3001/${data.photopath.replace(/^\/+/, '')}`;
 
                 setPreview(fullUrl);
+                setExistingPhotoPath(data.photopath)
             }
 
         }
@@ -144,9 +150,10 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
             }
 
             const profilejson = {
-                photopath: null,
+                photopath: profileImage ? null : existingPhotoPath,
                 businessname: values.businessname,
                 companysizeid: values.companysizeid,
+                phonenumber: values.phonenumber,
                 address1: values.address1,
                 countryname: values.countryname,
                 statename: values.statename,
@@ -233,6 +240,36 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
                             </Option>
                         ))}
                     </Select>
+                </Form.Item>
+
+                {/* Phone Number */}
+                <Form.Item
+                    label={<b>Phone Number</b>}
+                    name="phone"
+                    rules={[
+                        {
+                            validator: (_, value) => {
+                                if (!value || value.trim() === "") {
+                                    return Promise.resolve();
+                                }
+                                return value.length >= 10
+                                    ? Promise.resolve()
+                                    : Promise.reject(new Error("Enter a valid phone number (at least 10 digits)"));
+                            },
+                        },
+                    ]}
+                >
+                    <PhoneInput
+                        country={"in"}
+                        enableSearch
+                        inputStyle={{
+                            width: "100%",
+                            height: "40px",
+                            borderRadius: "8px",
+                        }}
+                        containerStyle={{ width: "100%" }}
+                        specialLabel=""
+                    />
                 </Form.Item>
 
                 {/* Address */}

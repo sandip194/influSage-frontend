@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Form, Input, DatePicker, Select, Button, message } from 'antd';
+import { Form, Input, DatePicker, Select, message } from 'antd';
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 import { RiImageAddLine } from 'react-icons/ri';
 import dayjs from 'dayjs';
 import axios from "axios";
@@ -14,7 +16,7 @@ const { Option } = Select;
 
 
 
-export const PersonalDetails = ({ onNext, data, onChange }) => {
+export const PersonalDetails = ({ onNext, data }) => {
 
 
   const [form] = Form.useForm();
@@ -27,8 +29,9 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
+  const [existingPhotoPath, setExistingPhotoPath] = useState(null);
 
-  const { token, userId, firstName, lastName } = useSelector(state => state.auth);
+  const { token, firstName, lastName } = useSelector(state => state.auth);
 
 
   const countryAPI = "https://countriesnow.space/api/v0.1/countries/positions";
@@ -75,7 +78,8 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
 
       form.setFieldsValue({
         gender: safe(data.genderid),
-        birthDate: data.dob ? dayjs(data.dob) : undefined,
+        birthDate: data.dob ? dayjs(data.dob, 'DD-MM-YYYY') : undefined,
+        phone: safe(data.phonenumber),
         address: safe(data.address1),
         country: safe(data.countryname),
         state: safe(data.statename),
@@ -83,11 +87,6 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
         zipCode: safe(data.zip),
         bio: safe(data.bio),
       });
-
-      // Load profile image preview if provided
-      if (data.photopath && !profileImage) {
-        setPreview('http://localhost:3001/' + data.photopath); // 👈 photopath should be a full image URL
-      }
 
       if (data.countryname) {
         setSelectedCountry(data.countryname);
@@ -98,22 +97,27 @@ export const PersonalDetails = ({ onNext, data, onChange }) => {
         setSelectedState(data.statename);
         fetchCities(data.countryname, data.statename);
       }
+
+      if (data.photopath) {
+        const fullUrl = data.photopath.startsWith('http')
+          ? data.photopath
+          : `http://localhost:3001/${data.photopath.replace(/^\/+/, '')}`;
+
+        setPreview(fullUrl);
+        setExistingPhotoPath(data.photopath)
+      }
     }
   }, [data, form]);
 
 
-useEffect(() => {
-  if (!firstName || !lastName) return;
+  useEffect(() => {
+    if (!firstName || !lastName) return;
 
-  form.setFieldsValue({
-    firstName: data?.firstname || firstName,
-    lastName: data?.lastname || lastName,
-  });
-}, [form, data, firstName, lastName]);
-
-
-
-
+    form.setFieldsValue({
+      firstName: data?.firstname || firstName,
+      lastName: data?.lastname || lastName,
+    });
+  }, [form, data, firstName, lastName]);
 
 
   const handleImageChange = (e) => {
@@ -146,8 +150,10 @@ useEffect(() => {
 
       // Format data as per API structure
       const profilePayload = {
+        photopath: profileImage ? null : existingPhotoPath,
         genderid: values.gender,
         dob: values.birthDate.format('DD-MM-YYYY'),
+        phonenumber: values.phone,
         address1: values.address,
         countryname: values.country,
         statename: values.state,
@@ -258,6 +264,36 @@ useEffect(() => {
             />
           </Form.Item>
         </div>
+
+        {/* Phone Number */}
+        <Form.Item
+          label={<b>Phone Number</b>}
+          name="phone"
+          rules={[
+            {
+              validator: (_, value) => {
+                if (!value || value.trim() === "") {
+                  return Promise.resolve();
+                }
+                return value.length >= 10
+                  ? Promise.resolve()
+                  : Promise.reject(new Error("Enter a valid phone number (at least 10 digits)"));
+              },
+            },
+          ]}
+        >
+          <PhoneInput
+            country={"in"}
+            enableSearch
+            inputStyle={{
+              width: "100%",
+              height: "40px",
+              borderRadius: "8px",
+            }}
+            containerStyle={{ width: "100%" }}
+            specialLabel=""
+          />
+        </Form.Item>
 
         {/* Address */}
         <Form.Item
