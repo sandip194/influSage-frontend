@@ -10,6 +10,9 @@ import {
 } from "@remixicon/react";
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../../../features/auth/authSlice";
 
 
 const Sidebar = () => {
@@ -28,6 +31,13 @@ const Sidebar = () => {
         }
     };
 
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const handleLogout = () => {
+        dispatch(logout());
+        navigate("/login");
+    };
+
     useEffect(() => {
         handleResize(); // check initially
         window.addEventListener("resize", handleResize);
@@ -35,7 +45,7 @@ const Sidebar = () => {
     }, []);
 
     const generalItems = [
-        { icon: <RiGalleryView2 className="w-5" />, label: "Dashboard", to: "/vendor-dashboard", end:true },
+        { icon: <RiGalleryView2 className="w-5" />, label: "Dashboard", to: "/vendor-dashboard", end: true },
         { icon: <RiSearch2Line className="w-5" />, label: "Browse Influencer", to: "/vendor-dashboard/browse-influencers" },
         { icon: <RiStackLine className="w-5" />, label: "My Campaign", to: "/vendor-dashboard/my-campaigns" },
         { icon: <RiMessage3Line className="w-5" />, label: "Messages", to: "/vendor-dashboard/messages" },
@@ -127,6 +137,7 @@ const Sidebar = () => {
             {/* Logout */}
             <div className="logout-btn mb-2">
                 <button
+                    onClick={handleLogout}
                     title={!isOpen ? "Logout" : ""}
                     className={`flex items-center cursor-pointer ${isOpen ? "justify-between px-6" : "justify-center"
                         } gap-2 w-full  py-2 border border-gray-300 rounded-full hover:bg-gray-100 text-sm`}

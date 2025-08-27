@@ -60,7 +60,7 @@ const statusLabels = {
   cancelled: "Cancelled",
 };
 
-const CampaignsLayout = () => {
+const  CampaignsLayout = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(1);

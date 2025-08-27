@@ -78,7 +78,7 @@ const ObjectiveSelector = ({ onBack, onNext, data }) => {
       </p>
 
       {/* Objective Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {objectives.map((obj) => (
           <div
             key={obj.id}

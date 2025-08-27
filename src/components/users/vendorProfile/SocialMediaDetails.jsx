@@ -4,7 +4,7 @@ import axios from 'axios';
 import { message } from 'antd';
 import { useSelector } from 'react-redux';
 
-export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
+export const SocialMediaDetails = ({ onBack, onNext, data}) => {
   const [form] = Form.useForm();
 
   const { token } = useSelector(state => state.auth);
@@ -71,15 +71,6 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
     }
   }, [data, form]);
 
-
-
-
-  // 🔍 Custom validator to ensure at least one field is filled
-  const validateAtLeastOne = (_, value) => {
-    const filled = platforms.some((p) => form.getFieldValue(p.field));
-    return filled ? Promise.resolve() : Promise.reject('Please enter at least one social media link');
-  };
-
   return (
     <div className="bg-white p-6 rounded-3xl">
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Connect Your Social Media</h2>
@@ -91,9 +82,6 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
         onFinish={onFinish}
 
       >
-
-
-
         <div className="space-y-4">
           {platforms.map((platform) => (
 
@@ -121,39 +109,8 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
           ))}
         </div>
 
-        {/* 🔒 Hidden field to attach custom validator */}
-        <Form.Item
-          shouldUpdate
-          style={{ margin: 0 }}
-        >
-          {() => {
-            const hasError = form.getFieldError('atLeastOne').length > 0;
-
-            return (
-              <>
-                {/* Hidden validation field */}
-                <Form.Item
-                  name="atLeastOne"
-                  rules={[{ validator: validateAtLeastOne }]}
-                  style={{ display: 'none', margin: 0 }}
-                >
-                  <Input style={{ margin: 0 }} />
-                </Form.Item>
-
-                {/* Manual error message display */}
-                {hasError && (
-                  <div className="text-red-500 text-sm mt-0 mb-0 !important">
-                    {form.getFieldError('atLeastOne')[0]}
-                  </div>
-                )}
-              </>
-            );
-          }}
-        </Form.Item>
-
-
         {/* Buttons */}
-        <div className="flex flex-row items-center gap-4 ">
+        <div className="flex flex-row items-center gap-4 mt-6">
           <button
             type="button"
             onClick={onBack}
