@@ -19,8 +19,10 @@ export const ProfileStepper = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [lastCompletedStep, setLastCompletedStep] = useState(null);
 
-  const { token, userId} = useSelector(state => state.auth);
+
+  const { token, userId } = useSelector(state => state.auth);
 
   const [profileData, setProfileData] = useState({
     profile: {},
@@ -109,19 +111,30 @@ export const ProfileStepper = () => {
     if (!updated[index]) {
       updated[index] = true;
       setCompletedSteps(updated);
+      localStorage.setItem('completedSteps', JSON.stringify(updated));
+      setLastCompletedStep(index);  // <-- trigger useEffect to refetch
     }
+
     if (index + 1 < steps.length) {
       setCurrentStep(index + 1);
     } else {
-      // All steps completed – navigate to thank you screen
       setCurrentStep("thankyou");
     }
   };
 
+
   useEffect(() => {
     const stored = localStorage.getItem('completedSteps');
-    if (stored) setCompletedSteps(JSON.parse(stored));
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      setCompletedSteps(parsed);
+
+      // Optionally, set lastCompletedStep to last completed index so data refetches once
+      const lastIndex = parsed.lastIndexOf(true);
+      if (lastIndex !== -1) setLastCompletedStep(lastIndex);
+    }
   }, []);
+
 
   const steps = [
     {
@@ -211,107 +224,113 @@ export const ProfileStepper = () => {
           payment: data.profileParts.p_paymentaccounts || null,
         };
 
-        console.log(parts)
-        setProfileData(parts);
+        setProfileData(parts)
 
-        // Step completion logic
-        const stepsCompletion = [
-          isProfileComplete(parts.profile),       // Step 0
-          isSocialComplete(parts.social),         // Step 1
-          isCategoriesComplete(parts.categories), // Step 2
-          isPortfolioComplete(parts.portfolio),   // Step 3
-          isPaymentComplete(parts.payment)        // Step 4
-        ];
+        // Check source and profile for your special case
+        if (data.source === "db" && isProfileComplete(parts.profile)) {
+          // Mark all steps complete and show thank you
+          setCompletedSteps([true, true, true, true, true]);
+          setCurrentStep("thankyou");
+        } else {
+          // Normal step completion logic
+          const stepsCompletion = [
+            isProfileComplete(parts.profile),
+            isSocialComplete(parts.social),
+            isCategoriesComplete(parts.categories),
+            isPortfolioComplete(parts.portfolio),
+            isPaymentComplete(parts.payment),
+          ];
 
+          setCompletedSteps(stepsCompletion);
 
-        setCompletedSteps(stepsCompletion);
-
-        // Navigate to first incomplete step
-        const firstIncomplete = stepsCompletion.findIndex(done => !done);
-        setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "thankyou");
+          // Navigate to first incomplete step
+          const firstIncomplete = stepsCompletion.findIndex(done => !done);
+          setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "thankyou");
+        }
       }
-    } catch (error) {
-      console.error("❌ Error fetching profile data:", error);
-    }
-  };
+      } catch (error) {
+        console.error("❌ Error fetching profile data:", error);
+      }
+    };
+
+    useEffect(() => {
+      getUserProfileCompationData();
+    }, [lastCompletedStep]);
 
 
-  useEffect(() => {
-    getUserProfileCompationData();
-  }, [])
 
-  return (
-    <>
-      {/* Header */}
-      <div className="profile-header sticky top-0 z-20 bg-whit">
-        <ProfileHeader />
-      </div>
+    return (
+      <>
+        {/* Header */}
+        <div className="profile-header sticky top-0 z-20 bg-whit">
+          <ProfileHeader />
+        </div>
 
-      {/* Mobile Menu Button */}
-      <div className="sm:hidden p-4 flex justify-start">
-        <RiMenu2Line
-          className="w-6 h-6 cursor-pointer"
-          onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-        />
-      </div>
-
-      {/* Mobile Sidebar - pure, no overlay */}
-      <div
-        className={`sm:hidden fixed top-[55px] left-0 h-full w-90 bg-white z-30 transition-transform duration-300 ease-in-out shadow-lg ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-      >
-        <div className="p-5">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Profile Steps</h2>
-            <button onClick={() => setIsMobileSidebarOpen(false)}>✕</button>
-          </div>
-          <Steps
-            direction="vertical"
-            current={currentStep}
-            items={steps.map((s) => ({ title: s.title }))}
-            onChange={(step) => {
-              if (completedSteps[step] || step <= currentStep) {
-                setCurrentStep(step);
-                setIsMobileSidebarOpen(false);
-              }
-            }}
+        {/* Mobile Menu Button */}
+        <div className="sm:hidden p-4 flex justify-start">
+          <RiMenu2Line
+            className="w-6 h-6 cursor-pointer"
+            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
           />
         </div>
-      </div>
 
-      {/* Layout */}
-      <div className="flex flex-col sm:flex-row bg-[#f5f5f5] min-h-screen p-4 gap-4">
-        {/* Desktop Sidebar */}
-        <div className="hidden sm:block w-full md:w-1/3 lg:w-1/4 p-3">
-          <div className="bg-white p-6 rounded-3xl sticky top-[60px]">
-            <h2 className="text-xl font-semibold mb-4">Profile Completion Steps</h2>
+        {/* Mobile Sidebar - pure, no overlay */}
+        <div
+          className={`sm:hidden fixed top-[55px] left-0 h-full w-90 bg-white z-30 transition-transform duration-300 ease-in-out shadow-lg ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
+        >
+          <div className="p-5">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Profile Steps</h2>
+              <button onClick={() => setIsMobileSidebarOpen(false)}>✕</button>
+            </div>
             <Steps
-              current={currentStep}
               direction="vertical"
-              items={steps.map((s, index) => ({
-                title: s.title,
-                status:
-                  completedSteps[index]
-                    ? 'finish'
-                    : index === currentStep
-                      ? 'process'
-                      : 'wait',
-              }))}
+              current={currentStep}
+              items={steps.map((s) => ({ title: s.title }))}
               onChange={(step) => {
                 if (completedSteps[step] || step <= currentStep) {
                   setCurrentStep(step);
+                  setIsMobileSidebarOpen(false);
                 }
               }}
             />
-
           </div>
         </div>
 
-        {/* Step Content */}
-        <div className="w-full sm:w-2/3 lg:w-3/4 p-3">
-          {currentStep === 'thankyou' ? <ThankYouScreen /> : steps[currentStep].component}
+        {/* Layout */}
+        <div className="flex flex-col sm:flex-row bg-[#f5f5f5] min-h-screen p-4 gap-4">
+          {/* Desktop Sidebar */}
+          <div className="hidden sm:block w-full md:w-1/3 lg:w-1/4 p-3">
+            <div className="bg-white p-6 rounded-3xl sticky top-[60px]">
+              <h2 className="text-xl font-semibold mb-4">Profile Completion Steps</h2>
+              <Steps
+                current={currentStep}
+                direction="vertical"
+                items={steps.map((s, index) => ({
+                  title: s.title,
+                  status:
+                    completedSteps[index]
+                      ? 'finish'
+                      : index === currentStep
+                        ? 'process'
+                        : 'wait',
+                }))}
+                onChange={(step) => {
+                  if (completedSteps[step] || step <= currentStep) {
+                    setCurrentStep(step);
+                  }
+                }}
+              />
+
+            </div>
+          </div>
+
+          {/* Step Content */}
+          <div className="w-full sm:w-2/3 lg:w-3/4 p-3">
+            {currentStep === 'thankyou' ? <ThankYouScreen /> : steps[currentStep].component}
+          </div>
         </div>
-      </div>
-    </>
-  );
-};
+      </>
+    );
+  };

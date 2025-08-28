@@ -14,10 +14,7 @@ dayjs.extend(customParseFormat);
 const { TextArea } = Input;
 const { Option } = Select;
 
-
-
 export const PersonalDetails = ({ onNext, data }) => {
-
 
   const [form] = Form.useForm();
   const [preview, setPreview] = useState(null);
@@ -140,53 +137,53 @@ export const PersonalDetails = ({ onNext, data }) => {
 
 
   const handleSubmit = async () => {
-    try {
-      if (!profileImage && !preview) {
-        setProfileError("Please select profile image! Profile image is required.");
-        return;
-      }
+  try {
+    
 
-      const values = await form.validateFields();
+    if (!profileImage && !preview) {
+      setProfileError("Please select profile image! Profile image is required.");
+      return;
+    }
 
-      // Format data as per API structure
-      const profilePayload = {
-        photopath: profileImage ? null : existingPhotoPath,
-        genderid: values.gender,
-        dob: values.birthDate.format('DD-MM-YYYY'),
-        phonenumber: values.phone,
-        address1: values.address,
-        countryname: values.country,
-        statename: values.state,
-        bio: values.bio || '',
-        city: values.city,
-        zip: values.zipCode,
-      };
-      const formData = new FormData();
-      formData.append('profilejson', JSON.stringify(profilePayload));
-      formData.append('photo', profileImage);
+    const values = await form.validateFields();
 
-      // Example API call
-      const response = await axios.post("user/complete-profile", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Auth header
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+    // Format data as per API structure
+    const profilePayload = {
+      photopath: profileImage ? null : existingPhotoPath,
+      genderid: values.gender,
+      dob: values.birthDate.format('DD-MM-YYYY'),
+      phonenumber: values.phone,
+      address1: values.address,
+      countryname: values.country,
+      statename: values.state,
+      bio: values.bio || '',
+      city: values.city,
+      zip: values.zipCode,
+    };
+    const formData = new FormData();
+    formData.append('profilejson', JSON.stringify(profilePayload));
+    formData.append('photo', profileImage);
 
-      if (response.status === 200) {
-        console.log(response.data)
-      }
+    // Call API only if changes detected
+    const response = await axios.post("user/complete-profile", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
 
-      console.log('✅ API Response:', response.data);
+    if (response.status === 200) {
       message.success('Form submitted successfully!');
       onNext();
-    } catch (errorInfo) {
-      console.log('❌ Validation Failed or API Error:', errorInfo);
-      message.error('Submission failed, please try again.');
+    } else {
+      message.error('Failed to submit form, please try again.');
     }
-  };
 
-
+  } catch (errorInfo) {
+    console.log('❌ Validation Failed or API Error:', errorInfo);
+    message.error('Submission failed, please try again.');
+  }
+};
 
   return (
     <div className="personal-details-container bg-white p-6 rounded-3xl text-inter">
@@ -223,7 +220,7 @@ export const PersonalDetails = ({ onNext, data }) => {
           <p className="text-red-500 text-sm mb-3">{profileError}</p>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-6">
           {/* First Name */}
           <Form.Item name="firstName" label={<b>First Name</b>}>
             <Input size="large" disabled className="rounded-xl" />
@@ -235,7 +232,7 @@ export const PersonalDetails = ({ onNext, data }) => {
           </Form.Item>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-6">
           {/* Gender */}
           <Form.Item
             name="gender"
@@ -306,7 +303,7 @@ export const PersonalDetails = ({ onNext, data }) => {
 
         {/* Location */}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6">
           {/* Country */}
           <Form.Item
             label={<b>Country</b>}
@@ -415,8 +412,6 @@ export const PersonalDetails = ({ onNext, data }) => {
         >
           <Input size="large" placeholder="Enter ZIP or PIN" className="rounded-xl" />
         </Form.Item>
-
-
 
         {/* Bio */}
         <Form.Item

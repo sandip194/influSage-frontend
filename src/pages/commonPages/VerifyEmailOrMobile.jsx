@@ -10,6 +10,7 @@ export const VerifyEmailOrMobile = () => {
     const [timer, setTimer] = useState(60); // 60 seconds countdown
     const [showTimer, setShowTimer] = useState(true);
     const inputsRef = [useRef(null), useRef(null), useRef(null), useRef(null)];
+    const [isResending, setIsResending] = useState(false);
 
     useEffect(() => {
         if (timer === 0) return;
@@ -55,25 +56,27 @@ export const VerifyEmailOrMobile = () => {
             const response = await axios.post('/user/verify-otp', { email, otp: otpValue });
             if (response.status === 200) {
                 setShowTimer(false)
-                toast.success(response.data.message || "OTP verified successfully!" , { position: "top-right" });
+                toast.success(response.data.message || "OTP verified successfully!", { position: "top-right" });
                 localStorage.removeItem('isCreatedNew');
                 localStorage.removeItem('selectedRole');
                 localStorage.removeItem('signupEmail');
                 navigate("/login")
             }
             if (response.status === 400) {
-                toast.error(response.data.message || "Invalid OTP" , { position: "top-right" });
-                setError(response.data.message );
+                toast.error(response.data.message || "Invalid OTP", { position: "top-right" });
+                setError(response.data.message);
             }
         } catch (error) {
             console.error("OTP verification failed:", error);
-            toast.error(error.response?.data?.message || "OTP verification failed. Please try again." , { position: "top-right" });
+            toast.error(error.response?.data?.message || "OTP verification failed. Please try again.", { position: "top-right" });
             setError('OTP verification failed. Please try again.');
         }
     };
 
+    const handleResendOtp = async () => {
+        if (isResending) return;  // prevent double clicks if somehow triggered multiple times
 
-    const handleResendOtp = async () =>{
+        setIsResending(true);
         try {
             const email = localStorage.getItem('signupEmail');
             const response = await axios.post('/user/resend-otp', { email });
@@ -81,24 +84,25 @@ export const VerifyEmailOrMobile = () => {
                 setOtp(['', '', '', '']);
                 setTimer(60);
                 setShowTimer(true);
-                toast.success(response.data.message || "OTP resent successfully!" , { position: "top-right" });
+                toast.success(response.data.message || "OTP resent successfully!", { position: "top-right" });
             }
         } catch (error) {
             console.error("Resending OTP failed:", error);
-            toast.error(error.response?.data?.message || "Failed to resend OTP. Please try again." , { position: "top-right" });
+            toast.error(error.response?.data?.message || "Failed to resend OTP. Please try again.", { position: "top-right" });
             setError('Failed to resend OTP. Please try again.');
+        } finally {
+            setIsResending(false);
         }
-    }
+    };
 
 
-
-    useEffect(()=>{
+    useEffect(() => {
         const email = localStorage.getItem('signupEmail');
         const isCreatedNew = localStorage.getItem('isCreatedNew');
         if (!email || !isCreatedNew) {
             navigate('/signup');
         }
-    },[])
+    }, [])
 
     return (
         <div className="login-container">
@@ -136,16 +140,17 @@ export const VerifyEmailOrMobile = () => {
                             <span className='text-sm text-[#6b7280]'>Didn’t Get OTP?</span>
                             {timer === 0 ? (
                                 <span
-                                className='text-sm text-[#2563eb] cursor-pointer'
-                                onClick={handleResendOtp}
+                                    className={`text-sm cursor-pointer ${isResending ? 'text-gray-400 cursor-not-allowed' : 'text-[#2563eb]'}`}
+                                    onClick={isResending ? undefined : handleResendOtp}
                                 >
-                                Resend OTP
+                                    {isResending ? 'Resending...' : 'Resend OTP'}
                                 </span>
                             ) : (
                                 <span className="text-sm text-[#6b7280]">
-                                OTP Expires In : <b>{timer}s</b>
+                                    OTP Expires In : <b>{timer}s</b>
                                 </span>
                             )}
+
                         </div>
                         {error && <span className="text-for-error">{error}</span>}
                         {/* {showTimer && <span>OTP Expires In : <b>{timer}s</b></span>} */}

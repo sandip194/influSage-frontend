@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CheckOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import { RiCheckLine } from '@remixicon/react';
 
 export const CategorySelector = ({ onBack, onNext, data }) => {
     const [categoryTree, setCategoryTree] = useState([])
@@ -9,7 +10,7 @@ export const CategorySelector = ({ onBack, onNext, data }) => {
     const [selectedChildren, setSelectedChildren] = useState([]);
     const [error, setError] = useState(false);
 
-     const { token, role } = useSelector(state => state.auth);
+    const { token, role } = useSelector(state => state.auth);
 
     const parentRefs = useRef({});
 
@@ -71,11 +72,11 @@ export const CategorySelector = ({ onBack, onNext, data }) => {
         try {
             const formData = new FormData();
             formData.append('categoriesjson', JSON.stringify(data));
-   
+
             // for Influencer 
             if (role === 1) {
                 const res = await axios.post(
-                    "user/complete-profile",formData,
+                    "user/complete-profile", formData,
                     {
                         headers: {
                             Authorization: "Bearer " + token
@@ -183,15 +184,22 @@ export const CategorySelector = ({ onBack, onNext, data }) => {
                             <div
                                 key={child.id}
                                 onClick={() => toggleChildSelection(child.id)}
-                                className={`relative wrap-anywhere cursor-pointer rounded-lg px-3 py-2 text-sm border transition-all ${selectedChildren.includes(child.id)
-                                    ? 'bg-[#121A3F] text-white border-[#121A3F]'
-                                    : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100'
+                                className={`flex justify-between items-center w-full px-4 py-3 text-sm rounded border cursor-pointer transition-all ${selectedChildren.includes(child.id)
+                                        ? "bg-[#0D132DE5] text-white border-[#0D132DE5]"
+                                        : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
                                     }`}
                             >
-                                {child.name}
-                                {selectedChildren.includes(child.id) && (
-                                    <CheckOutlined className="absolute top-2 right-2 text-white bg-green-600 rounded-full p-1 w-5" />
-                                )}
+                                <span className="wrap-anywhere">{child.name}</span>
+
+                                <div
+                                    className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all ${selectedChildren.includes(child.id)
+                                            ? "bg-[#12B76A] border-[#13297E] text-[#0D132DE5]"
+                                            : "bg-transparent border-gray-400"
+                                        }`}
+                                >
+                                
+                                    {selectedChildren.includes(child.id) && <RiCheckLine size={12} />}
+                                </div>
                             </div>
                         ))}
                     </div>

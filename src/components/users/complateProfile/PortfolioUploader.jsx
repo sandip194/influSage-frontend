@@ -185,7 +185,7 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
                 {isImage ? (
                   <img src={previewUrl} alt="preview" className="w-full h-full object-cover rounded-lg" />
                 ) : isVideo ? (
-                  <video src={previewUrl} className="w-full h-full object-cover" controls />
+                  <video src={previewUrl} className="w-full h-full object-cover" controls autoPlay muted loop />
                 ) : isPDF ? (
                   <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 underline">
                     PDF

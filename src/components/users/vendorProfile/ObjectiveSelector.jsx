@@ -1,3 +1,4 @@
+import { RiCheckLine } from "@remixicon/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from 'react-redux';
@@ -26,7 +27,7 @@ const ObjectiveSelector = ({ onBack, onNext, data }) => {
 
 
     const formData = new FormData();
-    formData.append('objectivesjson', JSON.stringify( [{ objectiveid: selected }]));
+    formData.append('objectivesjson', JSON.stringify([{ objectiveid: selected }]));
 
     try {
       const response = await axios.post("vendor/complete-vendor-profile", formData, {
@@ -78,19 +79,32 @@ const ObjectiveSelector = ({ onBack, onNext, data }) => {
       </p>
 
       {/* Objective Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1  md:grid-cols-2  lg:grid-cols-3 gap-4">
         {objectives.map((obj) => (
           <div
             key={obj.id}
             onClick={() => handleSelection(obj.id)}
-            className={`border rounded-2xl p-4 cursor-pointer transition hover:shadow-sm ${selected === obj.id ? "border-[#141843] bg-gray-50" : "border-gray-200"
+            className={`flex justify-between items-center border rounded-2xl px-4 py-4 cursor-pointer transition-all ${selected === obj.id
+                ? "bg-[#0D132DE5] border-[#0D132DE5] text-white"
+                : "bg-white border-gray-300 text-black hover:bg-gray-50"
               }`}
           >
-            <div className="flex flex-col items-start gap-3 p-2">
-              <div>
-                <h3 className="font-bold text-[#141843] mb-1">{obj.name}</h3>
-                <p className="text-sm text-gray-500">{obj.description}</p>
-              </div>
+            {/* Objective Content */}
+            <div className="flex flex-col gap-1 pr-3">
+              <h3 className={`font-bold ${selected === obj.id ? "text-white" : "text-[#141843]"}`}>
+                {obj.name}
+              </h3>
+              <p className="text-sm text-gray-400">{obj.description}</p>
+            </div>
+
+            {/* Custom Checkbox */}
+            <div
+              className={`flex items-center justify-center rounded-full border transition-all ${selected === obj.id
+                  ? "bg-[#12B76A] p-1 border-0 text-white"
+                  : "bg-transparent p-3 border-gray-400"
+                }`}
+            >
+              {selected === obj.id && <RiCheckLine size={22} />}
             </div>
           </div>
         ))}

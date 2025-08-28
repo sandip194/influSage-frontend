@@ -17,6 +17,7 @@ export const LoginForm = () => {
     const dispatch = useDispatch();
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
   const [showPassword, setShowPassword] = useState(false); // 👁️ Toggle state
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
 
   const navigate = useNavigate()
@@ -35,40 +36,33 @@ export const LoginForm = () => {
   }, [setValue]);
 
   const submitHandler = async (data) => {
-    const loadingToast = toast.loading("Logging in..." , { position: "top-right", });
-    try {
-
-      const res = await axios.post("/user/login", data);
-      if (res.status === 200) {
-        if (data.rememberMe) {
-          localStorage.setItem('rememberedEmail', data.email);
-          localStorage.setItem("rememberedPassword", data.password);
-        }
-        toast.success(res.data.message || "Login successful!", { position: "top-right", });
-
-        const {id, role, token, firstName, lastName} = res.data
-        console.log(id)
-
-        dispatch(setCredentials({ token, id, role, firstName, lastName }));
-
-
-        // redirect to dashboard, etc.
-        if (res.data.role === 2) {
-          navigate("/complate-vendor-profile")
-        }
-        if (res.data.role === 1) {
-          navigate("/complate-profile")
-        }
-
-
+  if (isLoggingIn) return; // prevent multiple submissions
+  setIsLoggingIn(true);
+  const loadingToast = toast.loading("Logging in...", { position: "top-right" });
+  try {
+    const res = await axios.post("/user/login", data);
+    if (res.status === 200) {
+      if (data.rememberMe) {
+        localStorage.setItem('rememberedEmail', data.email);
+        localStorage.setItem("rememberedPassword", data.password);
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed!", { position: "top-right", });
-    } finally {
-      toast.dismiss(loadingToast);
-    }
-  };
+      toast.success(res.data.message || "Login successful!", { position: "top-right" });
+      const { id, role, token, firstName, lastName } = res.data;
+      dispatch(setCredentials({ token, id, role, firstName, lastName }));
 
+      if (role === 2) {
+        navigate("/complate-vendor-profile");
+      } else if (role === 1) {
+        navigate("/complate-profile");
+      }
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Login failed!", { position: "top-right" });
+  } finally {
+    toast.dismiss(loadingToast);
+    setIsLoggingIn(false);
+  }
+};
   const validationSchema = {
     emailValidator: {
       required: {
@@ -140,7 +134,7 @@ export const LoginForm = () => {
               </Link>
             </div>
 
-            <button type="submit" className="login-btn bg-wonderblue">login</button>
+            <button type="submit" className="login-btn bg-wonderblue" disabled={isLoggingIn}> {isLoggingIn ? "Logging in..." : "Login"}</button>
 
             <div className="divider">Or Login With</div>
 
