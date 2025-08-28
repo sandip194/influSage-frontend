@@ -20,7 +20,7 @@ const options = [
 
 const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
   const [selected, setSelected] = useState(data?.contentExpectation || "");
-  const [durationDays, setDurationDays] = useState(data?.durationDays || "");
+  const [durationDays, setDurationDays] = useState(null);
   const [addLinkToBio, setAddLinkToBio] = useState(
     typeof data?.addLinkToBio === "boolean" ? data.addLinkToBio : null
   );
@@ -35,9 +35,9 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
   const { token, userId: reduxUserId } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (data?.contentExpectation) setSelected(data.contentExpectation);
-    if (data?.durationDays) setDurationDays(data.durationDays);
-    if (typeof data?.addLinkToBio === "boolean") setAddLinkToBio(data.addLinkToBio);
+    if (data?.objectiveid) setSelected(data.objectiveid);
+    if (data?.postdurationdays) setDurationDays(Number(data.postdurationdays));
+    if (typeof data?.isincludevendorprofilelink === "boolean") setAddLinkToBio(data.isincludevendorprofilelink);
   }, [data]);
 
   const handleContinue = async () => {

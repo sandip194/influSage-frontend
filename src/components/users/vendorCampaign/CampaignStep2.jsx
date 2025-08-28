@@ -37,6 +37,7 @@ const formatFollowers = (num) => {
 };
 
 const CampaignStep2 = ({ data, onNext, onBack }) => {
+  const [selected, setSelected] = useState(data?.contentExpectation || "");
   const { userId, token } = useSelector((state) => state.auth);
 
   const [errors, setErrors] = useState({

@@ -1,7 +1,7 @@
-// /src/pages/CreateCampaign.jsx
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 // Step components
 import CampaignExpectationSelector from "../../../components/users/vendorCampaign/CampaignExpectationSelector";
@@ -14,12 +14,9 @@ import CampaignReviewStep from "../../../components/users/vendorCampaign/Campaig
 const LOCAL_KEY = "campaign-progress";
 
 const CampaignWizard = () => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState(
-    [false, false, false, false, false, false]
-  );
-
   const { token } = useSelector((state) => state.auth);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false, false]);
 
   const [campaignData, setCampaignData] = useState({
     expectation: {},
@@ -27,9 +24,10 @@ const CampaignWizard = () => {
     step3: {},
     step4: {},
     step5: {},
+    profileParts: null, 
   });
 
-  // ✅ Update campaign data for a section
+  // Update section data
   const updateCampaignSection = (sectionKey, newData) => {
     setCampaignData((prev) => ({
       ...prev,
@@ -44,21 +42,16 @@ const CampaignWizard = () => {
     );
   };
 
-  // ✅ Step complete + go next
   const markStepComplete = (index) => {
     const updated = [...completedSteps];
-    if (!updated[index]) {
-      updated[index] = true;
-      setCompletedSteps(updated);
-    }
-    if (index + 1 < steps.length) {
-      setCurrentStep(index + 1);
-    } else {
-      setCurrentStep("review");
-    }
+    if (!updated[index]) updated[index] = true;
+    setCompletedSteps(updated);
+
+    if (index + 1 < steps.length) setCurrentStep(index + 1);
+    else setCurrentStep("review");
   };
 
-  // ✅ Load from localStorage
+  // Load from localStorage
   useEffect(() => {
     const stored = localStorage.getItem(LOCAL_KEY);
     if (stored) {
@@ -68,38 +61,35 @@ const CampaignWizard = () => {
     }
   }, []);
 
-  // ✅ Fetch API data
+  // Fetch campaign from API
   const getCampaignData = async () => {
     try {
       const res = await axios.get(`/vendor/campaign/01`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
+
       if (res.status === 200) {
-        const parts = res.data?.campaignParts || {};
-        setCampaignData((prev) => ({
-          ...prev,
-          ...parts,
-        }));
+        const parts = res.data?.campaignParts || null;
+        if (parts) {
+          setCampaignData(parts);
+        }
       }
     } catch (err) {
       console.error("❌ Error fetching campaign:", err);
+      toast.error("Failed to fetch campaign data. Using temp data.");
     }
   };
 
   useEffect(() => {
-    getCampaignData();
-  }, []);
+    if (token) getCampaignData();
+  }, [token]);
 
-  // ✅ Define steps
   const steps = [
     {
       title: "Expectation",
       component: (
         <CampaignExpectationSelector
-          data={campaignData.expectation}
+          data={campaignData.p_objectivejson}
           onChange={(updated) => updateCampaignSection("expectation", updated)}
           onNext={() => markStepComplete(0)}
         />
@@ -153,20 +143,18 @@ const CampaignWizard = () => {
       title: "Review",
       component: (
         <CampaignReviewStep
-          data={campaignData}
-          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+          campaignData={campaignData} 
+          onEdit={() => setCurrentStep(0)}
         />
       ),
     },
   ];
 
   return (
-    <div>
-      <div className="flex-1 bg-white shadow-md rounded-lg p-6">
-        {currentStep === "review"
-          ? <CampaignReviewStep data={campaignData} />
-          : steps[currentStep].component}
-      </div>
+    <div className="flex-1 bg-white shadow-md rounded-lg p-6">
+      {currentStep === "review"
+        ? <CampaignReviewStep campaignData={campaignData} onEdit={() => setCurrentStep(0)} />
+        : steps[currentStep].component}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
@@ -14,67 +14,129 @@ import {
   RiYoutubeFill,
 } from "@remixicon/react";
 
-const CampaignReviewStep = ({ campaignData, onEdit }) => {
-  const { token } = useSelector((state) => state.auth) || {};
+const CampaignReviewStep = ({ onEdit }) => {
+  const { token, userId } = useSelector((state) => state.auth) || {};
+  const [campaignData, setCampaignData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // API Call
+  // ✅ Fetch campaign data
+  useEffect(() => {
+    const fetchCampaign = async () => {
+      try {
+        const authToken = token || localStorage.getItem("token");
+        if (!authToken) {
+          toast.error("No token found. Please log in again.");
+          return;
+        }
+
+        const res = await axios.get(`/vendor/campaign/01`, {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+
+        // ✅ Save campaignParts only
+        setCampaignData(res.data?.campaignParts || {});
+      } catch (error) {
+        console.error(error);
+        toast.error(
+          error.response?.data?.message || "Failed to fetch campaign data"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCampaign();
+  }, [token, userId]);
+
+  // ✅ Finalize campaign
   const handleCreateCampaign = async () => {
     try {
       const authToken = token || localStorage.getItem("token");
-
       if (!authToken) {
-        toast.error("No token found. Please log in again.", { position: "top-right" });
+        toast.error("No token found. Please log in again.");
         return;
       }
 
-      const res = await axios.post("/vendor/create-campaign", campaignData, {
-        headers: { Authorization: `Bearer ${authToken}`, "Content-Type": "application/json" },
+      const payload = {
+        userid: userId,
+        objective: campaignData?.p_objectivejson || {},
+        vendorinfo: campaignData?.p_vendorinfojson || {},
+        campaign: campaignData?.p_campaignjson || {},
+        references: campaignData?.p_campaignfilejson || [],
+        contenttypes: campaignData?.p_contenttypejson || [],
+      };
+
+      const res = await axios.post("/vendor/finalize-campaign", payload, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
       });
 
-      toast.success(res.data.message || "Campaign created successfully!", { position: "top-right" });
+      toast.success(res.data.message || "Campaign created successfully!");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to create campaign", { position: "top-right" });
+      console.error(error);
+      toast.error(
+        error.response?.data?.message || "Failed to create campaign"
+      );
     }
   };
 
-  const profileParts = campaignData?.profileParts || {};
+  if (loading) return <p>Loading...</p>;
+  if (!campaignData) return <p>No campaign data found</p>;
 
-const p_objectivejson = profileParts.p_objectivejson || {};
-const p_vendorinfojson = profileParts.p_vendorinfojson || {};
-const p_campaignjson = profileParts.p_campaignjson || {};
-const p_campaignfilejason = profileParts.p_campaignfilejason || [];
-const p_contenttypejson = profileParts.p_contenttypejson || [];
+  // ✅ Extract dynamic parts directly
+  const p_objectivejson = campaignData.p_objectivejson || {};
+  const p_vendorinfojson = campaignData.p_vendorinfojson || {};
+  const p_campaignjson = campaignData.p_campaignjson || {};
+  const p_campaignfilejson = campaignData.p_campaignfilejson || [];
+  const p_contenttypejson = campaignData.p_contenttypejson || [];
 
-const platforms = p_contenttypejson.map((p) => p.providername) || [];
-const languages = p_vendorinfojson.campaignlanguages?.map((l) => l.languagename) || [];
-const genders = p_vendorinfojson.genderid === 1 ? ["Male"] : ["Female"];
-const references = p_campaignfilejason.map((f) => f.filepath) || [];
-const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
+  // ✅ Transform data
+  const platforms = p_contenttypejson.map((p) => p.providername) || [];
+  const languages =
+    p_vendorinfojson.campaignlanguages?.map((l) => l.languagename) || [];
+  const influencerTiers =
+    p_vendorinfojson.campaigninfluencertiers?.map(
+      (t) => t.influencertiername
+    ) || [];
+  const genders =
+    p_vendorinfojson.genderid === 1
+      ? ["Male"]
+      : p_vendorinfojson.genderid === 2
+      ? ["Female"]
+      : ["Other"];
+  const references = p_campaignfilejson.map((f) => f.filepath) || [];
+  const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
 
   return (
     <div className="w-full text-sm overflow-x-hidden">
       <h1 className="text-2xl font-semibold mb-4">Review Campaign</h1>
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Left Side */}
+        {/* ================= LEFT SIDE ================= */}
         <div className="flex-1 space-y-4">
           {/* Banner */}
           <div className="bg-white rounded-2xl overflow-hidden">
             <div className="relative h-40">
-              <img
-                src={references[0] || ""}
-                alt="Banner"
-                className="w-full h-28 object-cover"
-              />
               {references[0] && (
-                <img
-                  src={references[0]}
-                  alt="Logo"
-                  className="absolute rounded-full top-16 left-4 w-20 h-20 border-2 border-white shadow-md"
-                />
+                <>
+                  <img
+                    src={references[0]}
+                    alt="Banner"
+                    className="w-full h-28 object-cover"
+                  />
+                  <img
+                    src={references[0]}
+                    alt="Logo"
+                    className="absolute rounded-full top-16 left-4 w-20 h-20 border-2 border-white shadow-md"
+                  />
+                </>
               )}
             </div>
             <div className="p-4">
-              <h2 className="font-semibold text-lg mb-1">{p_campaignjson.name}</h2>
+              <h2 className="font-semibold text-lg mb-1">
+                {p_campaignjson.name}
+              </h2>
               <p className="text-gray-500">{p_campaignjson.branddetail}</p>
 
               <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4">
@@ -84,9 +146,9 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
                     <RiStackLine className="w-5" />
                     <span> Platforms</span>
                   </div>
-                  {platforms.map((p, i) => (
-                    <p key={i}>{p}</p>
-                  ))}
+                  {platforms.length > 0
+                    ? platforms.map((p, i) => <p key={i}>{p}</p>)
+                    : "—"}
                 </div>
 
                 {/* Budget */}
@@ -95,18 +157,18 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
                     <RiMoneyRupeeCircleLine className="w-5" />
                     <span> Budget </span>
                   </div>
-                  <p>₹{p_campaignjson.estimatedbudget}</p>
+                  <p>₹{p_campaignjson.estimatedbudget || "0"}</p>
                 </div>
 
                 {/* Languages */}
                 <div>
                   <div className="flex gap-2 items-center mb-2 text-gray-400">
                     <RiTranslate className="w-5" />
-                    <span> Language </span>
+                    <span> Languages </span>
                   </div>
-                  {languages.map((l, i) => (
-                    <p key={i}>{l}</p>
-                  ))}
+                  {languages.length > 0
+                    ? languages.map((l, i) => <p key={i}>{l}</p>)
+                    : "—"}
                 </div>
 
                 {/* Gender */}
@@ -125,9 +187,12 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
 
           {/* Description + Requirements */}
           <div className="bg-white p-4 rounded-2xl">
+            {/* Description */}
             <div className="campaign-description py-4 border-b border-gray-200">
               <h3 className="font-semibold text-lg mb-2">Campaign Description</h3>
-              <p className="text-gray-700 leading-relaxed">{p_campaignjson.description}</p>
+              <p className="text-gray-700 leading-relaxed">
+                {p_campaignjson.description || "No description provided"}
+              </p>
             </div>
 
             {/* Requirements */}
@@ -137,25 +202,53 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
                 <li className="flex items-start gap-2">
                   <RiCheckboxCircleFill />
                   <span>
-                    Post Duration: <strong>{p_objectivejson.postdurationdays} days</strong>
+                    Post Duration:{" "}
+                    <strong>{p_objectivejson.postdurationdays || 0} days</strong>
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <RiCheckboxCircleFill />
                   <span>
                     Include Vendor Profile Link:{" "}
-                    <strong>{p_objectivejson.isincludevendorprofilelink ? "Yes" : "No"}</strong>
+                    <strong>
+                      {p_objectivejson.isincludevendorprofilelink ? "Yes" : "No"}
+                    </strong>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <RiCheckboxCircleFill />
+                  <span>
+                    Product Shipping:{" "}
+                    <strong>
+                      {p_vendorinfojson.isproductshipping ? "Yes" : "No"}
+                    </strong>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <RiCheckboxCircleFill />
+                  <span>
+                    Influencer Tiers:{" "}
+                    <strong>
+                      {influencerTiers.length > 0
+                        ? influencerTiers.join(", ")
+                        : "—"}
+                    </strong>
                   </span>
                 </li>
               </ul>
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mt-4">
-                {tags.map((tag, i) => (
-                  <span key={i} className="px-3 py-1 bg-gray-100 rounded-full text-xs">
-                    {tag}
-                  </span>
-                ))}
+                {tags.length > 0
+                  ? tags.map((tag, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1 bg-gray-100 rounded-full text-xs"
+                      >
+                        {tag}
+                      </span>
+                    ))
+                  : "No tags"}
               </div>
             </div>
 
@@ -163,42 +256,51 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
             <div className="references py-4 border-b border-gray-200">
               <h3 className="font-semibold mb-4 text-lg">References</h3>
               <div className="flex gap-4 flex-wrap">
-                {references.map((ref, i) => (
-                  <div key={i} className="relative w-48 h-40 rounded-2xl overflow-hidden">
-                    <img src={ref} alt="Reference" className="w-full h-full object-cover" />
-                    <button className="absolute top-2 right-2 bg-gray-100 bg-opacity-70 text-black p-2 rounded-full">
-                      <RiDeleteBin6Line className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                {references.length > 0
+                  ? references.map((ref, i) => (
+                      <div
+                        key={i}
+                        className="relative w-48 h-40 rounded-2xl overflow-hidden"
+                      >
+                        <img
+                          src={ref}
+                          alt="Reference"
+                          className="w-full h-full object-cover"
+                        />
+                        <button className="absolute top-2 right-2 bg-gray-100 bg-opacity-70 text-black p-2 rounded-full">
+                          <RiDeleteBin6Line className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))
+                  : "No references uploaded"}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Side */}
+        {/* ================= RIGHT SIDE ================= */}
         <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="font-semibold text-lg">Campaign Details</h3>
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">Campaign Number</p>
-              <p>{p_campaignjson.campaignnumber}</p>
+              <p>{p_campaignjson.campaignnumber || "—"}</p>
             </div>
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">About Brand</p>
-              <p>{p_campaignjson.branddetail}</p>
+              <p>{p_campaignjson.branddetail || "—"}</p>
             </div>
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">Start Date</p>
-              <p>{p_campaignjson.startdate}</p>
+              <p>{p_campaignjson.startdate || "—"}</p>
             </div>
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">End Date</p>
-              <p>{p_campaignjson.enddate}</p>
+              <p>{p_campaignjson.enddate || "—"}</p>
             </div>
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">Total Budget</p>
-              <p>₹{p_campaignjson.estimatedbudget}</p>
+              <p>₹{p_campaignjson.estimatedbudget || "0"}</p>
             </div>
           </div>
 
@@ -206,20 +308,26 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="font-semibold text-lg mb-4">Platform</h3>
             <ul className="space-y-3">
-              {p_contenttypejson.map((p, i) => (
-                <li key={i} className="flex items-center gap-2">
-                  {p.providername === "Instagram" && <RiInstagramFill />}
-                  {p.providername === "Facebook" && <RiFacebookBoxFill />}
-                  {p.providername === "YouTube" && <RiYoutubeFill />}
-                  {p.providername} - {p.contenttypes.map((c) => c.contenttypename).join(", ")}
-                </li>
-              ))}
+              {p_contenttypejson.length > 0 ? (
+                p_contenttypejson.map((p, i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    {p.providername === "Instagram" && <RiInstagramFill />}
+                    {p.providername === "Facebook" && <RiFacebookBoxFill />}
+                    {p.providername === "YouTube" && <RiYoutubeFill />}
+                    <span>
+                      {p.providername}{" "}
+                      {p.caption ? `- ${p.caption}` : ""}
+                    </span>
+                  </li>
+                ))
+              ) : (
+                <p>No platforms selected</p>
+              )}
             </ul>
           </div>
         </div>
       </div>
 
-      {/* Buttons */}
       <div className="flex max-w-sm gap-3 mt-3">
         <button
           className="flex-1 bg-white border border-gray-300 text-gray-800 rounded-md py-2 hover:bg-gray-100"
