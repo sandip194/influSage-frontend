@@ -18,8 +18,9 @@ export const VendorProfileStepper = () => {
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
+    const [lastCompletedStep, setLastCompletedStep] = useState(null);
 
-      const { token, userId} = useSelector(state => state.auth);
+    const { token, userId } = useSelector(state => state.auth);
 
     const [vendorProfileData, setVendorProfileData] = useState({
         profile: {},
@@ -86,6 +87,7 @@ export const VendorProfileStepper = () => {
         if (!updated[index]) {
             updated[index] = true;
             setCompletedSteps(updated);
+            setLastCompletedStep(index);  // <-- trigger useEffect to refetch
         }
 
         if (index + 1 < steps.length) {
@@ -204,7 +206,8 @@ export const VendorProfileStepper = () => {
 
     useEffect(() => {
         getUserProfileCompletionData();
-    }, []);
+    }, [lastCompletedStep]);
+
 
     useEffect(() => {
         setIsHydrated(true);

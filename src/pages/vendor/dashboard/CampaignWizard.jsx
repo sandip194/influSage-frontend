@@ -162,7 +162,7 @@ const CampaignWizard = () => {
 
   return (
     <div>
-      <div className="flex-1 bg-white shadow-md rounded-lg p-6">
+      <div className="flex-1 bg-white  rounded-2xl p-6">
         {currentStep === "review"
           ? <CampaignReviewStep data={campaignData} />
           : steps[currentStep].component}

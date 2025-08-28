@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Select } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { RiCheckLine } from "@remixicon/react";
 
 const { Option } = Select;
 
@@ -49,7 +50,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    gender: data?.gender ?? null,
+    gender: Array.isArray(data?.gender) ? data.gender : [],
     shipProducts:
       typeof data?.shipProducts === "boolean" ? data.shipProducts : null,
     targetedInfluencers: data?.targetedInfluencers ?? [],
@@ -57,10 +58,10 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
   });
 
   useEffect(() => {
-    if (!data) return; 
+    if (!data) return;
 
     setFormData({
-      gender: data?.gender ?? null,
+      gender: Array.isArray(data?.gender) ? data.gender : [],
       shipProducts:
         typeof data?.shipProducts === "boolean" ? data.shipProducts : null,
       targetedInfluencers: data?.targetedInfluencers ?? [],
@@ -69,12 +70,18 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
   }, [data]);
 
   const toggleGender = (id) => {
-    setFormData((prev) => ({
-      ...prev,
-      gender: prev.gender === id ? null : id,
-    }));
+    setFormData((prev) => {
+      const isSelected = prev.gender.includes(id);
+      return {
+        ...prev,
+        gender: isSelected
+          ? prev.gender.filter((g) => g !== id)
+          : [...prev.gender, id],
+      };
+    });
     setErrors((prev) => ({ ...prev, gender: false }));
   };
+
 
   const handleShipProducts = (value) => {
     setFormData({ ...formData, shipProducts: value });
@@ -162,83 +169,142 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl">
+    <div className="bg-white rounded-2xl">
       {/* Gender */}
-      <h2 className="text-xl font-semibold mb-4">Gender</h2>
+      <h2 className="text-xl font-semibold mb-4">Please select the gender(s) of influencers you'd like to work with</h2>
       <div className="flex flex-wrap gap-4 mb-2">
-        {genderOptions.map(({ id, label }) => (
-          <button
-            key={id}
-            onClick={() => toggleGender(id)}
-            className={`border px-6 py-2 rounded-xl ${
-              formData.gender === id
-                ? "border-[#0D132D] font-semibold"
-                : "border-gray-300"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+        {genderOptions.map(({ id, label }) => {
+          const isSelected = formData.gender.includes(id);
+
+          return (
+            //   <div
+            //     key={id}
+            //     onClick={() => toggleGender(id)}
+            //     className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
+            // ${isSelected
+            //         ? "bg-[#0D132DE5] text-white border-[#0D132DE5]"
+            //         : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
+            //       }`}
+            //   >
+
+            <div
+              key={id}
+              onClick={() => toggleGender(id)}
+              className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
+          ${isSelected
+                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                  : "bg-white text-black border-gray-300 hover:bg-[#0D132D0D] hover:border-[#0D132D80]"
+                }`}
+            >
+              <span className="capitalize font-medium text-sm">{label}</span>
+
+              {/* <div
+                className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
+            ${isSelected
+                    ? "bg-[#12B76A] border-[#12B76A] text-white"
+                    : "bg-transparent border-gray-400 text-transparent"
+                  }`}
+              > */}
+
+              <div
+                className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
+            ${isSelected
+                    ? "bg-[#0D132DE5] border-[#0D132D26] text-white"
+                    : "bg-transparent border-gray-400 text-transparent"
+                  }`}
+              >
+                <RiCheckLine size={14} />
+              </div>
+            </div>
+          );
+        })}
       </div>
       {errors.gender && (
-        <div className="text-red-500 text-sm mb-4">
-          Please select a gender
-        </div>
+        <div className="text-red-500 text-sm mb-4">Please select at least one gender</div>
       )}
+
 
       <hr className="my-1 border-gray-200" />
 
       {/* Ship Products */}
-      <h2 className="text-xl font-semibold mb-4">
+      <h2 className="text-xl font-semibold mb-4 mt-6">
         Aiming to ship physical products to influencers?
       </h2>
       <div className="flex gap-4 mb-2">
         {[{ label: "Yes", value: true }, { label: "No", value: false }].map(
-          ({ label, value }) => (
-            <button
-              key={label}
-              onClick={() => handleShipProducts(value)}
-              className={`border px-6 py-2 rounded-xl capitalize ${
-                formData.shipProducts === value
-                  ? "border-[#0D132D] font-semibold"
-                  : "border-gray-300"
-              }`}
-            >
-              {label}
-            </button>
-          )
+          ({ label, value }) => {
+            const isSelected = formData.shipProducts === value;
+
+            return (
+              <div
+                key={label}
+                onClick={() => handleShipProducts(value)}
+                className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
+            ${isSelected
+                    ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                    : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
+                  }`}
+              >
+                <span className={`capitalize font-medium text-sm ${isSelected ? "text-black" : "text-black"}`}>
+                  {label}
+                </span>
+
+                <div
+                  className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
+              ${isSelected
+                      ? "bg-[#0D132DE5] border-[#0D132D26] text-white"
+                      : "bg-transparent border-gray-400 text-transparent"
+                    }`}
+                >
+                  <RiCheckLine size={14} />
+                </div>
+              </div>
+            );
+          }
         )}
       </div>
       {errors.shipProducts && (
-        <div className="text-red-500 text-sm mb-4">
-          Please select Yes or No
-        </div>
+        <div className="text-red-500 text-sm mb-4">Please select Yes or No</div>
       )}
+
 
       <hr className="my-1 border-gray-200" />
 
       {/* Targeted Influencers */}
-      <h2 className="text-xl font-semibold mb-4">Targeted Influencers</h2>
-      <div className="flex flex-col gap-3 mb-2">
-        {influencerTiers.map((tier) => (
-          <label key={tier.id} className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={formData.targetedInfluencers.includes(tier.id)}
-              onChange={() => toggleInfluencerTier(tier.id)}
-              className="w-5 h-5 accent-[#141843] rounded"
-            />
-            <span className="text-sm text-[#141843]">
-              {tier.name} Influencer (
-              {tier.maxfollowers
-                ? `${formatFollowers(tier.minfollowers)} - ${formatFollowers(
-                    tier.maxfollowers
-                  )}`
-                : `${formatFollowers(tier.minfollowers)}+`}{" "}
-              Followers)
-            </span>
-          </label>
-        ))}
+      <h2 className="text-xl font-semibold mb-4 mt-6">Targeted Influencers</h2>
+      <div className="flex-col space-y-2 flex-wrap gap-4 mb-2">
+        {influencerTiers.map((tier) => {
+          const isSelected = formData.targetedInfluencers.includes(tier.id);
+          return (
+            <div
+              key={tier.id}
+              onClick={() => toggleInfluencerTier(tier.id)}
+              className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-56 sm:w-80 md:w-90
+          ${isSelected
+                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                  : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
+                }`}
+            >
+              <span className="text-sm">
+                {tier.name} Influencer (
+                {tier.maxfollowers
+                  ? `${formatFollowers(tier.minfollowers)} - ${formatFollowers(tier.maxfollowers)}`
+                  : `${formatFollowers(tier.minfollowers)}+`}{" "}
+                Followers)
+              </span>
+
+              <div
+                className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
+            ${isSelected
+                    ? "bg-[#141843] border-[#0D132D26] text-white"
+                    : "bg-transparent border-gray-400 text-transparent"
+                  }`}
+              >
+                <RiCheckLine size={14} />
+              </div>
+            </div>
+          );
+        })}
       </div>
       {errors.targetedInfluencers && (
         <div className="text-red-500 text-sm mb-4">
@@ -249,7 +315,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
       <hr className="my-1 border-gray-200" />
 
       {/* Language */}
-      <h2 className="text-xl font-semibold mb-4">Language</h2>
+      <h2 className="text-xl font-semibold mb-4 mt-6">Select preferred languages for the content</h2>
       <Select
         mode="multiple"
         size="large"

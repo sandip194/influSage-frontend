@@ -153,7 +153,7 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
                 photopath: profileImage ? null : existingPhotoPath,
                 businessname: values.businessname,
                 companysizeid: values.companysizeid,
-                phonenumber: values.phonenumber,
+                phonenumber: values.phone,
                 address1: values.address1,
                 countryname: values.countryname,
                 statename: values.statename,
@@ -215,14 +215,49 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
                 </div>
                 {profileError && <p className="text-red-500 text-sm mb-3">{profileError}</p>}
 
-                {/* Business Name */}
-                <Form.Item
-                    name="businessname"
-                    label={<b>Business Name</b>}
-                    rules={[{ required: true, message: 'Please enter your Business Name' }]}
-                >
-                    <Input size="large" placeholder="Enter your Business Name" className="rounded-xl" />
-                </Form.Item>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 md:gap-6">
+                    {/* Business Name */}
+                    <Form.Item
+                        name="businessname"
+                        label={<b>Business Name</b>}
+                        rules={[{ required: true, message: 'Please enter your Business Name' }]}
+                    >
+                        <Input size="large" placeholder="Enter your Business Name" className="rounded-xl" />
+                    </Form.Item>
+
+
+                    {/* Phone Number */}
+                    <Form.Item
+                        label={<b>Phone Number</b>}
+                        name="phone"
+                        rules={[
+                            {
+                                validator: (_, value) => {
+                                    if (!value || value.trim() === "") {
+                                        return Promise.resolve();
+                                    }
+                                    return value.length >= 10
+                                        ? Promise.resolve()
+                                        : Promise.reject(new Error("Enter a valid phone number (at least 10 digits)"));
+                                },
+                            },
+                        ]}
+                    >
+                        <PhoneInput
+                            country={"in"}
+                            enableSearch
+                            inputStyle={{
+                                width: "100%",
+                                height: "40px",
+                                borderRadius: "8px",
+                            }}
+                            containerStyle={{ width: "100%" }}
+                            specialLabel=""
+                        />
+                    </Form.Item>
+                </div>
+
 
                 {/* Company Size */}
                 <Form.Item
@@ -242,35 +277,7 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
                     </Select>
                 </Form.Item>
 
-                {/* Phone Number */}
-                <Form.Item
-                    label={<b>Phone Number</b>}
-                    name="phone"
-                    rules={[
-                        {
-                            validator: (_, value) => {
-                                if (!value || value.trim() === "") {
-                                    return Promise.resolve();
-                                }
-                                return value.length >= 10
-                                    ? Promise.resolve()
-                                    : Promise.reject(new Error("Enter a valid phone number (at least 10 digits)"));
-                            },
-                        },
-                    ]}
-                >
-                    <PhoneInput
-                        country={"in"}
-                        enableSearch
-                        inputStyle={{
-                            width: "100%",
-                            height: "40px",
-                            borderRadius: "8px",
-                        }}
-                        containerStyle={{ width: "100%" }}
-                        specialLabel=""
-                    />
-                </Form.Item>
+
 
                 {/* Address */}
                 <Form.Item
@@ -282,7 +289,7 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
                 </Form.Item>
 
                 {/* Country / State / City */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6">
                     <Form.Item
                         label={<b>Country</b>}
                         name="countryname"

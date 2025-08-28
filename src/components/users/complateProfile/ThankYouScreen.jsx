@@ -28,12 +28,15 @@ const ThankYouScreen = () => {
                     </div>
                 </div>
                 <h2 className="text-2xl font-bold mb-4 text-[#0D132D]">Thank You</h2>
-                <p className="text-gray-700 mb-6">
+                <p className="text-gray-700 mb-6 text-justify">
                     Thank you for completing your profile and submitting your details.
                 </p>
-                <p className="text-gray-600 mb-8">
-                    Our team will review your information shortly, and once approved,
-                    you'll be able to access and start using the platform fully.
+                <p className="text-gray-600 mb-8 text-justify">
+                    <span className='font-bold text-[#12B76A] bg-green-100'>
+                        Our team will review your information shortly, and once approved,
+                        you'll be able to access and start using the platform fully.
+                    </span>
+
                     We appreciate your patience!
                 </p>
                 <button

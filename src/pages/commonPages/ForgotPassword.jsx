@@ -1,20 +1,26 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 export const ForgotPassword = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const [loading, setLoading] = useState(false); // ✅ loading state added
 
-  const onSubmit = async(data) => {
+  const onSubmit = async (data) => {
+    if (loading) return; // ✅ prevent multiple calls
+    setLoading(true); // ✅ set loading true before API call
+
     try {
       const response = await axios.post('/user/forgot-password', { email: data.email });
       if (response.status === 200) {
-        toast.success(response.data.message || "Reset link sent to your email!" , { position: "top-right" });
+        toast.success(response.data.message || "Reset link sent to your email!", { position: "top-right" });
       }
     } catch (error) {
-      toast.error(error.response.data.message || "Something went wrong!" , { position: "top-right" });
+      toast.error(error.response?.data?.message || "Something went wrong!", { position: "top-right" });
+    } finally {
+      setLoading(false); // ✅ reset loading after API call
     }
   };
 
@@ -50,11 +56,20 @@ export const ForgotPassword = () => {
             <label>Email
               <span className='text-red-500 text-sm'>*</span>
             </label>
-            <input type="text" placeholder="Enter Your Email" 
-            {...register("email", validationSchema.emailValidator)}/>
+            <input
+              type="text"
+              placeholder="Enter Your Email"
+              {...register("email", validationSchema.emailValidator)}
+            />
             <span className='text-for-error'>{errors.email?.message}</span>
 
-            <button type="submit" className="login-btn">Send Reset Link</button>
+            <button
+              type="submit"
+              className="login-btn"
+              disabled={loading} // ✅ disable button while loading
+            >
+              {loading ? "Sending..." : "Send Reset Link"} {/* Optional text change */}
+            </button>
 
             <p className="signup-link" style={{ marginTop: '20px' }}>
               Back To
@@ -64,5 +79,5 @@ export const ForgotPassword = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

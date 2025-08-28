@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Input, message } from "antd"; 
+import { Input, message } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { RiCheckLine } from "@remixicon/react";
 
 const options = [
   {
@@ -41,52 +42,52 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
   }, [data]);
 
   const handleContinue = async () => {
-  const newErrors = {
-    contentExpectation: !selected,
-    durationDays: !durationDays || isNaN(durationDays) || Number(durationDays) <= 0,
-    addLinkToBio: addLinkToBio === null,
+    const newErrors = {
+      contentExpectation: !selected,
+      durationDays: !durationDays || isNaN(durationDays) || Number(durationDays) <= 0,
+      addLinkToBio: addLinkToBio === null,
+    };
+
+    setErrors(newErrors);
+
+    const hasError = Object.values(newErrors).some((e) => e);
+    if (hasError) return;
+
+    const finalUserId = reduxUserId || propUserId;
+
+    if (!token || !finalUserId) {
+      message.error("User not authenticated.");
+      return;
+    }
+
+    const p_objectivejson = {
+      objectiveid: selected,
+      postdurationdays: Number(durationDays),
+      isincludevendorprofilelink: addLinkToBio,
+    };
+
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("p_userid", finalUserId);
+      formData.append("p_objectivejson", JSON.stringify(p_objectivejson));
+
+      const res = await axios.post("/vendor/create-campaign", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("API Response:", res.data);
+      onNext(p_objectivejson);
+    } catch (err) {
+      console.error("API Error:", err.response?.data || err.message);
+      message.error("Something went wrong while saving campaign step.");
+    } finally {
+      setLoading(false);
+    }
   };
-
-  setErrors(newErrors);
-
-  const hasError = Object.values(newErrors).some((e) => e);
-  if (hasError) return;
-
-  const finalUserId = reduxUserId || propUserId;
-
-  if (!token || !finalUserId) {
-    message.error("User not authenticated.");
-    return;
-  }
-
-  const p_objectivejson = {
-    objectiveid: selected,
-    postdurationdays: Number(durationDays),
-    isincludevendorprofilelink: addLinkToBio,
-  };
-
-  try {
-    setLoading(true);
-
-    const formData = new FormData();
-    formData.append("p_userid", finalUserId);
-    formData.append("p_objectivejson", JSON.stringify(p_objectivejson));
-
-    const res = await axios.post("/vendor/create-campaign", formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("API Response:", res.data);
-    onNext(p_objectivejson);
-  } catch (err) {
-    console.error("API Error:", err.response?.data || err.message);
-    message.error("Something went wrong while saving campaign step.");
-  } finally {
-    setLoading(false);
-  }
-};
 
 
   return (
@@ -104,11 +105,21 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
               setSelected(opt.id);
               setErrors((prev) => ({ ...prev, contentExpectation: false }));
             }}
-            className={`px-5 py-3 rounded-xl border cursor-pointer ${
-              selected === opt.id ? "border-gray-800 bg-gray-50" : "border-gray-200"
-            }`}
+            className={`flex justify-between items-center px-5 py-4 rounded-xl border cursor-pointer transition-all ${selected === opt.id
+              ? "bg-[#0D132DE5] text-white border-[#0D132DE5]"
+              : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
+              }`}
           >
-            {opt.text}
+            <span className="text-sm">{opt.text}</span>
+
+            <div
+              className={`w-6 h-6 flex items-center justify-center rounded-full border transition-all ${selected === opt.id
+                ? "bg-[#12B76A] border-[#13297E] text-[#0D132DE5]"
+                : "bg-transparent border-gray-400"
+                }`}
+            >
+              {selected === opt.id && <RiCheckLine size={18} />}
+            </div>
           </div>
         ))}
       </div>
@@ -125,6 +136,7 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
       <div className="flex items-center gap-2 mb-2">
         <Input
           type="number"
+          size="large"
           min={1}
           value={durationDays}
           onChange={(e) => {
@@ -134,7 +146,7 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
           style={{ width: 100 }}
           placeholder="Enter"
         />
-        <span className="text-sm font-medium">Days</span>
+        <span className="text-md font-medium">Days</span>
       </div>
       {errors.durationDays && (
         <div className="text-red-500 text-sm mb-4">Please enter a valid number of days</div>
@@ -148,20 +160,38 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
       </h2>
       <div className="flex gap-4 mb-2">
         {[{ label: "Yes", value: true }, { label: "No", value: false }].map(
-          ({ label, value }) => (
-            <button
-              key={label}
-              onClick={() => {
-                setAddLinkToBio(value);
-                setErrors((prev) => ({ ...prev, addLinkToBio: false }));
-              }}
-              className={`border px-6 py-2 rounded-xl capitalize ${
-                addLinkToBio === value ? "border-[#0D132D] font-semibold" : "border-gray-300"
-              }`}
-            >
-              {label}
-            </button>
-          )
+          ({ label, value }) => {
+            const isSelected = addLinkToBio === value;
+
+            return (
+              <div
+                key={label}
+                onClick={() => {
+                  setAddLinkToBio(value);
+                  setErrors((prev) => ({ ...prev, addLinkToBio: false }));
+                }}
+                className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
+            ${isSelected
+                    ? "bg-[#0D132DE5] text-white border-[#0D132DE5]"
+                    : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
+                  }`}
+              >
+                <span className={`capitalize font-medium text-sm ${isSelected ? "text-white" : "text-black"}`}>
+                  {label}
+                </span>
+
+                <div
+                  className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
+              ${isSelected
+                      ? "bg-[#12B76A] border-[#12B76A] text-white"
+                      : "bg-transparent border-gray-400 text-transparent"
+                    }`}
+                >
+                  <RiCheckLine size={14} />
+                </div>
+              </div>
+            );
+          }
         )}
       </div>
       {errors.addLinkToBio && (
