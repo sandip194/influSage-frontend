@@ -41,6 +41,12 @@ import EditProfile from "./components/users/EditProfile/editProfile";
 import Settings from "./components/users/Settings/SettingLayout";
 import Unauthorized from './pages/commonPages/Unauthorized';
 import PrivateRoute from './routes/PrivateRoute';
+import VendorCampaign from './components/users/vendorCampaign/VendorCampaignsLayout';
+import CampaignDetails from './components/users/vendorCampaign/CampaignDetails';
+import VendorActivity from './components/users/vendorCampaign/VendorActivity';
+import VendorMessage from './components/users/vendorCampaign/VendorMessage';
+import VendorFilesMedia from './components/users/vendorCampaign/VendorFilesMedia';
+import VendorPayment from './components/users/vendorCampaign/VendorPayment';
 
 const App = () => {
 
@@ -108,6 +114,12 @@ const App = () => {
                                                 <Route path='browse-influencers' element={<BrowseInfluencerPage />} />
                                                 <Route path='my-campaigns' element={<CreateCampaign />} />
                                                 <Route path='my-campaigns/create-campaign' element={<CampaignWizard />} />
+                                                <Route path='vendor-campaign' element={ <VendorCampaign/>} />
+                                                <Route path='vendor-campaign/campaignDetails/' element={<CampaignDetails />} />
+                                                <Route path='vendor-campaign/vendoractivity/' element={<VendorActivity />} />
+                                                <Route path='vendor-campaign/vendorMessage/' element={<VendorMessage />} />
+                                                <Route path='vendor-campaign/vendorFilesMedia/' element={<VendorFilesMedia />} />
+                                                <Route path='vendor-campaign/payment/' element={<VendorPayment />} />
                                                 <Route path='messages' element={<ChatAppPage />} />
                                         </Route>
                                         <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />

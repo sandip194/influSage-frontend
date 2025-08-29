@@ -4,22 +4,8 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { RiCheckLine } from "@remixicon/react";
 
-const options = [
-  {
-    id: 1,
-    text: "Post my existing content (video & Images) on their social media without creating any content on their own",
-  },
-  {
-    id: 2,
-    text: "Create content (Video or Images) on their own as well as publishing them on their social media",
-  },
-  {
-    id: 3,
-    text: "Only create content (Video or Images) for me.",
-  },
-];
-
 const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
+  const [options, setOptions] = useState([]);
   const [selected, setSelected] = useState(data?.contentExpectation || "");
   const [durationDays, setDurationDays] = useState(null);
   const [addLinkToBio, setAddLinkToBio] = useState(
@@ -35,16 +21,36 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
 
   const { token, userId: reduxUserId } = useSelector((state) => state.auth);
 
+  // Fetch campaign objectives from API
+  useEffect(() => {
+    const fetchObjectives = async () => {
+      try {
+        const res = await axios.get("/vendor/campaign/objectives", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setOptions(res.data.objectives || []);
+      } catch (err) {
+        console.error("Error fetching objectives:", err);
+        message.error("Failed to load campaign objectives.");
+      }
+    };
+    fetchObjectives();
+  }, [token]);
+
+  // Pre-fill data if editing
   useEffect(() => {
     if (data?.objectiveid) setSelected(data.objectiveid);
     if (data?.postdurationdays) setDurationDays(Number(data.postdurationdays));
-    if (typeof data?.isincludevendorprofilelink === "boolean") setAddLinkToBio(data.isincludevendorprofilelink);
+    if (typeof data?.isincludevendorprofilelink === "boolean") {
+      setAddLinkToBio(data.isincludevendorprofilelink);
+    }
   }, [data]);
 
   const handleContinue = async () => {
     const newErrors = {
       contentExpectation: !selected,
-      durationDays: !durationDays || isNaN(durationDays) || Number(durationDays) <= 0,
+      durationDays:
+        !durationDays || isNaN(durationDays) || Number(durationDays) <= 0,
       addLinkToBio: addLinkToBio === null,
     };
 
@@ -89,7 +95,6 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
     }
   };
 
-
   return (
     <div className="bg-white p-6 rounded-2xl">
       {/* Content Expectation */}
@@ -100,38 +105,44 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
       <div className="space-y-2 mb-1">
         {options.map((opt) => (
           <div
-            key={opt.id}
+            key={opt.id || `objective-${index}`}
             onClick={() => {
-              setSelected(opt.id);
+               setSelected(opt.id); 
+               
               setErrors((prev) => ({ ...prev, contentExpectation: false }));
             }}
-            className={`flex justify-between items-center px-5 py-4 rounded-xl border cursor-pointer transition-all ${selected === opt.id
-              ? "bg-[#0D132DE5] text-white border-[#0D132DE5]"
-              : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
-              }`}
+            className={`flex justify-between items-center px-5 py-4 rounded-xl border cursor-pointer transition-all ${
+              selected === opt.objectiveid
+                ? "bg-[#0D132DE5] text-white border-[#0D132DE5]"
+                : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
+            }`}
           >
-            <span className="text-sm">{opt.text}</span>
+            <span className="text-sm">{opt.objectivetext}</span>
 
             <div
-              className={`w-6 h-6 flex items-center justify-center rounded-full border transition-all ${selected === opt.id
-                ? "bg-[#12B76A] border-[#13297E] text-[#0D132DE5]"
-                : "bg-transparent border-gray-400"
-                }`}
+              className={`w-6 h-6 flex items-center justify-center rounded-full border transition-all ${
+                selected === opt.objectiveid
+                  ? "bg-[#12B76A] border-[#13297E] text-[#0D132DE5]"
+                  : "bg-transparent border-gray-400"
+              }`}
             >
-              {selected === opt.id && <RiCheckLine size={18} />}
+              {selected === opt.objectiveid && <RiCheckLine size={18} />}
             </div>
           </div>
         ))}
       </div>
       {errors.contentExpectation && (
-        <div className="text-red-500 text-sm mb-4">Please select at least one option</div>
+        <div className="text-red-500 text-sm mb-4">
+          Please select at least one option
+        </div>
       )}
 
       <hr className="my-6 border-gray-200" />
 
       {/* Post Duration */}
       <h2 className="text-xl font-semibold mb-4">
-        How long would you like the post to stay on the influencer’s social accounts?
+        How long would you like the post to stay on the influencer’s social
+        accounts?
       </h2>
       <div className="flex items-center gap-2 mb-2">
         <Input
@@ -149,14 +160,17 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
         <span className="text-md font-medium">Days</span>
       </div>
       {errors.durationDays && (
-        <div className="text-red-500 text-sm mb-4">Please enter a valid number of days</div>
+        <div className="text-red-500 text-sm mb-4">
+          Please enter a valid number of days
+        </div>
       )}
 
       <hr className="my-6 border-gray-200" />
 
       {/* Add Link to Bio */}
       <h2 className="text-xl font-semibold mb-4">
-        Would you like to have influencers add your link in their bio when publishing your campaign?
+        Would you like to have influencers add your link in their bio when
+        publishing your campaign?
       </h2>
       <div className="flex gap-4 mb-2">
         {[{ label: "Yes", value: true }, { label: "No", value: false }].map(
@@ -171,21 +185,27 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
                   setErrors((prev) => ({ ...prev, addLinkToBio: false }));
                 }}
                 className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
-            ${isSelected
-                    ? "bg-[#0D132DE5] text-white border-[#0D132DE5]"
-                    : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
-                  }`}
+            ${
+              isSelected
+                ? "bg-[#0D132DE5] text-white border-[#0D132DE5]"
+                : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
+            }`}
               >
-                <span className={`capitalize font-medium text-sm ${isSelected ? "text-white" : "text-black"}`}>
+                <span
+                  className={`capitalize font-medium text-sm ${
+                    isSelected ? "text-white" : "text-black"
+                  }`}
+                >
                   {label}
                 </span>
 
                 <div
                   className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
-              ${isSelected
-                      ? "bg-[#12B76A] border-[#12B76A] text-white"
-                      : "bg-transparent border-gray-400 text-transparent"
-                    }`}
+              ${
+                isSelected
+                  ? "bg-[#12B76A] border-[#12B76A] text-white"
+                  : "bg-transparent border-gray-400 text-transparent"
+              }`}
                 >
                   <RiCheckLine size={14} />
                 </div>
@@ -195,7 +215,9 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
         )}
       </div>
       {errors.addLinkToBio && (
-        <div className="text-red-500 text-sm mb-4">Please select Yes or No</div>
+        <div className="text-red-500 text-sm mb-4">
+          Please select Yes or No
+        </div>
       )}
 
       {/* Navigation Buttons */}

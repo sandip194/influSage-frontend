@@ -1,49 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input, message } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
 const { TextArea } = Input;
 
-const platforms = {
-  Instagram: [
-    { id: 1, label: "Post" },
-    { id: 2, label: "Story" },
-    { id: 3, label: "Reel" },
-  ],
-  Facebook: [
-    { id: 4, label: "Post" },
-    { id: 5, label: "Story" },
-    { id: 6, label: "Reel" },
-  ],
-  YouTube: [
-    { id: 7, label: "Video" },
-    { id: 8, label: "Short" },
-  ],
-  Twitter: [
-    { id: 9, label: "Video" },
-    { id: 10, label: "Post" },
-  ],
-};
-
-const providerIdMapping = {
-  Instagram: 1,
-  Facebook: 2,
-  YouTube: 3,
-  Twitter: 4,
-};
-
 const CampaignStep5 = ({ onNext, onBack }) => {
   const { token } = useSelector((state) => state.auth) || {};
-  const [formState, setFormState] = useState(() => {
-    const initial = {};
-    Object.keys(platforms).forEach((platform) => {
-      initial[platform] = { selectedTypes: [], caption: "" };
-    });
-    return initial;
-  });
+  const [platforms, setPlatforms] = useState([]); 
+  const [formState, setFormState] = useState({});
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchPlatforms = async () => {
+      try {
+        const res = await axios.get("/vendor/provider-content-type", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const apiPlatforms = res.data.providorType || [];
+
+        const grouped = apiPlatforms.reduce((acc, item) => {
+          if (!acc[item.providername]) {
+            acc[item.providername] = [];
+          }
+          acc[item.providername].push({
+            id: item.providercontenttypeid,
+            label: item.contenttypename,
+          });
+          return acc;
+        }, {});
+
+        setPlatforms(grouped);
+
+        const initial = {};
+        Object.keys(grouped).forEach((platform) => {
+          initial[platform] = { selectedTypes: [], caption: "" };
+        });
+        setFormState(initial);
+      } catch (err) {
+        console.error("Error fetching provider content types:", err);
+        message.error("Failed to load content types");
+      }
+    };
+
+    fetchPlatforms();
+  }, [token]);
 
   const toggleContentType = (platform, typeId) => {
     setFormState((prev) => {
@@ -72,36 +75,43 @@ const CampaignStep5 = ({ onNext, onBack }) => {
     const newErrors = {};
     let hasError = false;
 
-    const contenttypejson = Object.entries(formState).map(([platform, data]) => {
-      const selectedTypes = data.selectedTypes.map((typeId) => {
-        const type = platforms[platform].find((item) => item.id === typeId);
+    const contenttypejson = Object.entries(formState).map(
+      ([platform, data]) => {
+        const selectedTypes = data.selectedTypes.map((typeId) => {
+          const type = platforms[platform].find((item) => item.id === typeId);
+          return {
+            contenttypename: type.label,
+            providercontenttypeid: typeId,
+          };
+        });
+
+        if (selectedTypes.length === 0 || !data.caption.trim()) {
+          newErrors[platform] = {
+            type: selectedTypes.length === 0,
+            caption: !data.caption.trim(),
+          };
+          hasError = true;
+        }
+
+        const providerObj = Object.values(platforms)
+          .flat()
+          .find((t) => t.label === selectedTypes[0]?.contenttypename);
 
         return {
-          contenttypename: type.label, 
-          providercontenttypeid: typeId, 
+          providerid: providerObj?.providerid || null,
+          providername: platform,
+          caption: data.caption.trim(),
+          contenttypes: selectedTypes,
         };
-      });
-
-      if (selectedTypes.length === 0 || !data.caption.trim()) {
-        newErrors[platform] = {
-          type: selectedTypes.length === 0,
-          caption: !data.caption.trim(),
-        };
-        hasError = true;
       }
-
-      return {
-        providerid: providerIdMapping[platform] || null, 
-        providername: platform, 
-        caption: data.caption.trim(),
-        contenttypes: selectedTypes,
-      };
-    });
+    );
 
     setErrors(newErrors);
 
     if (hasError) {
-      message.error("Please select at least one type and add a caption for each platform.");
+      message.error(
+        "Please select at least one type and add a caption for each platform."
+      );
       return;
     }
 
@@ -116,7 +126,7 @@ const CampaignStep5 = ({ onNext, onBack }) => {
       );
 
       message.success("Step 5 saved successfully!");
-      onNext(contenttypejson); 
+      onNext(contenttypejson);
     } catch (err) {
       console.error(err);
       message.error("Failed to save Step 5. Try again.");
@@ -130,30 +140,33 @@ const CampaignStep5 = ({ onNext, onBack }) => {
       <h2 className="text-xl font-bold mb-6">Content Types & Captions</h2>
 
       {Object.entries(platforms).map(([platform, types]) => {
-        const { selectedTypes, caption } = formState[platform];
+        const { selectedTypes = [], caption = "" } = formState[platform] || {};
         const platformErrors = errors[platform] || {};
         return (
           <div key={platform} className="mb-5">
             <p className="font-semibold mb-2">{platform}</p>
             <div className="flex gap-2 mb-3 flex-wrap">
-              {types.map(({ id, label }) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => toggleContentType(platform, id)}
-                  className={`px-6 py-2 rounded-xl cursor-pointer border ${
-                    selectedTypes.includes(id)
-                      ? "border-[#0D132D] font-semibold bg-gray-100"
-                      : "border-gray-300"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+             {types.map(({ id, label }, index) => (
+  <button
+    key={`type-${platform}-${id || index}`}  
+    type="button"
+    onClick={() => toggleContentType(platform, id)}
+    className={`px-6 py-2 rounded-xl cursor-pointer border ${
+      selectedTypes.includes(id)
+        ? "border-[#0D132D] font-semibold bg-gray-100"
+        : "border-gray-300"
+    }`}
+  >
+    {label}
+  </button>
+))}
+
             </div>
 
             {platformErrors.type && (
-              <p className="text-red-500 text-sm mb-2">Select at least one type</p>
+              <p className="text-red-500 text-sm mb-2">
+                Select at least one type
+              </p>
             )}
 
             <TextArea

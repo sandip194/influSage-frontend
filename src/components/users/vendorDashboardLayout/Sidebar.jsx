@@ -47,7 +47,7 @@ const Sidebar = () => {
     const generalItems = [
         { icon: <RiGalleryView2 className="w-5" />, label: "Dashboard", to: "/vendor-dashboard", end: true },
         { icon: <RiSearch2Line className="w-5" />, label: "Browse Influencer", to: "/vendor-dashboard/browse-influencers" },
-        { icon: <RiStackLine className="w-5" />, label: "My Campaign", to: "/vendor-dashboard/my-campaigns" },
+        { icon: <RiStackLine className="w-5" />, label: "My Campaign", to: "/vendor-dashboard/vendor-campaign" },
         { icon: <RiMessage3Line className="w-5" />, label: "Messages", to: "/vendor-dashboard/messages" },
     ];
 

@@ -1,49 +1,40 @@
 import React, { useState, useMemo } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   RiMore2Fill,
   RiEyeLine,
   RiCheckboxCircleLine,
   RiCloseCircleLine,
+  RiAddFill,
 } from "@remixicon/react";
-
 
 const campaigns = [
   {
     id: 1,
-    client: "Presse Citron",
-    clientImage: "https://i.pravatar.cc/40?img=1",
+    image: "https://picsum.photos/100/100?random=1", 
     campaignName: "Instagram Campaign",
-    amount: "$124.32",
-    date: "16 Jan,2025",
+    budget: "$124.32",
+    dateStarted: "16 Jan, 2025",
+    dueDate: "16 Jan, 2025",
     status: "inprogress",
   },
   {
     id: 2,
-    client: "Presse Citron",
-    clientImage: "https://i.pravatar.cc/40?img=2",
+    image: "https://picsum.photos/100/100?random=2",
     campaignName: "YouTube Shortvideo Campaign",
-    amount: "$124.32",
-    date: "16 Jan,2025",
+    budget: "$124.32",
+    dateStarted: "16 Jan, 2025",
+    dueDate: "16 Jan, 2025",
     status: "completed",
   },
   {
     id: 3,
-    client: "Presse Citron",
-    clientImage: "https://i.pravatar.cc/40?img=3",
+    image: "https://picsum.photos/100/100?random=3",
     campaignName: "TikTok Video",
-    amount: "$124.32",
-    date: "16 Jan,2025",
+    budget: "$124.32",
+    dateStarted: "16 Jan, 2025",
+    dueDate: "16 Jan, 2025",
     status: "cancelled",
-  },
-  {
-    id: 4,
-    client: "Presse Citron",
-    clientImage: "https://i.pravatar.cc/40?img=4",
-    campaignName: "Instagram Campaign",
-    amount: "$124.32",
-    date: "16 Jan,2025",
-    status: "inprogress",
   },
 ];
 
@@ -59,7 +50,7 @@ const statusLabels = {
   cancelled: "Cancelled",
 };
 
-const  CampaignsLayout = () => {
+const VendorCampaignsLayout = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(1);
@@ -91,7 +82,6 @@ const  CampaignsLayout = () => {
     return data;
   }, [statusFilter, searchText]);
 
-  // ---------- Pagination ----------
   const paginatedData = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filteredCampaigns.slice(start, start + pageSize);
@@ -101,10 +91,23 @@ const  CampaignsLayout = () => {
 
   return (
     <div className="w-full text-sm px-2 sm:px-4">
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">My Campaigns</h2>
-      <p className="mb-6 text-gray-600 text-sm">Your Campaigns Overview</p>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">My Campaigns</h2>
+          <p className="text-gray-600 text-sm">Your Campaigns Overview</p>
+        </div>
+        <button
+          onClick={() => navigate("/vendor-dashboard/my-campaigns")}
+          className="flex items-center gap-2 px-5 py-2 rounded-full bg-[#141843] text-white font-medium shadow-md 
+                     hover:bg-[#1d214f] hover:shadow-lg transition-all duration-200"
+        >
+          <RiAddFill className="w-5 h-5" />
+          Add Campaign
+        </button>
+      </div>
 
-      {/* Tabs (Status Filters) */}
+      {/* Tabs */}
       <div className="bg-white p-3 sm:p-4 rounded-lg mb-6 flex flex-wrap gap-3 shadow-sm">
         {tabs.map(({ id, label }) => (
           <button
@@ -115,7 +118,7 @@ const  CampaignsLayout = () => {
             }}
             className={`px-4 py-2 rounded-lg border transition font-medium ${
               statusFilter === id
-                ? "bg-[#0f122f] text-white border-[#0f122f]"
+                ? "bg-[#141843] text-white border-[#141843]"
                 : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
             }`}
           >
@@ -135,38 +138,40 @@ const  CampaignsLayout = () => {
         />
       </div>
 
-      {/* Data Table */}
+      {/* Table */}
       <div className="bg-white rounded-xl shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left min-w-[700px]">
+          <table className="w-full text-left min-w-[750px]">
             <thead className="bg-gray-50 text-gray-700 text-sm tracking-wide">
               <tr>
-                <th className="p-4">Client</th>
                 <th className="p-4">Campaign Name</th>
-                <th className="p-4">Amount</th>
+                <th className="p-4">Budget</th>
                 <th className="p-4">Date Started</th>
+                <th className="p-4">Due Date</th>
                 <th className="p-4">Status</th>
                 <th className="p-4">Action</th>
               </tr>
             </thead>
             <tbody className="text-sm text-gray-700">
               {paginatedData.map((row) => (
-                <tr key={row.id} className="border-t border-gray-200 hover:bg-gray-50 transition">
-                  {/* Client with photo */}
+                <tr
+                  key={row.id}
+                  className="border-t border-gray-200 hover:bg-gray-50 transition"
+                >
                   <td className="p-4 flex items-center gap-3">
                     <img
-                      src={row.clientImage}
-                      alt={row.client}
+                      src={row.image}
+                      alt={row.campaignName}
                       className="w-9 h-9 rounded-full"
                     />
-                    <span>{row.client}</span>
+                    <span>{row.campaignName}</span>
                   </td>
 
-                  <td className="p-4">{row.campaignName}</td>
-                  <td className="p-4 font-medium">{row.amount}</td>
-                  <td className="p-4">{row.date}</td>
+                  <td className="p-4">{row.budget}</td>
+                  <td className="p-4">{row.dateStarted}</td>
+                  <td className="p-4">{row.dueDate}</td>
 
-                  {/* Status badge */}
+                  {/* Status */}
                   <td className="p-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[row.status]}`}
@@ -175,7 +180,7 @@ const  CampaignsLayout = () => {
                     </span>
                   </td>
 
-                  {/* Action Menu */}
+                  {/* Action */}
                   <td className="p-4 relative">
                     <button
                       onClick={() =>
@@ -191,7 +196,7 @@ const  CampaignsLayout = () => {
                         <button
                           onClick={() => {
                             setMenuOpenId(null);
-                            navigate(`/dashboard/my-campaigns/details/`);
+                            navigate(`/vendor-dashboard/vendor-campaign/campaignDetails`);
                           }}
                           className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-left"
                         >
@@ -201,7 +206,7 @@ const  CampaignsLayout = () => {
                           onClick={() => setMenuOpenId(null)}
                           className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-left"
                         >
-                          <RiCheckboxCircleLine/> Mark As Complete
+                          <RiCheckboxCircleLine /> Mark As Complete
                         </button>
                         <button
                           onClick={() => setMenuOpenId(null)}
@@ -217,7 +222,7 @@ const  CampaignsLayout = () => {
 
               {paginatedData.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="text-center py-6 text-gray-500">
+                  <td colSpan="7" className="text-center py-6 text-gray-500">
                     No campaigns found
                   </td>
                 </tr>
@@ -252,4 +257,4 @@ const  CampaignsLayout = () => {
   );
 };
 
-export default CampaignsLayout;
+export default VendorCampaignsLayout;

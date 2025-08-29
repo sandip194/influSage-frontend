@@ -75,12 +75,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
   const hasErrors = Object.values(newErrors).some((e) => e);
   if (hasErrors) return;
 
-  // Add profile image validation here
-  if (!profileImage && !preview) {
-    setProfileError("Please select profile image! Profile image is required.");
-    return;
-  }
-
   const payload = {
     name: formData.title,
     description: formData.description,
