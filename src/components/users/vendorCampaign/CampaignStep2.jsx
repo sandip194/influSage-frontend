@@ -178,15 +178,6 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
           const isSelected = formData.gender.includes(id);
 
           return (
-            //   <div
-            //     key={id}
-            //     onClick={() => toggleGender(id)}
-            //     className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
-            // ${isSelected
-            //         ? "bg-[#0D132DE5] text-white border-[#0D132DE5]"
-            //         : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
-            //       }`}
-            //   >
 
             <div
               key={id}
@@ -194,23 +185,16 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
               className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
           ${isSelected
                   ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                  : "bg-white text-black border-gray-300 hover:bg-[#0D132D0D] hover:border-[#0D132D80]"
+                  : "bg-white text-black border-gray-300  hover:border-[#141843]"
                 }`}
             >
               <span className="capitalize font-medium text-sm">{label}</span>
 
-              {/* <div
-                className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
-            ${isSelected
-                    ? "bg-[#12B76A] border-[#12B76A] text-white"
-                    : "bg-transparent border-gray-400 text-transparent"
-                  }`}
-              > */}
 
               <div
                 className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
             ${isSelected
-                    ? "bg-[#0D132DE5] border-[#0D132D26] text-white"
+                    ? "bg-[#141843] border-[#0D132D26] text-white"
                     : "bg-transparent border-gray-400 text-transparent"
                   }`}
               >
@@ -243,7 +227,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
                 className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
             ${isSelected
                     ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                    : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
+                    : "bg-white text-black border-gray-300 hover:border-[#141843]"
                   }`}
               >
                 <span className={`capitalize font-medium text-sm ${isSelected ? "text-black" : "text-black"}`}>
@@ -253,7 +237,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
                 <div
                   className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
               ${isSelected
-                      ? "bg-[#0D132DE5] border-[#0D132D26] text-white"
+                      ? "bg-[#141843] border-[#0D132D26] text-white"
                       : "bg-transparent border-gray-400 text-transparent"
                     }`}
                 >
@@ -283,7 +267,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
               className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-56 sm:w-80 md:w-90
           ${isSelected
                   ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                  : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
+                  : "bg-white text-black border-gray-300  hover:border-[#141843]"
                 }`}
             >
               <span className="text-sm">

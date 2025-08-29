@@ -106,16 +106,16 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
               setErrors((prev) => ({ ...prev, contentExpectation: false }));
             }}
             className={`flex justify-between items-center px-5 py-4 rounded-xl border cursor-pointer transition-all ${selected === opt.id
-              ? "bg-[#0D132DE5] text-white border-[#0D132DE5]"
-              : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
+              ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+              : "bg-white text-black border-gray-300  hover:border-[#141843]"
               }`}
           >
             <span className="text-sm">{opt.text}</span>
 
             <div
               className={`w-6 h-6 flex items-center justify-center rounded-full border transition-all ${selected === opt.id
-                ? "bg-[#12B76A] border-[#13297E] text-[#0D132DE5]"
-                : "bg-transparent border-gray-400"
+                ? "bg-[#141843] border-[#0D132D26] text-white"
+                : "bg-transparent border-gray-400 text-transparent"
                 }`}
             >
               {selected === opt.id && <RiCheckLine size={18} />}
@@ -172,18 +172,18 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
                 }}
                 className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
             ${isSelected
-                    ? "bg-[#0D132DE5] text-white border-[#0D132DE5]"
-                    : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
+                    ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                    : "bg-white text-black border-gray-300  hover:border-[#141843]"
                   }`}
               >
-                <span className={`capitalize font-medium text-sm ${isSelected ? "text-white" : "text-black"}`}>
+                <span className={`capitalize font-medium text-sm text-black`}>
                   {label}
                 </span>
 
                 <div
                   className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
               ${isSelected
-                      ? "bg-[#12B76A] border-[#12B76A] text-white"
+                      ? "bg-[#141843] border-[#0D132D26] text-white"
                       : "bg-transparent border-gray-400 text-transparent"
                     }`}
                 >

@@ -184,17 +184,17 @@ export const CategorySelector = ({ onBack, onNext, data }) => {
                             <div
                                 key={child.id}
                                 onClick={() => toggleChildSelection(child.id)}
-                                className={`flex justify-between items-center w-full px-4 py-3 text-sm rounded border cursor-pointer transition-all ${selectedChildren.includes(child.id)
-                                        ? "bg-[#0D132DE5] text-white border-[#0D132DE5]"
-                                        : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"
+                                className={`flex justify-between items-center w-full px-4 py-3 text-sm rounded-xl border cursor-pointer transition-all ${selectedChildren.includes(child.id)
+                                        ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                                        : "bg-white text-black border-gray-300  hover:border-[#141843]"
                                     }`}
                             >
                                 <span className="wrap-anywhere">{child.name}</span>
 
                                 <div
                                     className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all ${selectedChildren.includes(child.id)
-                                            ? "bg-[#12B76A] border-[#13297E] text-[#0D132DE5]"
-                                            : "bg-transparent border-gray-400"
+                                            ? "bg-[#141843] border-[#0D132D26] text-white"
+                                            : "bg-transparent border-gray-400 text-transparent"
                                         }`}
                                 >
                                 

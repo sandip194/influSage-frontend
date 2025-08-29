@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 export const VerifyEmailOrMobile = () => {
     const navigate = useNavigate();
@@ -77,6 +77,7 @@ export const VerifyEmailOrMobile = () => {
         if (isResending) return;  // prevent double clicks if somehow triggered multiple times
 
         setIsResending(true);
+        const loadingToast = toast.loading('Sending OTP...');
         try {
             const email = localStorage.getItem('signupEmail');
             const response = await axios.post('/user/resend-otp', { email });
@@ -84,14 +85,15 @@ export const VerifyEmailOrMobile = () => {
                 setOtp(['', '', '', '']);
                 setTimer(60);
                 setShowTimer(true);
-                toast.success(response.data.message || "OTP resent successfully!", { position: "top-right" });
+                toast.success(response.data.message || "OTP resent successfully!");
             }
         } catch (error) {
             console.error("Resending OTP failed:", error);
-            toast.error(error.response?.data?.message || "Failed to resend OTP. Please try again.", { position: "top-right" });
+            toast.error(error.response?.data?.message || "Failed to resend OTP. Please try again.");
             setError('Failed to resend OTP. Please try again.');
         } finally {
             setIsResending(false);
+            toast.dismiss(loadingToast); // hide the loading toast
         }
     };
 

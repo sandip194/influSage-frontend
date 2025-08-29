@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import { ToastContainer } from 'react-toastify';
 import './index.css'; // ✅ this imports tailwind styles
 
 
@@ -44,11 +44,22 @@ import PrivateRoute from './routes/PrivateRoute';
 
 const App = () => {
 
-        axios.defaults.baseURL = "http://localhost:3001"
+        const BASE_URL = import.meta.env.VITE_API_BASE_URL ;
+        axios.defaults.baseURL = BASE_URL
         return (
                 <Router>
                         {/* <h1 className="text-3xl font-bold text-green-500">Tailwind is Working ✅</h1> */}
-                        <Toaster />
+                        <ToastContainer
+                                position="top-right"
+                                autoClose={4000}
+                                hideProgressBar={false}
+                                newestOnTop={false}
+                                closeOnClick
+                                pauseOnFocusLoss
+                                draggable
+                                pauseOnHover
+                                theme="light"
+                        />
                         <Routes>
                                 <Route path='/' element={<Home />} />
                                 <Route path='/signup' element={<Signup />} />
