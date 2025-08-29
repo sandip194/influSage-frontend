@@ -199,11 +199,22 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
               key={id}
               onClick={() => toggleGender(id)}
               className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
-                ${isSelected ? "bg-[#0D132D26] text-black border-[#0D132D26]" : "bg-white text-black border-gray-300 hover:bg-[#0D132D0D] hover:border-[#0D132D80]"}`}
+
+          ${isSelected
+                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                  : "bg-white text-black border-gray-300  hover:border-[#141843]"
+                }`}
             >
-              <span className="capitalize font-medium text-sm">{name}</span>
-              <div className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
-                ${isSelected ? "bg-[#0D132DE5] border-[#0D132D26] text-white" : "bg-transparent border-gray-400 text-transparent"}`}>
+              <span className="capitalize font-medium text-sm">{label}</span>
+
+
+              <div
+                className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
+            ${isSelected
+                    ? "bg-[#141843] border-[#0D132D26] text-white"
+                    : "bg-transparent border-gray-400 text-transparent"
+                  }`}
+              >
                 <RiCheckLine size={14} />
               </div>
             </div>
@@ -217,21 +228,35 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
       {/* Ship Products */}
       <h2 className="text-xl font-semibold mb-4 mt-6">Aiming to ship physical products to influencers?</h2>
       <div className="flex gap-4 mb-2">
-        {[{ label: "Yes", value: true }, { label: "No", value: false }].map(({ label, value }) => {
-          const isSelected = formData.shipProducts === value;
-          return (
-            <div
-              key={label}
-              onClick={() => handleShipProducts(value)}
-              className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
-                ${isSelected ? "bg-[#0D132D26] text-black border-[#0D132D26]" : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"}`}
-            >
-              <span className="capitalize font-medium text-sm">{label}</span>
-              <div className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
-                ${isSelected ? "bg-[#0D132DE5] border-[#0D132D26] text-white" : "bg-transparent border-gray-400 text-transparent"}`}>
-                <RiCheckLine size={14} />
+        {[{ label: "Yes", value: true }, { label: "No", value: false }].map(
+          ({ label, value }) => {
+            const isSelected = formData.shipProducts === value;
+
+            return (
+              <div
+                key={label}
+                onClick={() => handleShipProducts(value)}
+                className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
+            ${isSelected
+                    ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                    : "bg-white text-black border-gray-300 hover:border-[#141843]"
+                  }`}
+              >
+                <span className={`capitalize font-medium text-sm ${isSelected ? "text-black" : "text-black"}`}>
+                  {label}
+                </span>
+
+                <div
+                  className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
+              ${isSelected
+                      ? "bg-[#141843] border-[#0D132D26] text-white"
+                      : "bg-transparent border-gray-400 text-transparent"
+                    }`}
+                >
+                  <RiCheckLine size={14} />
+                </div>
               </div>
-            </div>
+           
           );
         })}
       </div>
@@ -249,7 +274,12 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
               key={tier.id}
               onClick={() => toggleInfluencerTier(tier.id)}
               className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-56 sm:w-80 md:w-90
-                ${isSelected ? "bg-[#0D132D26] text-black border-[#0D132D26]" : "bg-white text-black border-gray-300 hover:bg-[#0D132D26] hover:border-[#0D132DBF]"}`}
+
+          ${isSelected
+                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                  : "bg-white text-black border-gray-300  hover:border-[#141843]"
+                }`}
+
             >
               <span className="text-sm">
                 {tier.name} Influencer (

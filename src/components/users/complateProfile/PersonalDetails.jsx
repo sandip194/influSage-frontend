@@ -23,6 +23,7 @@ export const PersonalDetails = ({ onNext, data }) => {
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedState, setSelectedState] = useState('');
   const [countries, setCountries] = useState([]);
+  const [gender, setGender] = useState([])
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
@@ -39,6 +40,19 @@ export const PersonalDetails = ({ onNext, data }) => {
     const entry = postalRegexList.find(e => e.ISO === iso);
     return entry?.Regex ? new RegExp(entry.Regex) : null;
   };
+
+  const getGender = async () => {
+    try {
+      const res = await axios.get("vendor/gender")
+      if (res) setGender(res.data.genders)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getGender()
+  }, [])
 
   useEffect(() => {
     setLoading(prev => ({ ...prev, countries: true }));
@@ -137,53 +151,53 @@ export const PersonalDetails = ({ onNext, data }) => {
 
 
   const handleSubmit = async () => {
-  try {
-    
+    try {
 
-    if (!profileImage && !preview) {
-      setProfileError("Please select profile image! Profile image is required.");
-      return;
+
+      if (!profileImage && !preview) {
+        setProfileError("Please select profile image! Profile image is required.");
+        return;
+      }
+
+      const values = await form.validateFields();
+
+      // Format data as per API structure
+      const profilePayload = {
+        photopath: profileImage ? null : existingPhotoPath,
+        genderid: values.gender,
+        dob: values.birthDate.format('DD-MM-YYYY'),
+        phonenumber: values.phone,
+        address1: values.address,
+        countryname: values.country,
+        statename: values.state,
+        bio: values.bio || '',
+        city: values.city,
+        zip: values.zipCode,
+      };
+      const formData = new FormData();
+      formData.append('profilejson', JSON.stringify(profilePayload));
+      formData.append('photo', profileImage);
+
+      // Call API only if changes detected
+      const response = await axios.post("user/complete-profile", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.status === 200) {
+        message.success('Form submitted successfully!');
+        onNext();
+      } else {
+        message.error('Failed to submit form, please try again.');
+      }
+
+    } catch (errorInfo) {
+      console.log('❌ Validation Failed or API Error:', errorInfo);
+      message.error('Submission failed, please try again.');
     }
-
-    const values = await form.validateFields();
-
-    // Format data as per API structure
-    const profilePayload = {
-      photopath: profileImage ? null : existingPhotoPath,
-      genderid: values.gender,
-      dob: values.birthDate.format('DD-MM-YYYY'),
-      phonenumber: values.phone,
-      address1: values.address,
-      countryname: values.country,
-      statename: values.state,
-      bio: values.bio || '',
-      city: values.city,
-      zip: values.zipCode,
-    };
-    const formData = new FormData();
-    formData.append('profilejson', JSON.stringify(profilePayload));
-    formData.append('photo', profileImage);
-
-    // Call API only if changes detected
-    const response = await axios.post("user/complete-profile", formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-
-    if (response.status === 200) {
-      message.success('Form submitted successfully!');
-      onNext();
-    } else {
-      message.error('Failed to submit form, please try again.');
-    }
-
-  } catch (errorInfo) {
-    console.log('❌ Validation Failed or API Error:', errorInfo);
-    message.error('Submission failed, please try again.');
-  }
-};
+  };
 
   return (
     <div className="personal-details-container bg-white p-6 rounded-3xl text-inter">
@@ -240,11 +254,14 @@ export const PersonalDetails = ({ onNext, data }) => {
             rules={[{ required: true, message: 'Please select your gender' }]}
           >
             <Select size="large" placeholder="Select Gender" className="rounded-xl">
-              <Option value={1}>Male</Option>
-              <Option value={2}>Female</Option>
-              <Option value={3}>Other</Option>
+              {gender.map((g) => (
+                <Option key={g.id} value={g.id}>
+                  {g.name}
+                </Option>
+              ))}
             </Select>
           </Form.Item>
+
 
           {/* Birth Date */}
           <Form.Item

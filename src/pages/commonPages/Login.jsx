@@ -8,7 +8,7 @@ import googleIcon from '../../assets/icons/google-logo.png';
 import facebookIcon from '../../assets/icons/facebook-logo.png';
 import appleIcon from '../../assets/icons/apple-logo.png';
 import { RiEyeLine, RiEyeOffLine } from '@remixicon/react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 import { setCredentials } from '../../features/auth/authSlice';
 
@@ -38,7 +38,7 @@ export const LoginForm = () => {
   const submitHandler = async (data) => {
   if (isLoggingIn) return; // prevent multiple submissions
   setIsLoggingIn(true);
-  const loadingToast = toast.loading("Logging in...", { position: "top-right" });
+  const loadingToast = toast.loading("Logging in...");
   try {
     const res = await axios.post("/user/login", data);
     if (res.status === 200) {
@@ -46,7 +46,7 @@ export const LoginForm = () => {
         localStorage.setItem('rememberedEmail', data.email);
         localStorage.setItem("rememberedPassword", data.password);
       }
-      toast.success(res.data.message || "Login successful!", { position: "top-right" });
+      toast.success(res.data.message || "Login successful!");
       const { id, role, token, firstName, lastName } = res.data;
       dispatch(setCredentials({ token, id, role, firstName, lastName }));
 
@@ -57,7 +57,7 @@ export const LoginForm = () => {
       }
     }
   } catch (error) {
-    toast.error(error.response?.data?.message || "Login failed!", { position: "top-right" });
+    toast.error(error.response?.data?.message || "Login failed!");
   } finally {
     toast.dismiss(loadingToast);
     setIsLoggingIn(false);

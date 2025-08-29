@@ -4,8 +4,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 const PrivateRoute = ({ allowedRoles }) => {
   const { token, role } = useSelector((state) => state.auth);
 
-  console.log("token : ", token)
-  console.log("role :", role)
+
 
   if (!token) {
     return <Navigate to="/login" replace />;

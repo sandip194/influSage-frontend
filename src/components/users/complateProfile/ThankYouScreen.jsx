@@ -32,7 +32,7 @@ const ThankYouScreen = () => {
                     Thank you for completing your profile and submitting your details.
                 </p>
                 <p className="text-gray-600 mb-8 text-justify">
-                    <span className='font-bold text-[#12B76A] bg-green-100'>
+                    <span className='font-bold text-[#121A3F]'>
                         Our team will review your information shortly, and once approved,
                         you'll be able to access and start using the platform fully.
                     </span>

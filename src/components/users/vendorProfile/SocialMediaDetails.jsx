@@ -1,22 +1,48 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Input } from 'antd';
 import axios from 'axios';
 import { message } from 'antd';
 import { useSelector } from 'react-redux';
+import { useMemo } from 'react';
 
-export const SocialMediaDetails = ({ onBack, onNext, data}) => {
+export const SocialMediaDetails = ({ onBack, onNext, data }) => {
+  const [providers, setProviders] = useState([])
   const [form] = Form.useForm();
 
   const { token } = useSelector(state => state.auth);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  const platforms = [
-    { name: 'Instagram', providerid: 1, icon: <img src='./public/assets/skill-icons_instagram.png' alt='Instagram' className='w-[24px]' />, field: 'instagram', placeholder: 'Enter Your Instagram link' },
-    { name: 'YouTube', providerid: 2, icon: <img src='./public/assets/logos_youtube-icon.png' alt='YouTube' className='w-[24px]' />, field: 'youtube', placeholder: 'Enter Your YouTube link' },
-    { name: 'Facebook', providerid: 3, icon: <img src='./public/assets/logos_facebook.png' alt='Facebook' className='w-[24px]' />, field: 'facebook', placeholder: 'Enter Your Facebook link' },
-    { name: 'X', providerid: 4, icon: <img src='./public/assets/Group.png' alt='X' className='w-[24px]' />, field: 'x', placeholder: 'Enter Your X link' },
-    { name: 'Tiktok', providerid: 5, icon: <img src='./public/assets/logos_tiktok-icon.png' alt='Tiktok' className='w-[24px]' />, field: 'tiktok', placeholder: 'Enter Your Tiktok link' },
-    { name: 'Pinterest', providerid: 6, icon: <img src='./public/assets/logos_pinterest.png' alt='Pinterest' className='w-[24px]' />, field: 'pinterest', placeholder: 'Enter Your Pinterest link' },
-  ];
+  const getAllPlatforms = async () => {
+    try {
+      const res = await axios.get("vendor/providers")
+      setProviders(res.data.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getAllPlatforms()
+  }, [])
+
+  const platforms = useMemo(() => {
+    return providers.map((provider) => {
+      const field = provider.name.toLowerCase().replace(/\s+/g, ''); // sanitize field name
+      return {
+        name: provider.name,
+        providerid: provider.id,
+        icon: (
+          <img
+            src={`${BASE_URL}/${provider.iconpath.replace(/^\/+/, '')}`}
+            alt={provider.name}
+            className="w-[24px]"
+          />
+        ),
+        field,
+        placeholder: `Enter your ${provider.name} link`,
+      };
+    });
+  }, [providers, BASE_URL]);
 
   const onFinish = async (values) => {
     try {
@@ -56,20 +82,20 @@ export const SocialMediaDetails = ({ onBack, onNext, data}) => {
   };
 
   useEffect(() => {
-    console.log(data)
-    if (data && Array.isArray(data)) {
+    if (data && Array.isArray(data) && platforms.length > 0) {
       const initialValues = {};
 
       data.forEach(item => {
-        const matchedPlatform = platforms.find(p => p.providerid === item.providerid);
-        if (matchedPlatform) {
-          initialValues[matchedPlatform.field] = item.handleslink;
+        const platform = platforms.find(p => p.providerid === item.providerid);
+        if (platform) {
+          initialValues[platform.field] = item.handleslink;
         }
       });
 
       form.setFieldsValue(initialValues);
     }
-  }, [data, form]);
+  }, [data, platforms, form]);
+
 
   return (
     <div className="bg-white p-6 rounded-3xl">

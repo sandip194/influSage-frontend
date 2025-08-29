@@ -99,7 +99,7 @@ const CampaignWizard = () => {
       title: "Step 2",
       component: (
         <CampaignStep2
-          data={campaignData.step2}
+          data={campaignData.p_vendorinfojson}
           onChange={(updated) => updateCampaignSection("step2", updated)}
           onNext={() => markStepComplete(1)}
           onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
