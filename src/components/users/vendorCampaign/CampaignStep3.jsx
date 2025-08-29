@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Input, Select, DatePicker } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
-import { useSelector } from "react-redux"; 
+import { useSelector } from "react-redux";
+import { RiImageAddLine } from "react-icons/ri";
 
 const { TextArea } = Input;
 const { Option } = Select;
 
 const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
-  const token = useSelector((state) => state.auth.token); 
+  const token = useSelector((state) => state.auth.token);
 
+  // Campaign form data
   const [formData, setFormData] = useState({
     title: data.title || "",
     description: data.description || "",
@@ -22,12 +24,38 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
     aboutBrand: data.aboutBrand || "",
   });
 
+  // Image upload states
+  const [profileImage, setProfileImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [profileError, setProfileError] = useState("");
+
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  const fileInputRef = useRef();
+
+  // Handle input change
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: false }));
+  };
+
+  // Handle image upload
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/webp"]; // PNG not allowed
+    if (!allowedTypes.includes(file.type)) {
+      setProfileError("Only JPG, JPEG, or WEBP files are allowed. PNG is not allowed.");
+      setProfileImage(null);
+      setPreview(null);
+      return;
+    }
+
+    setProfileError("");
+    setProfileImage(file);
+    setPreview(URL.createObjectURL(file));
   };
 
   const handleContinue = async () => {
@@ -46,6 +74,12 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
   setErrors(newErrors);
   const hasErrors = Object.values(newErrors).some((e) => e);
   if (hasErrors) return;
+
+  // Add profile image validation here
+  if (!profileImage && !preview) {
+    setProfileError("Please select profile image! Profile image is required.");
+    return;
+  }
 
   const payload = {
     name: formData.title,
@@ -66,6 +100,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
 
     const fd = new FormData();
     fd.append("p_campaignjson", JSON.stringify(payload));
+    if (profileImage) {
+      fd.append("profileImage", profileImage);
+    }
 
     const res = await axios.post("/vendor/create-campaign", fd, {
       headers: {
@@ -73,10 +110,10 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
       },
     });
 
-    console.log("Step 3 Saved:", res.data);
-    onNext(payload);
+    console.log("✅ Step 3 Saved:", res.data);
+    onNext({ ...payload, profileImageUrl: res.data.profileImageUrl || preview });
   } catch (err) {
-    console.error("API Error:", err.response?.data || err.message);
+    console.error("❌ API Error:", err.response?.data || err.message);
     alert("Failed to save campaign step. Try again.");
   } finally {
     setLoading(false);
@@ -85,6 +122,27 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
 
   return (
     <div className="bg-white p-6 rounded-2xl">
+      {/* Profile Image Upload */}
+      <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
+        <div className="relative m-auto w-30 h-30 rounded-full overflow-hidden bg-[#0D132D0D] hover:opacity-90 cursor-pointer border border-gray-100 group">
+          {preview ? (
+            <img src={preview} alt="Profile preview" className="object-cover w-full h-full" />
+          ) : (
+            <div className="flex items-center justify-center w-full h-full text-gray-800 opacity-50">
+              <RiImageAddLine className="w-8 h-8" />
+            </div>
+          )}
+          <input
+            type="file"
+            accept=".jpg,.jpeg,.webp"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          />
+        </div>
+      </div>
+      {profileError && <p className="text-red-500 text-sm mb-3">{profileError}</p>}
+
       {/* Campaign Title */}
       <label className="font-semibold block mb-2">Campaign Title</label>
       <Input
@@ -93,9 +151,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
         value={formData.title}
         onChange={(e) => handleChange("title", e.target.value)}
       />
-      {errors.title && (
-        <p className="text-red-500 text-sm mt-1">Please enter a title</p>
-      )}
+      {errors.title && <p className="text-red-500 text-sm mt-1">Please enter a title</p>}
 
       <hr className="my-4 border-gray-200" />
 
@@ -109,9 +165,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
         onChange={(e) => handleChange("description", e.target.value)}
       />
       {errors.description && (
-        <p className="text-red-500 text-sm mt-1">
-          Please enter a description
-        </p>
+        <p className="text-red-500 text-sm mt-1">Please enter a description</p>
       )}
 
       <hr className="my-4 border-gray-200" />
@@ -130,9 +184,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
       <hr className="my-4 border-gray-200" />
 
       {/* Budget */}
-      <label className="font-semibold block mb-2">
-        Budget <span>(Approx Price)</span>
-      </label>
+      <label className="font-semibold block mb-2">Budget <span>(Approx Price)</span></label>
       <div className="flex gap-4 mb-1">
         <Input
           size="large"
@@ -144,9 +196,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
         <span>{formData.currency}</span>
       </div>
       {errors.budgetAmount && (
-        <p className="text-red-500 text-sm mt-1">
-          Please enter a budget amount
-        </p>
+        <p className="text-red-500 text-sm mt-1">Please enter a budget amount</p>
       )}
 
       <hr className="my-4 border-gray-200" />
@@ -160,12 +210,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
           format="DD/MM/YYYY"
           placeholder="Start Date"
           value={formData.startDate}
-          disabledDate={(current) =>
-            current && current < dayjs().startOf("day")
-          }
+          disabledDate={(current) => current && current < dayjs().startOf("day")}
           onChange={(date) => handleChange("startDate", date)}
         />
-
         <DatePicker
           size="large"
           style={{ width: "100%" }}
@@ -175,22 +222,13 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
           disabledDate={(current) =>
             current &&
             (current < dayjs().startOf("day") ||
-              (formData.startDate &&
-                current < dayjs(formData.startDate).startOf("day")))
+              (formData.startDate && current < dayjs(formData.startDate).startOf("day")))
           }
           onChange={(date) => handleChange("endDate", date)}
         />
       </div>
-      {errors.startDate && (
-        <p className="text-red-500 text-sm mt-1">
-          Please select a start date
-        </p>
-      )}
-      {errors.endDate && (
-        <p className="text-red-500 text-sm mt-1">
-          Please select a valid end date
-        </p>
-      )}
+      {errors.startDate && <p className="text-red-500 text-sm mt-1">Please select a start date</p>}
+      {errors.endDate && <p className="text-red-500 text-sm mt-1">Please select a valid end date</p>}
 
       <hr className="my-4 border-gray-200" />
 
@@ -203,11 +241,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
         value={formData.aboutBrand}
         onChange={(e) => handleChange("aboutBrand", e.target.value)}
       />
-      {errors.aboutBrand && (
-        <p className="text-red-500 text-sm mt-1">
-          Please describe your brand
-        </p>
-      )}
+      {errors.aboutBrand && <p className="text-red-500 text-sm mt-1">Please describe your brand</p>}
 
       {/* Navigation Buttons */}
       <div className="flex gap-4 mt-8">
