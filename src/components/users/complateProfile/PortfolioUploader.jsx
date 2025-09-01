@@ -11,8 +11,10 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
   const [existingFiles, setExistingFiles] = useState([]);
   const [portfolioUrl, setPortfolioUrl] = useState('');
   const [fileError, setFileError] = useState('');
+  const [deletedFilePaths, setDeletedFilePaths] = useState([]);
 
-  const { token } = useSelector(state => state.auth);
+
+  const { token, userId } = useSelector(state => state.auth);
 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -30,10 +32,21 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
   // Remove file by uid from either existing or new list
   const handleRemove = (uid) => {
     if (uid.startsWith("existing-")) {
+      const fileToRemove = existingFiles.find(file => file.uid === uid);
+      if (!fileToRemove) return;
+
+      // Extract relative path
+      const relativePath = fileToRemove.url.replace(`${BASE_URL}/`, '');
+
+      // Save this path to be deleted later
+      setDeletedFilePaths(prev => [...prev, relativePath]);
+
+      // Remove from UI
       setExistingFiles(prev => prev.filter(file => file.uid !== uid));
     } else {
       setFileList(prev => prev.filter(file => file.uid !== uid));
     }
+
     setFileError('');
   };
 
@@ -47,6 +60,25 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
       return;
     }
 
+    // 🔴 1. First delete removed existing files from the server
+    try {
+      for (const filepath of deletedFilePaths) {
+        await axios.post(`/user/profile/delete-portfolio-file`, {
+          userId,
+          filepath,
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+    } catch (deleteErr) {
+      console.error("Delete failed", deleteErr);
+      message.error("Failed to delete removed files.");
+      return; // You may want to prevent form submission on delete failure
+    }
+
+    // 🔵 2. Continue with uploading remaining data
     const formData = new FormData();
 
     const existingFilePaths = existingFiles.map(file => ({
@@ -84,6 +116,7 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
       message.error("Failed to submit portfolio.");
     }
   };
+
 
   // Initialize existing files and portfolio URL from data prop
   useEffect(() => {

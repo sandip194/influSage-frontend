@@ -11,10 +11,14 @@ import { RiEyeLine, RiEyeOffLine } from '@remixicon/react';
 import { toast } from 'react-toastify';
 
 import { setCredentials } from '../../features/auth/authSlice';
+import SideImageSlider from '../../components/common/SideImageSlider';
 
 
 export const LoginForm = () => {
-    const dispatch = useDispatch();
+
+
+
+  const dispatch = useDispatch();
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
   const [showPassword, setShowPassword] = useState(false); // 👁️ Toggle state
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -36,33 +40,33 @@ export const LoginForm = () => {
   }, [setValue]);
 
   const submitHandler = async (data) => {
-  if (isLoggingIn) return; // prevent multiple submissions
-  setIsLoggingIn(true);
-  const loadingToast = toast.loading("Logging in...");
-  try {
-    const res = await axios.post("/user/login", data);
-    if (res.status === 200) {
-      if (data.rememberMe) {
-        localStorage.setItem('rememberedEmail', data.email);
-        localStorage.setItem("rememberedPassword", data.password);
-      }
-      toast.success(res.data.message || "Login successful!");
-      const { id, role, token, firstName, lastName } = res.data;
-      dispatch(setCredentials({ token, id, role, firstName, lastName }));
+    if (isLoggingIn) return; // prevent multiple submissions
+    setIsLoggingIn(true);
+    const loadingToast = toast.loading("Logging in...");
+    try {
+      const res = await axios.post("/user/login", data);
+      if (res.status === 200) {
+        if (data.rememberMe) {
+          localStorage.setItem('rememberedEmail', data.email);
+          localStorage.setItem("rememberedPassword", data.password);
+        }
+        toast.success(res.data.message || "Login successful!");
+        const { id, role, token, firstName, lastName } = res.data;
+        dispatch(setCredentials({ token, id, role, firstName, lastName }));
 
-      if (role === 2) {
-        navigate("/complate-vendor-profile");
-      } else if (role === 1) {
-        navigate("/complate-profile");
+        if (role === 2) {
+          navigate("/complate-vendor-profile");
+        } else if (role === 1) {
+          navigate("/complate-profile");
+        }
       }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Login failed!");
+    } finally {
+      toast.dismiss(loadingToast);
+      setIsLoggingIn(false);
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || "Login failed!");
-  } finally {
-    toast.dismiss(loadingToast);
-    setIsLoggingIn(false);
-  }
-};
+  };
   const validationSchema = {
     emailValidator: {
       required: {
@@ -89,18 +93,16 @@ export const LoginForm = () => {
   return (
     <div className="login-container">
       <div className="login-card h-90vh">
-        <div className="login-card-left">
-          <div className="branding">
-            <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
-            <p>Built for Creators.<br />Backed by Brands.</p>
-          </div>
-        </div>
-
+        <SideImageSlider />
         <div className="login-card-right">
+
           <form onSubmit={handleSubmit(submitHandler)}>
 
-            <h2>Welcome Back</h2>
-            <p>Your Journey Awaits—Log in to Continue.</p>
+            <div className="header-text">
+              <h2>Welcome Back</h2>
+              <p>Your Journey Awaits—Log in to Continue.</p>
+            </div>
+
 
             <label>Email
               <span className='text-red-500 text-sm'>*</span>
@@ -136,7 +138,7 @@ export const LoginForm = () => {
 
             <button type="submit" className="login-btn bg-wonderblue" disabled={isLoggingIn}> {isLoggingIn ? "Logging in..." : "Login"}</button>
 
-            <div className="divider">Or Login With</div>
+            {/* <div className="divider">Or Login With</div>
 
             <div className="social-buttons">
               <div className="social-btn">
@@ -148,7 +150,7 @@ export const LoginForm = () => {
               <div className="social-btn">
                 <img className='social-icon' src={appleIcon} alt="Apple" />
               </div>
-            </div>
+            </div> */}
 
             <div className="signup-link">
               Don’t have an account? <Link to="/role">Create New Account</Link>

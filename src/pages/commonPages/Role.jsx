@@ -4,6 +4,7 @@ import '../../assets/role.css'; // Reuse the same CSS
 import influencerIcon from '../../assets/icons/influencer.png';
 import vendorIcon from '../../assets/icons/vendor.png';
 import agencyIcon from '../../assets/icons/agancy.png';
+import SideImageSlider from '../../components/common/SideImageSlider';
 
 const roles = [
   { id: 1, label: 'Influencer', icon: influencerIcon },
@@ -29,13 +30,7 @@ const Role = () => {
   return (
     <div className="login-container">
       <div className="login-card h-90vh">
-        <div className="login-card-left">
-          <div className="branding">
-            <h2>InfluSage</h2>
-            <p>Built for Creators.<br />Backed by Brands.</p>
-          </div>
-        </div>
-
+        <SideImageSlider/>
       <div className="login-right">
         <div className="form-box">
           <h2>Select Your Role</h2>

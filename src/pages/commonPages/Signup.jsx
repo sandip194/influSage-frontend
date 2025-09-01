@@ -5,6 +5,7 @@ import { RiEyeLine, RiEyeOffLine } from '@remixicon/react';
 import '../../assets/login.css'; // Same CSS used for login & signup
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import SideImageSlider from '../../components/common/SideImageSlider';
 
 export const Signup = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -55,13 +56,7 @@ export const Signup = () => {
     <div className="login-container">
       <div className={`login-card h-90vh`}>
         {/* Left Image Section */}
-        <div className="login-card-left">
-          <div className="branding">
-            <h2>InfluSage</h2>
-            <p>Join the community.<br />Empower your presence.</p>
-          </div>
-        </div>
-
+        <SideImageSlider/>
         {/* Right Form Section */}
         <div className="login-card-right">
           <form onSubmit={handleSubmit(submitHandler)}>

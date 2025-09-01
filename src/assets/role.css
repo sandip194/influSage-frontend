@@ -27,8 +27,8 @@
   flex: 1;
   color: white;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: start;
+  justify-content: start;
   padding: 30px;
 }
 
@@ -44,7 +44,7 @@
 
 .branding p {
   font-size: 16px;
-  color: #ddd;
+  color: #0d0e2f;
 }
 
 /* Right role selection form */

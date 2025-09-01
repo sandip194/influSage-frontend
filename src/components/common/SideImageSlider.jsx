@@ -1,0 +1,63 @@
+// src/components/SideImageSlider.jsx
+import React, { useEffect, useState } from 'react';
+
+const slides = [
+  {
+    image: 'https://images.pexels.com/photos/7081099/pexels-photo-7081099.jpeg',
+    title: 'Empower Your Influence',
+    description: 'Join top creators shaping brand stories globally.',
+  },
+  {
+    image: 'https://images.pexels.com/photos/7081101/pexels-photo-7081101.jpeg',
+    title: 'Connect. Create. Collaborate.',
+    description: 'Fuel your passion by partnering with the best brands.',
+  },
+  {
+    image: 'https://images.pexels.com/photos/7081095/pexels-photo-7081095.jpeg',
+    title: 'Be Seen. Be Valued.',
+    description: 'Let your creativity shine on a platform built for you.',
+  },
+  {
+    image: 'https://images.pexels.com/photos/7081113/pexels-photo-7081113.jpeg',
+    title: 'Level Up Your Content Game',
+    description: 'Insights, tools, and connections — all in one place.',
+  },
+];
+
+const SideImageSlider = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 5000); // 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const { image, title, description } = slides[currentSlide];
+
+  return (
+    <div className="relative flex-1 min-h-full hidden md:flex items-start justify-start p-8 text-white overflow-hidden">
+      {/* Background image */}
+      <img
+        src={image}
+        alt="Slide"
+        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000"
+      />
+
+      {/* Dark gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0d132da4] z-10" />
+
+      {/* Content */}
+      <div className="relative z-20 max-w-sm">
+        <div className="mb-5">
+          <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+        </div>
+        <h2 className="text-md text-[#0f1533] font-bold mb-0 animate-fade-in">{title}</h2>
+        <p className="text-sm text-[#0f1533] leading-relaxed animate-fade-in">{description}</p>
+      </div>
+    </div>
+  );
+};
+
+export default SideImageSlider;

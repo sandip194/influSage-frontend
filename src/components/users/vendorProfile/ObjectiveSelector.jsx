@@ -85,23 +85,23 @@ const ObjectiveSelector = ({ onBack, onNext, data }) => {
             key={obj.id}
             onClick={() => handleSelection(obj.id)}
             className={`flex justify-between items-center border rounded-2xl px-4 py-4 cursor-pointer transition-all ${selected === obj.id
-                ? "bg-[#0D132DE5] border-[#0D132DE5] text-white"
-                : "bg-white border-gray-300 text-black hover:bg-gray-50"
+                ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                : "bg-white text-black border-gray-300 hover:border-[#141843]"
               }`}
           >
             {/* Objective Content */}
             <div className="flex flex-col gap-1 pr-3">
-              <h3 className={`font-bold ${selected === obj.id ? "text-white" : "text-[#141843]"}`}>
+              <h3 className={`font-bold text-[#141843]`}>
                 {obj.name}
               </h3>
-              <p className="text-sm text-gray-400">{obj.description}</p>
+              <p className="text-sm text-gray-600">{obj.description}</p>
             </div>
 
             {/* Custom Checkbox */}
             <div
-              className={`flex items-center justify-center rounded-full border transition-all ${selected === obj.id
-                  ? "bg-[#12B76A] p-1 border-0 text-white"
-                  : "bg-transparent p-3 border-gray-400"
+              className={`flex items-center  justify-center rounded-full border transition-all ${selected === obj.id
+                  ? "bg-[#141843] border-[#0D132D26] p-0 text-white"
+                  : "bg-transparent border-gray-400 p-[10px] text-transparent"
                 }`}
             >
               {selected === obj.id && <RiCheckLine size={22} />}

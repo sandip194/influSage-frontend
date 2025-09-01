@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import SideImageSlider from '../../components/common/SideImageSlider';
 
 export const VerifyEmailOrMobile = () => {
     const navigate = useNavigate();
@@ -110,16 +111,10 @@ export const VerifyEmailOrMobile = () => {
         <div className="login-container">
 
             <div className="login-card h-90vh">
-                <div className="login-card-left">
-                    <div className="branding">
-                        <h2>InfluSage</h2>
-                        <p>Verify Your Email or Mobile</p>
-                    </div>
-                </div>
+                <SideImageSlider/>
+
+
                 <div className="login-card-right">
-
-
-
                     <form onSubmit={handleSubmit}>
                         <h2>Verification Required</h2>
                         <p>Please verify your email or mobile number to continue.</p>

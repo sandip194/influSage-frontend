@@ -3,8 +3,6 @@
 @import "tailwindcss";
 
 
-
-
 .login-container {
   display: flex;
   justify-content: center;
@@ -27,27 +25,52 @@
 
 /* ===== Left Section ===== */
 .login-card-left {
-  float: 1;
-  background: url("https://images.pexels.com/photos/8119553/pexels-photo-8119553.jpeg?_gl=1*1itor20*_ga*MTc5MDkwNzA0Ni4xNzUzMDk0NTAx*_ga_8JE65Q40S6*czE3NTMxMDM0MTUkbzMkZzEkdDE3NTMxMDM0NDUkajMwJGwwJGgw") center/cover no-repeat;
   position: relative;
+  flex: 1;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: flex-start;
   padding: 30px;
+  overflow: hidden;
   color: white;
+}
+
+.slider-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transition: opacity .3s ease-in-out;
+  opacity: 1;
+  animation: fadeIn .2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0.3;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .login-card-left::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #000000);
+  z-index: 1;
 }
 
 .branding {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
+
 
 .branding h2 {
   font-size: 2rem;
@@ -61,11 +84,12 @@
 /* ===== Right Section ===== */
 .login-card-right {
   flex: 1.5;
-  padding: 30px;
+  padding: 10px 30px;
   background-color: white;
   display: flex;
-  flex-direction: column;
   justify-content: center;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .login-card-right h2 {
@@ -136,7 +160,7 @@
   position: absolute;
   right: 10px;
   margin: 10px;
-  color: black!important;
+  color: black !important;
 }
 
 .divider {
