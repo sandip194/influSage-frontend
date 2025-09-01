@@ -1,73 +1,112 @@
-import React, { useState } from 'react';
-import { Upload, message } from 'antd';
+import React, { useState, useEffect } from "react";
+import { Upload, message } from "antd";
 import {
   UploadOutlined,
   DeleteOutlined,
   FilePdfOutlined,
   FileWordOutlined,
   FileUnknownOutlined,
-} from '@ant-design/icons';
+} from "@ant-design/icons";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
 const { Dragger } = Upload;
 
-const CampaignStep4 = ({ onBack, onNext }) => {
-  const [fileList, setFileList] = useState([]);
+const CampaignStep4 = ({ onBack, onNext, campaignId }) => {
+  const [fileList, setFileList] = useState([]); 
   const [loading, setLoading] = useState(false);
   const token = useSelector((state) => state.auth.token);
 
+  // Allowed types & size check
   const beforeUpload = (file) => {
     const allowedTypes = [
-      'image/png', 'image/jpeg', 'image/jpg',
-      'video/mp4', 'video/quicktime',
-      'application/pdf', 'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      "image/png",
+      "image/jpeg",
+      "image/jpg",
+      "video/mp4",
+      "video/quicktime",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
     const isAllowed = allowedTypes.includes(file.type);
     const isLt25M = file.size / 1024 / 1024 < 25;
 
-    if (!isAllowed) message.error('Only PNG, JPG, MP4, MOV, PDF, DOC, DOCX files are allowed');
-    if (!isLt25M) message.error('File must be smaller than 25MB');
+    if (!isAllowed)
+      message.error(
+        "Only PNG, JPG, MP4, MOV, PDF, DOC, DOCX files are allowed"
+      );
+    if (!isLt25M) message.error("File must be smaller than 25MB");
 
     return isAllowed && isLt25M;
   };
 
-  const handleRemove = (uid) => {
-    setFileList(prev => prev.filter(file => file.uid !== uid));
+  const handleRemove = async (uid) => {
+    const fileToRemove = fileList.find((f) => f.uid === uid);
+
+    if (fileToRemove?.serverFilePath) {
+      // Call delete API to remove file from server
+      try {
+        await axios.post(
+          "/vendor/campaign/delete-file",
+          {
+            campaignId,
+            filepath: fileToRemove.serverFilePath,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        message.success("File deleted successfully");
+      } catch (error) {
+        console.error("Delete file error:", error);
+        message.error("Failed to delete file from server");
+        return; 
+      }
+    }
+
+    setFileList((prev) => prev.filter((file) => file.uid !== uid));
   };
 
   const handleContinue = async () => {
-  if (fileList.length === 0) {
-    message.error("Please upload at least one reference file.");
-    return;
-  }
+    if (fileList.length === 0) {
+      message.error("Please upload at least one reference file.");
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const formData = new FormData();
+      const formData = new FormData();
+      fileList.forEach(({ file }) => {
+        formData.append("Files", file);
+      });
 
-    fileList.forEach(({ file }) => {
-      formData.append("Files", file); 
-    });
+      const res = await axios.post("/vendor/create-campaign", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-    const res = await axios.post("/vendor/create-campaign", formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
+      if (res.data.uploadedFiles) {
+        setFileList((prev) =>
+          prev.map((fileItem, index) => ({
+            ...fileItem,
+            serverFilePath: res.data.uploadedFiles[index] || null,
+          }))
+        );
+      }
 
-    console.log("Saved Step 4:", res.data);
-    onNext();
-  } catch (err) {
-    console.error("API Error:", err.response?.data || err.message);
-    alert("Failed to save campaign step. Try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+      message.success("Files uploaded successfully");
+      onNext();
+    } catch (err) {
+      console.error("API Error:", err.response?.data || err.message);
+      message.error("Failed to save campaign step. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-white p-6 rounded-3xl">
@@ -80,12 +119,12 @@ const CampaignStep4 = ({ onBack, onNext }) => {
         fileList={[]}
         beforeUpload={(file) => {
           if (beforeUpload(file)) {
-            setFileList(prev => [
+            setFileList((prev) => [
               ...prev,
               { uid: `${Date.now()}-${file.name}`, file },
             ]);
           }
-          return false; 
+          return false;
         }}
         showUploadList={false}
       >
@@ -103,10 +142,10 @@ const CampaignStep4 = ({ onBack, onNext }) => {
         <div className="flex gap-3 overflow-x-auto mb-8 flex-wrap justify-center mt-6">
           {fileList.map(({ uid, file }) => {
             const { type } = file;
-            const isImage = type.startsWith('image/');
-            const isVideo = type.startsWith('video/');
-            const isPdf = type === 'application/pdf';
-            const isDoc = type.includes('word');
+            const isImage = type.startsWith("image/");
+            const isVideo = type.startsWith("video/");
+            const isPdf = type === "application/pdf";
+            const isDoc = type.includes("word");
             const previewUrl = URL.createObjectURL(file);
 
             return (
@@ -115,9 +154,18 @@ const CampaignStep4 = ({ onBack, onNext }) => {
                 className="relative w-[100px] h-[120px] rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center"
               >
                 {isImage ? (
-                  <img src={previewUrl} alt="preview" className="w-full h-full object-cover" />
+                  <img
+                    src={previewUrl}
+                    alt="preview"
+                    className="w-full h-full object-cover"
+                  />
                 ) : isVideo ? (
-                  <video src={previewUrl} className="w-full h-full object-cover" muted playsInline />
+                  <video
+                    src={previewUrl}
+                    className="w-full h-full object-cover"
+                    muted
+                    playsInline
+                  />
                 ) : isPdf ? (
                   <FilePdfOutlined className="text-4xl text-red-500" />
                 ) : isDoc ? (

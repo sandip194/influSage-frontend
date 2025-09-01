@@ -5,21 +5,24 @@ import { useSelector } from "react-redux";
 import {
   RiCheckboxCircleFill,
   RiDeleteBin6Line,
-  RiFacebookBoxFill,
-  RiInstagramFill,
   RiMenLine,
   RiMoneyRupeeCircleLine,
   RiStackLine,
   RiTranslate,
-  RiYoutubeFill,
-} from "@remixicon/react";
+} from "react-icons/ri";
 
 const CampaignReviewStep = ({ onEdit }) => {
   const { token, userId } = useSelector((state) => state.auth) || {};
   const [campaignData, setCampaignData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch campaign data
+  const getFullUrl = (path) => {
+    if (!path) return null;
+    return path.startsWith("http")
+      ? path
+      : `http://localhost:3001/${path.replace(/^\/+/, "")}`;
+  };
+
   useEffect(() => {
     const fetchCampaign = async () => {
       try {
@@ -33,7 +36,6 @@ const CampaignReviewStep = ({ onEdit }) => {
           headers: { Authorization: `Bearer ${authToken}` },
         });
 
-        // ✅ Save campaignParts only
         setCampaignData(res.data?.campaignParts || {});
       } catch (error) {
         console.error(error);
@@ -48,7 +50,50 @@ const CampaignReviewStep = ({ onEdit }) => {
     fetchCampaign();
   }, [token, userId]);
 
-  // ✅ Finalize campaign
+   const handleDeleteReference = async (fileToDelete) => {
+      if (!fileToDelete || !fileToDelete.filepath) {
+        toast.error("Invalid file selected for deletion.");
+        return;
+      }
+  
+      try {
+        const authToken = token || localStorage.getItem("token");
+        if (!authToken) {
+          toast.error("No token found. Please log in again.");
+          return;
+        }
+  
+        // Call delete API - adapt URL if needed
+        const res = await axios.post(
+          "/vendor/campaign/delete-file",
+          {
+             filepath: fileToDelete.filepath
+          },
+          {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }
+        );
+  
+        if (res.data.status) {
+          // Remove deleted file from local state
+          setCampaignData((prev) => ({
+            ...prev,
+            p_campaignfilejson: prev.p_campaignfilejson.filter(
+              (f) => f.filepath !== fileToDelete.filepath
+            ),
+          }));
+          toast.success("Reference file deleted successfully");
+        } else {
+          toast.error(res.data.message || "Failed to delete reference file");
+        }
+      } catch (error) {
+        console.error("Delete reference file error:", error);
+        toast.error(
+          error.response?.data?.message || "Failed to delete reference file"
+        );
+      }
+    };
+
   const handleCreateCampaign = async () => {
     try {
       const authToken = token || localStorage.getItem("token");
@@ -65,6 +110,11 @@ const CampaignReviewStep = ({ onEdit }) => {
         references: campaignData?.p_campaignfilejson || [],
         contenttypes: campaignData?.p_contenttypejson || [],
       };
+      console.log("Objective:", JSON.stringify(payload.objective, null, 2));
+      console.log("Vendor Info:", JSON.stringify(payload.vendorinfo, null, 2));
+      console.log("Campaign:", JSON.stringify(payload.campaign, null, 2));
+      console.log("References:", JSON.stringify(payload.references, null, 2));
+      console.log("Content Types:", JSON.stringify(payload.contenttypes, null, 2));
 
       const res = await axios.post("/vendor/finalize-campaign", payload, {
         headers: {
@@ -76,23 +126,19 @@ const CampaignReviewStep = ({ onEdit }) => {
       toast.success(res.data.message || "Campaign created successfully!");
     } catch (error) {
       console.error(error);
-      toast.error(
-        error.response?.data?.message || "Failed to create campaign"
-      );
+      toast.error(error.response?.data?.message || "Failed to create campaign");
     }
   };
 
   if (loading) return <p>Loading...</p>;
   if (!campaignData) return <p>No campaign data found</p>;
 
-  // ✅ Extract dynamic parts directly
   const p_objectivejson = campaignData.p_objectivejson || {};
   const p_vendorinfojson = campaignData.p_vendorinfojson || {};
   const p_campaignjson = campaignData.p_campaignjson || {};
   const p_campaignfilejson = campaignData.p_campaignfilejson || [];
   const p_contenttypejson = campaignData.p_contenttypejson || [];
 
-  // ✅ Transform data
   const platforms = p_contenttypejson.map((p) => p.providername) || [];
   const languages =
     p_vendorinfojson.campaignlanguages?.map((l) => l.languagename) || [];
@@ -100,43 +146,42 @@ const CampaignReviewStep = ({ onEdit }) => {
     p_vendorinfojson.campaigninfluencertiers?.map(
       (t) => t.influencertiername
     ) || [];
-  const genders =
-    p_vendorinfojson.genderid === 1
-      ? ["Male"]
-      : p_vendorinfojson.genderid === 2
-      ? ["Female"]
-      : ["Other"];
-  const references = p_campaignfilejson.map((f) => f.filepath) || [];
+ const genders =
+  Array.isArray(p_vendorinfojson.genderid) && p_vendorinfojson.genderid.length > 0
+    ? p_vendorinfojson.genderid.map((id) => {
+        switch (id) {
+          case 1:
+            return "Male";
+          case 2:
+            return "Female";
+          case 3:
+            return "Other";
+        }
+      })
+    : ["Unspecified"];
+
+  const references = p_campaignfilejson.map((f) => getFullUrl(f.filepath)) || [];
   const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
 
   return (
     <div className="w-full text-sm overflow-x-hidden">
       <h1 className="text-2xl font-semibold mb-4">Review Campaign</h1>
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* ================= LEFT SIDE ================= */}
+        {/* LEFT SIDE */}
         <div className="flex-1 space-y-4">
           {/* Banner */}
           <div className="bg-white rounded-2xl overflow-hidden">
             <div className="relative h-40">
               {references[0] && (
-                <>
-                  <img
-                    src={references[0]}
-                    alt="Banner"
-                    className="w-full h-28 object-cover"
-                  />
-                  <img
-                    src={references[0]}
-                    alt="Logo"
-                    className="absolute rounded-full top-16 left-4 w-20 h-20 border-2 border-white shadow-md"
-                  />
-                </>
+                <img
+                  src={references[0]}
+                  alt="Logo"
+                  className="absolute rounded-full top-16 left-4 w-20 h-20 border-2 border-white shadow-md"
+                />
               )}
             </div>
             <div className="p-4">
-              <h2 className="font-semibold text-lg mb-1">
-                {p_campaignjson.name}
-              </h2>
+              <h2 className="font-semibold text-lg mb-1">{p_campaignjson.name}</h2>
               <p className="text-gray-500">{p_campaignjson.branddetail}</p>
 
               <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4">
@@ -147,7 +192,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                     <span> Platforms</span>
                   </div>
                   {platforms.length > 0
-                    ? platforms.map((p, i) => <p key={i}>{p}</p>)
+                    ? platforms.map((p, i) => <p key={p + i}>{p}</p>)
                     : "—"}
                 </div>
 
@@ -167,7 +212,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                     <span> Languages </span>
                   </div>
                   {languages.length > 0
-                    ? languages.map((l, i) => <p key={i}>{l}</p>)
+                    ? languages.map((l, i) => <p key={l + i}>{l}</p>)
                     : "—"}
                 </div>
 
@@ -178,7 +223,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                     <span> Gender </span>
                   </div>
                   {genders.map((g, i) => (
-                    <p key={i}>{g}</p>
+                    <p key={g + i}>{g}</p>
                   ))}
                 </div>
               </div>
@@ -200,39 +245,29 @@ const CampaignReviewStep = ({ onEdit }) => {
               <h3 className="font-semibold text-lg mb-4">Requirements</h3>
               <ul className="space-y-2 text-gray-700">
                 <li className="flex items-start gap-2">
-                  <RiCheckboxCircleFill />
+                  <RiCheckboxCircleFill size={20} />
                   <span>
-                    Post Duration:{" "}
-                    <strong>{p_objectivejson.postdurationdays || 0} days</strong>
+                    Post Duration: <strong>{p_objectivejson.postdurationdays || 0} days</strong>
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <RiCheckboxCircleFill />
+                  <RiCheckboxCircleFill size={20} />
                   <span>
                     Include Vendor Profile Link:{" "}
-                    <strong>
-                      {p_objectivejson.isincludevendorprofilelink ? "Yes" : "No"}
-                    </strong>
+                    <strong>{p_objectivejson.isincludevendorprofilelink ? "Yes" : "No"}</strong>
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <RiCheckboxCircleFill />
+                  <RiCheckboxCircleFill size={20} />
                   <span>
-                    Product Shipping:{" "}
-                    <strong>
-                      {p_vendorinfojson.isproductshipping ? "Yes" : "No"}
-                    </strong>
+                    Product Shipping: <strong>{p_vendorinfojson.isproductshipping ? "Yes" : "No"}</strong>
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <RiCheckboxCircleFill />
+                  <RiCheckboxCircleFill size={20} />
                   <span>
                     Influencer Tiers:{" "}
-                    <strong>
-                      {influencerTiers.length > 0
-                        ? influencerTiers.join(", ")
-                        : "—"}
-                    </strong>
+                    <strong>{influencerTiers.length > 0 ? influencerTiers.join(", ") : "—"}</strong>
                   </span>
                 </li>
               </ul>
@@ -241,10 +276,7 @@ const CampaignReviewStep = ({ onEdit }) => {
               <div className="flex flex-wrap gap-2 mt-4">
                 {tags.length > 0
                   ? tags.map((tag, i) => (
-                      <span
-                        key={i}
-                        className="px-3 py-1 bg-gray-100 rounded-full text-xs"
-                      >
+                      <span key={tag + i} className="px-3 py-1 bg-gray-100 rounded-full text-xs">
                         {tag}
                       </span>
                     ))
@@ -253,38 +285,41 @@ const CampaignReviewStep = ({ onEdit }) => {
             </div>
 
             {/* References */}
-            <div className="references py-4 border-b border-gray-200">
-              <h3 className="font-semibold mb-4 text-lg">References</h3>
-              <div className="flex gap-4 flex-wrap">
-                {references.length > 0
-                  ? references.map((ref, i) => (
-                      <div
-                        key={i}
-                        className="relative w-48 h-40 rounded-2xl overflow-hidden"
-                      >
-                        <img
-                          src={ref}
-                          alt="Reference"
-                          className="w-full h-full object-cover"
-                        />
-                        <button className="absolute top-2 right-2 bg-gray-100 bg-opacity-70 text-black p-2 rounded-full">
-                          <RiDeleteBin6Line className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))
-                  : "No references uploaded"}
-              </div>
-            </div>
+<div className="references py-4 border-b border-gray-200">
+  <h3 className="font-semibold mb-4 text-lg">References</h3>
+  <div className="flex gap-4 flex-wrap">
+    {p_campaignfilejson.length > 0
+      ? p_campaignfilejson.map((file, i) => (
+          <div key={file.filepath + i} className="relative w-48 h-40 rounded-2xl overflow-hidden">
+            <img src={getFullUrl(file.filepath)} alt="Reference" className="w-full h-full object-cover" />
+            <button
+              className="absolute top-2 right-2 bg-gray-100 bg-opacity-70 text-black p-2 rounded-full"
+              type="button"
+              onClick={() => handleDeleteReference(file)}
+            >
+              <RiDeleteBin6Line className="w-4 h-4" />
+            </button>
+          </div>
+        ))
+      : "No references uploaded"}
+  </div>
+</div>
           </div>
         </div>
 
-        {/* ================= RIGHT SIDE ================= */}
+        {/* RIGHT SIDE */}
         <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="font-semibold text-lg">Campaign Details</h3>
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">Campaign Number</p>
-              <p>{p_campaignjson.campaignnumber || "—"}</p>
+              <p>
+                {p_campaignjson.campaignnumber
+                  ? p_campaignjson.campaignnumber
+                  : p_campaignjson.id
+                  ? `CMP-${String(p_campaignjson.id).padStart(4, "0")}`
+                  : "—"}
+              </p>
             </div>
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">About Brand</p>
@@ -310,13 +345,9 @@ const CampaignReviewStep = ({ onEdit }) => {
             <ul className="space-y-3">
               {p_contenttypejson.length > 0 ? (
                 p_contenttypejson.map((p, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    {p.providername === "Instagram" && <RiInstagramFill />}
-                    {p.providername === "Facebook" && <RiFacebookBoxFill />}
-                    {p.providername === "YouTube" && <RiYoutubeFill />}
+                  <li key={p.providername + i} className="flex items-center gap-2">
                     <span>
-                      {p.providername}{" "}
-                      {p.caption ? `- ${p.caption}` : ""}
+                      {p.providername} {p.caption ? `- ${p.caption}` : ""}
                     </span>
                   </li>
                 ))
@@ -328,16 +359,19 @@ const CampaignReviewStep = ({ onEdit }) => {
         </div>
       </div>
 
+      {/* Buttons */}
       <div className="flex max-w-sm gap-3 mt-3">
         <button
           className="flex-1 bg-white border border-gray-300 text-gray-800 rounded-md py-2 hover:bg-gray-100"
           onClick={onEdit}
+          type="button"
         >
           Edit Campaign
         </button>
         <button
           className="flex-1 bg-gray-900 text-white rounded-md py-2 hover:bg-gray-800"
           onClick={handleCreateCampaign}
+          type="button"
         >
           Create Campaign
         </button>

@@ -1,4 +1,3 @@
-// CampaignStep2.jsx
 import React, { useState, useEffect } from "react";
 import { Select } from "antd";
 import axios from "axios";
@@ -26,28 +25,37 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
   const { userId, token } = useSelector((state) => state.auth);
 
   const [errors, setErrors] = useState({
-    gender: false,
-    shipProducts: false,
-    targetedInfluencers: false,
-    language: false,
+    genderid: false,
+    isproductshipping: false,
+    campaigninfluencertiers: false,
+    campaignlanguages: false,
   });
 
   const [loading, setLoading] = useState(false);
 
+  // Initialize formData with IDs extracted from incoming data JSON structure
   const [formData, setFormData] = useState({
-    gender: Array.isArray(data?.gender) ? data.gender : [],
-    shipProducts: typeof data?.shipProducts === "boolean" ? data.shipProducts : null,
-    targetedInfluencers: data?.targetedInfluencers ?? [],
-    language: data?.language ?? [],
+    genderid: Array.isArray(data?.genderid) ? data.genderid : [],
+    isproductshipping: typeof data?.isproductshipping === "boolean" ? data.isproductshipping : null,
+    campaigninfluencertiers: Array.isArray(data?.campaigninfluencertiers)
+      ? data.campaigninfluencertiers.map((t) => t.influencertierid)
+      : [],
+    campaignlanguages: Array.isArray(data?.campaignlanguages)
+      ? data.campaignlanguages.map((l) => l.languageid)
+      : [],
   });
 
   useEffect(() => {
     if (!data) return;
     setFormData({
-      gender: Array.isArray(data?.gender) ? data.gender : [],
-      shipProducts: typeof data?.shipProducts === "boolean" ? data.shipProducts : null,
-      targetedInfluencers: data?.targetedInfluencers ?? [],
-      language: data?.language ?? [],
+      genderid: Array.isArray(data?.genderid) ? data.genderid : [],
+      isproductshipping: typeof data?.isproductshipping === "boolean" ? data.isproductshipping : null,
+      campaigninfluencertiers: Array.isArray(data?.campaigninfluencertiers)
+        ? data.campaigninfluencertiers.map((t) => t.influencertierid)
+        : [],
+      campaignlanguages: Array.isArray(data?.campaignlanguages)
+        ? data.campaignlanguages.map((l) => l.languageid)
+        : [],
     });
   }, [data]);
 
@@ -95,7 +103,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
         const res = await axios.get("/vendor/influencer-type", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setInfluencerTiers(res.data.influencerType || []); 
+        setInfluencerTiers(res.data.influencerType || []);
       } catch (err) {
         console.error("Error fetching influencer tiers:", err);
       } finally {
@@ -107,31 +115,31 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
 
   const toggleGender = (id) => {
     setFormData((prev) => {
-      const isSelected = prev.gender.includes(id);
+      const isSelected = prev.genderid.includes(id);
       return {
         ...prev,
-        gender: isSelected ? prev.gender.filter((g) => g !== id) : [...prev.gender, id],
+        genderid: isSelected ? prev.genderid.filter((g) => g !== id) : [...prev.genderid, id],
       };
     });
-    setErrors((prev) => ({ ...prev, gender: false }));
+    setErrors((prev) => ({ ...prev, genderid: false }));
   };
 
   const handleShipProducts = (value) => {
-    setFormData({ ...formData, shipProducts: value });
-    setErrors((prev) => ({ ...prev, shipProducts: false }));
+    setFormData({ ...formData, isproductshipping: value });
+    setErrors((prev) => ({ ...prev, isproductshipping: false }));
   };
 
   const toggleInfluencerTier = (id) => {
     setFormData((prev) => {
-      const alreadySelected = prev.targetedInfluencers.includes(id);
+      const alreadySelected = prev.campaigninfluencertiers.includes(id);
       return {
         ...prev,
-        targetedInfluencers: alreadySelected
-          ? prev.targetedInfluencers.filter((i) => i !== id)
-          : [...prev.targetedInfluencers, id],
+        campaigninfluencertiers: alreadySelected
+          ? prev.campaigninfluencertiers.filter((i) => i !== id)
+          : [...prev.campaigninfluencertiers, id],
       };
     });
-    setErrors((prev) => ({ ...prev, targetedInfluencers: false }));
+    setErrors((prev) => ({ ...prev, campaigninfluencertiers: false }));
   };
 
   const handleMultiSelectChange = (field, values) => {
@@ -141,28 +149,29 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
 
   const handleContinue = async () => {
     const newErrors = {
-      gender: !formData.gender.length,
-      shipProducts: formData.shipProducts === null,
-      targetedInfluencers: formData.targetedInfluencers.length === 0,
-      language: formData.language.length === 0,
+      genderid: !formData.genderid.length,
+      isproductshipping: formData.isproductshipping === null,
+      campaigninfluencertiers: formData.campaigninfluencertiers.length === 0,
+      campaignlanguages: formData.campaignlanguages.length === 0,
     };
 
     setErrors(newErrors);
     if (Object.values(newErrors).some((e) => e)) return;
 
-    const campaigninfluencertiers = formData.targetedInfluencers.map((id) => {
+    // Map IDs back to full objects for JSON
+    const campaigninfluencertiers = formData.campaigninfluencertiers.map((id) => {
       const tier = influencerTiers.find((t) => t.id === id);
       return { influencertierid: tier.id, influencertiername: tier.name };
     });
 
-    const campaignlanguages = formData.language.map((id) => {
+    const campaignlanguages = formData.campaignlanguages.map((id) => {
       const lang = languages.find((l) => l.id === id);
       return { languageid: lang.id, languagename: lang.name };
     });
 
     const p_vendorinfojson = {
-      genderid: formData.gender,
-      isproductshipping: formData.shipProducts,
+      genderid: formData.genderid,
+      isproductshipping: formData.isproductshipping,
       campaigninfluencertiers,
       campaignlanguages,
     };
@@ -190,29 +199,31 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
   return (
     <div className="bg-white rounded-2xl">
       {/* Gender */}
-      <h2 className="text-xl font-semibold mb-4">Please select the gender(s) of influencers you'd like to work with</h2>
+      <h2 className="text-xl font-semibold mb-4">
+        Please select the gender(s) of influencers you'd like to work with
+      </h2>
       <div className="flex flex-wrap gap-4 mb-2">
         {genders.map(({ id, name }) => {
-          const isSelected = formData.gender.includes(id);
+          const isSelected = formData.genderid.includes(id);
           return (
             <div
               key={id}
               onClick={() => toggleGender(id)}
               className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
-
-          ${isSelected
-                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                  : "bg-white text-black border-gray-300  hover:border-[#141843]"
+                ${
+                  isSelected
+                    ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                    : "bg-white text-black border-gray-300 hover:border-[#141843]"
                 }`}
             >
-              <span className="capitalize font-medium text-sm">{label}</span>
-
+              <span className="capitalize font-medium text-sm">{name}</span>
 
               <div
                 className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
-            ${isSelected
-                    ? "bg-[#141843] border-[#0D132D26] text-white"
-                    : "bg-transparent border-gray-400 text-transparent"
+                  ${
+                    isSelected
+                      ? "bg-[#141843] border-[#0D132D26] text-white"
+                      : "bg-transparent border-gray-400 text-transparent"
                   }`}
               >
                 <RiCheckLine size={14} />
@@ -221,7 +232,11 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
           );
         })}
       </div>
-      {errors.gender && <div className="text-red-500 text-sm mb-4">Please select at least one gender</div>}
+      {errors.genderid && (
+        <div className="text-red-500 text-sm mb-4">
+          Please select at least one gender
+        </div>
+      )}
 
       <hr className="my-1 border-gray-200" />
 
@@ -230,7 +245,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
       <div className="flex gap-4 mb-2">
         {[{ label: "Yes", value: true }, { label: "No", value: false }].map(
           ({ label, value }) => {
-            const isSelected = formData.shipProducts === value;
+            const isSelected = formData.isproductshipping === value;
 
             return (
               <div
@@ -242,7 +257,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
                     : "bg-white text-black border-gray-300 hover:border-[#141843]"
                   }`}
               >
-                <span className={`capitalize font-medium text-sm ${isSelected ? "text-black" : "text-black"}`}>
+                <span className={`capitalize font-medium text-sm`}>
                   {label}
                 </span>
 
@@ -256,11 +271,11 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
                   <RiCheckLine size={14} />
                 </div>
               </div>
-           
-          );
-        })}
+            );
+          }
+        )}
       </div>
-      {errors.shipProducts && <div className="text-red-500 text-sm mb-4">Please select Yes or No</div>}
+      {errors.isproductshipping && <div className="text-red-500 text-sm mb-4">Please select Yes or No</div>}
 
       <hr className="my-1 border-gray-200" />
 
@@ -268,18 +283,17 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
       <h2 className="text-xl font-semibold mb-4 mt-6">Targeted Influencers</h2>
       <div className="flex-col space-y-2 flex-wrap gap-4 mb-2">
         {influencerTiers.map((tier) => {
-          const isSelected = formData.targetedInfluencers.includes(tier.id);
+          const isSelected = formData.campaigninfluencertiers.includes(tier.id);
           return (
             <div
               key={tier.id}
               onClick={() => toggleInfluencerTier(tier.id)}
               className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-56 sm:w-80 md:w-90
-
-          ${isSelected
-                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                  : "bg-white text-black border-gray-300  hover:border-[#141843]"
-                }`}
-
+          ${
+            isSelected
+              ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+              : "bg-white text-black border-gray-300  hover:border-[#141843]"
+          }`}
             >
               <span className="text-sm">
                 {tier.name} Influencer (
@@ -295,7 +309,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
           );
         })}
       </div>
-      {errors.targetedInfluencers && <div className="text-red-500 text-sm mb-4">Please select at least one influencer tier</div>}
+      {errors.campaigninfluencertiers && <div className="text-red-500 text-sm mb-4">Please select at least one influencer tier</div>}
 
       <hr className="my-1 border-gray-200" />
 
@@ -306,8 +320,8 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
         size="large"
         style={{ width: "100%" }}
         placeholder={loadingLanguages ? "Loading languages..." : "Select Languages"}
-        value={formData.language}
-        onChange={(values) => handleMultiSelectChange("language", values)}
+        value={formData.campaignlanguages}
+        onChange={(values) => handleMultiSelectChange("campaignlanguages", values)}
         className="mb-6"
         loading={loadingLanguages}
       >
@@ -317,7 +331,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
           </Option>
         ))}
       </Select>
-      {errors.language && <div className="text-red-500 text-sm mb-4 mt-2">Please select at least one language</div>}
+      {errors.campaignlanguages && <div className="text-red-500 text-sm mb-4 mt-2">Please select at least one language</div>}
 
       {/* Navigation */}
       <div className="flex gap-4 mt-6">

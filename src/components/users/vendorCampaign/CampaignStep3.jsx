@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Input, Select, DatePicker } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
@@ -7,22 +7,26 @@ import { RiImageAddLine } from "react-icons/ri";
 
 const { TextArea } = Input;
 const { Option } = Select;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL; // Ensure this is set in your environment variables
 
 const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
   const token = useSelector((state) => state.auth.token);
 
   // Campaign form data
-  const [formData, setFormData] = useState({
-    title: data.title || "",
-    description: data.description || "",
-    hashtags: data.hashtags || [],
-    budgetType: data.budgetType || "Fixed Price",
-    budgetAmount: data.budgetAmount || "",
-    currency: data.currency || "₹",
-    startDate: data.startDate ? dayjs(data.startDate) : null,
-    endDate: data.endDate ? dayjs(data.endDate) : null,
-    aboutBrand: data.aboutBrand || "",
-  });
+  const [formData, setFormData] = useState({});
+  useEffect(() => {
+    setFormData({
+      title: data.name || "",
+      description: data.description || "",
+      hashtags: data.hashtag || [],
+      budgetType: data.budgetType || "Fixed Price",
+      budgetAmount: data.estimatedbudget || "",
+      currency: data.currency || "₹",
+      startDate: data.startdate ? dayjs(data.startDate) : null,
+      endDate: data.enddate ? dayjs(data.endDate) : null,
+      aboutBrand: data.branddetail || "",
+    });
+  }, [data]);
 
   // Image upload states
   const [profileImage, setProfileImage] = useState(null);
@@ -47,7 +51,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
 
     const allowedTypes = ["image/jpeg", "image/jpg", "image/webp"]; // PNG not allowed
     if (!allowedTypes.includes(file.type)) {
-      setProfileError("Only JPG, JPEG, or WEBP files are allowed. PNG is not allowed.");
+      setProfileError(
+        "Only JPG, JPEG, or WEBP files are allowed. PNG is not allowed."
+      );
       setProfileImage(null);
       setPreview(null);
       return;
@@ -59,68 +65,78 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
   };
 
   const handleContinue = async () => {
-  const newErrors = {
-    title: !formData.title,
-    description: !formData.description,
-    budgetAmount: !formData.budgetAmount,
-    startDate: !formData.startDate,
-    endDate:
-      !formData.endDate ||
-      (formData.startDate &&
-        dayjs(formData.endDate).isBefore(dayjs(formData.startDate))),
-    aboutBrand: !formData.aboutBrand,
-  };
+    const newErrors = {
+      title: !formData.title,
+      description: !formData.description,
+      budgetAmount: !formData.budgetAmount,
+      startDate: !formData.startDate,
+      endDate:
+        !formData.endDate ||
+        (formData.startDate &&
+          dayjs(formData.endDate).isBefore(dayjs(formData.startDate))),
+      aboutBrand: !formData.aboutBrand,
+    };
 
-  setErrors(newErrors);
-  const hasErrors = Object.values(newErrors).some((e) => e);
-  if (hasErrors) return;
+    setErrors(newErrors);
+    const hasErrors = Object.values(newErrors).some((e) => e);
+    if (hasErrors) return;
 
-  const payload = {
-    name: formData.title,
-    description: formData.description,
-    estimatedbudget: parseFloat(formData.budgetAmount),
-    startdate: formData.startDate
-      ? formData.startDate.format("YYYY-MM-DD")
-      : null,
-    enddate: formData.endDate
-      ? formData.endDate.format("YYYY-MM-DD")
-      : null,
-    branddetail: formData.aboutBrand,
-    hashtags: formData.hashtags.map((tag) => ({ hashtag: tag })),
-  };
+    const payload = {
+      name: formData.title,
+      description: formData.description,
+      estimatedbudget: parseFloat(formData.budgetAmount),
+      startdate: formData.startDate
+        ? formData.startDate.format("YYYY-MM-DD")
+        : null,
+      enddate: formData.endDate ? formData.endDate.format("YYYY-MM-DD") : null,
+      branddetail: formData.aboutBrand,
+      hashtags: formData.hashtags.map((tag) => ({ hashtag: tag })),
+    };
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const fd = new FormData();
-    fd.append("p_campaignjson", JSON.stringify(payload));
-    if (profileImage) {
-      fd.append("profileImage", profileImage);
+      const fd = new FormData();
+      fd.append("p_campaignjson", JSON.stringify(payload));
+
+      if (profileImage) {
+        fd.append("photo", profileImage);
+      }
+
+      const res = await axios.post("/vendor/create-campaign", fd, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("step 3 Saved:", res.data);
+
+      const profileImageUrl =
+        res.data.campaignParts?.p_campaignjson?.photopath || preview;
+
+      onNext({
+        ...payload,
+        profileImageUrl: `${BASE_URL}/${profileImageUrl.replace(/^\/+/, "")}`,
+      });
+    } catch (err) {
+      console.error("❌ API Error:", err.response?.data || err.message);
+      alert("Failed to save campaign step. Try again.");
+    } finally {
+      setLoading(false);
     }
-
-    const res = await axios.post("/vendor/create-campaign", fd, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("✅ Step 3 Saved:", res.data);
-    onNext({ ...payload, profileImageUrl: res.data.profileImageUrl || preview });
-  } catch (err) {
-    console.error("❌ API Error:", err.response?.data || err.message);
-    alert("Failed to save campaign step. Try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="bg-white p-6 rounded-2xl">
       {/* Profile Image Upload */}
       <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
         <div className="relative m-auto w-30 h-30 rounded-full overflow-hidden bg-[#0D132D0D] hover:opacity-90 cursor-pointer border border-gray-100 group">
-          {preview ? (
-            <img src={preview} alt="Profile preview" className="object-cover w-full h-full" />
+          {preview || formData.profileImageUrl ? (
+            <img
+              src={preview || formData.profileImageUrl}
+              alt="Profile preview"
+              className="object-cover w-full h-full"
+            />
           ) : (
             <div className="flex items-center justify-center w-full h-full text-gray-800 opacity-50">
               <RiImageAddLine className="w-8 h-8" />
@@ -135,7 +151,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
           />
         </div>
       </div>
-      {profileError && <p className="text-red-500 text-sm mb-3">{profileError}</p>}
+      {profileError && (
+        <p className="text-red-500 text-sm mb-3">{profileError}</p>
+      )}
 
       {/* Campaign Title */}
       <label className="font-semibold block mb-2">Campaign Title</label>
@@ -145,7 +163,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
         value={formData.title}
         onChange={(e) => handleChange("title", e.target.value)}
       />
-      {errors.title && <p className="text-red-500 text-sm mt-1">Please enter a title</p>}
+      {errors.title && (
+        <p className="text-red-500 text-sm mt-1">Please enter a title</p>
+      )}
 
       <hr className="my-4 border-gray-200" />
 
@@ -178,7 +198,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
       <hr className="my-4 border-gray-200" />
 
       {/* Budget */}
-      <label className="font-semibold block mb-2">Budget <span>(Approx Price)</span></label>
+      <label className="font-semibold block mb-2">
+        Budget <span>(Approx Price)</span>
+      </label>
       <div className="flex gap-4 mb-1">
         <Input
           size="large"
@@ -190,7 +212,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
         <span>{formData.currency}</span>
       </div>
       {errors.budgetAmount && (
-        <p className="text-red-500 text-sm mt-1">Please enter a budget amount</p>
+        <p className="text-red-500 text-sm mt-1">
+          Please enter a budget amount
+        </p>
       )}
 
       <hr className="my-4 border-gray-200" />
@@ -204,7 +228,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
           format="DD/MM/YYYY"
           placeholder="Start Date"
           value={formData.startDate}
-          disabledDate={(current) => current && current < dayjs().startOf("day")}
+          disabledDate={(current) =>
+            current && current < dayjs().startOf("day")
+          }
           onChange={(date) => handleChange("startDate", date)}
         />
         <DatePicker
@@ -216,13 +242,19 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
           disabledDate={(current) =>
             current &&
             (current < dayjs().startOf("day") ||
-              (formData.startDate && current < dayjs(formData.startDate).startOf("day")))
-          }
+              (formData.startDate &&
+                current < dayjs(formData.startDate).startOf("day")))}
           onChange={(date) => handleChange("endDate", date)}
         />
       </div>
-      {errors.startDate && <p className="text-red-500 text-sm mt-1">Please select a start date</p>}
-      {errors.endDate && <p className="text-red-500 text-sm mt-1">Please select a valid end date</p>}
+      {errors.startDate && (
+        <p className="text-red-500 text-sm mt-1">Please select a start date</p>
+      )}
+      {errors.endDate && (
+        <p className="text-red-500 text-sm mt-1">
+          Please select a valid end date
+        </p>
+      )}
 
       <hr className="my-4 border-gray-200" />
 
@@ -235,7 +267,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
         value={formData.aboutBrand}
         onChange={(e) => handleChange("aboutBrand", e.target.value)}
       />
-      {errors.aboutBrand && <p className="text-red-500 text-sm mt-1">Please describe your brand</p>}
+      {errors.aboutBrand && (
+        <p className="text-red-500 text-sm mt-1">Please describe your brand</p>
+      )}
 
       {/* Navigation Buttons */}
       <div className="flex gap-4 mt-8">

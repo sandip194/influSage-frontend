@@ -7,10 +7,11 @@ const { TextArea } = Input;
 
 const CampaignStep5 = ({ onNext, onBack }) => {
   const { token } = useSelector((state) => state.auth) || {};
-  const [platforms, setPlatforms] = useState([]); 
+  const [platforms, setPlatforms] = useState({});
   const [formState, setFormState] = useState({});
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [globalError, setGlobalError] = useState("");
 
   useEffect(() => {
     const fetchPlatforms = async () => {
@@ -26,8 +27,11 @@ const CampaignStep5 = ({ onNext, onBack }) => {
             acc[item.providername] = [];
           }
           acc[item.providername].push({
-            id: item.providercontenttypeid,
-            label: item.contenttypename,
+            id: item.providercontenttypeid
+              ? String(item.providercontenttypeid)
+              : `${item.providerid}-${acc[item.providername].length}`,
+            label: item.contenttypename || "Unknown",
+            providerid: item.providerid,
           });
           return acc;
         }, {});
@@ -49,16 +53,20 @@ const CampaignStep5 = ({ onNext, onBack }) => {
   }, [token]);
 
   const toggleContentType = (platform, typeId) => {
+    const stringId = String(typeId);
     setFormState((prev) => {
-      const selected = prev[platform].selectedTypes;
-      const alreadySelected = selected.includes(typeId);
+      const selected = Array.isArray(prev[platform]?.selectedTypes)
+        ? prev[platform].selectedTypes
+        : [];
+      const alreadySelected = selected.includes(stringId);
+
       return {
         ...prev,
         [platform]: {
           ...prev[platform],
           selectedTypes: alreadySelected
-            ? selected.filter((id) => id !== typeId)
-            : [...selected, typeId],
+            ? selected.filter((id) => id !== stringId)
+            : [...selected, stringId],
         },
       };
     });
@@ -73,46 +81,50 @@ const CampaignStep5 = ({ onNext, onBack }) => {
 
   const handleContinue = async () => {
     const newErrors = {};
-    let hasError = false;
+    let validPlatforms = [];
 
-    const contenttypejson = Object.entries(formState).map(
-      ([platform, data]) => {
-        const selectedTypes = data.selectedTypes.map((typeId) => {
-          const type = platforms[platform].find((item) => item.id === typeId);
-          return {
-            contenttypename: type.label,
-            providercontenttypeid: typeId,
-          };
-        });
+    const contenttypejson = Object.entries(formState)
+      .map(([platform, data]) => {
+        const typeObjs = platforms[platform].filter((item) =>
+          (data.selectedTypes || []).includes(item.id)
+        );
 
-        if (selectedTypes.length === 0 || !data.caption.trim()) {
-          newErrors[platform] = {
-            type: selectedTypes.length === 0,
-            caption: !data.caption.trim(),
-          };
-          hasError = true;
+        // Skip completely empty platforms
+        if (!typeObjs.length && !data.caption.trim()) {
+          return null;
         }
 
-        const providerObj = Object.values(platforms)
-          .flat()
-          .find((t) => t.label === selectedTypes[0]?.contenttypename);
+        // If partially filled → error
+        if (!typeObjs.length || !data.caption.trim()) {
+          newErrors[platform] = {
+            type: !typeObjs.length,
+            caption: !data.caption.trim(),
+          };
+          return null;
+        }
+
+        validPlatforms.push(platform);
 
         return {
-          providerid: providerObj?.providerid || null,
+          providerid: typeObjs[0].providerid,
           providername: platform,
           caption: data.caption.trim(),
-          contenttypes: selectedTypes,
+          contenttypes: typeObjs.map((t) => ({
+            contenttypename: t.label,
+            providercontenttypeid: t.id,
+          })),
         };
-      }
-    );
+      })
+      .filter(Boolean);
 
     setErrors(newErrors);
 
-    if (hasError) {
-      message.error(
-        "Please select at least one type and add a caption for each platform."
-      );
+    // 🔹 Global error if no platform is fully valid
+    if (!contenttypejson.length) {
+      setGlobalError("Please select at least one platform (type + caption).");
       return;
+    } else {
+      setGlobalError("");
     }
 
     try {
@@ -120,9 +132,7 @@ const CampaignStep5 = ({ onNext, onBack }) => {
       await axios.post(
         "/vendor/create-campaign",
         { p_contenttypejson: contenttypejson },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       message.success("Step 5 saved successfully!");
@@ -146,21 +156,20 @@ const CampaignStep5 = ({ onNext, onBack }) => {
           <div key={platform} className="mb-5">
             <p className="font-semibold mb-2">{platform}</p>
             <div className="flex gap-2 mb-3 flex-wrap">
-             {types.map(({ id, label }, index) => (
-  <button
-    key={`type-${platform}-${id || index}`}  
-    type="button"
-    onClick={() => toggleContentType(platform, id)}
-    className={`px-6 py-2 rounded-xl cursor-pointer border ${
-      selectedTypes.includes(id)
-        ? "border-[#0D132D] font-semibold bg-gray-100"
-        : "border-gray-300"
-    }`}
-  >
-    {label}
-  </button>
-))}
-
+              {types.map(({ id, label }, idx) => (
+                <button
+                  key={`type-${platform}-${id || idx}`}
+                  type="button"
+                  onClick={() => toggleContentType(platform, id)}
+                  className={`px-6 py-2 rounded-xl cursor-pointer border ${
+                    selectedTypes.includes(String(id))
+                      ? "border-[#0D132D] font-semibold bg-gray-100"
+                      : "border-gray-300"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
             {platformErrors.type && (
@@ -186,6 +195,11 @@ const CampaignStep5 = ({ onNext, onBack }) => {
           </div>
         );
       })}
+
+      {/* 🔹 Global error */}
+      {globalError && (
+        <p className="text-red-500 text-sm mb-4">{globalError}</p>
+      )}
 
       <div className="flex gap-4 mt-6">
         <button
