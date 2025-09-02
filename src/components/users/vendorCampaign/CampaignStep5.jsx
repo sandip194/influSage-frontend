@@ -22,20 +22,21 @@ const CampaignStep5 = ({ onNext, onBack }) => {
 
         const apiPlatforms = res.data.providorType || [];
 
-        const grouped = apiPlatforms.reduce((acc, item) => {
+       const grouped = apiPlatforms.reduce((acc, item, index) => {
           if (!acc[item.providername]) {
-            acc[item.providername] = [];
-          }
-          acc[item.providername].push({
-            id: item.providercontenttypeid
-              ? String(item.providercontenttypeid)
-              : `${item.providerid}-${acc[item.providername].length}`,
-            label: item.contenttypename || "Unknown",
-            providerid: item.providerid,
-          });
-          return acc;
-        }, {});
+          acc[item.providername] = [];
+        }
 
+        acc[item.providername].push({
+          id: item.providercontenttypeid
+            ? Number(item.providercontenttypeid) 
+            : Number(`${item.providerid}${index}`), 
+          label: item.contenttypename || "Unknown",
+          providerid: item.providerid,
+        });
+
+        return acc;
+      }, {});
         setPlatforms(grouped);
 
         const initial = {};
@@ -52,26 +53,24 @@ const CampaignStep5 = ({ onNext, onBack }) => {
     fetchPlatforms();
   }, [token]);
 
-  const toggleContentType = (platform, typeId) => {
-    const stringId = String(typeId);
-    setFormState((prev) => {
-      const selected = Array.isArray(prev[platform]?.selectedTypes)
-        ? prev[platform].selectedTypes
-        : [];
-      const alreadySelected = selected.includes(stringId);
+      const toggleContentType = (platform, typeId) => {
+      setFormState((prev) => {
+        const selected = Array.isArray(prev[platform]?.selectedTypes)
+          ? prev[platform].selectedTypes
+          : [];
+        const alreadySelected = selected.includes(typeId);
 
-      return {
-        ...prev,
-        [platform]: {
-          ...prev[platform],
-          selectedTypes: alreadySelected
-            ? selected.filter((id) => id !== stringId)
-            : [...selected, stringId],
-        },
-      };
-    });
-  };
-
+        return {
+          ...prev,
+          [platform]: {
+            ...prev[platform],
+            selectedTypes: alreadySelected
+              ? selected.filter((id) => id !== typeId)
+              : [...selected, typeId],
+          },
+        };
+      });
+    };
   const handleCaptionChange = (platform, value) => {
     setFormState((prev) => ({
       ...prev,
@@ -156,20 +155,20 @@ const CampaignStep5 = ({ onNext, onBack }) => {
           <div key={platform} className="mb-5">
             <p className="font-semibold mb-2">{platform}</p>
             <div className="flex gap-2 mb-3 flex-wrap">
-              {types.map(({ id, label }, idx) => (
-                <button
-                  key={`type-${platform}-${id || idx}`}
-                  type="button"
-                  onClick={() => toggleContentType(platform, id)}
-                  className={`px-6 py-2 rounded-xl cursor-pointer border ${
-                    selectedTypes.includes(String(id))
-                      ? "border-[#0D132D] font-semibold bg-gray-100"
-                      : "border-gray-300"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+             {types.map(({ id, label }, idx) => (
+              <button
+                key={`type-${platform}-${id || idx}`}
+                type="button"
+                onClick={() => toggleContentType(platform, id)}
+                className={`px-6 py-2 rounded-xl cursor-pointer border ${
+                  selectedTypes.includes(id)
+                    ? "border-[#0D132D] font-semibold bg-gray-100"
+                    : "border-gray-300"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
             </div>
 
             {platformErrors.type && (

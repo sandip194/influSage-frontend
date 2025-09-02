@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Upload, message } from "antd";
 import {
   UploadOutlined,
@@ -12,12 +12,14 @@ import { useSelector } from "react-redux";
 
 const { Dragger } = Upload;
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+
 const CampaignStep4 = ({ onBack, onNext, campaignId }) => {
-  const [fileList, setFileList] = useState([]); 
+  const [fileList, setFileList] = useState([]);
   const [loading, setLoading] = useState(false);
   const token = useSelector((state) => state.auth.token);
 
-  // Allowed types & size check
+  // Allowed file validation
   const beforeUpload = (file) => {
     const allowedTypes = [
       "image/png",
@@ -32,11 +34,12 @@ const CampaignStep4 = ({ onBack, onNext, campaignId }) => {
     const isAllowed = allowedTypes.includes(file.type);
     const isLt25M = file.size / 1024 / 1024 < 25;
 
-    if (!isAllowed)
-      message.error(
-        "Only PNG, JPG, MP4, MOV, PDF, DOC, DOCX files are allowed"
-      );
-    if (!isLt25M) message.error("File must be smaller than 25MB");
+    if (!isAllowed) {
+      message.error("Only PNG, JPG, MP4, MOV, PDF, DOC, DOCX files are allowed");
+    }
+    if (!isLt25M) {
+      message.error("File must be smaller than 25MB");
+    }
 
     return isAllowed && isLt25M;
   };
@@ -45,10 +48,9 @@ const CampaignStep4 = ({ onBack, onNext, campaignId }) => {
     const fileToRemove = fileList.find((f) => f.uid === uid);
 
     if (fileToRemove?.serverFilePath) {
-      // Call delete API to remove file from server
       try {
         await axios.post(
-          "/vendor/campaign/delete-file",
+          `/vendor/campaign/delete-file`,
           {
             campaignId,
             filepath: fileToRemove.serverFilePath,
@@ -61,7 +63,7 @@ const CampaignStep4 = ({ onBack, onNext, campaignId }) => {
       } catch (error) {
         console.error("Delete file error:", error);
         message.error("Failed to delete file from server");
-        return; 
+        return;
       }
     }
 
@@ -82,7 +84,7 @@ const CampaignStep4 = ({ onBack, onNext, campaignId }) => {
         formData.append("Files", file);
       });
 
-      const res = await axios.post("/vendor/create-campaign", formData, {
+      const res = await axios.post(`/vendor/create-campaign`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -124,7 +126,7 @@ const CampaignStep4 = ({ onBack, onNext, campaignId }) => {
               { uid: `${Date.now()}-${file.name}`, file },
             ]);
           }
-          return false;
+          return false; 
         }}
         showUploadList={false}
       >
@@ -140,13 +142,21 @@ const CampaignStep4 = ({ onBack, onNext, campaignId }) => {
       {/* File Preview */}
       {fileList.length > 0 && (
         <div className="flex gap-3 overflow-x-auto mb-8 flex-wrap justify-center mt-6">
-          {fileList.map(({ uid, file }) => {
+          {fileList.map(({ uid, file, serverFilePath }) => {
             const { type } = file;
             const isImage = type.startsWith("image/");
             const isVideo = type.startsWith("video/");
             const isPdf = type === "application/pdf";
             const isDoc = type.includes("word");
-            const previewUrl = URL.createObjectURL(file);
+
+            // Use BASE_URL logic like profileImageUrl
+            const previewUrl = serverFilePath
+              ? `${BASE_URL}/${serverFilePath.replace(/^\/+/, "")}`
+              : null;
+
+            const localPreview = !serverFilePath
+              ? URL.createObjectURL(file)
+              : null;
 
             return (
               <div
@@ -155,13 +165,13 @@ const CampaignStep4 = ({ onBack, onNext, campaignId }) => {
               >
                 {isImage ? (
                   <img
-                    src={previewUrl}
+                    src={previewUrl || localPreview}
                     alt="preview"
                     className="w-full h-full object-cover"
                   />
                 ) : isVideo ? (
                   <video
-                    src={previewUrl}
+                    src={previewUrl || localPreview}
                     className="w-full h-full object-cover"
                     muted
                     playsInline

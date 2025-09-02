@@ -69,9 +69,9 @@ const CampaignWizard = () => {
           const newCompletion = [
             !!parts.p_objectivejson,
             !!parts.p_vendorinfojson,
-            !!parts.step3,
-            !!parts.step4,
-            !!parts.step5,
+            !!parts.p_campaignjson,
+            !!parts.p_campaignfilejson,
+            !!parts.p_contenttypejson,
           ];
           setCompletedSteps(newCompletion);
 

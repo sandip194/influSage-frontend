@@ -7,26 +7,34 @@ import { RiImageAddLine } from "react-icons/ri";
 
 const { TextArea } = Input;
 const { Option } = Select;
-const BASE_URL = import.meta.env.VITE_API_BASE_URL; // Ensure this is set in your environment variables
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
   const token = useSelector((state) => state.auth.token);
 
   // Campaign form data
   const [formData, setFormData] = useState({});
-  useEffect(() => {
-    setFormData({
-      title: data.name || "",
-      description: data.description || "",
-      hashtags: data.hashtag || [],
-      budgetType: data.budgetType || "Fixed Price",
-      budgetAmount: data.estimatedbudget || "",
-      currency: data.currency || "₹",
-      startDate: data.startdate ? dayjs(data.startDate) : null,
-      endDate: data.enddate ? dayjs(data.endDate) : null,
-      aboutBrand: data.branddetail || "",
-    });
-  }, [data]);
+useEffect(() => {
+  if (!data) return;
+
+  setFormData({
+    title: data.name || "",
+    description: data.description || "",
+    hashtags: Array.isArray(data.hashtags)
+      ? data.hashtags.map((tag) => tag.hashtag)
+      : [],
+    budgetType: data.budgetType || "Fixed Price",
+    budgetAmount: data.estimatedbudget || "",
+    currency: data.currency || "₹",
+    startDate: data.startdate ? dayjs(data.startdate) : null,
+    endDate: data.enddate ? dayjs(data.enddate) : null,
+    aboutBrand: data.branddetail || "",
+    profileImageUrl: data.photopath
+      ? `${BASE_URL}/${data.photopath.replace(/^\/+/, "")}`
+      : null,
+  });
+}, [data]);
+
 
   // Image upload states
   const [profileImage, setProfileImage] = useState(null);
@@ -64,67 +72,72 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
     setPreview(URL.createObjectURL(file));
   };
 
-  const handleContinue = async () => {
-    const newErrors = {
-      title: !formData.title,
-      description: !formData.description,
-      budgetAmount: !formData.budgetAmount,
-      startDate: !formData.startDate,
-      endDate:
-        !formData.endDate ||
-        (formData.startDate &&
-          dayjs(formData.endDate).isBefore(dayjs(formData.startDate))),
-      aboutBrand: !formData.aboutBrand,
-    };
-
-    setErrors(newErrors);
-    const hasErrors = Object.values(newErrors).some((e) => e);
-    if (hasErrors) return;
-
-    const payload = {
-      name: formData.title,
-      description: formData.description,
-      estimatedbudget: parseFloat(formData.budgetAmount),
-      startdate: formData.startDate
-        ? formData.startDate.format("YYYY-MM-DD")
-        : null,
-      enddate: formData.endDate ? formData.endDate.format("YYYY-MM-DD") : null,
-      branddetail: formData.aboutBrand,
-      hashtags: formData.hashtags.map((tag) => ({ hashtag: tag })),
-    };
-
-    try {
-      setLoading(true);
-
-      const fd = new FormData();
-      fd.append("p_campaignjson", JSON.stringify(payload));
-
-      if (profileImage) {
-        fd.append("photo", profileImage);
-      }
-
-      const res = await axios.post("/vendor/create-campaign", fd, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      console.log("step 3 Saved:", res.data);
-
-      const profileImageUrl =
-        res.data.campaignParts?.p_campaignjson?.photopath || preview;
-
-      onNext({
-        ...payload,
-        profileImageUrl: `${BASE_URL}/${profileImageUrl.replace(/^\/+/, "")}`,
-      });
-    } catch (err) {
-      console.error("❌ API Error:", err.response?.data || err.message);
-      alert("Failed to save campaign step. Try again.");
-    } finally {
-      setLoading(false);
-    }
+const handleContinue = async () => {
+  const newErrors = {
+    title: !formData.title,
+    description: !formData.description,
+    budgetAmount: !formData.budgetAmount,
+    startDate: !formData.startDate,
+    endDate:
+      !formData.endDate ||
+      (formData.startDate &&
+        dayjs(formData.endDate).isBefore(dayjs(formData.startDate))),
+    aboutBrand: !formData.aboutBrand,
   };
+
+  setErrors(newErrors);
+  const hasErrors = Object.values(newErrors).some((e) => e);
+  if (hasErrors) return;
+
+  // JSON payload (without photo path yet)
+  const payload = {
+    name: formData.title,
+    description: formData.description,
+    estimatedbudget: parseFloat(formData.budgetAmount),
+    startdate: formData.startDate
+      ? formData.startDate.format("YYYY-MM-DD")
+      : null,
+    enddate: formData.endDate ? formData.endDate.format("YYYY-MM-DD") : null,
+    branddetail: formData.aboutBrand,
+    hashtags: formData.hashtags.map((tag) => ({ hashtag: tag })),
+  };
+
+  try {
+    setLoading(true);
+
+    const fd = new FormData();
+    fd.append("p_campaignjson", JSON.stringify(payload));
+
+    if (profileImage) {
+      fd.append("photo", profileImage);
+    }
+
+    const res = await axios.post("/vendor/create-campaign", fd, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("step 3 Saved:", res.data);
+    const photoPath = res.data.photopath || res.data?.campaignParts?.photo;
+
+    const updatedPayload = {
+      ...payload,
+      photopath: photoPath,
+      profileImageUrl: photoPath
+        ? `${BASE_URL}/${photoPath.replace(/^\/+/, "")}`
+        : preview,
+    };
+
+    onNext(updatedPayload);
+  } catch (err) {
+    console.error("❌ API Error:", err.response?.data || err.message);
+    alert("Failed to save campaign step. Try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="bg-white p-6 rounded-2xl">
