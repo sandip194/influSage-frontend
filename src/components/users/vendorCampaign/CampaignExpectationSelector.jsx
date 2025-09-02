@@ -37,14 +37,15 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
     fetchObjectives();
   }, [token]);
 
-  // Pre-fill data if editing
-  useEffect(() => {
-    if (data?.objectiveid) setSelected(data.objectiveid);
-    if (data?.postdurationdays) setDurationDays(Number(data.postdurationdays));
-    if (typeof data?.isincludevendorprofilelink === "boolean") {
-      setAddLinkToBio(data.isincludevendorprofilelink);
-    }
-  }, [data]);
+    useEffect(() => {
+      setSelected(data?.objectiveid || "");
+      setDurationDays(data?.postdurationdays ? Number(data.postdurationdays) : "");
+      setAddLinkToBio(
+        typeof data?.isincludevendorprofilelink === "boolean"
+          ? data.isincludevendorprofilelink
+          : null
+      );
+    }, [data]);
 
   const handleContinue = async () => {
     const newErrors = {
@@ -101,36 +102,37 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
       <h2 className="text-xl font-semibold mb-6">
         What do you expect influencers to do for your campaign?
       </h2>
-
       <div className="space-y-2 mb-1">
-        {options.map((opt) => (
-          <div
-            key={opt.id || `objective-${index}`}
-            onClick={() => {
-               setSelected(opt.id); 
-               
-              setErrors((prev) => ({ ...prev, contentExpectation: false }));
-            }}
+        {options.map((opt) => {
+          const isSelected = selected === opt.id;
 
-            className={`flex justify-between items-center px-5 py-4 rounded-xl border cursor-pointer transition-all ${selected === opt.objectiveid
-              ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-              : "bg-white text-black border-gray-300  hover:border-[#141843]"
-              }`}
-
-          >
-            <span className="text-sm">{opt.objectivetext}</span>
-
+          return (
             <div
-
-              className={`w-6 h-6 flex items-center justify-center rounded-full border transition-all ${selected === opt.objectiveid
-                ? "bg-[#141843] border-[#0D132D26] text-white"
-                : "bg-transparent border-gray-400 text-transparent"
-                }`}
+              key={opt.id}
+              onClick={() => {
+                setSelected(opt.id);
+                setErrors((prev) => ({ ...prev, contentExpectation: false }));
+              }}
+              className={`flex justify-between items-center px-5 py-4 rounded-xl border cursor-pointer transition-all ${
+                isSelected
+                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                  : "bg-white text-black border-gray-300 hover:border-[#141843]"
+              }`}
             >
-              {selected === opt.objectiveid && <RiCheckLine size={18} />}
+              <span className="text-sm">{opt.name}</span>
+
+              <div
+                className={`w-6 h-6 flex items-center justify-center rounded-full border transition-all ${
+                  isSelected
+                    ? "bg-[#141843] border-[#0D132D26] text-white"
+                    : "bg-transparent border-gray-400 text-transparent"
+                }`}
+              >
+                {isSelected && <RiCheckLine size={18} />}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       {errors.contentExpectation && (
         <div className="text-red-500 text-sm mb-4">

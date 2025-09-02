@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -11,12 +11,12 @@ import CampaignStep4 from "../../../components/users/vendorCampaign/CampaignStep
 import CampaignStep5 from "../../../components/users/vendorCampaign/CampaignStep5";
 import CampaignReviewStep from "../../../components/users/vendorCampaign/CampaignReviewStep";
 
-const LOCAL_KEY = "campaign-progress";
-
 const CampaignWizard = () => {
   const { token } = useSelector((state) => state.auth);
+
   const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false, false]);
+  const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
+  const [lastCompletedStep, setLastCompletedStep] = useState(null);
 
   const [campaignData, setCampaignData] = useState({
     expectation: {},
@@ -24,44 +24,29 @@ const CampaignWizard = () => {
     step3: {},
     step4: {},
     step5: {},
-    profileParts: null, 
+    profileParts: null,
   });
 
-  // Update section data
+  // Update state when a section is changed
   const updateCampaignSection = (sectionKey, newData) => {
     setCampaignData((prev) => ({
       ...prev,
       [sectionKey]: newData,
     }));
-    localStorage.setItem(
-      LOCAL_KEY,
-      JSON.stringify({
-        step: currentStep,
-        data: { ...campaignData, [sectionKey]: newData },
-      })
-    );
   };
 
   const markStepComplete = (index) => {
     const updated = [...completedSteps];
-    if (!updated[index]) updated[index] = true;
-    setCompletedSteps(updated);
+    if (!updated[index]) {
+      updated[index] = true;
+      setCompletedSteps(updated);
+      setLastCompletedStep(index); 
+    }
 
-    if (index + 1 < steps.length) setCurrentStep(index + 1);
-    else setCurrentStep("review");
+    const nextStep = index + 1 < steps.length ? index + 1 : "review";
+    setCurrentStep(nextStep);
   };
 
-  // Load from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem(LOCAL_KEY);
-    if (stored) {
-      const { step, data } = JSON.parse(stored);
-      setCurrentStep(step);
-      setCampaignData(data);
-    }
-  }, []);
-
-  // Fetch campaign from API
   const getCampaignData = async () => {
     try {
       const res = await axios.get(`/vendor/campaign/01`, {
@@ -71,25 +56,46 @@ const CampaignWizard = () => {
       if (res.status === 200) {
         const parts = res.data?.campaignParts || null;
         if (parts) {
-          setCampaignData(parts);
+          setCampaignData({
+            expectation: parts.p_objectivejson || {},
+            step2: parts.p_vendorinfojson || {},
+            step3: parts.p_campaignjson || {},
+            step4: parts.p_campaignfilejson || {},
+            step5: parts.p_contenttypejson || {},
+            profileParts: parts || null,
+          });
+
+          // Auto-complete steps based on data
+          const newCompletion = [
+            !!parts.p_objectivejson,
+            !!parts.p_vendorinfojson,
+            !!parts.step3,
+            !!parts.step4,
+            !!parts.step5,
+          ];
+          setCompletedSteps(newCompletion);
+
+          const firstIncomplete = newCompletion.findIndex((v) => !v);
+          setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "review");
         }
       }
     } catch (err) {
       console.error("❌ Error fetching campaign:", err);
-      toast.error("Failed to fetch campaign data. Using temp data.");
+      toast.error("Failed to fetch campaign data.");
     }
   };
 
+  // Refetch on token or step completion
   useEffect(() => {
     if (token) getCampaignData();
-  }, [token]);
+  }, [token, lastCompletedStep]);
 
   const steps = [
     {
       title: "Expectation",
       component: (
         <CampaignExpectationSelector
-          data={campaignData.p_objectivejson}
+          data={campaignData.expectation}
           onChange={(updated) => updateCampaignSection("expectation", updated)}
           onNext={() => markStepComplete(0)}
         />
@@ -99,7 +105,7 @@ const CampaignWizard = () => {
       title: "Step 2",
       component: (
         <CampaignStep2
-          data={campaignData.p_vendorinfojson}
+          data={campaignData.step2}
           onChange={(updated) => updateCampaignSection("step2", updated)}
           onNext={() => markStepComplete(1)}
           onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
@@ -139,22 +145,20 @@ const CampaignWizard = () => {
         />
       ),
     },
-    {
-      title: "Review",
-      component: (
-        <CampaignReviewStep
-          campaignData={campaignData} 
-          onEdit={() => setCurrentStep(0)}
-        />
-      ),
-    },
   ];
 
   return (
-    <div className="flex-1 bg-white shadow-md rounded-lg p-6">
-      {currentStep === "review"
-        ? <CampaignReviewStep campaignData={campaignData} onEdit={() => setCurrentStep(0)} />
-        : steps[currentStep].component}
+    <div className="flex flex-col gap-4">
+      <div className="bg-white shadow rounded-lg p-6">
+        {currentStep === "review" ? (
+          <CampaignReviewStep
+            campaignData={campaignData}
+            onEdit={() => setCurrentStep(0)}
+          />
+        ) : (
+          steps[currentStep]?.component
+        )}
+      </div>
     </div>
   );
 };
