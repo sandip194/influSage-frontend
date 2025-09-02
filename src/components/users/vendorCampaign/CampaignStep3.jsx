@@ -12,58 +12,58 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
   const token = useSelector((state) => state.auth.token);
 
-  // Campaign form data
   const [formData, setFormData] = useState({});
-useEffect(() => {
-  if (!data) return;
-
-  setFormData({
-    title: data.name || "",
-    description: data.description || "",
-    hashtags: Array.isArray(data.hashtags)
-      ? data.hashtags.map((tag) => tag.hashtag)
-      : [],
-    budgetType: data.budgetType || "Fixed Price",
-    budgetAmount: data.estimatedbudget || "",
-    currency: data.currency || "₹",
-    startDate: data.startdate ? dayjs(data.startdate) : null,
-    endDate: data.enddate ? dayjs(data.enddate) : null,
-    aboutBrand: data.branddetail || "",
-    profileImageUrl: data.photopath
-      ? `${BASE_URL}/${data.photopath.replace(/^\/+/, "")}`
-      : null,
-  });
-}, [data]);
-
-
-  // Image upload states
   const [profileImage, setProfileImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [profileError, setProfileError] = useState("");
-
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const fileInputRef = useRef();
 
-  // Handle input change
+  useEffect(() => {
+    if (!data) return;
+
+    // Prefer p_campaignfilejson > photopath
+    const photoPath =
+      data.p_campaignfilejson?.[0]?.filepath || data.photopath || null;
+
+    const imageUrl = photoPath
+      ? `${BASE_URL}/${photoPath.replace(/^\/+/, "")}`
+      : null;
+
+    setFormData({
+      title: data.name || "",
+      description: data.description || "",
+      hashtags: Array.isArray(data.hashtags)
+        ? data.hashtags.map((tag) => tag.hashtag)
+        : [],
+      budgetType: data.budgetType || "Fixed Price",
+      budgetAmount: data.estimatedbudget || "",
+      currency: data.currency || "₹",
+      startDate: data.startdate ? dayjs(data.startdate) : null,
+      endDate: data.enddate ? dayjs(data.enddate) : null,
+      aboutBrand: data.branddetail || "",
+      profileImageUrl: imageUrl,
+    });
+
+    setPreview(imageUrl);
+  }, [data, BASE_URL]);
+
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: false }));
   };
 
-  // Handle image upload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/webp"]; // PNG not allowed
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      setProfileError(
-        "Only JPG, JPEG, or WEBP files are allowed. PNG is not allowed."
-      );
+      setProfileError("Only JPG, JPEG, or WEBP files are allowed. PNG is not allowed.");
       setProfileImage(null);
-      setPreview(null);
+      setPreview(formData.profileImageUrl || null);
       return;
     }
 
@@ -86,20 +86,20 @@ const handleContinue = async () => {
   };
 
   setErrors(newErrors);
-  const hasErrors = Object.values(newErrors).some((e) => e);
-  if (hasErrors) return;
+  if (Object.values(newErrors).some((e) => e)) return;
 
-  // JSON payload (without photo path yet)
   const payload = {
     name: formData.title,
     description: formData.description,
     estimatedbudget: parseFloat(formData.budgetAmount),
-    startdate: formData.startDate
-      ? formData.startDate.format("YYYY-MM-DD")
-      : null,
+    startdate: formData.startDate ? formData.startDate.format("YYYY-MM-DD") : null,
     enddate: formData.endDate ? formData.endDate.format("YYYY-MM-DD") : null,
     branddetail: formData.aboutBrand,
     hashtags: formData.hashtags.map((tag) => ({ hashtag: tag })),
+
+    photopath: profileImage
+      ? null 
+      : formData.profileImageUrl?.replace(`${BASE_URL}/`, "") || null,
   };
 
   try {
@@ -112,24 +112,11 @@ const handleContinue = async () => {
       fd.append("photo", profileImage);
     }
 
-    const res = await axios.post("/vendor/create-campaign", fd, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    await axios.post("/vendor/create-campaign", fd, {
+      headers: { Authorization: `Bearer ${token}` },
     });
 
-    console.log("step 3 Saved:", res.data);
-    const photoPath = res.data.photopath || res.data?.campaignParts?.photo;
-
-    const updatedPayload = {
-      ...payload,
-      photopath: photoPath,
-      profileImageUrl: photoPath
-        ? `${BASE_URL}/${photoPath.replace(/^\/+/, "")}`
-        : preview,
-    };
-
-    onNext(updatedPayload);
+    onNext();
   } catch (err) {
     console.error("❌ API Error:", err.response?.data || err.message);
     alert("Failed to save campaign step. Try again.");
@@ -138,15 +125,14 @@ const handleContinue = async () => {
   }
 };
 
-
   return (
     <div className="bg-white p-6 rounded-2xl">
       {/* Profile Image Upload */}
       <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
         <div className="relative m-auto w-30 h-30 rounded-full overflow-hidden bg-[#0D132D0D] hover:opacity-90 cursor-pointer border border-gray-100 group">
-          {preview || formData.profileImageUrl ? (
+          {preview ? (
             <img
-              src={preview || formData.profileImageUrl}
+              src={preview}
               alt="Profile preview"
               className="object-cover w-full h-full"
             />
@@ -164,9 +150,7 @@ const handleContinue = async () => {
           />
         </div>
       </div>
-      {profileError && (
-        <p className="text-red-500 text-sm mb-3">{profileError}</p>
-      )}
+      {profileError && <p className="text-red-500 text-sm mb-3">{profileError}</p>}
 
       {/* Campaign Title */}
       <label className="font-semibold block mb-2">Campaign Title</label>
@@ -176,9 +160,7 @@ const handleContinue = async () => {
         value={formData.title}
         onChange={(e) => handleChange("title", e.target.value)}
       />
-      {errors.title && (
-        <p className="text-red-500 text-sm mt-1">Please enter a title</p>
-      )}
+      {errors.title && <p className="text-red-500 text-sm mt-1">Please enter a title</p>}
 
       <hr className="my-4 border-gray-200" />
 
@@ -225,9 +207,7 @@ const handleContinue = async () => {
         <span>{formData.currency}</span>
       </div>
       {errors.budgetAmount && (
-        <p className="text-red-500 text-sm mt-1">
-          Please enter a budget amount
-        </p>
+        <p className="text-red-500 text-sm mt-1">Please enter a budget amount</p>
       )}
 
       <hr className="my-4 border-gray-200" />
@@ -241,9 +221,7 @@ const handleContinue = async () => {
           format="DD/MM/YYYY"
           placeholder="Start Date"
           value={formData.startDate}
-          disabledDate={(current) =>
-            current && current < dayjs().startOf("day")
-          }
+          disabledDate={(current) => current && current < dayjs().startOf("day")}
           onChange={(date) => handleChange("startDate", date)}
         />
         <DatePicker
@@ -264,9 +242,7 @@ const handleContinue = async () => {
         <p className="text-red-500 text-sm mt-1">Please select a start date</p>
       )}
       {errors.endDate && (
-        <p className="text-red-500 text-sm mt-1">
-          Please select a valid end date
-        </p>
+        <p className="text-red-500 text-sm mt-1">Please select a valid end date</p>
       )}
 
       <hr className="my-4 border-gray-200" />

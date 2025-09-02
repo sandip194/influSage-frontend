@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom"; 
 import {
   RiCheckboxCircleFill,
   RiDeleteBin6Line,
@@ -15,12 +16,14 @@ const CampaignReviewStep = ({ onEdit }) => {
   const { token, userId } = useSelector((state) => state.auth) || {};
   const [campaignData, setCampaignData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); 
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getFullUrl = (path) => {
     if (!path) return null;
     return path.startsWith("http")
       ? path
-      : `http://localhost:3001/${path.replace(/^\/+/, "")}`;
+      : `${BASE_URL}/${path.replace(/^\/+/, "")}`;
   };
 
   useEffect(() => {
@@ -50,49 +53,43 @@ const CampaignReviewStep = ({ onEdit }) => {
     fetchCampaign();
   }, [token, userId]);
 
-   const handleDeleteReference = async (fileToDelete) => {
-      if (!fileToDelete || !fileToDelete.filepath) {
-        toast.error("Invalid file selected for deletion.");
+  const handleDeleteReference = async (fileToDelete) => {
+    if (!fileToDelete || !fileToDelete.filepath) {
+      toast.error("Invalid file selected for deletion.");
+      return;
+    }
+
+    try {
+      const authToken = token || localStorage.getItem("token");
+      if (!authToken) {
+        toast.error("No token found. Please log in again.");
         return;
       }
-  
-      try {
-        const authToken = token || localStorage.getItem("token");
-        if (!authToken) {
-          toast.error("No token found. Please log in again.");
-          return;
-        }
-  
-        // Call delete API - adapt URL if needed
-        const res = await axios.post(
-          "/vendor/campaign/delete-file",
-          {
-             filepath: fileToDelete.filepath
-          },
-          {
-            headers: { Authorization: `Bearer ${authToken}` },
-          }
-        );
-  
-        if (res.data.status) {
-          // Remove deleted file from local state
-          setCampaignData((prev) => ({
-            ...prev,
-            p_campaignfilejson: prev.p_campaignfilejson.filter(
-              (f) => f.filepath !== fileToDelete.filepath
-            ),
-          }));
-          toast.success("Reference file deleted successfully");
-        } else {
-          toast.error(res.data.message || "Failed to delete reference file");
-        }
-      } catch (error) {
-        console.error("Delete reference file error:", error);
-        toast.error(
-          error.response?.data?.message || "Failed to delete reference file"
-        );
+
+      const res = await axios.post(
+        "/vendor/campaign/delete-file",
+        { filepath: fileToDelete.filepath },
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
+
+      if (res.data.status) {
+        setCampaignData((prev) => ({
+          ...prev,
+          p_campaignfilejson: prev.p_campaignfilejson.filter(
+            (f) => f.filepath !== fileToDelete.filepath
+          ),
+        }));
+        toast.success("Reference file deleted successfully");
+      } else {
+        toast.error(res.data.message || "Failed to delete reference file");
       }
-    };
+    } catch (error) {
+      console.error("Delete reference file error:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to delete reference file"
+      );
+    }
+  };
 
   const handleCreateCampaign = async () => {
     try {
@@ -110,11 +107,6 @@ const CampaignReviewStep = ({ onEdit }) => {
         references: campaignData?.p_campaignfilejson || [],
         contenttypes: campaignData?.p_contenttypejson || [],
       };
-      console.log("Objective:", JSON.stringify(payload.objective, null, 2));
-      console.log("Vendor Info:", JSON.stringify(payload.vendorinfo, null, 2));
-      console.log("Campaign:", JSON.stringify(payload.campaign, null, 2));
-      console.log("References:", JSON.stringify(payload.references, null, 2));
-      console.log("Content Types:", JSON.stringify(payload.contenttypes, null, 2));
 
       const res = await axios.post("/vendor/finalize-campaign", payload, {
         headers: {
@@ -124,6 +116,9 @@ const CampaignReviewStep = ({ onEdit }) => {
       });
 
       toast.success(res.data.message || "Campaign created successfully!");
+
+      // Redirect after success
+      navigate("/vendor-dashboard/vendor-campaign");
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || "Failed to create campaign");
@@ -160,7 +155,8 @@ const CampaignReviewStep = ({ onEdit }) => {
       })
     : ["Unspecified"];
 
-  const references = p_campaignfilejson.map((f) => getFullUrl(f.filepath)) || [];
+ 
+  const camp_profile = p_campaignjson?.photopath ? [getFullUrl(p_campaignjson.photopath)] : [];
   const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
 
   return (
@@ -172,13 +168,15 @@ const CampaignReviewStep = ({ onEdit }) => {
           {/* Banner */}
           <div className="bg-white rounded-2xl overflow-hidden">
             <div className="relative h-40">
-              {references[0] && (
-                <img
-                  src={references[0]}
-                  alt="Logo"
-                  className="absolute rounded-full top-16 left-4 w-20 h-20 border-2 border-white shadow-md"
-                />
-              )}
+              <div className="relative h-40">
+                {camp_profile[0] && (
+                  <img
+                    src={camp_profile[0]}
+                    alt="Campaign"
+                    className="absolute rounded-full top-9 left-4 w-27 h-27 border-2 border-white shadow-md"
+                  />
+                )}
+              </div>
             </div>
             <div className="p-4">
               <h2 className="font-semibold text-lg mb-1">{p_campaignjson.name}</h2>
@@ -285,25 +283,25 @@ const CampaignReviewStep = ({ onEdit }) => {
             </div>
 
             {/* References */}
-<div className="references py-4 border-b border-gray-200">
-  <h3 className="font-semibold mb-4 text-lg">References</h3>
-  <div className="flex gap-4 flex-wrap">
-    {p_campaignfilejson.length > 0
-      ? p_campaignfilejson.map((file, i) => (
-          <div key={file.filepath + i} className="relative w-48 h-40 rounded-2xl overflow-hidden">
-            <img src={getFullUrl(file.filepath)} alt="Reference" className="w-full h-full object-cover" />
-            <button
-              className="absolute top-2 right-2 bg-gray-100 bg-opacity-70 text-black p-2 rounded-full"
-              type="button"
-              onClick={() => handleDeleteReference(file)}
-            >
-              <RiDeleteBin6Line className="w-4 h-4" />
-            </button>
-          </div>
-        ))
-      : "No references uploaded"}
-  </div>
-</div>
+            <div className="references py-4 border-b border-gray-200">
+              <h3 className="font-semibold mb-4 text-lg">References</h3>
+              <div className="flex gap-4 flex-wrap">
+                {p_campaignfilejson.length > 0
+                  ? p_campaignfilejson.map((file, i) => (
+                      <div key={file.filepath + i} className="relative w-48 h-40 rounded-2xl overflow-hidden">
+                        <img src={getFullUrl(file.filepath)} alt="Reference" className="w-full h-full object-cover" />
+                        <button
+                          className="absolute top-2 right-2 bg-gray-100 bg-opacity-70 text-black p-2 rounded-full"
+                          type="button"
+                          onClick={() => handleDeleteReference(file)}
+                        >
+                          <RiDeleteBin6Line className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))
+                  : "No references uploaded"}
+              </div>
+            </div>
           </div>
         </div>
 

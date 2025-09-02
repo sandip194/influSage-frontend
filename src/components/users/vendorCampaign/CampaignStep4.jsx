@@ -1,77 +1,90 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Upload, message } from "antd";
-import {
-  UploadOutlined,
-  DeleteOutlined,
-  FilePdfOutlined,
-  FileWordOutlined,
-  FileUnknownOutlined,
-} from "@ant-design/icons";
+import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 
 const { Dragger } = Upload;
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
-
-const CampaignStep4 = ({ onBack, onNext, campaignId }) => {
-  const [fileList, setFileList] = useState([]);
+const CampaignStep4 = ({ onBack, onNext, campaignId, data }) => {
+  const [fileList, setFileList] = useState([]); 
+  const [existingFiles, setExistingFiles] = useState([]);
+  const [fileError, setFileError] = useState("");
   const [loading, setLoading] = useState(false);
-  const token = useSelector((state) => state.auth.token);
 
-  // Allowed file validation
-  const beforeUpload = (file) => {
-    const allowedTypes = [
-      "image/png",
-      "image/jpeg",
-      "image/jpg",
-      "video/mp4",
-      "video/quicktime",
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-    const isAllowed = allowedTypes.includes(file.type);
-    const isLt25M = file.size / 1024 / 1024 < 25;
+  const { token } = useSelector((state) => state.auth);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-    if (!isAllowed) {
-      message.error("Only PNG, JPG, MP4, MOV, PDF, DOC, DOCX files are allowed");
-    }
-    if (!isLt25M) {
-      message.error("File must be smaller than 25MB");
-    }
+  const allowedTypes = [
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "video/mp4",
+    "video/quicktime",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
 
-    return isAllowed && isLt25M;
-  };
+  const getFileUID = (file) =>
+    `${file.name}-${file.size || 0}-${file.lastModified || Date.now()}`;
 
-  const handleRemove = async (uid) => {
-    const fileToRemove = fileList.find((f) => f.uid === uid);
+  // File change handler
+  const handleFileChange = (info) => {
+    const incomingFiles = info.fileList
+      .map((f) => f.originFileObj || f)
+      .filter(Boolean);
 
-    if (fileToRemove?.serverFilePath) {
-      try {
-        await axios.post(
-          `/vendor/campaign/delete-file`,
-          {
-            campaignId,
-            filepath: fileToRemove.serverFilePath,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        message.success("File deleted successfully");
-      } catch (error) {
-        console.error("Delete file error:", error);
-        message.error("Failed to delete file from server");
-        return;
+    let errorMessages = [];
+
+    setFileList((prevFiles) => {
+      const combinedFiles = [...prevFiles, ...existingFiles];
+      const existingUIDs = new Set(combinedFiles.map((f) => f.uid));
+      const newValidFiles = [];
+
+      for (const file of incomingFiles) {
+        if (!allowedTypes.includes(file.type)) {
+          errorMessages.push(`${file.name}: unsupported type`);
+          continue;
+        }
+        if (file.size / 1024 / 1024 > 25) {
+          errorMessages.push(`${file.name}: exceeds 25MB`);
+          continue;
+        }
+
+        const uid = getFileUID(file);
+        if (existingUIDs.has(uid)) {
+          message.warning(`${file.name}: already uploaded`);
+          continue;
+        }
+
+        if (
+          prevFiles.length + newValidFiles.length + existingFiles.length >= 5
+        ) {
+          errorMessages.push(`${file.name}: exceeds 5 file limit`);
+          continue;
+        }
+
+        file.uid = uid;
+        file.previewUrl = URL.createObjectURL(file);
+        newValidFiles.push(file);
+        existingUIDs.add(uid);
       }
-    }
 
-    setFileList((prev) => prev.filter((file) => file.uid !== uid));
+      if (errorMessages.length > 0) {
+        setFileError(errorMessages.join("; "));
+      } else {
+        setFileError("");
+      }
+
+      return [...prevFiles, ...newValidFiles];
+    });
   };
 
+  // Save handler
   const handleContinue = async () => {
-    if (fileList.length === 0) {
+    if (fileList.length === 0 && existingFiles.length === 0) {
       message.error("Please upload at least one reference file.");
       return;
     }
@@ -80,122 +93,190 @@ const CampaignStep4 = ({ onBack, onNext, campaignId }) => {
       setLoading(true);
 
       const formData = new FormData();
-      fileList.forEach(({ file }) => {
+      formData.append("campaignId", campaignId);
+
+      // keep existing filenames
+      existingFiles.forEach((file) => {
+        formData.append("references[]", file.name);
+      });
+
+      // append new files
+      fileList.forEach((file) => {
         formData.append("Files", file);
       });
 
-      const res = await axios.post(`/vendor/create-campaign`, formData, {
+      await axios.post(`/vendor/create-campaign`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
 
-      if (res.data.uploadedFiles) {
-        setFileList((prev) =>
-          prev.map((fileItem, index) => ({
-            ...fileItem,
-            serverFilePath: res.data.uploadedFiles[index] || null,
-          }))
-        );
-      }
-
-      message.success("Files uploaded successfully");
+      message.success("References saved successfully");
       onNext();
     } catch (err) {
-      console.error("API Error:", err.response?.data || err.message);
-      message.error("Failed to save campaign step. Try again.");
+      console.error("Save error:", err);
+      message.error("Failed to save references. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
+// useEffect for previewing existing backend files
+useEffect(() => {
+  if (data && Array.isArray(data)) {
+    const filesFromBackend = data
+      .filter((f) => f.filepath)
+      .map((f, index) => {
+        const name = f.filepath.split("/").pop() || "";
+        const ext = name.split(".").pop()?.toLowerCase();
+
+        let type = "";
+        if (["png", "jpg", "jpeg"].includes(ext)) type = "image/png";
+        else if (["mp4", "mov"].includes(ext)) type = "video/mp4";
+        else if (ext === "pdf") type = "application/pdf";
+        else if (["doc", "docx"].includes(ext)) type = "application/msword";
+
+        const fileUrl = `${BASE_URL}/${f.filepath.replace(/\\/g, "/")}`;
+
+        return {
+          uid: `existing-${index}`,
+          name,
+          url: fileUrl,
+          filepath: f.filepath,
+          status: "done",
+          type,
+          isExisting: true, 
+        };
+      });
+
+    setExistingFiles(filesFromBackend);
+  }
+}, [data, BASE_URL]);
+
+
+// Handle Delete
+const handleDeleteReference = async (fileToDelete) => {
+  if (fileToDelete.isExisting) {
+    try {
+      const authToken = token || localStorage.getItem("token");
+      if (!authToken) {
+        toast.error("No token found. Please log in again.");
+        return;
+      }
+
+      const res = await axios.post(
+        "/vendor/campaign/delete-file",
+        { filepath: fileToDelete.filepath },
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
+
+      if (res.data.status) {
+        setExistingFiles((prev) =>
+          prev.filter((f) => f.filepath !== fileToDelete.filepath)
+        );
+        toast.success("Reference file deleted successfully");
+      } else {
+        toast.error(res.data.message || "Failed to delete reference file");
+      }
+    } catch (error) {
+      console.error("Delete reference file error:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to delete reference file"
+      );
+    }
+  } else {
+    setFileList((prev) => prev.filter((f) => f.uid !== fileToDelete.uid));
+  }
+};
+
   return (
     <div className="bg-white p-6 rounded-3xl">
       <h2 className="text-xl font-bold mb-6">Reference</h2>
 
-      {/* Upload Section */}
+      {/* File Uploader */}
       <Dragger
-        name="file"
+        name="Files"
         multiple
         fileList={[]}
-        beforeUpload={(file) => {
-          if (beforeUpload(file)) {
-            setFileList((prev) => [
-              ...prev,
-              { uid: `${Date.now()}-${file.name}`, file },
-            ]);
-          }
-          return false; 
-        }}
+        beforeUpload={() => false}
+        onChange={handleFileChange}
         showUploadList={false}
       >
-        <div className="py-10">
+        <div className="py-6">
           <UploadOutlined className="text-2xl text-gray-500 mb-2" />
-          <p className="font-semibold text-gray-800 text-md">Upload Files</p>
+          <p className="font-semibold text-gray-800 text-md">
+            Upload Reference Files
+          </p>
           <p className="text-gray-500 text-sm">
-            Supported: PNG, JPG, MP4, MOV, PDF, DOC, DOCX under 25MB
+            Max 5 files. Each under 25MB. PNG, JPG, MP4, MOV, PDF, DOC, DOCX
           </p>
         </div>
       </Dragger>
-
-      {/* File Preview */}
-      {fileList.length > 0 && (
-        <div className="flex gap-3 overflow-x-auto mb-8 flex-wrap justify-center mt-6">
-          {fileList.map(({ uid, file, serverFilePath }) => {
-            const { type } = file;
-            const isImage = type.startsWith("image/");
-            const isVideo = type.startsWith("video/");
-            const isPdf = type === "application/pdf";
-            const isDoc = type.includes("word");
-
-            // Use BASE_URL logic like profileImageUrl
-            const previewUrl = serverFilePath
-              ? `${BASE_URL}/${serverFilePath.replace(/^\/+/, "")}`
-              : null;
-
-            const localPreview = !serverFilePath
-              ? URL.createObjectURL(file)
-              : null;
-
-            return (
-              <div
-                key={uid}
-                className="relative w-[100px] h-[120px] rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center"
-              >
-                {isImage ? (
-                  <img
-                    src={previewUrl || localPreview}
-                    alt="preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : isVideo ? (
-                  <video
-                    src={previewUrl || localPreview}
-                    className="w-full h-full object-cover"
-                    muted
-                    playsInline
-                  />
-                ) : isPdf ? (
-                  <FilePdfOutlined className="text-4xl text-red-500" />
-                ) : isDoc ? (
-                  <FileWordOutlined className="text-4xl text-blue-500" />
-                ) : (
-                  <FileUnknownOutlined className="text-4xl text-gray-500" />
-                )}
-
-                <button
-                  className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white p-1 rounded-full"
-                  onClick={() => handleRemove(uid)}
-                  type="button"
-                >
-                  <DeleteOutlined />
-                </button>
-              </div>
-            );
-          })}
-        </div>
+      {fileError && (
+        <p className="text-red-500 text-sm mt-2 text-center">{fileError}</p>
       )}
+
+      {/* Preview */}
+      <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
+        {[...existingFiles, ...fileList].map((file, index) => {
+          const previewUrl = file.url || file.previewUrl;
+          const isImage = file.type?.includes("image");
+          const isVideo = file.type?.includes("video");
+          const isPDF = file.type?.includes("pdf");
+          const isDoc =
+            file.type?.includes("word") ||
+            file.type?.includes("officedocument");
+
+          return (
+            <div
+              key={`${file.uid}-${index}`}
+              className="relative w-[100px] h-[120px] rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center p-2"
+            >
+              {isImage ? (
+                <img
+                  src={previewUrl}
+                  alt="preview"
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              ) : isVideo ? (
+                <video
+                  src={previewUrl}
+                  className="w-full h-full object-cover"
+                  muted
+                  controls
+                />
+              ) : isPDF || isDoc ? (
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 underline"
+                >
+                  {file.name}
+                </a>
+              ) : (
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 underline"
+                >
+                  File
+                </a>
+              )}
+
+              <button
+                className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white p-1 rounded-full"
+                onClick={() => handleDeleteReference(file)}
+                type="button"
+              >
+                <DeleteOutlined />
+              </button>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Buttons */}
       <div className="flex flex-col sm:flex-row items-center gap-4 mt-8">
@@ -210,7 +291,7 @@ const CampaignStep4 = ({ onBack, onNext, campaignId }) => {
           disabled={loading}
           className="bg-[#121A3F] cursor-pointer text-white inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
         >
-          {loading ? "Uploading..." : "Continue"}
+          {loading ? "Saving..." : "Continue"}
         </button>
       </div>
     </div>

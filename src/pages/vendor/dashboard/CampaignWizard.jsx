@@ -22,7 +22,7 @@ const CampaignWizard = () => {
     expectation: {},
     step2: {},
     step3: {},
-    step4: {},
+    step4: [],
     step5: {},
     profileParts: null,
   });
@@ -60,7 +60,7 @@ const CampaignWizard = () => {
             expectation: parts.p_objectivejson || {},
             step2: parts.p_vendorinfojson || {},
             step3: parts.p_campaignjson || {},
-            step4: parts.p_campaignfilejson || {},
+            step4: parts.p_campaignfilejson || [],
             step5: parts.p_contenttypejson || {},
             profileParts: parts || null,
           });
@@ -149,7 +149,6 @@ const CampaignWizard = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="bg-white shadow rounded-lg p-6">
         {currentStep === "review" ? (
           <CampaignReviewStep
             campaignData={campaignData}
@@ -158,7 +157,6 @@ const CampaignWizard = () => {
         ) : (
           steps[currentStep]?.component
         )}
-      </div>
     </div>
   );
 };

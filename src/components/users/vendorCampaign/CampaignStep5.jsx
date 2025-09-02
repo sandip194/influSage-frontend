@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 const { TextArea } = Input;
 
-const CampaignStep5 = ({ onNext, onBack }) => {
+const CampaignStep5 = ({ onNext, onBack, data }) => {
   const { token } = useSelector((state) => state.auth) || {};
   const [platforms, setPlatforms] = useState({});
   const [formState, setFormState] = useState({});
@@ -13,46 +13,59 @@ const CampaignStep5 = ({ onNext, onBack }) => {
   const [loading, setLoading] = useState(false);
   const [globalError, setGlobalError] = useState("");
 
-  useEffect(() => {
+ useEffect(() => {
     const fetchPlatforms = async () => {
       try {
         const res = await axios.get("/vendor/provider-content-type", {
           headers: { Authorization: `Bearer ${token}` },
         });
-
+ 
         const apiPlatforms = res.data.providorType || [];
-
-       const grouped = apiPlatforms.reduce((acc, item, index) => {
+ 
+        const grouped = apiPlatforms.reduce((acc, item, index) => {
           if (!acc[item.providername]) {
-          acc[item.providername] = [];
-        }
-
-        acc[item.providername].push({
-          id: item.providercontenttypeid
-            ? Number(item.providercontenttypeid) 
-            : Number(`${item.providerid}${index}`), 
-          label: item.contenttypename || "Unknown",
-          providerid: item.providerid,
-        });
-
-        return acc;
-      }, {});
+            acc[item.providername] = [];
+          }
+          acc[item.providername].push({
+            id: item.providercontenttypeid
+              ? Number(item.providercontenttypeid)
+              : Number(`${item.providerid}${index}`),
+            label: item.contenttypename || "Unknown",
+            providerid: item.providerid,
+          });
+          return acc;
+        }, {});
         setPlatforms(grouped);
-
+ 
+        // 🔹 Build base empty state
         const initial = {};
         Object.keys(grouped).forEach((platform) => {
           initial[platform] = { selectedTypes: [], caption: "" };
         });
+ 
+        // 🔹 Merge parent data (if provided)
+        if (Array.isArray(data)) {
+          data.forEach((entry) => {
+            const platformName = entry.providername;
+            if (grouped[platformName]) {
+              initial[platformName] = {
+                selectedTypes: entry.contenttypes.map((t) => t.providercontenttypeid),
+                caption: entry.caption || "",
+              };
+            }
+          });
+        }
+ 
         setFormState(initial);
       } catch (err) {
         console.error("Error fetching provider content types:", err);
         message.error("Failed to load content types");
       }
     };
-
+ 
     fetchPlatforms();
-  }, [token]);
-
+  }, [token, data]);
+ 
       const toggleContentType = (platform, typeId) => {
       setFormState((prev) => {
         const selected = Array.isArray(prev[platform]?.selectedTypes)
@@ -82,7 +95,7 @@ const CampaignStep5 = ({ onNext, onBack }) => {
     const newErrors = {};
     let validPlatforms = [];
 
-    const contenttypejson = Object.entries(formState)
+    const contenttypejson = Object. entries(formState)
       .map(([platform, data]) => {
         const typeObjs = platforms[platform].filter((item) =>
           (data.selectedTypes || []).includes(item.id)
