@@ -197,7 +197,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl">
+    <div className="bg-white p-6 rounded-2xl">
       {/* Gender */}
       <h2 className="text-xl font-semibold mb-4">
         Please select the gender(s) of influencers you'd like to work with
@@ -344,7 +344,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
         <button
           onClick={handleContinue}
           disabled={loading}
-          className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-50"
+          className="bg-[#121A3F] text-white cursor-pointer px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-50"
         >
           {loading ? "Saving..." : "Continue"}
         </button>

@@ -173,7 +173,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                   <img
                     src={camp_profile[0]}
                     alt="Campaign"
-                    className="absolute rounded-full top-9 left-4 w-27 h-27 border-2 border-white shadow-md"
+                    className="absolute rounded-full top-9 left-4 w-27 h-27 border-2 border-white"
                   />
                 )}
               </div>
@@ -310,16 +310,6 @@ const CampaignReviewStep = ({ onEdit }) => {
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="font-semibold text-lg">Campaign Details</h3>
             <div className="py-4 border-b border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Campaign Number</p>
-              <p>
-                {p_campaignjson.campaignnumber
-                  ? p_campaignjson.campaignnumber
-                  : p_campaignjson.id
-                  ? `CMP-${String(p_campaignjson.id).padStart(4, "0")}`
-                  : "—"}
-              </p>
-            </div>
-            <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">About Brand</p>
               <p>{p_campaignjson.branddetail || "—"}</p>
             </div>
@@ -360,7 +350,7 @@ const CampaignReviewStep = ({ onEdit }) => {
       {/* Buttons */}
       <div className="flex max-w-sm gap-3 mt-3">
         <button
-          className="flex-1 bg-white border border-gray-300 text-gray-800 rounded-md py-2 hover:bg-gray-100"
+          className="flex-1 bg-white border border-gray-300 text-gray-800 rounded-md py-2"
           onClick={onEdit}
           type="button"
         >

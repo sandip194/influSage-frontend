@@ -27,7 +27,9 @@ const CampaignWizard = () => {
     profileParts: null,
   });
 
-  // Update state when a section is changed
+ 
+
+  // Update a section of the campaign data
   const updateCampaignSection = (sectionKey, newData) => {
     setCampaignData((prev) => ({
       ...prev,
@@ -35,49 +37,55 @@ const CampaignWizard = () => {
     }));
   };
 
-  const markStepComplete = (index) => {
-    const updated = [...completedSteps];
-    if (!updated[index]) {
-      updated[index] = true;
-      setCompletedSteps(updated);
-      setLastCompletedStep(index); 
-    }
+  // Mark a step complete and move to the next
+const markStepComplete = (index) => {
+  const updated = [...completedSteps];
+  if (!updated[index]) {
+    updated[index] = true;
+    setCompletedSteps(updated);
+    localStorage.setItem("completedSteps", JSON.stringify(updated));
+    setLastCompletedStep(index); 
+  }
 
-    const nextStep = index + 1 < steps.length ? index + 1 : "review";
-    setCurrentStep(nextStep);
-  };
+  if (index + 1 < steps.length) {
+    setCurrentStep(index + 1);
+  } else {
+    setCurrentStep("review");
+  }
+};
 
+  // Fetch campaign data
   const getCampaignData = async () => {
     try {
-      const res = await axios.get(`/vendor/campaign/01`, {
+      const res = await axios.get("/vendor/campaign/01", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (res.status === 200) {
-        const parts = res.data?.campaignParts || null;
-        if (parts) {
-          setCampaignData({
-            expectation: parts.p_objectivejson || {},
-            step2: parts.p_vendorinfojson || {},
-            step3: parts.p_campaignjson || {},
-            step4: parts.p_campaignfilejson || [],
-            step5: parts.p_contenttypejson || {},
-            profileParts: parts || null,
-          });
+      const parts = res.data?.campaignParts;
+      if (res.status === 200 && parts) {
+        setCampaignData({
+          expectation: parts.p_objectivejson || {},
+          step2: parts.p_vendorinfojson || {},
+          step3: parts.p_campaignjson || {},
+          step4: parts.p_campaignfilejson || [],
+          step5: parts.p_contenttypejson || {},
+          profileParts: parts,
+        });
 
-          // Auto-complete steps based on data
-          const newCompletion = [
-            !!parts.p_objectivejson,
-            !!parts.p_vendorinfojson,
-            !!parts.p_campaignjson,
-            !!parts.p_campaignfilejson,
-            !!parts.p_contenttypejson,
-          ];
-          setCompletedSteps(newCompletion);
+        // Determine which steps are completed
+        const newCompletion = [
+          !!parts.p_objectivejson,
+          !!parts.p_vendorinfojson,
+          !!parts.p_campaignjson,
+          !!parts.p_campaignfilejson,
+          !!parts.p_contenttypejson,
+        ];
 
-          const firstIncomplete = newCompletion.findIndex((v) => !v);
-          setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "review");
-        }
+        setCompletedSteps(newCompletion);
+        localStorage.setItem("completedSteps", JSON.stringify(newCompletion));
+
+        const firstIncomplete = newCompletion.findIndex((v) => !v);
+        setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "review");
       }
     } catch (err) {
       console.error("❌ Error fetching campaign:", err);
@@ -85,11 +93,28 @@ const CampaignWizard = () => {
     }
   };
 
-  // Refetch on token or step completion
-  useEffect(() => {
-    if (token) getCampaignData();
-  }, [token, lastCompletedStep]);
+useEffect(() => {
+  if (lastCompletedStep !== null) {
+    getCampaignData(); 
+  }
+}, [lastCompletedStep]);
 
+
+  // Restore completed steps from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("completedSteps");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      setCompletedSteps(parsed);
+
+      const lastIndex = parsed.lastIndexOf(true);
+      if (lastIndex !== -1) {
+        setLastCompletedStep(lastIndex);
+      }
+    }
+  }, []);
+
+   // Define steps early so functions below can access it
   const steps = [
     {
       title: "Expectation",
@@ -146,17 +171,17 @@ const CampaignWizard = () => {
       ),
     },
   ];
-
+  
   return (
     <div className="flex flex-col gap-4">
-        {currentStep === "review" ? (
-          <CampaignReviewStep
-            campaignData={campaignData}
-            onEdit={() => setCurrentStep(0)}
-          />
-        ) : (
-          steps[currentStep]?.component
-        )}
+      {currentStep === "review" ? (
+        <CampaignReviewStep
+          campaignData={campaignData}
+          onEdit={() => setCurrentStep(0)}
+        />
+      ) : (
+        steps[currentStep]?.component
+      )}
     </div>
   );
 };

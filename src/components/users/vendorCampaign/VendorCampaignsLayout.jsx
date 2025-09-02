@@ -92,23 +92,23 @@ const VendorCampaignsLayout = () => {
   return (
     <div className="w-full text-sm px-2 sm:px-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">My Campaigns</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">My Campaigns</h2>
           <p className="text-gray-600 text-sm">Your Campaigns Overview</p>
         </div>
         <button
           onClick={() => navigate("/vendor-dashboard/my-campaigns")}
-          className="flex items-center gap-2 px-5 py-2 rounded-full bg-[#141843] text-white font-medium shadow-md 
-                     hover:bg-[#1d214f] hover:shadow-lg transition-all duration-200"
+          className="flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-[#141843] text-white font-medium
+                    hover:bg-[#1d214f] transition-all duration-200"
         >
-          <RiAddFill className="w-5 h-5" />
+          <RiAddFill />
           Add Campaign
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white p-3 sm:p-4 rounded-lg mb-6 flex flex-wrap gap-3 shadow-sm">
+      <div className="bg-white p-3 sm:p-4 rounded-lg mb-6 flex flex-wrap gap-3">
         {tabs.map(({ id, label }) => (
           <button
             key={id}
@@ -134,12 +134,12 @@ const VendorCampaignsLayout = () => {
           placeholder="Search campaigns..."
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="w-full sm:w-72 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#0f122f] focus:outline-none"
+          className="w-full sm:w-72 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0f122f] focus:outline-none"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow overflow-hidden">
+      <div className="bg-white rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left min-w-[750px]">
             <thead className="bg-gray-50 text-gray-700 text-sm tracking-wide">
@@ -192,7 +192,7 @@ const VendorCampaignsLayout = () => {
                     </button>
 
                     {menuOpenId === row.id && (
-                      <div className="absolute right-4 mt-2 w-44 bg-white rounded-lg shadow-lg border z-50">
+                      <div className="absolute right-4 mt-2 w-44 bg-white rounded-lg border z-50">
                         <button
                           onClick={() => {
                             setMenuOpenId(null);

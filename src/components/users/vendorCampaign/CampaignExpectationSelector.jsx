@@ -232,7 +232,7 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
         <button
           onClick={handleContinue}
           disabled={loading}
-          className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-50"
+          className="bg-[#121A3F] text-white cursor-pointer px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-50"
         >
           {loading ? "Saving..." : "Continue"}
         </button>

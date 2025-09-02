@@ -80,7 +80,7 @@ const Browse = () => {
   ];
 
   return (
-    <main className="flex-1 bg-gray-100 overflow-y-auto max-w-screen-xl mx-auto w-full">
+    <main className="flex-1 bg-gray-100 overflow-y-auto w-full">
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
       <p className="mb-6 text-gray-700 text-sm">
         Track your campaigns & Browse

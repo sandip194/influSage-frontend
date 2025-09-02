@@ -140,7 +140,6 @@ useEffect(() => {
         const fileUrl = `${BASE_URL}/${f.filepath.replace(/\\/g, "/")}`;
 
         return {
-          uid: `existing-${index}`,
           name,
           url: fileUrl,
           filepath: f.filepath,
@@ -152,7 +151,7 @@ useEffect(() => {
 
     setExistingFiles(filesFromBackend);
   }
-}, [data, BASE_URL]);
+}, [data]);
 
 
 // Handle Delete
@@ -289,7 +288,7 @@ const handleDeleteReference = async (fileToDelete) => {
         <button
           onClick={handleContinue}
           disabled={loading}
-          className="bg-[#121A3F] cursor-pointer text-white inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
+          className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
         >
           {loading ? "Saving..." : "Continue"}
         </button>

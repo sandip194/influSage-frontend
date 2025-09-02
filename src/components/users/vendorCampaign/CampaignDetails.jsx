@@ -14,7 +14,7 @@ import {
   RiStarFill,
   RiStarLine,
 } from "@remixicon/react";
-import { Modal, Upload, Input } from "antd";
+import { Modal, Input } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const { TextArea } = Input;
@@ -54,32 +54,6 @@ const CampaignDetails = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-
-  // File upload validation
-  const handleUpload = ({ fileList }) => {
-    let newErrors = {};
-    const allowedTypes = [
-      "image/png",
-      "image/jpeg",
-      "application/pdf",
-      "video/mp4",
-    ];
-    const maxSize = 5 * 1024 * 1024;
-
-    if (fileList.length > 0) {
-      const file = fileList[0].originFileObj;
-      if (!allowedTypes.includes(file.type)) {
-        newErrors.portfolioFile =
-          "Invalid file type. Allowed: PNG, JPG, PDF, MP4.";
-      }
-      if (file.size > maxSize) {
-        newErrors.portfolioFile = "File size must be less than 5MB.";
-      }
-    }
-
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length === 0) setFileList(fileList);
-  };
 
     // Complete action
   const handleComplete = () => {
@@ -175,28 +149,27 @@ const handleCancelComplete = () => {
             </div>
 
             <div className="p-4">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="font-semibold text-lg">Instagram Campaign</h2>
-                  <p className="text-gray-500 text-sm">Tiktokstar</p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                   <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
-                  >
-                    Complete & Payment
-                  </button>
-                  <button
-                    onClick={() => setCancelModel(true)}
-                    className="px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
-                  >
-                    Cancel Campaign
-                  </button>
-                </div>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+              <div>
+                <h2 className="font-semibold text-lg">Instagram Campaign</h2>
+                <p className="text-gray-500 text-sm">Tiktokstar</p>
               </div>
 
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
+                >
+                  Complete & Payment
+                </button>
+                <button
+                  onClick={() => setCancelModel(true)}
+                  className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
+                >
+                  Cancel Campaign
+                </button>
+              </div>
+            </div>
               {/* Campaign Info */}
               <div className="flex flex-wrap justify-around gap-6 border border-gray-200 rounded-2xl p-4">
                 <div>
@@ -260,11 +233,11 @@ const handleCancelComplete = () => {
 
             {/* Requirements */}
             <div className="pb-4 border-b border-gray-200">
-              <h3 className="font-semibold text-lg mb-4">Requirements</h3>
-              <ul className="space-y-2 text-gray-700">
+              <h3 className="font-semibold text-lg sm:text-xl mb-4">Requirements</h3> 
+              <ul className="space-y-3 text-gray-700 text-sm sm:text-base">
                 {Requirements.map((item, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <RiCheckboxCircleFill />
+                    <RiCheckboxCircleFill className="text-xl min-w-[1.25rem]" />
                     <span>
                       {item.label} <strong>{item.value}</strong>
                     </span>
@@ -294,7 +267,7 @@ const handleCancelComplete = () => {
                     <img
                       src={img}
                       alt={`reference-${index}`}
-                      className="w-32 h-32 object-cover rounded-xl shadow-md"
+                      className="w-32 h-32 object-cover rounded-xl"
                     />
                     <button
                       onClick={() => handleDeleteImage(index)}
@@ -334,7 +307,7 @@ const handleCancelComplete = () => {
 
           <div className="space-y-4 w-full max-w-xs">
             {/* Platform Card */}
-            <div className="bg-white p-4 rounded-2xl shadow">
+            <div className="bg-white p-4 rounded-2xl">
               <h3 className="font-semibold text-lg py-3">Platform</h3>
               <div className="space-y-3">
                 {/* Instagram */}
@@ -372,7 +345,7 @@ const handleCancelComplete = () => {
             </div>
 
             {/* Influencer Details Card */}
-            <div className="bg-white p-4 rounded-2xl shadow">
+            <div className="bg-white p-4 rounded-2xl">
               <h3 className="font-semibold text-lg">Influencer Details</h3>
               <div className="flex items-center gap-3">
                 <img
@@ -436,10 +409,9 @@ const handleCancelComplete = () => {
                 </button>
               </div>
             </div>
-          </div>
 
-          {/* Track Campaign */}
-          <div className="bg-white p-6 rounded-xl shadow-md">
+            {/* Track Campaign */}
+          <div className="bg-white p-6 rounded-2xl">
             <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
             <div className="relative">
               <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
@@ -455,6 +427,7 @@ const handleCancelComplete = () => {
                 </div>
               ))}
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -516,7 +489,7 @@ const handleCancelComplete = () => {
       </Modal>
 
       
-          {/* Cancel Campaign Modal */}
+      {/* Cancel Campaign Modal */}
       <Modal
         open={isCancelModel}
         onCancel={() => setCancelModel(false)}

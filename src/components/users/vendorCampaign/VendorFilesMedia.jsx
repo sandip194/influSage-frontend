@@ -152,34 +152,27 @@ const handleCancelComplete = () => {
             </div>
 
             <div className="p-4">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                  <div>
-                    <h2 className="font-semibold text-lg">
-                      Instagram Campaign
-                    </h2>
-                    <p className="text-gray-500 text-sm">Tiktokstar</p>
-                  </div>
-                </div>
-
-                {/* Right: Buttons */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
-                  >
-                   Complete & Payment
-                  </button>
-                  <button
-                    onClick={() => setCancelModel(true)}
-                    className="px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
-                  >
-                    Cancel Campaign
-                  </button>
-                </div>
-                </div>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+              <div>
+                <h2 className="font-semibold text-lg">Instagram Campaign</h2>
+                <p className="text-gray-500 text-sm">Tiktokstar</p>
               </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
+                >
+                  Complete & Payment
+                </button>
+                <button
+                  onClick={() => setCancelModel(true)}
+                  className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
+                >
+                  Cancel Campaign
+                </button>
+              </div>
+            </div>
 
               {/* Campaign Details Section */}
               <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4">
@@ -242,7 +235,7 @@ const handleCancelComplete = () => {
                 {files.map((file) => (
                   <div
                     key={file.id}
-                    className="flex items-center justify-between border border-gray-200 rounded-2xl p-3 hover:shadow-sm transition"
+                    className="flex items-center justify-between border border-gray-200 rounded-2xl p-3 transition"
                   >
                     {/* File Info */}
                     <div className="flex items-center gap-3">
@@ -291,7 +284,7 @@ const handleCancelComplete = () => {
 
           <div className="space-y-4 w-full max-w-xs">
             {/* Platform Card */}
-            <div className="bg-white p-4 rounded-2xl shadow">
+            <div className="bg-white p-4 rounded-2xl">
               <h3 className="font-semibold text-lg py-3">Platform</h3>
               <div className="space-y-3">
                 {/* Instagram */}
@@ -329,7 +322,7 @@ const handleCancelComplete = () => {
             </div>
 
             {/* Influencer Details Card */}
-            <div className="bg-white p-4 rounded-2xl shadow">
+            <div className="bg-white p-4 rounded-2xl">
               <h3 className="font-semibold text-lg">Influencer Details</h3>
               <div className="flex items-center gap-3">
                 <img
@@ -393,10 +386,8 @@ const handleCancelComplete = () => {
                 </button>
               </div>
             </div>
-          </div>
-
-          {/* Track Campaign */}
-          <div className="bg-white p-6 rounded-xl shadow-md">
+            {/* Track Campaign */}
+          <div className="bg-white p-6 rounded-xl">
             <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
             <div className="relative">
               <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
@@ -413,6 +404,9 @@ const handleCancelComplete = () => {
               ))}
             </div>
           </div>
+
+          </div>
+
         </div>
         
       </div>
