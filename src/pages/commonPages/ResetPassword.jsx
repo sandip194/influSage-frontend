@@ -23,8 +23,7 @@ export const ResetPassword = () => {
 
     const onSubmit = async (data) => {
         try {
-            console.log("Resetting password with data:", data);
-            console.log("Token from URL:", token);
+
             const response = await axios.post('/user/reset-password', { password: data.password, token });
             if (response.status === 200) {
                 toast.success(response.data.message);

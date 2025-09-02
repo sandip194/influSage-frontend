@@ -78,7 +78,7 @@ export const VerifyEmailOrMobile = () => {
         if (isResending) return;  // prevent double clicks if somehow triggered multiple times
 
         setIsResending(true);
-        const loadingToast = toast.loading('Sending OTP...');
+        
         try {
             const email = localStorage.getItem('signupEmail');
             const response = await axios.post('/user/resend-otp', { email });
@@ -94,7 +94,7 @@ export const VerifyEmailOrMobile = () => {
             setError('Failed to resend OTP. Please try again.');
         } finally {
             setIsResending(false);
-            toast.dismiss(loadingToast); // hide the loading toast
+            
         }
     };
 
