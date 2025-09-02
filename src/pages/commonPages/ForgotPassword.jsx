@@ -12,7 +12,7 @@ export const ForgotPassword = () => {
   const onSubmit = async (data) => {
     if (loading) return; // ✅ prevent multiple calls
     setLoading(true); // ✅ set loading true before API call
-    const loadingToast = toast.loading('Sending Password-Reset Link to Your Email...');
+    
     try {
       const response = await axios.post('/user/forgot-password', { email: data.email });
       if (response.status === 200) {
@@ -22,7 +22,7 @@ export const ForgotPassword = () => {
       toast.error(error.response?.data?.message || "Something went wrong!");
     } finally {
       setLoading(false); // ✅ reset loading after API call
-      toast.dismiss(loadingToast);
+
     }
   };
 

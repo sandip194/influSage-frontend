@@ -10,14 +10,14 @@ import SideImageSlider from '../../components/common/SideImageSlider';
 export const Signup = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [showModal, setShowModal] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false); // 👁️ Toggle state
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const submitHandler = async (data) => {
-    const loadingToast = toast.loading('Creating your account...');
     try {
+      setLoading(true)
       const role = localStorage.getItem('selectedRole');
       const userEmail = data.email;
       localStorage.setItem('signupEmail', userEmail);
@@ -35,20 +35,20 @@ export const Signup = () => {
 
       if (response.status === 400) {
         console.log("response", response.data.message);
-        toast.error(response.data.message || "Email already exists", { id: loadingToast }, { position: "top-right" });
+        toast.error(response.data.message || "Email already exists");
       }
 
       if (response.status === 200) {
         localStorage.setItem('isCreatedNew', response.data.message);
-        toast.success('Signup successful! Please verify your email or mobile.', { id: loadingToast }, { position: "top-right" });
+        toast.success('Signup successful! Please verify your email or mobile.');
         navigate('/verify-email-or-mobile');
       }
 
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Signup failed. Please try again.", { id: loadingToast }, { position: "top-right" });
+      toast.error(error?.response?.data?.message || "Signup failed. Please try again.");
       console.error("Signup failed:", error);
     } finally {
-      toast.dismiss(loadingToast); // hide the loading toast
+      setLoading(false); // 🔹 always re-enable after request
     }
   };
 
@@ -56,7 +56,7 @@ export const Signup = () => {
     <div className="login-container">
       <div className={`login-card h-90vh`}>
         {/* Left Image Section */}
-        <SideImageSlider/>
+        <SideImageSlider />
         {/* Right Form Section */}
         <div className="login-card-right">
           <form onSubmit={handleSubmit(submitHandler)}>
@@ -151,7 +151,13 @@ export const Signup = () => {
               <span style={{ color: "red", fontSize: "12px" }}>{errors.terms?.message}</span>
             </div>
 
-            <button type="submit" className="login-btn">Sign Up</button>
+            <button
+              type="submit"
+              className="login-btn"
+              disabled={loading} // 🔹 disable while loading
+            >
+              {loading ? "Signing Up..." : "Sign Up"} {/* 🔹 show spinner text */}
+            </button>
 
             <div className="signup-link">
               Already have an account? <Link to="/login">Login</Link>

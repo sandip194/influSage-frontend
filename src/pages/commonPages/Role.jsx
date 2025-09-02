@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../assets/role.css'; // Reuse the same CSS
-import influencerIcon from '../../assets/icons/influencer.png';
-import vendorIcon from '../../assets/icons/vendor.png';
-import agencyIcon from '../../assets/icons/agancy.png';
+import influencerIcon from '../../assets/icons/i-influencer.png';
+import vendorIcon from '../../assets/icons/i-vendor.png';
+import agencyIcon from '../../assets/icons/i-agancy.png';
 import SideImageSlider from '../../components/common/SideImageSlider';
 
 const roles = [
@@ -43,7 +43,7 @@ const Role = () => {
                 className={`role-box flex-col items-center justify-items-center ${selectedRole === role.id ? 'selected' : ''}`}
                 onClick={() => setSelectedRole(role.id)}
               >
-                  <img src={role.icon} alt={role.label} className="role-icon bg-gray-100 rounded-full" width="100px" />
+                  <img src={role.icon} alt={role.label} className="bg-gray-100 rounded-full w-80" />
                 <p>{role.label}</p>
               </div>
             ))}

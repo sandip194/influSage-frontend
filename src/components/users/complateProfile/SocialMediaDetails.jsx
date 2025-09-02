@@ -1,34 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { Form, Input } from 'antd';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Form, Input, InputNumber } from 'antd';
 import axios from 'axios';
 import { message } from 'antd';
 import { useSelector } from 'react-redux';
-import { useMemo } from 'react';
 
 export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
   const [form] = Form.useForm();
-  const [providers, setProviders] = useState([])
-
+  const [providers, setProviders] = useState([]);
   const { token, userId } = useSelector(state => state.auth);
 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getAllPlatforms = async () => {
     try {
-      const res = await axios.get("vendor/providers")
-      setProviders(res.data.data)
+      const res = await axios.get("vendor/providers");
+      setProviders(res.data.data);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
-    getAllPlatforms()
-  }, [])
+    getAllPlatforms();
+  }, []);
 
   const platforms = useMemo(() => {
     return providers.map((provider) => {
-      const field = provider.name.toLowerCase().replace(/\s+/g, ''); // sanitize field name
+      const field = provider.name.toLowerCase().replace(/\s+/g, '');
       return {
         name: provider.name,
         providerid: provider.id,
@@ -40,11 +38,12 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
           />
         ),
         field,
+        urlField: `${field}_url`,
+        followersField: `${field}_followers`,
         placeholder: `Enter your ${provider.name} link`,
       };
     });
   }, [providers, BASE_URL]);
-
 
   const onFinish = async (values) => {
     try {
@@ -53,27 +52,31 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
         return;
       }
 
-      // Transform filled values into required array
       const socialaccountjson = platforms
-        .filter(p => values[p.field]) // Only filled-in links
+        .filter(p => values[p.urlField]) // Only if URL is provided
         .map(p => ({
           providerid: p.providerid,
-          handleslink: values[p.field],
+          handleslink: values[p.urlField],
+          nooffollowers: values[p.followersField] || 0,
         }));
 
-      // Optionally store in localStorage
-      // localStorage.setItem("socialLinks", JSON.stringify(values));
+      // Validate: followers >= 1000 if url entered
+      for (let item of socialaccountjson) {
+        if (item.handleslink && item.nooffollowers < 1000) {
+          message.error(`You must have at least 1000 followers on ${platforms.find(p => p.providerid === item.providerid)?.name}`);
+          return;
+        }
+      }
 
       const formData = new FormData();
       formData.append('socialaccountjson', JSON.stringify(socialaccountjson));
 
       const response = await axios.post(
-        'user/complete-profile', // replace with actual URL
+        'user/complete-profile',
         formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
           },
         }
       );
@@ -88,27 +91,27 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
     }
   };
 
-   useEffect(() => {
-     if (data && Array.isArray(data) && platforms.length > 0) {
-       const initialValues = {};
- 
-       data.forEach(item => {
-         const platform = platforms.find(p => p.providerid === item.providerid);
-         if (platform) {
-           initialValues[platform.field] = item.handleslink;
-         }
-       });
- 
-       form.setFieldsValue(initialValues);
-     }
-   }, [data, platforms, form]);
+  // Prefill values
+  // Prefill values
+  useEffect(() => {
+    if (data && Array.isArray(data) && platforms.length > 0) {
+      const initialValues = {};
 
+      data.forEach(item => {
+        const platform = platforms.find(p => p.providerid === item.providerid);
+        if (platform) {
+          initialValues[platform.urlField] = item.handleslink;
+          // if null → undefined (empty input), else keep number
+          initialValues[platform.followersField] =
+            typeof item.nooffollowers === 'number' ? item.nooffollowers : undefined;
 
-  // 🔍 Custom validator to ensure at least one field is filled
-  const validateAtLeastOne = (_, value) => {
-    const filled = platforms.some((p) => form.getFieldValue(p.field));
-    return filled ? Promise.resolve() : Promise.reject('Please enter at least one social media link');
-  };
+        }
+      });
+
+      form.setFieldsValue(initialValues);
+    }
+  }, [data, platforms, form]);
+
 
   return (
     <div className="bg-white p-6 rounded-3xl">
@@ -119,80 +122,99 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
         form={form}
         layout="vertical"
         onFinish={onFinish}
+        onFinishFailed={({ errorFields }) => {
+          if (errorFields.length > 0) {
+            // scroll to the first error field
+            form.scrollToField(errorFields[0].name, {
+              behavior: 'smooth',
+              block: 'center',
+            });
+          }
+        }}
         onValuesChange={() => {
           const values = form.getFieldsValue();
           const socialData = platforms
-            .filter(p => values[p.field])
+            .filter(p => values[p.urlField])
             .map(p => ({
               providerid: p.providerid,
-              handleslink: values[p.field],
+              handleslink: values[p.urlField],
+              nooffollowers: values[p.followersField],
             }));
           onChange?.(socialData);
         }}
       >
 
-
-
         <div className="space-y-4">
           {platforms.map((platform) => (
+            <div
+              key={platform.field}
+              className="flex flex-col gap-3 border border-gray-100 p-3 rounded-xl bg-gray-50"
+            >
+              <div className="grid grid-cols-12 gap-4 items-center">
+                {/* Platform (small) */}
+                <div className="col-span-12 lg:col-span-2 flex items-center gap-2">
+                  {platform.icon}
+                  <span className="text-sm font-medium text-gray-700">
+                    {platform.name}
+                  </span>
+                </div>
 
-            <div key={platform.field} className="flex flex-row items-center gap-3">
-              <div className="flex items-center gap-2 min-w-[40px] md:min-w-[150px] border border-gray-200 rounded-lg px-4 py-2">
-                {platform.icon}
-                <span className="hidden md:block text-sm font-medium text-gray-700">{platform.name}</span>
+                {/* URL input (large) */}
+                <div className="col-span-12 lg:col-span-7">
+                  <Form.Item
+                    style={{ margin: 0 }}
+                    name={platform.urlField}
+                    rules={[{ type: "url", message: "Please enter a valid URL" }]}
+                  >
+                    <Input
+                      size="large"
+                      placeholder={platform.placeholder}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                    />
+                  </Form.Item>
+                </div>
+
+                {/* Followers input (medium) */}
+                <div className="col-span-12 lg:col-span-3">
+                  <Form.Item
+                    style={{ margin: 0 }}
+                    name={platform.followersField}
+                    rules={[
+                      {
+                        validator: (_, value) => {
+                          const url = form.getFieldValue(platform.urlField);
+                          if (url && (!value || value < 1000)) {
+                            return Promise.reject(
+                              new Error(`At least 1000 followers required for ${platform.name}`)
+                            );
+                          }
+                          return Promise.resolve();
+                        },
+                      },
+                    ]}
+                  >
+                    <InputNumber
+                      size="large"
+                      min={0}
+                      max={500000000}
+                      controls={false}
+                      className="w-full rounded-lg border border-gray-300"
+                      placeholder="How Many Followers ?"
+                      style={{ width: "100%" }}
+                      formatter={(value) => (value ? value.replace(/\D/g, "") : "")}
+                      parser={(value) => value.replace(/\D/g, "")}
+                    />
+                  </Form.Item>
+                </div>
               </div>
-              <Form.Item
-                style={{ margin: 0, width: "100%" }}
-                name={platform.field}
-                rules={[{ type: 'url', message: 'Please enter a valid URL' }]}
-              >
-                <Input
-                  size="large"
-                  placeholder={platform.placeholder}
-                  className="flex-1 border-none shadow-none bg-transparent focus:ring-0 focus:outline-none"
-                  onChange={() => {
-                    form.validateFields(['atLeastOne']);
-                  }}
-                />
-              </Form.Item>
             </div>
-
           ))}
+
         </div>
-
-        {/* 🔒 Hidden field to attach custom validator */}
-        <Form.Item
-          shouldUpdate
-          style={{ margin: 0 }}
-        >
-          {() => {
-            const hasError = form.getFieldError('atLeastOne').length > 0;
-
-            return (
-              <>
-                {/* Hidden validation field */}
-                <Form.Item
-                  name="atLeastOne"
-                  rules={[{ validator: validateAtLeastOne }]}
-                  style={{ display: 'none', margin: 0 }}
-                >
-                  <Input style={{ margin: 0 }} />
-                </Form.Item>
-
-                {/* Manual error message display */}
-                {hasError && (
-                  <div className="text-red-500 text-sm mt-0 mb-0 !important">
-                    {form.getFieldError('atLeastOne')[0]}
-                  </div>
-                )}
-              </>
-            );
-          }}
-        </Form.Item>
 
 
         {/* Buttons */}
-        <div className="flex flex-row items-center gap-4 ">
+        <div className="flex flex-row items-center gap-4 mt-6">
           <button
             type="button"
             onClick={onBack}
@@ -207,7 +229,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
             Continue
           </button>
         </div>
-      </Form >
-    </div >
+      </Form>
+    </div>
   );
 };

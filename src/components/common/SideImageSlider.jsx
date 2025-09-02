@@ -26,11 +26,17 @@ const slides = [
 
 const SideImageSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [fade, setFade] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000); // 5 seconds
+      setFade(false); // fade out text
+      setTimeout(() => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+        setFade(true); // fade in text
+      }, 500); // matches CSS transition
+    }, 4000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -53,8 +59,11 @@ const SideImageSlider = () => {
         <div className="mb-5">
           <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
         </div>
-        <h2 className="text-md text-[#0f1533] font-bold mb-0 animate-fade-in">{title}</h2>
-        <p className="text-sm text-[#0f1533] leading-relaxed animate-fade-in">{description}</p>
+        <div className={`branding ${fade ? '' : 'fade-out'}`}>
+          <h1 className="text-md text-[#0f1533] font-bold mb-0">{title}</h1>
+          <h1 className="text-sm text-[#0f1533] leading-relaxed">{description}</h1>
+        </div>
+
       </div>
     </div>
   );

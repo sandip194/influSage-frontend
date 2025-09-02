@@ -17,7 +17,7 @@ import SideImageSlider from '../../components/common/SideImageSlider';
 export const LoginForm = () => {
 
 
-  
+
 
   const dispatch = useDispatch();
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
@@ -43,7 +43,7 @@ export const LoginForm = () => {
   const submitHandler = async (data) => {
     if (isLoggingIn) return; // prevent multiple submissions
     setIsLoggingIn(true);
-    const loadingToast = toast.loading("Logging in...");
+    
     try {
       const res = await axios.post("/user/login", data);
       if (res.status === 200) {
@@ -64,7 +64,7 @@ export const LoginForm = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed!");
     } finally {
-      toast.dismiss(loadingToast);
+
       setIsLoggingIn(false);
     }
   };
