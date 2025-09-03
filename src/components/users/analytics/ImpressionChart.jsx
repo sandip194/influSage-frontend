@@ -96,12 +96,12 @@ const ImpressionReachChart = () => {
 
         {/* Filters */}
         <div className="flex space-x-2">
-          <select className="text-sm text-gray-600 border rounded-full px-4 py-1 shadow-sm">
+          <select className="text-sm text-gray-600 border rounded-full px-4 py-1">
             <option value="instagram">Instagram</option>
             <option value="youtube">YouTube</option>
             <option value="facebook">Facebook</option>
           </select>
-          <select className="text-sm text-gray-600 border rounded-full px-4 py-1 shadow-sm">
+          <select className="text-sm text-gray-600 border rounded-full px-4 py-1">
             <option value="monthly">Monthly</option>
             <option value="weekly">Weekly</option>
             <option value="yearly">Yearly</option>

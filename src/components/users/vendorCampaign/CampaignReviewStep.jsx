@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import FsLightbox from "fslightbox-react";
+
 import { useNavigate } from "react-router-dom"; 
 import {
   RiCheckboxCircleFill,
@@ -17,6 +19,10 @@ const CampaignReviewStep = ({ onEdit }) => {
   const [campaignData, setCampaignData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate(); 
+    const [lightboxController, setLightboxController] = useState({
+    toggler: false,
+    slide: 1,
+  });
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getFullUrl = (path) => {
@@ -134,6 +140,24 @@ const CampaignReviewStep = ({ onEdit }) => {
   const p_campaignfilejson = campaignData.p_campaignfilejson || [];
   const p_contenttypejson = campaignData.p_contenttypejson || [];
 
+  // Build lightbox sources and types from campaign files
+  const sources = p_campaignfilejson.map((file) => getFullUrl(file.filepath));
+
+  const types = p_campaignfilejson.map((file) => {
+    const ext = file.filepath.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'image';
+    if (['mp4', 'webm', 'ogg', 'mov'].includes(ext)) return 'video';
+    // FsLightbox doesn't support PDF directly, fallback to image or ignore
+    return 'image';
+  });
+
+  const openLightboxOnSlide = (slide) => {
+    setLightboxController({
+      toggler: !lightboxController.toggler,
+      slide,
+    });
+  };
+
   const platforms = p_contenttypejson.map((p) => p.providername) || [];
   const languages =
     p_vendorinfojson.campaignlanguages?.map((l) => l.languagename) || [];
@@ -169,11 +193,16 @@ const CampaignReviewStep = ({ onEdit }) => {
           <div className="bg-white rounded-2xl overflow-hidden">
             <div className="relative h-40">
               <div className="relative h-40">
+                <img
+                src="/src/assets/influencer.jpg"
+                alt="Banner"
+                className="w-full h-28 object-cover rounded-lg"
+              />
                 {camp_profile[0] && (
                   <img
                     src={camp_profile[0]}
                     alt="Campaign"
-                    className="absolute rounded-full top-9 left-4 w-27 h-27 border-2 border-white"
+                    className="absolute rounded-full top-18 left-4 w-22 h-22"
                   />
                 )}
               </div>
@@ -281,27 +310,96 @@ const CampaignReviewStep = ({ onEdit }) => {
                   : "No tags"}
               </div>
             </div>
+         {/* References */}
+      <div className="references py-4 border-b border-gray-200">
+        <h3 className="font-semibold mb-4 text-lg">References</h3>
+        <div className="flex gap-4 flex-wrap">
+          {p_campaignfilejson.length > 0 ? (
+            p_campaignfilejson.map((file, i) => {
+              const fileUrl = getFullUrl(file.filepath);
+              const ext = fileUrl?.split(".").pop().toLowerCase();
 
-            {/* References */}
-            <div className="references py-4 border-b border-gray-200">
-              <h3 className="font-semibold mb-4 text-lg">References</h3>
-              <div className="flex gap-4 flex-wrap">
-                {p_campaignfilejson.length > 0
-                  ? p_campaignfilejson.map((file, i) => (
-                      <div key={file.filepath + i} className="relative w-48 h-40 rounded-2xl overflow-hidden">
-                        <img src={getFullUrl(file.filepath)} alt="Reference" className="w-full h-full object-cover" />
-                        <button
-                          className="absolute top-2 right-2 bg-gray-100 bg-opacity-70 text-black p-2 rounded-full"
-                          type="button"
-                          onClick={() => handleDeleteReference(file)}
-                        >
-                          <RiDeleteBin6Line className="w-4 h-4" />
-                        </button>
+              const isImage = ["jpg", "jpeg", "png", "gif", "webp"].includes(ext);
+              const isVideo = ["mp4", "webm", "ogg", "mov"].includes(ext);
+              const isPdf = ext === "pdf";
+
+              return (
+                <div
+                  key={file.filepath + i}
+                  className="relative w-48 h-40 rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center cursor-pointer"
+                  onClick={() => {
+                    if (!isPdf) {
+                      openLightboxOnSlide(i + 1); // FsLightbox slides start at 1
+                    }
+                  }}
+                >
+                  {/* Thumbnail Preview */}
+                  {isImage && (
+                    <img
+                      src={fileUrl}
+                      alt="Reference"
+                      className="w-full h-full object-cover rounded-2xl"
+                    />
+                  )}
+                  {isVideo && (
+                    <video
+                      src={fileUrl}
+                      muted
+                      loop
+                      className="w-full h-full object-cover rounded-2xl"
+                      // prevent default video controls in thumbnail
+                      controls={false}
+                      playsInline
+                      autoPlay
+                    />
+                  )}
+
+                  {/* PDF Preview */}
+                  {isPdf && (
+                    <div className="flex flex-col items-center justify-center w-full h-full bg-gray-50 p-3 cursor-default">
+                      <div className="w-12 h-12 flex items-center justify-center bg-red-100 rounded-lg mb-2">
+                        <span className="text-red-600 text-lg font-bold">PDF</span>
                       </div>
-                    ))
-                  : "No references uploaded"}
-              </div>
-            </div>
+                      <a
+                        href={fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 text-blue-500 underline text-xs font-medium hover:text-blue-700"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        View PDF
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Delete Button */}
+                  <button
+                    className="absolute top-2 right-2 bg-gray-100 bg-opacity-70 text-black p-2 rounded-full"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent opening lightbox on delete
+                      handleDeleteReference(file);
+                    }}
+                  >
+                    <RiDeleteBin6Line className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })
+          ) : (
+            "No references uploaded"
+          )}
+        </div>
+      </div>
+
+      {/* FsLightbox for fullscreen preview */}
+      <FsLightbox
+        toggler={lightboxController.toggler}
+        sources={sources}
+        types={types}
+        slide={lightboxController.slide}
+        videoAutoplay={true}
+      />
           </div>
         </div>
 
@@ -327,25 +425,37 @@ const CampaignReviewStep = ({ onEdit }) => {
             </div>
           </div>
 
-          {/* Platform Info */}
-          <div className="bg-white p-4 rounded-2xl">
-            <h3 className="font-semibold text-lg mb-4">Platform</h3>
-            <ul className="space-y-3">
-              {p_contenttypejson.length > 0 ? (
-                p_contenttypejson.map((p, i) => (
-                  <li key={p.providername + i} className="flex items-center gap-2">
-                    <span>
-                      {p.providername} {p.caption ? `- ${p.caption}` : ""}
-                    </span>
-                  </li>
-                ))
-              ) : (
-                <p>No platforms selected</p>
-              )}
-            </ul>
+            {/* Platform Info */}
+            <div className="bg-white p-4 rounded-2xl">
+              <h3 className="font-semibold text-lg py-3">Platform</h3>
+              <div className="space-y-3">
+                {p_contenttypejson.length > 0 ? (
+                  p_contenttypejson.map((p, i) => (
+                    <div key={p.providername + i}>
+                      <div className="flex items-center justify-between pb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-700 font-medium">
+                            {p.providername}
+                          </span>
+                        </div>
+                         <span className="text-gray-500 text-sm">
+                        {p.contenttypes && p.contenttypes.length > 0
+                          ? p.contenttypes.map((ct) => ct.contenttypename).join(", ")
+                          : "No types"}
+                      </span>
+                      </div>
+                      {i < p_contenttypejson.length - 1 && (
+                        <hr className="my-4 border-gray-200" />
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p>No platforms selected</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Buttons */}
       <div className="flex max-w-sm gap-3 mt-3">

@@ -342,7 +342,7 @@ const Activity = () => {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-md">
+          <div className="bg-white p-6 rounded-xl">
             <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
 
             <div className="relative">

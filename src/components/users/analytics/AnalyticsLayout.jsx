@@ -82,7 +82,7 @@ const AnalyticsLayout = ({ balance = 22765, thisMonth = 2765 }) => {
         {stats.map(({ label, value, change, isPositive, icon }, idx) => (
           <div
             key={idx}
-            className="bg-white p-5 rounded-2xl shadow-sm flex items-center space-x-4"
+            className="bg-white p-5 rounded-2xl flex items-center space-x-4"
           >
             {/* Circle Icon */}
             <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#0D132D] text-white flex-shrink-0">
@@ -121,7 +121,7 @@ const AnalyticsLayout = ({ balance = 22765, thisMonth = 2765 }) => {
         </div>
 
         {/* Followers Section */}
-        <div className="bg-white rounded-2xl shadow-sm p-5 w-full">
+        <div className="bg-white rounded-2xl p-5 w-full">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Followers</h2>
           <div className="space-y-4">
             {followers.map(({ platform, username, count, icon }, idx) => (
@@ -149,7 +149,7 @@ const AnalyticsLayout = ({ balance = 22765, thisMonth = 2765 }) => {
           <ImpressionChart />
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm p-5 w-full">
+        <div className="bg-white rounded-2xl p-5 w-full">
           {/* Header */}
           <div className="ustify-between items-center mb-4">
             <h2 className="text-lg font-bold text-gray-900 mb-4">
@@ -204,7 +204,7 @@ const AnalyticsLayout = ({ balance = 22765, thisMonth = 2765 }) => {
         <TopContent />
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm p-4 w-full">
+      <div className="bg-white rounded-2xl p-4 w-full">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
           <h2 className="text-lg font-bold text-gray-900">
             Content Insight

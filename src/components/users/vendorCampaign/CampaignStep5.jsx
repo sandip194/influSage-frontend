@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Input, message } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
-
+import { RiCheckLine } from "@remixicon/react";
 const { TextArea } = Input;
 
 const CampaignStep5 = ({ onNext, onBack, data }) => {
@@ -158,78 +158,99 @@ const CampaignStep5 = ({ onNext, onBack, data }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-3xl">
-      <h2 className="text-xl font-bold mb-6">Content Types & Captions</h2>
+  <div className="bg-white p-6 rounded-3xl">
+    <h2 className="text-xl font-bold mb-6">Content Types & Captions</h2>
 
-      {Object.entries(platforms).map(([platform, types]) => {
-        const { selectedTypes = [], caption = "" } = formState[platform] || {};
-        const platformErrors = errors[platform] || {};
-        return (
-          <div key={platform} className="mb-5">
-            <p className="font-semibold mb-2">{platform}</p>
-            <div className="flex gap-2 mb-3 flex-wrap">
-             {types.map(({ id, label }, idx) => (
-              <button
-                key={`type-${platform}-${id || idx}`}
-                type="button"
-                onClick={() => toggleContentType(platform, id)}
-                className={`px-6 py-2 rounded-xl cursor-pointer border ${
-                  selectedTypes.includes(id)
-                    ? "border-[#0D132D] font-semibold bg-gray-100"
-                    : "border-gray-300"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-            </div>
+    {Object.entries(platforms).map(([platform, types]) => {
+      const { selectedTypes = [], caption = "" } = formState[platform] || {};
+      const platformErrors = errors[platform] || {};
 
-            {platformErrors.type && (
-              <p className="text-red-500 text-sm mb-2">
-                Select at least one type
-              </p>
-            )}
+      return (
+        <div key={platform} className="mb-5">
+          <p className="font-semibold mb-2">{platform}</p>
 
-            <TextArea
-              placeholder="Caption"
-              size="large"
-              value={caption}
-              onChange={(e) => handleCaptionChange(platform, e.target.value)}
-              rows={2}
-              className="rounded-2xl p-2"
-            />
+          <div className="flex gap-2 mb-3 flex-wrap">
+            {types.map(({ id, label }, idx) => {
+              const isSelected = selectedTypes.includes(id); // ✅ FIXED
 
-            {platformErrors.caption && (
-              <p className="text-red-500 text-sm mt-1">Caption is required</p>
-            )}
+              return (
+                <button
+                  key={`type-${platform}-${id || idx}`}
+                  type="button"
+                  onClick={() => toggleContentType(platform, id)}
+                  className={`px-6 py-2 rounded-xl cursor-pointer border flex items-center gap-2 transition-colors
+                    ${
+                      isSelected
+                        ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                        : "bg-white text-black border-gray-300 hover:border-[#141843]"
+                    }
+                  `}
+                >
+                  {label}
 
-            <hr className="mt-5 border-gray-200" />
+                  {/* Checkmark inside button */}
+                  <div
+                    className={`w-5 h-5 flex items-center justify-center rounded-full border ml-2
+                      ${
+                        isSelected
+                          ? "bg-[#141843] border-[#0D132D26] text-white"
+                          : "bg-transparent border-gray-400 text-transparent"
+                      }
+                    `}
+                  >
+                    <RiCheckLine size={14} />
+                  </div>
+                </button>
+              );
+            })}
           </div>
-        );
-      })}
 
-      {/* 🔹 Global error */}
-      {globalError && (
-        <p className="text-red-500 text-sm mb-4">{globalError}</p>
-      )}
+          {platformErrors.type && (
+            <p className="text-red-500 text-sm mb-2">
+              Select at least one type
+            </p>
+          )}
 
-      <div className="flex gap-4 mt-6">
-        <button
-          onClick={onBack}
-          className="bg-white text-[#0D132D] cursor-pointer px-8 py-3 rounded-full border border-[#121a3f26] hover:bg-[#0D132D] hover:text-white transition-colors"
-        >
-          Back
-        </button>
-        <button
-          onClick={handleContinue}
-          disabled={loading}
-          className="bg-[#121A3F] text-white cursor-pointer px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
-        >
-          {loading ? "Saving..." : "Continue"}
-        </button>
-      </div>
+          <TextArea
+            placeholder="Caption"
+            size="large"
+            value={caption}
+            onChange={(e) => handleCaptionChange(platform, e.target.value)}
+            rows={2}
+            className="rounded-2xl p-2"
+          />
+
+          {platformErrors.caption && (
+            <p className="text-red-500 text-sm mt-1">Caption is required</p>
+          )}
+
+          <hr className="mt-5 border-gray-200" />
+        </div>
+      );
+    })}
+
+    {/* 🔹 Global error */}
+    {globalError && (
+      <p className="text-red-500 text-sm mb-4">{globalError}</p>
+    )}
+
+    <div className="flex gap-4 mt-6">
+      <button
+        onClick={onBack}
+        className="bg-white text-[#0D132D] cursor-pointer px-8 py-3 rounded-full border border-[#121a3f26] hover:bg-[#0D132D] hover:text-white transition-colors"
+      >
+        Back
+      </button>
+      <button
+        onClick={handleContinue}
+        disabled={loading}
+        className="bg-[#121A3F] text-white cursor-pointer px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
+      >
+        {loading ? "Saving..." : "Continue"}
+      </button>
     </div>
-  );
+  </div>
+);
 };
 
 export default CampaignStep5;

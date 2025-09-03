@@ -38,7 +38,7 @@ const CampaignWizard = () => {
   };
 
   // Mark a step complete and move to the next
-const markStepComplete = (index) => {
+const markStepComplete = async (index) => {
   const updated = [...completedSteps];
   if (!updated[index]) {
     updated[index] = true;
@@ -46,6 +46,9 @@ const markStepComplete = (index) => {
     localStorage.setItem("completedSteps", JSON.stringify(updated));
     setLastCompletedStep(index); 
   }
+
+  // Fetch updated campaign data immediately
+  await getCampaignData();
 
   if (index + 1 < steps.length) {
     setCurrentStep(index + 1);
