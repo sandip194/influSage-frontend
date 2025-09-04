@@ -260,7 +260,7 @@ const FilesMedia = () => {
                 {files.map((file) => (
                   <div
                     key={file.id}
-                    className="flex items-center justify-between border border-gray-200 rounded-2xl p-3 hover:shadow-sm transition"
+                    className="flex items-center justify-between border border-gray-200 rounded-2xl p-3 transition"
                   >
                     {/* File Info */}
                     <div className="flex items-center gap-3">
@@ -307,7 +307,7 @@ const FilesMedia = () => {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-md">
+          <div className="bg-white p-6 rounded-xl">
             <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
 
             <div className="relative">

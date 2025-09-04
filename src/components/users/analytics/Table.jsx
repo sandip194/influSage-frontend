@@ -82,12 +82,12 @@ const Table = () => {
             setPage(1); // reset to page 1 on new search
             setSearchText(e.target.value);
           }}
-          className="w-full sm:w-72 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#0f122f] focus:outline-none"
+          className="w-full sm:w-72 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0f122f] focus:outline-none"
         />
       </div>
 
       {/* Data Table */}
-      <div className="bg-white rounded-xl shadow overflow-hidden">
+      <div className="bg-white rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left min-w-[800px]">
             <thead className="bg-gray-50 text-gray-700 text-sm tracking-wide">

@@ -64,7 +64,7 @@ const EarnChart = ({ data }) => {
     <div className="bg-white p-6 rounded-2xl w-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Earning Summary</h2>
-        <select className="text-sm text-gray-600 border rounded-full px-4 py-1 shadow-sm">
+        <select className="text-sm text-gray-600 border rounded-full px-4 py-1">
           <option value="yearly">Yearly</option>
           <option value="monthly">Monthly</option>
           <option value="weekly">Weekly</option>

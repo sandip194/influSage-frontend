@@ -105,7 +105,7 @@ const  CampaignsLayout = () => {
       <p className="mb-6 text-gray-600 text-sm">Your Campaigns Overview</p>
 
       {/* Tabs (Status Filters) */}
-      <div className="bg-white p-3 sm:p-4 rounded-lg mb-6 flex flex-wrap gap-3 shadow-sm">
+      <div className="bg-white p-3 sm:p-4 rounded-lg mb-6 flex flex-wrap gap-3">
         {tabs.map(({ id, label }) => (
           <button
             key={id}
@@ -131,12 +131,12 @@ const  CampaignsLayout = () => {
           placeholder="Search campaigns..."
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="w-full sm:w-72 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#0f122f] focus:outline-none"
+          className="w-full sm:w-72 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0f122f] focus:outline-none"
         />
       </div>
 
       {/* Data Table */}
-      <div className="bg-white rounded-xl shadow overflow-hidden">
+      <div className="bg-white rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left min-w-[700px]">
             <thead className="bg-gray-50 text-gray-700 text-sm tracking-wide">
@@ -187,7 +187,7 @@ const  CampaignsLayout = () => {
                     </button>
 
                     {menuOpenId === row.id && (
-                      <div className="absolute right-4 mt-2 w-44 bg-white rounded-lg shadow-lg border z-50">
+                      <div className="absolute right-4 mt-2 w-44 bg-white rounded-lg border z-50">
                         <button
                           onClick={() => {
                             setMenuOpenId(null);

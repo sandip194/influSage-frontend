@@ -193,21 +193,40 @@ const handleContinue = async () => {
       <hr className="my-4 border-gray-200" />
 
       {/* Budget */}
-      <label className="font-semibold block mb-2">
+        <label className="font-semibold block mb-2">
         Budget <span>(Approx Price)</span>
       </label>
       <div className="flex gap-4 mb-1">
         <Input
           size="large"
           type="number"
+          min={1} 
           placeholder="0.00"
           value={formData.budgetAmount}
-          onChange={(e) => handleChange("budgetAmount", e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+
+            // Update form data
+            handleChange("budgetAmount", value);
+
+            // Inline validation: set error if 0 or empty
+            if (!value || Number(value) <= 0) {
+              setErrors((prev) => ({
+                ...prev,
+                budgetAmount: "Budget must be greater than 0",
+              }));
+            } else {
+              setErrors((prev) => ({
+                ...prev,
+                budgetAmount: "",
+              }));
+            }
+          }}
         />
         <span>{formData.currency}</span>
       </div>
       {errors.budgetAmount && (
-        <p className="text-red-500 text-sm mt-1">Please enter a budget amount</p>
+        <p className="text-red-500 text-sm mt-1">{errors.budgetAmount}</p>
       )}
 
       <hr className="my-4 border-gray-200" />

@@ -18,7 +18,7 @@ const AudienceDemographic = () => {
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-5 w-full">
+    <div className="bg-white rounded-2xl p-5 w-full">
       {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
           <h2 className="text-lg font-bold text-gray-900">
