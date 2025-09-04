@@ -11,11 +11,9 @@ const PerformanceCard = () => {
       {
         data: Array(12).fill(1),
         backgroundColor: [
-          // First 9 segments = blue gradient or solid
           '#3B82F6', '#3B82F6', '#3B82F6',
           '#335CFF', '#335CFF', '#335CFF',
           '#335CFF', '#335CFF', '#335CFF',
-          // Last 3 segments = dark blue (inactive)
           '#0F172A', '#0F172A', '#0F172A'
         ],
         borderWidth: 0,
@@ -29,32 +27,32 @@ const PerformanceCard = () => {
     cutout: '80%',
     rotation: -90,
     circumference: 360,
-    plugins: {
-      tooltip: { enabled: false },
-    }
+    plugins: { tooltip: { enabled: false } },
+    responsive: true,
+    maintainAspectRatio: true,
   };
 
   return (
     <div className="bg-white p-6 rounded-2xl w-full">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-bold text-gray-900">Performance</h2>
-        <div className="flex gap-2">
-          <button className="border border-gray-300 rounded-full px-4 py-1 text-sm text-gray-700 flex items-center gap-1">
-            Instagram <i className="ri-arrow-down-s-line"></i>
-          </button>
-          <button className="border border-gray-300 rounded-full px-4 py-1 text-sm text-gray-700 flex items-center gap-1">
-            Monthly <i className="ri-arrow-down-s-line"></i>
-          </button>
+       {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 sm:gap-0">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900">Performance</h2>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
+            <button className="border border-gray-300 rounded-full px-3 py-1 sm:px-4 sm:py-1 text-xs sm:text-sm text-gray-700 flex items-center gap-1 justify-center">
+              Instagram <i className="ri-arrow-down-s-line"></i>
+            </button>
+            <button className="border border-gray-300 rounded-full px-3 py-1 sm:px-4 sm:py-1 text-xs sm:text-sm text-gray-700 flex items-center gap-1 justify-center">
+              Monthly <i className="ri-arrow-down-s-line"></i>
+            </button>
+          </div>
         </div>
-      </div>
 
       {/* Donut Chart */}
-      <div className="relative w-48 h-48 mx-auto mb-6">
+      <div className="relative w-full max-w-[200px] sm:max-w-[192px] mx-auto mb-6 aspect-[1/1]">
         <Doughnut data={data} options={options} />
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-sm text-gray-400">Avg. Performance</span>
-          <span className="text-2xl font-semibold text-gray-800">75%</span>
+          <span className="text-sm sm:text-base text-gray-400">Avg. Performance</span>
+          <span className="text-xl sm:text-2xl font-semibold text-gray-800">75%</span>
         </div>
       </div>
 
@@ -96,7 +94,7 @@ const MetricRow = ({ color, label, value, icon, change, positive }) => {
         <div className={`w-2.5 h-2.5 rounded-full ${color}`}></div>
         <span className="text-gray-800">{label}</span>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-wrap">
         <span className="font-bold text-gray-900">{value}</span>
         <div className="flex items-center gap-1 px-2 py-1 border rounded-full text-xs text-gray-700 bg-gray-100">
           <i className={`${icon} ${positive ? 'text-green-500' : 'text-red-500'}`}></i>
