@@ -173,7 +173,7 @@ const CampaignStep5 = ({ onNext, onBack, data }) => {
 
           <div className="flex gap-2 mb-3 flex-wrap">
             {types.map(({ id, label }, idx) => {
-              const isSelected = selectedTypes.includes(id); // ✅ FIXED
+              const isSelected = selectedTypes.includes(id); 
 
               return (
                 <button

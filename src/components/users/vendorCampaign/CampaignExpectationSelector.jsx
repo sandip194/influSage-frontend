@@ -113,22 +113,24 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
                 setSelected(opt.id);
                 setErrors((prev) => ({ ...prev, contentExpectation: false }));
               }}
-              className={`flex justify-between items-center px-5 py-4 rounded-xl border cursor-pointer transition-all ${
-                isSelected
-                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                  : "bg-white text-black border-gray-300 hover:border-[#141843]"
-              }`}
+             className={`flex justify-between items-center px-3 sm:px-5 py-3 sm:py-4 rounded-xl border cursor-pointer transition-all ${
+              isSelected
+                ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                : "bg-white text-black border-gray-300 hover:border-[#141843]"
+            }`}
             >
-              <span className="text-sm">{opt.name}</span>
+              <span className="text-xs sm:text-sm md:text-base break-words pr-2 text-justify">
+                {opt.name}
+              </span>
 
               <div
-                className={`w-6 h-6 flex items-center justify-center rounded-full border transition-all ${
+                className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full border transition-all shrink-0 ${
                   isSelected
                     ? "bg-[#141843] border-[#0D132D26] text-white"
                     : "bg-transparent border-gray-400 text-transparent"
                 }`}
               >
-                {isSelected && <RiCheckLine size={18} />}
+                {isSelected && <RiCheckLine size={16} className="sm:w-5 sm:h-5" />}
               </div>
             </div>
           );
@@ -143,7 +145,7 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
       <hr className="my-6 border-gray-200" />
 
       {/* Post Duration */}
-      <h2 className="text-xl font-semibold mb-4">
+      <h2 className="text-xl font-semibold mb-4 ">
         How long would you like the post to stay on the influencer’s social
         accounts?
       </h2>
@@ -171,7 +173,7 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
       <hr className="my-6 border-gray-200" />
 
       {/* Add Link to Bio */}
-      <h2 className="text-xl font-semibold mb-4">
+      <h2 className="text-xl font-semibold mb-4 text-justify">
         Would you like to have influencers add your link in their bio when
         publishing your campaign?
       </h2>
@@ -223,12 +225,12 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
 
       {/* Navigation Buttons */}
       <div className="flex gap-4 mt-6">
-        <button
+        {/* <button
           className="bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
           disabled
         >
           Back
-        </button>
+        </button> */}
         <button
           onClick={handleContinue}
           disabled={loading}

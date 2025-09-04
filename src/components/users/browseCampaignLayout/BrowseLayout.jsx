@@ -6,6 +6,7 @@ import {
   RiExchangeDollarLine,
   RiArrowDownSLine,
   RiEqualizerFill,
+  RiCloseFill,
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
 import { Input } from "antd";
@@ -213,75 +214,84 @@ const Browse = () => {
           </div>
 
           {showFilter && (
-            <div className="w-full lg:w-80 border border-gray-300 rounded-lg p-4 bg-gray-50 flex-shrink-0">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Filter Options</h3>
-                <button
-                  onClick={() => setShowFilter(false)}
-                  className="text-gray-500 hover:text-gray-900"
-                >
-                  Close
-                </button>
-              </div>
+            <>
+              <div
+                className="fixed inset-0 bg-black/30 z-40"
+                onClick={() => setShowFilter(false)}
+              />
 
-              <div>
+              <div className="fixed top-0 right-0 w-80 h-auto bg-white p-4 z-50 shadow-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Filter Options</h3>
+                  <button
+                    onClick={() => setShowFilter(false)}
+                    className="text-gray-500 hover:text-gray-900"
+                  >
+                    <RiCloseFill />
+                  </button>
+                </div>
+
+            <hr className="my-4 border-gray-200" />
+
+                {/* Platform */}
                 <h4 className="font-semibold mb-2">Platform</h4>
                 {["Instagram", "YouTube", "Facebook", "TikTok"].map((item) => (
                   <label key={item} className="block mb-1">
-                    <input type="checkbox" className="mr-2" />
-                    {item}
+                    <input type="checkbox" className="mr-2" /> {item}
                   </label>
                 ))}
-              </div>
 
-              <div className="mt-4">
-                <h4 className="font-semibold mb-2">Type</h4>
-                {["All", "Story", "Reel", "Video"].map((item) => (
-                  <label key={item} className="block mb-1">
-                    <input type="checkbox" className="mr-2" />
-                    {item}
-                  </label>
-                ))}
-              </div>
+                {/* Type */}
+                <div className="mt-4">
+                  <h4 className="font-semibold mb-2">Type</h4>
+                  {["All", "Story", "Reel", "Video"].map((item) => (
+                    <label key={item} className="block mb-1">
+                      <input type="checkbox" className="mr-2" /> {item}
+                    </label>
+                  ))}
+                </div>
 
-              <div className="mt-4">
-                <h4 className="font-semibold mb-2">Campaign</h4>
-                {["Instagram", "Youtube", "Guest"].map((item) => (
-                  <label key={item} className="block mb-1">
-                    <input type="checkbox" className="mr-2" />
-                    {item}
-                  </label>
-                ))}
-              </div>
+                {/* Campaign */}
+                <div className="mt-4">
+                  <h4 className="font-semibold mb-2">Campaign</h4>
+                  {["Instagram", "Youtube", "Guest"].map((item) => (
+                    <label key={item} className="block mb-1">
+                      <input type="checkbox" className="mr-2" /> {item}
+                    </label>
+                  ))}
+                </div>
 
-              <div className="mt-4">
-                <h4 className="font-semibold mb-2">Budget</h4>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    placeholder="Min Price"
-                    className="border border-gray-300 rounded px-2 py-1 w-1/2"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Max Price"
-                    className="border border-gray-300 rounded px-2 py-1 w-1/2"
-                  />
+                {/* Budget */}
+                <div className="mt-4">
+                  <h4 className="font-semibold mb-2">Budget</h4>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Min Price"
+                      className="border border-gray-300 rounded px-2 py-1 w-1/2"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max Price"
+                      className="border border-gray-300 rounded px-2 py-1 w-1/2"
+                    />
+                  </div>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 mt-4 px-4">
+                  <button className="flex-1 py-2 bg-gray-200 rounded-full hover:bg-gray-300">
+                    Clear
+                  </button>
+                  <button
+                    className="flex-1 py-2 bg-[#0f122f] text-white rounded-full hover:bg-[#23265a]"
+                    onClick={() => setShowFilter(false)}
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
-
-              <div className="flex gap-3 mt-4">
-                <button className="flex-1 py-2 bg-gray-200 rounded hover:bg-gray-300">
-                  Clear
-                </button>
-                <button
-                  className="flex-1 py-2 bg-[#0f122f] text-white rounded hover:bg-[#23265a]"
-                  onClick={() => setShowFilter(false)}
-                >
-                  Filter
-                </button>
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>

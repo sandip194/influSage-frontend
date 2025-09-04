@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { Upload, message } from "antd";
-import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
+import { UploadOutlined } from "@ant-design/icons";
+import {
+RiCloseLine,
+RiUpload2Line,
+RiDeleteBin6Line,
+} from "react-icons/ri";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import "react-photo-view/dist/react-photo-view.css";
+import { PhotoProvider, PhotoView } from "react-photo-view";
 
 const { Dragger } = Upload;
 
 const CampaignStep4 = ({ onBack, onNext, data }) => {
   const [fileList, setFileList] = useState([]);
   const [existingFiles, setExistingFiles] = useState([]);
+  const [lightboxVideo, setLightboxVideo] = useState({ open: false, src: "" });
   const [fileError, setFileError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -30,56 +38,57 @@ const CampaignStep4 = ({ onBack, onNext, data }) => {
   const getFileUID = (file) =>
     `${file.name}-${file.size || 0}-${file.lastModified || Date.now()}`;
 
-    // File change handler
-    const handleFileChange = (info) => {
-      const incomingFiles = info.fileList
-        .map((f) => f.originFileObj || f)
-        .filter(Boolean);
+  // File change handler
+  const handleFileChange = (info) => {
+    const incomingFiles = info.fileList
+      .map((f) => f.originFileObj || f)
+      .filter(Boolean);
 
-      let errorMessages = new Set(); 
+    let errorMessages = new Set();
 
-      setFileList((prevFiles) => {
-        const combinedFiles = [...prevFiles, ...existingFiles];
-        const existingUIDs = new Set(combinedFiles.map((f) => f.uid));
-        const newValidFiles = [];
+    setFileList((prevFiles) => {
+      const combinedFiles = [...prevFiles, ...existingFiles];
+      const existingUIDs = new Set(combinedFiles.map((f) => f.uid));
+      const newValidFiles = [];
 
-        for (const file of incomingFiles) {
-          if (!allowedTypes.includes(file.type)) {
-            errorMessages.add(`${file.name}: unsupported type`);
-            continue;
-          }
-          if (file.size / 1024 / 1024 > 25) {
-            errorMessages.add(`${file.name}: exceeds 25MB`);
-            continue;
-          }
-
-          const uid = getFileUID(file);
-          if (existingUIDs.has(uid)) {
-            continue;
-          }
-
-          if (
-            prevFiles.length + newValidFiles.length + existingFiles.length >= 5
-          ) {
-            errorMessages.add("Maximum 5 files allowed");
-            break;
-          }
-
-          file.uid = uid;
-          file.previewUrl = URL.createObjectURL(file);
-          newValidFiles.push(file);
-          existingUIDs.add(uid);
+      for (const file of incomingFiles) {
+        if (!allowedTypes.includes(file.type)) {
+          errorMessages.add(`${file.name}: unsupported type`);
+          continue;
+        }
+        if (file.size / 1024 / 1024 > 25) {
+          errorMessages.add(`${file.name}: exceeds 25MB`);
+          continue;
         }
 
-        if (errorMessages.size > 0) {
-          setFileError(Array.from(errorMessages).join("\n"));
-        } else {
-          setFileError("");
+        const uid = getFileUID(file);
+        if (existingUIDs.has(uid)) {
+          continue;
         }
 
-        return [...prevFiles, ...newValidFiles];
-      });
-    };
+        if (
+          prevFiles.length + newValidFiles.length + existingFiles.length >=
+          5
+        ) {
+          errorMessages.add("Maximum 5 files allowed");
+          break;
+        }
+
+        file.uid = uid;
+        file.previewUrl = URL.createObjectURL(file);
+        newValidFiles.push(file);
+        existingUIDs.add(uid);
+      }
+
+      if (errorMessages.size > 0) {
+        setFileError(Array.from(errorMessages).join("\n"));
+      } else {
+        setFileError("");
+      }
+
+      return [...prevFiles, ...newValidFiles];
+    });
+  };
 
   const handleContinue = async () => {
     if (fileList.length === 0 && existingFiles.length === 0) {
@@ -196,13 +205,14 @@ const CampaignStep4 = ({ onBack, onNext, data }) => {
         onChange={handleFileChange}
         showUploadList={false}
       >
-        <div className="py-6">
-          <UploadOutlined className="text-2xl text-gray-500 mb-2" />
-          <p className="font-semibold text-gray-800 text-md">
+        <div className="py-6 flex flex-col items-center justify-center text-center">
+          <RiUpload2Line className="text-4xl text-gray-400 mb-3" />
+          <p className="font-semibold text-gray-800 text-base">
             Upload Reference Files
           </p>
-          <p className="text-gray-500 text-sm">
-            Max 5 files. Each under 25MB. PNG, JPG, MP4, MOV, PDF, DOC, DOCX
+          <p className="text-gray-500 text-sm mt-1">
+            Max 5 files · Each under 25MB <br />
+            PNG, JPG, MP4, MOV, PDF, DOC, DOCX
           </p>
         </div>
       </Dragger>
@@ -213,105 +223,141 @@ const CampaignStep4 = ({ onBack, onNext, data }) => {
       )}
 
       {/* Preview */}
-      <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
-        {[...existingFiles, ...fileList].map((file, index) => {
-          const previewUrl = file.url || file.previewUrl;
-          const isImage = file.type?.includes("image");
-          const isVideo = file.type?.includes("video");
-          const isPDF = file.type?.includes("pdf");
-          const isDoc =
-            file.type?.includes("word") || file.type?.includes("officedocument");
+      <PhotoProvider>
+        <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
+          {[...existingFiles, ...fileList].map((file, index) => {
+            const previewUrl = file.url || file.previewUrl;
+            const isImage = file.type?.includes("image");
+            const isVideo = file.type?.includes("video");
+            const isPDF = file.type?.includes("pdf");
+            const isDoc =
+              file.type?.includes("word") ||
+              file.type?.includes("officedocument");
 
-          return (
-            <div
-              key={`${file.uid || file.name}-${index}`}
-              className="relative w-[100px] h-[120px] rounded-lg overflow-hidden bg-gray-50 flex flex-col items-center justify-center p-2 shadow-sm"
-            >
-              {/* Image Preview */}
-              {isImage && (
-                <img
-                  src={previewUrl}
-                  alt="preview"
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              )}
-
-              {/* Video Preview */}
-              {isVideo && (
-                <video
-                  src={previewUrl}
-                  className="w-full h-full object-cover rounded-lg"
-                  muted
-                  controls
-                />
-              )}
-
-              {/* PDF Preview */}
-              {isPDF && (
-                <div className="flex flex-col items-center justify-center w-full h-full text-gray-700">
-                  <div className="w-10 h-10 flex items-center justify-center bg-red-100 rounded-lg mb-1">
-                    <span className="text-red-600 font-bold text-sm">PDF</span>
-                  </div>
-                  <p className="text-[10px] text-gray-600 text-center truncate w-full px-1">
-                    {file.name}
-                  </p>
-                  <a
-                    href={previewUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 underline text-[10px] mt-1"
-                  >
-                    View PDF
-                  </a>
-                </div>
-              )}
-
-              {/* Doc/Docx Preview */}
-              {isDoc && (
-                <div className="flex flex-col items-center justify-center w-full h-full text-gray-700">
-                  <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg mb-1">
-                    <span className="text-blue-600 font-bold text-sm">DOC</span>
-                  </div>
-                  <p className="text-[10px] text-gray-600 text-center truncate w-full px-1">
-                    {file.name}
-                  </p>
-                  <a
-                    href={previewUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 underline text-[10px] mt-1"
-                  >
-                    View Doc
-                  </a>
-                </div>
-              )}
-
-              {/* Fallback */}
-              {!isImage && !isVideo && !isPDF && !isDoc && (
-                <a
-                  href={previewUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-blue-600 underline"
-                >
-                  {file.name || "File"}
-                </a>
-              )}
-
-              <button
-                className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white p-1 rounded-full"
-                onClick={() => handleDeleteReference(file)}
-                type="button"
+            return (
+              <div
+                key={`${file.uid || file.name}-${index}`}
+                className="relative w-28 h-28 rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center"
               >
-                <DeleteOutlined />
-              </button>
-            </div>
-          );
-        })}
-      </div>
+                {/* Image Preview with react-photo-view */}
+                {isImage && (
+                  <PhotoView src={previewUrl}>
+                    <img
+                      src={previewUrl}
+                      alt="preview"
+                      className="w-full h-full object-cover rounded-lg cursor-pointer"
+                    />
+                  </PhotoView>
+                )}
+
+                {isVideo && (
+                  <div
+                    className="w-full h-full cursor-pointer relative"
+                    onClick={() =>
+                      setLightboxVideo({ open: true, src: previewUrl })
+                    }
+                  >
+                    <video
+                      src={previewUrl}
+                      muted
+                      loop
+                      playsInline
+                      className="w-full h-full object-cover rounded-2xl"
+                    />
+                  </div>
+                )}
+
+                {/* PDF Preview */}
+                {isPDF && (
+                  <div className="flex flex-col items-center justify-center w-full h-full text-gray-700">
+                    <div className="w-10 h-10 flex items-center justify-center bg-red-100 rounded-lg mb-1">
+                      <span className="text-red-600 font-bold text-sm">
+                        PDF
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-gray-600 text-center truncate w-full px-1">
+                      {file.name}
+                    </p>
+                    <a
+                      href={previewUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline text-[10px] mt-1"
+                    >
+                      View PDF
+                    </a>
+                  </div>
+                )}
+
+                {/* Doc/Docx Preview */}
+                {isDoc && (
+                  <div className="flex flex-col items-center justify-center w-full h-full text-gray-700">
+                    <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg mb-1">
+                      <span className="text-blue-600 font-bold text-sm">
+                        DOC
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-gray-600 text-center truncate w-full px-1">
+                      {file.name}
+                    </p>
+                    <a
+                      href={previewUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline text-[10px] mt-1"
+                    >
+                      View Doc
+                    </a>
+                  </div>
+                )}
+
+                {/* Fallback */}
+                {!isImage && !isVideo && !isPDF && !isDoc && (
+                  <a
+                    href={previewUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 underline"
+                  >
+                    {file.name || "File"}
+                  </a>
+                )}
+
+                <button
+                  className="absolute top-1 right-1 bg-black flex items-center justify-center w-7 h-7 hover:bg-black/80 text-white p-1 rounded-full"
+                  onClick={() => handleDeleteReference(file)}
+                  type="button"
+                >
+                  <RiDeleteBin6Line />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </PhotoProvider>
+
+      {/* Custom modal for videos */}
+      {lightboxVideo.open && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <div className="relative w-[90%] max-w-4xl">
+            <video
+              src={lightboxVideo.src}
+              controls
+              autoPlay
+              className="w-full rounded-lg"
+            />
+            <button
+              className="absolute top-2 right-2 bg-white/60 flex items-center justify-center w-7 h-7 text-black p-1 rounded-full"
+              onClick={() => setLightboxVideo({ open: false, src: "" })}
+            >
+            <RiCloseLine/>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Buttons */}
-      <div className="flex flex-col sm:flex-row items-center gap-4 mt-8">
+      <div className="flex gap-4 mt-8">
         <button
           onClick={onBack}
           className="bg-white text-[#0D132D] cursor-pointer px-8 py-3 rounded-full border border-[#121a3f26] hover:bg-[#0D132D] hover:text-white transition-colors"

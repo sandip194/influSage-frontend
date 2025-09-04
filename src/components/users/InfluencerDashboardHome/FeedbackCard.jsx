@@ -33,11 +33,15 @@ const feedbacks = [
 
 const FeedbackCard = () => {
   return (
-    <div className="bg-white p-6 rounded-2xl w-full">
+    <div className="bg-white p-4 sm:p-6 rounded-2xl w-full">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold text-gray-900">Recent Feedbacks From Brands</h2>
-        <button className="text-sm cursor-pointer text-gray-700 hover:underline">View All</button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
+        <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+          Recent Feedbacks From Brands
+        </h2>
+        <button className="text-sm cursor-pointer text-gray-700 hover:underline">
+          View All
+        </button>
       </div>
 
       {/* Cards Grid */}
@@ -52,7 +56,7 @@ const FeedbackCard = () => {
               {[...Array(5)].map((_, i) => (
                 <i
                   key={i}
-                  className={`ri-star-${i < fb.rating ? 'fill' : 'line'} text-xl ${
+                  className={`ri-star-${i < fb.rating ? 'fill' : 'line'} text-lg sm:text-xl ${
                     i < fb.rating ? 'text-yellow-500' : 'text-gray-400'
                   }`}
                 ></i>
@@ -60,20 +64,21 @@ const FeedbackCard = () => {
             </div>
 
             {/* Feedback Text */}
-            <p className="text-sm text-gray-700 mb-4">{fb.feedback}</p>
+            <p className="text-sm text-gray-700 mb-4 text-justify">{fb.feedback}</p>
+
 
             {/* Author Info */}
             <div className="flex items-center gap-3 mt-auto">
               <img
                 src={fb.avatar}
                 alt={fb.name}
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
               />
               <div>
-                <p className="text-sm font-bold text-gray-800">{fb.name}</p>
-                <p className="text-xs text-gray-500">{fb.time}</p>
+                <p className="text-sm sm:text-base font-bold text-gray-800">{fb.name}</p>
+                <p className="text-xs sm:text-sm text-gray-500">{fb.time}</p>
               </div>
-            </div>
+            </div>  
           </div>
         ))}
       </div>
