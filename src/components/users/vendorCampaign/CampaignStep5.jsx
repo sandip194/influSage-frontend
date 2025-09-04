@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Input, message } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { RiCheckLine } from "@remixicon/react";
 
 const { TextArea } = Input;
 
@@ -13,15 +14,15 @@ const CampaignStep5 = ({ onNext, onBack, data }) => {
   const [loading, setLoading] = useState(false);
   const [globalError, setGlobalError] = useState("");
 
- useEffect(() => {
+  useEffect(() => {
     const fetchPlatforms = async () => {
       try {
         const res = await axios.get("/vendor/provider-content-type", {
           headers: { Authorization: `Bearer ${token}` },
         });
- 
+
         const apiPlatforms = res.data.providorType || [];
- 
+
         const grouped = apiPlatforms.reduce((acc, item, index) => {
           if (!acc[item.providername]) {
             acc[item.providername] = [];
@@ -36,13 +37,13 @@ const CampaignStep5 = ({ onNext, onBack, data }) => {
           return acc;
         }, {});
         setPlatforms(grouped);
- 
+
         // 🔹 Build base empty state
         const initial = {};
         Object.keys(grouped).forEach((platform) => {
           initial[platform] = { selectedTypes: [], caption: "" };
         });
- 
+
         // 🔹 Merge parent data (if provided)
         if (Array.isArray(data)) {
           data.forEach((entry) => {
@@ -55,35 +56,35 @@ const CampaignStep5 = ({ onNext, onBack, data }) => {
             }
           });
         }
- 
+
         setFormState(initial);
       } catch (err) {
         console.error("Error fetching provider content types:", err);
         message.error("Failed to load content types");
       }
     };
- 
+
     fetchPlatforms();
   }, [token, data]);
- 
-      const toggleContentType = (platform, typeId) => {
-      setFormState((prev) => {
-        const selected = Array.isArray(prev[platform]?.selectedTypes)
-          ? prev[platform].selectedTypes
-          : [];
-        const alreadySelected = selected.includes(typeId);
 
-        return {
-          ...prev,
-          [platform]: {
-            ...prev[platform],
-            selectedTypes: alreadySelected
-              ? selected.filter((id) => id !== typeId)
-              : [...selected, typeId],
-          },
-        };
-      });
-    };
+  const toggleContentType = (platform, typeId) => {
+    setFormState((prev) => {
+      const selected = Array.isArray(prev[platform]?.selectedTypes)
+        ? prev[platform].selectedTypes
+        : [];
+      const alreadySelected = selected.includes(typeId);
+
+      return {
+        ...prev,
+        [platform]: {
+          ...prev[platform],
+          selectedTypes: alreadySelected
+            ? selected.filter((id) => id !== typeId)
+            : [...selected, typeId],
+        },
+      };
+    });
+  };
   const handleCaptionChange = (platform, value) => {
     setFormState((prev) => ({
       ...prev,
@@ -95,7 +96,7 @@ const CampaignStep5 = ({ onNext, onBack, data }) => {
     const newErrors = {};
     let validPlatforms = [];
 
-    const contenttypejson = Object. entries(formState)
+    const contenttypejson = Object.entries(formState)
       .map(([platform, data]) => {
         const typeObjs = platforms[platform].filter((item) =>
           (data.selectedTypes || []).includes(item.id)
@@ -166,22 +167,36 @@ const CampaignStep5 = ({ onNext, onBack, data }) => {
         const platformErrors = errors[platform] || {};
         return (
           <div key={platform} className="mb-5">
-            <p className="font-semibold mb-2">{platform}</p>
+            <p className="text-2xl font-semibold mb-2">{platform}</p>
             <div className="flex gap-2 mb-3 flex-wrap">
-             {types.map(({ id, label }, idx) => (
-              <button
-                key={`type-${platform}-${id || idx}`}
-                type="button"
-                onClick={() => toggleContentType(platform, id)}
-                className={`px-6 py-2 rounded-xl cursor-pointer border ${
-                  selectedTypes.includes(id)
-                    ? "border-[#0D132D] font-semibold bg-gray-100"
-                    : "border-gray-300"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+              {types.map(({ id, label }, idx) => {
+                const isSelected = selectedTypes.includes(id);
+
+                return (
+                  <div
+                    key={`type-${platform}-${id || idx}`}
+                    onClick={() => toggleContentType(platform, id)}
+                    className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-40
+        ${isSelected
+                        ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                        : "bg-white text-black border-gray-300 hover:border-[#141843]"
+                      }`}
+                  >
+                    <span className="capitalize font-medium text-sm">{label}</span>
+
+                    <div
+                      className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
+          ${isSelected
+                          ? "bg-[#141843] border-[#0D132D26] text-white"
+                          : "bg-transparent border-gray-400 text-transparent"
+                        }`}
+                    >
+                      <RiCheckLine size={14} />
+                    </div>
+                  </div>
+                );
+              })}
+
             </div>
 
             {platformErrors.type && (
