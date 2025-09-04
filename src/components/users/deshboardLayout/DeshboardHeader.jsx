@@ -7,6 +7,7 @@ import {
   SettingOutlined,
   LogoutOutlined,
   DownOutlined,
+  MenuOutlined,
 } from "@ant-design/icons";
 import {
   Dropdown,
@@ -23,7 +24,7 @@ import { logout } from "../../../features/auth/authSlice";
 import NotificationDropdown from "./NotificationDropdown";
 import MessageDropdown from "./MessageDropdown";
 
-const DeshboardHeader = () => {
+const DeshboardHeader = ({ toggleSidebar }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -60,14 +61,26 @@ const DeshboardHeader = () => {
   const messageMenu = <MessageDropdown />;
 
   return (
-    <div className="w-full flex justify-end sm:justify-between items-center p-4 bg-white shadow-sm border-b-1 border-gray-200">
-      {/* Search Bar */}
-      <div className="hidden sm:block w-full max-w-sm">
-        <Input
-          size="large"
-          prefix={<SearchOutlined />}
-          placeholder=" Search"
-        />
+    <div className="w-full flex justify-between items-center p-4 bg-white shadow-sm border-b border-gray-200">
+
+      {/* Left side: Hamburger + Search */}
+      <div className="flex items-center gap-4 w-full max-w-sm">
+        {/* Mobile Hamburger */}
+        <button
+          className="sm:hidden p-2 rounded-sm bg-gray-100 hover:bg-gray-100"
+          onClick={toggleSidebar}
+        >
+          <MenuOutlined className="text-lg" />
+        </button>
+
+        {/* Search (hidden on mobile) */}
+        <div className="hidden sm:block flex-1">
+          <Input
+            size="large"
+            prefix={<SearchOutlined />}
+            placeholder=" Search"
+          />
+        </div>
       </div>
 
       {/* Right Side Icons */}
@@ -88,7 +101,7 @@ const DeshboardHeader = () => {
         <Dropdown overlay={profileMenu} trigger={["click"]}>
           <div className="flex items-center gap-2 cursor-pointer border border-gray-200 px-3 py-1 rounded-full">
             <Avatar src="https://randomuser.me/api/portraits/men/32.jpg" />
-            <span className=" sm:inline text-sm font-medium">Sean Smith</span>
+            <span className="hidden sm:inline text-sm font-medium">Sean Smith</span>
             <DownOutlined className="text-xs" />
           </div>
         </Dropdown>
