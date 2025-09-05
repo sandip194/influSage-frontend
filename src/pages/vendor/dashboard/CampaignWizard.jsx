@@ -87,8 +87,6 @@ const markStepComplete = async (index) => {
         setCompletedSteps(newCompletion);
         localStorage.setItem("completedSteps", JSON.stringify(newCompletion));
 
-        const firstIncomplete = newCompletion.findIndex((v) => !v);
-        setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "review");
       }
     } catch (err) {
       console.error("❌ Error fetching campaign:", err);

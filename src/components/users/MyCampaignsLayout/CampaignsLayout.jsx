@@ -100,7 +100,7 @@ const  CampaignsLayout = () => {
   const totalPages = Math.ceil(filteredCampaigns.length / pageSize);
 
   return (
-    <div className="w-full text-sm px-2 sm:px-4">
+    <div className="w-full text-sm ">
       <h2 className="text-2xl font-bold text-gray-900 mb-2">My Campaigns</h2>
       <p className="mb-6 text-gray-600 text-sm">Your Campaigns Overview</p>
 

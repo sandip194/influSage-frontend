@@ -33,7 +33,7 @@ const ImpressionReachChart = () => {
         data: [5000, 15000, 10000, 20000, 5000, 22000, 30000, 15000, 25000, 30000, 18000, 10000],
         borderColor: "#335CFF",
         backgroundColor: "#335CFF",
-        tension: 0.4, // smooth curve
+        tension: 0.4,
         fill: false,
         pointRadius: 3,
         pointHoverRadius: 5,
@@ -91,17 +91,17 @@ const ImpressionReachChart = () => {
 
   return (
     <div className="bg-white p-6 rounded-2xl w-full">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Impression vs. Reach</h2>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
+        <h2 className="text-base sm:text-lg font-semibold">Impression vs. Reach</h2>
 
         {/* Filters */}
-        <div className="flex space-x-2">
-          <select className="text-sm text-gray-600 border rounded-full px-4 py-1">
+        <div className="flex flex-col sm:flex-row gap-2 ">
+          <select className="text-sm text-gray-600 border rounded-full px-3 py-1">
             <option value="instagram">Instagram</option>
             <option value="youtube">YouTube</option>
             <option value="facebook">Facebook</option>
           </select>
-          <select className="text-sm text-gray-600 border rounded-full px-4 py-1">
+          <select className="text-sm text-gray-600 border rounded-full px-3 py-1 ">
             <option value="monthly">Monthly</option>
             <option value="weekly">Weekly</option>
             <option value="yearly">Yearly</option>

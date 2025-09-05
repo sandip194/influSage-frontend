@@ -184,7 +184,7 @@ const Browse = () => {
                   <RiExchangeDollarLine size={16} />
                   <span>{campaign.price}</span>
                 </div>
-                <p className="text-gray-700 text-sm mb-4">
+                <p className="text-gray-700 text-sm mb-4 text-justify">
                   {campaign.description}
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -268,12 +268,12 @@ const Browse = () => {
                     <input
                       type="number"
                       placeholder="Min Price"
-                      className="border border-gray-300 rounded px-2 py-1 w-1/2"
+                      className="border border-gray-300 rounded px-2 py-1 w-32"
                     />
                     <input
                       type="number"
                       placeholder="Max Price"
-                      className="border border-gray-300 rounded px-2 py-1 w-1/2"
+                      className="border border-gray-300 rounded px-2 py-1 w-32"
                     />
                   </div>
                 </div>

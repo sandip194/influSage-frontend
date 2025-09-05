@@ -276,7 +276,7 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
                   </a>
                 )}
                 <button
-                  className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white p-1 rounded-full"
+                  className="absolute top-1 right-1 bg-black flex items-center justify-center w-7 h-7 hover:bg-black/80 text-white p-1 rounded-full"
                   onClick={() => handleRemove(file.uid)}
                   type="button"
                 >
@@ -309,7 +309,7 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
         </Form.Item>
 
         {/* Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-4">
+        <div className="flex gap-4 mt-8">
           <button
             onClick={onBack}
             className="bg-white text-[#0D132D] cursor-pointer px-8 py-3 rounded-full border border-[#121a3f26] hover:bg-[#0D132D] hover:text-white transition-colors"
