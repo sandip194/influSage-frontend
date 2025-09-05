@@ -74,7 +74,7 @@ const Sidebar = forwardRef((props, ref) => {
             {/* Sidebar */}
             <div
                 className={`
-                        bg-white text-[#141843] flex flex-col transition-all duration-300 shadow-sm z-40
+                        bg-white text-[#0D132D] flex flex-col transition-all duration-300 shadow-sm z-40
                        ${isMobile
                         ? `fixed top-0 left-0 h-full ${isOpen ? "w-64 px-4 py-1" : "w-0"}`
                         : `h-screen ${isOpen ? "w-64 px-3 py-1" : "w-16 px-2 py-1"}`
@@ -95,7 +95,7 @@ const Sidebar = forwardRef((props, ref) => {
                     {!isMobile && (
                         <button
                             onClick={toggleSidebar}
-                            className="bg-gray-100 text-[#141843] rounded-lg p-1 cursor-pointer"
+                            className="bg-gray-100 text-[#0D132D] rounded-lg p-1 cursor-pointer"
                         >
                             <RiArrowLeftDoubleLine
                                 className={`transform transition-transform duration-300 ${!isOpen ? "rotate-180" : ""}`}
@@ -130,8 +130,8 @@ const Sidebar = forwardRef((props, ref) => {
                             title={!isOpen ? item.label : ""}
                             className={({ isActive }) =>
                                 `flex items-center ${isOpen ? "justify-start" : "justify-center"}
-               mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#141843] 
-               ${isActive ? "bg-[#141843] text-white" : "text-[#141843]"}`
+               mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#0D132D] 
+               ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
                             }
                         >
                             <span className="text-base">{item.icon}</span>
@@ -154,8 +154,8 @@ const Sidebar = forwardRef((props, ref) => {
                             title={!isOpen ? item.label : ""}
                             className={({ isActive }) =>
                                 `flex items-center ${isOpen ? "justify-start" : "justify-center"}
-               mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#141843] 
-               ${isActive ? "bg-[#141843] text-white" : "text-[#141843]"}`
+               mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#0D132D] 
+               ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
                             }
                         >
                             <span className="text-base">{item.icon}</span>
@@ -179,9 +179,6 @@ const Sidebar = forwardRef((props, ref) => {
             </div>
         </>
     );
-
-
-
 });
 
 export default Sidebar;
