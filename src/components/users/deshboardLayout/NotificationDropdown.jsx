@@ -33,7 +33,11 @@ const notifications = [
 
 const NotificationDropdown = () => {
   return (
-    <div className="w-64 sm:w-80 bg-white p-4 shadow-lg rounded-3xl mt-5">
+    <div className="w-64 sm:w-80 bg-white p-4 shadow-lg rounded-3xl mt-5"
+    style={{
+        right: "-43px",
+        position: "absolute",
+      }}>
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-lg font-semibold text-[#0b0d28]">Notifications</h3>
         <button className="text-sm text-[#0b0d28] font-medium hover:underline cursor-pointer">View All</button>

@@ -1,4 +1,3 @@
-
 import React from "react";
 
 const MessageDropdown = () => {
@@ -34,10 +33,18 @@ const MessageDropdown = () => {
   ];
 
   return (
-    <div className="w-60 sm:w-80 bg-white shadow-lg rounded-3xl p-4 mt-5">
+    <div
+      className="w-60 sm:w-80 bg-white shadow-lg rounded-3xl p-4 mt-5"
+      style={{
+        left: "-71px",
+        position: "absolute",
+      }}
+    >
       <div className="flex justify-between items-center mb-3">
         <h2 className="font-semibold text-lg text-[#0b0d28]">Messages</h2>
-        <button className="text-sm text-[#0b0d28] font-medium hover:underline cursor-pointer">View All</button>
+        <button className="text-sm text-[#0b0d28] font-medium hover:underline cursor-pointer">
+          View All
+        </button>
       </div>
       <div className="divide-y divide-gray-200">
         {messages.map((msg) => (
