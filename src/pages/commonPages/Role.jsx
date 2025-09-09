@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../assets/role.css'; // Reuse the same CSS
 import influencerIcon from '../../assets/icons/i-influencer.png';
 import vendorIcon from '../../assets/icons/i-vendor.png';
 import agencyIcon from '../../assets/icons/i-agancy.png';
 import SideImageSlider from '../../components/common/SideImageSlider';
+import axios from 'axios';
 
 const roles = [
   { id: 1, label: 'Influencer', icon: influencerIcon },
@@ -17,6 +18,19 @@ const Role = () => {
   const [showError, setShowError] = useState(false)
 
   const navigate = useNavigate();
+
+  const fatchRoles = async() =>{
+    try {
+      const res = await axios.get("roles")
+      console.log(res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(()=>{
+    fatchRoles();
+  },[])
 
   const handleContinue = () => {
     if (selectedRole) {

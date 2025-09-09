@@ -43,7 +43,7 @@ export const PersonalDetails = ({ onNext, data }) => {
 
   const getGender = async () => {
     try {
-      const res = await axios.get("vendor/gender")
+      const res = await axios.get("genders")
       if (res) setGender(res.data.genders)
     } catch (error) {
       console.log(error)

@@ -10,24 +10,26 @@ import CampaignStep3 from "../../../components/users/vendorCampaign/CampaignStep
 import CampaignStep4 from "../../../components/users/vendorCampaign/CampaignStep4";
 import CampaignStep5 from "../../../components/users/vendorCampaign/CampaignStep5";
 import CampaignReviewStep from "../../../components/users/vendorCampaign/CampaignReviewStep";
+import CampaignCategorySection from "../../../components/users/vendorCampaign/CampaignCategorySection";
 
 const CampaignWizard = () => {
   const { token } = useSelector((state) => state.auth);
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
+  const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false, false]);
   const [lastCompletedStep, setLastCompletedStep] = useState(null);
 
   const [campaignData, setCampaignData] = useState({
     expectation: {},
     step2: {},
     step3: {},
+    categories: [],
     step4: [],
     step5: {},
     profileParts: null,
   });
 
- 
+
 
   // Update a section of the campaign data
   const updateCampaignSection = (sectionKey, newData) => {
@@ -38,24 +40,24 @@ const CampaignWizard = () => {
   };
 
   // Mark a step complete and move to the next
-const markStepComplete = async (index) => {
-  const updated = [...completedSteps];
-  if (!updated[index]) {
-    updated[index] = true;
-    setCompletedSteps(updated);
-    localStorage.setItem("completedSteps", JSON.stringify(updated));
-    setLastCompletedStep(index); 
-  }
+  const markStepComplete = async (index) => {
+    const updated = [...completedSteps];
+    if (!updated[index]) {
+      updated[index] = true;
+      setCompletedSteps(updated);
+      localStorage.setItem("completedSteps", JSON.stringify(updated));
+      setLastCompletedStep(index);
+    }
 
-  // Fetch updated campaign data immediately
-  await getCampaignData();
+    // Fetch updated campaign data immediately
+    await getCampaignData();
 
-  if (index + 1 < steps.length) {
-    setCurrentStep(index + 1);
-  } else {
-    setCurrentStep("review");
-  }
-};
+    if (index + 1 < steps.length) {
+      setCurrentStep(index + 1);
+    } else {
+      setCurrentStep("review");
+    }
+  };
 
   // Fetch campaign data
   const getCampaignData = async () => {
@@ -70,6 +72,7 @@ const markStepComplete = async (index) => {
           expectation: parts.p_objectivejson || {},
           step2: parts.p_vendorinfojson || {},
           step3: parts.p_campaignjson || {},
+          categories: parts.p_campaigncategoyjson  || [],
           step4: parts.p_campaignfilejson || [],
           step5: parts.p_contenttypejson || {},
           profileParts: parts,
@@ -80,6 +83,7 @@ const markStepComplete = async (index) => {
           !!parts.p_objectivejson,
           !!parts.p_vendorinfojson,
           !!parts.p_campaignjson,
+          !!parts.p_campaigncategoyjson ,
           !!parts.p_campaignfilejson,
           !!parts.p_contenttypejson,
         ];
@@ -94,11 +98,11 @@ const markStepComplete = async (index) => {
     }
   };
 
-useEffect(() => {
-  if (lastCompletedStep !== null) {
-    getCampaignData(); 
-  }
-}, [lastCompletedStep]);
+  useEffect(() => {
+    if (lastCompletedStep !== null) {
+      getCampaignData();
+    }
+  }, [lastCompletedStep]);
 
 
   // Restore completed steps from localStorage
@@ -115,7 +119,7 @@ useEffect(() => {
     }
   }, []);
 
-   // Define steps early so functions below can access it
+  // Define steps early so functions below can access it
   const steps = [
     {
       title: "Expectation",
@@ -150,12 +154,22 @@ useEffect(() => {
       ),
     },
     {
+      title: "Categories", // 👈 NEW STEP
+      component: (
+        <CampaignCategorySection
+          data={campaignData.categories || []} // 👈 you may need to adjust this based on saved data
+          onNext={() => markStepComplete(3)}
+          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+        />
+      ),
+    },
+    {
       title: "Step 4",
       component: (
         <CampaignStep4
           data={campaignData.step4}
           onChange={(updated) => updateCampaignSection("step4", updated)}
-          onNext={() => markStepComplete(3)}
+          onNext={() => markStepComplete(4)}
           onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
         />
       ),
@@ -166,13 +180,13 @@ useEffect(() => {
         <CampaignStep5
           data={campaignData.step5}
           onChange={(updated) => updateCampaignSection("step5", updated)}
-          onNext={() => markStepComplete(4)}
+          onNext={() => markStepComplete(5)}
           onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
         />
       ),
     },
   ];
-  
+
   return (
     <div className="flex flex-col gap-4">
       {currentStep === "review" ? (

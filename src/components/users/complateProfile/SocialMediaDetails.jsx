@@ -13,7 +13,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
 
   const getAllPlatforms = async () => {
     try {
-      const res = await axios.get("vendor/providers");
+      const res = await axios.get("providers");
       setProviders(res.data.data);
     } catch (error) {
       console.log(error);

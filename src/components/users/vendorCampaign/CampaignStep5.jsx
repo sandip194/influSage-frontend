@@ -23,7 +23,7 @@ const CampaignStep5 = ({ onNext, onBack, data }) => {
 
         const apiPlatforms = res.data.providorType || [];
 
-        console.log(apiPlatforms)
+        
         const grouped = apiPlatforms.reduce((acc, item, index) => {
           if (!acc[item.providername]) {
             acc[item.providername] = [];
@@ -144,7 +144,7 @@ const CampaignStep5 = ({ onNext, onBack, data }) => {
 
     try {
       setLoading(true);
-      console.table(contenttypejson.flatMap(p => p.contenttypes));
+      
 
       await axios.post(
         "/vendor/create-campaign",

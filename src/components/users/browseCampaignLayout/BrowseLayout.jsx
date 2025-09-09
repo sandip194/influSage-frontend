@@ -82,8 +82,8 @@ const Browse = () => {
 
   const getAllPlatforms = async () => {
     try {
-      const res = await axios.get("vendor/providers")
-      console.log(res.data)
+      const res = await axios.get("providers")
+      
       if (res.status === 200) {
         setPlatforms(res.data.data)
       }
@@ -94,7 +94,7 @@ const Browse = () => {
 
   const getAllLanguages = async () => {
     try {
-      const res = await axios.get("/vendor/campaign/languages", {
+      const res = await axios.get("languages", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setLanguages(res.data.languages || []);
@@ -121,13 +121,11 @@ const Browse = () => {
         Object.entries(params).filter(([_, v]) => v !== undefined && v !== null)
       );
 
-      console.log("API Params:", cleanParams);
 
       const res = await axios.get("user/browse/fiterWithSort", {
         params: cleanParams,
       });
 
-      console.log("Campaigns:", res.data.fn_get_campaignbrowse);
       setTotalCampaigns(res.data.fn_get_campaignbrowse.totalcount)
       setCampaigns(res.data.fn_get_campaignbrowse.records);
 

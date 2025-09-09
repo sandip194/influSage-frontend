@@ -72,7 +72,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
     const fetchLanguages = async () => {
       try {
         setLoadingLanguages(true);
-        const res = await axios.get("/vendor/campaign/languages", {
+        const res = await axios.get("languages", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setLanguages(res.data.languages || []);
@@ -90,7 +90,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
     const fetchGenders = async () => {
       try {
         setLoadingGenders(true);
-        const res = await axios.get("/vendor/gender", {
+        const res = await axios.get("genders", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setGenders(res.data.genders || []);
@@ -198,8 +198,8 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("Saved Step 2:", res.data);
-      onNext({ ...data, ...p_vendorinfojson });
+     if(res.status === 200) onNext({ ...data, ...p_vendorinfojson });
+      
     } catch (err) {
       console.error("API Error:", err.response?.data || err.message);
       alert("Failed to save campaign step. Try again.");
