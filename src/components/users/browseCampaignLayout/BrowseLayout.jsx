@@ -82,7 +82,7 @@ const Browse = () => {
 
   const getAllPlatforms = async () => {
     try {
-      const res = await axios.get("vendor/providers")
+      const res = await axios.get("providers")
       console.log(res.data)
       if (res.status === 200) {
         setPlatforms(res.data.data)
@@ -94,7 +94,7 @@ const Browse = () => {
 
   const getAllLanguages = async () => {
     try {
-      const res = await axios.get("/vendor/campaign/languages", {
+      const res = await axios.get("languages", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setLanguages(res.data.languages || []);

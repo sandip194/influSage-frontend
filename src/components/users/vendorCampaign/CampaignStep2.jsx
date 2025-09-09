@@ -72,7 +72,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
     const fetchLanguages = async () => {
       try {
         setLoadingLanguages(true);
-        const res = await axios.get("/vendor/campaign/languages", {
+        const res = await axios.get("languages", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setLanguages(res.data.languages || []);
@@ -90,7 +90,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
     const fetchGenders = async () => {
       try {
         setLoadingGenders(true);
-        const res = await axios.get("/vendor/gender", {
+        const res = await axios.get("genders", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setGenders(res.data.genders || []);
