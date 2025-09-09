@@ -5,6 +5,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { RiImageAddLine, RiInformationLine, RiDeleteBin6Line } from "react-icons/ri";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { toast } from 'react-toastify';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -158,7 +159,8 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
       onNext();
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
-      alert("Failed to save campaign step. Try again.");
+     toast.error("Failed to save campaign step. Try again.");
+
     } finally {
       setLoading(false);
     }
@@ -462,7 +464,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
           const isIncomplete = !last.description || !last.amount || !last.enddate;
 
           if (isIncomplete) {
-            alert("Please complete the current milestone before adding a new one.");
+             toast.warning("Please complete the current milestone before adding a new one.");
             return;
           }
 

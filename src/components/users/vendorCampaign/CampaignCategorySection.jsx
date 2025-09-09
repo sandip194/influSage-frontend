@@ -31,16 +31,40 @@ const CampaignCategorySection = ({ data, onNext, onBack }) => {
 
     useEffect(() => {
         fetchAllCategories();
+    }, []);
 
-        if (data && Array.isArray(data)) {
-            const preselectedIds = data
-                .flatMap(parent => parent.categories)
-                .map(child => child.categoryid);
+    useEffect(() => {
+        if (data && Array.isArray(data) && categoryTree.length > 0) {
+            const preselectedIds = [];
 
-                setSelectedChildren(preselectedIds);
+            // Automatically select the first parent if there's only one in `data`
+            if (data.length === 1) {
+                setSelectedParentId(data[0].parentcategoryid);
+            }
+
+            // Find matches in categoryTree
+            data.forEach(parentFromProp => {
+                const matchingParent = categoryTree.find(
+                    cat => cat.parentcategoryid === parentFromProp.parentcategoryid
+                );
+
+                if (matchingParent) {
+                    parentFromProp.categories.forEach(childFromProp => {
+                        const matchedChild = matchingParent.categories.find(
+                            child => child.categoryid === childFromProp.categoryid || child.id === childFromProp.categoryid
+                        );
+
+                        if (matchedChild) {
+                            preselectedIds.push(matchedChild.id); // Use categoryTree's `id`
+                        }
+                    });
+                }
+            });
+
+            setSelectedChildren(preselectedIds);
         }
+    }, [data, categoryTree]);
 
-    }, [data]);
 
 
     const sendDataToBackend = async (formattedData) => {
@@ -68,7 +92,7 @@ const CampaignCategorySection = ({ data, onNext, onBack }) => {
 
     const handleSubmit = () => {
         if (selectedChildren.length === 0) {
-             setErrorEmpty(true);
+            setErrorEmpty(true);
             return;
         }
 
@@ -167,7 +191,7 @@ const CampaignCategorySection = ({ data, onNext, onBack }) => {
 
             </div>
             {/* Conditional Message Below Select */}
-            
+
             {errorLimit && <p className="text-red-500 text-sm mt-1">⚠️ You can select only up to 5 subcategories.</p>}
             {errorEmpty && <p className="text-red-500 text-sm mt-4">Please select at least one subcategory.</p>}
 

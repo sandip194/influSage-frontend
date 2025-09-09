@@ -242,6 +242,28 @@ const CampaignReviewStep = ({ onEdit }) => {
 
           {/* Description + Requirements */}
           <div className="bg-white p-4 rounded-2xl">
+
+
+            {/* Categories */}
+            <div className="py-4 border-b border-gray-200">
+              <p className="text-sm text-gray-500 mb-1">Categories</p>
+              <div className="flex flex-wrap gap-2">
+                {campaignData?.p_campaigncategoyjson?.[0]?.categories?.length > 0 ? (
+                  campaignData.p_campaigncategoyjson[0].categories.slice(0, 5).map((subcat) => (
+                    <span
+                      key={subcat.categoryid}
+                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium"
+                    >
+                      {subcat.categoryname}
+                    </span>
+                  ))
+                ) : (
+                  <p>—</p>
+                )}
+              </div>
+            </div>
+
+
             {/* Description */}
             <div className="campaign-description py-4 border-b border-gray-200">
               <h3 className="font-semibold text-lg mb-2">
@@ -447,28 +469,41 @@ const CampaignReviewStep = ({ onEdit }) => {
               <p className="text-sm text-gray-500 mb-1">End Date</p>
               <p>{p_campaignjson.enddate || "—"}</p>
             </div>
-            <div className="py-4 border-b border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Categories</p>
-              <div className="flex flex-wrap gap-2">
-                {campaignData?.categories && campaignData.categories.length > 0 ? (
-                  campaignData.categories.slice(0, 5).map((cat, i) => (
-                    <span
-                      key={cat + i}
-                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium"
-                    >
-                      {cat}
-                    </span>
-                  ))
-                ) : (
-                  <p>—</p>
-                )}
-              </div>
-            </div>
 
-            <div className="py-4 border-b border-gray-200">
+            <div className="pt-4 pb-2">
               <p className="text-sm text-gray-500 mb-1">Total Budget</p>
               <p>₹{p_campaignjson.estimatedbudget || "0"}</p>
             </div>
+          </div>
+
+          {/* Milestone Info */}
+          <div className="bg-white p-4 rounded-2xl">
+            <div className="space-y-4">
+              {campaignData?.p_campaignjson?.milestones?.length > 0 ? (
+                campaignData.p_campaignjson.milestones.map((milestone, index) => (
+                  <div
+                    key={index}
+                    className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm"
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-semibold text-sm text-gray-800">
+                        Milestone {index + 1}
+                      </h4>
+                      <span className="text-xs text-gray-500">{milestone.enddate}</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-1">
+                      <strong>Description:</strong> {milestone.description || "—"}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Amount:</strong> ₹{milestone.amount.toLocaleString()}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No milestones added.</p>
+              )}
+            </div>
+
           </div>
 
           {/* Platform Info */}
@@ -502,6 +537,8 @@ const CampaignReviewStep = ({ onEdit }) => {
               )}
             </div>
           </div>
+
+
         </div>
       </div>
 
