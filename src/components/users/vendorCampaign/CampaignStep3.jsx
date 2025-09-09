@@ -83,6 +83,7 @@ const handleContinue = async () => {
       (formData.startDate &&
         dayjs(formData.endDate).isBefore(dayjs(formData.startDate))),
     aboutBrand: !formData.aboutBrand,
+    profileImage: !profileImage && !formData.profileImageUrl, 
   };
 
   setErrors(newErrors);
@@ -98,7 +99,7 @@ const handleContinue = async () => {
     hashtags: formData.hashtags.map((tag) => ({ hashtag: tag })),
 
     photopath: profileImage
-      ? null 
+    ? null
       : formData.profileImageUrl?.replace(`${BASE_URL}/`, "") || null,
   };
 
@@ -150,6 +151,7 @@ const handleContinue = async () => {
           />
         </div>
       </div>
+      {errors.profileImage && (<p className="text-red-500 text-sm mt-2">Please upload a campaign photo</p>)}
       {profileError && <p className="text-red-500 text-sm mb-3">{profileError}</p>}
 
       {/* Campaign Title */}

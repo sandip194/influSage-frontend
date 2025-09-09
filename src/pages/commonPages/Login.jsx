@@ -16,6 +16,7 @@ import SideImageSlider from '../../components/common/SideImageSlider';
 
 export const LoginForm = () => {
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 
 
@@ -26,6 +27,20 @@ export const LoginForm = () => {
 
 
   const navigate = useNavigate()
+//   useEffect(() => {
+//   const params = new URLSearchParams(window.location.search);
+//   const token = params.get("token");
+//   const id = params.get("id");
+//   const role = params.get("role");
+//   const firstName = params.get("firstName");
+//   const lastName = params.get("lastName");
+
+//   if (token && id && role) {
+//     dispatch(setCredentials({ token, id, role, firstName, lastName }));
+//     localStorage.setItem("auth_token", token);
+//     navigate(role === "2" ? "/complate-vendor-profile" : "/complate-profile");
+//   }
+// }, [dispatch, navigate]);
 
   // Load saved email on mount
   useEffect(() => {
@@ -67,6 +82,12 @@ export const LoginForm = () => {
 
       setIsLoggingIn(false);
     }
+  };
+  // Google login redirect
+  const handleGoogleLogin = () => {
+    const storedRole = localStorage.getItem("selectedRole") || 1; 
+    const backendUrl = BASE_URL.replace(/\/$/, "");
+    window.location.href = `${backendUrl}/auth/google?roleid=${storedRole}`; 
   };
   const validationSchema = {
     emailValidator: {
@@ -150,11 +171,11 @@ export const LoginForm = () => {
 
             <button type="submit" className="login-btn bg-wonderblue" disabled={isLoggingIn}> {isLoggingIn ? "Logging in..." : "Login"}</button>
 
-            {/* <div className="divider">Or Login With</div>
+            <div className="divider">Or Login With</div>
 
             <div className="social-buttons">
-              <div className="social-btn">
-                <img className='social-icon' src={googleIcon} alt="Google" />
+              <div className="social-btn" onClick={handleGoogleLogin}>
+                <img className="social-icon" src={googleIcon} alt="Google" />
               </div>
               <div className="social-btn">
                 <img className='social-icon' src={facebookIcon} alt="Facebook" />
@@ -162,7 +183,7 @@ export const LoginForm = () => {
               <div className="social-btn">
                 <img className='social-icon' src={appleIcon} alt="Apple" />
               </div>
-            </div> */}
+            </div>
 
             <div className="signup-link">
               Don’t have an account? <Link to="/role">Create New Account</Link>
