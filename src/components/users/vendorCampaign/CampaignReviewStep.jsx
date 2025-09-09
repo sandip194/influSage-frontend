@@ -148,17 +148,17 @@ const CampaignReviewStep = ({ onEdit }) => {
     ) || [];
   const genders =
     Array.isArray(p_vendorinfojson.genderid) &&
-    p_vendorinfojson.genderid.length > 0
+      p_vendorinfojson.genderid.length > 0
       ? p_vendorinfojson.genderid.map((id) => {
-          switch (id) {
-            case 1:
-              return "Male";
-            case 2:
-              return "Female";
-            case 3:
-              return "Other";
-          }
-        })
+        switch (id) {
+          case 1:
+            return "Male";
+          case 2:
+            return "Female";
+          case 3:
+            return "Other";
+        }
+      })
       : ["Unspecified"];
 
   const camp_profile = p_campaignjson?.photopath
@@ -302,13 +302,13 @@ const CampaignReviewStep = ({ onEdit }) => {
               <div className="flex flex-wrap gap-2 mt-4">
                 {tags.length > 0
                   ? tags.map((tag, i) => (
-                      <span
-                        key={tag + i}
-                        className="px-3 py-1 bg-gray-100 rounded-full text-xs"
-                      >
-                        {tag}
-                      </span>
-                    ))
+                    <span
+                      key={tag + i}
+                      className="px-3 py-1 bg-gray-100 rounded-full text-xs"
+                    >
+                      {tag}
+                    </span>
+                  ))
                   : "No tags"}
               </div>
             </div>
@@ -320,88 +320,88 @@ const CampaignReviewStep = ({ onEdit }) => {
                 <div className="flex gap-4 flex-wrap justify-center">
                   {p_campaignfilejson.length > 0
                     ? p_campaignfilejson.map((file, i) => {
-                        const fileUrl = getFullUrl(file.filepath);
-                        const ext = fileUrl?.split(".").pop().toLowerCase();
+                      const fileUrl = getFullUrl(file.filepath);
+                      const ext = fileUrl?.split(".").pop().toLowerCase();
 
-                        const isImage = [
-                          "jpg",
-                          "jpeg",
-                          "png",
-                          "gif",
-                          "webp",
-                        ].includes(ext);
-                        const isVideo = ["mp4", "webm", "ogg", "mov"].includes(
-                          ext
-                        );
-                        const isPdf = ext === "pdf";
+                      const isImage = [
+                        "jpg",
+                        "jpeg",
+                        "png",
+                        "gif",
+                        "webp",
+                      ].includes(ext);
+                      const isVideo = ["mp4", "webm", "ogg", "mov"].includes(
+                        ext
+                      );
+                      const isPdf = ext === "pdf";
 
-                        return (
-                          <div
-                            key={file.filepath + i}
-                            className="relative w-28 h-28 rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center"
-                          >
-                            {/* Images → open with PhotoView */}
-                            {isImage && (
-                              <PhotoView src={fileUrl}>
-                                <img
-                                  src={fileUrl}
-                                  alt="Reference"
-                                  className="w-full h-full object-cover rounded-2xl cursor-pointer"
-                                />
-                              </PhotoView>
-                            )}
+                      return (
+                        <div
+                          key={file.filepath + i}
+                          className="relative w-28 h-28 rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center"
+                        >
+                          {/* Images → open with PhotoView */}
+                          {isImage && (
+                            <PhotoView src={fileUrl}>
+                              <img
+                                src={fileUrl}
+                                alt="Reference"
+                                className="w-full h-full object-cover rounded-2xl cursor-pointer"
+                              />
+                            </PhotoView>
+                          )}
 
-                            {/* Videos → open with <video> in modal */}
-                            {isVideo && (
-                              <div
-                                className="w-full h-full cursor-pointer relative"
-                                onClick={() =>
-                                  setLightboxVideo({ open: true, src: fileUrl })
-                                }
-                              >
-                                <video
-                                  src={fileUrl}
-                                  muted
-                                  loop
-                                  playsInline
-                                  className="w-full h-full object-cover rounded-2xl"
-                                />
-                              </div>
-                            )}
-
-                            {/* PDFs → show download link */}
-                            {isPdf && (
-                              <div className="flex flex-col items-center justify-center w-full h-full bg-gray-50 p-3 cursor-default">
-                                <div className="w-12 h-12 flex items-center justify-center bg-red-100 rounded-lg mb-2">
-                                  <span className="text-red-600 text-lg font-bold">
-                                    PDF
-                                  </span>
-                                </div>
-                                <a
-                                  href={fileUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="mt-2 text-blue-500 underline text-xs font-medium hover:text-blue-700"
-                                >
-                                  View PDF
-                                </a>
-                              </div>
-                            )}
-
-                            {/* Delete Button */}
-                            <button
-                              className="absolute top-1 right-1 bg-black/60 flex items-center justify-center w-7 h-7 hover:bg-black/80 text-white p-1 rounded-full"
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteReference(file);
-                              }}
+                          {/* Videos → open with <video> in modal */}
+                          {isVideo && (
+                            <div
+                              className="w-full h-full cursor-pointer relative"
+                              onClick={() =>
+                                setLightboxVideo({ open: true, src: fileUrl })
+                              }
                             >
-                              <RiDeleteBin6Line />
-                            </button>
-                          </div>
-                        );
-                      })
+                              <video
+                                src={fileUrl}
+                                muted
+                                loop
+                                playsInline
+                                className="w-full h-full object-cover rounded-2xl"
+                              />
+                            </div>
+                          )}
+
+                          {/* PDFs → show download link */}
+                          {isPdf && (
+                            <div className="flex flex-col items-center justify-center w-full h-full bg-gray-50 p-3 cursor-default">
+                              <div className="w-12 h-12 flex items-center justify-center bg-red-100 rounded-lg mb-2">
+                                <span className="text-red-600 text-lg font-bold">
+                                  PDF
+                                </span>
+                              </div>
+                              <a
+                                href={fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-2 text-blue-500 underline text-xs font-medium hover:text-blue-700"
+                              >
+                                View PDF
+                              </a>
+                            </div>
+                          )}
+
+                          {/* Delete Button */}
+                          <button
+                            className="absolute top-1 right-1 bg-black/60 flex items-center justify-center w-7 h-7 hover:bg-black/80 text-white p-1 rounded-full"
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteReference(file);
+                            }}
+                          >
+                            <RiDeleteBin6Line />
+                          </button>
+                        </div>
+                      );
+                    })
                     : "No references uploaded"}
                 </div>
               </PhotoProvider>
@@ -448,6 +448,24 @@ const CampaignReviewStep = ({ onEdit }) => {
               <p>{p_campaignjson.enddate || "—"}</p>
             </div>
             <div className="py-4 border-b border-gray-200">
+              <p className="text-sm text-gray-500 mb-1">Categories</p>
+              <div className="flex flex-wrap gap-2">
+                {campaignData?.categories && campaignData.categories.length > 0 ? (
+                  campaignData.categories.slice(0, 5).map((cat, i) => (
+                    <span
+                      key={cat + i}
+                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium"
+                    >
+                      {cat}
+                    </span>
+                  ))
+                ) : (
+                  <p>—</p>
+                )}
+              </div>
+            </div>
+
+            <div className="py-4 border-b border-gray-200">
               <p className="text-sm text-gray-500 mb-1">Total Budget</p>
               <p>₹{p_campaignjson.estimatedbudget || "0"}</p>
             </div>
@@ -469,8 +487,8 @@ const CampaignReviewStep = ({ onEdit }) => {
                       <span className="text-gray-500 text-sm">
                         {p.contenttypes && p.contenttypes.length > 0
                           ? p.contenttypes
-                              .map((ct) => ct.contenttypename)
-                              .join(", ")
+                            .map((ct) => ct.contenttypename)
+                            .join(", ")
                           : "No types"}
                       </span>
                     </div>

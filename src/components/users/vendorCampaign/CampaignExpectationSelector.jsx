@@ -37,15 +37,15 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
     fetchObjectives();
   }, [token]);
 
-    useEffect(() => {
-      setSelected(data?.objectiveid || "");
-      setDurationDays(data?.postdurationdays ? Number(data.postdurationdays) : "");
-      setAddLinkToBio(
-        typeof data?.isincludevendorprofilelink === "boolean"
-          ? data.isincludevendorprofilelink
-          : null
-      );
-    }, [data]);
+  useEffect(() => {
+    setSelected(data?.objectiveid || "");
+    setDurationDays(data?.postdurationdays ? Number(data.postdurationdays) : "");
+    setAddLinkToBio(
+      typeof data?.isincludevendorprofilelink === "boolean"
+        ? data.isincludevendorprofilelink
+        : null
+    );
+  }, [data]);
 
   const handleContinue = async () => {
     const newErrors = {
@@ -86,8 +86,8 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
         },
       });
 
-      console.log("API Response:", res.data);
-      onNext(p_objectivejson);
+      if (res.status === 200) onNext(p_objectivejson);
+
     } catch (err) {
       console.error("API Error:", err.response?.data || err.message);
       message.error("Something went wrong while saving campaign step.");
@@ -113,22 +113,20 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
                 setSelected(opt.id);
                 setErrors((prev) => ({ ...prev, contentExpectation: false }));
               }}
-             className={`flex justify-between items-center px-3 sm:px-5 py-3 sm:py-4 rounded-xl border cursor-pointer transition-all ${
-              isSelected
-                ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                : "bg-white text-black border-gray-300 hover:border-[#141843]"
-            }`}
+              className={`flex justify-between items-center px-3 sm:px-5 py-3 sm:py-4 rounded-xl border cursor-pointer transition-all ${isSelected
+                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                  : "bg-white text-black border-gray-300 hover:border-[#141843]"
+                }`}
             >
               <span className="text-xs sm:text-sm md:text-base break-words pr-2 text-justify">
                 {opt.name}
               </span>
 
               <div
-                className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full border transition-all shrink-0 ${
-                  isSelected
+                className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full border transition-all shrink-0 ${isSelected
                     ? "bg-[#141843] border-[#0D132D26] text-white"
                     : "bg-transparent border-gray-400 text-transparent"
-                }`}
+                  }`}
               >
                 {isSelected && <RiCheckLine size={16} className="sm:w-5 sm:h-5" />}
               </div>

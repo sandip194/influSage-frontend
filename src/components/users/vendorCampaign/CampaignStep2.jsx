@@ -198,8 +198,8 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("Saved Step 2:", res.data);
-      onNext({ ...data, ...p_vendorinfojson });
+     if(res.status === 200) onNext({ ...data, ...p_vendorinfojson });
+      
     } catch (err) {
       console.error("API Error:", err.response?.data || err.message);
       alert("Failed to save campaign step. Try again.");
