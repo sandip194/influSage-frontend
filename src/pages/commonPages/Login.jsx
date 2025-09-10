@@ -27,20 +27,57 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 
   const navigate = useNavigate()
-//   useEffect(() => {
-//   const params = new URLSearchParams(window.location.search);
-//   const token = params.get("token");
-//   const id = params.get("id");
-//   const role = params.get("role");
-//   const firstName = params.get("firstName");
-//   const lastName = params.get("lastName");
+  
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+  if (!token) return;
 
-//   if (token && id && role) {
-//     dispatch(setCredentials({ token, id, role, firstName, lastName }));
-//     localStorage.setItem("auth_token", token);
-//     navigate(role === "2" ? "/complate-vendor-profile" : "/complate-profile");
-//   }
-// }, [dispatch, navigate]);
+  const userId = params.get("userId");
+  const roleId = Number(params.get("roleId"));
+  const firstName = params.get("firstName");
+  const lastName = params.get("lastName");
+  const email = params.get("email"); 
+
+  console.log("[DEBUG] Google login callback params:", {
+    token,
+    userId,
+    roleId,
+    firstName,
+    lastName,
+    email,
+  });
+
+    if (!roleId || roleId === 0 || isNaN(roleId)) {
+      navigate("/role");
+      return;
+    }
+    
+  // Save token and user info
+  localStorage.setItem("auth_token", token);
+  localStorage.setItem("userId", userId);
+  localStorage.setItem("roleId", roleId);
+  localStorage.setItem("firstName", firstName);
+  localStorage.setItem("lastName", lastName);
+  localStorage.setItem("email", email);
+
+  // Update 
+  dispatch(
+    setCredentials({ token, id: userId, role: roleId, firstName, lastName, email })
+  );
+
+  // Set axios default header
+  axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+  // Clear query params
+  window.history.replaceState({}, document.title, window.location.pathname);
+
+navigate(
+  `/signup?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&email=${encodeURIComponent(email)}`
+);
+
+}, [dispatch, navigate]);
+
 
   // Load saved email on mount
   useEffect(() => {
@@ -84,11 +121,25 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
     }
   };
   // Google login redirect
-  const handleGoogleLogin = () => {
-    const storedRole = localStorage.getItem("selectedRole") || 1; 
+  // const handleGoogleLogin = () => {
+  //   const storedRole = localStorage.getItem("selectedRole"); 
+  //   const backendUrl = BASE_URL.replace(/\/$/, "");
+  //   window.location.href = `${backendUrl}/auth/google?roleid=${storedRole}`; 
+  // };
+
+    const handleGoogleLogin = () => {
+    const storedRole = localStorage.getItem("selected_role");
+
+    if (!storedRole) {
+      // No role selected, go to role page first
+      navigate("/role");
+      return;
+    }
+
     const backendUrl = BASE_URL.replace(/\/$/, "");
-    window.location.href = `${backendUrl}/auth/google?roleid=${storedRole}`; 
+    window.location.href = `${backendUrl}/auth/google?roleid=${storedRole}`;
   };
+
   const validationSchema = {
     emailValidator: {
       required: {
@@ -152,14 +203,14 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
             <span className='text-for-error'>{errors.password?.message}</span>
 
             <div className="form-options flex items-center justify-between gap-4">
-              <label className="flex items-center cursor-pointer text-sm sm:text-base">
+              {/* <label className="flex items-center cursor-pointer text-sm sm:text-base">
                 <input
                   type="checkbox"
                   {...register("rememberMe")}
                   className="w-5 h-5 mr-2 cursor-pointer"
                 />
                 Remember Me
-              </label>
+              </label> */}
 
               <Link
                 to="/forgot-password"
