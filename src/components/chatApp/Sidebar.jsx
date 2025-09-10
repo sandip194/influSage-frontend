@@ -1,3 +1,4 @@
+import { RiAddLine } from 'react-icons/ri';
 export default function Sidebar({ onSelectChat }) {
   const conversations = [
     {
@@ -33,8 +34,8 @@ export default function Sidebar({ onSelectChat }) {
       {/* Header */}
       <div className="p-4 border-b-2  border-gray-100  font-bold text-xl flex justify-between items-center">
         <span>Conversations</span>
-        <button className="w-10 h-10 bg-[#0D132D] text-white rounded-full text-xl">
-          +
+        <button className="w-10 h-10 bg-[#0D132D] text-white rounded-full text-xl flex items-center justify-center">
+          <RiAddLine />
         </button>
       </div>
 

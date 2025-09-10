@@ -1,27 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { RiEyeLine, RiEyeOffLine } from '@remixicon/react';
-import '../../assets/login.css'; // Same CSS used for login & signup
+import '../../assets/login.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import SideImageSlider from '../../components/common/SideImageSlider';
 
 export const Signup = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm();
   const [showModal, setShowModal] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // 👁️ Toggle state
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
+  // 🔹 Prefill from Google OAuth redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const firstName = params.get("firstName");
+    const lastName = params.get("lastName");
+    const email = params.get("email");
+
+    if (firstName) setValue("firstName", firstName);
+    if (lastName) setValue("lastName", lastName);
+    if (email) setValue("email", email);
+  }, [setValue]);
+
   const submitHandler = async (data) => {
     try {
-      setLoading(true)
+      setLoading(true);
       const role = localStorage.getItem('selectedRole');
-      const userEmail = data.email;
-      localStorage.setItem('signupEmail', userEmail);
-      // If role is not selected, redirect to role selection
       if (!role) {
         toast.error('Please select a role first!', { position: "top-right" });
         return navigate('/role');
@@ -29,12 +38,12 @@ export const Signup = () => {
 
       const userData = {
         ...data,
-        roleId: Number(role)
-      }
+        roleId: Number(role),
+      };
+
       const response = await axios.post('/user/register', userData);
 
       if (response.status === 400) {
-        console.log("response", response.data.message);
         toast.error(response.data.message || "Email already exists");
       }
 
@@ -43,29 +52,24 @@ export const Signup = () => {
         toast.success('Signup successful! Please verify your email or mobile.');
         navigate('/verify-email-or-mobile');
       }
-
     } catch (error) {
       toast.error(error?.response?.data?.message || "Signup failed. Please try again.");
       console.error("Signup failed:", error);
     } finally {
-      setLoading(false); // 🔹 always re-enable after request
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-container">
       <div className={`login-card h-90vh`}>
-        {/* Left Image Section */}
         <SideImageSlider />
-        {/* Right Form Section */}
         <div className="login-card-right">
           <form onSubmit={handleSubmit(submitHandler)}>
             <h2>Create Account</h2>
             <p>Start your journey with InfluSage today!</p>
 
-            <label>First Name
-              <span className='text-red-500 text-sm'>*</span>
-            </label>
+            <label>First Name<span className='text-red-500 text-sm'>*</span></label>
             <input
               type="text"
               placeholder="Enter first name"
@@ -73,9 +77,7 @@ export const Signup = () => {
             />
             <span className='text-for-error'>{errors.firstName?.message}</span>
 
-            <label>Last Name
-              <span className='text-red-500 text-sm'>*</span>
-            </label>
+            <label>Last Name<span className='text-red-500 text-sm'>*</span></label>
             <input
               type="text"
               placeholder="Enter last name"
@@ -83,9 +85,7 @@ export const Signup = () => {
             />
             <span className='text-for-error'>{errors.lastName?.message}</span>
 
-            <label>Email
-              <span className='text-red-500 text-sm'>*</span>
-            </label>
+            <label>Email<span className='text-red-500 text-sm'>*</span></label>
             <input
               type="text"
               placeholder="Enter your email"
@@ -99,26 +99,7 @@ export const Signup = () => {
             />
             <span className='text-for-error'>{errors.email?.message}</span>
 
-            {/* <label>Phone Number</label>
-            <input
-              type="text"
-              placeholder="Enter 10-digit phone number"
-              {...register('phone', {
-                required: "Phone number is required",
-                pattern:{
-                //8
-                value:/[6-9]{1}[0-9]{9}/,
-                message:"contact is not valid*"
-            }
-              })}
-            />
-            <span>{errors.phone?.message}</span> */}
-
-
-            <label>Password
-              <span className='text-red-500 text-sm'>*</span>
-            </label>
-
+            <label>Password<span className='text-red-500 text-sm'>*</span></label>
             <div className="password-wrapper">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -135,10 +116,9 @@ export const Signup = () => {
                 {showPassword ? <RiEyeOffLine className='w-[18px]' /> : <RiEyeLine className='w-[18px]' />}
               </span>
             </div>
-
             <span className='text-for-error'>{errors.password?.message}</span>
 
-            {/* ✅ Terms & Conditions Checkbox */}
+            {/* Terms */}
             <div style={{ marginTop: "10px", fontSize: "14px", marginBottom: "10px" }}>
               <label>
                 <input type="checkbox" {...register("terms", { required: "Please accept terms & conditions" })} />
@@ -147,16 +127,11 @@ export const Signup = () => {
                   Terms & Conditions
                 </span>
               </label>
-
               <span style={{ color: "red", fontSize: "12px" }}>{errors.terms?.message}</span>
             </div>
 
-            <button
-              type="submit"
-              className="login-btn"
-              disabled={loading} // 🔹 disable while loading
-            >
-              {loading ? "Signing Up..." : "Sign Up"} {/* 🔹 show spinner text */}
+            <button type="submit" className="login-btn" disabled={loading}>
+              {loading ? "Signing Up..." : "Sign Up"}
             </button>
 
             <div className="signup-link">
@@ -166,7 +141,7 @@ export const Signup = () => {
         </div>
       </div>
 
-      {/* ✅ Modal for Terms and Conditions */}
+         {/* ✅ Modal for Terms and Conditions */}
       {showModal && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
@@ -194,6 +169,7 @@ export const Signup = () => {
           </div>
         </div>
       )}
+      
     </div>
   );
 };

@@ -39,6 +39,13 @@ const Role = () => {
     } else {
       setShowError(true);
     }
+    //  if (selectedRole) {
+    //   localStorage.setItem("selected_role", selectedRole);
+    //   // Directly continue to Google OAuth
+    //   window.location.href = `http://localhost:3001/auth/google?roleid=${selectedRole}`;
+    // } else {
+    //   setShowError(true);
+    // }
   };
 
   return (
