@@ -4,25 +4,29 @@ import {
   RiChatUploadLine,
   RiVerifiedBadgeLine,
 } from "@remixicon/react";
-import { Modal, Input, DatePicker, Button, Upload, message } from "antd";
-import dayjs from "dayjs";
+import { Modal, Input, Button, Upload, message } from "antd";
+import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const { TextArea } = Input;
 
 const ApplyNow = () => {
   const [amount, setAmount] = useState("");
-  const [submissionDate, setSubmissionDate] = useState(null);
   const [proposal, setProposal] = useState("");
   const [portfolioFile, setPortfolioFile] = useState(null);
-  const [milestoneDescription, setMilestoneDescription] = useState("");
-  const [milestoneAmount, setMilestoneAmount] = useState("");
-  const [milestoneDate, setMilestoneDate] = useState(null);
   const [errors, setErrors] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false)
+
+  const { campaignId } = useParams();
+  const navigate = useNavigate()
+  const token = useSelector((state) => state.auth.token);
 
   const handleUpload = (info) => {
-    if (info.file.size > 5 * 1024 * 1024) {
-      message.error("File size should be less than 5MB.");
+    if (info.file.size > 25 * 1024 * 1024) {
+      message.error("File size should be less than 25MB.");
       return;
     }
     setPortfolioFile(info.file);
@@ -33,31 +37,53 @@ const ApplyNow = () => {
     if (!amount || Number(amount) <= 0) {
       newErrors.amount = "Please enter a valid amount greater than 0.";
     }
-    if (!submissionDate) {
-      newErrors.submissionDate = "Please select a submission date.";
-    }
     if (!proposal.trim()) {
       newErrors.proposal = "Please describe your proposal.";
     }
     if (!portfolioFile) {
       newErrors.portfolioFile = "Please upload your portfolio file.";
     }
-    if (!milestoneAmount || Number(milestoneAmount) <= 0) {
-      newErrors.milestoneAmount = "Please enter a valid milestone amount.";
-    }
-    if (!milestoneDate) {
-      newErrors.milestoneDate = "Please select a milestone due date.";
-    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validate()) {
-      setIsModalVisible(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!validate()) return;
+    // Prepare JSON payload
+    const applycampaignjson = {
+      amount,
+      proposal,
+    };
+
+    // Prepare FormData
+    const formData = new FormData();
+    formData.append("applycampaignjson", JSON.stringify(applycampaignjson));
+    if (portfolioFile) {
+      formData.append("portfolioFiles", portfolioFile); // Backend expects this name
+    }
+
+    try {
+      setLoading(true)
+      const response = await axios.post(`user/apply-for-campaign/${campaignId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.status === 200) {
+        console.log(response.data)
+        navigate("/dashboard/browse/applied");
+      }
+      toast.success(response.data.message);
+    } catch (err) {
+      console.error(err);
+      toast.error("Application not submited")
+    } finally {
+      setLoading(false)
     }
   };
+
 
   return (
     <main className="w-full max-w-7xl mx-auto text-sm overflow-x-hidden">
@@ -76,41 +102,6 @@ const ApplyNow = () => {
             <p className="mb-4 text-gray-600">
               What makes you the best influencer for this campaign?
             </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block font-medium text-sm mb-1">
-                  Amount <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  type="number"
-                  placeholder="$0.00"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  status={errors.amount ? "error" : ""}
-                />
-                {errors.amount && (
-                  <p className="text-red-500 text-sm">{errors.amount}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block font-medium text-sm mb-1">
-                  Submission Date <span className="text-red-500">*</span>
-                </label>
-                <DatePicker
-                  className="w-full"
-                  value={submissionDate ? dayjs(submissionDate) : null}
-                  onChange={(date) => setSubmissionDate(date)}
-                  status={errors.submissionDate ? "error" : ""}
-                />
-                {errors.submissionDate && (
-                  <p className="text-red-500 text-sm">
-                    {errors.submissionDate}
-                  </p>
-                )}
-              </div>
-            </div>
 
             <label className="block font-medium text-sm mb-1">
               Describe Your Proposal <span className="text-red-500">*</span>
@@ -161,52 +152,27 @@ const ApplyNow = () => {
 
           {/* Proposal Breakdown */}
           <section>
-            <h2 className="text-lg mb-2 font-bold">Proposal Breakdown</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-3">
-              <div>
-                <label className="block font-medium text-sm mb-1">
-                  Description
-                </label>
-                <TextArea
-                  rows={1}
-                  placeholder="Description"
-                  value={milestoneDescription}
-                  onChange={(e) => setMilestoneDescription(e.target.value)}
-                />
-              </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block font-medium text-sm mb-1">
-                  Amount <span className="text-red-500">*</span>
+                  Proposal Amount <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="number"
-                  placeholder="$0.00"
-                  value={milestoneAmount}
-                  onChange={(e) => setMilestoneAmount(e.target.value)}
-                  status={errors.milestoneAmount ? "error" : ""}
+                  addonBefore="₹"
+                  placeholder="0.00"
+                  value={amount}
+                  min={1}
+                  onChange={(e) => setAmount(e.target.value)}
+                  status={errors.amount ? "error" : ""}
                 />
-                {errors.milestoneAmount && (
-                  <p className="text-red-500 text-sm">
-                    {errors.milestoneAmount}
-                  </p>
+
+                {errors.amount && (
+                  <p className="text-red-500 text-sm">{errors.amount}</p>
                 )}
               </div>
 
-              <div>
-                <label className="block font-medium text-sm mb-1">
-                  Due Date <span className="text-red-500">*</span>
-                </label>
-                <DatePicker
-                  className="w-full"
-                  value={milestoneDate ? dayjs(milestoneDate) : null}
-                  onChange={(date) => setMilestoneDate(date)}
-                  status={errors.milestoneDate ? "error" : ""}
-                />
-                {errors.milestoneDate && (
-                  <p className="text-red-500 text-sm">{errors.milestoneDate}</p>
-                )}
-              </div>
             </div>
           </section>
 
@@ -214,9 +180,10 @@ const ApplyNow = () => {
             htmlType="submit"
             type="primary"
             shape="round"
+            disabled={loading}
             className="!bg-[#0f122f] !text-white font-semibold px-6 py-2 hover:!bg-[#23265a] transition"
           >
-            Apply Now
+            {loading ? "Appling..." : "Apply Now"}
           </Button>
         </form>
       </div>

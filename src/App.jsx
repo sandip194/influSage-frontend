@@ -90,7 +90,7 @@ const App = () => {
                                                 <Route path='browse/description' element={<DescriptionLayout />} />
 
                                                 <Route path='browse/edit' element={<EditLayout />} />
-                                                <Route path='browse/apply-now' element={<ApplyNow />} />
+                                                <Route path='browse/apply-now/:campaignId' element={<ApplyNow />} />
 
                                                 <Route path='my-campaigns' element={<CampaignsLayout />} />
                                                 <Route path='my-campaigns/details' element={<Details />} />

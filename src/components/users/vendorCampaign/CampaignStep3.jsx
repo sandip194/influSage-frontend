@@ -16,6 +16,8 @@ dayjs.extend(customParseFormat);
 
 
 const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
+
+
   const token = useSelector((state) => state.auth.token);
 
   const [formData, setFormData] = useState({});
@@ -159,7 +161,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
       onNext();
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
-     toast.error("Failed to save campaign step. Try again.");
+      toast.error("Failed to save campaign step. Try again.");
 
     } finally {
       setLoading(false);
@@ -379,9 +381,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
       <p className="text-sm mb-3 text-gray-500">Suggest a milestone schedule for your client</p>
 
       {formData.milestones?.map((milestone, index) => (
-        <div key={index} className="grid grid-cols-12 gap-4 items-center mb-3">
+        <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center mb-4">
           {/* Description */}
-          <div className="col-span-4">
+          <div className="md:col-span-4">
             <Input
               size="large"
               placeholder="Description"
@@ -395,7 +397,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
           </div>
 
           {/* Amount */}
-          <div className="col-span-3">
+          <div className="md:col-span-3">
             <Input
               size="large"
               type="number"
@@ -411,7 +413,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
           </div>
 
           {/* Due Date */}
-          <div className="col-span-4">
+          <div className="md:col-span-4">
             <DatePicker
               size="large"
               format="DD-MM-YYYY"
@@ -437,11 +439,10 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
                 setFormData((prev) => ({ ...prev, milestones: updated }));
               }}
             />
-
           </div>
 
           {/* Remove Button */}
-          <div className="col-span-1 flex justify-center">
+          <div className="md:col-span-1 flex md:justify-center">
             <button
               type="button"
               className="text-red-500 p-2 bg-gray-100 rounded-full cursor-pointer hover:text-red-700"
@@ -455,6 +456,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
             </button>
           </div>
         </div>
+
       ))}
 
       {/* Add Milestone Button */}
@@ -465,7 +467,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
           const isIncomplete = !last.description || !last.amount || !last.enddate;
 
           if (isIncomplete) {
-             toast.warning("Please complete the current milestone before adding a new one.");
+            toast.warning("Please complete the current milestone before adding a new one.");
             return;
           }
 

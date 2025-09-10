@@ -1,20 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   RiFileCopyFill,
   RiVideoAddLine,
   RiExchangeDollarLine,
   RiArrowDownSLine,
+  RiFileCopyLine
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Input } from "antd";
+import { Input, Pagination, Select } from "antd";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const SavedLayout = () => {
-  const [showFilter, setShowFilter] = useState(false);
-  const [selected, setSelected] = useState("browse");
+  const [campaigns, setCampaigns] = useState([]);
+  const [pagenumber, setPageNumber] = useState(1);
+  const [pagesize, setPageSize] = useState(10); // or any default
+  const [pageSizeConfig, setPageSizeConfig] = useState({ desktop: 15, mobile: 10 });
+  const [totalCampaigns, setTotalCampaigns] = useState(0);
+  const [sortby, setSortBy] = useState("createddate");
+  const [sortorder, setSortOrder] = useState("desc");
+  const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { token } = useSelector((state) => state.auth);
 
   const handleClick = (path) => {
     navigate(path);
@@ -32,54 +43,97 @@ const SavedLayout = () => {
 
   const selectedButton = buttons.find((b) => location.pathname === b.path)?.id;
 
-  const campaigns = [
-    {
-      id: 1,
-      time: "Posted 25 Mins Ago",
-      image: "https://randomuser.me/api/portraits/men/32.jpg",
-      title: "Instagram Campaign",
-      brand: "Tiktokstar",
-      type: "Instagram Video",
-      price: "$120.25 / Video",
-      description:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Read More...",
-      tags: ["Fixed Price", "Expert", "Beauty", "Micro"],
-    },
-    {
-      id: 2,
-      time: "Posted 25 Mins Ago",
-      image: "https://randomuser.me/api/portraits/women/44.jpg",
-      title: "YouTube Review",
-      brand: "BeautyPro",
-      type: "YouTube Video",
-      price: "$200.00 / Video",
-      description:
-        "Create a review video for our new product line. Read More...",
-      tags: ["Fixed Price", "Intermediate", "Lifestyle"],
-    },
-    {
-      id: 3,
-      time: "Posted 25 Mins Ago",
-      image: "https://randomuser.me/api/portraits/men/65.jpg",
-      title: "Twitter Shoutout",
-      brand: "TechGuru",
-      type: "Twitter Post",
-      price: "$50.00 / Post",
-      description:
-        "Share our latest tech gadget with your followers. Read More...",
-      tags: ["One Time", "Beginner", "Tech"],
-    },
+  const sortOptions = [
+    { value: "createddate_desc", label: "Newest" },
+    { value: "estimatedbudget_asc", label: "Price: Low to High" },
+    { value: "estimatedbudget_desc", label: "Price: High to Low" },
   ];
 
-  const sortOptions = [
-    { value: "newest", label: "Newest" },
-    { value: "oldest", label: "Oldest" },
-    { value: "priceLowHigh", label: "Price: Low to High" },
-    { value: "priceHighLow", label: "Price: High to Low" },
-  ];
+  const getPaginationConfig = async () => {
+    try {
+      const res = await axios.get("pagination");
+      setPageSizeConfig({
+        desktop: Number(res.data.desktop),
+        mobile: Number(res.data.mobile)
+      });
+
+      const isMobile = window.innerWidth <= 768;
+      setPageSize(isMobile ? Number(res.data.mobile) : Number(res.data.desktop));
+    } catch (error) {
+      console.error("Failed to fetch pagination config", error);
+    }
+  };
+
+
+  const getAllSavedCampaigns = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`user/saved-campaign`, {
+        params: {
+          sortby,
+          sortorder,
+          pagenumber,
+          pagesize,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const { records, totalcount } = res.data.data; // assuming backend sends `records` and `totalcount`
+      console.log(records)
+      setCampaigns(records);
+      setTotalCampaigns(totalcount);
+    } catch (error) {
+      console.error("Failed to fetch campaigns", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async (id) => {
+    try {
+      const res = await axios.post(
+        `user/save-campaign/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(res.data)
+      toast.success(res.data?.message);
+      if (res.status === 201) {
+        getAllSavedCampaigns()
+      }
+
+    } catch (error) {
+      console.log(error)
+      toast.error(error);
+    }
+  }
+
+  useEffect(() => {
+    getPaginationConfig();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth <= 768;
+      setPageSize(isMobile ? pageSizeConfig.mobile : pageSizeConfig.desktop);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [pageSizeConfig]);
+
+  useEffect(() => {
+    getAllSavedCampaigns();
+  }, [pagenumber, pagesize, sortby, sortorder]);
 
   return (
-    <main className="flex-1 bg-gray-100 overflow-y-auto w-full">
+    <div >
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
       <p className="mb-6 text-gray-700 text-sm">
         Track your campaigns & Browse
@@ -113,16 +167,25 @@ const SavedLayout = () => {
           <div className="flex gap-2 w-full sm:w-auto justify-end">
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-end">
               <div className="relative w-full sm:w-auto">
-                <select className="w-full sm:w-auto appearance-none border border-gray-200 rounded-md px-4 py-2 pr-8 bg-white text-gray-700">
-                  <option value="" disabled defaultValue>
-                    Sort By
-                  </option>
+                <Select
+                  size="large"
+                  value={`${sortby}_${sortorder}`}
+                  onChange={(value) => {
+                    const [newSortBy, newSortOrder] = value.split("_");
+                    setSortBy(newSortBy);
+                    setSortOrder(newSortOrder);
+                    setPageNumber(1); // Reset to first page on sort
+                  }}
+                  className="w-full sm:w-48"
+                  placeholder="Sort By"
+                  suffixIcon={<RiArrowDownSLine size={16} />}
+                >
                   {sortOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
+                    <Select.Option key={option.value} value={option.value}>
                       {option.label}
-                    </option>
+                    </Select.Option>
                   ))}
-                </select>
+                </Select>
                 <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                   <RiArrowDownSLine size={16} />
                 </span>
@@ -133,10 +196,7 @@ const SavedLayout = () => {
 
         <div className="flex flex-col lg:flex-row gap-6 mt-6">
           <div
-            className={`grid gap-6 flex-1 ${showFilter
-              ? "grid-cols-1 sm:grid-cols-2"
-              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-              }`}
+            className="grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           >
             {campaigns.map((campaign) => (
               <div
@@ -144,63 +204,88 @@ const SavedLayout = () => {
                 className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
               >
                 <span className="text-xs text-gray-500 mb-3">
-                  {campaign.time}
+                  Posted on {new Date(campaign.createddate).toLocaleDateString()}
                 </span>
                 <div className="flex items-center gap-3 mb-3">
                   <img
-                    src={campaign.image}
+                    src={`/${campaign.photopath}`} // adjust if image path needs base URL
                     alt="icon"
-                    className="w-10 h-10 rounded-full"
+                    className="w-10 h-10 rounded-full object-cover"
                   />
                   <div>
-                    <div className="font-semibold text-gray-900">
-                      {campaign.title}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {campaign.brand}
-                    </div>
+                    <div className="font-semibold text-gray-900">{campaign.name}</div>
+                    <div className="text-xs text-gray-500">{campaign.businessname}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
                   <RiVideoAddLine size={16} />
-                  <span>{campaign.type}</span>
+                  <span>
+                    {campaign.providercontenttype[0]?.providername}{" "}
+                    {campaign.providercontenttype[0]?.contenttypename}
+                  </span>
                   <RiExchangeDollarLine size={16} />
-                  <span>{campaign.price}</span>
+                  <span>₹{campaign.estimatedbudget}</span>
                 </div>
-                <p className="text-gray-700 text-sm mb-4">
+                <p className="text-gray-700 text-sm mb-4 line-clamp-2">
                   {campaign.description}
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {campaign.tags.map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-1 bg-gray-100 rounded text-xs"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                  {[...(campaign.campaigncategories || []), ...(campaign.campaigninfluencertiers || [])].map(
+                    (item, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2 py-1 bg-gray-100 rounded text-xs"
+                      >
+                        {item.categoryname || item.influencertiername}
+                      </span>
+                    )
+                  )}
                 </div>
                 <div className="flex items-center justify-between mt-auto gap-4">
-                  <Link to="/dashboard/browse/apply-now" className="flex-1">
-                    <button className="w-full py-2 rounded-3xl bg-[#0f122f] text-white font-semibold hover:bg-[#23265a] transition">
-                      Apply Now
+                  {campaign.campaignapplied ? (
+                    <button className="w-full py-2 rounded-3xl bg-[#9d9d9d] cursor-pointer text-white font-semibold  transition">
+                      Applied
                     </button>
-                  </Link>
-                  <Link
-                    to="/dashboard/browse/description"
-                    className="flex-shrink-0"
+                  ) : (
+                    <Link to={`/dashboard/browse/apply-now/${campaign.id}`} className="flex-1">
+                      <button className="w-full py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition">
+                        Apply Now
+                      </button>
+                    </Link>
+
+                  )}
+
+                  <button
+                    onClick={() => handleSave(campaign.id)}
+                    className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition"
                   >
-                    <div className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition">
-                      <RiFileCopyFill size={20} />
-                    </div>
-                  </Link>
+                    <RiFileCopyFill size={20} />
+
+                  </button>
+
                 </div>
               </div>
             ))}
+
           </div>
         </div>
       </div>
-    </main>
+
+      {/* Pagination */}
+      <div className="mt-6 flex justify-center">
+        <Pagination
+          current={pagenumber}
+          pageSize={pagesize}
+          total={totalCampaigns}
+          onChange={(page, pageSize) => {
+            setPageNumber(page);
+            setPageSize(pageSize);
+          }}
+          showSizeChanger={false}
+
+        />
+      </div>
+    </div>
   );
 };
 

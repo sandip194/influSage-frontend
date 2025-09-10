@@ -7,11 +7,16 @@ import {
   RiArrowDownSLine,
   RiEqualizerFill,
   RiCloseFill,
+  RiFileCopyFill
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
 import { Input, Pagination, Select } from "antd";
+import { toast } from 'react-toastify';
 import axios from "axios";
 import { useSelector } from "react-redux";
+
+
+
 
 
 const Browse = () => {
@@ -22,6 +27,7 @@ const Browse = () => {
   const [campaignTypes, setCampaignTypes] = useState([]);
   const [campaigns, setCampaigns] = useState([])
   const [totalCampaigns, setTotalCampaigns] = useState(0);
+  const [pageSize, setPageSize] = useState(0)
 
   const [filters, setFilters] = useState({
     providers: [],
@@ -32,7 +38,7 @@ const Browse = () => {
     sortby: "createddate",
     sortorder: "desc",
     pagenumber: 1,
-    pagesize: 10,
+    pagesize: null,
   });
 
 
@@ -79,11 +85,31 @@ const Browse = () => {
     });
   }, []);
 
+  const getPagination = async () => {
+    try {
+      const res = await axios.get("pagination");
+
+      const data = res.data;
+      setPageSize(data);
+
+      // Detect device type
+      const isMobile = window.innerWidth <= 768;
+
+      // Set pagesize in filters based on device
+      setFilters(prev => ({
+        ...prev,
+        pagesize: isMobile ? Number(data.mobile) : Number(data.desktop)
+      }));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
 
   const getAllPlatforms = async () => {
     try {
       const res = await axios.get("providers")
-      
+
       if (res.status === 200) {
         setPlatforms(res.data.data)
       }
@@ -114,7 +140,7 @@ const Browse = () => {
         sortby: filters.sortby || undefined,
         sortorder: filters.sortorder || undefined,
         pagenumber: filters.pagenumber || 1,
-        pagesize: filters.pagesize || 10,
+        pagesize: filters.pagesize || 15,
       };
 
       const cleanParams = Object.fromEntries(
@@ -122,9 +148,12 @@ const Browse = () => {
       );
 
 
-      const res = await axios.get("user/browse/fiterWithSort", {
+      const res = await axios.get("user/browse-all-campaigns/fiterWithSort", {
         params: cleanParams,
-      });
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },);
 
       setTotalCampaigns(res.data.fn_get_campaignbrowse.totalcount)
       setCampaigns(res.data.fn_get_campaignbrowse.records);
@@ -133,7 +162,6 @@ const Browse = () => {
       console.error("Error fetching campaigns:", error);
     }
   };
-
 
   const getAllCampaignTypes = async () => {
     try {
@@ -144,8 +172,51 @@ const Browse = () => {
     }
   }
 
+  const handleSave = async (id) => {
+    try {
+      const res = await axios.post(
+        `user/save-campaign/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(res.data)
+      toast.success(res.data?.message);
+      if (res.status === 201) {
+        getAllCampaigns()
+      }
+
+    } catch (error) {
+      console.log(error)
+      toast.error(error);
+    }
+  }
 
   useEffect(() => {
+    document.querySelector('main').scrollTo({ top: 0, behavior: "smooth" });
+  }, [filters.pagenumber]);
+
+  useEffect(() => {
+  const handleResize = () => {
+    if (!pageSize.mobile || !pageSize.desktop) return;
+    const isMobile = window.innerWidth <= 768;
+    setFilters(prev => ({
+      ...prev,
+      pagesize: isMobile ? Number(pageSize.mobile) : Number(pageSize.desktop)
+    }));
+  };
+
+  window.addEventListener("resize", handleResize);
+
+  return () => window.removeEventListener("resize", handleResize);
+}, [pageSize]);
+
+
+  useEffect(() => {
+    getPagination();
     getAllLanguages();
     getAllPlatforms();
     getAllCampaignTypes();
@@ -157,7 +228,9 @@ const Browse = () => {
 
 
   return (
-    <main className="flex-1 bg-gray-100 overflow-y-auto w-full">
+    <div className="browslayout">
+
+
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
       <p className="mb-6 text-gray-700 text-sm">
         Track your campaigns & Browse
@@ -183,6 +256,8 @@ const Browse = () => {
         <h4 className="text-xl font-bold text-gray-900 mb-2">
           Browse Campaign
         </h4>
+
+        {/*Header Like Searching, filter and Sort By */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <Input
             size="large"
@@ -234,8 +309,10 @@ const Browse = () => {
         </div>
 
         <div className="flex flex-col gap-6 mt-6">
+
+          {/* Campaign Card */}
           <div
-            className={`grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 `}
+            className={`grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}
           >
             {campaigns.map((campaign) => (
               <div
@@ -243,7 +320,7 @@ const Browse = () => {
                 className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
               >
                 <span className="text-xs text-gray-500 mb-3">
-                  {campaign.time}
+                  Posted on {new Date(campaign.createddate).toLocaleDateString()}
                 </span>
                 <div className="flex items-center gap-3 mb-3">
                   <img
@@ -277,37 +354,52 @@ const Browse = () => {
                   {campaign.description}
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {/* {campaign.tags.map((tag, idx) => (
+                  {campaign.campaigncategories?.map((tag, idx) => (
                     <span
                       key={idx}
-                      className="px-2 py-1 bg-gray-100 rounded text-xs"
+                      className="px-2 py-1 bg-gray-100 rounded-xl text-xs"
                     >
-                      {tag}
+                      {tag.categoryname}
                     </span>
-                  ))} */}
+                  ))}
                 </div>
+
                 <div className="flex items-center justify-between mt-auto gap-4">
-                  <Link to="apply-now" className="flex-1">
-                    <button className="w-full py-2 rounded-3xl bg-[#0f122f] text-white font-semibold hover:bg-[#23265a] transition">
-                      Apply Now
+                  {campaign.campaignapplied ? (
+                    <button className="w-full py-2 rounded-3xl bg-[#9d9d9d] cursor-pointer text-white font-semibold  transition">
+                      Applied
                     </button>
-                  </Link>
-                  <Link to="description" className="flex-shrink-0">
-                    <div className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition">
-                      <RiFileCopyLine size={20} />
-                    </div>
-                  </Link>
+                  ) : (
+                    <Link to={`/dashboard/browse/apply-now/${campaign.id}`} className="flex-1">
+                      <button className="w-full py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition">
+                        Apply Now
+                      </button>
+                    </Link>
+
+                  )}
+
+                  <button
+                    onClick={() => handleSave(campaign.id)}
+                    className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition"
+                  >
+
+                    {campaign.campaigsaved ? <RiFileCopyFill size={20} /> : <RiFileCopyLine size={20} />}
+
+                  </button>
+
                 </div>
               </div>
             ))}
 
           </div>
 
+          {/* Pagination */}
           <div className="mt-6 flex justify-center">
             <Pagination
               current={filters.pagenumber}
               pageSize={filters.pagesize}
               total={totalCampaigns}
+              showSizeChanger={false}
               onChange={(page, pageSize) => {
                 setFilters(prev => ({
                   ...prev,
@@ -315,11 +407,11 @@ const Browse = () => {
                   pagesize: pageSize,
                 }));
               }}
-              showSizeChanger
-              pageSizeOptions={['10', '20']}
+              
             />
           </div>
 
+          {/* Filter Show Conditionly  */}
           {showFilter && (
             <>
               <div
@@ -458,7 +550,7 @@ const Browse = () => {
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 

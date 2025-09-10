@@ -1,28 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../assets/role.css'; // Reuse the same CSS
-import influencerIcon from '../../assets/icons/i-influencer.png';
-import vendorIcon from '../../assets/icons/i-vendor.png';
-import agencyIcon from '../../assets/icons/i-agancy.png';
 import SideImageSlider from '../../components/common/SideImageSlider';
 import axios from 'axios';
 
-const roles = [
-  { id: 1, label: 'Influencer', icon: influencerIcon },
-  { id: 2, label: 'Vendor', icon: vendorIcon },
-  { id: 3, label: 'Agency', icon: agencyIcon }
-];
+
 
 const Role = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [showError, setShowError] = useState(false)
+  const [roles, setRoles] = useState([])
 
   const navigate = useNavigate();
 
   const fatchRoles = async() =>{
     try {
       const res = await axios.get("roles")
-      console.log(res.data)
+      setRoles(res.data?.roles)
     } catch (error) {
       console.log(error)
     }
@@ -57,8 +51,8 @@ const Role = () => {
                 className={`role-box flex-col items-center justify-items-center ${selectedRole === role.id ? 'selected' : ''}`}
                 onClick={() => setSelectedRole(role.id)}
               >
-                  <img src={role.icon} alt={role.label} className="bg-gray-100 rounded-full w-80" />
-                <p>{role.label}</p>
+                  <img src={role.iconpath} alt={role.name} className="bg-gray-100 rounded-full w-80" />
+                <p>{role.name}</p>
               </div>
             ))}
           </div>

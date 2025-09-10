@@ -252,7 +252,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                   campaignData.p_campaigncategoyjson[0].categories.slice(0, 5).map((subcat) => (
                     <span
                       key={subcat.categoryid}
-                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium"
+                      className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium"
                     >
                       {subcat.categoryname}
                     </span>
@@ -483,7 +483,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                 campaignData.p_campaignjson.milestones.map((milestone, index) => (
                   <div
                     key={index}
-                    className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm"
+                    className="border border-gray-200 rounded-lg p-4 "
                   >
                     <div className="flex justify-between items-center mb-2">
                       <h4 className="font-semibold text-sm text-gray-800">
