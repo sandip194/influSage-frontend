@@ -15,7 +15,7 @@ export const Signup = () => {
 
   const navigate = useNavigate();
 
-  // 🔹 Prefill from Google OAuth redirect
+  // Prefill from Google OAuth redirect
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const firstName = params.get("firstName");
@@ -29,8 +29,11 @@ export const Signup = () => {
 
   const submitHandler = async (data) => {
     try {
-      setLoading(true);
+      setLoading(true)
       const role = localStorage.getItem('selectedRole');
+      const userEmail = data.email;
+      localStorage.setItem('signupEmail', userEmail);
+      // If role is not selected, redirect to role selection
       if (!role) {
         toast.error('Please select a role first!', { position: "top-right" });
         return navigate('/role');
@@ -38,12 +41,12 @@ export const Signup = () => {
 
       const userData = {
         ...data,
-        roleId: Number(role),
-      };
-
+        roleId: Number(role)
+      }
       const response = await axios.post('/user/register', userData);
 
       if (response.status === 400) {
+        console.log("response", response.data.message);
         toast.error(response.data.message || "Email already exists");
       }
 
@@ -52,11 +55,12 @@ export const Signup = () => {
         toast.success('Signup successful! Please verify your email or mobile.');
         navigate('/verify-email-or-mobile');
       }
+
     } catch (error) {
       toast.error(error?.response?.data?.message || "Signup failed. Please try again.");
       console.error("Signup failed:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // 🔹 always re-enable after request
     }
   };
 

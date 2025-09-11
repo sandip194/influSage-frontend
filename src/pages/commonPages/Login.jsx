@@ -39,14 +39,7 @@ useEffect(() => {
   const lastName = params.get("lastName");
   const email = params.get("email"); 
 
-  console.log("[DEBUG] Google login callback params:", {
-    token,
-    userId,
-    roleId,
-    firstName,
-    lastName,
-    email,
-  });
+  console.log("[DEBUG] Google login callback params:", {token, userId, roleId, firstName, lastName,  email });
 
     if (!roleId || roleId === 0 || isNaN(roleId)) {
       navigate("/role");
@@ -62,9 +55,7 @@ useEffect(() => {
   localStorage.setItem("email", email);
 
   // Update 
-  dispatch(
-    setCredentials({ token, id: userId, role: roleId, firstName, lastName, email })
-  );
+  dispatch( setCredentials({ token, id: userId, role: roleId, firstName, lastName, email }) );
 
   // Set axios default header
   axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
