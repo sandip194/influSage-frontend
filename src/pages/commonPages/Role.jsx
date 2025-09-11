@@ -27,20 +27,13 @@ const Role = () => {
   },[])
 
   const handleContinue = () => {
-    if (selectedRole) {
-      localStorage.setItem('selectedRole', selectedRole);
-      navigate('/signup');
-    } else {
-      setShowError(true);
-    }
-    //  if (selectedRole) {
-    //   localStorage.setItem("selected_role", selectedRole);
-    //   // Directly continue to Google OAuth
-    //   window.location.href = `http://localhost:3001/auth/google?roleid=${selectedRole}`;
-    // } else {
-    //   setShowError(true);
-    // }
-  };
+  if (selectedRole) {
+    localStorage.setItem("selected_role", selectedRole);
+    navigate("/signup");
+  } else {
+    setShowError(true);
+  }
+};
 
   return (
     <div className="login-container">

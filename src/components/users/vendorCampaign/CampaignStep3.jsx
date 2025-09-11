@@ -116,6 +116,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
           dayjs(formData.applicationenddate).isBefore(dayjs(formData.applicationstartdate))),
 
       aboutBrand: !formData.aboutBrand,
+      profileImage: !profileImage && !formData.profileImageUrl,
     };
 
     setErrors(newErrors);
