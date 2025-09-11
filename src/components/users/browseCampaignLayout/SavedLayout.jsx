@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   RiFileCopyFill,
   RiVideoAddLine,
   RiExchangeDollarLine,
   RiArrowDownSLine,
-  RiFileCopyLine
+  RiFileCopyLine,
+  RiEyeLine
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Empty, Input, Pagination, Select } from "antd";
+import { Empty, Input, Pagination, Select, Tooltip, Modal  } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -42,7 +43,10 @@ const SavedLayout = () => {
     { id: "saved", label: "Saved Campaign", path: "/dashboard/browse/saved" },
   ];
 
-  const selectedButton = buttons.find((b) => location.pathname === b.path)?.id;
+  const selectedButton = useMemo(
+    () => buttons.find((b) => location.pathname === b.path)?.id,
+    [location.pathname]
+  );
 
   const sortOptions = [
     { value: "createddate_desc", label: "Newest" },
@@ -53,7 +57,7 @@ const SavedLayout = () => {
 
 
 
-  const getAllSavedCampaigns = async () => {
+  const getAllSavedCampaigns = useCallback(async () => {
     try {
       setLoading(true);
       const res = await axios.get(`user/saved-campaign`, {
@@ -77,7 +81,7 @@ const SavedLayout = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sortby, sortorder, pagenumber, pagesize, token])
 
   const handleSave = async (id) => {
     try {
@@ -106,7 +110,7 @@ const SavedLayout = () => {
 
   useEffect(() => {
     getAllSavedCampaigns();
-  }, [pagenumber, pagesize, sortby, sortorder]);
+  }, [getAllSavedCampaigns]);
 
   return (
     <div >
@@ -215,18 +219,19 @@ const SavedLayout = () => {
                     {campaign.description}
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {[...(campaign.campaigncategories || []), ...(campaign.campaigninfluencertiers || [])].map(
+                    {[...(campaign.campaigncategories || [])].map(
                       (item, idx) => (
                         <span
                           key={idx}
                           className="px-2 py-1 bg-gray-100 rounded text-xs"
                         >
-                          {item.categoryname || item.influencertiername}
+                          {item.categoryname}
                         </span>
                       )
                     )}
                   </div>
                   <div className="flex items-center justify-between mt-auto gap-4">
+                    
                     {campaign.campaignapplied ? (
                       <button className="w-full py-2 rounded-3xl bg-[#9d9d9d] cursor-pointer text-white font-semibold  transition">
                         Applied
@@ -240,13 +245,24 @@ const SavedLayout = () => {
 
                     )}
 
-                    <button
-                      onClick={() => handleSave(campaign.id)}
-                      className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition"
-                    >
-                      <RiFileCopyFill size={20} />
+                    <Tooltip title="Unsave This Campaign">
+                      <button
+                        onClick={() => handleSave(campaign.id)}
+                        className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition"
+                      >
+                        <RiFileCopyFill size={20} />
 
-                    </button>
+                      </button>
+                    </Tooltip>
+
+
+                    <Tooltip title="View Details">
+                      <Link to={`/dashboard/browse/description/${campaign.id}`}>
+                        <button className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition">
+                          <RiEyeLine size={20} />
+                        </button>
+                      </Link>
+                    </Tooltip>
 
                   </div>
                 </div>

@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   RiMessage2Line,
   RiVideoAddLine,
   RiExchangeDollarLine,
   RiArrowDownSLine,
+  RiEyeLine,
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Empty, Input, Pagination, Select } from "antd";
+import { Empty, Input, Pagination, Select, Skeleton, Tooltip } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
@@ -43,7 +44,10 @@ const AppliedLayout = () => {
     { id: "saved", label: "Saved Campaign", path: "/dashboard/browse/saved" },
   ];
 
-  const selectedButton = buttons.find((b) => location.pathname === b.path)?.id;
+  const selectedButton = useMemo(
+    () => buttons.find((b) => location.pathname === b.path)?.id,
+    [location.pathname]
+  );
 
   const sortOptions = [
     { value: "createddate_desc", label: "Newest" },
@@ -51,10 +55,9 @@ const AppliedLayout = () => {
     { value: "estimatedbudget_desc", label: "Price: High to Low" },
   ];
 
-
-  const getAllAppliedCampaigns = async () => {
+  const getAllAppliedCampaigns = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await axios.get(`user/applied-campaigns`, {
         params: {
           p_sortby: sortby,
@@ -66,8 +69,7 @@ const AppliedLayout = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      const { records, totalcount } = res.data.data; // assuming backend sends `records` and `totalcount`
+      const { records, totalcount } = res.data.data;
       setCampaigns(records);
       setTotalCampaigns(totalcount);
     } catch (error) {
@@ -75,12 +77,12 @@ const AppliedLayout = () => {
     } finally {
       setLoading(false);
     }
-  };
-
+  }, [sortby, sortorder, pagenumber, pagesize, token]);
 
   useEffect(() => {
-    getAllAppliedCampaigns()
-  }, [pagenumber, pagesize, sortby, sortorder])
+    getAllAppliedCampaigns();
+  }, [getAllAppliedCampaigns]);
+
 
   return (
     <div className="appliedlayout">
@@ -152,72 +154,74 @@ const AppliedLayout = () => {
             className="grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           >
             {loading ? (
-              <div className="col-span-full text-center py-10 text-gray-500">
-                Loading campaigns...
-              </div>
+              <Skeleton active paragraph={{ rows: 6 }} className="col-span-full" />
             ) : campaigns.length === 0 ? (
               <div className="col-span-full py-10">
                 <Empty description="No campaigns found." />
               </div>
             ) : (
-            campaigns.map((campaign) => (
-              <div
-                key={campaign.id}
-                className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
-              >
-                <span className="text-xs text-gray-500 mb-3">
-                  Applied on {new Date(campaign.createddate).toLocaleDateString()}
-                </span>
-                <div className="flex items-center gap-3 mb-3">
-                  <img
-                    src={`${BASE_URL}/${campaign.photopath}`} // adjust if image path needs base URL
-                    alt="icon"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <div className="font-semibold text-gray-900">{campaign.name}</div>
-                    <div className="text-xs text-gray-500">{campaign.businessname}</div>
+              campaigns.map((campaign) => (
+                <div
+                  key={campaign.id}
+                  className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
+                >
+                  <span className="text-xs text-gray-500 mb-3">
+                    Applied on {new Date(campaign.createddate).toLocaleDateString()}
+                  </span>
+                  <div className="flex items-center gap-3 mb-3">
+                    <img
+                      src={`${BASE_URL}/${campaign.photopath}`} // adjust if image path needs base URL
+                      alt="icon"
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div>
+                      <div className="font-semibold text-gray-900">{campaign.name}</div>
+                      <div className="text-xs text-gray-500">{campaign.businessname}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                    <RiVideoAddLine size={16} />
+                    <span>
+                      {campaign.providercontenttype[0]?.providername}{" "}
+                      {campaign.providercontenttype[0]?.contenttypename}
+                    </span>
+                    <RiExchangeDollarLine size={16} />
+                    <span>₹{campaign.estimatedbudget}</span>
+                  </div>
+                  <p className="text-gray-700 text-sm mb-4 line-clamp-2">
+                    {campaign.description}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {[...(campaign.campaigncategories || [])].map(
+                      (item, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-1 bg-gray-100 rounded text-xs"
+                        >
+                          {item.categoryname}
+                        </span>
+                      )
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between mt-auto gap-4">
+                    <Link to="/dashboard/browse/edit" className="flex-1">
+                      <button className="w-full py-2 rounded-3xl bg-[#0f122f] text-white font-semibold hover:bg-[#23265a] transition">
+                        Edit Application
+                      </button>
+                    </Link>
+
+                    <Tooltip title="View Details">
+                      <Link to={`/dashboard/browse/applied-campaign-details/${campaign.id}`} className="flex-shrink-0">
+                        <div className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition">
+                          <RiEyeLine size={20} />
+                        </div>
+                      </Link>
+                    </Tooltip>
+
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                  <RiVideoAddLine size={16} />
-                  <span>
-                    {campaign.providercontenttype[0]?.providername}{" "}
-                    {campaign.providercontenttype[0]?.contenttypename}
-                  </span>
-                  <RiExchangeDollarLine size={16} />
-                  <span>₹{campaign.estimatedbudget}</span>
-                </div>
-                <p className="text-gray-700 text-sm mb-4 line-clamp-2">
-                  {campaign.description}
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {[...(campaign.campaigncategories || []), ...(campaign.campaigninfluencertiers || [])].map(
-                    (item, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-1 bg-gray-100 rounded text-xs"
-                      >
-                        {item.categoryname || item.influencertiername}
-                      </span>
-                    )
-                  )}
-                </div>
-                <div className="flex items-center justify-between mt-auto gap-4">
-                  <Link to="/dashboard/browse/edit" className="flex-1">
-                    <button className="w-full py-2 rounded-3xl bg-[#0f122f] text-white font-semibold hover:bg-[#23265a] transition">
-                      Edit Application
-                    </button>
-                  </Link>
-                  <Link to="/dashboard/browse/edit" className="flex-shrink-0">
-                    <div className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition">
-                      <RiMessage2Line size={20} />
-                    </div>
-                  </Link>
-                </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
 
           </div>
         </div>

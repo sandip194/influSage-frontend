@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   RiFileCopyLine,
@@ -7,10 +7,11 @@ import {
   RiArrowDownSLine,
   RiEqualizerFill,
   RiCloseFill,
-  RiFileCopyFill
+  RiFileCopyFill,
+  RiEyeLine
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Empty, Input, Pagination, Select } from "antd";
+import { Empty, Input, Pagination, Select, Tooltip } from "antd";
 import { toast } from 'react-toastify';
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -37,7 +38,7 @@ const Browse = () => {
     sortby: "createddate",
     sortorder: "desc",
     pagenumber: 1,
-    pagesize: 10,
+    pagesize: 15,
   });
 
 
@@ -61,7 +62,11 @@ const Browse = () => {
     { id: "saved", label: "Saved Campaign", path: "/dashboard/browse/saved" },
   ];
 
-  const selectedButton = buttons.find((b) => location.pathname === b.path)?.id;
+  const selectedButton = useMemo(
+    () => buttons.find((b) => location.pathname === b.path)?.id,
+    [location.pathname]
+  );
+
 
   const sortOptions = [
     { value: "createddate_desc", label: "Newest" },
@@ -180,8 +185,6 @@ const Browse = () => {
   }, [filters.pagenumber]);
 
 
-
-
   useEffect(() => {
     getAllLanguages();
     getAllPlatforms();
@@ -192,6 +195,19 @@ const Browse = () => {
     getAllCampaigns();
   }, [filters.pagenumber, filters.pagesize, filters.sortby, filters.sortorder]);
 
+
+  useEffect(() => {
+    const handleResize = () => {
+      setFilters((prev) => ({
+        ...prev,
+        pagesize: window.innerWidth < 640 ? 10 : 15,
+        pagenumber: 1,
+      }));
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div className="browslayout">
@@ -300,6 +316,7 @@ const Browse = () => {
                   <img
                     src={`${BASE_URL}/${campaign.photopath}`}
                     alt="icon"
+                    loading="lazy"
                     className="w-10 h-10 rounded-full"
                   />
                   <div>
@@ -352,14 +369,24 @@ const Browse = () => {
 
                   )}
 
-                  <button
-                    onClick={() => handleSave(campaign.id)}
-                    className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition"
-                  >
+                  <Tooltip title="Save Campaign">
+                    <button
+                      onClick={() => handleSave(campaign.id)}
+                      className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition"
+                    >
 
-                    {campaign.campaigsaved ? <RiFileCopyFill size={20} /> : <RiFileCopyLine size={20} />}
+                      {campaign.campaigsaved ? <RiFileCopyFill size={20} /> : <RiFileCopyLine size={20} />}
+                    </button>
+                  </Tooltip>
 
-                  </button>
+
+                  <Tooltip title="View Details">
+                    <Link to={`/dashboard/browse/description/${campaign.id}`}>
+                      <button className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition">
+                        <RiEyeLine size={20} />
+                      </button>
+                    </Link>
+                  </Tooltip>
 
                 </div>
               </div>
@@ -394,7 +421,6 @@ const Browse = () => {
                 className="fixed inset-0 bg-black/30 z-40"
                 onClick={() => setShowFilter(false)}
               />
-
               <div className="fixed top-0 right-0 w-80 h-full bg-white p-4 z-50 shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
 
                 <div className="flex justify-between items-center mb-4">

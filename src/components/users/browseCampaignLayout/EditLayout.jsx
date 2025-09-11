@@ -14,7 +14,10 @@ import {
   RiEmotionLine,
   RiMoreFill,
 } from "@remixicon/react";
-import React from "react";
+import axios from "axios";
+import React, { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 
 const SimilarCampaigns = [
   {
@@ -40,10 +43,52 @@ const SimilarCampaigns = [
 ];
 
 const EditLayout = () => {
+
+  const [campaignDetails, setCampaignDetails] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null);
+
+
+  const { token } = useSelector((state) => state.auth);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const { campaignId } = useParams();
+
+  const fetchCampaignDetails = useCallback(async () => {
+    if (!campaignId || !token) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await axios.get(`user/applied-campaign-details/${campaignId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = res.data.data[0];
+      console.log(data)
+      setCampaignDetails(data);
+
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch campaign details.");
+    } finally {
+      setLoading(false);
+    }
+  }, [campaignId, token, BASE_URL]);
+
+  useEffect(() => {
+    fetchCampaignDetails();
+  }, [fetchCampaignDetails]);
+
+  const handleBack = useCallback(() => {
+    window.history.back();
+  }, []);
+
+
   return (
     <div className="w-full max-w-7xl mx-auto text-sm overflow-x-hidden">
       <button
-        onClick={() => window.history.back()}
+        onClick={handleBack}
         className="text-gray-600 flex items-center gap-2 hover:text-gray-900 transition"
       >
         <RiArrowLeftSLine /> Back

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   RiArrowLeftSLine,
   RiChatUploadLine,
@@ -16,8 +16,10 @@ const ApplyNow = () => {
   const [amount, setAmount] = useState("");
   const [proposal, setProposal] = useState("");
   const [portfolioFile, setPortfolioFile] = useState(null);
+  const [existingFilePath, setExistingFilePath] = useState(null);
   const [errors, setErrors] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
   const [loading, setLoading] = useState(false)
 
   const { campaignId } = useParams();
@@ -30,6 +32,7 @@ const ApplyNow = () => {
       return;
     }
     setPortfolioFile(info.file);
+    setExistingFilePath(null);
   };
 
   const validate = () => {
@@ -64,6 +67,10 @@ const ApplyNow = () => {
       formData.append("portfolioFiles", portfolioFile); // Backend expects this name
     }
 
+    if (!portfolioFile && existingFilePath) {
+      formData.append("existingFilePath", existingFilePath);
+    }
+
     try {
       setLoading(true)
       const response = await axios.post(`user/apply-for-campaign/${campaignId}`, formData, {
@@ -83,6 +90,45 @@ const ApplyNow = () => {
       setLoading(false)
     }
   };
+
+
+  const getAppliedCampiagnDetails = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`user/signle-applied/${campaignId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = res.data.data;
+      console.log(data)
+      if (res.data) {
+        setIsEdit(true);
+        setAmount(data.budget || "");
+        setProposal(data.description || "");
+        if (res.data.filepaths && res.data.filepaths.length > 0) {
+          setExistingFilePath(res.data.filepaths[0].filepath);
+        }
+        // set form fields as above
+      }
+
+      // Assuming data contains amount, proposal, and portfolio file info
+
+      // For portfolioFile, you might need to handle differently if it's a URL or file metadata
+      // You can store the file info or URL in a separate state to show the existing file
+      // For example:
+      // setPortfolioFile(data.portfolioFile || null);
+
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getAppliedCampiagnDetails();
+  }, [])
 
 
   return (
@@ -125,6 +171,38 @@ const ApplyNow = () => {
             <h2 className="text-lg font-bold mb-2">
               Portfolio <span className="text-red-500">*</span>
             </h2>
+            {existingFilePath && (
+              <div className="mb-2">
+                <p className="font-medium">Existing Portfolio File:</p>
+                {/* If it's a video */}
+                {existingFilePath.endsWith(".mp4") ? (
+                  <video width="320" height="180" controls>
+                    <source src={existingFilePath} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  // For images or PDFs, show a link or thumbnail
+                  <a
+                    href={existingFilePath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline"
+                  >
+                    View File
+                  </a>
+                )}
+                <Button
+                  type="link"
+                  danger
+                  onClick={() => {
+                    setExistingFilePath(null);
+                    setPortfolioFile(null);
+                  }}
+                >
+                  Remove File
+                </Button>
+              </div>
+            )}
             <p className="text-gray-600 mb-4">
               Upload your portfolio or recent works
             </p>
@@ -175,16 +253,13 @@ const ApplyNow = () => {
 
             </div>
           </section>
-
-          <Button
-            htmlType="submit"
-            type="primary"
-            shape="round"
+          <button
+            type="submit"
             disabled={loading}
-            className="!bg-[#0f122f] !text-white font-semibold px-6 py-2 hover:!bg-[#23265a] transition"
-          >
-            {loading ? "Appling..." : "Apply Now"}
-          </Button>
+            className="w-42 py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition">
+            {loading ? (isEdit ? "Saving..." : "Applying...") : (isEdit ? "Save" : "Apply Now")}
+          </button>
+
         </form>
       </div>
 
