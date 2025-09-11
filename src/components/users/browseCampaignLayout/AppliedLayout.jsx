@@ -7,7 +7,7 @@ import {
   RiArrowDownSLine,
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Input, Pagination, Select } from "antd";
+import { Empty, Input, Pagination, Select } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
@@ -16,7 +16,6 @@ const AppliedLayout = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [pagenumber, setPageNumber] = useState(1);
   const [pagesize, setPageSize] = useState(10); // or any default
-  const [pageSizeConfig, setPageSizeConfig] = useState({ desktop: 15, mobile: 10 });
   const [totalCampaigns, setTotalCampaigns] = useState(0);
   const [sortby, setSortBy] = useState("createddate");
   const [sortorder, setSortOrder] = useState("desc");
@@ -25,6 +24,7 @@ const AppliedLayout = () => {
 
 
   const { token } = useSelector((state) => state.auth);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -58,7 +58,7 @@ const AppliedLayout = () => {
       const res = await axios.get(`user/applied-campaigns`, {
         params: {
           p_sortby: sortby,
-          p_sortorder : sortorder,
+          p_sortorder: sortorder,
           p_pagenumber: pagenumber,
           p_pagesize: pagesize,
         },
@@ -76,36 +76,6 @@ const AppliedLayout = () => {
       setLoading(false);
     }
   };
-
-  const getPaginationConfig = async () => {
-    try {
-      const res = await axios.get("pagination");
-      setPageSizeConfig({
-        desktop: Number(res.data.desktop),
-        mobile: Number(res.data.mobile)
-      });
-
-      const isMobile = window.innerWidth <= 768;
-      setPageSize(isMobile ? Number(res.data.mobile) : Number(res.data.desktop));
-    } catch (error) {
-      console.error("Failed to fetch pagination config", error);
-    }
-  };
-
-
-  useEffect(() => {
-    getPaginationConfig();
-  }, []);
-
-  useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth <= 768;
-      setPageSize(isMobile ? pageSizeConfig.mobile : pageSizeConfig.desktop);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [pageSizeConfig]);
 
 
   useEffect(() => {
@@ -181,7 +151,16 @@ const AppliedLayout = () => {
           <div
             className="grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           >
-            {campaigns.map((campaign) => (
+            {loading ? (
+              <div className="col-span-full text-center py-10 text-gray-500">
+                Loading campaigns...
+              </div>
+            ) : campaigns.length === 0 ? (
+              <div className="col-span-full py-10">
+                <Empty description="No campaigns found." />
+              </div>
+            ) : (
+            campaigns.map((campaign) => (
               <div
                 key={campaign.id}
                 className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
@@ -191,7 +170,7 @@ const AppliedLayout = () => {
                 </span>
                 <div className="flex items-center gap-3 mb-3">
                   <img
-                    src={`/${campaign.photopath}`} // adjust if image path needs base URL
+                    src={`${BASE_URL}/${campaign.photopath}`} // adjust if image path needs base URL
                     alt="icon"
                     className="w-10 h-10 rounded-full object-cover"
                   />
@@ -237,7 +216,8 @@ const AppliedLayout = () => {
                   </Link>
                 </div>
               </div>
-            ))}
+            ))
+          )}
 
           </div>
         </div>
@@ -253,7 +233,8 @@ const AppliedLayout = () => {
             setPageNumber(page);
             setPageSize(pageSize);
           }}
-          showSizeChanger={false}
+          showSizeChanger
+          pageSizeOptions={['10', '15', '25', '50']}
         />
       </div>
     </div>

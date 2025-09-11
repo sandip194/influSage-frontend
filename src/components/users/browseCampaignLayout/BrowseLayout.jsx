@@ -10,12 +10,10 @@ import {
   RiFileCopyFill
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Input, Pagination, Select } from "antd";
+import { Empty, Input, Pagination, Select } from "antd";
 import { toast } from 'react-toastify';
 import axios from "axios";
 import { useSelector } from "react-redux";
-
-
 
 
 
@@ -27,7 +25,8 @@ const Browse = () => {
   const [campaignTypes, setCampaignTypes] = useState([]);
   const [campaigns, setCampaigns] = useState([])
   const [totalCampaigns, setTotalCampaigns] = useState(0);
-  const [pageSize, setPageSize] = useState(0)
+  const [loading, setLoading] = useState(false);
+
 
   const [filters, setFilters] = useState({
     providers: [],
@@ -38,7 +37,7 @@ const Browse = () => {
     sortby: "createddate",
     sortorder: "desc",
     pagenumber: 1,
-    pagesize: null,
+    pagesize: 10,
   });
 
 
@@ -85,26 +84,6 @@ const Browse = () => {
     });
   }, []);
 
-  const getPagination = async () => {
-    try {
-      const res = await axios.get("pagination");
-
-      const data = res.data;
-      setPageSize(data);
-
-      // Detect device type
-      const isMobile = window.innerWidth <= 768;
-
-      // Set pagesize in filters based on device
-      setFilters(prev => ({
-        ...prev,
-        pagesize: isMobile ? Number(data.mobile) : Number(data.desktop)
-      }));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
 
   const getAllPlatforms = async () => {
     try {
@@ -131,6 +110,7 @@ const Browse = () => {
 
   const getAllCampaigns = async () => {
     try {
+      setLoading(true);
       const params = {
         providers: filters.providers.length ? JSON.stringify(filters.providers) : undefined,
         contenttypes: filters.contenttypes.length ? JSON.stringify(filters.contenttypes) : undefined,
@@ -147,19 +127,19 @@ const Browse = () => {
         Object.entries(params).filter(([_, v]) => v !== undefined && v !== null)
       );
 
-
       const res = await axios.get("user/browse-all-campaigns/fiterWithSort", {
         params: cleanParams,
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      },);
+      });
 
-      setTotalCampaigns(res.data.fn_get_campaignbrowse.totalcount)
+      setTotalCampaigns(res.data.fn_get_campaignbrowse.totalcount);
       setCampaigns(res.data.fn_get_campaignbrowse.records);
-
     } catch (error) {
       console.error("Error fetching campaigns:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -199,24 +179,10 @@ const Browse = () => {
     document.querySelector('main').scrollTo({ top: 0, behavior: "smooth" });
   }, [filters.pagenumber]);
 
-  useEffect(() => {
-  const handleResize = () => {
-    if (!pageSize.mobile || !pageSize.desktop) return;
-    const isMobile = window.innerWidth <= 768;
-    setFilters(prev => ({
-      ...prev,
-      pagesize: isMobile ? Number(pageSize.mobile) : Number(pageSize.desktop)
-    }));
-  };
 
-  window.addEventListener("resize", handleResize);
-
-  return () => window.removeEventListener("resize", handleResize);
-}, [pageSize]);
 
 
   useEffect(() => {
-    getPagination();
     getAllLanguages();
     getAllPlatforms();
     getAllCampaignTypes();
@@ -314,7 +280,15 @@ const Browse = () => {
           <div
             className={`grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}
           >
-            {campaigns.map((campaign) => (
+            {loading ? (
+              <div className="col-span-full text-center py-10 text-gray-500">
+                Loading campaigns...
+              </div>
+            ) : campaigns.length === 0 ? (
+              <div className="col-span-full py-10">
+                <Empty description="No campaigns found." />
+              </div>
+            ) : (campaigns.map((campaign) => (
               <div
                 key={campaign.id}
                 className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
@@ -324,7 +298,7 @@ const Browse = () => {
                 </span>
                 <div className="flex items-center gap-3 mb-3">
                   <img
-                    src={`${BASE_URL}${campaign.photopath}`}
+                    src={`${BASE_URL}/${campaign.photopath}`}
                     alt="icon"
                     className="w-10 h-10 rounded-full"
                   />
@@ -389,7 +363,8 @@ const Browse = () => {
 
                 </div>
               </div>
-            ))}
+            )))
+            }
 
           </div>
 
@@ -399,7 +374,6 @@ const Browse = () => {
               current={filters.pagenumber}
               pageSize={filters.pagesize}
               total={totalCampaigns}
-              showSizeChanger={false}
               onChange={(page, pageSize) => {
                 setFilters(prev => ({
                   ...prev,
@@ -407,7 +381,9 @@ const Browse = () => {
                   pagesize: pageSize,
                 }));
               }}
-              
+              showSizeChanger
+              pageSizeOptions={['10', '15', '25', '50']}
+
             />
           </div>
 

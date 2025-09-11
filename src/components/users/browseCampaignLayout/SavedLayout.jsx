@@ -8,7 +8,7 @@ import {
   RiFileCopyLine
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Input, Pagination, Select } from "antd";
+import { Empty, Input, Pagination, Select } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -17,7 +17,7 @@ const SavedLayout = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [pagenumber, setPageNumber] = useState(1);
   const [pagesize, setPageSize] = useState(10); // or any default
-  const [pageSizeConfig, setPageSizeConfig] = useState({ desktop: 15, mobile: 10 });
+
   const [totalCampaigns, setTotalCampaigns] = useState(0);
   const [sortby, setSortBy] = useState("createddate");
   const [sortorder, setSortOrder] = useState("desc");
@@ -26,6 +26,7 @@ const SavedLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = useSelector((state) => state.auth);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleClick = (path) => {
     navigate(path);
@@ -49,20 +50,7 @@ const SavedLayout = () => {
     { value: "estimatedbudget_desc", label: "Price: High to Low" },
   ];
 
-  const getPaginationConfig = async () => {
-    try {
-      const res = await axios.get("pagination");
-      setPageSizeConfig({
-        desktop: Number(res.data.desktop),
-        mobile: Number(res.data.mobile)
-      });
 
-      const isMobile = window.innerWidth <= 768;
-      setPageSize(isMobile ? Number(res.data.mobile) : Number(res.data.desktop));
-    } catch (error) {
-      console.error("Failed to fetch pagination config", error);
-    }
-  };
 
 
   const getAllSavedCampaigns = async () => {
@@ -114,19 +102,7 @@ const SavedLayout = () => {
     }
   }
 
-  useEffect(() => {
-    getPaginationConfig();
-  }, []);
 
-  useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth <= 768;
-      setPageSize(isMobile ? pageSizeConfig.mobile : pageSizeConfig.desktop);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [pageSizeConfig]);
 
   useEffect(() => {
     getAllSavedCampaigns();
@@ -198,74 +174,84 @@ const SavedLayout = () => {
           <div
             className="grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           >
-            {campaigns.map((campaign) => (
-              <div
-                key={campaign.id}
-                className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
-              >
-                <span className="text-xs text-gray-500 mb-3">
-                  Posted on {new Date(campaign.createddate).toLocaleDateString()}
-                </span>
-                <div className="flex items-center gap-3 mb-3">
-                  <img
-                    src={`/${campaign.photopath}`} // adjust if image path needs base URL
-                    alt="icon"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <div className="font-semibold text-gray-900">{campaign.name}</div>
-                    <div className="text-xs text-gray-500">{campaign.businessname}</div>
+            {loading ? (
+              <div className="col-span-full text-center py-10 text-gray-500">
+                Loading campaigns...
+              </div>
+            ) : campaigns.length === 0 ? (
+              <div className="col-span-full py-10">
+                <Empty description="No campaigns found." />
+              </div>
+            ) : (
+              campaigns.map((campaign) => (
+                <div
+                  key={campaign.id}
+                  className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
+                >
+                  <span className="text-xs text-gray-500 mb-3">
+                    Posted on {new Date(campaign.createddate).toLocaleDateString()}
+                  </span>
+                  <div className="flex items-center gap-3 mb-3">
+                    <img
+                      src={`${BASE_URL}/${campaign.photopath}`} // adjust if image path needs base URL
+                      alt="icon"
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div>
+                      <div className="font-semibold text-gray-900">{campaign.name}</div>
+                      <div className="text-xs text-gray-500">{campaign.businessname}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                    <RiVideoAddLine size={16} />
+                    <span>
+                      {campaign.providercontenttype[0]?.providername}{" "}
+                      {campaign.providercontenttype[0]?.contenttypename}
+                    </span>
+                    <RiExchangeDollarLine size={16} />
+                    <span>₹{campaign.estimatedbudget}</span>
+                  </div>
+                  <p className="text-gray-700 text-sm mb-4 line-clamp-2">
+                    {campaign.description}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {[...(campaign.campaigncategories || []), ...(campaign.campaigninfluencertiers || [])].map(
+                      (item, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-1 bg-gray-100 rounded text-xs"
+                        >
+                          {item.categoryname || item.influencertiername}
+                        </span>
+                      )
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between mt-auto gap-4">
+                    {campaign.campaignapplied ? (
+                      <button className="w-full py-2 rounded-3xl bg-[#9d9d9d] cursor-pointer text-white font-semibold  transition">
+                        Applied
+                      </button>
+                    ) : (
+                      <Link to={`/dashboard/browse/apply-now/${campaign.id}`} className="flex-1">
+                        <button className="w-full py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition">
+                          Apply Now
+                        </button>
+                      </Link>
+
+                    )}
+
+                    <button
+                      onClick={() => handleSave(campaign.id)}
+                      className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition"
+                    >
+                      <RiFileCopyFill size={20} />
+
+                    </button>
+
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                  <RiVideoAddLine size={16} />
-                  <span>
-                    {campaign.providercontenttype[0]?.providername}{" "}
-                    {campaign.providercontenttype[0]?.contenttypename}
-                  </span>
-                  <RiExchangeDollarLine size={16} />
-                  <span>₹{campaign.estimatedbudget}</span>
-                </div>
-                <p className="text-gray-700 text-sm mb-4 line-clamp-2">
-                  {campaign.description}
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {[...(campaign.campaigncategories || []), ...(campaign.campaigninfluencertiers || [])].map(
-                    (item, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-1 bg-gray-100 rounded text-xs"
-                      >
-                        {item.categoryname || item.influencertiername}
-                      </span>
-                    )
-                  )}
-                </div>
-                <div className="flex items-center justify-between mt-auto gap-4">
-                  {campaign.campaignapplied ? (
-                    <button className="w-full py-2 rounded-3xl bg-[#9d9d9d] cursor-pointer text-white font-semibold  transition">
-                      Applied
-                    </button>
-                  ) : (
-                    <Link to={`/dashboard/browse/apply-now/${campaign.id}`} className="flex-1">
-                      <button className="w-full py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition">
-                        Apply Now
-                      </button>
-                    </Link>
-
-                  )}
-
-                  <button
-                    onClick={() => handleSave(campaign.id)}
-                    className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition"
-                  >
-                    <RiFileCopyFill size={20} />
-
-                  </button>
-
-                </div>
-              </div>
-            ))}
+              ))
+            )}
 
           </div>
         </div>
@@ -281,8 +267,8 @@ const SavedLayout = () => {
             setPageNumber(page);
             setPageSize(pageSize);
           }}
-          showSizeChanger={false}
-
+          showSizeChanger
+          pageSizeOptions={['10', '15', '25', '50']}
         />
       </div>
     </div>
