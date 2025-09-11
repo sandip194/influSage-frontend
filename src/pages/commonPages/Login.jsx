@@ -40,11 +40,6 @@ useEffect(() => {
   const email = params.get("email"); 
 
   console.log("[DEBUG] Google login callback params:", {token, userId, roleId, firstName, lastName,  email });
-
-    if (!roleId || roleId === 0 || isNaN(roleId)) {
-      navigate("/role");
-      return;
-    }
     
   // Save token and user info
   localStorage.setItem("auth_token", token);
@@ -63,10 +58,7 @@ useEffect(() => {
   // Clear query params
   window.history.replaceState({}, document.title, window.location.pathname);
 
-navigate(
-  `/signup?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&email=${encodeURIComponent(email)}`
-);
-
+navigate( `/setPassword`);
 }, [dispatch, navigate]);
 
 
@@ -122,8 +114,7 @@ navigate(
     const storedRole = localStorage.getItem("selected_role");
 
     if (!storedRole) {
-      // No role selected, go to role page first
-      navigate("/role");
+      navigate("/roledefault");
       return;
     }
 

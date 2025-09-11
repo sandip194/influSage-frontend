@@ -6,7 +6,7 @@ import axios from 'axios';
 
 
 
-const Role = () => {
+const RoleDefault = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [showError, setShowError] = useState(false)
   const [roles, setRoles] = useState([])
@@ -27,14 +27,22 @@ const Role = () => {
   },[])
 
   const handleContinue = () => {
-  if (selectedRole) {
-    // localStorage.setItem("selected_role", selectedRole);
+//   if (selectedRole) {
+//     localStorage.setItem("selected_role", selectedRole);
+//     navigate("/signup");
+//   } else {
+//     setShowError(true);
+//   }
+
+     if (selectedRole) {
+    //   localStorage.setItem("selected_role", selectedRole);
     sessionStorage.setItem("selected_role", selectedRole);
-    navigate("/signup");
-  } else {
-    setShowError(true);
-  }
+      window.location.href = `http://localhost:3001/auth/google?roleid=${selectedRole}`;
+    } else {
+      setShowError(true);
+    }
 };
+
 
   return (
     <div className="login-container">
@@ -60,9 +68,9 @@ const Role = () => {
           {showError && <p className="error-text">Please select a role</p>}
           <button onClick={handleContinue} className="login-btn">Continue</button>
 
-          <p className="signup-link" style={{ marginTop: '20px' }}>
+          {/* <p className="signup-link" style={{ marginTop: '20px' }}>
             Back to <span onClick={() => navigate('/login')} style={{ fontWeight: 'bold', cursor: 'pointer' }}>Login</span>
-          </p>
+          </p> */}
         </div>
       </div>
       </div>
@@ -70,4 +78,4 @@ const Role = () => {
   );
 };
 
-export { Role };
+export { RoleDefault };
