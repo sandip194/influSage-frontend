@@ -1,56 +1,93 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
 import "../../assets/login.css";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../../features/auth/authSlice";
 import SideImageSlider from "../../components/common/SideImageSlider";
 
 export const SetPassword = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-  const [showModal, setShowModal] = useState(false);
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
 
-  const submitHandler = async (data) => {
-    try {
-      setLoading(true);
+  // Extract params from URL
+  const [userInfo, setUserInfo] = useState({});
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setUserInfo({
+      email: params.get("email"),
+      firstName: params.get("firstName"),
+      lastName: params.get("lastName"),
+      roleId: params.get("roleId"),
+    });
+  }, [location.search]);
 
-      const role = localStorage.getItem("selectedRole");
-      const userId = localStorage.getItem("userId");
-      const email = localStorage.getItem("email");
+const submitHandler = async (data) => {
+  setLoading(true);
+  try {
+    const { email, firstName, lastName, roleId } = userInfo;
 
-      if (!role || !userId || !email) {
-        toast.error("Missing account information. Please login again.");
-        return navigate("/role");
-      }
+    // if (!email || !firstName || !lastName || !roleId) {
+    //   toast.error("Missing user info. Please login again.");
+    //   return navigate("/roledefault");
+    // }
 
-      const payload = {
-        userId,
-        email,
-        roleId: Number(role),
-        password: data.password,
-      };
+    const payload = {
+      email,
+      firstName,
+      lastName,
+      roleId: Number(roleId), 
+      password: data.password,
+    };
 
-      const response = await axios.post("/user/set-password", payload);
+    const response = await axios.post("/auth/set-password", payload);
 
-      if (response.status === 200) {
-        toast.success("Password set successfully!");
-        navigate("/dashboard");
-      }
-    } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to set password.");
-    } finally {
-      setLoading(false);
+    if (response.status === 201) {  
+      const token = response.data.token;
+      const user = response.data.user;
+
+      // Save token & user info
+      localStorage.setItem("auth_token", token);
+      localStorage.setItem("userId", user.id);
+      localStorage.setItem("roleId", user.role);
+      localStorage.setItem("firstName", user.firstName);
+      localStorage.setItem("lastName", user.lastName);
+      localStorage.setItem("email", user.email);
+
+      // Set axios default Authorization header
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      // Update Redux store
+      dispatch(setCredentials({
+        token,
+        id: user.id,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      }));
+
+      toast.success("Password set successfully!");
+
+      if (user.role === 1) navigate("/complate-profile");
+      else if (user.role === 2) navigate("/complate-vendor-profile");
+      else navigate("/");
     }
-  };
+  } catch (error) {
+    toast.error(error?.response?.data?.message || "Failed to set password");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="login-container">

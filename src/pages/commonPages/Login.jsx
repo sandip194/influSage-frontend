@@ -29,37 +29,53 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate()
   
 useEffect(() => {
+  // Always set axios header if token exists
+  const storedToken = localStorage.getItem("auth_token");
+  if (storedToken) {
+    axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+  }
+
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
-  if (!token) return;
-
+  const email = params.get("email");
   const userId = params.get("userId");
-  const roleId = Number(params.get("roleId"));
+  const roleId = params.get("roleId");
   const firstName = params.get("firstName");
   const lastName = params.get("lastName");
-  const email = params.get("email"); 
 
-  console.log("[DEBUG] Google login callback params:", {token, userId, roleId, firstName, lastName,  email });
-    
-  // Save token and user info
-  localStorage.setItem("auth_token", token);
-  localStorage.setItem("userId", userId);
-  localStorage.setItem("roleId", roleId);
-  localStorage.setItem("firstName", firstName);
-  localStorage.setItem("lastName", lastName);
-  localStorage.setItem("email", email);
+  console.log("[DEBUG] Login page params:", { token, email, userId, roleId, firstName, lastName });
 
-  // Update 
-  dispatch( setCredentials({ token, id: userId, role: roleId, firstName, lastName, email }) );
+  if (token) {
+    // persist token + user info
+    localStorage.setItem("auth_token", token);
+    localStorage.setItem("userId", userId || "");
+    localStorage.setItem("roleId", roleId || "");
+    localStorage.setItem("firstName", firstName || "");
+    localStorage.setItem("lastName", lastName || "");
+    localStorage.setItem("email", email || "");
 
-  // Set axios default header
-  axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    // set axios default header
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-  // Clear query params
-  window.history.replaceState({}, document.title, window.location.pathname);
+    // redux state update
+    dispatch(setCredentials({ token, id: userId, role: Number(roleId), firstName, lastName, email }));
 
-navigate( `/setPassword`);
+    // clean query string
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+    // navigate immediately after state & storage are ready
+    if (Number(roleId) === 1) {
+      navigate("/complate-profile");
+    } else if (Number(roleId) === 2) {
+      navigate("/complate-vendor-profile");
+    }
+  } else if (email && !token) {
+    navigate(
+      `/roledefault?email=${encodeURIComponent(email)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&roleId=${roleId}`
+    );
+  }
 }, [dispatch, navigate]);
+
 
 
   // Load saved email on mount
@@ -103,20 +119,14 @@ navigate( `/setPassword`);
       setIsLoggingIn(false);
     }
   };
-  // Google login redirect
-  // const handleGoogleLogin = () => {
-  //   const storedRole = localStorage.getItem("selectedRole"); 
-  //   const backendUrl = BASE_URL.replace(/\/$/, "");
-  //   window.location.href = `${backendUrl}/auth/google?roleid=${storedRole}`; 
-  // };
 
     const handleGoogleLogin = () => {
     const storedRole = localStorage.getItem("selected_role");
 
-    if (!storedRole) {
-      navigate("/roledefault");
-      return;
-    }
+    // if (!storedRole) {
+    //   navigate("/roledefault");
+    //   return;
+    // }
 
     const backendUrl = BASE_URL.replace(/\/$/, "");
     window.location.href = `${backendUrl}/auth/google?roleid=${storedRole}`;

@@ -28,8 +28,8 @@ const Role = () => {
 
   const handleContinue = () => {
   if (selectedRole) {
-    // localStorage.setItem("selected_role", selectedRole);
-    sessionStorage.setItem("selected_role", selectedRole);
+    localStorage.setItem("selectedRole", selectedRole);
+    // sessionStorage.setItem("selectedRole", selectedRole);
     navigate("/signup");
   } else {
     setShowError(true);

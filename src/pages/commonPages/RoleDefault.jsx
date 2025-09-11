@@ -26,21 +26,31 @@ const RoleDefault = () => {
     fatchRoles();
   },[])
 
-  const handleContinue = () => {
-//   if (selectedRole) {
-//     localStorage.setItem("selected_role", selectedRole);
-//     navigate("/signup");
-//   } else {
-//     setShowError(true);
-//   }
+//   const handleContinue = () => {
+//      if (selectedRole) {
+//       localStorage.setItem("selectedRole", selectedRole);
+//     // sessionStorage.setItem("selectedRole", selectedRole);
+//     //   window.location.href = `http://localhost:3001/auth/google?roleid=${selectedRole}`;
+//     navigate("/setPassword");
+//     } else {
+//       setShowError(true);
+//     }
+// };
 
-     if (selectedRole) {
-    //   localStorage.setItem("selected_role", selectedRole);
-    sessionStorage.setItem("selected_role", selectedRole);
-      window.location.href = `http://localhost:3001/auth/google?roleid=${selectedRole}`;
-    } else {
-      setShowError(true);
-    }
+const handleContinue = () => {
+  if (!selectedRole) {
+    setShowError(true);
+    return;
+  }
+
+  const params = new URLSearchParams(location.search);
+  const email = params.get("email");
+  const firstName = params.get("firstName");
+  const lastName = params.get("lastName");
+
+  navigate(
+    `/setPassword?email=${encodeURIComponent(email)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&roleId=${selectedRole}`
+  );
 };
 
 
