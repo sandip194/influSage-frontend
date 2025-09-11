@@ -1,172 +1,141 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { RiEyeLine, RiEyeOffLine } from '@remixicon/react';
-import '../../assets/login.css'; // Same CSS used for login & signup
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import SideImageSlider from '../../components/common/SideImageSlider';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
+import "../../assets/login.css";
+import axios from "axios";
+import { toast } from "react-toastify";
+import SideImageSlider from "../../components/common/SideImageSlider";
 
-export const Signup = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+export const SetPassword = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const [showModal, setShowModal] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // 👁️ Toggle state
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const submitHandler = async (data) => {
     try {
-      setLoading(true)
-      const role = localStorage.getItem('selectedRole');
-      const userEmail = data.email;
-      localStorage.setItem('signupEmail', userEmail);
-      // If role is not selected, redirect to role selection
-      if (!role) {
-        toast.error('Please select a role first!', { position: "top-right" });
-        return navigate('/role');
+      setLoading(true);
+
+      const role = localStorage.getItem("selectedRole");
+      const userId = localStorage.getItem("userId");
+      const email = localStorage.getItem("email");
+
+      if (!role || !userId || !email) {
+        toast.error("Missing account information. Please login again.");
+        return navigate("/role");
       }
 
-      const userData = {
-        ...data,
-        roleId: Number(role)
-      }
-      const response = await axios.post('/user/register', userData);
+      const payload = {
+        userId,
+        email,
+        roleId: Number(role),
+        password: data.password,
+      };
 
-      if (response.status === 400) {
-        console.log("response", response.data.message);
-        toast.error(response.data.message || "Email already exists");
-      }
+      const response = await axios.post("/user/set-password", payload);
 
       if (response.status === 200) {
-        localStorage.setItem('isCreatedNew', response.data.message);
-        toast.success('Signup successful! Please verify your email or mobile.');
-        navigate('/verify-email-or-mobile');
+        toast.success("Password set successfully!");
+        navigate("/dashboard");
       }
-
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Signup failed. Please try again.");
-      console.error("Signup failed:", error);
+      toast.error(error?.response?.data?.message || "Failed to set password.");
     } finally {
-      setLoading(false); // 🔹 always re-enable after request
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-container">
-      <div className={`login-card h-90vh`}>
-        {/* Left Image Section */}
+      <div className="login-card h-90vh">
         <SideImageSlider />
-        {/* Right Form Section */}
+
         <div className="login-card-right">
           <form onSubmit={handleSubmit(submitHandler)}>
-            <h2>Create Account</h2>
-            <p>Start your journey with InfluSage today!</p>
+            <h2>Set Password</h2>
 
-            <label>First Name
-              <span className='text-red-500 text-sm'>*</span>
+            {/* Password */}
+            <label>
+              Password <span className="text-red-500 text-sm">*</span>
             </label>
-            <input
-              type="text"
-              placeholder="Enter first name"
-              {...register('firstName', { required: "First name is required" })}
-            />
-            <span className='text-for-error'>{errors.firstName?.message}</span>
-
-            <label>Last Name
-              <span className='text-red-500 text-sm'>*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Enter last name"
-              {...register('lastName', { required: "Last name is required" })}
-            />
-            <span className='text-for-error'>{errors.lastName?.message}</span>
-
-            <label>Email
-              <span className='text-red-500 text-sm'>*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Enter your email"
-              {...register('email', {
-                required: "Email is required",
-                pattern: {
-                  value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-                  message: "Invalid email format"
-                }
-              })}
-            />
-            <span className='text-for-error'>{errors.email?.message}</span>
-
-            {/* <label>Phone Number</label>
-            <input
-              type="text"
-              placeholder="Enter 10-digit phone number"
-              {...register('phone', {
-                required: "Phone number is required",
-                pattern:{
-                //8
-                value:/[6-9]{1}[0-9]{9}/,
-                message:"contact is not valid*"
-            }
-              })}
-            />
-            <span>{errors.phone?.message}</span> */}
-
-
-            <label>Password
-              <span className='text-red-500 text-sm'>*</span>
-            </label>
-
             <div className="password-wrapper">
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="Create a password"
-                {...register('password', {
-                  required: "Password is required",
+                {...register("password", {
+                  required: { value: true, message: "Password is required" },
                   pattern: {
-                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
-                    message: "Password must have 8+ chars, 1 uppercase, 1 lowercase, 1 number, 1 special char"
-                  }
+                    value:
+                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
+                    message:
+                      "Must be 8+ chars, include uppercase, lowercase, number, special char",
+                  },
                 })}
               />
-              <span className="eye-icon" onClick={() => setShowPassword(prev => !prev)}>
-                {showPassword ? <RiEyeOffLine className='w-[18px]' /> : <RiEyeLine className='w-[18px]' />}
+              <span
+                className="eye-icon"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? (
+                  <RiEyeOffLine className="w-[18px]" />
+                ) : (
+                  <RiEyeLine className="w-[18px]" />
+                )}
               </span>
             </div>
+            {errors.password && (
+              <span className="text-for-error">{errors.password.message}</span>
+            )}
 
-            <span className='text-for-error'>{errors.password?.message}</span>
-
-            {/* ✅ Terms & Conditions Checkbox */}
-            <div style={{ marginTop: "10px", fontSize: "14px", marginBottom: "10px" }}>
+            {/* Terms */}
+            <div
+              style={{
+                marginTop: "10px",
+                fontSize: "14px",
+                marginBottom: "10px",
+              }}
+            >
               <label>
-                <input type="checkbox" {...register("terms", { required: "Please accept terms & conditions" })} />
+                <input
+                  type="checkbox"
+                  {...register("terms", {
+                    required: {
+                      value: true,
+                      message: "Please accept terms & conditions",
+                    },
+                  })}
+                />
                 &nbsp;I agree to&nbsp;
-                <span style={{ color: "#0066cc", cursor: "pointer" }} onClick={() => setShowModal(true)}>
+                <span
+                  style={{ color: "#0066cc", cursor: "pointer" }}
+                  onClick={() => setShowModal(true)}
+                >
                   Terms & Conditions
                 </span>
               </label>
-
-              <span style={{ color: "red", fontSize: "12px" }}>{errors.terms?.message}</span>
+              {/* Show error */}
+              {errors.terms && (
+                <span style={{ color: "red", fontSize: "12px" }}>
+                  {errors.terms.message}
+                </span>
+              )}
             </div>
 
-            <button
-              type="submit"
-              className="login-btn"
-              disabled={loading} // 🔹 disable while loading
-            >
-              {loading ? "Signing Up..." : "Sign Up"} {/* 🔹 show spinner text */}
+            <button type="submit" className="login-btn" disabled={loading}>
+              {loading ? "Saving..." : "Save"}
             </button>
-
-            <div className="signup-link">
-              Already have an account? <Link to="/login">Login</Link>
-            </div>
           </form>
         </div>
       </div>
 
-      {/* ✅ Modal for Terms and Conditions */}
+      {/* Modal for Terms and Conditions */}
       {showModal && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
@@ -179,7 +148,7 @@ export const Signup = () => {
             overflowY: "scroll", height: "90vh", scrollbarWidth: "none", scrollbarColor: "#999 #f1f1f1"
           }}>
             <h3 style={{ marginBottom: "10px" }}>Terms and Conditions</h3>
-            <p style={{ fontSize: "14px", lineHeight: "1.6" , textAlign: "justify" }}>
+            <p style={{ fontSize: "14px", lineHeight: "1.6", textAlign: "justify" }}>
               By using this platform, you agree to comply with our policies and guidelines.
               <br /><br />
               This is a placeholder for your detailed terms. You can replace this with your actual T&C content.
@@ -198,4 +167,4 @@ export const Signup = () => {
   );
 };
 
-export default Signup;
+export default SetPassword

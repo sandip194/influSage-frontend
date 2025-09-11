@@ -9,6 +9,8 @@ import { Signup } from './pages/commonPages/Signup';
 import { LoginForm } from './pages/commonPages/Login';
 import { Home } from './components/common/Home';
 import { Role } from './pages/commonPages/Role';
+import { RoleDefault } from './pages/commonPages/RoleDefault';
+import { SetPassword } from './pages/commonPages/SetPassword';
 import { ForgotPassword } from './pages/commonPages/ForgotPassword';
 import { VerifyEmailOrMobile } from './pages/commonPages/VerifyEmailOrMobile'
 import { ResetPassword } from './pages/commonPages/ResetPassword';
@@ -70,6 +72,8 @@ const App = () => {
                                 <Route path='/' element={<Home />} />
                                 <Route path='/signup' element={<Signup />} />
                                 <Route path="/role" element={<Role />} />
+                                <Route path="/roledefault" element={<RoleDefault />} />
+                                <Route path="/setPassword" element={<SetPassword />} />
                                 <Route path='/login' element={<LoginForm />} />
                                 <Route path='/forgot-password' element={<ForgotPassword />} />
                                 <Route path='/verify-email-or-mobile' element={<VerifyEmailOrMobile />} />
