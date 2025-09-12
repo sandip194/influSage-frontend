@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../assets/role.css'; // Reuse the same CSS
+import '../../assets/role.css';
 import influencerIcon from '../../assets/icons/influencer.png';
 import vendorIcon from '../../assets/icons/vendor.png';
 import agencyIcon from '../../assets/icons/agancy.png';
