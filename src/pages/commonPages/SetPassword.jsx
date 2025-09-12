@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { useNavigate, useLocation } from "react-router-dom";
-import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
-import "../../assets/login.css";
-import axios from "axios";
-import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
-import { setCredentials } from "../../features/auth/authSlice";
-import SideImageSlider from "../../components/common/SideImageSlider";
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { RiEyeLine, RiEyeOffLine } from '@remixicon/react';
+import '../../assets/login.css';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../../features/auth/authSlice';
+import SideImageSlider from '../../components/common/SideImageSlider';
 
 export const SetPassword = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   BellOutlined,
   MessageOutlined,
@@ -8,7 +8,7 @@ import {
   LogoutOutlined,
   DownOutlined,
   MenuOutlined,
-} from "@ant-design/icons";
+} from '@ant-design/icons';
 import {
   Dropdown,
   Input,
@@ -16,13 +16,13 @@ import {
   Badge,
   Menu,
   Button,
-} from "antd";
-import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { logout } from "../../../features/auth/authSlice";
+} from 'antd';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../../features/auth/authSlice';
 
-import NotificationDropdown from "./NotificationDropdown";
-import MessageDropdown from "./MessageDropdown";
+import NotificationDropdown from './NotificationDropdown';
+import MessageDropdown from './MessageDropdown';
 
 const DeshboardHeader = ({ toggleSidebar }) => {
   const dispatch = useDispatch();

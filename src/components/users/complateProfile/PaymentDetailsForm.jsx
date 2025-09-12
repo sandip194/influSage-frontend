@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Form,
   Input,
@@ -10,10 +10,10 @@ import {
   Row,
   Col,
   Button,
-} from "antd";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
-import axios from "axios";
+} from 'antd';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import axios from 'axios';
 
 import { useSelector } from 'react-redux';
 

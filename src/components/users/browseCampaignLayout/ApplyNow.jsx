@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useEffect, useState } from "react";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import {
@@ -14,6 +15,19 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { RiArrowLeftSLine, RiVerifiedBadgeLine } from "@remixicon/react";
+=======
+import React, { useEffect, useState } from 'react';
+import {
+  RiArrowLeftSLine,
+  RiChatUploadLine,
+  RiVerifiedBadgeLine,
+} from '@remixicon/react';
+import { Modal, Input, Button, Upload, message } from 'antd';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+>>>>>>> 94f720759072191d751f94a3ddf07b435fb3c83b
 
 const { TextArea } = Input;
 

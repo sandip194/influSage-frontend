@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Form, Input, Select, message } from 'antd';
 import { RiImageAddLine } from 'react-icons/ri';
-import axios from "axios";
+import axios from 'axios';
 import postalRegexList from '../complateProfile/postalRegex.json'
 
 const { TextArea } = Input;

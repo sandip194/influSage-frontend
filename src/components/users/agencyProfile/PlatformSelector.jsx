@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { FaInstagram, FaYoutube, FaFacebook, FaTiktok } from "react-icons/fa";
+import React, { useState, useEffect } from 'react';
+import { FaInstagram, FaYoutube, FaFacebook, FaTiktok } from 'react-icons/fa';
 
 // Numeric IDs for platforms
 const platforms = [

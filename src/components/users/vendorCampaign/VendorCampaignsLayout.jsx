@@ -1,12 +1,12 @@
-import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   RiMore2Fill,
   RiEyeLine,
   RiCheckboxCircleLine,
   RiCloseCircleLine,
   RiAddFill,
-} from "@remixicon/react";
+} from '@remixicon/react';
 
 const campaigns = [
   {

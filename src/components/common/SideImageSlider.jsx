@@ -1,4 +1,3 @@
-// src/components/SideImageSlider.jsx
 import React, { useEffect, useState } from 'react';
 
 const slides = [

@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { Upload, Form, Input, Button } from "antd";
+import React, { useState } from 'react';
+import { Upload, Form, Input, Button } from 'antd';
 import {
   PlusOutlined,
   DeleteOutlined,
-} from "@ant-design/icons";
-import { RiChatUploadLine, RiDeleteBin6Line } from "react-icons/ri";
+} from '@ant-design/icons';
+import { RiChatUploadLine, RiDeleteBin6Line } from 'react-icons/ri';
 
 const { Dragger } = Upload;
 

@@ -1,9 +1,9 @@
-import { RiCheckLine } from "@remixicon/react";
-import axios from "axios";
+import { RiCheckLine } from '@remixicon/react';
+import axios from 'axios';
 import React, { useEffect, useState } from "react";
 import { useSelector } from 'react-redux';
 
-const STORAGE_KEY = "selected_objective"; // optional fallback storage
+const STORAGE_KEY = 'selected_objective'; // optional fallback storage
 
 const ObjectiveSelector = ({ onBack, onNext, data }) => {
   const [selected, setSelected] = useState(null);

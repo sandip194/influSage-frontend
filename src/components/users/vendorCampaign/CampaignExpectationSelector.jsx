@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Input, message } from "antd";
-import axios from "axios";
-import { useSelector } from "react-redux";
-import { RiCheckLine } from "@remixicon/react";
+import React, { useEffect, useState } from 'react';
+import { Input, message } from 'antd';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { RiCheckLine } from '@remixicon/react';
 
 const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
   const [options, setOptions] = useState([]);

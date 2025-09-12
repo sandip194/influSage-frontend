@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
-import { Form, Input, Select, DatePicker, Button } from "antd";
-import { RiImageAddLine } from "react-icons/ri";
-import dayjs from "dayjs";
+import React, { useState, useRef } from 'react';
+import { Form, Input, Select, DatePicker, Button } from 'antd';
+import { RiImageAddLine } from 'react-icons/ri';
+import dayjs from 'dayjs';
 
 const { Option } = Select;
 const { TextArea } = Input;

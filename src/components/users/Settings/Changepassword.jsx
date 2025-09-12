@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Form, Input, Button, Card } from "antd";
-import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+import React, { useState } from 'react';
+import { Form, Input, Button, Card } from 'antd';
+import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 
 const ChangePassword = () => {
   const [form] = Form.useForm();

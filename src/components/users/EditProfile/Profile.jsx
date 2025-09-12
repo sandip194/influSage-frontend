@@ -4,10 +4,10 @@ import {
   RiArrowDownSLine,
   RiStarFill,
   RiArrowUpSLine,
-} from "@remixicon/react";
+} from '@remixicon/react';
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const socialMediaData = [
   {

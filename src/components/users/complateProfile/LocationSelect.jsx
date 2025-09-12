@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { Select, Input } from "antd";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Select, Input } from 'antd';
 import postalRegexList from './postalRegex.json'
 
 const { Option } = Select;

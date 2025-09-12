@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   RiUserSettingsLine,
   RiLockPasswordLine,
   RiNotification3Line,
   RiDeleteBinLine,
-} from "react-icons/ri";
-import Account from "./account";
-import ChangePassword from "./Changepassword";
-import Notification from "./Notification";
-import DeleteAccount from "./DeleteAccount";
+} from 'react-icons/ri';
+import Account from './account';
+import ChangePassword from './Changepassword';
+import Notification from './Notification';
+import DeleteAccount from './DeleteAccount';
 
 const SettingLayout = () => {
   const [activeStep, setActiveStep] = useState(0);

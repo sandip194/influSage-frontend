@@ -1,7 +1,7 @@
-import React, { useRef } from "react";
-import DeshboardHeader from "./DeshboardHeader";
-import Sidebar from "./Sidebar";
-import { Outlet } from "react-router-dom";
+import React, { useRef } from 'react';
+import DeshboardHeader from './DeshboardHeader';
+import Sidebar from './Sidebar';
+import { Outlet } from 'react-router-dom';
 
 const DashboardLayout = () => {
   const sidebarRef = useRef();

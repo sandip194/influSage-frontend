@@ -1,4 +1,4 @@
-import EarningsChart from "./EarningsChart";
+import EarningsChart from './EarningsChart';
 
 
 const EarningsSummarySection = ({ balance = 22765, thisMonth = 2765 }) => {

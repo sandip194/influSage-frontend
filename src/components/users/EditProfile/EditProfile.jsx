@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import EditPersonalDetails from "./EditPersonalDetails";
-import Category from "./Category";
-import SocialMedia from "./SocialMedia"
-import Portfolio from "./Portfolio"
-import Payment from "./Payment"
-import { RiArrowLeftSLine } from "react-icons/ri";
+import React, { useState } from 'react';
+import EditPersonalDetails from './EditPersonalDetails';
+import Category from './Category';
+import SocialMedia from './SocialMedia'
+import Portfolio from './Portfolio'
+import Payment from './Payment'
+import { RiArrowLeftSLine } from 'react-icons/ri';
 
 const EditProfile = () => {
   const [activeStep, setActiveStep] = useState(0);

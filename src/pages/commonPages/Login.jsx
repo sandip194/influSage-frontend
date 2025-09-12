@@ -122,15 +122,16 @@ useEffect(() => {
 
     const handleGoogleLogin = () => {
     const storedRole = localStorage.getItem("selected_role");
-
-    // if (!storedRole) {
-    //   navigate("/roledefault");
-    //   return;
-    // }
-
     const backendUrl = BASE_URL.replace(/\/$/, "");
     window.location.href = `${backendUrl}/auth/google?roleid=${storedRole}`;
   };
+
+  const handleFacebookLogin = () => {
+    const storedRole = localStorage.getItem("selected_role");
+    const backendUrl = BASE_URL.replace(/\/$/, "");
+    window.location.href = `${backendUrl}/auth/facebook?roleid=${storedRole}`;
+  };
+
 
   const validationSchema = {
     emailValidator: {
@@ -221,7 +222,7 @@ useEffect(() => {
                 <img className="social-icon" src={googleIcon} alt="Google" />
               </div>
               <div className="social-btn">
-                <img className='social-icon' src={facebookIcon} alt="Facebook" />
+                <img className='social-icon' onClick={handleFacebookLogin} src={facebookIcon} alt="Facebook" />
               </div>
               <div className="social-btn">
                 <img className='social-icon' src={appleIcon} alt="Apple" />

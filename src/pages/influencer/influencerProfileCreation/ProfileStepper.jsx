@@ -10,7 +10,7 @@ import { CategorySelector } from '../../../components/users/vendorProfile/Catego
 import PortfolioUploader from '../../../components/users/complateProfile/PortfolioUploader';
 import PaymentDetailsForm from '../../../components/users/complateProfile/PaymentDetailsForm';
 import ThankYouScreen from '../../../components/users/complateProfile/ThankYouScreen';
-import "../../../components/users/complateProfile/profile.css"
+import '../../../components/users/complateProfile/profile.css'
 import axios from 'axios';
 
 import { useSelector } from 'react-redux';

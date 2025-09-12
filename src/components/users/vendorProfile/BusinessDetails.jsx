@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Form, Input, Select, message } from 'antd';
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 import { RiImageAddLine } from 'react-icons/ri';
 import axios from "axios";
 import postalRegexList from '../complateProfile/postalRegex.json';

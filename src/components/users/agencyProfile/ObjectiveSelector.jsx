@@ -7,10 +7,10 @@ import {
   RiLiveLine,
   RiSwapBoxLine,
   RiVipCrownLine,
-} from "@remixicon/react";
-import React, { useEffect, useState } from "react";
+} from '@remixicon/react';
+import React, { useEffect, useState } from 'react';
 
-const STORAGE_KEY = "selected_objective"; // Store a single ID
+const STORAGE_KEY = 'selected_objective'; // Store a single ID
 
 const objectives = [
   {
