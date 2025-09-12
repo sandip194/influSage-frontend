@@ -1,39 +1,52 @@
 import React, { useEffect, useState } from "react";
+import { PhotoProvider, PhotoView } from "react-photo-view";
 import {
-  RiArrowLeftSLine,
-  RiChatUploadLine,
-  RiVerifiedBadgeLine,
-} from "@remixicon/react";
+  RiUpload2Line,
+  RiDeleteBin6Line,
+  RiCloseLine,
+  RiFilePdf2Line,
+  RiFileWord2Line,
+  RiFile3Line,
+} from "react-icons/ri";
 import { Modal, Input, Button, Upload, message } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { RiArrowLeftSLine, RiVerifiedBadgeLine } from "@remixicon/react";
 
 const { TextArea } = Input;
 
 const ApplyNow = () => {
   const [amount, setAmount] = useState("");
   const [proposal, setProposal] = useState("");
-  const [portfolioFile, setPortfolioFile] = useState(null);
-  const [existingFilePath, setExistingFilePath] = useState(null);
   const [errors, setErrors] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [loading, setLoading] = useState(false)
+  const [fileList, setFileList] = useState([]);
+  const [existingFiles, setExistingFiles] = useState([]);
+  const [fileError, setFileError] = useState("");
 
   const { campaignId } = useParams();
   const navigate = useNavigate()
   const token = useSelector((state) => state.auth.token);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  const handleUpload = (info) => {
-    if (info.file.size > 25 * 1024 * 1024) {
-      message.error("File size should be less than 25MB.");
-      return;
-    }
-    setPortfolioFile(info.file);
-    setExistingFilePath(null);
-  };
+  const allowedTypes = [
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "video/mp4",
+    "video/quicktime",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
+
+  const getFileUID = (file) =>
+    `${file.name}-${file.size || 0}-${file.lastModified || Date.now()}`;
+
 
   const validate = () => {
     const newErrors = {};
@@ -43,53 +56,60 @@ const ApplyNow = () => {
     if (!proposal.trim()) {
       newErrors.proposal = "Please describe your proposal.";
     }
-    if (!portfolioFile) {
-      newErrors.portfolioFile = "Please upload your portfolio file.";
+
+    if (fileList.length + existingFiles.length < 1) {
+      newErrors.portfolioFile = "Please upload at least one portfolio file.";
+      setFileError("Please upload at least one portfolio file.");
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!validate()) return;
-    // Prepare JSON payload
+
     const applycampaignjson = {
       amount,
       proposal,
+      filepaths: existingFiles.map((file) => ({ filepath: file.filepath })), 
     };
 
-    // Prepare FormData
     const formData = new FormData();
     formData.append("applycampaignjson", JSON.stringify(applycampaignjson));
-    if (portfolioFile) {
-      formData.append("portfolioFiles", portfolioFile); // Backend expects this name
-    }
 
-    if (!portfolioFile && existingFilePath) {
-      formData.append("existingFilePath", existingFilePath);
-    }
+    // Append new files
+    fileList.forEach((file) => {
+      formData.append("portfolioFiles", file);
+    });
+
 
     try {
-      setLoading(true)
-      const response = await axios.post(`user/apply-for-campaign/${campaignId}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      setLoading(true);
+      const response = await axios.post(
+        `user/apply-for-campaign/${campaignId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       if (response.status === 200) {
-        console.log(response.data)
         navigate("/dashboard/browse/applied");
       }
       toast.success(response.data.message);
     } catch (err) {
       console.error(err);
-      toast.error("Application not submited")
+      toast.error("Application not submitted");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
+
 
 
   const getAppliedCampiagnDetails = async () => {
@@ -100,31 +120,46 @@ const ApplyNow = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      const data = res.data.data;
-      console.log(data)
-      if (res.data) {
-        setIsEdit(true);
+
+      const data = res.data?.data;
+
+      if (data) {
         setAmount(data.budget || "");
         setProposal(data.description || "");
-        if (res.data.filepaths && res.data.filepaths.length > 0) {
-          setExistingFilePath(res.data.filepaths[0].filepath);
-        }
-        // set form fields as above
+        setIsEdit(true);
       }
 
-      // Assuming data contains amount, proposal, and portfolio file info
+      if (data.filepaths?.length > 0) {
+        const filesFromBackend = data.filepaths.map((f) => {
+          const name = f.filepath.split("/").pop() || "";
+          const ext = name.split(".").pop()?.toLowerCase();
+          let type = "";
 
-      // For portfolioFile, you might need to handle differently if it's a URL or file metadata
-      // You can store the file info or URL in a separate state to show the existing file
-      // For example:
-      // setPortfolioFile(data.portfolioFile || null);
+          if (["png", "jpg", "jpeg"].includes(ext)) type = "image/png";
+          else if (["mp4", "mov"].includes(ext)) type = "video/mp4";
+          else if (ext === "pdf") type = "application/pdf";
+          else if (["doc", "docx"].includes(ext)) type = "application/msword";
 
+          return {
+            name,
+            url: f.filepath,
+            filepath: f.filepath,
+            type,
+            isExisting: true,
+          };
+        });
+
+        console.log(filesFromBackend)
+
+        setExistingFiles(filesFromBackend);
+      }
     } catch (error) {
       console.log(error);
     } finally {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     getAppliedCampiagnDetails();
@@ -141,6 +176,12 @@ const ApplyNow = () => {
       </button>
       <h1 className="text-2xl font-semibold mb-4">Apply Now</h1>
       <div className="bg-white p-4 rounded-lg mb-6 flex flex-col">
+
+        {isEdit && (
+          <div className="p-3 mb-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded">
+            You’ve already applied to this campaign. You can update your proposal and files below.
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Description */}
           <section>
@@ -171,65 +212,152 @@ const ApplyNow = () => {
             <h2 className="text-lg font-bold mb-2">
               Portfolio <span className="text-red-500">*</span>
             </h2>
-            {existingFilePath && (
-              <div className="mb-2">
-                <p className="font-medium">Existing Portfolio File:</p>
-                {/* If it's a video */}
-                {existingFilePath.endsWith(".mp4") ? (
-                  <video width="320" height="180" controls>
-                    <source src={existingFilePath} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                ) : (
-                  // For images or PDFs, show a link or thumbnail
-                  <a
-                    href={existingFilePath}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline"
-                  >
-                    View File
-                  </a>
-                )}
-                <Button
-                  type="link"
-                  danger
-                  onClick={() => {
-                    setExistingFilePath(null);
-                    setPortfolioFile(null);
-                  }}
-                >
-                  Remove File
-                </Button>
-              </div>
-            )}
-            <p className="text-gray-600 mb-4">
-              Upload your portfolio or recent works
-            </p>
+
             <Upload.Dragger
+              name="Files"
+              multiple
+              fileList={[]}
               beforeUpload={() => false}
-              maxCount={1}
-              onChange={handleUpload}
-              accept=".png,.jpg,.jpeg,.pdf,.mp4"
-              className={errors.portfolioFile ? "border-red-500" : ""}
+              onChange={(info) => {
+                const incomingFiles = info.fileList
+                  .map((f) => f.originFileObj || f)
+                  .filter(Boolean);
+
+                let errorMessages = new Set();
+
+                setFileList((prevFiles) => {
+                  const combinedFiles = [...prevFiles, ...existingFiles];
+                  const existingUIDs = new Set(combinedFiles.map((f) => f.uid));
+                  const newValidFiles = [];
+
+                  for (const file of incomingFiles) {
+                    if (!allowedTypes.includes(file.type)) {
+                      errorMessages.add(`${file.name}: unsupported file type`);
+                      continue;
+                    }
+
+                    if (file.size / 1024 / 1024 > 25) {
+                      errorMessages.add(`${file.name}: exceeds 25MB`);
+                      continue;
+                    }
+
+                    const uid = getFileUID(file);
+                    if (existingUIDs.has(uid)) continue;
+
+                    if (
+                      prevFiles.length + newValidFiles.length + existingFiles.length >=
+                      5
+                    ) {
+                      errorMessages.add("Maximum 5 files allowed");
+                      break;
+                    }
+
+                    file.uid = uid;
+                    file.previewUrl = URL.createObjectURL(file);
+                    newValidFiles.push(file);
+                    existingUIDs.add(uid);
+                  }
+
+                  if (errorMessages.size > 0) {
+                    setFileError(Array.from(errorMessages).join("\n"));
+                  } else {
+                    setFileError("");
+                  }
+
+                  return [...prevFiles, ...newValidFiles];
+                });
+              }}
+              showUploadList={false}
+              accept=".png,.jpg,.jpeg,.pdf,.mp4,.mov,.doc,.docx"
             >
-              <p className="ant-upload-drag-icon">
-                <RiChatUploadLine className="text-2xl text-gray-600 mx-auto" />
-              </p>
-              <p className="ant-upload-text font-semibold">Upload Files</p>
-              <p className="ant-upload-hint text-sm text-gray-500">
-                Supported files: PNG, JPG, MP4, PDF (Max 5MB)
-              </p>
+              <div className="py-3 flex flex-col items-center justify-center text-center">
+                <RiUpload2Line className="text-4xl text-gray-400 mb-3" />
+                <p className="font-bold text-gray-800 text-sm">
+                  Upload Portfolio Files
+                </p>
+                <p className="text-gray-500 text-xs mt-1">
+                  Max 5 files · Each under 25MB <br />
+                  PNG, JPG, MP4, MOV, PDF, DOC, DOCX
+                </p>
+              </div>
             </Upload.Dragger>
-            {errors.portfolioFile && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.portfolioFile}
+
+            {fileError && (
+              <p className="text-red-500 text-sm mt-2 whitespace-pre-line text-center">
+                {fileError}
               </p>
             )}
           </section>
 
+          <PhotoProvider>
+            <div className="flex flex-wrap items-center gap-4 mt-4">
+              {[...existingFiles, ...fileList].map((file, index) => {
+                const isImage = file.type?.includes("image");
+                const isVideo = file.type?.includes("video");
+                const isPDF = file.type?.includes("pdf");
+                const isDoc =
+                  file.type?.includes("word") ||
+                  file.type?.includes("officedocument");
+
+                const previewUrl = file.isExisting
+                  ? `${BASE_URL}/src${file.filepath}` // for backend files
+                  : file.previewUrl || "";         // for new files
+
+                return (
+                  <div
+                    key={file.uid || file.filepath || file.name}
+                    className="relative w-24 h-24 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center"
+                  >
+                    {isImage ? (
+                      <PhotoView src={previewUrl}>
+                        <img
+                          src={previewUrl}
+                          alt="preview"
+                          className="object-cover w-full h-full cursor-pointer"
+                        />
+                      </PhotoView>
+                    ) : isVideo ? (
+                      <video src={previewUrl} autoPlay loop controls muted className="object-cover w-full h-full" />
+                    ) : isPDF ? (
+                      <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs underline text-red-600 flex flex-col items-center">
+                        <RiFilePdf2Line size={42} /> View PDF
+                      </a>
+                    ) : isDoc ? (
+                      <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs underline text-blue-600 flex flex-col items-center">
+                        <RiFileWord2Line size={42} /> View Doc
+                      </a>
+                    ) : (
+                      <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs underline flex flex-col items-center">
+                        <RiFile3Line size={42} /> View File
+                      </a>
+                    )}
+
+                    {/* Delete Button */}
+                    <button
+                      type="button"
+                      className="absolute top-1 right-1 bg-black text-white p-1 rounded-full"
+                      onClick={() => {
+                        if (file.isExisting) {
+                          setExistingFiles((prev) =>
+                            prev.filter((f) => f.filepath !== file.filepath)
+                          );
+                        } else {
+                          setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
+                        }
+                      }}
+                    >
+                      <RiDeleteBin6Line />
+                    </button>
+                  </div>
+                );
+              })}
+
+            </div>
+          </PhotoProvider>
           {/* Proposal Breakdown */}
           <section>
+
+
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>

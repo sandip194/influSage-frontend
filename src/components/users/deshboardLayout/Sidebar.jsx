@@ -30,12 +30,16 @@ const Sidebar = forwardRef((props, ref) => {
     const handleResize = () => {
         if (window.innerWidth < 768) {
             setIsMobile(true);
-            setIsOpen(false);
+            setIsOpen(false); // Mobile: sidebar hidden fully
+        } else if (window.innerWidth <= 1024) {
+            setIsMobile(false);
+            setIsOpen(false); // Medium: sidebar closed, but not mobile (icons visible)
         } else {
             setIsMobile(false);
-            setIsOpen(true);
+            setIsOpen(true);  // Desktop: sidebar open full
         }
     };
+
 
     const dispatch = useDispatch();
     const navigate = useNavigate();

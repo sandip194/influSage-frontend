@@ -9,7 +9,7 @@ import {
   RiEyeLine
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Empty, Input, Pagination, Select, Tooltip, Modal  } from "antd";
+import { Empty, Input, Pagination, Select, Tooltip, Modal } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -23,6 +23,9 @@ const SavedLayout = () => {
   const [sortby, setSortBy] = useState("createddate");
   const [sortorder, setSortOrder] = useState("desc");
   const [loading, setLoading] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,9 +57,6 @@ const SavedLayout = () => {
     { value: "estimatedbudget_desc", label: "Price: High to Low" },
   ];
 
-
-
-
   const getAllSavedCampaigns = useCallback(async () => {
     try {
       setLoading(true);
@@ -66,14 +66,14 @@ const SavedLayout = () => {
           sortorder,
           pagenumber,
           pagesize,
+          p_search: searchTerm.trim(),
         },
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const { records, totalcount } = res.data.data; // assuming backend sends `records` and `totalcount`
-      console.log(records)
+      const { records, totalcount } = res.data.data;
       setCampaigns(records);
       setTotalCampaigns(totalcount);
     } catch (error) {
@@ -81,7 +81,9 @@ const SavedLayout = () => {
     } finally {
       setLoading(false);
     }
-  }, [sortby, sortorder, pagenumber, pagesize, token])
+  }, [sortby, sortorder, pagenumber, pagesize, searchTerm, token]);
+
+
 
   const handleSave = async (id) => {
     try {
@@ -105,8 +107,6 @@ const SavedLayout = () => {
       toast.error(error);
     }
   }
-
-
 
   useEffect(() => {
     getAllSavedCampaigns();
@@ -140,9 +140,27 @@ const SavedLayout = () => {
           <Input
             size="large"
             prefix={<SearchOutlined />}
-            placeholder="Search"
+            placeholder="Search campaigns"
             className="w-full sm:w-auto flex-1"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              const trimmedInput = searchInput.trim();
+
+              if ((e.key === "Enter" || e.key === " ") && trimmedInput !== "") {
+                setPageNumber(1);
+                setSearchTerm(trimmedInput);
+              }
+
+              if (e.key === "Enter" && trimmedInput === "") {
+                // Reset search
+                setSearchTerm("");
+                setPageNumber(1);
+              }
+            }}
           />
+
+
 
           <div className="flex gap-2 w-full sm:w-auto justify-end">
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-end">
@@ -193,7 +211,7 @@ const SavedLayout = () => {
                   className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
                 >
                   <span className="text-xs text-gray-500 mb-3">
-                    Posted on {new Date(campaign.createddate).toLocaleDateString()}
+                    Posted on {new Date(campaign.campaigncreatedate).toLocaleDateString()}
                   </span>
                   <div className="flex items-center gap-3 mb-3">
                     <img
@@ -207,9 +225,9 @@ const SavedLayout = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                    <RiVideoAddLine size={16} />
+                    
                     <span>
-                      {campaign.providercontenttype[0]?.providername}{" "}
+                      {campaign.providercontenttype[0]?.providername}{" - "}
                       {campaign.providercontenttype[0]?.contenttypename}
                     </span>
                     <RiExchangeDollarLine size={16} />
@@ -231,7 +249,7 @@ const SavedLayout = () => {
                     )}
                   </div>
                   <div className="flex items-center justify-between mt-auto gap-4">
-                    
+
                     {campaign.campaignapplied ? (
                       <button className="w-full py-2 rounded-3xl bg-[#9d9d9d] cursor-pointer text-white font-semibold  transition">
                         Applied

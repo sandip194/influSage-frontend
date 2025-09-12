@@ -67,7 +67,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
       <div className="flex items-center gap-4 w-full max-w-sm">
         {/* Mobile Hamburger */}
         <button
-          className="sm:hidden p-2 rounded-sm bg-gray-100 hover:bg-gray-100"
+          className="md:hidden p-2 rounded-sm bg-gray-100 hover:bg-gray-100"
           onClick={toggleSidebar}
         >
           <MenuOutlined className="text-lg" />

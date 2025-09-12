@@ -20,6 +20,8 @@ const AppliedLayout = () => {
   const [totalCampaigns, setTotalCampaigns] = useState(0);
   const [sortby, setSortBy] = useState("createddate");
   const [sortorder, setSortOrder] = useState("desc");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchInput, setSearchInput] = useState("");
 
   const [loading, setLoading] = useState(false);
 
@@ -64,6 +66,7 @@ const AppliedLayout = () => {
           p_sortorder: sortorder,
           p_pagenumber: pagenumber,
           p_pagesize: pagesize,
+          p_search: searchTerm.trim(),
         },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -77,7 +80,7 @@ const AppliedLayout = () => {
     } finally {
       setLoading(false);
     }
-  }, [sortby, sortorder, pagenumber, pagesize, token]);
+  }, [sortby, sortorder, pagenumber, pagesize, token, searchTerm]);
 
   useEffect(() => {
     getAllAppliedCampaigns();
@@ -114,8 +117,24 @@ const AppliedLayout = () => {
           <Input
             size="large"
             prefix={<SearchOutlined />}
-            placeholder="Search"
+            placeholder="Search campaigns "
             className="w-full sm:w-auto flex-1"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              const trimmedInput = searchInput.trim();
+
+              if ((e.key === "Enter" || e.key === " ") && trimmedInput !== "") {
+                setPageNumber(1);
+                setSearchTerm(trimmedInput);
+              }
+
+              if (e.key === "Enter" && trimmedInput === "") {
+                // Reset search
+                setSearchTerm("");
+                setPageNumber(1);
+              }
+            }}
           />
 
           <div className="flex gap-2 w-full sm:w-auto justify-end">
@@ -180,9 +199,9 @@ const AppliedLayout = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                    <RiVideoAddLine size={16} />
+                    
                     <span>
-                      {campaign.providercontenttype[0]?.providername}{" "}
+                      {campaign.providercontenttype[0]?.providername}{" - "}
                       {campaign.providercontenttype[0]?.contenttypename}
                     </span>
                     <RiExchangeDollarLine size={16} />
@@ -204,8 +223,8 @@ const AppliedLayout = () => {
                     )}
                   </div>
                   <div className="flex items-center justify-between mt-auto gap-4">
-                    <Link to="/dashboard/browse/edit" className="flex-1">
-                      <button className="w-full py-2 rounded-3xl bg-[#0f122f] text-white font-semibold hover:bg-[#23265a] transition">
+                    <Link to={`/dashboard/browse/apply-now/${campaign.id}`} className="flex-1">
+                      <button className="w-full py-2 cursor-pointer rounded-3xl bg-[#0f122f] text-white font-semibold hover:bg-[#23265a] transition">
                         Edit Application
                       </button>
                     </Link>

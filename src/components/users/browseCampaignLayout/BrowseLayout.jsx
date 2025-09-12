@@ -27,6 +27,8 @@ const Browse = () => {
   const [campaigns, setCampaigns] = useState([])
   const [totalCampaigns, setTotalCampaigns] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchInput, setSearchInput] = useState("");
 
 
   const [filters, setFilters] = useState({
@@ -126,6 +128,7 @@ const Browse = () => {
         sortorder: filters.sortorder || undefined,
         pagenumber: filters.pagenumber || 1,
         pagesize: filters.pagesize || 15,
+        p_search: searchTerm.trim()
       };
 
       const cleanParams = Object.fromEntries(
@@ -193,7 +196,7 @@ const Browse = () => {
 
   useEffect(() => {
     getAllCampaigns();
-  }, [filters.pagenumber, filters.pagesize, filters.sortby, filters.sortorder]);
+  }, [filters.pagenumber, filters.pagesize, filters.sortby, filters.sortorder, searchTerm]);
 
 
   useEffect(() => {
@@ -244,9 +247,34 @@ const Browse = () => {
           <Input
             size="large"
             prefix={<SearchOutlined />}
-            placeholder="Search"
+            placeholder="Search campaigns"
             className="w-full sm:w-auto flex-1"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              const trimmedInput = searchInput.trim();
+
+              if ((e.key === "Enter" || e.key === " ") && trimmedInput !== "") {
+                setFilters((prev) => ({
+                  ...prev,
+                  pagesize: window.innerWidth < 640 ? 10 : 15,
+                  pagenumber: 1,
+                }));
+                setSearchTerm(trimmedInput);
+              }
+
+              if (e.key === "Enter" && trimmedInput === "") {
+                // Reset search
+                setSearchTerm("");
+                setFilters((prev) => ({
+                  ...prev,
+                  pagesize: window.innerWidth < 640 ? 10 : 15,
+                  pagenumber: 1,
+                }));
+              }
+            }}
           />
+
 
           <div className="flex gap-2 w-full sm:w-auto justify-end">
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-end">
@@ -319,8 +347,8 @@ const Browse = () => {
                     loading="lazy"
                     className="w-10 h-10 rounded-full"
                   />
-                  <div>
-                    <div className="font-semibold text-gray-900">
+                  <div className="max-w-full">
+                    <div className="font-semibold truncate  text-gray-900">
                       {campaign.name}
                     </div>
                     <div className="text-xs text-gray-500">
@@ -355,40 +383,43 @@ const Browse = () => {
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between mt-auto gap-4">
-                  {campaign.campaignapplied ? (
-                    <button className="w-full py-2 rounded-3xl bg-[#9d9d9d] cursor-pointer text-white font-semibold  transition">
-                      Applied
-                    </button>
-                  ) : (
-                    <Link to={`/dashboard/browse/apply-now/${campaign.id}`} className="flex-1">
-                      <button className="w-full py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition">
-                        Apply Now
-                      </button>
-                    </Link>
+                <div className="flex items-center justify-between mt-auto gap-4 min-w-0">
+  {campaign.campaignapplied ? (
+    <button className="flex-1 py-2 rounded-3xl bg-[#9d9d9d] cursor-pointer text-white font-semibold transition min-w-0 truncate">
+      Applied
+    </button>
+  ) : (
+    <Link to={`/dashboard/browse/apply-now/${campaign.id}`} className="flex-1 min-w-0">
+      <button className="py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition w-full truncate">
+        Apply Now
+      </button>
+    </Link>
+  )}
 
-                  )}
+  <Tooltip title="Save Campaign">
+    <button
+      onClick={() => handleSave(campaign.id)}
+      className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition"
+    >
+      {campaign.campaigsaved ? <RiFileCopyFill size={20} /> : <RiFileCopyLine size={20} />}
+    </button>
+  </Tooltip>
 
-                  <Tooltip title="Save Campaign">
-                    <button
-                      onClick={() => handleSave(campaign.id)}
-                      className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition"
-                    >
+  <Tooltip title="View Details">
+    <Link
+      to={
+        campaign.campaignapplied
+          ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
+          : `/dashboard/browse/description/${campaign.id}`
+      }
+    >
+      <button className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition">
+        <RiEyeLine size={20} />
+      </button>
+    </Link>
+  </Tooltip>
+</div>
 
-                      {campaign.campaigsaved ? <RiFileCopyFill size={20} /> : <RiFileCopyLine size={20} />}
-                    </button>
-                  </Tooltip>
-
-
-                  <Tooltip title="View Details">
-                    <Link to={`/dashboard/browse/description/${campaign.id}`}>
-                      <button className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition">
-                        <RiEyeLine size={20} />
-                      </button>
-                    </Link>
-                  </Tooltip>
-
-                </div>
               </div>
             )))
             }
