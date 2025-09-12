@@ -1,13 +1,13 @@
-import React, { useState, useMemo } from "react";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import { Modal } from "antd";
+import React, { useState, useMemo } from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { Modal } from 'antd';
 import {
   RiWalletLine,
   RiTimeLine,
   RiMoneyDollarCircleLine,
   RiEyeLine,
-} from "@remixicon/react";
+} from '@remixicon/react';
 const generateInvoice = (transaction) => {
   const doc = new jsPDF();
 

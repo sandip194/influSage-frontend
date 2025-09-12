@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Input, Select, DatePicker } from "antd";
-import dayjs from "dayjs";
-import axios from "axios";
-import { useSelector } from "react-redux";
-import { RiImageAddLine, RiInformationLine, RiDeleteBin6Line } from "react-icons/ri";
-import customParseFormat from "dayjs/plugin/customParseFormat";
+import React, { useState, useRef, useEffect } from 'react';
+import { Input, Select, DatePicker } from 'antd';
+import dayjs from 'dayjs';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { RiImageAddLine, RiInformationLine, RiDeleteBin6Line } from 'react-icons/ri';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { toast } from 'react-toastify';
 
 const { TextArea } = Input;

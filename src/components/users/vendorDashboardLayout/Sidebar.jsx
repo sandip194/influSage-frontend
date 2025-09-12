@@ -7,12 +7,12 @@ import {
     RiShutDownLine,
     RiStackLine,
     RiWallet3Line
-} from "@remixicon/react";
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { NavLink } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { logout } from "../../../features/auth/authSlice";
+} from '@remixicon/react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { NavLink } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../../../features/auth/authSlice';
 
 
 const Sidebar = forwardRef((props, ref) => {

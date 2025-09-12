@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Switch } from "antd";
+import React, { useState } from 'react';
+import { Switch } from 'antd';
 import {
   RiUser3Line,
   RiNotification3Line,
@@ -7,7 +7,7 @@ import {
   RiMoneyDollarCircleLine,
   RiAlertLine,
   RiMailLine,
-} from "react-icons/ri";
+} from 'react-icons/ri';
 
 const Notifications = () => {
   const [settings, setSettings] = useState({

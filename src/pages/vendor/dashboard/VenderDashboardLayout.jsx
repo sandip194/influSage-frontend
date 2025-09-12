@@ -1,7 +1,7 @@
-import React, { useRef } from "react";
-import DeshboardHeader from "../../../components/users/deshboardLayout/DeshboardHeader";
-import Sidebar from "../../../components/users/vendorDashboardLayout/Sidebar";
-import { Outlet } from "react-router-dom";
+import React, { useRef } from 'react';
+import DeshboardHeader from '../../../components/users/deshboardLayout/DeshboardHeader';
+import Sidebar from '../../../components/users/vendorDashboardLayout/Sidebar';
+import { Outlet } from 'react-router-dom';
 
 const VenderDashboardLayout = () => {
   const sidebarRef = useRef();

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   RiCheckboxCircleFill,
   RiMenLine,
@@ -13,9 +13,9 @@ import {
   RiTiktokFill,
   RiStarFill,
   RiStarLine,
-} from "@remixicon/react";
-import { Modal, Input } from "antd";
-import { useNavigate, useLocation } from "react-router-dom";
+} from '@remixicon/react';
+import { Modal, Input } from 'antd';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const { TextArea } = Input;
 

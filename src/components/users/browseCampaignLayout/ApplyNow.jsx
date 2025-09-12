@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   RiArrowLeftSLine,
   RiChatUploadLine,
   RiVerifiedBadgeLine,
-} from "@remixicon/react";
-import { Modal, Input, Button, Upload, message } from "antd";
-import { useNavigate, useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
-import axios from "axios";
-import { toast } from "react-toastify";
+} from '@remixicon/react';
+import { Modal, Input, Button, Upload, message } from 'antd';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const { TextArea } = Input;
 

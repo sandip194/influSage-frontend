@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { CheckOutlined } from "@ant-design/icons";
+import React, { useState } from 'react';
+import { CheckOutlined } from '@ant-design/icons';
 
 const categories = [
   { key: "beauty", name: "Beauty", image: "/assets/imgs/beauty.png" },

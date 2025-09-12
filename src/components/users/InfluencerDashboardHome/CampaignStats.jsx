@@ -1,4 +1,4 @@
-import { RiCheckLine, RiExchange2Line, RiLoader4Line, RiStackLine } from "@remixicon/react";
+import { RiCheckLine, RiExchange2Line, RiLoader4Line, RiStackLine } from '@remixicon/react';
 
 
 

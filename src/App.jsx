@@ -15,7 +15,7 @@ import { ForgotPassword } from './pages/commonPages/ForgotPassword';
 import { VerifyEmailOrMobile } from './pages/commonPages/VerifyEmailOrMobile'
 import { ResetPassword } from './pages/commonPages/ResetPassword';
 // import { ProfileStepper } from "./pages/influencer/influencerProfileCreation/ProfileStepper"
-import { BrowseCampaign } from './components/users/browseCampaign';
+import { BrowseCampaign } from './components/users/BrowseCampaign';
 import DashboardLayout from './components/users/deshboardLayout/DashboardLayout';
 import AppliedLayout from './components/users/browseCampaignLayout/AppliedLayout';
 import SavedLayout from './components/users/browseCampaignLayout/SavedLayout';
@@ -30,7 +30,7 @@ import FilesMedia from './components/users/MyCampaignsLayout/FilesMedia';
 import EditLayout from './components/users/browseCampaignLayout/EditLayout';
 import ApplyNow from './components/users/browseCampaignLayout/ApplyNow';
 import { ProfileStepper } from "./pages/influencer/influencerProfileCreation/ProfileStepper"
-import CreateCampaign from "./pages/vendor/dashboard/CreateCampaign"
+import CreateCampaign from './pages/vendor/dashboard/CreateCampaign'
 import CampaignWizard from './pages/vendor/dashboard/CampaignWizard';
 import VenderDashboardLayout from './pages/vendor/dashboard/VenderDashboardLayout';
 import { VendorProfileStepper } from './pages/vendor/venderProfileCreation/VendorProfileStepper';
@@ -38,9 +38,9 @@ import DashboardPage from './pages/influencer/dashboard/DashboardPage';
 import VenderDashboardPage from './pages/vendor/dashboard/VenderDashboardPage';
 import BrowseInfluencerPage from './pages/vendor/dashboard/BrowseInfluencerPage';
 import ChatAppPage from './components/chatApp/ChatAppPage';
-import Profile from "./components/users/EditProfile/Profile";
-import EditProfile from "./components/users/EditProfile/editProfile";
-import Settings from "./components/users/Settings/SettingLayout";
+import Profile from './components/users/EditProfile/Profile';
+import EditProfile from './components/users/EditProfile/editProfile';
+import Settings from './components/users/Settings/SettingLayout';
 import Unauthorized from './pages/commonPages/Unauthorized';
 import PrivateRoute from './routes/PrivateRoute';
 import VendorCampaign from './components/users/vendorCampaign/VendorCampaignsLayout';
@@ -71,14 +71,14 @@ const App = () => {
                         <Routes>
                                 <Route path='/' element={<Home />} />
                                 <Route path='/signup' element={<Signup />} />
-                                <Route path="/role" element={<Role />} />
-                                <Route path="/roledefault" element={<RoleDefault />} />
-                                <Route path="/setPassword" element={<SetPassword />} />
+                                <Route path='/role' element={<Role />} />
+                                <Route path='/roledefault' element={<RoleDefault />} />
+                                <Route path='/setPassword' element={<SetPassword />} />
                                 <Route path='/login' element={<LoginForm />} />
                                 <Route path='/forgot-password' element={<ForgotPassword />} />
                                 <Route path='/verify-email-or-mobile' element={<VerifyEmailOrMobile />} />
                                 <Route path='/reset-password' element={<ResetPassword />} />
-                                <Route path="/unauthorized" element={<Unauthorized />} />
+                                <Route path='/unauthorized' element={<Unauthorized />} />
 
 
 
@@ -111,9 +111,9 @@ const App = () => {
 
                                                 <Route path='profile' element={<Profile />} />
 
-                                                <Route path="editProfile" element={<EditProfile />} />
+                                                <Route path='editProfile' element={<EditProfile />} />
 
-                                                <Route path="setting" element={<Settings />} />
+                                                <Route path='setting' element={<Settings />} />
 
                                         </Route>
 

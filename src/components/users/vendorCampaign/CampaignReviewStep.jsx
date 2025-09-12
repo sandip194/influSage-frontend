@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { PhotoProvider, PhotoView } from "react-photo-view";
-import "react-photo-view/dist/react-photo-view.css";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import 'react-photo-view/dist/react-photo-view.css';
 
 import {
   RiCheckboxCircleFill,

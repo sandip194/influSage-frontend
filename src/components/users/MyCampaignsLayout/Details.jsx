@@ -9,10 +9,10 @@ import {
   RiCheckboxBlankCircleLine,
   RiChatUploadLine,
   RiDeleteBin6Line,
-} from "@remixicon/react";
-import React, { useState } from "react";
-import { Modal, Upload, Input } from "antd";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+} from '@remixicon/react';
+import React, { useState } from 'react';
+import { Modal, Upload, Input } from 'antd';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 const { TextArea } = Input;
 
 const Requirements = [

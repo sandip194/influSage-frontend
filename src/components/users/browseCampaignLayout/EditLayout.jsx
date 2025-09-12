@@ -13,11 +13,11 @@ import {
   RiAttachment2,
   RiEmotionLine,
   RiMoreFill,
-} from "@remixicon/react";
-import axios from "axios";
-import React, { useCallback, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+} from '@remixicon/react';
+import axios from 'axios';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
 const SimilarCampaigns = [
   {

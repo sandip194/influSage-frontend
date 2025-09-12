@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { Upload, message } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from 'react';
+import { Upload, message } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import {
 RiCloseLine,
 RiUpload2Line,
 RiDeleteBin6Line,
-} from "react-icons/ri";
-import axios from "axios";
-import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
-import "react-photo-view/dist/react-photo-view.css";
-import { PhotoProvider, PhotoView } from "react-photo-view";
+} from 'react-icons/ri';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
+import 'react-photo-view/dist/react-photo-view.css';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
 
 const { Dragger } = Upload;
 

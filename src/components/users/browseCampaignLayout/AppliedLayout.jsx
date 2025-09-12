@@ -1,16 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
-  RiMessage2Line,
   RiVideoAddLine,
   RiExchangeDollarLine,
   RiArrowDownSLine,
   RiEyeLine,
-} from "@remixicon/react";
-import { SearchOutlined } from "@ant-design/icons";
-import { Empty, Input, Pagination, Select, Skeleton, Tooltip } from "antd";
-import axios from "axios";
-import { useSelector } from "react-redux";
+} from '@remixicon/react';
+import { SearchOutlined } from '@ant-design/icons';
+import { Empty, Input, Pagination, Select, Skeleton, Tooltip } from 'antd';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const AppliedLayout = () => {
 

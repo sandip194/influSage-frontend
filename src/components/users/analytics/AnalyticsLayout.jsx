@@ -4,12 +4,12 @@ import {
   RiStackLine,
   RiArrowUpLine,
   RiArrowDownLine,
-} from "@remixicon/react";
-import EarnChart from "./EarnChart";
-import ImpressionChart from "./ImpressionChart";
-import Audience from "./Audience";
-import TopContent from "./TopContent";
-import Table from "./Table";
+} from '@remixicon/react';
+import EarnChart from './EarnChart';
+import ImpressionChart from './ImpressionChart';
+import Audience from './Audience';
+import TopContent from './TopContent';
+import Table from './Table';
 
 const AnalyticsLayout = ({ balance = 22765, thisMonth = 2765 }) => {
   const contentData = [

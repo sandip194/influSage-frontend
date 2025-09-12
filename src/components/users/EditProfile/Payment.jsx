@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Form,
   Input,
@@ -8,11 +8,11 @@ import {
   Typography,
   message,
   Row, Col
-} from "antd";
+} from 'antd';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import { useEffect } from "react";
-import axios from "axios";
+import { useEffect } from 'react';
+import axios from 'axios';
 
 const { Option } = Select;
 const { Link } = Typography;

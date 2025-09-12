@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   RiMenLine,
   RiMoneyRupeeCircleLine,
@@ -11,9 +11,9 @@ import {
   RiTiktokFill,
   RiStarFill,
   RiStarLine,
-} from "@remixicon/react";
-import { Modal, Upload, Input } from "antd";
-import { useNavigate, useLocation } from "react-router-dom";
+} from '@remixicon/react';
+import { Modal, Upload, Input } from 'antd';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const { TextArea } = Input;
 

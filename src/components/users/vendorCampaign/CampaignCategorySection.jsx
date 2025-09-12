@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Select } from 'antd';
-import { useSelector } from "react-redux";
+import { useSelector } from 'react-redux';
 
 const { Option } = Select;
 
