@@ -1,32 +1,17 @@
 import {
-  RiMessage2Line,
   RiMenLine,
   RiMoneyRupeeCircleLine,
   RiStackLine,
   RiTranslate,
   RiArrowLeftSLine,
-  RiStarLine,
-  RiArrowRightSLine,
-  RiMoneyDollarCircleLine,
   RiCalendarLine,
-  RiSendPlane2Line,
-  RiAttachment2,
-  RiEmotionLine,
-  RiMoreFill,
-<<<<<<< HEAD
   RiCheckLine,
 } from "@remixicon/react";
 import axios from "axios";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
-=======
-} from '@remixicon/react';
-import axios from 'axios';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
->>>>>>> 94f720759072191d751f94a3ddf07b435fb3c83b
+
 
 const SimilarCampaigns = [
   {

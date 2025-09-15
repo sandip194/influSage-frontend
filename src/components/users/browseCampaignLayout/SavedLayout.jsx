@@ -2,25 +2,17 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   RiFileCopyFill,
-  RiVideoAddLine,
   RiExchangeDollarLine,
   RiArrowDownSLine,
   RiEyeLine
-<<<<<<< HEAD
+
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
 import { Empty, Input, Pagination, Select, Tooltip, Modal } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-=======
-} from '@remixicon/react';
-import { SearchOutlined } from '@ant-design/icons';
-import { Empty, Input, Pagination, Select, Tooltip  } from 'antd';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
->>>>>>> 94f720759072191d751f94a3ddf07b435fb3c83b
+
 
 const SavedLayout = () => {
   const [campaigns, setCampaigns] = useState([]);
