@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Form, Input, message } from 'antd';
+import { Upload, Form, Input, message, Select, Spin } from 'antd';
 import { UploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 const { Dragger } = Upload;
+const { Option } = Select;
 
 const PortfolioUploader = ({ onBack, onNext, data }) => {
   const [form] = Form.useForm();
@@ -12,6 +13,9 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
   const [portfolioUrl, setPortfolioUrl] = useState('');
   const [fileError, setFileError] = useState('');
   const [deletedFilePaths, setDeletedFilePaths] = useState([]);
+  const [languages, setLanguages] = useState([]);
+  const [selectedLanguages, setSelectedLanguages] = useState([]);
+  const [loadingLanguages, setLoadingLanguages] = useState(false);
 
 
   const { token, userId } = useSelector(state => state.auth);
@@ -50,12 +54,39 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
     setFileError('');
   };
 
+useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        setLoadingLanguages(true);
+        const res = await axios.get("languages", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setLanguages(res.data.languages || []);
+      } catch (err) {
+        console.error("Error fetching languages:", err);
+      } finally {
+        setLoadingLanguages(false);
+      }
+    };
+    fetchLanguages();
+  }, [token]);
+
+useEffect(() => {
+  if (data?.languages?.length && languages.length) {
+    const selectedIds = data.languages.map(l => l.languageid)
+      .filter(id => languages.some(lang => lang.id === id));
+    setSelectedLanguages(selectedIds);
+  }
+}, [data, languages]);
+
   // Form submission handler
   const handleSubmit = async () => {
+    console.log("Submitting portfolio...");
     const hasFiles = fileList.length > 0 || existingFiles.length > 0;
     const isValidUrl = /^https?:\/\/.+/.test(portfolioUrl);
 
     if (!hasFiles && !isValidUrl) {
+      setFileError('Please upload at least one file or add a valid portfolio URL.');
       message.error('Please upload at least one file or add a valid portfolio URL.');
       return;
     }
@@ -87,16 +118,25 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
         : file.url,
     }));
 
+    const selectedLanguagesData = selectedLanguages.map(langId => {
+    const lang = languages.find(l => l.id === langId);
+    return lang ? { languageid: lang.id, languagename: lang.name } : null;
+  }).filter(Boolean);
+
     const portfoliojson = {
       portfoliourl: isValidUrl ? portfolioUrl : null,
       filepaths: existingFilePaths.length > 0 ? existingFilePaths : [{ filepath: null }],
+      languages: selectedLanguagesData,
     };
 
     formData.append("portfoliojson", JSON.stringify(portfoliojson));
     fileList.forEach(file => {
       formData.append("portfolioFiles", file);
     });
-
+console.log("portfoliojson object:", portfoliojson);
+for (let [key, value] of formData.entries()) {
+  console.log("FormData entry:", key, value);
+}
     try {
       const res = await axios.post("user/complete-profile", formData, {
         headers: {
@@ -107,6 +147,7 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
 
       if (res.status === 200) {
         message.success("Portfolio submitted successfully!");
+        console.log("Submitted data:", formData);
         onNext?.();
       } else {
         message.error("Something went wrong.");
@@ -157,8 +198,12 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
 
         setExistingFiles(filesFromBackend);
       }
+      if (Array.isArray(data.contentlanguages)) {
+      const selectedIds = data.contentlanguages.map(l => l.languageid);
+      setSelectedLanguages(selectedIds);
     }
-  }, [data]);
+    }
+  }, [data, languages]);
 
   // Handler for when user selects files in the uploader
   const handleFileChange = (info) => {
@@ -308,6 +353,29 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
           />
         </Form.Item>
 
+       <Form.Item className="mb-6">
+            <label className="block mb-2 font-semibold text-gray-700">Languages <span className="text-red-500">*</span></label>
+            <Select
+              mode="multiple"
+              size="large"
+              style={{ width: "100%" }}
+              placeholder={loadingLanguages ? "Loading languages..." : "Select Languages"}
+              value={selectedLanguages}
+              onChange={setSelectedLanguages}
+              className="mb-6"
+              loading={loadingLanguages}
+            >
+              {languages.map(({ id, name }) => (
+                <Option key={id} value={id}>{name}</Option>
+              ))}
+            </Select>
+            {selectedLanguages.length === 0 && (
+              <div className="text-red-500 text-sm mb-4 mt-2">
+                Please select at least one language
+              </div>
+            )}
+          </Form.Item>
+
         {/* Buttons */}
         <div className="flex gap-4 mt-8">
           <button
@@ -318,7 +386,8 @@ const PortfolioUploader = ({ onBack, onNext, data }) => {
             Back
           </button>
           <button
-            htmlType="submit"
+            type="submit" 
+            onClick={handleSubmit} 
             className="bg-[#121A3F] cursor-pointer text-white inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
           >
             Continue

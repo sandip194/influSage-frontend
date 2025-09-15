@@ -96,6 +96,45 @@ const CampaignReviewStep = ({ onEdit }) => {
     }
   };
 
+const p_objectivejson = campaignData?.p_objectivejson || {};
+const p_vendorinfojson = campaignData?.p_vendorinfojson || {};
+const p_campaignjson = campaignData?.p_campaignjson || {};
+const p_campaignfilejson = campaignData?.p_campaignfilejson || [];  
+const p_contenttypejson = campaignData?.p_contenttypejson || [];
+
+const platforms =
+  p_contenttypejson.flatMap((p) =>
+    p.contenttypes?.map((ct) => `${p.providername} - ${ct.contenttypename}`)
+  ) || [];
+
+const languages =
+  p_vendorinfojson.campaignlanguages?.map((l) => l.languagename) || [];
+
+const influencerTiers =
+  p_vendorinfojson.campaigninfluencertiers?.map(
+    (t) => t.influencertiername
+  ) || [];
+
+  // const gendersPayload = Array.isArray(p_vendorinfojson.genderid)
+  //     ? p_vendorinfojson.genders.map((g) => ({
+  //         genderid: g.genderid,
+  //         gendername: g.gendername || "Unspecified",
+  //       }))
+  //     : [];
+
+const genders = Array.isArray(p_vendorinfojson.genders)
+  ? p_vendorinfojson.genders.map((g) => ({
+      genderid: g.genderid,
+      gendername: g.gendername || "Unspecified",
+    }))
+  : [];
+
+const camp_profile = p_campaignjson?.photopath
+  ? [getFullUrl(p_campaignjson.photopath)]
+  : [];
+
+const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
+
   const handleCreateCampaign = async () => {
     try {
       const authToken = token || localStorage.getItem("token");
@@ -107,7 +146,10 @@ const CampaignReviewStep = ({ onEdit }) => {
       const payload = {
         userid: userId,
         objective: campaignData?.p_objectivejson || {},
-        vendorinfo: campaignData?.p_vendorinfojson || {},
+       vendorinfo: {
+        ...p_vendorinfojson,
+        genders
+      },
         campaign: campaignData?.p_campaignjson || {},
         references: campaignData?.p_campaignfilejson || [],
         contenttypes: campaignData?.p_contenttypejson || [],
@@ -133,38 +175,7 @@ const CampaignReviewStep = ({ onEdit }) => {
   if (loading) return <p>Loading...</p>;
   if (!campaignData) return <p>No campaign data found</p>;
 
-  const p_objectivejson = campaignData.p_objectivejson || {};
-  const p_vendorinfojson = campaignData.p_vendorinfojson || {};
-  const p_campaignjson = campaignData.p_campaignjson || {};
-  const p_campaignfilejson = campaignData.p_campaignfilejson || [];
-  const p_contenttypejson = campaignData.p_contenttypejson || [];
-
-  const platforms = p_contenttypejson.map((p) => p.providername) || [];
-  const languages =
-    p_vendorinfojson.campaignlanguages?.map((l) => l.languagename) || [];
-  const influencerTiers =
-    p_vendorinfojson.campaigninfluencertiers?.map(
-      (t) => t.influencertiername
-    ) || [];
-  const genders =
-    Array.isArray(p_vendorinfojson.genderid) &&
-      p_vendorinfojson.genderid.length > 0
-      ? p_vendorinfojson.genderid.map((id) => {
-        switch (id) {
-          case 1:
-            return "Male";
-          case 2:
-            return "Female";
-          case 3:
-            return "Other";
-        }
-      })
-      : ["Unspecified"];
-
-  const camp_profile = p_campaignjson?.photopath
-    ? [getFullUrl(p_campaignjson.photopath)]
-    : [];
-  const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
+ 
 
   return (
     <div className="w-full text-sm overflow-x-hidden">
@@ -232,9 +243,11 @@ const CampaignReviewStep = ({ onEdit }) => {
                     <RiMenLine className="w-5" />
                     <span> Gender </span>
                   </div>
-                  {genders.map((g, i) => (
-                    <p key={g + i}>{g}</p>
-                  ))}
+                  {genders.length > 0
+                    ? genders.map((g) => (
+                        <p key={g.genderid}>{g.gendername}</p>
+                      ))
+                    : "—"}
                 </div>
               </div>
             </div>
@@ -462,13 +475,30 @@ const CampaignReviewStep = ({ onEdit }) => {
               <p>{p_campaignjson.branddetail || "—"}</p>
             </div>
             <div className="py-4 border-b border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Start Date</p>
-              <p>{p_campaignjson.startdate || "—"}</p>
+            <p className="text-sm text-gray-500 mb-1 font-semibold">Campaign Dates</p>
+            <div className="flex justify-between">
+              <div>
+                <p className="text-sm text-gray-500 mb-1 my-2">Start Date</p>
+                <p>{p_campaignjson.startdate || "—"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1 my-2">End Date</p>
+                <p>{p_campaignjson.enddate || "—"}</p>
+              </div>
             </div>
-            <div className="py-4 border-b border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">End Date</p>
-              <p>{p_campaignjson.enddate || "—"}</p>
+              <hr className="my-4 border-gray-200" />
+            <p className="text-sm text-gray-500 mb-1 mt-4 font-semibold">Application Dates</p>
+            <div className="flex justify-between">
+              <div>
+                <p className="text-sm text-gray-500 mb-1 my-2">Start Date</p>
+                <p>{p_campaignjson.applicationstartdate || "—"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1 my-2">End Date</p>
+                <p>{p_campaignjson.applicationenddate || "—"}</p>
+              </div>
             </div>
+          </div>
 
             <div className="pt-4 pb-2">
               <p className="text-sm text-gray-500 mb-1">Total Budget</p>

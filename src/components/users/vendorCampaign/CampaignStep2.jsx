@@ -53,7 +53,9 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
   useEffect(() => {
     if (!data) return;
     setFormData({
-      genderid: Array.isArray(data?.genderid) ? data.genderid : [],
+      genderid: Array.isArray(data?.genderid)
+      ? data.genderid.map(g => typeof g === 'object' ? g.genderid : g)
+      : [],
       isproductshipping:
         typeof data?.isproductshipping === "boolean"
           ? data.isproductshipping
@@ -126,9 +128,9 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
       const isSelected = prev.genderid.includes(id);
       return {
         ...prev,
-        genderid: isSelected
-          ? prev.genderid.filter((g) => g !== id)
-          : [...prev.genderid, id],
+      genderid: isSelected
+        ? prev.genderid.filter((g) => g !== id)
+        : [...prev.genderid, id],
       };
     });
     setErrors((prev) => ({ ...prev, genderid: false }));
@@ -181,8 +183,13 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
       return { languageid: lang.id, languagename: lang.name };
     });
 
+    const gendersSelected = formData.genderid.map((id) => {
+    const gender = genders.find((g) => g.id === id);
+    return gender ? { genderid: gender.id, gendername: gender.name } : null;
+  }).filter(Boolean);
+
     const p_vendorinfojson = {
-      genderid: formData.genderid,
+      genderid: gendersSelected,
       isproductshipping: formData.isproductshipping,
       campaigninfluencertiers,
       campaignlanguages,

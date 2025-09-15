@@ -84,14 +84,21 @@ const CampaignWizard = () => {
           !!parts.p_vendorinfojson,
           !!parts.p_campaignjson,
           !!parts.p_campaigncategoyjson ,
-          !!parts.p_campaignfilejson,
-          !!parts.p_contenttypejson,
+          !!(parts.p_campaignfilejson && parts.p_campaignfilejson.length > 0),
+          !!(parts.p_contenttypejson && Object.keys(parts.p_contenttypejson).length > 0), 
         ];
 
         setCompletedSteps(newCompletion);
         localStorage.setItem("completedSteps", JSON.stringify(newCompletion));
 
-      }
+    // Find the first incomplete step
+    const firstIncomplete = newCompletion.findIndex((done) => !done);
+    if (firstIncomplete !== -1) {
+      setCurrentStep(firstIncomplete);
+    } else {
+      setCurrentStep("review"); 
+    }
+          }
     } catch (err) {
       console.error("❌ Error fetching campaign:", err);
       toast.error("Failed to fetch campaign data.");
@@ -105,19 +112,27 @@ const CampaignWizard = () => {
   }, [lastCompletedStep]);
 
 
-  // Restore completed steps from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem("completedSteps");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setCompletedSteps(parsed);
+useEffect(() => {
+  const stored = localStorage.getItem("completedSteps");
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    setCompletedSteps(parsed);
 
-      const lastIndex = parsed.lastIndexOf(true);
-      if (lastIndex !== -1) {
-        setLastCompletedStep(lastIndex);
-      }
+    const lastIndex = parsed.lastIndexOf(true);
+    if (lastIndex !== -1) {
+      setLastCompletedStep(lastIndex);
     }
-  }, []);
+
+    // Go to first incomplete step
+    const firstIncomplete = parsed.findIndex((done) => !done);
+    if (firstIncomplete !== -1) {
+      setCurrentStep(firstIncomplete);
+    } else {
+      setCurrentStep("review");
+    }
+  }
+}, []);
+
 
   // Define steps early so functions below can access it
   const steps = [

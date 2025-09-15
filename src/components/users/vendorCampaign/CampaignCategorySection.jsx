@@ -130,7 +130,7 @@ const CampaignCategorySection = ({ data, onNext, onBack }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Main Category Select */}
                 <div>
-                    <label className="block mb-2 font-semibold text-gray-700">Main Category</label>
+                    <label className="block mb-2 font-semibold text-gray-700">Main Category <span className="text-red-500">*</span></label>
                     <Select
                         size="large"
                         style={{ width: '100%' }}
