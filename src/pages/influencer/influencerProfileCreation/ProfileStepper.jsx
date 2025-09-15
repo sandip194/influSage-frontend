@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Steps } from 'antd';
 import { RiMenu2Line } from 'react-icons/ri';
-
 
 import { PersonalDetails } from '../../../components/users/complateProfile/PersonalDetails';
 import { ProfileHeader } from '../../../components/users/complateProfile/ProfileHeader';
@@ -10,17 +9,48 @@ import { CategorySelector } from '../../../components/users/vendorProfile/Catego
 import PortfolioUploader from '../../../components/users/complateProfile/PortfolioUploader';
 import PaymentDetailsForm from '../../../components/users/complateProfile/PaymentDetailsForm';
 import ThankYouScreen from '../../../components/users/complateProfile/ThankYouScreen';
-import '../../../components/users/complateProfile/profile.css'
-import axios from 'axios';
 
+import '../../../components/users/complateProfile/profile.css';
+import axios from 'axios';
 import { useSelector } from 'react-redux';
+import ErrorBoundary from '../../../components/common/ErrorBoundary';
+
+
+// Validation Function ==> bcs we dont need to re create it for every render 
+const isProfileComplete = (profile) => {
+  if (!profile || Object.keys(profile).length === 0) return false;
+  const fieldsToCheck = ['photopath', 'genderid', 'dob', 'address1', 'countryname', 'statename', 'bio'];
+  return fieldsToCheck.some(field => profile[field]?.trim?.() || profile[field]);
+};
+
+const isSocialComplete = (social) => Array.isArray(social) && social.length > 0;
+const isCategoriesComplete = (categories) => Array.isArray(categories) && categories.length > 0;
+
+const isPortfolioComplete = (portfolio) => {
+  if (!portfolio || typeof portfolio !== 'object') return false;
+  const hasValidUrl = typeof portfolio.portfoliourl === 'string' && portfolio.portfoliourl.trim() !== '';
+  const hasValidFilepath = Array.isArray(portfolio.filepaths) &&
+    portfolio.filepaths.some(file => typeof file.filepath === 'string' && file.filepath.trim() !== '');
+  return hasValidUrl || hasValidFilepath;
+};
+
+const isPaymentComplete = (payment) => {
+  if (!payment || Object.keys(payment).length === 0) return false;
+  const fieldsToCheck = ['bankcountry', 'bankname', 'accountholdername', 'accountnumber', 'bankcode', 'branchaddress', 'contactnumber', 'email', 'preferredcurrency', 'taxidentificationnumber'];
+  const hasValidField = fieldsToCheck.some(field => payment[field]?.trim?.() || payment[field]);
+  const hasValidPaymentMethod = Array.isArray(payment.paymentmethod) &&
+    payment.paymentmethod.some(pm => pm.method && pm.paymentdetails);
+  return hasValidField || hasValidPaymentMethod;
+};
+
+
+//main function
 
 export const ProfileStepper = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [lastCompletedStep, setLastCompletedStep] = useState(null);
-
 
   const { token, userId } = useSelector(state => state.auth);
 
@@ -32,95 +62,12 @@ export const ProfileStepper = () => {
     payment: {}
   });
 
-
-  const updateProfileSection = (sectionKey, newData) => {
+  const updateProfileSection = useCallback((sectionKey, newData) => {
     setProfileData(prev => ({
       ...prev,
       [sectionKey]: newData
     }));
-  };
-
-  const isProfileComplete = (profile) => {
-    // Check if any important profile field is filled
-    if (!profile || Object.keys(profile).length === 0) return false;
-
-    const fieldsToCheck = [
-      'photopath', 'genderid', 'dob', 'address1',
-      'countryname', 'statename', 'bio'
-    ];
-
-    return fieldsToCheck.some(field => {
-      const value = profile[field];
-      return value !== null && value !== undefined && value !== '';
-    });
-  };
-
-  const isSocialComplete = (social) => {
-    // Social should be a non-empty array
-    return Array.isArray(social) && social.length > 0;
-  };
-
-  const isCategoriesComplete = (categories) => {
-    // Categories should be a non-empty array
-    return Array.isArray(categories) && categories.length > 0;
-  };
-  const isPortfolioComplete = (portfolio) => {
-    if (!portfolio || typeof portfolio !== 'object') return false;
-
-    const hasValidUrl = typeof portfolio.portfoliourl === 'string' && portfolio.portfoliourl.trim() !== '';
-
-    const hasValidFilepath = Array.isArray(portfolio.filepaths) &&
-      portfolio.filepaths.some(file => typeof file.filepath === 'string' && file.filepath.trim() !== '');
-
-    return hasValidUrl || hasValidFilepath;
-  };
-
-
-  const isPaymentComplete = (payment) => {
-    if (!payment || Object.keys(payment).length === 0) return false;
-
-    // Important payment fields to check:
-    const fieldsToCheck = [
-      'bankcountry',
-      'bankname',
-      'accountholdername',
-      'accountnumber',
-      'bankcode',
-      'branchaddress',
-      'contactnumber',
-      'email',
-      'preferredcurrency',
-      'taxidentificationnumber',
-    ];
-
-    const hasValidField = fieldsToCheck.some(field => {
-      const val = payment[field];
-      return val !== null && val !== undefined && val !== '';
-    });
-
-    // Additionally check paymentmethod array for at least one valid method with details
-    const hasValidPaymentMethod = Array.isArray(payment.paymentmethod) && payment.paymentmethod.some(pm => {
-      return pm.method && pm.method !== null && pm.paymentdetails && pm.paymentdetails !== null;
-    });
-
-    return hasValidField || hasValidPaymentMethod;
-  };
-
-  const markStepComplete = (index) => {
-    const updated = [...completedSteps];
-    if (!updated[index]) {
-      updated[index] = true;
-      setCompletedSteps(updated);
-      localStorage.setItem('completedSteps', JSON.stringify(updated));
-      setLastCompletedStep(index);  // <-- trigger useEffect to refetch
-    }
-
-    if (index + 1 < steps.length) {
-      setCurrentStep(index + 1);
-    } else {
-      setCurrentStep("thankyou");
-    }
-  };
+  }, []);
 
 
   useEffect(() => {
@@ -128,15 +75,26 @@ export const ProfileStepper = () => {
     if (stored) {
       const parsed = JSON.parse(stored);
       setCompletedSteps(parsed);
-
-      // Optionally, set lastCompletedStep to last completed index so data refetches once
       const lastIndex = parsed.lastIndexOf(true);
       if (lastIndex !== -1) setLastCompletedStep(lastIndex);
     }
   }, []);
 
+  const markStepComplete = useCallback((index) => {
+    setCompletedSteps(prev => {
+      const updated = [...prev];
+      if (!updated[index]) {
+        updated[index] = true;
+        localStorage.setItem('completedSteps', JSON.stringify(updated));
+        setLastCompletedStep(index);
+      }
+      return updated;
+    });
 
-  const steps = [
+    setCurrentStep(index + 1 < steps.length ? index + 1 : 'thankyou');
+  }, [steps.length]);
+
+  const steps = useMemo(() => [
     {
       title: 'Personal Information',
       component: (
@@ -154,7 +112,7 @@ export const ProfileStepper = () => {
           data={profileData.social}
           onChange={(updated) => updateProfileSection('social', updated)}
           onNext={() => markStepComplete(1)}
-          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+          onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
         />
       )
     },
@@ -162,28 +120,26 @@ export const ProfileStepper = () => {
       title: 'Categories and Interests',
       component: (
         <CategorySelector
-          data={profileData.categories} // ✅ pass preloaded categories
+          data={profileData.categories}
+          onChange={(updated) => updateProfileSection('categories', updated)}
           onNext={() => markStepComplete(2)}
-          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
-          onChange={(updated) => updateProfileSection('categories', updated)} // Optional, if you want to sync updated categories
+          onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
         />
       )
-    }
-    ,
+    },
     {
       title: 'Portfolio and Work Samples',
       component: (
         <PortfolioUploader
-          data={profileData.portfolio} // ✅ prefill here
+          data={profileData.portfolio}
           onNext={(updated) => {
-            updateProfileSection('portfolio', updated); // save back
+            updateProfileSection('portfolio', updated);
             markStepComplete(3);
           }}
-          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+          onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
         />
       )
-    }
-    ,
+    },
     {
       title: 'Payment Information',
       component: (
@@ -195,142 +151,148 @@ export const ProfileStepper = () => {
         />
       )
     }
-
-  ];
+  ], [profileData, updateProfileSection, markStepComplete]);
 
 
   const getUserProfileCompationData = async () => {
     try {
-
       const res = await axios.get(`user/profile/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
+
       if (res.status === 200) {
         const data = res?.data;
+        if (!data) return;
 
-        if (!data) {
-          console.error("❌ No profile data found in response:", res);
-          return;
-        }
-
-        let parts = {
+        const parts = {
           profile: data.profileParts.p_profile || {},
           social: data.profileParts.p_socials || [],
           categories: data.profileParts.p_categories || [],
           portfolio: data.profileParts.p_portfolios || {},
-          payment: data.profileParts.p_paymentaccounts || null,
+          payment: data.profileParts.p_paymentaccounts || {}
         };
 
-        setProfileData(parts)
+        setProfileData(parts);
 
-        // Check source and profile for your special case
-        if (data.source === "db" && isProfileComplete(parts.profile)) {
-          // Mark all steps complete and show thank you
-          setCompletedSteps([true, true, true, true, true]);
-          setCurrentStep("thankyou");
-        } else {
-          // Normal step completion logic
-          const stepsCompletion = [
-            isProfileComplete(parts.profile),
-            isSocialComplete(parts.social),
-            isCategoriesComplete(parts.categories),
-            isPortfolioComplete(parts.portfolio),
-            isPaymentComplete(parts.payment),
-          ];
+        const isNewUser = !isProfileComplete(parts.profile) &&
+          !isSocialComplete(parts.social) &&
+          !isCategoriesComplete(parts.categories) &&
+          !isPortfolioComplete(parts.portfolio) &&
+          !isPaymentComplete(parts.payment);
 
-          setCompletedSteps(stepsCompletion);
-
-          // Navigate to first incomplete step
-          const firstIncomplete = stepsCompletion.findIndex(done => !done);
-          setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "thankyou");
+        if (isNewUser) {
+          localStorage.removeItem('completedSteps');
+          setCompletedSteps([false, false, false, false, false]);
+          setCurrentStep(0);
+          return;
         }
+
+        const stepsCompletion = [
+          isProfileComplete(parts.profile),
+          true,
+          isCategoriesComplete(parts.categories),
+          isPortfolioComplete(parts.portfolio),
+          isPaymentComplete(parts.payment),
+        ];
+
+        setCompletedSteps(stepsCompletion);
+
+        const firstIncomplete = stepsCompletion.findIndex(done => !done);
+        setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : 'thankyou');
       }
-      } catch (error) {
-        console.error("❌ Error fetching profile data:", error);
-      }
-    };
-
-    useEffect(() => {
-      getUserProfileCompationData();
-    }, [lastCompletedStep]);
+    } catch (error) {
+      console.error("❌ Error fetching profile data:", error);
+    }
+  };
 
 
 
-    return (
-      <>
-        {/* Header */}
-        <div className="profile-header sticky top-0 z-20 bg-whit">
-          <ProfileHeader />
-        </div>
 
-        {/* Mobile Menu Button */}
-        <div className="sm:hidden p-4 flex justify-start">
-          <RiMenu2Line
-            className="w-6 h-6 cursor-pointer"
-            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+  useEffect(() => {
+    getUserProfileCompationData();
+  }, [lastCompletedStep]);
+
+  return (
+    <>
+      {/* Header */}
+      <div className="profile-header sticky top-0 z-20 bg-white">
+        <ProfileHeader />
+      </div>
+
+      {/* Mobile Toggle Button */}
+      <div className="sm:hidden p-4 flex justify-start">
+        <RiMenu2Line
+          className="w-6 h-6 cursor-pointer"
+          onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+        />
+      </div>
+
+      {/* Mobile Sidebar */}
+      <div className={`sm:hidden fixed top-[55px] left-0 h-full w-90 bg-white z-30 transition-transform duration-300 ease-in-out shadow-lg ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-5">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Profile Steps</h2>
+            <button onClick={() => setIsMobileSidebarOpen(false)}>✕</button>
+          </div>
+          <Steps
+            direction="vertical"
+            current={typeof currentStep === 'number' ? currentStep : steps.length}
+            items={steps.map((s) => ({ title: s.title }))}
+            onChange={(step) => {
+              if (completedSteps[step] || step <= currentStep) {
+                setCurrentStep(step);
+                setIsMobileSidebarOpen(false);
+              }
+            }}
           />
         </div>
+      </div>
 
-        {/* Mobile Sidebar - pure, no overlay */}
-        <div
-          className={`sm:hidden fixed top-[55px] left-0 h-full w-90 bg-white z-30 transition-transform duration-300 ease-in-out shadow-lg ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-            }`}
-        >
-          <div className="p-5">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Profile Steps</h2>
-              <button onClick={() => setIsMobileSidebarOpen(false)}>✕</button>
-            </div>
+      {/* Main Layout */}
+      <div className="flex flex-col sm:flex-row bg-[#f5f5f5] min-h-screen p-4 gap-4">
+        {/* Desktop Sidebar */}
+        <div className="hidden sm:block w-full md:w-1/3 lg:w-1/4 p-3">
+          <div className="bg-white p-6 rounded-3xl sticky top-[60px]">
+            <h2 className="text-xl font-semibold mb-4">Profile Completion Steps</h2>
             <Steps
+              current={typeof currentStep === 'number' ? currentStep : steps.length}
               direction="vertical"
-              current={currentStep}
-              items={steps.map((s) => ({ title: s.title }))}
+              items={steps.map((s, index) => ({
+                title: s.title,
+                status:
+                  completedSteps[index]
+                    ? 'finish'
+                    : index === currentStep
+                      ? 'process'
+                      : 'wait',
+              }))}
               onChange={(step) => {
                 if (completedSteps[step] || step <= currentStep) {
                   setCurrentStep(step);
-                  setIsMobileSidebarOpen(false);
                 }
               }}
             />
           </div>
         </div>
 
-        {/* Layout */}
-        <div className="flex flex-col sm:flex-row bg-[#f5f5f5] min-h-screen p-4 gap-4">
-          {/* Desktop Sidebar */}
-          <div className="hidden sm:block w-full md:w-1/3 lg:w-1/4 p-3">
-            <div className="bg-white p-6 rounded-3xl sticky top-[60px]">
-              <h2 className="text-xl font-semibold mb-4">Profile Completion Steps</h2>
-              <Steps
-                current={currentStep}
-                direction="vertical"
-                items={steps.map((s, index) => ({
-                  title: s.title,
-                  status:
-                    completedSteps[index]
-                      ? 'finish'
-                      : index === currentStep
-                        ? 'process'
-                        : 'wait',
-                }))}
-                onChange={(step) => {
-                  if (completedSteps[step] || step <= currentStep) {
-                    setCurrentStep(step);
-                  }
-                }}
-              />
-
-            </div>
-          </div>
-
-          {/* Step Content */}
-          <div className="w-full sm:w-2/3 lg:w-3/4 p-3">
-            {currentStep === 'thankyou' ? <ThankYouScreen /> : steps[currentStep].component}
-          </div>
+        {/* Step Content */}
+        <div className="w-full sm:w-2/3 lg:w-3/4 p-3">
+          <ErrorBoundary>
+            {currentStep === 'thankyou' ? (
+              <ThankYouScreen />
+            ) : (
+              steps[currentStep]?.component || (
+                <div className="p-6 bg-yellow-50 border border-yellow-300 rounded">
+                  <p>⚠️ Invalid step index. Please try reloading the page.</p>
+                </div>
+              )
+            )}
+          </ErrorBoundary>
         </div>
-      </>
-    );
-  };
+      </div>
+    </>
+  );
+};

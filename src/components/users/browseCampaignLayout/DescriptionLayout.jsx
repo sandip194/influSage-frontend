@@ -82,7 +82,7 @@ const DescriptionLayout = () => {
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-40 text-gray-500">
+      <div className="flex justify-center items-center h-40 text-gray-900">
         Loading...
       </div>
     );
@@ -99,13 +99,13 @@ const DescriptionLayout = () => {
       </div>
     );
   if (!campaignDetails)
-    return <div className="text-center py-10 text-gray-500">No campaign details found.</div>;
+    return <div className="text-center py-10 text-gray-900">No campaign details found.</div>;
 
   return (
     <div className="w-full text-sm overflow-x-hidden">
       <button
         onClick={handleBack}
-        className="text-gray-600 flex items-center gap-2 hover:text-gray-900 transition mb-4"
+        className="text-gray-900 flex items-center gap-2 hover:text-gray-900 transition mb-4"
         aria-label="Go back"
       >
         <RiArrowLeftSLine size={20} /> Back
@@ -129,14 +129,14 @@ const DescriptionLayout = () => {
               <div className="flex flex-col gap-4 sm:flex-row justify-between items-start mb-5">
                 <div>
                   <h2 className="font-semibold text-lg">{campaignDetails?.name}</h2>
-                  <p className="text-gray-500 text-sm">{campaignDetails?.businessname}</p>
-                  <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-500 font-medium">
+                  <p className="text-gray-900 text-sm">{campaignDetails?.businessname}</p>
+                  <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-900 font-medium">
                     <div>
-                      <span className="font-semibold text-gray-700">Apply Before:</span>{" "}
+                      <span className="font-semibold text-gray-900">Apply Before:</span>{" "}
                       {campaignDetails.applicationenddate || "N/A"}
                     </div>
                     <div>
-                      <span className="font-semibold text-gray-700">Campaign Start:</span>{" "}
+                      <span className="font-semibold text-gray-900">Campaign Start:</span>{" "}
                       {campaignDetails.startdate || "N/A"}
                     </div>
 
@@ -146,13 +146,13 @@ const DescriptionLayout = () => {
                 <div className="flex items-center gap-3">
                   <button
                     aria-label="Stack"
-                    className="p-2 rounded-full border border-gray-300 text-gray-500 hover:text-black hover:border-gray-500 transition"
+                    className="p-2 rounded-full border border-gray-300 text-gray-900 hover:text-black hover:border-gray-500 transition"
                   >
                     <RiStackLine size={16} />
                   </button>
                   <button
                     aria-label="Men"
-                    className="p-2 rounded-full border border-gray-300 text-gray-500 hover:text-black hover:border-gray-500 transition"
+                    className="p-2 rounded-full border border-gray-300 text-gray-900 hover:text-black hover:border-gray-500 transition"
                   >
                     <RiMenLine size={16} />
                   </button>
@@ -213,11 +213,11 @@ const DescriptionLayout = () => {
           <div className="bg-white p-6 rounded-2xl ">
             <div className="pb-6 border-b border-gray-200">
               <h3 className="font-semibold text-lg mb-3">Campaign Description</h3>
-              <p className="text-gray-700 leading-relaxed mb-6">
+              <p className="text-gray-900 leading-relaxed mb-6">
                 {campaignDetails.description || "No description available."}
               </p>
 
-              <div className="flex gap-2 items-center justify-start mb-2 text-gray-400">
+              <div className="flex gap-2 items-center justify-start mb-2  font-semibold text-lg">
                 <span>Categories</span>
               </div>
               {campaignDetails.campaigncategories?.map(({ categoryname, categoryid }) => (
@@ -229,12 +229,12 @@ const DescriptionLayout = () => {
 
             <div className="pt-6 border-b border-gray-200">
               <h3 className="font-semibold text-lg mb-4">Requirements</h3>
-              <ul className="space-y-3 text-gray-700">
+              <ul className="space-y-3 text-gray-900">
                 {requirements.map(({ label, value }, index) => (
                   <li key={index} className="flex items-start gap-3">
-                    <RiCheckLine size={16} className="text-gray-500 flex-shrink-0 border rounded" />
+                    <RiCheckLine size={16} className="text-gray-900 flex-shrink-0 border rounded" />
                     <span>
-                      {label} <strong>{value}</strong>
+                     <strong>{label}</strong>  {value}
                     </span>
                   </li>
                 ))}
@@ -247,7 +247,7 @@ const DescriptionLayout = () => {
                     {campaignDetails.hashtags.map(({ hashtag }, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold"
+                        className="px-3 py-1 bg-gray-100 text-gray-900 rounded-full text-xs font-semibold"
                       >
                         {hashtag}
                       </span>
@@ -340,7 +340,7 @@ const DescriptionLayout = () => {
                               href={fileUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center justify-center text-gray-500 text-xs w-full h-full"
+                              className="flex items-center justify-center text-gray-900 text-xs w-full h-full"
                             >
                               View File
                             </a>
@@ -363,18 +363,18 @@ const DescriptionLayout = () => {
             <h3 className="font-semibold text-lg mb-5">About Brand</h3>
             <div className="space-y-3">
               <div>
-                <p className="text-gray-500">Brand Name</p>
-                <p className="font-medium text-gray-900">{campaignDetails.branddetails?.aboutbrand || "N/A"}</p>
+                <p className="font-medium text-gray-900">Brand Name</p>
+                <p className=" text-gray-900">{campaignDetails.branddetails?.aboutbrand || "N/A"}</p>
               </div>
               <hr className="border-gray-200" />
               <div>
-                <p className="text-gray-500">Location</p>
-                <p className="font-medium text-gray-900">{campaignDetails.branddetails?.location || "N/A"}</p>
+                <p className="font-medium text-gray-900">Location</p>
+                <p className=" text-gray-900">{campaignDetails.branddetails?.location || "N/A"}</p>
               </div>
               <hr className="border-gray-200" />
               <div>
-                <p className="text-gray-500">Industry</p>
-                <p className="font-medium text-gray-900">{campaignDetails.branddetails?.Industry || "N/A"}</p>
+                <p className="font-medium text-gray-900">Industry</p>
+                <p className=" text-gray-900">{campaignDetails.branddetails?.Industry || "N/A"}</p>
               </div>
             </div>
           </div>
@@ -382,7 +382,7 @@ const DescriptionLayout = () => {
           {/* Provider Content Types with optional captions */}
           <div className="bg-white rounded-2xl p-6 w-full text-sm   ">
             <h3 className="font-semibold text-lg mb-4">Platform Content Types</h3>
-            <ul className="space-y-3 text-gray-800">
+            <ul className="space-y-3 text-gray-900">
               {campaignDetails.providercontenttype?.map(
                 ({ providercontenttypeid, providername, contenttypename, caption }) => (
                   <li key={providercontenttypeid} className="border-b border-gray-200 pb-2 last:border-none">
@@ -390,13 +390,13 @@ const DescriptionLayout = () => {
                       {providername} - {contenttypename}
                     </p>
                     {caption && (
-                      <p className="text-gray-600 text-sm italic mt-1">{caption}</p>
+                      <p className="text-gray-900 text-sm italic mt-1">{caption}</p>
                     )}
                   </li>
                 )
               )}
               {!campaignDetails.providercontenttype?.length && (
-                <li className="text-gray-500">No platform content types available.</li>
+                <li className="text-gray-900">No platform content types available.</li>
               )}
             </ul>
           </div>

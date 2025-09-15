@@ -230,7 +230,7 @@ const AppliedLayout = () => {
 
                     <Tooltip title="View Details">
                       <Link to={`/dashboard/browse/applied-campaign-details/${campaign.id}`} className="flex-shrink-0">
-                        <div className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition">
+                        <div className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition">
                           <RiEyeLine size={20} />
                         </div>
                       </Link>

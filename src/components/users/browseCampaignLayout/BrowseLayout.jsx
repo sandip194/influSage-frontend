@@ -398,7 +398,7 @@ const Browse = () => {
   <Tooltip title="Save Campaign">
     <button
       onClick={() => handleSave(campaign.id)}
-      className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition"
+      className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition"
     >
       {campaign.campaigsaved ? <RiFileCopyFill size={20} /> : <RiFileCopyLine size={20} />}
     </button>
@@ -412,7 +412,7 @@ const Browse = () => {
           : `/dashboard/browse/description/${campaign.id}`
       }
     >
-      <button className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition">
+      <button className="border bg-[#0f122f] text-white border-gray-200 w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition">
         <RiEyeLine size={20} />
       </button>
     </Link>
@@ -555,7 +555,7 @@ const Browse = () => {
                         languages: [],
                         maxbudget: "",
                         minbudget: "",
-                        sortby: "",
+                        sortby: "createddate",
                         sortorder: "desc",
                         pagenumber: 1,
                         pagesize: 10,

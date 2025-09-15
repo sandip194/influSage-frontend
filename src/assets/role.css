@@ -179,3 +179,9 @@
   }
 
 }
+@media (max-width: 420px){
+.login-container{
+    height: auto;
+    
+  }
+}
