@@ -133,7 +133,8 @@ input::-webkit-credentials-auto-fill-button {
 
 .login-card-right input[type="text"],
 .login-card-right input[type="password"],
-.login-card-right input[type="number"] {
+.login-card-right input[type="number"],
+ .login-card-right input[type="email"]{
   width: 100%;
   padding: 10px;
   border: 1px solid #d1d5db;

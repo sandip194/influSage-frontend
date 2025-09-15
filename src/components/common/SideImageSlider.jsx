@@ -42,7 +42,7 @@ const SideImageSlider = () => {
   const { image, title, description } = slides[currentSlide];
 
   return (
-    <div className="relative flex-1 min-h-full hidden md:flex items-start justify-start p-8 text-white overflow-hidden">
+    <div className="relative flex-1 min-h-full  md:flex items-start justify-start p-8 text-white">
       {/* Background image */}
       <img
         src={image}

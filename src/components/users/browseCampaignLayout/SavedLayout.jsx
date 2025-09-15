@@ -266,7 +266,7 @@ const SavedLayout = () => {
                     <Tooltip title="Unsave This Campaign">
                       <button
                         onClick={() => handleSave(campaign.id)}
-                        className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition"
+                        className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition"
                       >
                         <RiFileCopyFill size={20} />
 
@@ -276,7 +276,7 @@ const SavedLayout = () => {
 
                     <Tooltip title="View Details">
                       <Link to={`/dashboard/browse/description/${campaign.id}`}>
-                        <button className="border border-gray-200 bg-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-gray-100 transition">
+                        <button className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition">
                           <RiEyeLine size={20} />
                         </button>
                       </Link>
