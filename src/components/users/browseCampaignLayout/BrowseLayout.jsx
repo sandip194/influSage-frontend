@@ -17,6 +17,7 @@ import { useSelector } from 'react-redux';
 
 
 
+
 const Browse = () => {
   const [showFilter, setShowFilter] = useState(false);
 
@@ -383,41 +384,42 @@ const Browse = () => {
                 </div>
 
                 <div className="flex items-center justify-between mt-auto gap-4 min-w-0">
-  {campaign.campaignapplied ? (
-    <button className="flex-1 py-2 rounded-3xl bg-[#9d9d9d] cursor-pointer text-white font-semibold transition min-w-0 truncate">
-      Applied
-    </button>
-  ) : (
-    <Link to={`/dashboard/browse/apply-now/${campaign.id}`} className="flex-1 min-w-0">
-      <button className="py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition w-full truncate">
-        Apply Now
-      </button>
-    </Link>
-  )}
+                  {campaign.campaignapplied ? (
+                    <button className="flex-1 py-2 rounded-3xl bg-[#9d9d9d] cursor-pointer text-white font-semibold transition min-w-0 truncate">
+                      Applied
+                    </button>
+                  ) : (
+                    <Link to={`/dashboard/browse/apply-now/${campaign.id}`} className="flex-1 min-w-0">
+                      <button className="py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition w-full truncate">
+                        Apply Now
+                      </button>
+                    </Link>
+                  )}
 
-  <Tooltip title="Save Campaign">
-    <button
-      onClick={() => handleSave(campaign.id)}
-      className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition"
-    >
-      {campaign.campaigsaved ? <RiFileCopyFill size={20} /> : <RiFileCopyLine size={20} />}
-    </button>
-  </Tooltip>
+                  <Tooltip title="Save Campaign">
+                    <button
+                      onClick={() => handleSave(campaign.id)}
+                      className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition"
+                    >
+                      {campaign.campaigsaved ? <RiFileCopyFill size={20} /> : <RiFileCopyLine size={20} />}
+                    </button>
+                  </Tooltip>
 
-  <Tooltip title="View Details">
-    <Link
-      to={
-        campaign.campaignapplied
-          ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
-          : `/dashboard/browse/description/${campaign.id}`
-      }
-    >
-      <button className="border bg-[#0f122f] text-white border-gray-200 w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition">
-        <RiEyeLine size={20} />
-      </button>
-    </Link>
-  </Tooltip>
-</div>
+                  <Tooltip title="View Details">
+                    <Link
+                      to={
+                        campaign.campaignapplied
+                          ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
+                          : `/dashboard/browse/description/${campaign.id}`
+                      }
+                    >
+                      <button className="border bg-[#0f122f] text-white border-gray-200 w-10 h-10 p-0 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition">
+                        <RiEyeLine size={20} />
+
+                      </button>
+                    </Link>
+                  </Tooltip>
+                </div>
 
               </div>
             )))

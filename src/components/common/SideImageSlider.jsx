@@ -42,29 +42,31 @@ const SideImageSlider = () => {
   const { image, title, description } = slides[currentSlide];
 
   return (
-    <div className="relative flex-1 min-h-full  md:flex items-start justify-start p-8 text-white">
-      {/* Background image */}
+    <>
       <img
         src={image}
         alt="Slide"
         className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000"
-      />
+      />  
 
-      {/* Dark gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0d132da4] z-10" />
+        {/* <div className="relative flex-1 min-h-full  md:flex items-start justify-start p-8 text-white">
 
-      {/* Content */}
-      <div className="relative z-20 max-w-sm">
-        <div className="mb-5">
-          <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
-        </div>
-        <div className={`branding ${fade ? '' : 'fade-out'}`}>
-          <h1 className="text-md text-[#0f1533] font-bold mb-0">{title}</h1>
-          <h1 className="text-sm text-[#0f1533] leading-relaxed">{description}</h1>
-        </div>
 
-      </div>
-    </div>
+          <div className="relative z-20 max-w-sm">
+            <div className="mb-5">
+              <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+            </div>
+            <div className={`branding ${fade ? '' : 'fade-out'}`}>
+              <h1 className="text-md text-[#0f1533] font-bold mb-0">{title}</h1>
+              <h1 className="text-sm text-[#0f1533] leading-relaxed">{description}</h1>
+            </div>
+
+          </div>
+
+        </div> */}
+    </>
+
   );
 };
 

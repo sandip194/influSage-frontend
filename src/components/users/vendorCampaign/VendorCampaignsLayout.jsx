@@ -98,7 +98,7 @@ const VendorCampaignsLayout = () => {
           <p className="text-gray-600 text-sm">Your Campaigns Overview</p>
         </div>
         <button
-          onClick={() => navigate("/vendor-dashboard/my-campaigns")}
+          onClick={() => navigate("/vendor-dashboard/vendor-campaign/my-campaigns")}
           className="flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-[#141843] text-white font-medium
                     hover:bg-[#1d214f] transition-all duration-200"
         >

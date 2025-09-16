@@ -163,13 +163,16 @@ export const LoginForm = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card h-90vh">
-        <Suspense fallback={<div className="loader">Loading...</div>}>
-          <SideImageSlider />
-        </Suspense>
+    <div className="login-container object-cover">
+      <Suspense fallback={<div className="loader">Loading...</div>}>
+        <SideImageSlider />
+      </Suspense>
+      <div className="relative z-20  login-card">
 
         <div className="login-card-right">
+          <div className="mb-2 ">
+            <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+          </div>
           <form onSubmit={handleSubmit(submitHandler)}>
             <div className="header-text">
               <h2>Welcome Back</h2>
@@ -239,7 +242,7 @@ export const LoginForm = () => {
               </div>
             </div>
 
-            <div className="signup-link">
+            <div className="signup-link mb-4">
               Don’t have an account? <Link to="/role">Create New Account</Link>
             </div>
           </form>

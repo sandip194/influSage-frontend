@@ -8,6 +8,8 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
   const [form] = Form.useForm();
   const [providers, setProviders] = useState([]);
   const { token, userId } = useSelector(state => state.auth);
+  const [customValidationError, setCustomValidationError] = useState(null);
+
 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -53,20 +55,24 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
       }
 
       const socialaccountjson = platforms
-        .filter(p => values[p.urlField]) // Only if URL is provided
+        .filter(p => values[p.urlField])
         .map(p => ({
           providerid: p.providerid,
           handleslink: values[p.urlField],
           nooffollowers: values[p.followersField] || 0,
         }));
 
-      // Validate: followers >= 1000 if url entered
-      for (let item of socialaccountjson) {
-        if (item.handleslink && item.nooffollowers < 1000) {
-          message.error(`You must have at least 1000 followers on ${platforms.find(p => p.providerid === item.providerid)?.name}`);
-          return;
-        }
+      const hasValidEntry = socialaccountjson.some(
+        (item) => item.handleslink && item.nooffollowers >= 1000
+      );
+
+      if (!hasValidEntry) {
+        setCustomValidationError("Please fill at least one social media URL and 1000+ followers.");
+        return;
       }
+
+      // Clear error if passed
+      setCustomValidationError(null);
 
       const formData = new FormData();
       formData.append('socialaccountjson', JSON.stringify(socialaccountjson));
@@ -81,7 +87,6 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
         }
       );
 
-      console.log('✅ Social media data sent:', response.data);
       message.success('Social media details submitted!');
       if (onNext) onNext();
 
@@ -91,7 +96,8 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
     }
   };
 
-  // Prefill values
+
+
   // Prefill values
   useEffect(() => {
     if (data && Array.isArray(data) && platforms.length > 0) {
@@ -209,6 +215,13 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
               </div>
             </div>
           ))}
+
+          {customValidationError && (
+            <div className="text-red-500 font-medium mb-4">
+              {customValidationError}
+            </div>
+          )}
+
 
         </div>
 

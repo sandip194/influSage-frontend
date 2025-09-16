@@ -437,13 +437,13 @@ const EditLayout = () => {
                 </div>
 
                 {/* Deadline (Optional - You may remove this if backend doesn't provide) */}
-                <div className="flex-row items-center justify-center gap-2">
+                {/* <div className="flex-row items-center justify-center gap-2">
                   <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
                     <RiCalendarLine className="w-5" />
                     <span>Deadline</span>
                   </div>
                   <p className="text-gray-500">Not specified</p>
-                </div>
+                </div> */}
               </div>
             </div>
 

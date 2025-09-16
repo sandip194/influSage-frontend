@@ -192,7 +192,7 @@ export const ProfileStepper = () => {
 
         const stepsCompletion = [
           isProfileComplete(parts.profile),
-          true,
+          isSocialComplete(parts.social),
           isCategoriesComplete(parts.categories),
           isPortfolioComplete(parts.portfolio),
           isPaymentComplete(parts.payment),

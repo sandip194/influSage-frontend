@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { RiEyeLine, RiEyeOffLine } from '@remixicon/react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { Modal } from 'antd';
+
 
 import '../../assets/login.css';
 
@@ -47,12 +49,17 @@ export const Signup = () => {
 
   return (
     <div className="login-container">
-      <div className="login-card h-90vh">
-        <Suspense fallback={<div className="loader">Loading...</div>}>
-          <SideImageSlider />
-        </Suspense>
+      <Suspense fallback={<div className="loader">Loading...</div>}>
+        <SideImageSlider />
+      </Suspense>
+
+      <div className="relative z-20 login-card">
 
         <div className="login-card-right">
+          <div className="mb-2 ">
+            <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+          </div>
+          
           <form onSubmit={handleSubmit(submitHandler)}>
             <h2>Create Account</h2>
             <p>Start your journey with InfluSage today!</p>
@@ -140,7 +147,7 @@ export const Signup = () => {
               {loading ? "Signing Up..." : "Sign Up"}
             </button>
 
-            <div className="signup-link">
+            <div className="signup-link mb-4">
               Already have an account? <Link to="/login">Login</Link>
             </div>
           </form>
@@ -149,20 +156,30 @@ export const Signup = () => {
 
       {/* Terms & Conditions Modal */}
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>Terms and Conditions</h3>
-            <p className="modal-text">
-              {/* Replace with real T&C */}
-              By using this platform, you agree to comply with our policies and guidelines.
-              <br /><br />
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse facilisis nulla in orci porttitor, at placerat risus dapibus...
-            </p>
-            <button className="modal-close-btn" onClick={() => setShowModal(false)}>
-              Close
-            </button>
-          </div>
-        </div>
+        <Modal
+          title="Terms and Conditions"
+          open={showModal}
+          onCancel={() => setShowModal(false)}
+          footer={null}
+          centered
+          width={700}
+          bodyStyle={{ maxHeight: '60vh', overflowY: 'auto' }}
+        >
+          <p>
+            {/* Replace this content with your actual Terms & Conditions */}
+            By using this platform, you agree to comply with our policies and guidelines.
+            <br /><br />
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse facilisis nulla in orci porttitor, at placerat risus dapibus.
+            Morbi blandit suscipit sapien non tincidunt. Proin lacinia diam nec turpis posuere, eget vehicula est gravida.
+            Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas...
+            <br /><br />
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse facilisis nulla in orci porttitor, at placerat risus dapibus.
+            Morbi blandit suscipit sapien non tincidunt. Proin lacinia diam nec turpis posuere, eget vehicula est gravida.
+            Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas...
+            
+          </p>
+        </Modal>
+
       )}
     </div>
   );

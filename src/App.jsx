@@ -49,6 +49,8 @@ import VendorActivity from './components/users/vendorCampaign/VendorActivity';
 import VendorMessage from './components/users/vendorCampaign/VendorMessage';
 import VendorFilesMedia from './components/users/vendorCampaign/VendorFilesMedia';
 import VendorPayment from './components/users/vendorCampaign/VendorPayment';
+import OffersLayout from './components/vendor/offers/OffersLayout';
+import ViewAllOffers from './components/vendor/offers/ViewAllOffers';
 
 const App = () => {
 
@@ -127,8 +129,8 @@ const App = () => {
                                         <Route path='/vendor-dashboard' element={<VenderDashboardLayout />}>
                                                 <Route path='' element={<VenderDashboardPage />} />
                                                 <Route path='browse-influencers' element={<BrowseInfluencerPage />} />
-                                                <Route path='my-campaigns' element={<CreateCampaign />} />
-                                                <Route path='my-campaigns/create-campaign' element={<CampaignWizard />} />
+                                                <Route path='vendor-campaign/my-campaigns' element={<CreateCampaign />} />
+                                                <Route path='vendor-campaign/create-campaign' element={<CampaignWizard />} />
                                                 <Route path='vendor-campaign' element={ <VendorCampaign/>} />
                                                 <Route path='vendor-campaign/campaignDetails/' element={<CampaignDetails />} />
                                                 <Route path='vendor-campaign/vendoractivity/' element={<VendorActivity />} />
@@ -136,6 +138,10 @@ const App = () => {
                                                 <Route path='vendor-campaign/vendorFilesMedia/' element={<VendorFilesMedia />} />
                                                 <Route path='vendor-campaign/payment/' element={<VendorPayment />} />
                                                 <Route path='messages' element={<ChatAppPage />} />
+
+
+                                                <Route path='offers' element={<OffersLayout/>}/>
+                                                <Route path='offers/view-all-offers' element={<ViewAllOffers/>}/>
                                         </Route>
                                         <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
                                 </Route>

@@ -52,13 +52,18 @@ const Role = () => {
 
   return (
     <div className="login-container">
-      <div className="login-card h-90vh">
-        <Suspense fallback={<div className="loader">Loading...</div>}>
-          <SideImageSlider />
-        </Suspense>
+      <Suspense fallback={<div className="loader">Loading...</div>}>
+        <SideImageSlider />
+      </Suspense>
 
+      <div className="relative z-20 login-card h-90vh">
+        
         <div className="login-right">
+
           <div className="form-box">
+            <div className="mb-2 ">
+          <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+        </div>
             <h2>Select Your Role</h2>
             <p>Select your role based on your requirements</p>
 
@@ -66,9 +71,8 @@ const Role = () => {
               {roles.map((role) => (
                 <div
                   key={role.id}
-                  className={`role-box flex-col items-center justify-items-center ${
-                    Number(selectedRole) === role.id ? "selected" : ""
-                  }`}
+                  className={`role-box flex-col items-center justify-items-center ${Number(selectedRole) === role.id ? "selected" : ""
+                    }`}
                   onClick={() => {
                     setSelectedRole(role.id);
                     setShowError(false); // Hide error on new selection

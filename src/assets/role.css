@@ -13,13 +13,15 @@
 }
 
 .login-card {
-  display: flex;
-  width: 900px;
-  max-width: 95%;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  background: white;
+   background: #ffffff6e; /* translucent white */
+  backdrop-filter: blur(10px); /* ⬅️ This is the blur effect */
+  -webkit-backdrop-filter: blur(10px); /* Safari support */
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  width: 100%;
+  max-width: 420px;
+  z-index: 10;
+  position: relative;
 }
 
 /* Left branding panel */
@@ -54,6 +56,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
 }
 
 .form-box {
@@ -71,7 +74,7 @@
 .form-box p {
   font-size: 14px;
   margin-bottom:5px;
-  color: #666;
+  color: #282828;
 }
 
 .role-options {
@@ -137,7 +140,7 @@
 .signup-link {
   font-size: 14px;
   margin-top: 10px;
-  color: #555;
+  color: #282828;
 }
 
 .signup-link span {
@@ -157,7 +160,8 @@
   }
   .login-card {
     flex-direction: column;
-    height: auto;
+    height: 100%;
+    overflow-y: scroll;
     margin: 20px 0;
   }
 
@@ -179,9 +183,9 @@
   }
 
 }
-@media (max-width: 420px){
+/* @media (max-width: 420px){
 .login-container{
     height: auto;
     
   }
-}
+} */

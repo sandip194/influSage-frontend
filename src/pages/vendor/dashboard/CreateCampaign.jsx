@@ -26,7 +26,7 @@ const CreateCampaign = () => {
   const navigate = useNavigate();
 
   const handleCreateCampaign = () => {
-    navigate('create-campaign');
+    navigate('/vendor-dashboard/vendor-campaign/create-campaign');
   };
 
   return (
