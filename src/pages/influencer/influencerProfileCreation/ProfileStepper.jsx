@@ -91,8 +91,8 @@ export const ProfileStepper = () => {
       return updated;
     });
 
-    setCurrentStep(index + 1 < steps.length ? index + 1 : 'thankyou');
-  }, [steps.length]);
+    setCurrentStep(index + 1 < steps?.length ? index + 1 : 'thankyou');
+  }, []);
 
   const steps = useMemo(() => [
     {
