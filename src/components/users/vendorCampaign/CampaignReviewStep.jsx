@@ -115,13 +115,6 @@ const influencerTiers =
     (t) => t.influencertiername
   ) || [];
 
-  // const gendersPayload = Array.isArray(p_vendorinfojson.genderid)
-  //     ? p_vendorinfojson.genders.map((g) => ({
-  //         genderid: g.genderid,
-  //         gendername: g.gendername || "Unspecified",
-  //       }))
-  //     : [];
-
 const genders = Array.isArray(p_vendorinfojson.genders)
   ? p_vendorinfojson.genders.map((g) => ({
       genderid: g.genderid,
@@ -144,16 +137,16 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
       }
 
       const payload = {
-        userid: userId,
-        objective: campaignData?.p_objectivejson || {},
-       vendorinfo: {
+      userid: userId,
+      objective: campaignData?.p_objectivejson || {},
+      vendorinfo: {
         ...p_vendorinfojson,
-        genders
+        genders,
       },
-        campaign: campaignData?.p_campaignjson || {},
-        references: campaignData?.p_campaignfilejson || [],
-        contenttypes: campaignData?.p_contenttypejson || [],
-      };
+      campaign: campaignData?.p_campaignjson || {},
+      references: campaignData?.p_campaignfilejson || [],
+      contenttypes: campaignData?.p_contenttypejson || [],
+    };
 
       const res = await axios.post("/vendor/finalize-campaign", payload, {
         headers: {
@@ -237,16 +230,13 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
                     : "—"}
                 </div>
 
-                {/* Gender */}
-                <div>
+              <div>
                   <div className="flex gap-2 items-center mb-2 text-gray-400">
                     <RiMenLine className="w-5" />
                     <span> Gender </span>
                   </div>
                   {genders.length > 0
-                    ? genders.map((g) => (
-                        <p key={g.genderid}>{g.gendername}</p>
-                      ))
+                    ? genders.map((g) => <p key={g.genderid}>{g.gendername}</p>)
                     : "—"}
                 </div>
               </div>

@@ -160,41 +160,42 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
   };
 
   const handleContinue = async () => {
-    const newErrors = {
-      genderid: !formData.genderid.length,
-      isproductshipping: formData.isproductshipping === null,
-      campaigninfluencertiers: formData.campaigninfluencertiers.length === 0,
-      campaignlanguages: formData.campaignlanguages.length === 0,
-    };
+     const newErrors = {
+    genderid: !formData.genderid.length,
+    isproductshipping: formData.isproductshipping === null,
+    campaigninfluencertiers: formData.campaigninfluencertiers.length === 0,
+    campaignlanguages: formData.campaignlanguages.length === 0,
+  };
 
-    setErrors(newErrors);
-    if (Object.values(newErrors).some((e) => e)) return;
+  setErrors(newErrors);
+  if (Object.values(newErrors).some((e) => e)) return;
 
-    // Map IDs back to full objects for JSON
-    const campaigninfluencertiers = formData.campaigninfluencertiers.map(
-      (id) => {
-        const tier = influencerTiers.find((t) => t.id === id);
-        return { influencertierid: tier.id, influencertiername: tier.name };
-      }
-    );
+  // Map IDs back to full objects
+  const campaigninfluencertiers = formData.campaigninfluencertiers.map((id) => {
+    const tier = influencerTiers.find((t) => t.id === id);
+    return { influencertierid: tier.id, influencertiername: tier.name };
+  });
 
-    const campaignlanguages = formData.campaignlanguages.map((id) => {
-      const lang = languages.find((l) => l.id === id);
-      return { languageid: lang.id, languagename: lang.name };
-    });
+  const campaignlanguages = formData.campaignlanguages.map((id) => {
+    const lang = languages.find((l) => l.id === id);
+    return { languageid: lang.id, languagename: lang.name };
+  });
 
-    const gendersSelected = formData.genderid.map((id) => {
-    const gender = genders.find((g) => g.id === id);
-    return gender ? { genderid: gender.id, gendername: gender.name } : null;
-  }).filter(Boolean);
+  const gendersSelected = formData.genderid
+    .map((id) => {
+      const gender = genders.find((g) => g.id === id);
+      return gender
+        ? { genderid: gender.id, gendername: gender.name }
+        : null;
+    })
+    .filter(Boolean);
 
-    const p_vendorinfojson = {
-      genderid: gendersSelected,
-      isproductshipping: formData.isproductshipping,
-      campaigninfluencertiers,
-      campaignlanguages,
-    };
-
+  const p_vendorinfojson = {
+    genders: gendersSelected,
+    isproductshipping: formData.isproductshipping,
+    campaigninfluencertiers,
+    campaignlanguages,
+  };
     try {
       setLoading(true);
       const fd = new FormData();
