@@ -12,11 +12,11 @@ export const ForgotPassword = () => {
   const onSubmit = async (data) => {
     if (loading) return; // ✅ prevent multiple calls
     setLoading(true); // ✅ set loading true before API call
-    
+
     try {
       const response = await axios.post('/user/forgot-password', { email: data.email });
       if (response.status === 200) {
-        toast.success(response.data.message );
+        toast.success(response.data.message);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong!");
@@ -41,9 +41,13 @@ export const ForgotPassword = () => {
 
   return (
     <div className="login-container">
-      <div className="login-card h-90vh">
-        <SideImageSlider/>
+      <SideImageSlider />
+      <div className="relative z-20 login-card">
+
         <div className="login-card-right">
+          <div className="mb-2 ">
+            <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+          </div>
           <form onSubmit={handleSubmit(onSubmit)}>
             <h2>Forgot Password</h2>
             <p>Please enter your email to reset your password.</p>

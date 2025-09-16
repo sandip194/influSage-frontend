@@ -13,6 +13,7 @@ import { NavLink } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../../features/auth/authSlice';
+import { RiPriceTag3Line } from 'react-icons/ri';
 
 
 const Sidebar = forwardRef((props, ref) => {
@@ -51,7 +52,8 @@ const Sidebar = forwardRef((props, ref) => {
     const generalItems = [
         { icon: <RiGalleryView2 className="w-5" />, label: "Dashboard", to: "/vendor-dashboard", end: true },
         { icon: <RiSearch2Line className="w-5" />, label: "Browse Influencer", to: "/vendor-dashboard/browse-influencers" },
-        { icon: <RiStackLine className="w-5" />, label: "My Campaign", to: "/vendor-dashboard/vendor-campaign" },
+        { icon: <RiStackLine className="w-5" />, label: "My Campaign", to: "/vendor-dashboard/vendor-campaign" },  
+        { icon: <RiPriceTag3Line className="w-5" />, label: "Offers", to: "/vendor-dashboard/offers" },
         { icon: <RiMessage3Line className="w-5" />, label: "Messages", to: "/vendor-dashboard/messages" },
     ];
 

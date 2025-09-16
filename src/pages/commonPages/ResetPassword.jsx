@@ -57,9 +57,14 @@ export const ResetPassword = () => {
 
     return (
         <div className='login-container'>
-            <div className="login-card h-90vh">
-                <SideImageSlider/>
+            <SideImageSlider />
+            <div className="relative z-20 login-card">
+
                 <div className="login-card-right">
+                    <div className="mb-2 ">
+                        <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+                    </div>
+
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <h2>Reset Password</h2>
                         <p>Please enter your new password.</p>
