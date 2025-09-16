@@ -120,7 +120,7 @@ export const LoginForm = () => {
   const handleGoogleLogin = useCallback(() => {
     const storedRole = localStorage.getItem("selected_role");
     const backendUrl = BASE_URL.replace(/\/$/, "");
-    window.location.href = `=${backendUrl}/auth/google?roleid${storedRole}`;
+    window.location.href = `${backendUrl}/auth/google/?roleid=${storedRole}`;
   }, [BASE_URL]);
 
   const handleFacebookLogin = useCallback(() => {

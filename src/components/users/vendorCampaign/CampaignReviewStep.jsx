@@ -201,7 +201,7 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
               <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4">
                 {/* Platforms */}
                 <div>
-                  <div className="flex gap-2 items-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center mb-2 text-gray-500">
                     <RiStackLine className="w-5" />
                     <span> Platforms</span>
                   </div>
@@ -212,7 +212,7 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
 
                 {/* Budget */}
                 <div>
-                  <div className="flex gap-2 items-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center mb-2 text-gray-500">
                     <RiMoneyRupeeCircleLine className="w-5" />
                     <span> Budget </span>
                   </div>
@@ -221,7 +221,7 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
 
                 {/* Languages */}
                 <div>
-                  <div className="flex gap-2 items-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center mb-2 text-gray-500">
                     <RiTranslate className="w-5" />
                     <span> Languages </span>
                   </div>
@@ -231,7 +231,7 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
                 </div>
 
               <div>
-                  <div className="flex gap-2 items-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center mb-2 text-gray-500">
                     <RiMenLine className="w-5" />
                     <span> Gender </span>
                   </div>
@@ -249,13 +249,13 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
 
             {/* Categories */}
             <div className="py-4 border-b border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Categories</p>
-              <div className="flex flex-wrap gap-2">
+              <p className="text-sm font-semibold mb-1">Categories</p>
+              <div className="flex flex-wrap gap-2 my-2">
                 {campaignData?.p_campaigncategoyjson?.[0]?.categories?.length > 0 ? (
                   campaignData.p_campaigncategoyjson[0].categories.slice(0, 5).map((subcat) => (
                     <span
                       key={subcat.categoryid}
-                      className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium"
+                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
                     >
                       {subcat.categoryname}
                     </span>
@@ -280,45 +280,42 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
             {/* Requirements */}
             <div className="requirements py-4 border-b border-gray-200">
               <h3 className="font-semibold text-lg mb-4">Requirements</h3>
-              <ul className="space-y-2 text-gray-700">
+              <ul className="space-y-2 font-semibold">
                 <li className="flex items-start gap-2">
                   <RiCheckboxCircleFill size={20} />
-                  <span>
-                    Post Duration:{" "}
-                    <strong>
-                      {p_objectivejson.postdurationdays || 0} days
-                    </strong>
-                  </span>
+               <span>
+                  Post Duration : <span className="text-gray-500">{p_objectivejson.postdurationdays || 0} days</span>
+                </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <RiCheckboxCircleFill size={20} />
                   <span>
-                    Include Vendor Profile Link:{" "}
-                    <strong>
+                    Include Vendor Profile Link :{" "}
+                    <span className="text-gray-500">
                       {p_objectivejson.isincludevendorprofilelink
                         ? "Yes"
                         : "No"}
-                    </strong>
+                    </span>
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <RiCheckboxCircleFill size={20} />
                   <span>
-                    Product Shipping:{" "}
-                    <strong>
+                    Product Shipping :{" "}
+                    <span className="text-gray-500">
                       {p_vendorinfojson.isproductshipping ? "Yes" : "No"}
-                    </strong>
+                    </span>
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <RiCheckboxCircleFill size={20} />
                   <span>
-                    Influencer Tiers:{" "}
-                    <strong>
+                    Influencer Tiers :{" "}
+                    <span className="text-gray-500">
                       {influencerTiers.length > 0
                         ? influencerTiers.join(", ")
                         : "—"}
-                    </strong>
+                    </span>
                   </span>
                 </li>
               </ul>
@@ -459,40 +456,40 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="font-semibold text-lg">Campaign Details</h3>
             <div className="py-4 border-b border-gray-200">
-              <p className="text-sm text-gray-500 mb-1 text-justify">
+              <p className="text-sm font-semibold mb-1 text-justify">
                 About Brand
               </p>
-              <p>{p_campaignjson.branddetail || "—"}</p>
+              <p className='text-gray-500'>{p_campaignjson.branddetail || "—"}</p>
             </div>
             <div className="py-4 border-b border-gray-200">
-            <p className="text-sm text-gray-500 mb-1 font-semibold">Campaign Dates</p>
+            <p className="text-sm mb-1 font-semibold">Campaign Dates</p>
             <div className="flex justify-between">
               <div>
-                <p className="text-sm text-gray-500 mb-1 my-2">Start Date</p>
-                <p>{p_campaignjson.startdate || "—"}</p>
+                <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
+                <p className='text-gray-500'>{p_campaignjson.startdate || "—"}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1 my-2">End Date</p>
-                <p>{p_campaignjson.enddate || "—"}</p>
+                <p className="text-sm font-semibold mb-1 my-2">End Date</p>
+                <p className='text-gray-500'>{p_campaignjson.enddate || "—"}</p>
               </div>
             </div>
               <hr className="my-4 border-gray-200" />
-            <p className="text-sm text-gray-500 mb-1 mt-4 font-semibold">Application Dates</p>
+            <p className="text-sm mb-1 mt-4 font-semibold">Application Dates</p>
             <div className="flex justify-between">
               <div>
-                <p className="text-sm text-gray-500 mb-1 my-2">Start Date</p>
-                <p>{p_campaignjson.applicationstartdate || "—"}</p>
+                <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
+                <p className='text-gray-500'>{p_campaignjson.applicationstartdate || "—"}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1 my-2">End Date</p>
-                <p>{p_campaignjson.applicationenddate || "—"}</p>
+                <p className="text-sm font-semibold mb-1 my-2">End Date</p>
+                <p className='text-gray-500'>{p_campaignjson.applicationenddate || "—"}</p>
               </div>
             </div>
           </div>
 
             <div className="pt-4 pb-2">
-              <p className="text-sm text-gray-500 mb-1">Total Budget</p>
-              <p>₹{p_campaignjson.estimatedbudget || "0"}</p>
+              <p className="text-sm font-semibold mb-1">Total Budget</p>
+              <p className='text-gray-500'>₹{p_campaignjson.estimatedbudget || "0"}</p>
             </div>
           </div>
 
@@ -506,16 +503,16 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
                     className="border border-gray-200 rounded-lg p-4 "
                   >
                     <div className="flex justify-between items-center mb-2">
-                      <h4 className="font-semibold text-sm text-gray-800">
+                      <h4 className="font-semibold text-sm ">
                         Milestone {index + 1}
                       </h4>
                       <span className="text-xs text-gray-500">{milestone.enddate}</span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-1">
-                      <strong>Description:</strong> {milestone.description || "—"}
+                    <p className="text-sm mb-1">
+                      <span className="font-semibold">Description :</span> {milestone.description || "—"}
                     </p>
-                    <p className="text-sm text-gray-600">
-                      <strong>Amount:</strong> ₹{milestone.amount.toLocaleString()}
+                    <p className="text-sm">
+                      <span className="font-semibold">Amount :</span> ₹{milestone.amount.toLocaleString()}
                     </p>
                   </div>
                 ))
