@@ -141,8 +141,8 @@ const Browse = () => {
         },
       });
 
-      setTotalCampaigns(res.data.fn_get_campaignbrowse.totalcount);
-      setCampaigns(res.data.fn_get_campaignbrowse.records);
+      setTotalCampaigns(res.data.totalcount);
+      setCampaigns(res.data.records);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
     } finally {

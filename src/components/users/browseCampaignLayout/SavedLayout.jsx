@@ -225,7 +225,7 @@ const SavedLayout = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                    
+
                     <span>
                       {campaign.providercontenttype[0]?.providername}{" - "}
                       {campaign.providercontenttype[0]?.contenttypename}
@@ -275,7 +275,9 @@ const SavedLayout = () => {
 
 
                     <Tooltip title="View Details">
-                      <Link to={`/dashboard/browse/description/${campaign.id}`}>
+                      <Link to={campaign.campaignapplied
+                        ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
+                        : `/dashboard/browse/description/${campaign.id}`}>
                         <button className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition">
                           <RiEyeLine size={20} />
                         </button>
