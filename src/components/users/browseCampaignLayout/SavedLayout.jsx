@@ -211,7 +211,8 @@ const SavedLayout = () => {
                   className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
                 >
                   <span className="text-xs text-gray-500 mb-3">
-                    Posted on {new Date(campaign.campaigncreatedate).toLocaleDateString()}
+                    Posted on {campaign.campaigncreatedate} 
+                     {/* new Date(campaign.campaigncreatedate).toLocaleDateString() */}
                   </span>
                   <div className="flex items-center gap-3 mb-3">
                     <img
@@ -227,8 +228,9 @@ const SavedLayout = () => {
                   <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
 
                     <span>
-                      {campaign.providercontenttype[0]?.providername}{" - "}
-                      {campaign.providercontenttype[0]?.contenttypename}
+                      {campaign?.providercontenttype?.[0]?.providername
+                        ? `${campaign.providercontenttype[0].providername} - ${campaign.providercontenttype[0].contenttypename}`
+                        : "N/A"}
                     </span>
                     <RiExchangeDollarLine size={16} />
                     <span>₹{campaign.estimatedbudget}</span>

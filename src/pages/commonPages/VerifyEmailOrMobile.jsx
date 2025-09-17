@@ -78,7 +78,7 @@ export const VerifyEmailOrMobile = () => {
         if (isResending) return;  // prevent double clicks if somehow triggered multiple times
 
         setIsResending(true);
-        
+
         try {
             const email = localStorage.getItem('signupEmail');
             const response = await axios.post('/user/resend-otp', { email });
@@ -94,7 +94,7 @@ export const VerifyEmailOrMobile = () => {
             setError('Failed to resend OTP. Please try again.');
         } finally {
             setIsResending(false);
-            
+
         }
     };
 
@@ -109,12 +109,14 @@ export const VerifyEmailOrMobile = () => {
 
     return (
         <div className="login-container">
-
-            <div className="login-card h-90vh">
-                <SideImageSlider/>
-
+            <SideImageSlider />
+            <div className="relative z-20 login-card">
 
                 <div className="login-card-right">
+
+                    <div className="mb-2 ">
+                        <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+                    </div>
                     <form onSubmit={handleSubmit}>
                         <h2>Verification Required</h2>
                         <p>Please verify your email or mobile number to continue.</p>
@@ -134,16 +136,16 @@ export const VerifyEmailOrMobile = () => {
                             ))}
                         </div>
                         <div className="resend-box flex justify-between items-center ">
-                            <span className='text-sm text-[#6b7280]'>Didn’t Get OTP?</span>
+                            <span className='text-sm text-gray-900'>Didn’t Get OTP?</span>
                             {timer === 0 ? (
                                 <span
-                                    className={`text-sm cursor-pointer ${isResending ? 'text-gray-400 cursor-not-allowed' : 'text-[#2563eb]'}`}
+                                    className={`text-sm cursor-pointer ${isResending ? 'text-gray-900 cursor-not-allowed' : 'text-[#2563eb]'}`}
                                     onClick={isResending ? undefined : handleResendOtp}
                                 >
                                     {isResending ? 'Resending...' : 'Resend OTP'}
                                 </span>
                             ) : (
-                                <span className="text-sm text-[#6b7280]">
+                                <span className="text-sm text-gray-900">
                                     OTP Expires In : <b>{timer}s</b>
                                 </span>
                             )}

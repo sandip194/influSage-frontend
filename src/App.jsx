@@ -53,6 +53,8 @@ import VendorFilesMedia from './components/users/vendorCampaign/VendorFilesMedia
 import VendorPayment from './components/users/vendorCampaign/VendorPayment';
 import OffersLayout from './components/vendor/offers/OffersLayout';
 import ViewAllOffers from './components/vendor/offers/ViewAllOffers';
+import OfferDetails from './components/vendor/offers/OfferDetails';
+import InfluencerProfile from './components/vendor/offers/InfluencerProfile';
 
 const App = () => {
 
@@ -149,6 +151,8 @@ const App = () => {
 
                                                 <Route path='offers' element={<OffersLayout/>}/>
                                                 <Route path='offers/view-all-offers' element={<ViewAllOffers/>}/>
+                                                <Route path="offers/:id" element={<OfferDetails />}/>
+                                                <Route path='offers/influencer-details/:userId' element={<InfluencerProfile/>} />
                                         </Route>
                                         <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
                                 </Route>

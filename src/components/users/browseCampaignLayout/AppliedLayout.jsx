@@ -198,10 +198,11 @@ const AppliedLayout = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                    
+
                     <span>
-                      {campaign.providercontenttype[0]?.providername}{" - "}
-                      {campaign.providercontenttype[0]?.contenttypename}
+                      {campaign?.providercontenttype?.[0]?.providername
+                        ? `${campaign.providercontenttype[0].providername} - ${campaign.providercontenttype[0].contenttypename}`
+                        : "N/A"}
                     </span>
                     <RiExchangeDollarLine size={16} />
                     <span>₹{campaign.estimatedbudget}</span>
