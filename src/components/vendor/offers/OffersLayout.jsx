@@ -1,3 +1,4 @@
+import { Pagination } from "antd";
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -123,20 +124,15 @@ const OffersLayout = () => {
                 <p className="text-gray-600">
                     Showing {paginatedData.length} of {filteredOffers.length} Results
                 </p>
-                <div className="flex gap-2 mt-2 sm:mt-0">
-                    {Array.from({ length: totalPages }, (_, i) => (
-                        <button
-                            key={i}
-                            onClick={() => setPage(i + 1)}
-                            className={`px-3 py-1.5 rounded-lg border ${page === i + 1
-                                    ? "bg-[#0f122f] text-white border-[#0f122f]"
-                                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                                }`}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
-                </div>
+                <Pagination
+                    current={page}
+                    total={filteredOffers.length}
+                    pageSize={pageSize}
+                    onChange={(page) => setPage(page)}
+                    size="large"
+                    showSizeChanger={false}
+                    className="mt-2 sm:mt-0"
+                />
             </div>
         </div>
     );

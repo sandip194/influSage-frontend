@@ -112,8 +112,6 @@ export const VerifyEmailOrMobile = () => {
             <SideImageSlider />
             <div className="relative z-20 login-card">
 
-
-
                 <div className="login-card-right">
 
                     <div className="mb-2 ">
@@ -138,16 +136,16 @@ export const VerifyEmailOrMobile = () => {
                             ))}
                         </div>
                         <div className="resend-box flex justify-between items-center ">
-                            <span className='text-sm text-[#6b7280]'>Didn’t Get OTP?</span>
+                            <span className='text-sm text-gray-900'>Didn’t Get OTP?</span>
                             {timer === 0 ? (
                                 <span
-                                    className={`text-sm cursor-pointer ${isResending ? 'text-gray-400 cursor-not-allowed' : 'text-[#2563eb]'}`}
+                                    className={`text-sm cursor-pointer ${isResending ? 'text-gray-900 cursor-not-allowed' : 'text-[#2563eb]'}`}
                                     onClick={isResending ? undefined : handleResendOtp}
                                 >
                                     {isResending ? 'Resending...' : 'Resend OTP'}
                                 </span>
                             ) : (
-                                <span className="text-sm text-[#6b7280]">
+                                <span className="text-sm text-gray-900">
                                     OTP Expires In : <b>{timer}s</b>
                                 </span>
                             )}

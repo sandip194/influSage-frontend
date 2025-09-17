@@ -27,14 +27,21 @@ const Sidebar = forwardRef((props, ref) => {
     }));
 
     const handleResize = () => {
-        if (window.innerWidth < 768) {
-            setIsMobile(true);
-            setIsOpen(false);
+        const width = window.innerWidth;
+
+        if (width < 768) {
+            setIsMobile(true);   // true mobile
+            setIsOpen(false);    // hide sidebar
+        } else if (width < 1024) {
+            setIsMobile(false);  // tablet-like
+            setIsOpen(false);    // mini-sidebar (icons only)
         } else {
-            setIsMobile(false);
-            setIsOpen(true);
+            setIsMobile(false);  // desktop
+            setIsOpen(true);     // full sidebar
         }
     };
+
+
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -52,7 +59,7 @@ const Sidebar = forwardRef((props, ref) => {
     const generalItems = [
         { icon: <RiGalleryView2 className="w-5" />, label: "Dashboard", to: "/vendor-dashboard", end: true },
         { icon: <RiSearch2Line className="w-5" />, label: "Browse Influencer", to: "/vendor-dashboard/browse-influencers" },
-        { icon: <RiStackLine className="w-5" />, label: "My Campaign", to: "/vendor-dashboard/vendor-campaign" },  
+        { icon: <RiStackLine className="w-5" />, label: "My Campaign", to: "/vendor-dashboard/vendor-campaign" },
         { icon: <RiPriceTag3Line className="w-5" />, label: "Offers", to: "/vendor-dashboard/offers" },
         { icon: <RiMessage3Line className="w-5" />, label: "Messages", to: "/vendor-dashboard/messages" },
     ];
@@ -128,7 +135,7 @@ const Sidebar = forwardRef((props, ref) => {
                             key={index}
                             to={item.to}
                             end={item.end}
-                             onClick={() => isMobile && toggleSidebar()}
+                            onClick={() => isMobile && toggleSidebar()}
                             title={!isOpen ? item.label : ""}
                             className={({ isActive }) =>
                                 `flex items-center ${isOpen ? "justify-start" : "justify-center"}

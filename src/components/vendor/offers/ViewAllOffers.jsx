@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Tabs, Dropdown, Menu, Pagination, Input } from 'antd';
+import React, { useState, useMemo } from "react";
+import { Tabs, Dropdown, Menu, Pagination, Input, Select } from "antd";
 import {
   RiMore2Fill,
   RiCheckboxCircleLine,
@@ -7,90 +7,97 @@ import {
   RiEyeLine,
   RiMessage3Line,
   RiUserLine,
-} from '@remixicon/react';
+  RiArrowLeftLine,
+} from "@remixicon/react";
+import AcceptOfferModal from "./models/AcceptOfferModal"; // 👈 import modal
+import { useNavigate } from "react-router-dom";
+
 
 const offers = [
   {
     id: 1,
-    image: 'https://i.pravatar.cc/100?img=1',
-    name: 'Jacob Jones',
-    location: 'Ahmedabad, India',
+    image: "https://i.pravatar.cc/100?img=1",
+    name: "Jacob Jones",
+    location: "Ahmedabad, India",
     rating: 4.2,
-    categories: ['Fashion', 'Beauty', 'Fitness', 'Other'],
-    offer: '$10',
-    deliveryDate: '16 Jan, 2025',
-    status: 'in_review',
+    categories: ["Fashion", "Beauty", "Fitness", "Other"],
+    offer: "$10",
+    deliveryDate: "16 Jan, 2025",
+    status: "in_review",
   },
   {
     id: 2,
-    image: 'https://i.pravatar.cc/100?img=2',
-    name: 'Kathryn Murphy',
-    location: 'Ahmedabad, India',
+    image: "https://i.pravatar.cc/100?img=2",
+    name: "Kathryn Murphy",
+    location: "Ahmedabad, India",
     rating: 4.2,
-    categories: ['Fashion', 'Other'],
-    offer: '$10',
-    deliveryDate: '19 Jan, 2025',
-    status: 'accepted',
+    categories: ["Fashion", "Other"],
+    offer: "$10",
+    deliveryDate: "19 Jan, 2025",
+    status: "accepted",
   },
   {
     id: 3,
-    image: 'https://i.pravatar.cc/100?img=3',
-    name: 'Theresa Webb',
-    location: 'Ahmedabad, India',
+    image: "https://i.pravatar.cc/100?img=3",
+    name: "Theresa Webb",
+    location: "Ahmedabad, India",
     rating: 4.2,
-    categories: ['Beauty'],
-    offer: '$10',
-    deliveryDate: '16 Jan, 2025',
-    status: 'rejected',
+    categories: ["Beauty"],
+    offer: "$10",
+    deliveryDate: "16 Jan, 2025",
+    status: "rejected",
   },
   {
     id: 4,
-    image: 'https://i.pravatar.cc/100?img=4',
-    name: 'Wade Warren',
-    location: 'Ahmedabad, India',
+    image: "https://i.pravatar.cc/100?img=4",
+    name: "Wade Warren",
+    location: "Ahmedabad, India",
     rating: 4.2,
-    categories: ['Fitness', 'Beauty'],
-    offer: '$10',
-    deliveryDate: '16 Jan, 2025',
-    status: 'in_review',
+    categories: ["Fitness", "Beauty"],
+    offer: "$10",
+    deliveryDate: "16 Jan, 2025",
+    status: "in_review",
   },
   {
     id: 5,
-    image: 'https://i.pravatar.cc/100?img=5',
-    name: 'Robert Fox',
-    location: 'Ahmedabad, India',
+    image: "https://i.pravatar.cc/100?img=5",
+    name: "Robert Fox",
+    location: "Ahmedabad, India",
     rating: 4.2,
-    categories: ['Other'],
-    offer: '$10',
-    deliveryDate: '16 Jan, 2025',
-    status: 'in_review',
+    categories: ["Other"],
+    offer: "$10",
+    deliveryDate: "16 Jan, 2025",
+    status: "in_review",
   },
 ];
 
 const statusLabels = {
-  in_review: 'In Review',
-  accepted: 'Accepted',
-  rejected: 'Rejected',
+  in_review: "In Review",
+  accepted: "Accepted",
+  rejected: "Rejected",
 };
 
 const statusColors = {
-  in_review: 'bg-yellow-100 text-yellow-800',
-  accepted: 'bg-green-100 text-green-700',
-  rejected: 'bg-red-100 text-red-700',
+  in_review: "bg-yellow-100 text-yellow-800",
+  accepted: "bg-green-100 text-green-700",
+  rejected: "bg-red-100 text-red-700",
 };
 
 const ViewAllOffers = () => {
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOffer, setSelectedOffer] = useState(null);
+  const [sortOption, setSortOption] = useState(null);
+
+
+  const navigate = useNavigate();
+
   const pageSize = 5;
 
   const filteredOffers = useMemo(() => {
     let data = [...offers];
-
-    if (statusFilter !== 'all') {
-      data = data.filter((offer) => offer.status === statusFilter);
-    }
 
     if (searchText.trim()) {
       data = data.filter((offer) =>
@@ -99,74 +106,73 @@ const ViewAllOffers = () => {
     }
 
     return data;
-  }, [statusFilter, searchText]);
+  }, [searchText]);
 
   const paginatedOffers = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
     return filteredOffers.slice(start, start + pageSize);
   }, [filteredOffers, currentPage]);
 
-  const tabItems = [
-    { key: 'all', label: 'All' },
-    { key: 'in_review', label: 'In Review' },
-    { key: 'accepted', label: 'Accepted' },
-    { key: 'rejected', label: 'Rejected' },
-  ];
+
 
   const handleAction = (type, offer) => {
     switch (type) {
-      case 'accept':
-        console.log(`Accepting offer from ${offer.name}`);
+      case "accept":
+        setSelectedOffer(offer);
+        setIsModalOpen(true);
         break;
-      case 'reject':
-        console.log(`Rejecting offer from ${offer.name}`);
+      case "view":
+        navigate(`/vendor-dashboard/offers/${offer.id}`);
         break;
-      case 'view':
-        console.log(`Viewing details for ${offer.name}`);
-        break;
-      case 'message':
+      case "message":
         console.log(`Messaging ${offer.name}`);
         break;
-      case 'profile':
-        console.log(`Viewing profile of ${offer.name}`);
+      case "profile":
+        navigate(`/vendor-dashboard/offers/influencer-details/${203}`);
         break;
       default:
         break;
     }
   };
 
+  const handleConfirmAccept = (offer) => {
+    console.log("Accepted offer:", {
+      userId: offer.id,
+      name: offer.name,
+      offer: offer.offer,
+      deliveryDate: offer.deliveryDate,
+    });
+    setIsModalOpen(false);
+  };
+
+
   const getActionMenu = (offer) => (
     <Menu
       items={[
         {
-          key: 'accept',
+          key: "accept",
           icon: <RiCheckboxCircleLine className="text-green-600" />,
-          label: 'Accept Offer',
-          onClick: () => handleAction('accept', offer),
+          label: "Accept Offer",
+          onClick: () => handleAction("accept", offer),
         },
+
         {
-          key: 'reject',
-          icon: <RiCloseCircleLine className="text-red-500" />,
-          label: 'Reject Offer',
-          onClick: () => handleAction('reject', offer),
-        },
-        {
-          key: 'view',
+          key: "view",
           icon: <RiEyeLine />,
-          label: 'View Offer Details',
-          onClick: () => handleAction('view', offer),
+          label: "View Offer Details",
+          onClick: () => handleAction("view", offer),
         },
         {
-          key: 'message',
+          key: "message",
           icon: <RiMessage3Line />,
-          label: 'Send Message',
-          onClick: () => handleAction('message', offer),
+          label: "Send Message",
+          onClick: () => handleAction("message", offer),
         },
         {
-          key: 'profile',
+          key: "profile",
           icon: <RiUserLine />,
-          label: 'View Influencer Profile',
-          onClick: () => handleAction('profile', offer),
+          label: "View Influencer Profile",
+          onClick: () => handleAction("profile", offer),
         },
       ]}
     />
@@ -174,32 +180,45 @@ const ViewAllOffers = () => {
 
   return (
     <div className="text-sm">
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-gray-600 mb-2"
+      >
+        <RiArrowLeftLine /> Back
+      </button>
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start gap-4  sm:items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row items-start gap-4 sm:items-center justify-between mb-4">
         <h2 className="text-xl font-bold">View All Offers</h2>
-        <button className="px-4 py-2 bg-[#141843] text-white rounded-lg">
+        <button className="px-4 py-2 bg-[#0D132D] text-white rounded-lg">
           View Campaign Details
         </button>
       </div>
 
-      {/* Tabs */}
-      <Tabs
-        activeKey={statusFilter}
-        onChange={(key) => {
-          setStatusFilter(key);
-          setCurrentPage(1);
-        }}
-        className="mb-4"
-        items={tabItems}
-      />
 
       {/* Search */}
-      <div className="mb-4">
+      <div className="mb-4 flex flex-col sm:flex-row justify-between">
         <Input
+          size="large"
           placeholder="Search influencers..."
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           className="max-w-sm"
+        />
+
+        <Select
+          size="large"
+          value={sortOption}
+          onChange={(value) => setSortOption(value)}
+          placeholder="Sort By"
+          className="w-52"
+          options={[
+            { value: "rating_desc", label: "Rating: High to Low" },
+            { value: "rating_asc", label: "Rating: Low to High" },
+            { value: "budget_desc", label: "Budget: High to Low" },
+            { value: "budget_asc", label: "Budget: Low to High" },
+            { value: "newest", label: "Newest" },
+          ]}
         />
       </div>
 
@@ -220,7 +239,7 @@ const ViewAllOffers = () => {
             {paginatedOffers.map((offer) => (
               <tr
                 key={offer.id}
-                className="border-t border-gray-200 hover:bg-gray-50 transition"
+                className="border-t border-gray-200 hover:bg-gray-100 transition"
               >
                 <td className="p-4 flex gap-3 items-center">
                   <img
@@ -262,7 +281,7 @@ const ViewAllOffers = () => {
                 </td>
 
                 <td className="p-4">
-                  <Dropdown overlay={getActionMenu(offer)} trigger={['click']}>
+                  <Dropdown overlay={getActionMenu(offer)} trigger={["click"]}>
                     <button className="p-2 rounded-full hover:bg-gray-100">
                       <RiMore2Fill className="text-gray-600" />
                     </button>
@@ -295,6 +314,23 @@ const ViewAllOffers = () => {
           size="small"
         />
       </div>
+
+      {/* Accept Offer Modal */}
+      <AcceptOfferModal
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmAccept}
+        offer={selectedOffer}
+      />
+
+      {/* Reject Offer Modal */}
+      {/* <RejectOfferModal
+        open={isRejectModalOpen}
+        onCancel={() => setIsRejectModalOpen(false)}
+        onConfirm={handleConfirmReject}
+        offer={selectedOffer}
+      /> */}
+
     </div>
   );
 };
