@@ -90,7 +90,11 @@ useEffect(() => {
       message.error('Please upload at least one file or add a valid portfolio URL.');
       return;
     }
-
+    // Require at least one language
+      if (selectedLanguages.length === 0) {
+        message.error("Please select at least one language");
+        return;
+      }
     // 🔴 1. First delete removed existing files from the server
     try {
       for (const filepath of deletedFilePaths) {
