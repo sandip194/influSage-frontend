@@ -1,126 +1,227 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { useSelector } from "react-redux";
 import axios from "axios";
-import { toast } from 'react-toastify';
 import {
   RiArrowDownSLine,
   RiEqualizerFill,
   RiCloseFill,
-  RiMessage2Line,
-  RiStarLine,
   RiHeartLine,
   RiHeartFill,
-  RiSearchLine,
-} from "react-icons/ri";
-import { useNavigate, Link } from "react-router-dom";
-import { Empty, Input, Pagination, Select, Tooltip } from "antd";
+  RiMessage2Line,
+  RiUserAddLine,
+} from "@remixicon/react";
+import { SearchOutlined } from "@ant-design/icons";
+import { Input, Pagination, Select, Empty, Tooltip } from "antd";
+import { toast } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom";
 
 const BrowseInfluencersLayout = () => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
-  const [likedInfluencers, setLikedInfluencers] = useState(new Set());
   const [showFilter, setShowFilter] = useState(false);
-  const [total, setTotal] = useState(0);
+  const [platforms, setPlatforms] = useState([]);
+  const [contentTypes, setContentTypes] = useState([]);
+  const [languages, setLanguages] = useState([]);
+  const [genderOptions, setGenderOptions] = useState([]);
+  const [location, setLocation] = useState("");
   const [influencers, setInfluencers] = useState([]);
+  const [totalInfluencers, setTotalInfluencers] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [likedInfluencers, setLikedInfluencers] = useState(new Set());
+  const [activeTab, setActiveTab] = useState("all");
 
-  const handleClick = useCallback(
-    (path) => {
-      navigate(path);
-    },
-    [navigate]
-  );
+  const [filters, setFilters] = useState({
+    providers: [],
+    languages: [],
+    influencertiers: [],
+    sortby: "createddate",
+    sortorder: "desc",
+    pagenumber: 1,
+    pagesize: 15,
+    gender: [],
+  });
 
-  // Fetch Influencers
-  useEffect(() => {
-    const fetchInfluencers = async () => {
-      try {
-        const res = await axios.get("/vendor/allinfluencer/browse");
-        const records =
-          res.data?.data?.[0]?.fn_get_influencerbrowse?.records || [];
-        const totalcount =
-          res.data?.data?.[0]?.fn_get_influencerbrowse?.totalcount || 0;
+  const navigate = useNavigate();
+  const { token } = useSelector((state) => state.auth);
 
-        setInfluencers(records);
-        setTotal(totalcount);
-      } catch (error) {
-        console.error("Failed to fetch influencers", error);
-      }
-    };
-
-    fetchInfluencers();
-  }, []);
-
-  useEffect(() => {
-  const fetchInfluencers = async () => {
+  const getAllInfluencers = async (filters, token, searchTerm = "") => {
     try {
       setLoading(true);
+      const params = {
+        p_location: filters.location || null,
+        p_providers: filters.providers?.length ? filters.providers : null,
+        p_influencertiers: filters.influencertiers?.length
+          ? filters.influencertiers
+          : null,
+        p_genders: filters.gender?.length ? filters.gender : null,
+        p_languages: filters.languages?.length ? filters.languages : null,
+        p_pagenumber: filters.pagenumber || 1,
+        p_pagesize: filters.pagesize || 20,
+        p_search: searchTerm?.trim() || null,
+      };
 
-      const userId = localStorage.getItem("userId");
-      // Fetch all influencers
-      const res = await axios.get("/vendor/allinfluencer/browse");
-      const records =
-        res.data?.data?.[0]?.fn_get_influencerbrowse?.records || [];
-      const totalcount =
-        res.data?.data?.[0]?.fn_get_influencerbrowse?.totalcount || 0;
+      const cleanParams = Object.fromEntries(
+        Object.entries(params).filter(([_, v]) => v !== null && v !== undefined)
+      );
 
-      setInfluencers(records);
-      setTotal(totalcount);
+      const response = await axios.get("/vendor/allinfluencer/browse", {
+        params: cleanParams,
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      setLoading(false);
-    } catch (error) {
-      console.error("Failed to fetch influencers", error);
+      const influencersData = response.data?.data?.records || [];
+      const totalCount = response.data?.data?.totalcount || 0;
+
+      setInfluencers(influencersData);
+      setTotalInfluencers(totalCount);
+    } catch (err) {
+      console.error("Error fetching influencers:", err);
+      toast.error("Failed to fetch influencers");
+    } finally {
       setLoading(false);
     }
   };
 
-  fetchInfluencers();
-}, []);
+  const getFavouriteInfluencers = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
 
-const handleLike = async (influencerId) => {
-  const userId = localStorage.getItem("userId");
-  if (!userId) {
-    toast.error("User not logged in");
-    return;
-  }
-
-  const isLiked = likedInfluencers.has(influencerId);
-
-  setLikedInfluencers((prev) => {
-    const newSet = new Set(prev);
-    isLiked ? newSet.delete(influencerId) : newSet.add(influencerId);
-    return newSet;
-  });
-
-  try {
-    const response = await axios.post("/vendor/addfavourite/influencer", {
-      userId,
-      influencerId,
-    });
-
-    if (response.data.status) {
-      toast.success(
-        !isLiked ? "Added to favourites!" : "Removed from favourites!"
-      );
-    } else {
-      toast.error(response.data.message || "Failed to update favourite");
-
-      setLikedInfluencers((prev) => {
-        const newSet = new Set(prev);
-        isLiked ? newSet.add(influencerId) : newSet.delete(influencerId);
-        return newSet;
+    try {
+      const res = await axios.get("/vendor/getfavourite/influencer", {
+        params: { userId },
+        headers: { Authorization: `Bearer ${token}` },
       });
+
+      const favIds = res.data.data?.map((inf) => inf.id) || [];
+      setLikedInfluencers(new Set(favIds));
+    } catch (err) {
+      console.error("Failed to fetch favourite influencers:", err);
     }
-  } catch (error) {
-    console.error("Error calling favourite API:", error);
-    toast.error("Something went wrong. Please try again.");
-    
+  };
+  const handleLike = async (influencerId) => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return toast.error("User not logged in");
+
+    const isLiked = likedInfluencers.has(influencerId);
+
+    // Optimistic UI update
     setLikedInfluencers((prev) => {
-      const newSet = new Set(prev);
-      isLiked ? newSet.add(influencerId) : newSet.delete(influencerId);
-      return newSet;
+      const updated = new Set(prev);
+      if (isLiked) updated.delete(influencerId);
+      else updated.add(influencerId);
+
+      // Show toast immediately after UI update
+      toast.success(isLiked ? "Removed from favorites" : "Added to favorites");
+
+      return updated;
     });
-  }
-};
+
+    try {
+      const res = await axios.post("/vendor/addfavourite/influencer", {
+        p_userId: userId,
+        p_influencerId: influencerId,
+      });
+
+      if (!res.data.status) {
+        // Revert if API fails
+        setLikedInfluencers((prev) => {
+          const reverted = new Set(prev);
+          if (isLiked) reverted.add(influencerId);
+          else reverted.delete(influencerId);
+          return reverted;
+        });
+        toast.error(res.data.message || "Failed to update favourite");
+      }
+    } catch (err) {
+      // Revert on error
+      setLikedInfluencers((prev) => {
+        const reverted = new Set(prev);
+        if (isLiked) reverted.add(influencerId);
+        else reverted.delete(influencerId);
+        return reverted;
+      });
+      toast.error("Something went wrong");
+    }
+  };
+
+  // Fetch platforms
+  const getAllPlatforms = async () => {
+    try {
+      const res = await axios.get("providers");
+      if (res.status === 200) setPlatforms(res.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Fetch languages
+  const getAllLanguages = async () => {
+    try {
+      const res = await axios.get("languages", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setLanguages(res.data.languages || []);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAllGender = async () => {
+    try {
+      const res = await axios.get("genders", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setGenderOptions(res.data.genders || []);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAllContentTypes = async () => {
+    try {
+      const res = await axios.get("/vendor/influencer-type", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("Content types response:", res.data);
+
+      setContentTypes(res.data.influencerType || []);
+    } catch (error) {
+      console.error("Error fetching content types:", error);
+      toast.error("Failed to load content types. Please try again.");
+    }
+  };
+
+  const handleCheckboxChange = useCallback((category, id) => {
+    setFilters((prev) => {
+      const updated = prev[category].includes(id)
+        ? prev[category].filter((v) => v !== id)
+        : [...prev[category], id];
+      return { ...prev, [category]: updated, pagenumber: 1 };
+    });
+  }, []);
+
+  useEffect(() => {
+    getAllLanguages();
+    getAllPlatforms();
+    getAllContentTypes();
+    getAllGender();
+    getFavouriteInfluencers();
+  }, []);
+
+  useEffect(() => {
+    getAllInfluencers(filters, token, searchTerm);
+  }, [
+    filters.providers,
+    filters.languages,
+    filters.contentTypes,
+    filters.gender,
+    filters.sortby,
+    filters.sortorder,
+    filters.pagenumber,
+    filters.pagesize,
+    searchTerm,
+  ]);
 
   const buttons = [
     { id: "all", label: "All", path: "/vendor-dashboard/browse-influencers" },
@@ -136,14 +237,9 @@ const handleLike = async (influencerId) => {
     },
   ];
 
-  const sortOptions = [
-    { value: "createddate_desc", label: "Newest" },
-    { value: "followers_desc", label: "Followers: High to Low" },
-    { value: "followers_asc", label: "Followers: Low to High" },
-  ];
-
   return (
     <div>
+      {/* Header */}
       <div className="header mb-4">
         <h3 className="text-2xl text-[#0D132D] font-bold mb-2">
           Browse Influencers
@@ -152,13 +248,15 @@ const handleLike = async (influencerId) => {
           Browse Influencers To Promote Your Brand
         </p>
       </div>
+
+      {/* Tabs */}
       <div className="bg-white p-4 rounded-lg mb-6 flex flex-col sm:flex-row gap-3">
         {buttons.map(({ id, label, path }) => (
           <button
             key={id}
             onClick={() => {
               setActiveTab(id);
-              handleClick(path);
+              navigate(path);
             }}
             className={`px-4 py-2 rounded-md border transition
               ${
@@ -172,43 +270,39 @@ const handleLike = async (influencerId) => {
         ))}
       </div>
 
-      {/* Influencers List */}
+      {/* Main Card Wrapper */}
       <div className="bg-white p-4 rounded-lg">
         {/* Search + Sort + Filter */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <Input
             size="large"
-            prefix={<RiSearchLine />}
+            prefix={<SearchOutlined />}
             placeholder="Search influencers"
             className="w-full sm:w-auto flex-1"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              const trimmed = searchInput.trim();
+              if (e.key === "Enter") {
+                setFilters((prev) => ({ ...prev, pagenumber: 1 }));
+                setSearchTerm(trimmed);
+              }
+            }}
           />
 
           <div className="flex gap-2 w-full sm:w-auto justify-end">
-            <Select
-              size="large"
-              defaultValue="createddate_desc"
-              className="w-full sm:w-48"
-              placeholder="Sort By"
-              suffixIcon={<RiArrowDownSLine size={16} />}
-            >
-              {sortOptions.map((option) => (
-                <Select.Option key={option.value} value={option.value}>
-                  {option.label}
-                </Select.Option>
-              ))}
-            </Select>
-
             <button
               onClick={() => setShowFilter(true)}
-              className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition"
+              className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white hover:bg-gray-100"
             >
-              Filter <RiEqualizerFill size={16} />
+              Filter
+              <RiEqualizerFill size={16} />
             </button>
           </div>
         </div>
 
-        {/* Influencer Cards */}
-        <div className={`grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-6`} >
+        {/* Influencers List */}
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-6">
           {loading ? (
             <div className="col-span-full text-center py-10 text-gray-500">
               Loading influencers...
@@ -221,14 +315,12 @@ const handleLike = async (influencerId) => {
             influencers.map((influencer) => (
               <div
                 key={influencer.id}
-                className="border rounded-2xl transition border-gray-200 bg-white p-5 flex flex-col cursor-pointer hover:bg-gray-100"
+                className="border justify-between rounded-2xl transition border-gray-200 bg-white p-5 flex flex-col cursor-pointer hover:bg-gray-100"
                 onClick={() => navigate(`/influencer/${influencer.id}`)}
               >
-
                 {/* Profile Section */}
                 <div className="flex items-center justify-between mb-3">
-                  {/* Left: Avatar + Details */}
-                  <div className="flex items-center gap-3 h">
+                  <div className="flex items-center gap-3">
                     <img
                       src={
                         influencer.photopath
@@ -239,7 +331,7 @@ const handleLike = async (influencerId) => {
                       loading="lazy"
                       className="w-12 h-12 rounded-full"
                     />
-                    <div className="max-w-full">
+                    <div>
                       <Link
                         to={`vendor-dashboard/browse-influencers/influencer/${influencer.id}`}
                         onClick={(e) => e.stopPropagation()}
@@ -247,7 +339,6 @@ const handleLike = async (influencerId) => {
                       >
                         {influencer.firstname} {influencer.lastname}
                       </Link>
-
                       <div className="text-xs text-gray-500">
                         {influencer.statename}, {influencer.countryname}
                       </div>
@@ -263,58 +354,79 @@ const handleLike = async (influencerId) => {
                     </div>
                   </div>
 
-                  {/* Right: Footer Buttons */}
+                  {/* Action buttons */}
                   <div className="flex gap-2">
-                    <Tooltip title="Message">
+                    <Tooltip title="Invite">
                       <button
-                        aria-label="Message"
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-8 h-8 flex items-center justify-center rounded-3xl 
+                        aria-label="Invite"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleInvite(influencer.id);
+                        }}
+                        className="w-9 h-9 flex items-center justify-center rounded-full 
                bg-[#0f122f] text-white hover:bg-[#23265a] transition"
                       >
-                        <RiMessage2Line size={16} />
+                        <RiUserAddLine size={16} />
                       </button>
                     </Tooltip>
 
                     <Tooltip
-                      title={likedInfluencers.has(influencer.id) ? "Unlike" : "Like"}
+                      title={
+                        likedInfluencers.has(influencer.id) ? "Unlike" : "Like"
+                      }
                     >
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleLike(influencer.id);
                         }}
-                        aria-label={
-                          likedInfluencers.has(influencer.id) ? "Unlike" : "Like"
-                        }
-                        className="w-8 h-8 flex items-center justify-center rounded-3xl bg-[#0f122f] text-white hover:bg-[#23265a] transition"
+                        className="w-9 h-9 flex items-center justify-center rounded-full 
+               bg-[#0f122f] text-white hover:bg-[#23265a] transition"
                       >
                         {likedInfluencers.has(influencer.id) ? (
-                          <RiHeartFill size={16} color="red" />
+                          <RiHeartFill className="text-red-500 cursor-pointer" />
                         ) : (
-                          <RiHeartLine size={16} />
+                          <RiHeartLine className="text-gray-400 cursor-pointer" />
                         )}
                       </button>
                     </Tooltip>
                   </div>
                 </div>
 
-                {/* Providers (Followers) */}
-                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600 mb-0">
-                {influencer.providers
+                {/* Categories */}
+                <div className="flex flex-wrap gap-2 mb-4 mt-2">
+                  {influencer.categories?.slice(0, 3).map((cat, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-1 bg-gray-300 rounded-xl text-xs"
+                    >
+                      {cat.categoryname}
+                    </span>
+                  ))}
+                  {influencer.categories &&
+                    influencer.categories.length > 3 && (
+                      <span className="px-2 py-1 bg-gray-300 rounded-xl text-xs">
+                        ...
+                      </span>
+                    )}
+                </div>
+
+                {/* Providers */}
+                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
+                  {influencer.providers
                     ?.filter((p) => p.nooffollowers > 0)
                     .map((p) => (
-                    <span
+                      <span
                         key={p.providerid}
                         className="flex items-center gap-1"
-                    >
+                      >
                         <img
-                        src={`http://localhost:3001/${p.iconpath}`}
-                        alt={p.providername}
-                        className="w-4 h-4"
+                          src={`http://localhost:3001/${p.iconpath}`}
+                          alt={p.providername}
+                          className="w-4 h-4"
                         />
                         {p.nooffollowers}
-                    </span>
+                      </span>
                     ))}
                 </div>
               </div>
@@ -324,11 +436,23 @@ const handleLike = async (influencerId) => {
 
         {/* Pagination */}
         <div className="mt-6 flex justify-center">
-          <Pagination current={1} pageSize={10} total={total} showSizeChanger />
+          <Pagination
+            current={filters.pagenumber}
+            pageSize={filters.pagesize}
+            total={totalInfluencers}
+            showSizeChanger
+            onChange={(page, pageSize) =>
+              setFilters((prev) => ({
+                ...prev,
+                pagenumber: page,
+                pagesize: pageSize,
+              }))
+            }
+          />
         </div>
       </div>
 
-      {/* Side Filter */}
+      {/* Filter Sidebar */}
       {showFilter && (
         <>
           <div
@@ -336,131 +460,136 @@ const handleLike = async (influencerId) => {
             onClick={() => setShowFilter(false)}
           />
           <div className="fixed top-0 right-0 w-80 h-full bg-white p-4 z-50 shadow-lg overflow-y-auto">
-            {/* Header */}
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Filter</h3>
-              <button
-                onClick={() => setShowFilter(false)}
-                className="text-gray-500 hover:text-gray-900"
-              >
-                <RiCloseFill size={20} />
+              <h3 className="text-lg font-semibold">Filter Options</h3>
+              <button onClick={() => setShowFilter(false)}>
+                <RiCloseFill />
               </button>
             </div>
 
-            <hr className="my-4 border-gray-200" />
-
-            {/* Location */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Location</label>
+            <div className="mt-4">
+              <h4 className="font-semibold mb-2">Location</h4>
               <Input
-                size="middle"
+                prefix={<SearchOutlined />}
                 placeholder="Search"
-                prefix={<RiSearchLine />}
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
                 className="w-full"
               />
             </div>
 
-            {/* Platform */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Platform</label>
-              <div className="flex flex-col gap-1">
-                {["All", "Instagram", "Youtube", "Facebook", "Tiktok"].map(
-                  (platform) => (
-                    <label
-                      key={platform}
-                      className="flex items-center gap-2 text-gray-700 text-sm"
-                    >
-                      <input type="checkbox" className="w-4 h-4" />
-                      {platform}
-                    </label>
-                  )
-                )}
-              </div>
+            <hr className="my-4 border-gray-200" />
+
+            <div>
+              <h4 className="font-semibold mb-2">Platform</h4>
+              {platforms.map((platform) => (
+                <label key={platform.id} className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    className="mr-2"
+                    checked={filters.providers.includes(platform.id)}
+                    onChange={() =>
+                      handleCheckboxChange("providers", platform.id)
+                    }
+                  />
+                  <span className="text-sm">{platform.name}</span>
+                </label>
+              ))}
             </div>
 
-            {/* Followers */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">
-                Followers
-              </label>
-              <div className="flex flex-col gap-1">
-                {[
-                  "All",
-                  "Nano (5k-10k followers)",
-                  "Micro (10k-100k followers)",
-                  "Macro (100k-1M followers)",
-                  "Mega (Over 1M followers)",
-                ].map((f) => (
-                  <label
-                    key={f}
-                    className="flex items-center gap-2 text-gray-700 text-sm"
-                  >
-                    <input type="checkbox" className="w-4 h-4" />
-                    {f}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Ratings */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Ratings</label>
-              <div className="flex flex-col gap-1">
-                {[5, 4, 3, 2, 1].map((r) => (
-                  <label
-                    key={r}
-                    className="flex items-center gap-2 text-gray-700 text-sm"
-                  >
-                    <input type="checkbox" className="w-4 h-4" />
-                    <span className="flex">
-                      {[...Array(r)].map((_, i) => (
-                        <RiStarLine key={i} />
-                      ))}
+            <hr className="my-4 border-gray-200" />
+            <div className="mt-4">
+              <h4 className="font-semibold mb-2">Followers</h4>
+              {contentTypes.map((type) => (
+                <label key={type.id} className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    className="mr-2"
+                    checked={filters.influencertiers?.includes(type.id)}
+                    onChange={() =>
+                      handleCheckboxChange("influencertiers", type.id)
+                    }
+                  />
+                  <span className="text-sm">
+                    {type.name}{" "}
+                    <span>
+                      (
+                      {type.maxfollowers
+                        ? `${type.minfollowers} - ${type.maxfollowers} followers`
+                        : `Over ${type.minfollowers} followers`}
+                      )
                     </span>
-                  </label>
-                ))}
-              </div>
+                  </span>
+                </label>
+              ))}
             </div>
 
-            {/* Gender */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Gender</label>
-              <div className="flex flex-col gap-1">
-                {["All", "Male", "Female"].map((g) => (
-                  <label
-                    key={g}
-                    className="flex items-center gap-2 text-gray-700 text-sm"
-                  >
-                    <input type="checkbox" className="w-4 h-4" />
-                    {g}
-                  </label>
-                ))}
-              </div>
+            <hr className="my-4 border-gray-200" />
+            <div className="mt-4">
+              <h4 className="font-semibold mb-2">Languages</h4>
+              {languages.map((lang) => (
+                <label key={lang.id} className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    className="mr-2"
+                    checked={filters.languages.includes(lang.id)}
+                    onChange={() => handleCheckboxChange("languages", lang.id)}
+                  />
+                  <span className="text-sm">{lang.name}</span>
+                </label>
+              ))}
             </div>
-
-            {/* Language */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Language</label>
-              <div className="flex flex-col gap-1">
-                {["All", "English", "Hindi", "Gujarati"].map((lang) => (
-                  <label
-                    key={lang}
-                    className="flex items-center gap-2 text-gray-700 text-sm"
-                  >
-                    <input type="checkbox" className="w-4 h-4" />
-                    {lang}
-                  </label>
-                ))}
-              </div>
+            <hr className="my-4 border-gray-200" />
+            <div className="mt-4">
+              <h4 className="font-semibold mb-2">Gender</h4>
+              {genderOptions.map((g) => (
+                <label key={g.id} className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    className="mr-2"
+                    checked={filters.gender.includes(g.id)}
+                    onChange={() => handleCheckboxChange("gender", g.id)}
+                  />
+                  <span className="text-sm">{g.name}</span>
+                </label>
+              ))}
             </div>
+            <hr className="my-4 border-gray-200" />
 
-            {/* Footer Buttons */}
-            <div className="flex justify-between mt-6">
-              <button className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition w-1/2 mr-2">
+            <div className="flex gap-3 mt-4 px-4">
+              <button
+                className="flex-1 py-2 bg-gray-200 rounded-full"
+                onClick={() => {
+                  const clearedFilters = {
+                    providers: [],
+                    languages: [],
+                    influencertiers: [],
+                    gender: [],
+                    sortby: "createddate",
+                    sortorder: "desc",
+                    pagenumber: 1,
+                    pagesize: 15,
+                  };
+                  setFilters(clearedFilters);
+                  setShowFilter(false);
+                  getAllInfluencers(clearedFilters, token, "");
+                }}
+              >
                 Clear
               </button>
-              <button className="px-4 py-2 rounded-md bg-[#0f122f] text-white hover:bg-[#23265a] transition w-1/2 ml-2">
-                Filter
+
+              <button
+                className="flex-1 py-2 bg-[#0f122f] text-white rounded-full"
+                onClick={() => {
+                  setShowFilter(false);
+                  getAllInfluencers(
+                    { ...filters, location },
+                    token,
+                    searchTerm
+                  );
+                }}
+              >
+                Apply
               </button>
             </div>
           </div>
