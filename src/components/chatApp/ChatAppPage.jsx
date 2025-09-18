@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
 import Sidebar from './Sidebar';
 import ChatHeader from './ChatHeader';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
+
+// Connect to backend Socket.IO
+const socket = io("http://localhost:3001"); 
 
 export default function ChatAppPage() {
   const [activeChat, setActiveChat] = useState(null);
@@ -23,6 +27,23 @@ export default function ChatAppPage() {
     },
   ]);
 
+  // Listen for messages from backend
+  useEffect(() => {
+    socket.on("receiveMessage", (msg) => {
+      setMessages((prev) => [...prev, msg]);
+    });
+
+    // Optional: log connection status
+    socket.on("connect", () => console.log("✅ Connected to socket:", socket.id));
+    socket.on("disconnect", () => console.log("❌ Disconnected from socket"));
+
+    return () => {
+      socket.off("receiveMessage");
+      socket.off("connect");
+      socket.off("disconnect");
+    };
+  }, []);
+
   // Send new message
   const handleSendMessage = (text) => {
     if (!text.trim()) return;
@@ -34,7 +55,11 @@ export default function ChatAppPage() {
       type: 'text',
     };
 
+    // Add locally
     setMessages((prev) => [...prev, newMsg]);
+
+    // Send to backend via socket
+    socket.emit("sendMessage", newMsg);
   };
 
   return (

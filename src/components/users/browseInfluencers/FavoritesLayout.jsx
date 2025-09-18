@@ -30,61 +30,43 @@ const FavoritesLayout = () => {
   });
 
   const navigate = useNavigate();
-  const { token } = useSelector((state) => state.auth);
+    const { token, userId } = useSelector(state => state.auth);
 
-   const getFavouriteInfluencers = async () => {
-     const userId = localStorage.getItem("userId");
-     if (!userId) {
-       toast.error("User ID not found in localStorage");
-       return;
-     }
- 
-     setLoading(true);
- 
-     try {
-       const res = await axios.get("/vendor/browse/inviteinfluencer", {
-         params: {
-           p_pagenumber: filters.pagenumber,
-           p_pagesize: filters.pagesize,
-           p_search: searchTerm || null,
-         },
-         headers: { Authorization: `Bearer ${token}` },
-       });
- 
-       console.log("API response:", res.data);
- 
-       const apiData = res.data?.data;
-       if (!apiData) {
-         throw new Error("No data field in response");
-       }
- 
-       const infls = apiData.records || [];
-       const total = apiData.totalcount || 0;
- 
-       const favSet = new Set(
-         infls
-           .filter((inf) => {
-             return inf.isfavourite === true;
-           })
-           .map((inf) => inf.id)
-       );
- 
-       console.log("Favorites from API:", favSet);
- 
-       setInfluencers(infls);
-       setTotalInfluencers(total);
-       setLikedInfluencers(favSet);
-     } catch (error) {
-       console.error("Failed to fetch invited influencers:", error);
-       toast.error("Failed to load influencers");
-     } finally {
-       setLoading(false);
-     }
-   };
- 
+  const getFavouriteInfluencers = async () => {
+    if (!userId) return;
+    setLoading(true);
+
+    try {
+      const res = await axios.get("/vendor/getfavourite/influencer", {
+        params: {
+          userId,
+          p_pagenumber: filters.pagenumber,
+          p_pagesize: filters.pagesize,
+          p_search: searchTerm,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data.status) {
+        const { records = [], totalcount = 0 } = res.data.data || {};
+
+        // Set the influencers list
+        setInfluencers(Array.isArray(records) ? records : []);
+        setTotalInfluencers(totalcount);
+
+        // Add this line to mark them as liked
+        const likedSet = new Set(records.map((inf) => inf.id));
+        setLikedInfluencers(likedSet);
+      }
+    } catch (err) {
+      console.error("Failed to fetch favourite influencers:", err);
+      toast.error("Failed to load favourites");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLike = async (influencerId) => {
-    const userId = localStorage.getItem("userId");
     if (!userId) {
       toast.error("User not logged in");
       return;
@@ -92,6 +74,7 @@ const FavoritesLayout = () => {
 
     const isLiked = likedInfluencers.has(influencerId);
 
+    // Optimistic update
     setLikedInfluencers((prev) => {
       const updated = new Set(prev);
       if (isLiked) updated.delete(influencerId);
@@ -100,30 +83,36 @@ const FavoritesLayout = () => {
     });
 
     try {
-      const resp = await axios.post(
+      const response = await axios.post(
         "/vendor/addfavourite/influencer",
         {
           p_userId: userId,
           p_influencerId: influencerId,
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
-      if (resp.data && resp.data.status) {
-        toast.success(isLiked ? "Removed from favorites" : "Added to favorites");
+      if (response.data.status) {
+        // Show toast for success
+        if (isLiked) {
+          toast.success(response.data.message || "Removed from favorites");
+        } else {
+          toast.success(response.data.message || "Added to favorites");
+        }
       } else {
-        // revert
+        // Revert if API fails
         setLikedInfluencers((prev) => {
           const updated = new Set(prev);
           if (isLiked) updated.add(influencerId);
           else updated.delete(influencerId);
           return updated;
         });
-        toast.error(resp.data?.message || "Failed to update favourite");
+        toast.error(response.data.message || "Failed to update favourite");
       }
     } catch (err) {
-      console.error("Error in liking:", err);
-      // revert
+      // Revert if API error
       setLikedInfluencers((prev) => {
         const updated = new Set(prev);
         if (isLiked) updated.add(influencerId);
@@ -136,7 +125,6 @@ const FavoritesLayout = () => {
 
   // for invite
   const handleInvite = async (influencerId) => {
-    const userId = localStorage.getItem("userId");
     if (!userId) return toast.error("User not logged in");
 
     setSelectedInfluencer(influencerId);
@@ -200,8 +188,10 @@ const FavoritesLayout = () => {
   };
 
   useEffect(() => {
-    getFavouriteInfluencers();
-  }, [filters.pagenumber, filters.pagesize, searchTerm]);
+    if (activeTab === "favorites") {
+      getFavouriteInfluencers();
+    }
+  }, [filters.pagenumber, filters.pagesize, searchTerm, activeTab]);
 
   const buttons = [
     { id: "all", label: "All", path: "/vendor-dashboard/browse-influencers" },
@@ -256,20 +246,35 @@ const FavoritesLayout = () => {
         {/* Search */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <Input
-            size="large"
-            prefix={<SearchOutlined />}
-            placeholder="Search influencers"
-            className="w-full sm:w-auto flex-1"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => {
-              const trimmed = searchInput.trim();
-              if (e.key === "Enter") {
-                setFilters((prev) => ({ ...prev, pagenumber: 1 }));
-                setSearchTerm(trimmed);
-              }
-            }}
-          />
+                        size="large"
+                        prefix={<SearchOutlined />}
+                        placeholder="Search campaigns"
+                        className="w-full sm:w-auto flex-1"
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          const trimmedInput = searchInput.trim();
+          
+                          if ((e.key === "Enter" || e.key === " ") && trimmedInput !== "") {
+                      setFilters((prev) => ({
+                        ...prev,
+                        pagesize: window.innerWidth < 640 ? 10 : 15,
+                        pagenumber: 1,
+                      }));
+                      setSearchTerm(trimmedInput);
+                          }
+          
+                          if (e.key === "Enter" && trimmedInput === "") {
+                      // Reset search
+                      setSearchTerm("");
+                      setFilters((prev) => ({
+                        ...prev,
+                        pagesize: window.innerWidth < 640 ? 10 : 15,
+                        pagenumber: 1,
+                      }));
+                          }
+                        }}
+                      />
         </div>
 
         {/* Influencers List */}
@@ -339,11 +344,7 @@ const FavoritesLayout = () => {
                         <RiUserAddLine size={16} />
                       </button>
                     </Tooltip>
-                    <Tooltip
-                      title={
-                        likedInfluencers.has(influencer.id) ? "Unlike" : "Like"
-                      }
-                    >
+                    <Tooltip title={influencer.isLiked ? "UnFavorite" : "Favorite"}>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

@@ -46,68 +46,67 @@ const BrowseInfluencersLayout = () => {
   });
 
   const navigate = useNavigate();
-  const { token } = useSelector((state) => state.auth);
+  const { token, userId } = useSelector(state => state.auth);
 
-  const getAllInfluencers = async (filters, token, searchTerm = "") => {
-    try {
-      setLoading(true);
+const getAllInfluencers = async (filters, token, searchTerm = "") => {
+  try {
+    setLoading(true);
 
-      const params = {
-        p_location: filters.location || null,
-        p_providers: filters.providers?.length ? filters.providers : null,
-        p_influencertiers: filters.influencertiers?.length
-          ? filters.influencertiers
-          : null,
-        p_genders: filters.gender?.length ? filters.gender : null,
-        p_languages: filters.languages?.length ? filters.languages : null,
-        p_pagenumber: filters.pagenumber || 1,
-        p_pagesize: filters.pagesize || 20,
-        p_search: searchTerm?.trim() || null,
-      };
+const params = {
+  p_userid: userId,
+  p_location: filters.location || null,
+  p_providers: filters.providers?.length ? JSON.stringify(filters.providers) : null,
+  p_influencertiers: filters.influencertiers?.length ? JSON.stringify(filters.influencertiers) : null,
+  p_ratings: filters.ratings?.length ? JSON.stringify(filters.ratings) : null,
+  p_genders: filters.gender?.length ? JSON.stringify(filters.gender) : null,
+  p_languages: filters.languages?.length ? JSON.stringify(filters.languages) : null,
+  p_pagenumber: filters.pagenumber || 1,
+  p_pagesize: filters.pagesize || 20,
+  p_search: searchTerm?.trim() || null,
+};
 
-      const cleanParams = Object.fromEntries(
-        Object.entries(params).filter(([_, v]) => v !== null && v !== undefined)
-      );
 
-      // Fetch influencers & favorite IDs simultaneously
-      const [influencerRes, favRes] = await Promise.all([
-        axios.get("/vendor/allinfluencer/browse", {
-          params: cleanParams,
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get("/vendor/getfavourite/influencer", {
-          params: { userId: localStorage.getItem("userId") },
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
+    // Remove null or undefined params
+    const cleanParams = Object.fromEntries(
+      Object.entries(params).filter(([_, v]) => v !== null && v !== undefined)
+    );
 
-      const influencersData = influencerRes.data?.data?.records || [];
-      const totalCount = influencerRes.data?.data?.totalcount || 0;
+    const [influencerRes, favRes] = await Promise.all([
+      axios.get("/vendor/allinfluencer/browse", {
+        params: cleanParams,
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      axios.get("/vendor/getfavourite/influencer", {
+        params: { userId },
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ]);
 
-      const favIds = new Set(
-        favRes.data?.data?.records?.map((inf) => inf.id) || []
-      );
+    const influencersData = influencerRes.data?.data?.records || [];
+    const totalCount = influencerRes.data?.data?.totalcount || 0;
 
-      // Mark each influencer as liked or not
-      const updatedInfluencers = influencersData.map((inf) => ({
-        ...inf,
-        isLiked: favIds.has(inf.id),
-      }));
+    const favIds = new Set(
+      favRes.data?.data?.records?.map((inf) => inf.id) || []
+    );
 
-      setInfluencers(updatedInfluencers);
-      setLikedInfluencers(favIds);
-      setTotalInfluencers(totalCount);
-    } catch (err) {
-      console.error("Error fetching influencers:", err);
-      toast.error("Failed to fetch influencers");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const updatedInfluencers = influencersData.map((inf) => ({
+      ...inf,
+      isLiked: favIds.has(inf.id),
+    }));
+
+    setInfluencers(updatedInfluencers);
+    setLikedInfluencers(favIds);
+    setTotalInfluencers(totalCount);
+  } catch (err) {
+    console.error("Error fetching influencers:", err);
+    toast.error("Failed to fetch influencers");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const getFavouriteInfluencers = async () => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) return;
 
     try {
       const res = await axios.get("/vendor/getfavourite/influencer", {
@@ -115,15 +114,13 @@ const BrowseInfluencersLayout = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const favIds = res.data.data?.map((inf) => inf.id) || [];
+      const favIds = res.data.data?.records?.map((inf) => inf.id) || [];
       setLikedInfluencers(new Set(favIds));
     } catch (err) {
       console.error("Failed to fetch favourite influencers:", err);
     }
   };
   const handleLike = async (influencerId) => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) return toast.error("User not logged in");
 
     setInfluencers((prev) =>
       prev.map((inf) =>
@@ -235,11 +232,12 @@ const BrowseInfluencersLayout = () => {
     }
   };
 
-  const handleCheckboxChange = useCallback((category, id) => {
-    setFilters((prev) => {
+const handleCheckboxChange = useCallback((category, id) => {
+    setFilters(prev => {
       const updated = prev[category].includes(id)
-        ? prev[category].filter((v) => v !== id)
+        ? prev[category].filter(v => v !== id)
         : [...prev[category], id];
+
       return { ...prev, [category]: updated, pagenumber: 1 };
     });
   }, []);
@@ -268,7 +266,6 @@ const BrowseInfluencersLayout = () => {
 
   // for invite
   const handleInvite = async (influencerId) => {
-    const userId = localStorage.getItem("userId");
     if (!userId) return toast.error("User not logged in");
 
     setSelectedInfluencer(influencerId);
@@ -383,20 +380,35 @@ const BrowseInfluencersLayout = () => {
         {/* Search + Sort + Filter */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <Input
-            size="large"
-            prefix={<SearchOutlined />}
-            placeholder="Search influencers"
-            className="w-full sm:w-auto flex-1"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => {
-              const trimmed = searchInput.trim();
-              if (e.key === "Enter") {
-                setFilters((prev) => ({ ...prev, pagenumber: 1 }));
-                setSearchTerm(trimmed);
-              }
-            }}
-          />
+              size="large"
+              prefix={<SearchOutlined />}
+              placeholder="Search campaigns"
+              className="w-full sm:w-auto flex-1"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                const trimmedInput = searchInput.trim();
+
+                if ((e.key === "Enter" || e.key === " ") && trimmedInput !== "") {
+            setFilters((prev) => ({
+              ...prev,
+              pagesize: window.innerWidth < 640 ? 10 : 15,
+              pagenumber: 1,
+            }));
+            setSearchTerm(trimmedInput);
+                }
+
+                if (e.key === "Enter" && trimmedInput === "") {
+            // Reset search
+            setSearchTerm("");
+            setFilters((prev) => ({
+              ...prev,
+              pagesize: window.innerWidth < 640 ? 10 : 15,
+              pagenumber: 1,
+            }));
+                }
+              }}
+            />
 
           <div className="flex gap-2 w-full sm:w-auto justify-end">
             <button
@@ -481,7 +493,7 @@ const BrowseInfluencersLayout = () => {
                       </span>
                     </Tooltip>
 
-                    <Tooltip title={influencer.isLiked ? "Unlike" : "Like"}>
+                    <Tooltip title={influencer.isLiked ? "UnFavorite" : "Favorite"}>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
