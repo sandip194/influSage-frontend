@@ -18,7 +18,7 @@ import {
   Button,
 } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../../features/auth/authSlice';
 
 import NotificationDropdown from './NotificationDropdown';
@@ -27,6 +27,9 @@ import MessageDropdown from './MessageDropdown';
 const DeshboardHeader = ({ toggleSidebar }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { role } = useSelector((state) => state.auth);
+
+  const basePath = role === 1 ? '/dashboard' : '/vendor-dashboard';
 
   const handleLogout = () => {
     dispatch(logout());
@@ -39,12 +42,12 @@ const DeshboardHeader = ({ toggleSidebar }) => {
         {
           key: "1",
           icon: <UserOutlined />,
-          label: <Link to="/dashboard/profile">My Profile</Link>,
+          label: <Link to={`${basePath}/profile`}>My Profile</Link>,
         },
         {
           key: "2",
           icon: <SettingOutlined />,
-          label: <Link to="/dashboard/setting">Settings</Link>,
+          label:  <Link to={`${basePath}/settings`}>Settings</Link>,
         },
         {
           key: "3",

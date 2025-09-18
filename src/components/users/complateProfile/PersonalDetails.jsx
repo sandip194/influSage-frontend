@@ -9,12 +9,13 @@ import postalRegexList from './postalRegex.json'
 import { useSelector } from 'react-redux';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { toast } from 'react-toastify';
 dayjs.extend(customParseFormat);
 
 const { TextArea } = Input;
 const { Option } = Select;
 
-export const PersonalDetails = ({ onNext, data }) => {
+export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave }) => {
 
   const [form] = Form.useForm();
   const [preview, setPreview] = useState(null);
@@ -149,11 +150,8 @@ export const PersonalDetails = ({ onNext, data }) => {
     setPreview(URL.createObjectURL(file));
   };
 
-
   const handleSubmit = async () => {
     try {
-
-
       if (!profileImage && !preview) {
         setProfileError("Please select profile image! Profile image is required.");
         return;
@@ -161,7 +159,6 @@ export const PersonalDetails = ({ onNext, data }) => {
 
       const values = await form.validateFields();
 
-      // Format data as per API structure
       const profilePayload = {
         photopath: profileImage ? null : existingPhotoPath,
         genderid: values.gender,
@@ -174,11 +171,11 @@ export const PersonalDetails = ({ onNext, data }) => {
         city: values.city,
         zip: values.zipCode,
       };
+
       const formData = new FormData();
       formData.append('profilejson', JSON.stringify(profilePayload));
       formData.append('photo', profileImage);
 
-      // Call API only if changes detected
       const response = await axios.post("user/complete-profile", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -187,8 +184,13 @@ export const PersonalDetails = ({ onNext, data }) => {
       });
 
       if (response.status === 200) {
-        message.success('Form submitted successfully!');
-        onNext();
+        if (showToast) toast.success('Profile updated successfully!');
+
+        // Stepper: Go to next
+        if (onNext) onNext();
+
+        // Edit Profile: Custom save handler
+        if (onSave) onSave(profilePayload);
       } else {
         message.error('Failed to submit form, please try again.');
       }
@@ -198,6 +200,7 @@ export const PersonalDetails = ({ onNext, data }) => {
       message.error('Submission failed, please try again.');
     }
   };
+
 
   return (
     <div className="personal-details-container bg-white p-6 rounded-3xl text-inter">
@@ -445,12 +448,17 @@ export const PersonalDetails = ({ onNext, data }) => {
         </Form.Item>
 
         {/* Submit Button */}
-        <button
-          className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
-          onClick={handleSubmit}
-        >
-          Continue
-        </button>
+        {showControls && (
+          <div className="flex justify-start mt-6">
+            <button
+              className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
+              onClick={handleSubmit}
+            >
+              {onNext ? 'Continue' : 'Save Changes'}
+            </button>
+          </div>
+        )}
+
       </Form>
     </div>
   );

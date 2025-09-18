@@ -55,6 +55,7 @@ import OffersLayout from './components/vendor/offers/OffersLayout';
 import ViewAllOffers from './components/vendor/offers/ViewAllOffers';
 import OfferDetails from './components/vendor/offers/OfferDetails';
 import InfluencerProfile from './components/vendor/offers/InfluencerProfile';
+import EditVendorProfile from './components/users/EditProfile/EditVendorProfile';
 
 const App = () => {
 
@@ -153,6 +154,9 @@ const App = () => {
                                                 <Route path='offers/view-all-offers' element={<ViewAllOffers/>}/>
                                                 <Route path="offers/:id" element={<OfferDetails />}/>
                                                 <Route path='offers/influencer-details/:userId' element={<InfluencerProfile/>} />
+
+
+                                                <Route path='edit-profile' element={<EditVendorProfile />} />
                                         </Route>
                                         <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
                                 </Route>

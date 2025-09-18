@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Steps } from 'antd';
 import { ProfileHeader } from '../../../components/users/complateProfile/ProfileHeader';
 import { RiMenu2Line } from 'react-icons/ri';
-import PaymentDetailsForm from '../../../components/users/complateProfile/PaymentDetailsForm';
-import ThankYouScreen from '../../../components/users/complateProfile/ThankYouScreen';
 import { BusinessDetails } from '../../../components/users/vendorProfile/BusinessDetails';
 import { CategorySelector } from '../../../components/users/vendorProfile/CategorySelector';
-import PlatformSelector from '../../../components/users/vendorProfile/PlatformSelector';
-import ObjectiveSelector from '../../../components/users/vendorProfile/ObjectiveSelector';
-import axios from 'axios';
 import { SocialMediaDetails } from '../../../components/users/vendorProfile/SocialMediaDetails';
+import ObjectiveSelector from '../../../components/users/vendorProfile/ObjectiveSelector';
+import PaymentDetailsForm from '../../../components/users/complateProfile/PaymentDetailsForm';
+import ThankYouScreen from '../../../components/users/complateProfile/ThankYouScreen';
+import axios from 'axios';
 import { useSelector } from 'react-redux';
 
 export const VendorProfileStepper = () => {

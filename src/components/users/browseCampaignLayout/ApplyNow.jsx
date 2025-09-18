@@ -27,6 +27,7 @@ const ApplyNow = () => {
   const [loading, setLoading] = useState(false)
   const [fileList, setFileList] = useState([]);
   const [existingFiles, setExistingFiles] = useState([]);
+  const [deletedFilePaths, setDeletedFilePaths] = useState([]);
   const [fileError, setFileError] = useState("");
 
   const { campaignId } = useParams();
@@ -75,7 +76,7 @@ const ApplyNow = () => {
     const applycampaignjson = {
       amount,
       proposal,
-      filepaths: existingFiles.map((file) => ({ filepath: file.filepath })), 
+      filepaths: existingFiles.map((file) => ({ filepath: file.filepath })),
     };
 
     const formData = new FormData();
@@ -85,6 +86,23 @@ const ApplyNow = () => {
     fileList.forEach((file) => {
       formData.append("portfolioFiles", file);
     });
+
+    // Delete removed files
+    for (const path of deletedFilePaths) {
+      try {
+        await axios.post(
+          "/user/apply-now/portfoliofile-delete",
+          {
+            filePath: path,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+      } catch (err) {
+        console.error(`Failed to delete file: ${path}`, err);
+      }
+    }
 
 
     try {
@@ -103,6 +121,7 @@ const ApplyNow = () => {
         navigate("/dashboard/browse/applied");
       }
       toast.success(response.data.message);
+      setDeletedFilePaths([]);
     } catch (err) {
       console.error(err);
       toast.error("Application not submitted");
@@ -292,7 +311,7 @@ const ApplyNow = () => {
 
           <PhotoProvider>
             <div className="flex flex-wrap items-center gap-4 mt-4">
-              {[...existingFiles, ...fileList].map((file, index) => {
+              {[...existingFiles, ...fileList].map((file, ) => {
                 const isImage = file.type?.includes("image");
                 const isVideo = file.type?.includes("video");
                 const isPDF = file.type?.includes("pdf");
@@ -339,6 +358,7 @@ const ApplyNow = () => {
                       className="absolute top-1 right-1 bg-black text-white p-1 rounded-full"
                       onClick={() => {
                         if (file.isExisting) {
+                          setDeletedFilePaths((prev) => [...prev, file.filepath]); // ✅ Track deleted
                           setExistingFiles((prev) =>
                             prev.filter((f) => f.filepath !== file.filepath)
                           );
@@ -346,6 +366,7 @@ const ApplyNow = () => {
                           setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
                         }
                       }}
+
                     >
                       <RiDeleteBin6Line />
                     </button>
