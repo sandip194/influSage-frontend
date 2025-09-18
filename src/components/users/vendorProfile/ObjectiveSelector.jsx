@@ -2,10 +2,11 @@ import { RiCheckLine } from '@remixicon/react';
 import axios from 'axios';
 import React, { useEffect, useState } from "react";
 import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 
 const STORAGE_KEY = 'selected_objective'; // optional fallback storage
 
-const ObjectiveSelector = ({ onBack, onNext, data }) => {
+const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSave }) => {
   const [selected, setSelected] = useState(null);
   const [error, setError] = useState("");
   const [objectives, setObjectives] = useState([]);
@@ -24,8 +25,6 @@ const ObjectiveSelector = ({ onBack, onNext, data }) => {
 
     setError("");
 
-
-
     const formData = new FormData();
     formData.append('objectivesjson', JSON.stringify([{ objectiveid: selected }]));
 
@@ -37,8 +36,15 @@ const ObjectiveSelector = ({ onBack, onNext, data }) => {
         },
       });
 
-      console.log("✅ Objective saved:", response.data);
-      onNext?.();
+      if (response.status === 200) {
+        if (showToast) toast.success('Profile updated successfully!');
+
+        // Stepper: Go to next
+        if (onNext) onNext();
+
+        // Edit Profile: Custom save handler
+        if (onSave) onSave(formData);
+      }
     } catch (err) {
       console.error("❌ Failed to save objective:", err);
       setError("Failed to save your objective. Please try again.");
@@ -85,8 +91,8 @@ const ObjectiveSelector = ({ onBack, onNext, data }) => {
             key={obj.id}
             onClick={() => handleSelection(obj.id)}
             className={`flex justify-between items-center border rounded-2xl px-4 py-4 cursor-pointer transition-all ${selected === obj.id
-                ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                : "bg-white text-black border-gray-300 hover:border-[#141843]"
+              ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+              : "bg-white text-black border-gray-300 hover:border-[#141843]"
               }`}
           >
             {/* Objective Content */}
@@ -100,8 +106,8 @@ const ObjectiveSelector = ({ onBack, onNext, data }) => {
             {/* Custom Checkbox */}
             <div
               className={`flex items-center  justify-center rounded-full border transition-all ${selected === obj.id
-                  ? "bg-[#141843] border-[#0D132D26] p-0 text-white"
-                  : "bg-transparent border-gray-400 p-[10px] text-transparent"
+                ? "bg-[#141843] border-[#0D132D26] p-0 text-white"
+                : "bg-transparent border-gray-400 p-[10px] text-transparent"
                 }`}
             >
               {selected === obj.id && <RiCheckLine size={22} />}
@@ -113,19 +119,28 @@ const ObjectiveSelector = ({ onBack, onNext, data }) => {
       {error && <p className="text-red-600 text-sm mt-4 font-medium">{error}</p>}
 
       {/* Navigation Buttons */}
-      <div className="mt-8 flex gap-4">
-        <button
-          onClick={onBack}
-          className="bg-white text-sm cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
-        >
-          Back
-        </button>
-        <button
-          onClick={handleContinue}
-          className="bg-[#121A3F] text-sm text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-1 rounded-full hover:bg-[#0D132D]"
-        >
-          Continue
-        </button>
+      <div className="flex flex-row items-center gap-4 mt-6">
+        {/* Back Button (only shown if onBack is provided) */}
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
+          >
+            Back
+          </button>
+        )}
+
+        {/* Next / Save Button */}
+        {(showControls || onNext) && (
+          <button
+            className="bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition"
+            onClick={handleContinue}
+          >
+            {onNext ? "Continue" : "Save Changes"}
+          </button>
+        )}
+
       </div>
     </div>
   );

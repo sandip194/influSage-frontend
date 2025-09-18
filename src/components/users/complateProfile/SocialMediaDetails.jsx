@@ -3,8 +3,9 @@ import { Form, Input, InputNumber } from 'antd';
 import axios from 'axios';
 import { message } from 'antd';
 import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 
-export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
+export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControls, showToast, onSave }) => {
   const [form] = Form.useForm();
   const [providers, setProviders] = useState([]);
   const { token, userId } = useSelector(state => state.auth);
@@ -87,8 +88,16 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
         }
       );
 
-      message.success('Social media details submitted!');
-      if (onNext) onNext();
+      if (response.status == 200) {
+        if (showToast) toast.success('Profile updated successfully!');
+
+        // Stepper: Go to next
+        if (onNext) onNext();
+
+        // Edit Profile: Custom save handler
+        if (onSave) onSave(socialaccountjson);
+      }
+
 
     } catch (error) {
       console.error('❌ Failed to submit social links:', error);
@@ -228,20 +237,29 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange }) => {
 
         {/* Buttons */}
         <div className="flex flex-row items-center gap-4 mt-6">
-          <button
-            type="button"
-            onClick={onBack}
-            className="bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
-          >
-            Back
-          </button>
-          <button
-            type="submit"
-            className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
-          >
-            Continue
-          </button>
+          {/* Back Button (only shown if onBack is provided) */}
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
+            >
+              Back
+            </button>
+          )}
+
+          {/* Next / Save Button */}
+          {(showControls || onNext) && (
+            <button
+              className="bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition"
+              onClick={onFinish}
+            >
+              {onNext ? "Continue" : "Save Changes"}
+            </button>
+          )}
+
         </div>
+
       </Form>
     </div>
   );

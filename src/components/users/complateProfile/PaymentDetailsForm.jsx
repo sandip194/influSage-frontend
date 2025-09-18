@@ -16,6 +16,7 @@ import 'react-phone-input-2/lib/style.css';
 import axios from 'axios';
 
 import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 
 const { Option } = Select;
 const { Link } = Typography;
@@ -26,7 +27,7 @@ const countries = [
   { code: "GB", name: "United Kingdom" },
 ];
 
-const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
+const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, showToast, onSave }) => {
   const [form] = Form.useForm();
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [termsVisible, setTermsVisible] = useState(false);
@@ -133,9 +134,14 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
         );
 
         if (res.status === 200) {
-          message.success("Payment details saved!");
           onChange?.(payload.paymentjson);
-          onNext?.();
+          if (showToast) toast.success('Profile updated successfully!');
+
+          // Stepper: Go to next
+          if (onNext) onNext();
+
+          // Edit Profile: Custom save handler
+          if (onSave) onSave(formData);
         } else {
           message.error("Failed to save payment info");
         }
@@ -154,9 +160,14 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
         );
 
         if (res.status === 200) {
-          message.success("Payment details saved!");
           onChange?.(payload.paymentjson);
-          onNext?.();
+          if (showToast) toast.success('Profile updated successfully!');
+
+          // Stepper: Go to next
+          if (onNext) onNext();
+
+          // Edit Profile: Custom save handler
+          if (onSave) onSave(formData);
         } else {
           message.error("Failed to save payment info");
         }
@@ -545,19 +556,28 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange }) => {
           </Form.Item>
 
           {/* Buttons */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 ">
-            <button
-              onClick={onBack}
-              className="bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
-            >
-              Back
-            </button>
-            <button
-              onClick={onFinish}
-              className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
-            >
-              Complate Profile
-            </button>
+          <div className="flex flex-row items-center gap-4 mt-6">
+            {/* Back Button (only shown if onBack is provided) */}
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
+              >
+                Back
+              </button>
+            )}
+
+            {/* Next / Save Button */}
+            {(showControls || onNext) && (
+              <button
+                className="bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition"
+                onClick={onFinish}
+              >
+                {onNext ? "Complate Profile" : "Save Changes"}
+              </button>
+            )}
+
           </div>
         </Form>
       </div>

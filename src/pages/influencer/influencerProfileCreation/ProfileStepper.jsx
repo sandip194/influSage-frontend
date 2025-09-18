@@ -100,6 +100,8 @@ export const ProfileStepper = () => {
       component: (
         <PersonalDetails
           data={profileData.profile}
+          showControls={true}
+          showToast={true}
           onChange={(updated) => updateProfileSection('profile', updated)}
           onNext={() => markStepComplete(0)}
         />

@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { RiCheckLine } from '@remixicon/react';
+import { toast } from 'react-toastify';
 
-export const CategorySelector = ({ onBack, onNext, data }) => {
+export const CategorySelector = ({ onBack, onNext, data, showControls, showToast, onSave }) => {
     const [categoryTree, setCategoryTree] = useState([])
     const [selectedParentId, setSelectedParentId] = useState(null); // default to first parent
     const [selectedChildren, setSelectedChildren] = useState([]);
@@ -12,14 +13,14 @@ export const CategorySelector = ({ onBack, onNext, data }) => {
 
     const { token, role } = useSelector(state => state.auth);
 
-    const parentRefs = useRef({});
+    // const parentRefs = useRef({});
 
-    const handleParentClick = (id) => {
-        setSelectedParentId(id);
-        setTimeout(() => {
-            parentRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 0);
-    };
+    // const handleParentClick = (id) => {
+    //     setSelectedParentId(id);
+    //     setTimeout(() => {
+    //         parentRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    //     }, 0);
+    // };
 
     const fatchAllCategories = async () => {
         try {
@@ -84,12 +85,18 @@ export const CategorySelector = ({ onBack, onNext, data }) => {
                     }
                 );
 
+
                 if (res.status === 200) {
-                    console.log("✅ Backend response:", res.data);
-                } else {
-                    console.warn("❗ Unexpected response:", res);
+                    if (showToast) toast.success('Profile updated successfully!');
+
+                    // Stepper: Go to next
+                    if (onNext) onNext();
+
+                    // Edit Profile: Custom save handler
+                    if (onSave) onSave(formData);
                 }
             }
+
 
             // for Vendor
             if (role === 2) {
@@ -104,9 +111,13 @@ export const CategorySelector = ({ onBack, onNext, data }) => {
                 );
 
                 if (res.status === 200) {
-                    console.log("✅ Backend response:", res.data);
-                } else {
-                    console.warn("❗ Unexpected response:", res);
+                    if (showToast) toast.success('Profile updated successfully!');
+
+                    // Stepper: Go to next
+                    if (onNext) onNext();
+
+                    // Edit Profile: Custom save handler
+                    if (onSave) onSave(formData);
                 }
             }
 
@@ -185,19 +196,19 @@ export const CategorySelector = ({ onBack, onNext, data }) => {
                                 key={child.id}
                                 onClick={() => toggleChildSelection(child.id)}
                                 className={`flex justify-between items-center w-full px-4 py-3 text-sm rounded-xl border cursor-pointer transition-all ${selectedChildren.includes(child.id)
-                                        ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                                        : "bg-white text-black border-gray-300  hover:border-[#141843]"
+                                    ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                                    : "bg-white text-black border-gray-300  hover:border-[#141843]"
                                     }`}
                             >
                                 <span className="wrap-anywhere">{child.name}</span>
 
                                 <div
                                     className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all ${selectedChildren.includes(child.id)
-                                            ? "bg-[#141843] border-[#0D132D26] text-white"
-                                            : "bg-transparent border-gray-400 text-transparent"
+                                        ? "bg-[#141843] border-[#0D132D26] text-white"
+                                        : "bg-transparent border-gray-400 text-transparent"
                                         }`}
                                 >
-                                
+
                                     {selectedChildren.includes(child.id) && <RiCheckLine size={12} />}
                                 </div>
                             </div>
@@ -211,19 +222,28 @@ export const CategorySelector = ({ onBack, onNext, data }) => {
                 <div className="text-red-500 text-sm font-medium mt-4">Please select at least one subcategory.</div>
             )}
 
-            <div className="mt-6 flex flex-col sm:flex-row gap-4">
-                <button
-                    onClick={onBack}
-                    className="bg-white text-sm cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
-                >
-                    Back
-                </button>
-                <button
-                    onClick={handleSubmit}
-                    className="bg-[#121A3F] text-sm text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
-                >
-                    Continue
-                </button>
+            <div className="flex flex-row items-center gap-4 mt-6">
+                {/* Back Button (only shown if onBack is provided) */}
+                {onBack && (
+                    <button
+                        type="button"
+                        onClick={onBack}
+                        className="bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
+                    >
+                        Back
+                    </button>
+                )}
+
+                {/* Next / Save Button */}
+                {(showControls || onNext) && (
+                    <button
+                        className="bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition"
+                        onClick={handleSubmit}
+                    >
+                        {onNext ? "Continue" : "Save Changes"}
+                    </button>
+                )}
+
             </div>
         </div>
     );

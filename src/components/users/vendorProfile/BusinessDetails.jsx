@@ -6,11 +6,12 @@ import { RiImageAddLine } from 'react-icons/ri';
 import axios from "axios";
 import postalRegexList from '../complateProfile/postalRegex.json';
 import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 
 const { TextArea } = Input;
 const { Option } = Select;
 
-export const BusinessDetails = ({ onNext, data = {} }) => {
+export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, onSave }) => {
     const [form] = Form.useForm();
     const [preview, setPreview] = useState(null);
     const [profileImage, setProfileImage] = useState(null);
@@ -175,8 +176,13 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
             });
 
             if (response.status === 200 || response.status === 201) {
-                message.success("Business details updated successfully!");
-                onNext();
+                if (showToast) toast.success('Profile updated successfully!');
+
+                // Stepper: Go to next
+                if (onNext) onNext();
+
+                // Edit Profile: Custom save handler
+                if (onSave) onSave(formData);
             } else {
                 message.error("Failed to update profile.");
             }
@@ -388,13 +394,16 @@ export const BusinessDetails = ({ onNext, data = {} }) => {
                 </Form.Item>
 
                 {/* Submit Button */}
-                <button
-                    type="button"
-                    className="bg-[#121A3F] text-white cursor-pointer px-8 py-3 rounded-full hover:bg-[#0D132D]"
-                    onClick={handleSubmit}
-                >
-                    Continue
-                </button>
+                {showControls && (
+                    <div className="flex justify-start mt-6">
+                        <button
+                            className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
+                            onClick={handleSubmit}
+                        >
+                            {onNext ? 'Continue' : 'Save Changes'}
+                        </button>
+                    </div>
+                )}
             </Form>
         </div>
     );
