@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { RiHeartLine, RiHeartFill, RiUserAddLine } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Input, Pagination, Empty, Tooltip } from "antd";
+import { Input, Pagination, Modal, Spin, Empty, Tooltip } from "antd";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -14,7 +14,14 @@ const FavoritesLayout = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [likedInfluencers, setLikedInfluencers] = useState(new Set());
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("favorites");
+  const [isInviteModalVisible, setIsInviteModalVisible] = useState(false);
+  const [inviteCampaigns, setInviteCampaigns] = useState([]);
+  const [loadingInvite, setLoadingInvite] = useState(false);
+  const [selectedInfluencer, setSelectedInfluencer] = useState(null);
+  const [selectedCampaigns, setSelectedCampaigns] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+
   const [filters, setFilters] = useState({
     pagenumber: 1,
     pagesize: 15,
@@ -25,36 +32,56 @@ const FavoritesLayout = () => {
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
 
-  const getFavouriteInfluencers = async () => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) return;
-
-    try {
-      const res = await axios.get("/vendor/getfavourite/influencer", {
-        params: {
-          userId,
-          p_pagenumber: filters.pagenumber,
-          p_pagesize: filters.pagesize,
-          p_search: searchTerm,
-        },
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.data.status) {
-        const favData = res.data.data[0]?.fn_get_influencersave || {};
-        const records = favData.records || [];
-        const totalcount = favData.totalcount || 0;
-
-        const favIds = records.map((inf) => inf.id) || [];
-        setLikedInfluencers(new Set(favIds));
-        setInfluencers(records);
-        setTotalInfluencers(totalcount);
-      }
-    } catch (err) {
-      console.error("Failed to fetch favourite influencers:", err);
-      toast.error("Failed to load favourites");
-    }
-  };
+   const getFavouriteInfluencers = async () => {
+     const userId = localStorage.getItem("userId");
+     if (!userId) {
+       toast.error("User ID not found in localStorage");
+       return;
+     }
+ 
+     setLoading(true);
+ 
+     try {
+       const res = await axios.get("/vendor/browse/inviteinfluencer", {
+         params: {
+           p_pagenumber: filters.pagenumber,
+           p_pagesize: filters.pagesize,
+           p_search: searchTerm || null,
+         },
+         headers: { Authorization: `Bearer ${token}` },
+       });
+ 
+       console.log("API response:", res.data);
+ 
+       const apiData = res.data?.data;
+       if (!apiData) {
+         throw new Error("No data field in response");
+       }
+ 
+       const infls = apiData.records || [];
+       const total = apiData.totalcount || 0;
+ 
+       const favSet = new Set(
+         infls
+           .filter((inf) => {
+             return inf.isfavourite === true;
+           })
+           .map((inf) => inf.id)
+       );
+ 
+       console.log("Favorites from API:", favSet);
+ 
+       setInfluencers(infls);
+       setTotalInfluencers(total);
+       setLikedInfluencers(favSet);
+     } catch (error) {
+       console.error("Failed to fetch invited influencers:", error);
+       toast.error("Failed to load influencers");
+     } finally {
+       setLoading(false);
+     }
+   };
+ 
 
   const handleLike = async (influencerId) => {
     const userId = localStorage.getItem("userId");
@@ -65,7 +92,6 @@ const FavoritesLayout = () => {
 
     const isLiked = likedInfluencers.has(influencerId);
 
-    // Optimistic update
     setLikedInfluencers((prev) => {
       const updated = new Set(prev);
       if (isLiked) updated.delete(influencerId);
@@ -74,30 +100,30 @@ const FavoritesLayout = () => {
     });
 
     try {
-      const response = await axios.post("/vendor/addfavourite/influencer", {
-        p_userId: userId,
-        p_influencerId: influencerId,
-      });
+      const resp = await axios.post(
+        "/vendor/addfavourite/influencer",
+        {
+          p_userId: userId,
+          p_influencerId: influencerId,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      if (response.data.status) {
-        // Show toast for success
-        if (isLiked) {
-          toast.success("Removed from favorites");
-        } else {
-          toast.success("Added to favorites");
-        }
+      if (resp.data && resp.data.status) {
+        toast.success(isLiked ? "Removed from favorites" : "Added to favorites");
       } else {
-        // Revert if API fails
+        // revert
         setLikedInfluencers((prev) => {
           const updated = new Set(prev);
           if (isLiked) updated.add(influencerId);
           else updated.delete(influencerId);
           return updated;
         });
-        toast.error(response.data.message || "Failed to update favourite");
+        toast.error(resp.data?.message || "Failed to update favourite");
       }
     } catch (err) {
-      // Revert if API error
+      console.error("Error in liking:", err);
+      // revert
       setLikedInfluencers((prev) => {
         const updated = new Set(prev);
         if (isLiked) updated.add(influencerId);
@@ -108,11 +134,74 @@ const FavoritesLayout = () => {
     }
   };
 
-  useEffect(() => {
-    if (activeTab === "favorites") {
-      getFavouriteInfluencers();
+  // for invite
+  const handleInvite = async (influencerId) => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return toast.error("User not logged in");
+
+    setSelectedInfluencer(influencerId);
+    setIsInviteModalVisible(true);
+    setLoadingInvite(true);
+
+    try {
+      const res = await axios.get("/vendor/inviteinfluencer/Campaigns", {
+        params: { p_userid: userId, p_influencerid: influencerId },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const campaigns = res.data?.data || [];
+      setInviteCampaigns(campaigns);
+    } catch (err) {
+      console.error("Error fetching campaigns:", err);
+      toast.error("Something went wrong while fetching campaigns");
+    } finally {
+      setLoadingInvite(false);
     }
-  }, [filters.pagenumber, filters.pagesize, searchTerm, activeTab]);
+  };
+
+  const handleBulkInvite = async () => {
+    if (selectedCampaigns.length === 0) {
+      toast.error("Please select at least one campaign");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const formattedCampaigns = selectedCampaigns.map((id) => ({
+        campaignid: id,
+      }));
+
+      const res = await axios.post(
+        "/vendor/campaign/invite",
+        {
+          p_influencerid: selectedInfluencer,
+          p_campaignidjson: formattedCampaigns,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.status === 200) {
+        toast.success(res.data?.message || "Invited successfully");
+        setIsInviteModalVisible(false);
+        setSelectedCampaigns([]);
+        if (typeof refreshData === "function") refreshData();
+      } else {
+        toast.error(res.data?.message || "Failed to invite");
+      }
+    } catch (error) {
+      console.error("Invite API error:", error);
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    getFavouriteInfluencers();
+  }, [filters.pagenumber, filters.pagesize, searchTerm]);
 
   const buttons = [
     { id: "all", label: "All", path: "/vendor-dashboard/browse-influencers" },
@@ -264,9 +353,15 @@ const FavoritesLayout = () => {
                bg-[#0f122f] text-white hover:bg-[#23265a] transition"
                       >
                         {likedInfluencers.has(influencer.id) ? (
-                          <RiHeartFill className="text-red-500 cursor-pointer" />
+                          <RiHeartFill
+                            size={20}
+                            className="text-red-500 cursor-pointer"
+                          />
                         ) : (
-                          <RiHeartLine className="text-gray-400 cursor-pointer" />
+                          <RiHeartLine
+                            size={20}
+                            className="text-gray-400 cursor-pointer"
+                          />
                         )}
                       </button>
                     </Tooltip>
@@ -313,6 +408,84 @@ const FavoritesLayout = () => {
           />
         </div>
       </div>
+
+      <Modal
+        title={
+          <h3 className="text-lg font-semibold text-[#0D132D]">
+            Invite Influencer to Campaign
+          </h3>
+        }
+        open={isInviteModalVisible}
+        onCancel={() => {
+          setIsInviteModalVisible(false);
+          setSelectedCampaigns([]);
+        }}
+        footer={null}
+        className="rounded-xl"
+      >
+        {loadingInvite ? (
+          <div className="flex justify-center items-center py-10">
+            <Spin size="large" />
+          </div>
+        ) : inviteCampaigns && inviteCampaigns.length > 0 ? (
+          <div className="max-h-96 overflow-y-auto pr-2 space-y-3">
+            {inviteCampaigns.map((campaign) => (
+              <div
+                key={campaign.id}
+                className="flex items-center justify-between border border-gray-200 rounded-lg p-4 hover:shadow-md transition cursor-pointer"
+                onClick={() => {
+                  if (selectedCampaigns.includes(campaign.id)) {
+                    setSelectedCampaigns((prev) =>
+                      prev.filter((id) => id !== campaign.id)
+                    );
+                  } else {
+                    setSelectedCampaigns((prev) => [...prev, campaign.id]);
+                  }
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedCampaigns.includes(campaign.id)}
+                  readOnly
+                  className="w-4 h-4 accent-[#0f122f] mr-4"
+                />
+
+                <div className="flex-1">
+                  <h4 className="font-semibold text-[#0D132D]">
+                    {campaign.name}
+                  </h4>
+                  {campaign.startdate && campaign.enddate && (
+                    <p className="text-xs text-gray-500">
+                      {campaign.startdate} → {campaign.enddate}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center py-8">
+            No campaigns available
+          </p>
+        )}
+
+        {/* Footer */}
+        {inviteCampaigns.length > 0 && (
+          <div className="flex justify-end sticky bottom-0 bg-white pt-4 mt-4 border-t">
+            <button
+              type="button"
+              onClick={handleBulkInvite}
+              disabled={selectedCampaigns.length === 0 || submitting}
+              className="px-5 py-2 bg-[#0f122f] text-white rounded-lg font-medium 
+                             hover:bg-[#23265a] disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              {submitting
+                ? "Inviting..."
+                : `Invite Selected (${selectedCampaigns.length})`}
+            </button>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

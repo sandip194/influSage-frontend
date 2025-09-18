@@ -2,16 +2,14 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import {
-  RiArrowDownSLine,
   RiEqualizerFill,
   RiCloseFill,
   RiHeartLine,
   RiHeartFill,
-  RiMessage2Line,
   RiUserAddLine,
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Input, Pagination, Select, Empty, Tooltip } from "antd";
+import { Input, Pagination, Modal, Spin, Empty, Tooltip } from "antd";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -29,6 +27,12 @@ const BrowseInfluencersLayout = () => {
   const [searchInput, setSearchInput] = useState("");
   const [likedInfluencers, setLikedInfluencers] = useState(new Set());
   const [activeTab, setActiveTab] = useState("all");
+  const [isInviteModalVisible, setIsInviteModalVisible] = useState(false);
+  const [inviteCampaigns, setInviteCampaigns] = useState([]);
+  const [loadingInvite, setLoadingInvite] = useState(false);
+  const [selectedInfluencer, setSelectedInfluencer] = useState(null);
+  const [selectedCampaigns, setSelectedCampaigns] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
 
   const [filters, setFilters] = useState({
     providers: [],
@@ -47,6 +51,7 @@ const BrowseInfluencersLayout = () => {
   const getAllInfluencers = async (filters, token, searchTerm = "") => {
     try {
       setLoading(true);
+
       const params = {
         p_location: filters.location || null,
         p_providers: filters.providers?.length ? filters.providers : null,
@@ -64,15 +69,33 @@ const BrowseInfluencersLayout = () => {
         Object.entries(params).filter(([_, v]) => v !== null && v !== undefined)
       );
 
-      const response = await axios.get("/vendor/allinfluencer/browse", {
-        params: cleanParams,
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // Fetch influencers & favorite IDs simultaneously
+      const [influencerRes, favRes] = await Promise.all([
+        axios.get("/vendor/allinfluencer/browse", {
+          params: cleanParams,
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get("/vendor/getfavourite/influencer", {
+          params: { userId: localStorage.getItem("userId") },
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
 
-      const influencersData = response.data?.data?.records || [];
-      const totalCount = response.data?.data?.totalcount || 0;
+      const influencersData = influencerRes.data?.data?.records || [];
+      const totalCount = influencerRes.data?.data?.totalcount || 0;
 
-      setInfluencers(influencersData);
+      const favIds = new Set(
+        favRes.data?.data?.records?.map((inf) => inf.id) || []
+      );
+
+      // Mark each influencer as liked or not
+      const updatedInfluencers = influencersData.map((inf) => ({
+        ...inf,
+        isLiked: favIds.has(inf.id),
+      }));
+
+      setInfluencers(updatedInfluencers);
+      setLikedInfluencers(favIds);
       setTotalInfluencers(totalCount);
     } catch (err) {
       console.error("Error fetching influencers:", err);
@@ -102,31 +125,46 @@ const BrowseInfluencersLayout = () => {
     const userId = localStorage.getItem("userId");
     if (!userId) return toast.error("User not logged in");
 
-    const isLiked = likedInfluencers.has(influencerId);
+    setInfluencers((prev) =>
+      prev.map((inf) =>
+        inf.id === influencerId ? { ...inf, isLiked: !inf.isLiked } : inf
+      )
+    );
 
-    // Optimistic UI update
+    const isCurrentlyLiked = likedInfluencers.has(influencerId);
     setLikedInfluencers((prev) => {
       const updated = new Set(prev);
-      if (isLiked) updated.delete(influencerId);
+      if (isCurrentlyLiked) updated.delete(influencerId);
       else updated.add(influencerId);
-
-      // Show toast immediately after UI update
-      toast.success(isLiked ? "Removed from favorites" : "Added to favorites");
-
       return updated;
     });
 
     try {
-      const res = await axios.post("/vendor/addfavourite/influencer", {
-        p_userId: userId,
-        p_influencerId: influencerId,
-      });
+      const res = await axios.post(
+        "/vendor/addfavourite/influencer",
+        { p_userId: userId, p_influencerId: influencerId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      if (!res.data.status) {
-        // Revert if API fails
+      if (res.data.status) {
+        // Show toast for success
+        if (isCurrentlyLiked) {
+          toast.success(res.data.message || "Removed from favorites");
+        } else {
+          toast.success(res.data.message || "Added to favorites");
+        }
+      } else {
+        // Revert on failure
+        setInfluencers((prev) =>
+          prev.map((inf) =>
+            inf.id === influencerId
+              ? { ...inf, isLiked: isCurrentlyLiked }
+              : inf
+          )
+        );
         setLikedInfluencers((prev) => {
           const reverted = new Set(prev);
-          if (isLiked) reverted.add(influencerId);
+          if (isCurrentlyLiked) reverted.add(influencerId);
           else reverted.delete(influencerId);
           return reverted;
         });
@@ -134,9 +172,14 @@ const BrowseInfluencersLayout = () => {
       }
     } catch (err) {
       // Revert on error
+      setInfluencers((prev) =>
+        prev.map((inf) =>
+          inf.id === influencerId ? { ...inf, isLiked: isCurrentlyLiked } : inf
+        )
+      );
       setLikedInfluencers((prev) => {
         const reverted = new Set(prev);
-        if (isLiked) reverted.add(influencerId);
+        if (isCurrentlyLiked) reverted.add(influencerId);
         else reverted.delete(influencerId);
         return reverted;
       });
@@ -222,6 +265,71 @@ const BrowseInfluencersLayout = () => {
     filters.pagesize,
     searchTerm,
   ]);
+
+  // for invite
+  const handleInvite = async (influencerId) => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return toast.error("User not logged in");
+
+    setSelectedInfluencer(influencerId);
+    setIsInviteModalVisible(true);
+    setLoadingInvite(true);
+
+    try {
+      const res = await axios.get("/vendor/inviteinfluencer/Campaigns", {
+        params: { p_userid: userId, p_influencerid: influencerId },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const campaigns = res.data?.data || [];
+      setInviteCampaigns(campaigns);
+    } catch (err) {
+      console.error("Error fetching campaigns:", err);
+      toast.error("Something went wrong while fetching campaigns");
+    } finally {
+      setLoadingInvite(false);
+    }
+  };
+
+  const handleBulkInvite = async () => {
+    if (selectedCampaigns.length === 0) {
+      toast.error("Please select at least one campaign");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const formattedCampaigns = selectedCampaigns.map((id) => ({
+        campaignid: id,
+      }));
+
+      const res = await axios.post(
+        "/vendor/campaign/invite",
+        {
+          p_influencerid: selectedInfluencer,
+          p_campaignidjson: formattedCampaigns,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.status === 200) {
+        toast.success(res.data?.message || "Invited successfully");
+        setIsInviteModalVisible(false);
+        setSelectedCampaigns([]);
+        if (typeof refreshData === "function") refreshData();
+      } else {
+        toast.error(res.data?.message || "Failed to invite");
+      }
+    } catch (error) {
+      console.error("Invite API error:", error);
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const buttons = [
     { id: "all", label: "All", path: "/vendor-dashboard/browse-influencers" },
@@ -357,36 +465,41 @@ const BrowseInfluencersLayout = () => {
                   {/* Action buttons */}
                   <div className="flex gap-2">
                     <Tooltip title="Invite">
-                      <button
-                        aria-label="Invite"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleInvite(influencer.id);
-                        }}
-                        className="w-9 h-9 flex items-center justify-center rounded-full 
-               bg-[#0f122f] text-white hover:bg-[#23265a] transition"
-                      >
-                        <RiUserAddLine size={16} />
-                      </button>
+                      <span>
+                        <button
+                          type="button"
+                          aria-label="Invite"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleInvite(influencer.id);
+                          }}
+                          className="w-9 h-9 flex items-center justify-center rounded-full 
+        bg-[#0f122f] text-white hover:bg-[#23265a] transition"
+                        >
+                          <RiUserAddLine size={16} />
+                        </button>
+                      </span>
                     </Tooltip>
 
-                    <Tooltip
-                      title={
-                        likedInfluencers.has(influencer.id) ? "Unlike" : "Like"
-                      }
-                    >
+                    <Tooltip title={influencer.isLiked ? "Unlike" : "Like"}>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleLike(influencer.id);
                         }}
                         className="w-9 h-9 flex items-center justify-center rounded-full 
-               bg-[#0f122f] text-white hover:bg-[#23265a] transition"
+           bg-[#0f122f] text-white hover:bg-[#23265a] transition"
                       >
-                        {likedInfluencers.has(influencer.id) ? (
-                          <RiHeartFill className="text-red-500 cursor-pointer" />
+                        {influencer.isLiked ? (
+                          <RiHeartFill
+                            size={20}
+                            className="text-red-500 cursor-pointer"
+                          />
                         ) : (
-                          <RiHeartLine className="text-gray-400 cursor-pointer" />
+                          <RiHeartLine
+                            size={20}
+                            className="text-gray-400 cursor-pointer"
+                          />
                         )}
                       </button>
                     </Tooltip>
@@ -595,6 +708,84 @@ const BrowseInfluencersLayout = () => {
           </div>
         </>
       )}
+
+      <Modal
+        title={
+          <h3 className="text-lg font-semibold text-[#0D132D]">
+            Invite Influencer to Campaign
+          </h3>
+        }
+        open={isInviteModalVisible}
+        onCancel={() => {
+          setIsInviteModalVisible(false);
+          setSelectedCampaigns([]);
+        }}
+        footer={null}
+        className="rounded-xl"
+      >
+        {loadingInvite ? (
+          <div className="flex justify-center items-center py-10">
+            <Spin size="large" />
+          </div>
+        ) : inviteCampaigns && inviteCampaigns.length > 0 ? (
+          <div className="max-h-96 overflow-y-auto pr-2 space-y-3">
+            {inviteCampaigns.map((campaign) => (
+              <div
+                key={campaign.id}
+                className="flex items-center justify-between border border-gray-200 rounded-lg p-4 hover:shadow-md transition cursor-pointer"
+                onClick={() => {
+                  if (selectedCampaigns.includes(campaign.id)) {
+                    setSelectedCampaigns((prev) =>
+                      prev.filter((id) => id !== campaign.id)
+                    );
+                  } else {
+                    setSelectedCampaigns((prev) => [...prev, campaign.id]);
+                  }
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedCampaigns.includes(campaign.id)}
+                  readOnly
+                  className="w-4 h-4 accent-[#0f122f] mr-4"
+                />
+
+                <div className="flex-1">
+                  <h4 className="font-semibold text-[#0D132D]">
+                    {campaign.name}
+                  </h4>
+                  {campaign.startdate && campaign.enddate && (
+                    <p className="text-xs text-gray-500">
+                      {campaign.startdate} → {campaign.enddate}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center py-8">
+            No campaigns available
+          </p>
+        )}
+
+        {/* Footer */}
+        {inviteCampaigns.length > 0 && (
+          <div className="flex justify-end sticky bottom-0 bg-white pt-4 mt-4 border-t">
+            <button
+              type="button"
+              onClick={handleBulkInvite}
+              disabled={selectedCampaigns.length === 0 || submitting}
+              className="px-5 py-2 bg-[#0f122f] text-white rounded-lg font-medium 
+                       hover:bg-[#23265a] disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              {submitting
+                ? "Inviting..."
+                : `Invite Selected (${selectedCampaigns.length})`}
+            </button>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
