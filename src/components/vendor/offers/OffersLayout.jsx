@@ -33,8 +33,6 @@ const OffersLayout = () => {
     ];
 
 
-
-
     const getAllOffers = useCallback(async () => {
         try {
             setLoading(true)
@@ -140,13 +138,17 @@ const OffersLayout = () => {
 
                     {/* Table Body */}
                     {loading ? (
-                        <div className="text-center py-10 text-gray-500 min-w-[900px]">
-                            Loading Offers...
-                        </div>
+                        <tr>
+                            <td colSpan="5" className="text-center py-10 text-gray-500">
+                                Loading Offers...
+                            </td>
+                        </tr>
                     ) : offers.length === 0 ? (
-                        <div className="py-10 min-w-[900px]">
-                            <Empty description="No Offers found." />
-                        </div>
+                        <tr>
+                            <td colSpan="5" className="text-center py-10">
+                                <Empty description="No Applications found." />
+                            </td>
+                        </tr>
                     ) : (
                         offers.map((offer) => (
                             <div
@@ -175,7 +177,7 @@ const OffersLayout = () => {
                                     </div>
                                     <div className="w-1/5 text-center">
                                         <button
-                                            onClick={() => navigate(`/vendor-dashboard/offers/view-all-offers`)}
+                                            onClick={() => navigate(`/vendor-dashboard/offers/view-all-offers/${offer.id}`)}
                                             className="bg-[#0f122f] hover:bg-[#1a1d3a] text-white px-4 py-2 rounded-full text-sm"
                                         >
                                             View Offers

@@ -448,7 +448,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
         </Form.Item>
 
         {/* Submit Button */}
-        {showControls && (
+        {(showControls || onNext) && (
           <div className="flex justify-start mt-6">
             <button
               className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"

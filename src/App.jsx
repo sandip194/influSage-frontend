@@ -151,7 +151,7 @@ const App = () => {
 
 
                                                 <Route path='offers' element={<OffersLayout/>}/>
-                                                <Route path='offers/view-all-offers' element={<ViewAllOffers/>}/>
+                                                <Route path='offers/view-all-offers/:id' element={<ViewAllOffers/>}/>
                                                 <Route path="offers/:id" element={<OfferDetails />}/>
                                                 <Route path='offers/influencer-details/:userId' element={<InfluencerProfile/>} />
 
