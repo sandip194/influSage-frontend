@@ -7,7 +7,7 @@ import {
 } from "react-icons/ri";
 import EmojiPicker from "emoji-picker-react";
 
-export default function ChatInput({ onSend }) {
+export default function ChatInputVendor({ onSend }) {
   const [text, setText] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [file, setFile] = useState(null);

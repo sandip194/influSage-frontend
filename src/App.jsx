@@ -40,6 +40,7 @@ import BrowseInfluencerPage from './components/users/browseInfluencers/BrowseInf
 import FavoritesLayout from './components/users/browseInfluencers/FavoritesLayout';
 import Invited from './components/users/browseInfluencers/Invited';
 import ChatAppPage from './components/chatApp/ChatAppPage';
+import ChatAppPageVendor from './components/chatAppVendor/ChatAppPageVendor';
 import Profile from './components/users/EditProfile/Profile';
 import EditProfile from './components/users/EditProfile/editProfile';
 import Settings from './components/users/Settings/SettingLayout';
@@ -147,7 +148,7 @@ const App = () => {
                                                 <Route path='vendor-campaign/vendorMessage/' element={<VendorMessage />} />
                                                 <Route path='vendor-campaign/vendorFilesMedia/' element={<VendorFilesMedia />} />
                                                 <Route path='vendor-campaign/payment/' element={<VendorPayment />} />
-                                                <Route path='messages' element={<ChatAppPage />} />
+                                                <Route path='messages' element={<ChatAppPageVendor />} />
 
 
                                                 <Route path='offers' element={<OffersLayout/>}/>

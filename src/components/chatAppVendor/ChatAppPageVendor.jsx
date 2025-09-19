@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
+import Sidebar from './SidebarVendor';
+import ChatHeader from './ChatHeaderVendor';
+import ChatMessages from './ChatMessagesVendor';
+import ChatInput from './ChatInputVendor';
 import { useSelector } from 'react-redux';
-import Sidebar from './Sidebar';
-import ChatHeader from './ChatHeader';
-import ChatMessages from './ChatMessages';
-import ChatInput from './ChatInput';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-export default function ChatAppPage() {
+export default function ChatAppPageVendor() {
   const { token, userId, role } = useSelector((state) => state.auth);
 
   const [activeChat, setActiveChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
 
-  // Define current user first
+  // current user first
   const currentUser = { id: userId, role };
 
   // Initialize socket after component mounts

@@ -17,7 +17,7 @@ const DashboardPage = () => {
                 <ProfileComplation />
                 <CampaignStats />
                 <EarningsSummarySection />
-                <div class="flex flex-col md:flex-row gap-4 my-3">
+                <div className="flex flex-col md:flex-row gap-4 my-3">
                     <PerformanceCard />
                     <TodoListCard />
                 </div>
