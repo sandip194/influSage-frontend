@@ -1,64 +1,103 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
     RiArrowLeftLine,
-    RiStarFill,
     RiPlayCircleLine,
     RiMessage2Line,
     RiEyeLine,
-    RiStarLine,
 } from "@remixicon/react";
 import AcceptOfferModal from "./models/AcceptOfferModal";
 import { Tooltip } from "antd";
-import { FaFacebook, FaInstagram, FaTiktok, FaYoutube } from "react-icons/fa";
-
-// ✅ static data for now
-const offerDetails = {
-    terms: {
-        budget: "12500",
-        deadline: "11 Jun, 2025",
-    },
-    description:
-        "Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...",
-    influencer: {
-        name: "Courtney Henry",
-        location: "Ahmedabad, India",
-        rating: 4.2,
-        categories: ["Fashion", "Beauty", "Fitness", "Other"],
-        followers: {
-            instagram: "11.8k",
-            youtube: "2.3k",
-            facebook: "5.2k",
-            twitter: "2.3k",
-        },
-        profileImage: "https://randomuser.me/api/portraits/women/65.jpg",
-    },
-    portfolio: [
-
-        "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9",
-        "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7",
-        "https://images.unsplash.com/photo-1524504388940-b1c1722653e1"
-    ]
-
-
-};
+import {
+    FaFacebook,
+    FaInstagram,
+    FaTiktok,
+    FaYoutube,
+} from "react-icons/fa";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const OfferDetails = () => {
-    const { terms, description, influencer, portfolio } = offerDetails;
-    const navigate = useNavigate();
-
-    // modal states
+    const [offerDetails, setOfferDetails] = useState(null);
+    const [loading, setLoading] = useState(false);
     const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
+    const navigate = useNavigate();
+    const { id } = useParams();
+    const { token } = useSelector((state) => state.auth);
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-    // confirm handlers
+    useEffect(() => {
+        const getApplicationDetails = async () => {
+            try {
+                setLoading(true);
+                const res = await axios.get(`vendor/offer-detail/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setOfferDetails(res.data.data);
+            } catch (error) {
+                console.error("Failed to fetch offer details:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        getApplicationDetails();
+    }, [id, token]);
+
+    if (loading || !offerDetails) return <div>Loading...</div>;
+
+    const followers = {};
+    offerDetails.providers?.forEach((p) => {
+        const key = p.providername.toLowerCase();
+        followers[key] = p.nooffollowers.toLocaleString("en-IN");
+    });
+
+    const profileImage = `${BASE_URL}/${offerDetails?.photopath}`;
+    const influencerName = `${offerDetails?.firstname || ""} ${offerDetails?.lastname || ""}`;
+    const location = `${offerDetails?.statename || ""}, ${offerDetails?.countryname || ""}`;
+
+
+    const handleAcceptApplication = async () => {
+        try {
+            setLoading(true)
+
+            const res = await axios.post(
+                `/vendor/application-status`,
+                {
+                    p_applicationid: Number(offerDetails?.applicationid),
+                    p_statusname: "Selected"
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            )
+
+            if (res.status === 200) {
+                console.log(res)
+                toast.success("Application Selected For Your Campaign Successfully")
+            }
+        } catch (error) {
+            console.log(error)
+            toast.error(error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const handleConfirmAccept = () => {
-        console.log("✅ Offer accepted:", influencer.name, terms);
+        console.log("Offer accepted:", offerDetails?.applicationid);
+        handleAcceptApplication()
         setIsAcceptModalOpen(false);
+        // Handle accept logic here
     };
 
     return (
-        <div className="">
+        <div>
             {/* Back button */}
             <button
                 onClick={() => navigate(-1)}
@@ -68,90 +107,81 @@ const OfferDetails = () => {
             </button>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Right Section (Influencer Details) */}
+                {/* Right Section */}
                 <div className="order-1 md:order-2 bg-white p-6 rounded-2xl space-y-4 self-start">
-                    <div
-                        key={influencer.id}
-                        className=" transition  border-gray-200 bg-white  flex flex-col"
-                    >
-                        {/* Profile Section */}
+                    <div key={offerDetails?.applicationid} className="flex flex-col">
+                        {/* Profile */}
                         <div className="flex items-center gap-3 mb-3">
                             <img
-                                src={influencer.profileImage}
-                                alt={influencer.name}
+                                src={profileImage}
+                                alt={influencerName}
                                 loading="lazy"
                                 className="w-12 h-12 rounded-full object-cover"
                             />
-                            <div className="max-w-full">
-                                <div className="font-semibold truncate text-gray-900">
-                                    {influencer.name}
+                            <div>
+                                <div className="font-semibold text-gray-900">
+                                    {influencerName}
                                 </div>
-                                <div className="text-xs text-gray-500">
-                                    {influencer.location}
-                                </div>
-                                <div className="flex items-center gap-1 text-xs text-gray-500">
-                                    <RiStarLine size={13} />
-                                    <span>
-                                        {influencer.rating} ({influencer.reviews})
-                                    </span>
-                                </div>
+                                <div className="text-xs text-gray-500">{location}</div>
                             </div>
                         </div>
 
-                        {/* Tags */}
+                        {/* Categories */}
                         <div className="flex flex-wrap gap-2 mb-3">
-                            {influencer?.categories?.map((tag, idx) => (
+                            {offerDetails?.categories?.map((cat) => (
                                 <span
-                                    key={idx}
+                                    key={cat.categoryid}
                                     className="px-2 py-1 bg-gray-100 rounded-xl text-xs text-gray-700"
                                 >
-                                    {tag}
+                                    {cat.categoryname}
                                 </span>
                             ))}
                         </div>
 
                         <hr className="my-2 border-gray-200" />
 
-                        {/* Social Stats */}
-                        <div className="flex text-xl flex-wrap justify-between text-xs text-gray-600 mb-4 gap-3">
-                            <span className="flex items-center gap-1 text-pink-600">
-                                <FaInstagram className="text-xl"/> {influencer.followers?.instagram}
-                            </span>
-                            <span className="flex items-center gap-1 text-red-600">
-                                <FaYoutube className="text-xl"/> {influencer.followers?.youtube}
-                            </span>
-                            <span className="flex items-center gap-1 text-blue-600">
-                                <FaFacebook className="text-xl"/> {influencer.followers?.facebook}
-                            </span>
-                            <span className="flex items-center gap-1 text-black">
-                                <FaTiktok className="text-xl"/> {influencer.followers?.tiktok}
-                            </span>
+                        {/* Social Followers */}
+                        <div className="flex flex-wrap gap-3 text-xs text-gray-600 mb-4">
+                            {followers.instagram && (
+                                <span className="flex items-center gap-1 text-pink-600">
+                                    <FaInstagram className="text-xl" /> {followers.instagram}
+                                </span>
+                            )}
+                            {followers.youtube && (
+                                <span className="flex items-center gap-1 text-red-600">
+                                    <FaYoutube className="text-xl" /> {followers.youtube}
+                                </span>
+                            )}
+                            {followers.facebook && (
+                                <span className="flex items-center gap-1 text-blue-600">
+                                    <FaFacebook className="text-xl" /> {followers.facebook}
+                                </span>
+                            )}
+                            {followers.tiktok && (
+                                <span className="flex items-center gap-1 text-black">
+                                    <FaTiktok className="text-xl" /> {followers.tiktok}
+                                </span>
+                            )}
                         </div>
 
-                        {/* Footer Buttons */}
+                        {/* Buttons */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
-                            {/* View Profile */}
-                            <button
-                                className="w-full sm:w-auto flex-1 py-2 flex items-center justify-center gap-2 
-      rounded-3xl border border-gray-300 cursor-pointer 
-      font-medium text-gray-700 hover:bg-gray-100 transition truncate"
+                            <button className="w-full sm:w-auto flex-1 py-2 flex items-center justify-center gap-2 
+                rounded-3xl border border-gray-300 text-gray-700 hover:bg-gray-100"
                             >
                                 <RiEyeLine size={18} /> View Profile
                             </button>
 
-                            {/* Message */}
                             <Tooltip title="Message" className="w-full sm:w-auto">
                                 <button
                                     aria-label="Message"
                                     className="w-full sm:w-auto flex-1 py-2 flex items-center justify-center 
-        gap-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white 
-        hover:bg-[#23265a] transition"
+                  gap-2 rounded-3xl bg-[#0f122f] text-white hover:bg-[#23265a]"
                                 >
                                     <RiMessage2Line size={18} /> Message
                                 </button>
                             </Tooltip>
                         </div>
-
                     </div>
                 </div>
 
@@ -163,68 +193,82 @@ const OfferDetails = () => {
                         <div className="flex gap-6 mb-4">
                             <div className="flex flex-col">
                                 <span className="text-gray-700 font-medium mb-2">Budget</span>
-                                <span className="font-medium"> ₹{Number(terms.budget).toLocaleString("en-IN")} </span>
+                                <span className="font-medium">
+                                    ₹{Number(offerDetails?.budget || 0).toLocaleString("en-IN")}
+                                </span>
                             </div>
-
                         </div>
 
-                        {/* Description */}
                         <div>
                             <h3 className="text-gray-700 font-medium mb-2">Description</h3>
                             <p className="text-gray-600 text-sm leading-relaxed">
-                                {description}
+                                {offerDetails?.description}
                             </p>
                         </div>
 
-                        {/* Buttons */}
+                        {/* Action Buttons */}
                         <div className="flex gap-4 mt-6">
                             <button
                                 onClick={() => setIsAcceptModalOpen(true)}
-                                className="bg-[#0D132D] cursor-pointer text-white px-6 py-2 rounded-full hover:bg-[#0D132Ded]"
+                                className="bg-[#0D132D] text-white px-6 py-2 rounded-full hover:bg-[#0D132Ded]"
                             >
                                 Accept Offer
                             </button>
-                            {/* <button
-                                onClick={() => setIsRejectModalOpen(true)}
-                                className="border border-gray-300 cursor-pointer px-6 py-2 rounded-full text-[#0D132D] hover:bg-gray-100"
-                            >
-                                Reject Offer
-                            </button> */}
                         </div>
                     </div>
 
                     {/* Portfolio */}
-                    <div className="bg-white p-6 rounded-2xl ">
+                    <div className="bg-white p-6 rounded-2xl">
                         <h2 className="text-lg font-semibold mb-4">Portfolio</h2>
-                        <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
-                            {portfolio.map((img, idx) => (
-                                <div key={idx} className="relative group">
-                                    <img
-                                        src={img}
-                                        alt={`portfolio-${idx}`}
-                                        className="rounded-xl w-full h-28 object-cover"
-                                    />
-                                    {/* Play Icon Overlay */}
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                                        <RiPlayCircleLine className="text-white text-3xl drop-shadow-lg" />
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {offerDetails?.filepaths?.map((file, idx) => {
+                                const fileUrl = `${BASE_URL}${file.filepath}`;
+                                const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileUrl);
+
+                                return (
+                                    <div key={idx} className="relative group">
+                                        {isImage ? (
+                                            <img
+                                                src={fileUrl}
+                                                alt={`portfolio-${idx}`}
+                                                className="rounded-xl w-full h-28 object-cover"
+                                            />
+                                        ) : (
+                                            <a
+                                                href={fileUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="block bg-gray-100 p-4 rounded-xl text-center text-sm text-blue-600 underline"
+                                            >
+                                                Download File
+                                            </a>
+                                        )}
+                                        {isImage && (
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                                <RiPlayCircleLine className="text-white text-3xl drop-shadow-lg" />
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
-                        <button className="mt-4 text-blue-600 text-sm">View More</button>
+                        {offerDetails?.filepaths?.length > 4 && (
+                            <button className="mt-4 text-blue-600 text-sm">View More</button>
+                        )}
                     </div>
                 </div>
-
             </div>
 
-            {/* Modals */}
+            {/* Accept Modal */}
             <AcceptOfferModal
                 open={isAcceptModalOpen}
                 onCancel={() => setIsAcceptModalOpen(false)}
                 onConfirm={handleConfirmAccept}
-                offer={influencer}
+                offer={{
+                    name: influencerName,
+                    applicationid: offerDetails?.applicationid,
+                }}
             />
-
         </div>
     );
 };

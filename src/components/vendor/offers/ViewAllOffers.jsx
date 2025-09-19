@@ -16,8 +16,9 @@ import { useSelector } from "react-redux";
 
 
 const statusLabels = {
-  true: { text: "Seen", style: "bg-green-100 text-green-700" },
-  false: { text: "New", style: "bg-blue-100 text-blue-700" },
+  "Viewed": { text: "Seen", style: "bg-blue-50 border border-blue-200 text-blue-700" },
+  "Applied": { text: "New", style: "bg-yellow-50 border border-yellow-200 text-yellow-700" }, 
+  "Selected": { text: "Selected", style: "bg-green-50 border border-green-200 text-green-700" }, 
 };
 
 
@@ -40,14 +41,14 @@ const ViewAllOffers = () => {
 
 
   const handleViewOffer = async (offer) => {
-    console.log(offer.markasview)
-    if (offer.markasview === false) {
+    console.log(offer.status)
+    if (offer.status === "Applied" && offer.status !== "Viewed") {
       try {
         await axios.post(
           `/vendor/application-status`,
           {
-            p_applicationid: offer.id,
-            p_statusname: true
+            p_applicationid: Number(offer.applicationid),
+            p_statusname: "Viewed"
           },
           {
             headers: {
@@ -59,7 +60,7 @@ const ViewAllOffers = () => {
         setApplications((prev) =>
           prev.map((o) =>
             o.applicationid === offer.applicationid
-              ? { ...o, markasview: "true" }
+              ? { ...o, status: "true" }
               : o
           )
         );
@@ -68,7 +69,7 @@ const ViewAllOffers = () => {
       }
     }
 
-    navigate(`/vendor-dashboard/offers/${offer.id}`);
+    navigate(`/vendor-dashboard/offers/${offer.applicationid}`);
   };
 
   const handleViewProfile = () => {
@@ -249,7 +250,7 @@ const ViewAllOffers = () => {
 
                   <td className="p-4">
                     {(() => {
-                      const { text, style } = statusLabels[offer.markasview === "true"];
+                      const { text, style } = statusLabels[offer.status];
                       return (
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${style}`}>
                           {text}
