@@ -1,57 +1,144 @@
 import { useState } from 'react'
-import { RiCheckLine } from 'react-icons/ri';
 
 export const Home = () => {
-  const [checked, setChecked] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [selectedInfluencer, setSelectedInfluencer] = useState(null);
+
+  const campaigns = [
+    { id: 1, name: "Campaign A", influencers: ["John", "Emma", "Liam"] },
+    { id: 2, name: "Campaign B", influencers: ["Sophia", "Mia"] },
+    { id: 3, name: "Campaign C", influencers: ["Noah", "Olivia", "Ethan"] },
+  ];
+
+  // For mobile, track which panel is currently visible
+  const [activePanel, setActivePanel] = useState('campaigns'); // 'campaigns' | 'influencers' | 'chat'
 
   return (
-    <div className="p-6 flex gap-6">
+    <div className="flex flex-col md:flex-row h-screen bg-gray-100">
+      {/* Campaigns Panel */}
       <div
-        onClick={() => setChecked(!checked)}
-        className={`flex w-100 justify-between items-center p-4 rounded border cursor-pointer transition-all ${checked ? "bg-[#0D132DE5] border-[#0D132DE5]" : "bg-white border-gray-300"
-          }`}
+        className={`
+          bg-white border-r overflow-y-auto
+          md:w-1/5
+          ${activePanel === 'campaigns' ? 'block' : 'hidden'}
+          md:block
+        `}
       >
-        <span className={`text-md ${checked ? "text-white" : "text-black"}`}>
-          Checkbox 
-        </span>
-
-        {/* Custom Checkbox Icon */}
-        <div
-          className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all ${checked
-              ? "bg-white border-[#13297E] text-[#335CFFBF]"
-              : "bg-transparent border-gray-400"
+        <h2 className="p-4 font-bold text-lg border-b flex justify-between items-center">
+          Campaigns
+          {/* Show back button on mobile if not on campaigns panel */}
+          {activePanel !== 'campaigns' && (
+            <button
+              onClick={() => setActivePanel('campaigns')}
+              className="md:hidden text-blue-500"
+            >
+              Back
+            </button>
+          )}
+        </h2>
+        {campaigns.map((c) => (
+          <div
+            key={c.id}
+            onClick={() => {
+              setSelectedCampaign(c);
+              setSelectedInfluencer(null);
+              setActivePanel('influencers'); // move to influencers panel on mobile
+            }}
+            className={`p-3 cursor-pointer hover:bg-gray-200 ${
+              selectedCampaign?.id === c.id ? "bg-gray-300 font-semibold" : ""
             }`}
-        >
-          {checked && <RiCheckLine />}
-        </div>
+          >
+            {c.name}
+          </div>
+        ))}
       </div>
 
+      {/* Influencers Panel */}
       <div
-        onClick={() => setChecked(!checked)}
-        className={`flex w-100 justify-between items-center p-4 rounded border cursor-pointer transition-all ${checked ? "bg-[#0D132D26] border-[#0D132DBF]" : "bg-white border-gray-300"
-          }`}
+        className={`
+          bg-white border-r overflow-y-auto
+          md:w-1/5
+          ${activePanel === 'influencers' ? 'block' : 'hidden'}
+          md:block
+        `}
       >
-        <span className={`text-md ${checked ? "text-[#0D132D]" : "text-black"}`}>
-          Checkbox 
-        </span>
+        <h2 className="p-4 font-bold text-lg border-b flex justify-between items-center">
+          Influencers
+          {/* Back button on mobile */}
+          <button
+            onClick={() => setActivePanel('campaigns')}
+            className="md:hidden text-blue-500"
+          >
+            Back
+          </button>
+        </h2>
+        {selectedCampaign ? (
+          selectedCampaign.influencers.map((i, idx) => (
+            <div
+              key={idx}
+              onClick={() => {
+                setSelectedInfluencer(i);
+                setActivePanel('chat'); // move to chat panel on mobile
+              }}
+              className={`p-3 cursor-pointer hover:bg-gray-200 ${
+                selectedInfluencer === i ? "bg-gray-300 font-semibold" : ""
+              }`}
+            >
+              {i}
+            </div>
+          ))
+        ) : (
+          <p className="p-3 text-gray-500">Select a campaign</p>
+        )}
+      </div>
 
-        {/* Custom Checkbox Icon */}
-        <div
-          className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all ${checked
-              ? "bg-[#0D132D] border-[#0D132D] text-white"
-              : "bg-transparent border-gray-400"
-            }`}
-        >
-          {checked && <RiCheckLine />}
+      {/* Chat Panel */}
+      <div
+        className={`
+          flex-1 bg-white flex flex-col
+          ${activePanel === 'chat' ? 'block' : 'hidden'}
+          md:block
+        `}
+      >
+        <div className="p-4 border-b font-bold text-lg flex justify-between items-center">
+          {selectedInfluencer
+            ? `Chat with ${selectedInfluencer}`
+            : "Select an influencer"}
+          {/* Back button on mobile */}
+          <button
+            onClick={() => setActivePanel('influencers')}
+            className="md:hidden text-blue-500"
+          >
+            Back
+          </button>
         </div>
+
+        <div className="flex-1 overflow-y-auto p-4">
+          {selectedInfluencer ? (
+            <div className="space-y-3">
+              <div className="bg-gray-200 p-3 rounded-lg w-max">Hello 👋</div>
+              <div className="bg-blue-500 text-white p-3 rounded-lg w-max ml-auto">
+                Hi! Let’s work on the campaign.
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500">No messages yet</p>
+          )}
+        </div>
+
+        {selectedInfluencer && (
+          <div className="p-3 border-t flex">
+            <input
+              type="text"
+              placeholder="Type a message..."
+              className="flex-1 border rounded-lg px-3 py-2 mr-2"
+            />
+            <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+              Send
+            </button>
+          </div>
+        )}
       </div>
     </div>
-
   );
-}
-
-export default Home;
-
-
-
-
+} 

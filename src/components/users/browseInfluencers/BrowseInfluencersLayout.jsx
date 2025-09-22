@@ -13,19 +13,32 @@ import { Input, Pagination, Modal, Spin, Empty, Tooltip } from "antd";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 
+
+const buttons = [
+  { id: "all", label: "All", path: "/vendor-dashboard/browse-influencers" },
+  {
+    id: "favorites",
+    label: "Favorites",
+    path: "/vendor-dashboard/browse-influencers/favorites",
+  },
+  {
+    id: "invited",
+    label: "Invited",
+    path: "/vendor-dashboard/browse-influencers/invited",
+  },
+];
+
 const BrowseInfluencersLayout = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [platforms, setPlatforms] = useState([]);
   const [contentTypes, setContentTypes] = useState([]);
   const [languages, setLanguages] = useState([]);
   const [genderOptions, setGenderOptions] = useState([]);
-  const [location, setLocation] = useState("");
   const [influencers, setInfluencers] = useState([]);
   const [totalInfluencers, setTotalInfluencers] = useState(0);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [likedInfluencers, setLikedInfluencers] = useState(new Set());
   const [activeTab, setActiveTab] = useState("all");
   const [isInviteModalVisible, setIsInviteModalVisible] = useState(false);
   const [inviteCampaigns, setInviteCampaigns] = useState([]);
@@ -43,143 +56,62 @@ const BrowseInfluencersLayout = () => {
     pagenumber: 1,
     pagesize: 15,
     gender: [],
+    location: ""
   });
+  const [draftFilters, setDraftFilters] = useState(filters);
 
   const navigate = useNavigate();
   const { token, userId } = useSelector(state => state.auth);
 
-const getAllInfluencers = async (filters, token, searchTerm = "") => {
-  try {
-    setLoading(true);
-
-const params = {
-  p_userid: userId,
-  p_location: filters.location || null,
-  p_providers: filters.providers?.length ? JSON.stringify(filters.providers) : null,
-  p_influencertiers: filters.influencertiers?.length ? JSON.stringify(filters.influencertiers) : null,
-  p_ratings: filters.ratings?.length ? JSON.stringify(filters.ratings) : null,
-  p_genders: filters.gender?.length ? JSON.stringify(filters.gender) : null,
-  p_languages: filters.languages?.length ? JSON.stringify(filters.languages) : null,
-  p_pagenumber: filters.pagenumber || 1,
-  p_pagesize: filters.pagesize || 20,
-  p_search: searchTerm?.trim() || null,
-};
-
+  const getAllInfluencers = async (filters, token, searchTerm = "") => {
+    const params = {
+      p_userid: userId,
+      p_location: filters.location || null,
+      p_providers: filters.providers?.length ? JSON.stringify(filters.providers) : null,
+      p_influencertiers: filters.influencertiers?.length ? JSON.stringify(filters.influencertiers) : null,
+      p_ratings: filters.ratings?.length ? JSON.stringify(filters.ratings) : null,
+      p_genders: filters.gender?.length ? JSON.stringify(filters.gender) : null,
+      p_languages: filters.languages?.length ? JSON.stringify(filters.languages) : null,
+      p_pagenumber: filters.pagenumber || 1,
+      p_pagesize: filters.pagesize || 20,
+      p_search: searchTerm?.trim() || null,
+    };
 
     // Remove null or undefined params
     const cleanParams = Object.fromEntries(
       Object.entries(params).filter(([_, v]) => v !== null && v !== undefined)
     );
+    try {
+      setLoading(true);
 
-    const [influencerRes, favRes] = await Promise.all([
-      axios.get("/vendor/allinfluencer/browse", {
+      const influencerRes = await axios.get("/vendor/allinfluencer/browse", {
         params: cleanParams,
         headers: { Authorization: `Bearer ${token}` },
-      }),
-      axios.get("/vendor/getfavourite/influencer", {
-        params: { userId },
-        headers: { Authorization: `Bearer ${token}` },
-      }),
-    ]);
+      })
 
-    const influencersData = influencerRes.data?.data?.records || [];
-    const totalCount = influencerRes.data?.data?.totalcount || 0;
+      const influencersData = influencerRes.data?.data?.records || [];
+      const totalCount = influencerRes.data?.data?.totalcount || 0;
+      setInfluencers(influencersData);
+      setTotalInfluencers(totalCount);
 
-    const favIds = new Set(
-      favRes.data?.data?.records?.map((inf) => inf.id) || []
-    );
-
-    const updatedInfluencers = influencersData.map((inf) => ({
-      ...inf,
-      isLiked: favIds.has(inf.id),
-    }));
-
-    setInfluencers(updatedInfluencers);
-    setLikedInfluencers(favIds);
-    setTotalInfluencers(totalCount);
-  } catch (err) {
-    console.error("Error fetching influencers:", err);
-    toast.error("Failed to fetch influencers");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  const getFavouriteInfluencers = async () => {
-
-    try {
-      const res = await axios.get("/vendor/getfavourite/influencer", {
-        params: { userId },
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const favIds = res.data.data?.records?.map((inf) => inf.id) || [];
-      setLikedInfluencers(new Set(favIds));
     } catch (err) {
-      console.error("Failed to fetch favourite influencers:", err);
+      console.error("Error fetching influencers:", err);
+      toast.error("Failed to fetch influencers");
+    } finally {
+      setLoading(false);
     }
   };
+
   const handleLike = async (influencerId) => {
-
-    setInfluencers((prev) =>
-      prev.map((inf) =>
-        inf.id === influencerId ? { ...inf, isLiked: !inf.isLiked } : inf
-      )
-    );
-
-    const isCurrentlyLiked = likedInfluencers.has(influencerId);
-    setLikedInfluencers((prev) => {
-      const updated = new Set(prev);
-      if (isCurrentlyLiked) updated.delete(influencerId);
-      else updated.add(influencerId);
-      return updated;
-    });
-
     try {
       const res = await axios.post(
         "/vendor/addfavourite/influencer",
         { p_userId: userId, p_influencerId: influencerId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      if (res.data.status) {
-        // Show toast for success
-        if (isCurrentlyLiked) {
-          toast.success(res.data.message || "Removed from favorites");
-        } else {
-          toast.success(res.data.message || "Added to favorites");
-        }
-      } else {
-        // Revert on failure
-        setInfluencers((prev) =>
-          prev.map((inf) =>
-            inf.id === influencerId
-              ? { ...inf, isLiked: isCurrentlyLiked }
-              : inf
-          )
-        );
-        setLikedInfluencers((prev) => {
-          const reverted = new Set(prev);
-          if (isCurrentlyLiked) reverted.add(influencerId);
-          else reverted.delete(influencerId);
-          return reverted;
-        });
-        toast.error(res.data.message || "Failed to update favourite");
-      }
+      toast.success(res.data.message);
     } catch (err) {
-      // Revert on error
-      setInfluencers((prev) =>
-        prev.map((inf) =>
-          inf.id === influencerId ? { ...inf, isLiked: isCurrentlyLiked } : inf
-        )
-      );
-      setLikedInfluencers((prev) => {
-        const reverted = new Set(prev);
-        if (isCurrentlyLiked) reverted.add(influencerId);
-        else reverted.delete(influencerId);
-        return reverted;
-      });
+      console.log(err)
       toast.error("Something went wrong");
     }
   };
@@ -206,6 +138,7 @@ const params = {
     }
   };
 
+  // Fetch Gender
   const getAllGender = async () => {
     try {
       const res = await axios.get("genders", {
@@ -217,6 +150,7 @@ const params = {
     }
   };
 
+  // Fetch ContentTypes
   const getAllContentTypes = async () => {
     try {
       const res = await axios.get("/vendor/influencer-type", {
@@ -232,47 +166,35 @@ const params = {
     }
   };
 
-const handleCheckboxChange = useCallback((category, id) => {
-    setFilters(prev => {
+  const handleCheckboxChange = useCallback((category, id) => {
+    setDraftFilters(prev => {
       const updated = prev[category].includes(id)
         ? prev[category].filter(v => v !== id)
         : [...prev[category], id];
 
-      return { ...prev, [category]: updated, pagenumber: 1 };
+      return { ...prev, [category]: updated };
     });
   }, []);
+
 
   useEffect(() => {
     getAllLanguages();
     getAllPlatforms();
     getAllContentTypes();
     getAllGender();
-    getFavouriteInfluencers();
   }, []);
 
   useEffect(() => {
     getAllInfluencers(filters, token, searchTerm);
   }, [
-    filters.providers,
-    filters.languages,
-    filters.contentTypes,
-    filters.gender,
-    filters.sortby,
-    filters.sortorder,
-    filters.pagenumber,
-    filters.pagesize,
+    filters,
     searchTerm,
   ]);
 
-  // for invite
-  const handleInvite = async (influencerId) => {
-    if (!userId) return toast.error("User not logged in");
-
-    setSelectedInfluencer(influencerId);
-    setIsInviteModalVisible(true);
-    setLoadingInvite(true);
-
+  //get Campaigns when Vendor Wants to invite Influencer for Campaign
+  const getCampaigns = async (influencerId) => {
     try {
+      setLoadingInvite(true);
       const res = await axios.get("/vendor/inviteinfluencer/Campaigns", {
         params: { p_userid: userId, p_influencerid: influencerId },
         headers: { Authorization: `Bearer ${token}` },
@@ -286,6 +208,15 @@ const handleCheckboxChange = useCallback((category, id) => {
     } finally {
       setLoadingInvite(false);
     }
+  }
+
+  // for invite
+  const handleInvite = (influencerId) => {
+    if (!userId) return toast.error("User not logged in");
+
+    setSelectedInfluencer(influencerId);
+    setIsInviteModalVisible(true);
+    getCampaigns(influencerId)
   };
 
   const handleBulkInvite = async () => {
@@ -316,9 +247,6 @@ const handleCheckboxChange = useCallback((category, id) => {
         toast.success(res.data?.message || "Invited successfully");
         setIsInviteModalVisible(false);
         setSelectedCampaigns([]);
-        if (typeof refreshData === "function") refreshData();
-      } else {
-        toast.error(res.data?.message || "Failed to invite");
       }
     } catch (error) {
       console.error("Invite API error:", error);
@@ -328,19 +256,6 @@ const handleCheckboxChange = useCallback((category, id) => {
     }
   };
 
-  const buttons = [
-    { id: "all", label: "All", path: "/vendor-dashboard/browse-influencers" },
-    {
-      id: "favorites",
-      label: "Favorites",
-      path: "/vendor-dashboard/browse-influencers/favorites",
-    },
-    {
-      id: "invited",
-      label: "Invited",
-      path: "/vendor-dashboard/browse-influencers/invited",
-    },
-  ];
 
   return (
     <div>
@@ -364,10 +279,9 @@ const handleCheckboxChange = useCallback((category, id) => {
               navigate(path);
             }}
             className={`px-4 py-2 rounded-md border transition
-              ${
-                activeTab === id
-                  ? "bg-[#141843] text-white border-[#141843]"
-                  : "bg-white text-[#141843] border-gray-300 hover:bg-gray-100"
+              ${activeTab === id
+                ? "bg-[#141843] text-white border-[#141843]"
+                : "bg-white text-[#141843] border-gray-300 hover:bg-gray-100"
               }`}
           >
             {label}
@@ -380,35 +294,35 @@ const handleCheckboxChange = useCallback((category, id) => {
         {/* Search + Sort + Filter */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <Input
-              size="large"
-              prefix={<SearchOutlined />}
-              placeholder="Search campaigns"
-              className="w-full sm:w-auto flex-1"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => {
-                const trimmedInput = searchInput.trim();
+            size="large"
+            prefix={<SearchOutlined />}
+            placeholder="Search campaigns"
+            className="w-full sm:w-auto flex-1"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              const trimmedInput = searchInput.trim();
 
-                if ((e.key === "Enter" || e.key === " ") && trimmedInput !== "") {
-            setFilters((prev) => ({
-              ...prev,
-              pagesize: window.innerWidth < 640 ? 10 : 15,
-              pagenumber: 1,
-            }));
-            setSearchTerm(trimmedInput);
-                }
+              if ((e.key === "Enter" || e.key === " ") && trimmedInput !== "") {
+                setFilters((prev) => ({
+                  ...prev,
+                  pagesize: window.innerWidth < 640 ? 10 : 15,
+                  pagenumber: 1,
+                }));
+                setSearchTerm(trimmedInput);
+              }
 
-                if (e.key === "Enter" && trimmedInput === "") {
-            // Reset search
-            setSearchTerm("");
-            setFilters((prev) => ({
-              ...prev,
-              pagesize: window.innerWidth < 640 ? 10 : 15,
-              pagenumber: 1,
-            }));
-                }
-              }}
-            />
+              if (e.key === "Enter" && trimmedInput === "") {
+                // Reset search
+                setSearchTerm("");
+                setFilters((prev) => ({
+                  ...prev,
+                  pagesize: window.innerWidth < 640 ? 10 : 15,
+                  pagenumber: 1,
+                }));
+              }
+            }}
+          />
 
           <div className="flex gap-2 w-full sm:w-auto justify-end">
             <button
@@ -594,11 +508,11 @@ const handleCheckboxChange = useCallback((category, id) => {
 
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Location</h4>
-              <Input
+              <Input  
                 prefix={<SearchOutlined />}
                 placeholder="Search"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                value={draftFilters.location}
+                onChange={(e) => setDraftFilters(prev => ({ ...prev, location: e.target.value }))}
                 className="w-full"
               />
             </div>
@@ -607,12 +521,12 @@ const handleCheckboxChange = useCallback((category, id) => {
 
             <div>
               <h4 className="font-semibold mb-2">Platform</h4>
-              {platforms.map((platform) => (
+              {platforms?.map((platform) => (
                 <label key={platform.id} className="flex items-center mb-2">
                   <input
                     type="checkbox"
                     className="mr-2"
-                    checked={filters.providers.includes(platform.id)}
+                    checked={draftFilters.providers.includes(platform.id)}
                     onChange={() =>
                       handleCheckboxChange("providers", platform.id)
                     }
@@ -625,12 +539,12 @@ const handleCheckboxChange = useCallback((category, id) => {
             <hr className="my-4 border-gray-200" />
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Followers</h4>
-              {contentTypes.map((type) => (
+              {contentTypes?.map((type) => (
                 <label key={type.id} className="flex items-center mb-2">
                   <input
                     type="checkbox"
                     className="mr-2"
-                    checked={filters.influencertiers?.includes(type.id)}
+                    checked={draftFilters.influencertiers?.includes(type.id)}
                     onChange={() =>
                       handleCheckboxChange("influencertiers", type.id)
                     }
@@ -652,12 +566,12 @@ const handleCheckboxChange = useCallback((category, id) => {
             <hr className="my-4 border-gray-200" />
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Languages</h4>
-              {languages.map((lang) => (
+              {languages?.map((lang) => (
                 <label key={lang.id} className="flex items-center mb-2">
                   <input
                     type="checkbox"
                     className="mr-2"
-                    checked={filters.languages.includes(lang.id)}
+                    checked={draftFilters.languages.includes(lang.id)}
                     onChange={() => handleCheckboxChange("languages", lang.id)}
                   />
                   <span className="text-sm">{lang.name}</span>
@@ -667,12 +581,12 @@ const handleCheckboxChange = useCallback((category, id) => {
             <hr className="my-4 border-gray-200" />
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Gender</h4>
-              {genderOptions.map((g) => (
+              {genderOptions?.map((g) => (
                 <label key={g.id} className="flex items-center mb-2">
                   <input
                     type="checkbox"
                     className="mr-2"
-                    checked={filters.gender.includes(g.id)}
+                    checked={draftFilters.gender.includes(g.id)}
                     onChange={() => handleCheckboxChange("gender", g.id)}
                   />
                   <span className="text-sm">{g.name}</span>
@@ -685,7 +599,7 @@ const handleCheckboxChange = useCallback((category, id) => {
               <button
                 className="flex-1 py-2 bg-gray-200 rounded-full"
                 onClick={() => {
-                  const clearedFilters = {
+                  const cleared = {
                     providers: [],
                     languages: [],
                     influencertiers: [],
@@ -694,10 +608,11 @@ const handleCheckboxChange = useCallback((category, id) => {
                     sortorder: "desc",
                     pagenumber: 1,
                     pagesize: 15,
+                    location: ""
                   };
-                  setFilters(clearedFilters);
+                  setDraftFilters(cleared);
+                  setFilters(cleared); // <-- trigger API call
                   setShowFilter(false);
-                  getAllInfluencers(clearedFilters, token, "");
                 }}
               >
                 Clear
@@ -706,12 +621,8 @@ const handleCheckboxChange = useCallback((category, id) => {
               <button
                 className="flex-1 py-2 bg-[#0f122f] text-white rounded-full"
                 onClick={() => {
+                  setFilters(draftFilters);
                   setShowFilter(false);
-                  getAllInfluencers(
-                    { ...filters, location },
-                    token,
-                    searchTerm
-                  );
                 }}
               >
                 Apply

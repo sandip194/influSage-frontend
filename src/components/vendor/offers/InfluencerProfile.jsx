@@ -1,76 +1,20 @@
 import { RiArrowLeftLine, RiFile3Line, RiHeart3Line } from "@remixicon/react";
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
 
-const influencer = {
-    id: 203,
-    photopath: "http://localhost:3001/src/uploads/influencer/loka_busy_up_1758018752852.jpg",
-    firstname: "loka",
-    lastname: "busy",
-    email: "fetteuppoidopra-2537@yopmail.com",
-    phonenumber: null,
-    statename: "Assam",
-    countryname: "India",
-    bio: "",
-    genderid: 1,
-    dob: "2025-09-01",
-    address1: "no addres available",
-    portfoliourl: null,
-    totalCampaign: 112,
-    totalEarning: 1200,
-    categories: [
-        { categoryid: 51, categoryname: "Finance" },
-        { categoryid: 52, categoryname: "NFT" },
-        { categoryid: 53, categoryname: "Web Apps" },
-        { categoryid: 56, categoryname: "Agency" },
-        { categoryid: 57, categoryname: "Advertising" },
-        { categoryid: 58, categoryname: "Other" },
-        { categoryid: 66, categoryname: "Collectibles" },
-        { categoryid: 68, categoryname: "Online Services" }
-    ],
-    providers: [
-        {
-            providerid: 1,
-            handleslink: "https://www.instagram.com/rohitsharma123216",
-            providername: "Instagram",
-            nooffollowers: 12000
-        },
-        {
-            providerid: 5,
-            handleslink: "http://localhost:5173/complate-profile",
-            providername: "Tiktok",
-            nooffollowers: 50000
-        }
-    ],
-    portfoliofiles: [
-        { filepath: "http://localhost:3001/src/uploads/influencer/Akshy_Kumar_up_1757928304170.webp" },
-        { filepath: "http://localhost:3001/src/uploads/influencer/gangaram_busy_portfoliofile_1756877566433-494963876.mp4" },
-        { filepath: "http://localhost:3001/src/uploads/influencer/doc_sample.docx" },
-        { filepath: "http://localhost:3001/src/uploads/influencer/gangaram_malhotra_portfoliofile_1757660967522-662145186.pdf" }
-    ]
-};
+
 
 const InfluencerProfile = () => {
-    const {
-        photopath,
-        firstname,
-        lastname,
-        email,
-        statename,
-        countryname,
-        dob,
-        address1,
-        bio,
-        genderid,
-        categories,
-        providers,
-        portfoliofiles,
-        totalCampaign,
-        totalEarning
-    } = influencer;
+    const [loading, setLoading] = useState(false)
+    const [influDetails, setInfluDetails] = useState([])
 
 
     const navigate = useNavigate();
+    const { userId } = useParams()
+    const { token } = useSelector((state) => state.auth);
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
     const formatDOB = (dob) => {
         const date = new Date(dob);
@@ -80,6 +24,28 @@ const InfluencerProfile = () => {
             day: "numeric",
         });
     };
+
+
+    const getInfluencerDetails = async () => {
+        try {
+            setLoading(true)
+            const res = await axios.get(`vendor/influencer-detail/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+
+            if (res.status === 200) console.log(res.data)
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        getInfluencerDetails();
+    }, [])
 
     return (
         <div className="">
@@ -93,7 +59,7 @@ const InfluencerProfile = () => {
             {/* Top Header */}
             <div className="flex bg-white rounded-2xl p-6 flex-col md:flex-row  md:items-start gap-6  pb-6">
                 <img
-                    src={photopath}
+                    src={influDetails?.photo}
                     alt="Profile"
                     className="w-28 h-28 rounded-full object-cover border-4 border-gray-200"
                 />
@@ -102,11 +68,11 @@ const InfluencerProfile = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                         <div>
                             <h2 className="text-3xl font-semibold capitalize text-gray-900">
-                                {firstname} {lastname}
+                                {influDetails?.firstname} {influDetails?.lastname}
                             </h2>
-                            <p className="text-sm text-gray-500 mt-1">{email}</p>
+                            <p className="text-sm text-gray-500 mt-1">{influDetails?.email}</p>
                             <p className="text-sm text-gray-500 mt-1">
-                                {statename}, {countryname}
+                                {influDetails?.statename}, {influDetails?.countryname}
                             </p>
                         </div>
 
@@ -115,14 +81,14 @@ const InfluencerProfile = () => {
                                 <p className="text-gray-400 text-xs uppercase tracking-wide">
                                     Total Campaign
                                 </p>
-                                <p className="text-lg font-semibold text-gray-900">{totalCampaign}</p>
+                                <p className="text-lg font-semibold text-gray-900">{influDetails?.totalCampaign}</p>
                             </div>
                             <div>
                                 <p className="text-gray-400 text-xs uppercase tracking-wide">
                                     Total Earning
                                 </p>
                                 <p className="text-lg font-semibold text-gray-900">
-                                    ${totalEarning.toLocaleString()}
+                                    ${influDetails?.totalEarning?.toLocaleString()}
                                 </p>
                             </div>
                         </div>
@@ -154,12 +120,12 @@ const InfluencerProfile = () => {
                 <div className="bg-white rounded-2xl p-4 md:col-span-2 space-y-4">
                     <h3 className="text-xl font-semibold text-gray-900">Bio</h3>
                     <p className="text-gray-600 text-sm leading-relaxed italic">
-                        {bio || "No bio available."}
+                        {influDetails?.bio || "No bio available."}
                     </p>
 
                     <h4 className="text-lg font-semibold mt-8 mb-3 text-gray-900">Categories</h4>
                     <div className="flex flex-wrap gap-3">
-                        {categories.map((cat) => (
+                        {influDetails?.categories?.map((cat) => (
                             <span
                                 key={cat.categoryid}
                                 className="bg-gray-200 text-gray-800 text-xs px-3 py-1 rounded-full"
@@ -176,13 +142,13 @@ const InfluencerProfile = () => {
                     </h3>
                     <ul className="text-sm text-gray-700 space-y-3">
                         <li>
-                            <strong>Date of Birth:</strong> {formatDOB(dob)}
+                            <strong>Date of Birth:</strong> {formatDOB(influDetails?.dob)}
                         </li>
                         <li>
-                            <strong>Address:</strong> {address1}
+                            <strong>Address:</strong> {influDetails?.address1}
                         </li>
                         <li>
-                            <strong>Gender:</strong> {genderid === 1 ? "Male" : "Female"}
+                            <strong>Gender:</strong> {influDetails?.genderid === 1 ? "Male" : "Female"}
                         </li>
                     </ul>
                 </div>
@@ -192,7 +158,7 @@ const InfluencerProfile = () => {
             <div className="mt-4 bg-white rounded-2xl p-4">
                 <h3 className="text-xl font-semibold mb-5 text-gray-900">Social Media</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-                    {providers.map((provider, index) => (
+                    {influDetails?.providers?.map((provider, index) => (
                         <a
                             key={index}
                             href={provider.handleslink}
@@ -204,7 +170,7 @@ const InfluencerProfile = () => {
                             <div>
                                 <p className="font-medium text-base">{provider.providername}</p>
                                 <p className="text-sm text-gray-500">
-                                    {provider.nooffollowers.toLocaleString()} followers
+                                    {provider.nooffollowers?.toLocaleString()} followers
                                 </p>
                             </div>
                         </a>
@@ -216,9 +182,9 @@ const InfluencerProfile = () => {
             <div className="mt-4 bg-white rounded-2xl p-4">
                 <h3 className="text-xl font-semibold mb-5 text-gray-900">Portfolio</h3>
 
-                {portfoliofiles.length > 0 ? (
+                {influDetails?.portfoliofiles?.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {portfoliofiles.map((file, index) => {
+                        {influDetails?.portfoliofiles?.map((file, index) => {
                             const url = file.filepath;
                             const extension = url.split('.').pop().toLowerCase();
 

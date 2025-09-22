@@ -52,7 +52,7 @@ const OfferDetails = () => {
     const followers = {};
     offerDetails.providers?.forEach((p) => {
         const key = p.providername.toLowerCase();
-        followers[key] = p.nooffollowers.toLocaleString("en-IN");
+        followers[key] = p.nooffollowers?.toLocaleString("en-IN");
     });
 
     const profileImage = `${BASE_URL}/${offerDetails?.photopath}`;
@@ -222,7 +222,7 @@ const OfferDetails = () => {
                         <h2 className="text-lg font-semibold mb-4">Portfolio</h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {offerDetails?.filepaths?.map((file, idx) => {
-                                const fileUrl = `${BASE_URL}${file.filepath}`;
+                                const fileUrl = `${BASE_URL}/src${file.filepath}`;
                                 const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileUrl);
 
                                 return (
