@@ -179,9 +179,9 @@ const Sidebar = forwardRef((props, ref) => {
                         onClick={handleLogout}
                         title={!isOpen ? "Logout" : ""}
                         className={`flex items-center cursor-pointer ${isOpen ? "justify-between px-6" : "justify-center"}
-            gap-2 w-full py-2 border border-gray-300 rounded-full hover:bg-gray-100 text-sm`}
+            gap-2 w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm`}
                     >
-                        {isOpen && <span>Logout</span>}
+                        {isOpen && <span >Logout</span>}
                         <RiShutDownLine />
                     </button>
                 </div>

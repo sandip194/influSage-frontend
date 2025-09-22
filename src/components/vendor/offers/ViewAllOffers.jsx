@@ -17,8 +17,8 @@ import { useSelector } from "react-redux";
 
 const statusLabels = {
   "Viewed": { text: "Seen", style: "bg-blue-50 border border-blue-200 text-blue-700" },
-  "Applied": { text: "New", style: "bg-yellow-50 border border-yellow-200 text-yellow-700" }, 
-  "Selected": { text: "Selected", style: "bg-green-50 border border-green-200 text-green-700" }, 
+  "Applied": { text: "New", style: "bg-yellow-50 border border-yellow-200 text-yellow-700" },
+  "Selected": { text: "Selected", style: "bg-green-50 border border-green-200 text-green-700" },
 };
 
 
@@ -72,9 +72,8 @@ const ViewAllOffers = () => {
     navigate(`/vendor-dashboard/offers/${offer.applicationid}`);
   };
 
-  const handleViewProfile = () => {
-    // Replace 203 with actual ID if dynamic
-    navigate(`/vendor-dashboard/offers/influencer-details/${203}`);
+  const handleViewProfile = (offer) => {
+    navigate(`/vendor-dashboard/offers/influencer-details/${offer.id}`);
   };
 
   // Action handler map
