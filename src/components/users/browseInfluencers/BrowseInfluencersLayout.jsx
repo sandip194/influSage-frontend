@@ -63,17 +63,17 @@ const BrowseInfluencersLayout = () => {
   const navigate = useNavigate();
   const { token, userId } = useSelector(state => state.auth);
 
-  const getAllInfluencers = async (filters, token, searchTerm = "") => {
+  const getAllInfluencers = async () => {
     const params = {
       p_userid: userId,
-      p_location: filters.location || null,
-      p_providers: filters.providers?.length ? JSON.stringify(filters.providers) : null,
-      p_influencertiers: filters.influencertiers?.length ? JSON.stringify(filters.influencertiers) : null,
-      p_ratings: filters.ratings?.length ? JSON.stringify(filters.ratings) : null,
-      p_genders: filters.gender?.length ? JSON.stringify(filters.gender) : null,
-      p_languages: filters.languages?.length ? JSON.stringify(filters.languages) : null,
-      p_pagenumber: filters.pagenumber || 1,
-      p_pagesize: filters.pagesize || 20,
+      p_location: filters?.location || null,
+      p_providers: filters?.providers?.length ? JSON.stringify(filters.providers) : null,
+      p_influencertiers: filters?.influencertiers?.length ? JSON.stringify(filters.influencertiers) : null,
+      p_ratings: filters?.ratings?.length ? JSON.stringify(filters.ratings) : null,
+      p_genders: filters?.gender?.length ? JSON.stringify(filters.gender) : null,
+      p_languages: filters?.languages?.length ? JSON.stringify(filters.languages) : null,
+      p_pagenumber: filters?.pagenumber || 1,
+      p_pagesize: filters?.pagesize || 20,
       p_search: searchTerm?.trim() || null,
     };
 
@@ -110,6 +110,7 @@ const BrowseInfluencersLayout = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success(res.data.message);
+      getAllInfluencers()
     } catch (err) {
       console.log(err)
       toast.error("Something went wrong");
@@ -185,7 +186,7 @@ const BrowseInfluencersLayout = () => {
   }, []);
 
   useEffect(() => {
-    getAllInfluencers(filters, token, searchTerm);
+    getAllInfluencers();
   }, [
     filters,
     searchTerm,
@@ -407,7 +408,7 @@ const BrowseInfluencersLayout = () => {
                       </span>
                     </Tooltip>
 
-                    <Tooltip title={influencer.isLiked ? "UnFavorite" : "Favorite"}>
+                    <Tooltip title={influencer.savedinfluencer ? "UnFavorite" : "Favorite"}>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -416,7 +417,7 @@ const BrowseInfluencersLayout = () => {
                         className="w-9 h-9 flex items-center justify-center rounded-full 
            bg-[#0f122f] text-white hover:bg-[#23265a] transition"
                       >
-                        {influencer.isLiked ? (
+                        {influencer.savedinfluencer ? (
                           <RiHeartFill
                             size={20}
                             className="text-red-500 cursor-pointer"

@@ -1,4 +1,4 @@
-import { RiArrowLeftLine, RiFile3Line, RiHeart3Line } from "@remixicon/react";
+import { RiArrowLeftLine, RiFile3Line, RiHeart3Fill, RiHeart3Line } from "@remixicon/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -35,7 +35,7 @@ const InfluencerProfile = () => {
                 },
             })
 
-            if (res.status === 200) console.log(res.data)
+            if (res.status === 200) setInfluDetails(res?.data?.result)
         } catch (error) {
             console.log(error)
         } finally {
@@ -59,7 +59,7 @@ const InfluencerProfile = () => {
             {/* Top Header */}
             <div className="flex bg-white rounded-2xl p-6 flex-col md:flex-row  md:items-start gap-6  pb-6">
                 <img
-                    src={influDetails?.photo}
+                    src={`${BASE_URL}/${influDetails?.photopath}`}
                     alt="Profile"
                     className="w-28 h-28 rounded-full object-cover border-4 border-gray-200"
                 />
@@ -103,7 +103,7 @@ const InfluencerProfile = () => {
                                 Invited
                             </button>
                             <button className="border border-gray-300 text-gray-700 rounded-full p-2 hover:bg-gray-100 transition w-full sm:w-auto flex justify-center">
-                                <RiHeart3Line className="text-gray-700" />
+                                {influDetails?.savedinfluencer ? (<RiHeart3Fill className="text-red-700" />): (<RiHeart3Line className="text-gray-700" />)}
                             </button>
                         </div>
 
@@ -200,7 +200,7 @@ const InfluencerProfile = () => {
                                 >
                                     {isImage && (
                                         <img
-                                            src={url}
+                                            src={`${BASE_URL}/${url}`}
                                             alt={`Portfolio ${index + 1}`}
                                             className="w-full h-48 object-cover rounded-2xl"
                                         />
@@ -211,14 +211,14 @@ const InfluencerProfile = () => {
                                             controls
                                             className="w-full h-48 rounded-2xl object-cover"
                                         >
-                                            <source src={url} type={`video/${extension}`} />
+                                            <source src={`${BASE_URL}/${url}`} type={`video/${extension}`} />
                                             Your browser does not support the video tag.
                                         </video>
                                     )}
 
                                     {isPDF && (
                                         <iframe
-                                            src={url}
+                                            src={`${BASE_URL}/${url}`}
                                             className="w-full h-48 rounded-2xl"
                                             title={`PDF ${index + 1}`}
                                         ></iframe>
@@ -228,7 +228,7 @@ const InfluencerProfile = () => {
                                         <div className="flex flex-col items-center justify-center text-center gap-2 py-4">
                                             <RiFile3Line className="w-16  h-16 text-gray-500" />
                                             <a
-                                                href={url}
+                                                href={`${BASE_URL}/${url}`}
                                                 download
                                                 className="text-blue-600 text-sm underline break-all"
                                             >
