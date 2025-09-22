@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
-import { useSelector } from 'react-redux';
-import Sidebar from './Sidebar';
-import ChatHeader from './ChatHeader';
-import ChatMessages from './ChatMessages';
-import ChatInput from './ChatInput';
+// ChatAppPage.js
+import { useState, useEffect } from "react";
+import { io } from "socket.io-client";
+import { useSelector } from "react-redux";
+import Sidebar from "./Sidebar";
+import ChatHeader from "./ChatHeader";
+import ChatMessages from "./ChatMessages";
+import ChatInput from "./ChatInput";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export default function ChatAppPage() {
   const { token, userId, role } = useSelector((state) => state.auth);
 
@@ -14,14 +16,12 @@ export default function ChatAppPage() {
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
 
-  // Define current user first
   const currentUser = { id: userId, role };
 
-  // Initialize socket after component mounts
+  // Initialize Socket.IO
   useEffect(() => {
-    const newSocket = io(BASE_URL, {
-      auth: { token },
-    });
+    if (!token) return;
+    const newSocket = io(BASE_URL, { auth: { token } });
     setSocket(newSocket);
 
     newSocket.on("connect", () => console.log("✅ Connected:", newSocket.id));
@@ -33,66 +33,81 @@ export default function ChatAppPage() {
     return () => newSocket.disconnect();
   }, [token]);
 
-  // Register user on socket after login
-  useEffect(() => {
-    if (socket && currentUser?.id) {
-      socket.emit("register", currentUser.id);
-      console.log("📡 Registering user:", currentUser.id);
-    }
-  }, [socket, currentUser]);
-
-  // Create conversation
-  const createConversation = async (receiverId, receiverRole) => {
+  // Start conversation via campaign
+  const startConversation = async (campaignApplicationId) => {
     try {
-      const res = await fetch(`${BASE_URL}/conversations`, {
+      const res = await fetch(`${BASE_URL}/chat/startconversation`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          p_senderid: currentUser.id,
-          p_senderrole: currentUser.role,
-          p_receiverid: receiverId,
-          p_receiverrole: receiverRole,
-          p_message: "",
-        }),
+        body: JSON.stringify({ p_campaignapplicationid: campaignApplicationId }),
       });
-
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Conversation creation failed");
-      return data.data;
+      if (!res.ok || !data.p_status) throw new Error(data.message);
+      return data.conversationId;
     } catch (err) {
-      console.error("❌ Create conversation error:", err);
+      console.error("❌ Start conversation error:", err);
       return null;
     }
   };
 
-  // Send message
-  const handleSendMessage = async (text) => {
-    // if (!text.trim()) return;
+  // Call your insertMessage API
+  const insertMessage = async (conversationId, text, files = null) => {
+    try {
+      const formData = new FormData();
+      formData.append("p_conversationid", conversationId);
+      formData.append("p_roleid", currentUser.role);
+      formData.append("p_messages", text);
+      if (files) {
+        for (let file of files) {
+          formData.append("files", file);
+        }
+      }
+
+      // const res = await fetch(`${BASE_URL}/chat/message`, {
+      //   method: "POST",
+      //   headers: {
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: formData,
+      // });
+
+      const data = await res.json();
+      if (!res.ok || !data.p_status) throw new Error(data.message);
+      return data;
+    } catch (err) {
+      console.error("❌ Insert message error:", err);
+      return null;
+    }
+  };
+
+  // Handle sending message
+  const handleSendMessage = async ({ text, file }) => {
     if (!activeChat) return;
 
-    let conversationId = activeChat?.id;
+    let conversationId = activeChat.id;
 
-    // If no conversation exists → create one
+    // If no conversation exists, start one
     if (!conversationId) {
-      const conv = await createConversation(activeChat.userId, activeChat.role);
-      if (!conv) return;
-      setActiveChat(conv);
-      conversationId = conv.id;
+      conversationId = await startConversation(activeChat.campaignApplicationId);
+      if (!conversationId) return;
+      setActiveChat({ ...activeChat, id: conversationId });
     }
 
-    const newMsg = {
-      id: Date.now(),
-      sender: currentUser.id,
-      content: text,
-      type: "text",
-      conversationId,
-    };
-
-    setMessages((prev) => [...prev, newMsg]);
-    socket?.emit("sendMessage", newMsg);
+    const result = await insertMessage(conversationId, text, file ? [file] : null);
+    if (result?.p_status) {
+      const newMsg = {
+        id: Date.now(),
+        sender: currentUser.id,
+        content: text,
+        type: "text",
+        conversationId,
+      };
+      setMessages((prev) => [...prev, newMsg]);
+      socket?.emit("sendMessage", newMsg);
+    }
   };
 
   return (
@@ -100,7 +115,7 @@ export default function ChatAppPage() {
       {/* Sidebar */}
       <div
         className={`md:w-1/4 w-full h-full border-gray-200 flex-shrink-0 me-2 ${
-          activeChat ? 'hidden md:block' : 'block'
+          activeChat ? "hidden md:block" : "block"
         }`}
       >
         <Sidebar onSelectChat={(chat) => setActiveChat(chat)} />
@@ -109,7 +124,7 @@ export default function ChatAppPage() {
       {/* Chat area */}
       <div
         className={`flex-1 h-full flex flex-col ${
-          activeChat ? 'flex' : 'hidden md:flex'
+          activeChat ? "flex" : "hidden md:flex"
         }`}
       >
         <div className="sticky top-0 z-10 bg-white rounded-2xl border-b border-gray-200">

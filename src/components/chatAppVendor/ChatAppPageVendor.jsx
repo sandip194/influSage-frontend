@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
-import Sidebar from './SidebarVendor';
-import ChatHeader from './ChatHeaderVendor';
-import ChatMessages from './ChatMessagesVendor';
-import ChatInput from './ChatInputVendor';
-import { useSelector } from 'react-redux';
+import { useState, useEffect } from "react";
+import { io } from "socket.io-client";
+import Sidebar from "./SidebarVendor";
+import ChatHeader from "./ChatHeaderVendor";
+import ChatMessages from "./ChatMessagesVendor";
+import ChatInput from "./ChatInputVendor";
+import { useSelector } from "react-redux";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export default function ChatAppPageVendor() {
   const { token, userId, role } = useSelector((state) => state.auth);
 
@@ -14,14 +15,12 @@ export default function ChatAppPageVendor() {
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
 
-  // current user first
   const currentUser = { id: userId, role };
 
-  // Initialize socket after component mounts
+  // Initialize Socket.IO
   useEffect(() => {
-    const newSocket = io(BASE_URL, {
-      auth: { token },
-    });
+    if (!token) return;
+    const newSocket = io(BASE_URL, { auth: { token } });
     setSocket(newSocket);
 
     newSocket.on("connect", () => console.log("✅ Connected:", newSocket.id));
@@ -33,93 +32,112 @@ export default function ChatAppPageVendor() {
     return () => newSocket.disconnect();
   }, [token]);
 
-  // Register user on socket after login
-  useEffect(() => {
-    if (socket && currentUser?.id) {
-      socket.emit("register", currentUser.id);
-      console.log("📡 Registering user:", currentUser.id);
-    }
-  }, [socket, currentUser]);
-
-  // Create conversation
-  const createConversation = async (receiverId, receiverRole) => {
+  // Start conversation via campaign
+  const startConversation = async (campaignApplicationId) => {
     try {
-      const res = await fetch(`${BASE_URL}/conversations`, {
+      const res = await fetch(`${BASE_URL}/chat/startconversation`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          p_senderid: currentUser.id,
-          p_senderrole: currentUser.role,
-          p_receiverid: receiverId,
-          p_receiverrole: receiverRole,
-          p_message: "",
+          p_campaignapplicationid: campaignApplicationId,
         }),
       });
-
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Conversation creation failed");
-      return data.data;
+      if (!res.ok || !data.p_status) throw new Error(data.message);
+      return data.conversationId;
     } catch (err) {
-      console.error("❌ Create conversation error:", err);
+      console.error("❌ Start conversation error:", err);
       return null;
     }
   };
 
-  // Send message
+  // Send message via SP
+  const sendMessageToSP = async (conversationId, text) => {
+    try {
+      const res = await fetch(`${BASE_URL}/chat/message`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          p_action: "send",
+          p_conversationid: conversationId,
+          p_roleid: currentUser.role,
+          p_messages: text,
+          p_filepath: null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.p_status) throw new Error(data.message);
+      return data;
+    } catch (err) {
+      console.error("❌ Send message error:", err);
+      return null;
+    }
+  };
+
+  // Handle sending message
   const handleSendMessage = async (text) => {
-    // if (!text.trim()) return;
     if (!activeChat) return;
 
-    let conversationId = activeChat?.id;
+    let conversationId = activeChat.id;
 
-    // If no conversation exists → create one
+    // If no conversation exists, start one
     if (!conversationId) {
-      const conv = await createConversation(activeChat.userId, activeChat.role);
-      if (!conv) return;
-      setActiveChat(conv);
-      conversationId = conv.id;
+      conversationId = await startConversation(
+        activeChat.campaignApplicationId
+      );
+      if (!conversationId) return;
+      setActiveChat({ ...activeChat, id: conversationId });
     }
 
-    const newMsg = {
-      id: Date.now(),
-      sender: currentUser.id,
-      content: text,
-      type: "text",
-      conversationId,
-    };
-
-    setMessages((prev) => [...prev, newMsg]);
-    socket?.emit("sendMessage", newMsg);
+    const result = await sendMessageToSP(conversationId, text);
+    if (result?.p_status) {
+      const newMsg = {
+        id: Date.now(),
+        sender: currentUser.id,
+        content: text,
+        type: "text",
+        conversationId,
+      };
+      setMessages((prev) => [...prev, newMsg]);
+      socket?.emit("sendMessage", newMsg);
+    }
   };
 
   return (
-    <div className="h-[85vh] flex overflow-hidden">
-      {/* Sidebar */}
+    <div className="h-[85vh] flex flex-row overflow-hidden gap-2">
+      {/* Sidebar (Expanded on desktop, full width on mobile) */}
       <div
-        className={`md:w-1/4 w-full h-full border-gray-200 flex-shrink-0 me-2 ${
-          activeChat ? 'hidden md:block' : 'block'
+        className={`w-full md:w-3/4 h-full ${
+          activeChat ? "hidden md:block" : "block"
         }`}
       >
         <Sidebar onSelectChat={(chat) => setActiveChat(chat)} />
       </div>
 
-      {/* Chat area */}
+      {/* Chat Area (Narrow, right-aligned on desktop) */}
+      {/* Chat Area (Expanded and right-aligned on desktop) */}
       <div
-        className={`flex-1 h-full flex flex-col ${
-          activeChat ? 'flex' : 'hidden md:flex'
+        className={`w-full md:w-[600px] h-full flex flex-col bg-white rounded-2xl shadow-md ${
+          activeChat ? "flex" : "hidden md:flex"
         }`}
       >
-        <div className="sticky top-0 z-10 bg-white rounded-2xl border-b border-gray-200">
+        {/* Header */}
+        <div className="sticky top-0 z-10 bg-white rounded-t-2xl border-b border-gray-200">
           <ChatHeader chat={activeChat} onBack={() => setActiveChat(null)} />
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-white p-4">
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4">
           <ChatMessages chat={activeChat} messages={messages} />
         </div>
 
+        {/* Input */}
         <div className="sticky bottom-0 bg-white border-t border-gray-100">
           <ChatInput onSend={handleSendMessage} />
         </div>

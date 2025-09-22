@@ -1,33 +1,37 @@
-import { RiAddLine } from "react-icons/ri";
+import { RiAddLine, RiArrowLeftLine } from "react-icons/ri";
 import { useState } from "react";
 
 export default function SidebarVendor({ onSelectChat }) {
-  const [activeTab, setActiveTab] = useState("Influencer");
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
 
-  const Influencer = [
+ const Influencer = [
     {
       name: "Sean Smith",
       message: "Hi How Are you ?",
       time: "05:00 PM",
       unread: 2,
       img: "https://randomuser.me/api/portraits/men/32.jpg",
+      campaignId: 1,
     },
     {
       name: "Annette Black",
       message: "Hi How Are you ?",
       time: "05:00 PM",
       img: "https://randomuser.me/api/portraits/women/44.jpg",
+      campaignId: 2,
     },
   ];
 
   const Campaigns = [
     {
+      id: 1,
       name: "Author One",
       message: "Published new book!",
       time: "02:30 PM",
       img: "https://randomuser.me/api/portraits/men/12.jpg",
     },
     {
+      id: 2,
       name: "Author Two",
       message: "Working on a new article.",
       time: "04:10 PM",
@@ -35,73 +39,91 @@ export default function SidebarVendor({ onSelectChat }) {
     },
   ];
 
-  const currentList = activeTab === "Campaigns" ? Campaigns : Influencer;
+  const filteredInfluencers = selectedCampaign
+    ? Influencer.filter((inf) => inf.campaignId === selectedCampaign.id)
+    : [];
 
   return (
-    <div className="h-full flex rounded-2xl flex-col bg-white">
-      <div className="p-4 flex items-center bg-white border-b border-gray-200">
-        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 flex-1">
-          <svg
-            className="w-5 h-5 text-gray-400 mr-2"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 12.65z" />
-          </svg>
-          <input
-            placeholder="Search"
-            className="w-full outline-none text-sm"
-          />
+    <div className="h-full flex flex-col md:flex-row bg-white shadow-md rounded-2xl overflow-hidden">
+      {/* Campaigns Panel */}
+      <div className={`md:w-1/2 w-full border-r border-gray-200 flex flex-col
+                      ${selectedCampaign ? "hidden md:flex" : "flex"}`}>
+        <div className="p-4 flex items-center justify-between border-b border-gray-200">
+          <h2 className="font-semibold text-gray-700 text-sm md:text-base">Campaigns</h2>
         </div>
-      </div>
-
-      {/* Tabs + Add Button */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-        <div className="flex space-x-6 text-sm font-medium">
-          {["Influencer", "Campaigns"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`pb-2 transition-colors ${
-                activeTab === tab
-                  ? "border-b-2 border-[#0D132D] text-[#0D132D]"
-                  : "text-gray-500 hover:text-gray-700"
+        <div className="flex-1 overflow-y-auto">
+          {Campaigns.map((campaign) => (
+            <div
+              key={campaign.id}
+              onClick={() => setSelectedCampaign(campaign)}
+              className={`flex items-center justify-between p-4 cursor-pointer border-b border-gray-100 hover:bg-gray-100 transition ${
+                selectedCampaign?.id === campaign.id ? "bg-gray-200" : ""
               }`}
             >
-              {tab}
-            </button>
+              <div className="flex items-center space-x-3">
+                <img
+                  src={campaign.img}
+                  alt={campaign.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <div className="overflow-hidden">
+                  <div className="font-semibold text-sm text-gray-800 truncate">{campaign.name}</div>
+                  <div className="text-xs text-gray-500 truncate">{campaign.message}</div>
+                </div>
+              </div>
+              <span className="text-xs text-gray-400">{campaign.time}</span>
+            </div>
           ))}
         </div>
-
-        <button className="w-9 h-9 bg-[#0D132D] text-white rounded-full flex items-center justify-center">
-          <RiAddLine />
-        </button>
       </div>
 
-      {/* Chat List */}
-      <div className="flex-1 overflow-y-auto">
-        {currentList.map((item, i) => (
-          <div
-            key={i}
-            onClick={() => onSelectChat(item)}
-            className="flex items-center justify-between p-4 hover:bg-gray-100 cursor-pointer border-b border-gray-100"
+      {/* Influencers Panel */}
+      <div className={`md:w-1/2 w-full flex flex-col
+                      ${!selectedCampaign ? "hidden md:flex" : "flex"}`}>
+        <div className="p-4 flex items-center justify-between border-b border-gray-200">
+          {/* Back Button - only on mobile */}
+          <button
+            onClick={() => setSelectedCampaign(null)}
+            className="md:hidden mr-2 p-2 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
+            aria-label="Back"
           >
-            <div className="flex items-center space-x-3">
-              <img
-                src={item.img}
-                alt={item.name}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-              <div>
-                <div className="font-semibold text-sm">{item.name}</div>
-                <div className="text-xs text-gray-500">{item.message}</div>
+            <RiArrowLeftLine size={20} />
+          </button>
+          <h2 className="font-semibold text-gray-700 text-sm md:text-base flex-grow">
+            Influencers
+          </h2>
+          <button className="w-9 h-9 bg-[#0D132D] text-white rounded-full flex items-center justify-center hover:bg-[#0a0e1f] transition">
+            <RiAddLine />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {filteredInfluencers.length > 0 ? (
+            filteredInfluencers.map((inf) => (
+              <div
+                key={inf.name}
+                onClick={() => onSelectChat(inf)}
+                className="flex items-center justify-between p-4 hover:bg-gray-100 cursor-pointer border-b border-gray-100 transition"
+              >
+                <div className="flex items-center space-x-3">
+                  <img
+                    src={inf.img}
+                    alt={inf.name}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div className="overflow-hidden">
+                    <div className="font-semibold text-sm text-gray-800 truncate">{inf.name}</div>
+                    <div className="text-xs text-gray-500 truncate">{inf.message}</div>
+                  </div>
+                </div>
+                <span className="text-xs text-gray-400">{inf.time}</span>
               </div>
+            ))
+          ) : (
+            <div className="p-6 text-center text-gray-400 text-sm">
+              Please select a campaign to see influencers
             </div>
-            <span className="text-xs text-gray-400">{item.time}</span>
-          </div>
-        ))}
+          )}
+        </div>
       </div>
     </div>
   );
