@@ -351,7 +351,7 @@ const BrowseInfluencersLayout = () => {
               <div
                 key={influencer.id}
                 className="border justify-between rounded-2xl transition border-gray-200 bg-white p-5 flex flex-col cursor-pointer hover:bg-gray-100"
-                onClick={() => navigate(`/influencer/${influencer.id}`)}
+                onClick={() => navigate(`/vendor-dashboard/browse-influencers/influencer-details/${influencer.id}`)}
               >
                 {/* Profile Section */}
                 <div className="flex items-center justify-between mb-3">
@@ -368,7 +368,7 @@ const BrowseInfluencersLayout = () => {
                     />
                     <div>
                       <Link
-                        to={`vendor-dashboard/browse-influencers/influencer/${influencer.id}`}
+                        to={`/vendor-dashboard/browse-influencers/influencer-details/${influencer.id}`}
                         onClick={(e) => e.stopPropagation()}
                         className="font-semibold text-gray-900 truncate hover:text-blue-600 hover:underline"
                       >

@@ -14,6 +14,7 @@ import { NavLink } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../../features/auth/authSlice';
+import { Tooltip } from 'antd';
 
 
 
@@ -36,7 +37,7 @@ const Sidebar = forwardRef((props, ref) => {
             setIsOpen(false); // Medium: sidebar closed, but not mobile (icons visible)
         } else {
             setIsMobile(false);
-            setIsOpen(true);  // Desktop: sidebar open full
+            setIsOpen(false);  // Desktop: sidebar open full
         }
     };
 
@@ -141,7 +142,9 @@ const Sidebar = forwardRef((props, ref) => {
                   ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
                             }
                         >
-                            <span className="text-base">{item.icon}</span>
+                            <Tooltip title={item.label} placement="right" disabled={isOpen}>
+                                <span className="text-base">{item.icon}</span>
+                            </Tooltip>
                             {isOpen && <span className="text-sm">{item.label}</span>}
                         </NavLink>
                     ))}
@@ -165,7 +168,9 @@ const Sidebar = forwardRef((props, ref) => {
                   ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
                             }
                         >
-                            <span className="text-base">{item.icon}</span>
+                            <Tooltip title={item.label} placement="right" disabled={isOpen}>
+                                <span className="text-base">{item.icon}</span>
+                            </Tooltip>
                             {isOpen && <span className="text-sm">{item.label}</span>}
                         </NavLink>
                     ))}
@@ -175,12 +180,13 @@ const Sidebar = forwardRef((props, ref) => {
                 <div className="logout-btn mb-2">
                     <button
                         onClick={handleLogout}
-                        title={!isOpen ? "Logout" : ""}
                         className={`flex items-center cursor-pointer ${isOpen ? "justify-between px-6" : "justify-center"}
-               gap-2 w-full py-2 border border-gray-300 rounded-full hover:bg-gray-100 text-sm`}
+            gap-2 w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm`}
                     >
-                        {isOpen && <span>Logout</span>}
-                        <RiShutDownLine />
+                        <Tooltip title='Logout' placement="right" disabled={isOpen}>
+                            {isOpen && <span >Logout</span>}
+                            <RiShutDownLine />
+                        </Tooltip>
                     </button>
                 </div>
             </div>

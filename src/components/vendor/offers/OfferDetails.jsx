@@ -96,6 +96,10 @@ const OfferDetails = () => {
         // Handle accept logic here
     };
 
+    const handleViewProfile = (userId) => {
+    navigate(`/vendor-dashboard/offers/influencer-details/${userId}`);
+  };
+
     return (
         <div>
             {/* Back button */}
@@ -166,7 +170,9 @@ const OfferDetails = () => {
 
                         {/* Buttons */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
-                            <button className="w-full sm:w-auto flex-1 py-2 flex items-center justify-center gap-2 
+                            <button 
+                            onClick={() => handleViewProfile(offerDetails.influencerid)}
+                            className="w-full sm:w-auto flex-1 py-2 flex items-center justify-center gap-2 
                 rounded-3xl border border-gray-300 text-gray-700 hover:bg-gray-100"
                             >
                                 <RiEyeLine size={18} /> View Profile

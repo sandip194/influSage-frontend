@@ -14,6 +14,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../../features/auth/authSlice';
 import { RiPriceTag3Line } from 'react-icons/ri';
+import { Tooltip } from 'antd';
 
 
 const Sidebar = forwardRef((props, ref) => {
@@ -33,11 +34,11 @@ const Sidebar = forwardRef((props, ref) => {
             setIsMobile(true);   // true mobile
             setIsOpen(false);    // hide sidebar
         } else if (width < 1024) {
-            setIsMobile(false);  // tablet-like
+            setIsMobile(true);  // tablet-like
             setIsOpen(false);    // mini-sidebar (icons only)
         } else {
             setIsMobile(false);  // desktop
-            setIsOpen(true);     // full sidebar
+            setIsOpen(false);     // full sidebar
         }
     };
 
@@ -136,14 +137,16 @@ const Sidebar = forwardRef((props, ref) => {
                             to={item.to}
                             end={item.end}
                             onClick={() => isMobile && toggleSidebar()}
-                            title={!isOpen ? item.label : ""}
+
                             className={({ isActive }) =>
                                 `flex items-center ${isOpen ? "justify-start" : "justify-center"}
                mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#0D132D] 
                ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
                             }
                         >
-                            <span className="text-base">{item.icon}</span>
+                            <Tooltip title={item.label} placement="right" disabled={isOpen}>
+                                <span className="text-base">{item.icon}</span>
+                            </Tooltip>
                             {isOpen && <span className="text-sm">{item.label}</span>}
                         </NavLink>
                     ))}
@@ -160,14 +163,16 @@ const Sidebar = forwardRef((props, ref) => {
                         <NavLink
                             key={index}
                             to={item.to}
-                            title={!isOpen ? item.label : ""}
+
                             className={({ isActive }) =>
                                 `flex items-center ${isOpen ? "justify-start" : "justify-center"}
                mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#0D132D] 
                ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
                             }
                         >
-                            <span className="text-base">{item.icon}</span>
+                            <Tooltip title={item.label} placement="right" disabled={isOpen}>
+                                <span className="text-base">{item.icon}</span>
+                            </Tooltip>
                             {isOpen && <span className="text-sm">{item.label}</span>}
                         </NavLink>
                     ))}
@@ -177,12 +182,14 @@ const Sidebar = forwardRef((props, ref) => {
                 <div className="logout-btn mb-2">
                     <button
                         onClick={handleLogout}
-                        title={!isOpen ? "Logout" : ""}
+
                         className={`flex items-center cursor-pointer ${isOpen ? "justify-between px-6" : "justify-center"}
             gap-2 w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm`}
                     >
-                        {isOpen && <span >Logout</span>}
-                        <RiShutDownLine />
+                        <Tooltip title='Logout' placement="right" disabled={isOpen}>
+                            {isOpen && <span >Logout</span>}
+                            <RiShutDownLine />
+                        </Tooltip>
                     </button>
                 </div>
             </div>
