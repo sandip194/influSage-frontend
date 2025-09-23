@@ -159,7 +159,7 @@ const ViewAllOffers = () => {
 
 
       {/* Search */}
-      <div className="mb-4 flex flex-col sm:flex-row justify-between">
+      <div className="mb-4 p-3 bg-white rounded-t-2xl flex flex-col sm:flex-row justify-between">
         <Input
           size="large"
           prefix={<SearchOutlined />}
@@ -187,7 +187,7 @@ const ViewAllOffers = () => {
       {/* Table */}
       <div className="bg-white rounded-xl overflow-auto">
         <table className="w-full text-left min-w-[900px]">
-          <thead className="bg-gray-50 text-gray-700 text-sm">
+          <thead className="bg-gray-100 text-gray-900 text-sm">
             <tr>
               <th className="p-4">Influencer Name</th>
               <th className="p-4">Category</th>

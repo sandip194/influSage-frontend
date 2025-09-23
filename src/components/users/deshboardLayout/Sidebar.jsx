@@ -177,18 +177,26 @@ const Sidebar = forwardRef((props, ref) => {
                 </ul>
 
                 {/* Logout */}
-                <div className="logout-btn mb-2">
-                    <button
-                        onClick={handleLogout}
-                        className={`flex items-center cursor-pointer ${isOpen ? "justify-between px-6" : "justify-center"}
-            gap-2 w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm`}
-                    >
-                        <Tooltip title='Logout' placement="right" disabled={isOpen}>
-                            {isOpen && <span >Logout</span>}
-                            <RiShutDownLine />
+                {!(isMobile && !isOpen) && (
+                    <div className="logout-btn mb-2">
+                        <Tooltip
+                            title="Logout"
+                            placement="right"
+                            disabled={isOpen}
+                        >
+                            <button
+                                onClick={handleLogout}
+                                className={`flex items-center cursor-pointer ${isOpen ? "justify-between px-6" : "justify-center "
+                                    } w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm`}
+                            >
+
+                                {isOpen && <span>Logout</span>}
+                                <RiShutDownLine />
+
+                            </button>
                         </Tooltip>
-                    </button>
-                </div>
+                    </div>
+                )}
             </div>
         </>
     );

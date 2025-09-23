@@ -159,7 +159,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
           {(showControls || onNext) && (
             <button
               className="bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition"
-              onClick={onFinish}
+              type='submit'
             >
               {onNext ? "Continue" : "Save Changes"}
             </button>

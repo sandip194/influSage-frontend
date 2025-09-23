@@ -188,6 +188,7 @@ export const useVendorProfileCompletionSteps = () => {
         currentStep,
         setCurrentStep,
         markStepComplete,
-        isCompleted
+        isCompleted,
+        getUserProfileCompletionData
     };
 }

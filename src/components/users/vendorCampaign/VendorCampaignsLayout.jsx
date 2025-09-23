@@ -90,7 +90,7 @@ const VendorCampaignsLayout = () => {
   const totalPages = Math.ceil(filteredCampaigns.length / pageSize);
 
   return (
-    <div className="w-full text-sm px-2 sm:px-4">
+    <div className="w-full text-sm ">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
         <div>

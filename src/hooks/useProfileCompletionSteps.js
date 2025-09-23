@@ -97,6 +97,7 @@ export const useProfileCompletionSteps = () => {
         completedSteps,
         currentStep,
         setCurrentStep,
-        markStepComplete
+        markStepComplete,
+        getUserProfileCompletionData
     };
 };

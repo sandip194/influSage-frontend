@@ -123,7 +123,7 @@ const OffersLayout = () => {
                 {/* Scrollable Table Container */}
                 <div className="w-full overflow-x-auto">
                     {/* Table Heading */}
-                    <div className="flex items-center px-4 py-4 text-gray-500 text-sm font-medium border-b border-gray-300 bg-gray-100 min-w-[900px]">
+                    <div className="flex items-center px-4 py-4 text-gray-900 text-sm font-bold border-b border-gray-300 bg-gray-100 min-w-[900px]">
                         <div className="flex items-center gap-4 w-1/4">
                             <span>Campaign Name</span>
                         </div>

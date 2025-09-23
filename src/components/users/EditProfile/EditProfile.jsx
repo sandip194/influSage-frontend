@@ -15,7 +15,8 @@ const EditProfile = () => {
     updateProfileSection,
     currentStep,
     setCurrentStep,
-    markStepComplete
+    markStepComplete,
+    getUserProfileCompletionData
   } = useProfileCompletionSteps();
 
   const steps = useMemo(() => [
@@ -26,6 +27,7 @@ const EditProfile = () => {
           data={profileData.profile}
           onSave={() => {
             toast.success('Profile updated successfully!');
+            getUserProfileCompletionData()
           }}
           showControls={true}
           showToast={false}
@@ -39,6 +41,7 @@ const EditProfile = () => {
           data={profileData.social}
           onSave={() => {
             toast.success('Profile updated successfully!');
+            getUserProfileCompletionData()
           }}
           showControls={true}
           showToast={false}
@@ -52,6 +55,7 @@ const EditProfile = () => {
           data={profileData.categories}
           onSave={() => {
             toast.success('Profile updated successfully!');
+            getUserProfileCompletionData()
           }}
           showControls={true}
           showToast={false}
@@ -65,6 +69,7 @@ const EditProfile = () => {
           data={profileData.portfolio}
           onSave={() => {
             toast.success('Profile updated successfully!');
+            getUserProfileCompletionData()
           }}
           showControls={true}
           showToast={false}
@@ -78,6 +83,7 @@ const EditProfile = () => {
           data={profileData.payment}
           onSave={() => {
             toast.success('Profile updated successfully!');
+            getUserProfileCompletionData()
           }}
           showControls={true}
           showToast={false}
@@ -87,7 +93,7 @@ const EditProfile = () => {
   ], [profileData, updateProfileSection, markStepComplete]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto text-sm">
+    <div className="w-full text-sm">
       <button
         onClick={() => window.history.back()}
         className="text-gray-600 flex items-center gap-2 hover:text-gray-900 transition mb-4"

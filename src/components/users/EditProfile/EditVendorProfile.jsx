@@ -15,7 +15,8 @@ const EditVendorProfile = () => {
         updateProfileSection,
         currentStep,
         setCurrentStep,
-        markStepComplete
+        markStepComplete,
+        getUserProfileCompletionData
     } = useVendorProfileCompletionSteps();
 
     const steps = useMemo(() => [
@@ -26,6 +27,7 @@ const EditVendorProfile = () => {
                     data={vendorProfileData.profile}
                     onSave={() => {
                         toast.success('Profile updated successfully!');
+                        getUserProfileCompletionData()
                     }}
                     showControls={true}
                     showToast={false}
@@ -39,6 +41,7 @@ const EditVendorProfile = () => {
                     data={vendorProfileData.categories}
                     onSave={() => {
                         toast.success('Profile updated successfully!');
+                        getUserProfileCompletionData()
                     }}
                     showControls={true}
                     showToast={false}
@@ -52,6 +55,7 @@ const EditVendorProfile = () => {
                     data={vendorProfileData.providers}
                     onSave={() => {
                         toast.success('Profile updated successfully!');
+                        getUserProfileCompletionData()
                     }}
                     showControls={true}
                     showToast={false}
@@ -66,6 +70,7 @@ const EditVendorProfile = () => {
                     data={vendorProfileData.objectives}
                     onSave={() => {
                         toast.success('Profile updated successfully!');
+                        getUserProfileCompletionData()
                     }}
                     showControls={true}
                     showToast={false}
@@ -79,6 +84,7 @@ const EditVendorProfile = () => {
                     data={vendorProfileData.payment}
                     onSave={() => {
                         toast.success('Profile updated successfully!');
+                        getUserProfileCompletionData()
                     }}
                     showControls={true}
                     showToast={false}
@@ -88,7 +94,7 @@ const EditVendorProfile = () => {
     ], [vendorProfileData, updateProfileSection, markStepComplete]);
 
     return (
-        <div className="w-full max-w-7xl mx-auto text-sm">
+        <div className="w-full text-sm">
             <button
                 onClick={() => window.history.back()}
                 className="text-gray-600 flex items-center gap-2 hover:text-gray-900 transition mb-4"
