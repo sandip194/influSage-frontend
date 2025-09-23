@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../assets/role.css'; // Reuse the same CSS
 import SideImageSlider from '../../components/common/SideImageSlider';

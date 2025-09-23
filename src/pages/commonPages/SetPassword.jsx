@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { RiEyeLine, RiEyeOffLine } from '@remixicon/react';
@@ -31,73 +31,79 @@ export const SetPassword = () => {
     });
   }, [location.search]);
 
-const submitHandler = async (data) => {
-  setLoading(true);
-  try {
-    const { email, firstName, lastName, roleId } = userInfo;
+  const submitHandler = async (data) => {
+    setLoading(true);
+    try {
+      const { email, firstName, lastName, roleId } = userInfo;
 
-    // if (!email || !firstName || !lastName || !roleId) {
-    //   toast.error("Missing user info. Please login again.");
-    //   return navigate("/roledefault");
-    // }
+      // if (!email || !firstName || !lastName || !roleId) {
+      //   toast.error("Missing user info. Please login again.");
+      //   return navigate("/roledefault");
+      // }
 
-    const payload = {
-      email,
-      firstName,
-      lastName,
-      roleId: Number(roleId), 
-      password: data.password,
-    };
+      const payload = {
+        email,
+        firstName,
+        lastName,
+        roleId: Number(roleId),
+        password: data.password,
+      };
 
-    const response = await axios.post("/auth/set-password", payload);
+      const response = await axios.post("/auth/set-password", payload);
 
-    if (response.status === 201) {  
-      const token = response.data.token;
-      const user = response.data.user;
+      if (response.status === 201) {
+        const token = response.data.token;
+        const user = response.data.user;
 
-      // Save token & user info
-      localStorage.setItem("auth_token", token);
-      localStorage.setItem("userId", user.id);
-      localStorage.setItem("roleId", user.role);
-      localStorage.setItem("firstName", user.firstName);
-      localStorage.setItem("lastName", user.lastName);
-      localStorage.setItem("email", user.email);
+        // Save token & user info
+        localStorage.setItem("auth_token", token);
+        localStorage.setItem("userId", user.id);
+        localStorage.setItem("roleId", user.role);
+        localStorage.setItem("firstName", user.firstName);
+        localStorage.setItem("lastName", user.lastName);
+        localStorage.setItem("email", user.email);
 
-      // Set axios default Authorization header
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        // Set axios default Authorization header
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      // Update Redux store
-      dispatch(setCredentials({
-        token,
-        id: user.id,
-        role: user.role,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email
-      }));
+        // Update Redux store
+        dispatch(setCredentials({
+          token,
+          id: user.id,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email
+        }));
 
-      toast.success("Password set successfully!");
+        toast.success("Password set successfully!");
 
-      if (user.role === 1) navigate("/complate-profile");
-      else if (user.role === 2) navigate("/complate-vendor-profile");
-      else navigate("/");
+        if (user.role === 1) navigate("/complate-profile");
+        else if (user.role === 2) navigate("/complate-vendor-profile");
+        else navigate("/");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to set password");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    toast.error(error?.response?.data?.message || "Failed to set password");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="login-container">
-      <div className="login-card h-90vh">
+
+      <Suspense fallback={<div className="loader">Loading...</div>}>
         <SideImageSlider />
+      </Suspense>
+
+      <div className="relative z-20 login-card h-90vh">
 
         <div className="login-card-right">
+          <div className="mb-2 ">
+            <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+          </div>
           <form onSubmit={handleSubmit(submitHandler)}>
             <h2>Set Password</h2>
-
             {/* Password */}
             <label>
               Password <span className="text-red-500 text-sm">*</span>
