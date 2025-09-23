@@ -70,26 +70,18 @@ const InfluencerProfile = () => {
                             <h2 className="text-3xl font-semibold capitalize text-gray-900">
                                 {influDetails?.firstname} {influDetails?.lastname}
                             </h2>
-                            <p className="text-sm text-gray-500 mt-1">{influDetails?.email}</p>
-                            <p className="text-sm text-gray-500 mt-1">
+                            <p className="text-sm text-gray-900 mt-1">{influDetails?.email}</p>
+                            <p className="text-sm text-gray-900 mt-1">
                                 {influDetails?.statename}, {influDetails?.countryname}
                             </p>
                         </div>
 
                         <div className="flex gap-10 mt-4 sm:mt-0 text-center">
                             <div>
-                                <p className="text-gray-400 text-xs uppercase tracking-wide">
+                                <p className="text-gray-900 font-bold text-xs uppercase tracking-wide">
                                     Total Campaign
                                 </p>
                                 <p className="text-lg font-semibold text-gray-900">{influDetails?.totalCampaign}</p>
-                            </div>
-                            <div>
-                                <p className="text-gray-400 text-xs uppercase tracking-wide">
-                                    Total Earning
-                                </p>
-                                <p className="text-lg font-semibold text-gray-900">
-                                    ${influDetails?.totalEarning?.toLocaleString()}
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -99,10 +91,10 @@ const InfluencerProfile = () => {
                             <button className="bg-[#0f122f] text-white px-5 py-2 rounded-full hover:bg-[#23265a] transition w-full sm:w-auto">
                                 Send Message
                             </button>
-                            <button className="border border-gray-300 text-gray-700 px-5 py-2 rounded-full hover:bg-gray-100 transition w-full sm:w-auto">
+                            <button className="border border-gray-300 text-gray-900 px-5 py-2 rounded-full hover:bg-gray-100 transition w-full sm:w-auto">
                                 Invited
                             </button>
-                            <button className="border border-gray-300 text-gray-700 rounded-full p-2 hover:bg-gray-100 transition w-full sm:w-auto flex justify-center">
+                            <button className="border border-gray-300 text-gray-900 rounded-full p-2 hover:bg-gray-100 transition w-full sm:w-auto flex justify-center">
                                 {influDetails?.savedinfluencer ? (<RiHeart3Fill className="text-red-700" />): (<RiHeart3Line className="text-gray-700" />)}
                             </button>
                         </div>

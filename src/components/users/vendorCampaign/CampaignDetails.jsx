@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import {
-  RiCheckboxCircleFill,
   RiMenLine,
   RiMoneyRupeeCircleLine,
   RiTranslate,
   RiArrowLeftSLine,
   RiCheckboxBlankCircleLine,
-  RiDeleteBin6Line,
   RiInstagramFill,
   RiYoutubeFill,
   RiFacebookFill,
@@ -14,24 +12,17 @@ import {
   RiStarFill,
   RiStarLine,
 } from '@remixicon/react';
-import { Modal, Input } from 'antd';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Modal, Input, Tabs } from 'antd';
+import { RiStarLine as AntdStarLine } from '@remixicon/react'; // Note: Using Remixicon for stars in modal, but can adjust if needed
+import VendorCampaignOverview from './VendorCampaignOverview';
+import VendorActivity from './VendorActivity';
+import VendorMessage from './VendorMessage';
+import VendorFilesMedia from './VendorFilesMedia';
+import VendorPayment from './VendorPayment';
 
 const { TextArea } = Input;
 
-const Requirements = [
-  { label: "Shopify User:", value: "Yes" },
-  {
-    label: "Expectation:",
-    value:
-      "Post my existing content Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-  },
-  { label: "Due Date:", value: "11 Jul 2025" },
-  { label: "Ship Products:", value: "Yes" },
-  { label: "Target Country:", value: "India" },
-  { label: "Duration:", value: "2 Months" },
-  { label: "Offers:", value: "Allow Influencer to make offers" },
-];
+
 
 const steps = [
   { name: "Campaign Created", date: "16 Jun 2021, 05:00 PM" },
@@ -43,19 +34,11 @@ const CampaignDetails = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [proposal, setProposal] = useState("");
   const [errors, setErrors] = useState({});
-  const [fileList, setFileList] = useState([]);
   const [cancelReason, setCancelReason] = useState("");
   const [isCancelModel, setCancelModel] = useState(false);
-  const [images, setImages] = useState([
-    "https://images.pexels.com/photos/33350497/pexels-photo-33350497.jpeg",
-    "https://images.pexels.com/photos/25835001/pexels-photo-25835001.jpeg",
-    "https://images.pexels.com/photos/32429493/pexels-photo-32429493.jpeg",
-  ]);
 
-  const navigate = useNavigate();
-  const location = useLocation();
 
-    // Complete action
+  // Complete action
   const handleComplete = () => {
     let newErrors = {};
     if (!proposal) newErrors.proposal = "Please add a review";
@@ -68,55 +51,23 @@ const CampaignDetails = () => {
     setIsModalOpen(false);
   };
 
-  
-const handleCancelComplete = () => {
-  let newErrors = {};
 
-  if (!cancelReason) {
-    newErrors.cancelReason = "Please select a reason for cancellation.";
-  }
+  const handleCancelComplete = () => {
+    let newErrors = {};
 
-  if (Object.keys(newErrors).length > 0) {
-    setErrors(newErrors);
-    return;
-  }
+    if (!cancelReason) {
+      newErrors.cancelReason = "Please select a reason for cancellation.";
+    }
 
-  setCancelModel(false);
-};
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
-  // Delete reference image
-  const handleDeleteImage = (index) => {
-    setImages(images.filter((_, i) => i !== index));
+    setCancelModel(false);
   };
 
-  const buttons = [
-    {
-      id: "overview",
-      label: "Overview",
-      path: "/vendor-dashboard/vendor-campaign/campaignDetails/",
-    },
-    {
-      id: "activity",
-      label: "Activity",
-      path: "/vendor-dashboard/vendor-campaign/vendoractivity/",
-    },
-    {
-      id: "message",
-      label: "Message",
-      path: "/vendor-dashboard/vendor-campaign/vendorMessage",
-    },
-    {
-      id: "files&media",
-      label: "Files & Media",
-      path: "/vendor-dashboard/vendor-campaign/vendorFilesMedia",
-    },
-     {
-      id: "payment",
-      label: "payment",
-      path: "/vendor-dashboard/vendor-campaign/payment",
-    },
-  ];
-  const selectedButton = buttons.find((b) => location.pathname === b.path)?.id;
+
 
   return (
     <div className="w-full text-sm overflow-x-hidden">
@@ -150,26 +101,26 @@ const handleCancelComplete = () => {
 
             <div className="p-4">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
-              <div>
-                <h2 className="font-semibold text-lg">Instagram Campaign</h2>
-                <p className="text-gray-500 text-sm">Tiktokstar</p>
-              </div>
+                <div>
+                  <h2 className="font-semibold text-lg">Instagram Campaign</h2>
+                  <p className="text-gray-500 text-sm">Tiktokstar</p>
+                </div>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
-                >
-                  Complete & Payment
-                </button>
-                <button
-                  onClick={() => setCancelModel(true)}
-                  className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
-                >
-                  Cancel Campaign
-                </button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
+                  >
+                    Complete & Payment
+                  </button>
+                  <button
+                    onClick={() => setCancelModel(true)}
+                    className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
+                  >
+                    Cancel Campaign
+                  </button>
+                </div>
               </div>
-            </div>
               {/* Campaign Info */}
               <div className="flex flex-wrap justify-around gap-6 border border-gray-200 rounded-2xl p-4">
                 <div>
@@ -202,83 +153,27 @@ const handleCancelComplete = () => {
 
           {/* Tabs + Content */}
           <div className="bg-white p-5 rounded-2xl">
-            <div className="flex flex-wrap gap-3 mb-6">
-              {buttons.map(({ id, label, path }) => (
-                <button
-                  key={id}
-                  onClick={() => navigate(path)}
-                  className={`px-4 py-2 rounded-md border transition ${
-                    selectedButton === id
-                      ? "bg-[#0f122f] text-white"
-                      : "bg-white text-[#141843] border-gray-300 hover:bg-gray-100"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            <Tabs defaultActiveKey="overview">
+              <Tabs.TabPane tab="Overview" key="overview">
+                <VendorCampaignOverview />
+              </Tabs.TabPane>
 
-            <hr className="my-4 border-gray-200" />
+              <Tabs.TabPane tab="Activity" key="activity">
+                <VendorActivity />
+              </Tabs.TabPane>
 
-            {/* Description */}
-            <div className="border-b border-gray-200 pb-4 mb-4">
-              <h3 className="font-semibold text-lg mb-2">
-                Campaign Description
-              </h3>
-              <p className="text-gray-700 leading-relaxed">
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry...
-              </p>
-            </div>
+              <Tabs.TabPane tab="Message" key="message">
+                <VendorMessage />
+              </Tabs.TabPane>
 
-            {/* Requirements */}
-            <div className="pb-4 border-b border-gray-200">
-              <h3 className="font-semibold text-lg sm:text-xl mb-4">Requirements</h3> 
-              <ul className="space-y-3 text-gray-700 text-sm sm:text-base">
-                {Requirements.map((item, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <RiCheckboxCircleFill className="text-xl min-w-[1.25rem]" />
-                    <span>
-                      {item.label} <strong>{item.value}</strong>
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <Tabs.TabPane tab="Files & Media" key="files&media">
+                <VendorFilesMedia/>
+              </Tabs.TabPane>
 
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2 mt-6 mb-6">
-                {["Fixed Price", "Expert", "Beauty", "Micro Influencer"].map(
-                  (tag, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
-                    >
-                      {tag}
-                    </span>
-                  )
-                )}
-              </div>
-
-              {/* References */}
-              <h2 className="text-lg font-semibold mb-3">References</h2>
-              <div className="flex gap-4 flex-wrap">
-                {images.map((img, index) => (
-                  <div key={index} className="relative">
-                    <img
-                      src={img}
-                      alt={`reference-${index}`}
-                      className="w-32 h-32 object-cover rounded-xl"
-                    />
-                    <button
-                      onClick={() => handleDeleteImage(index)}
-                      className="absolute top-2 right-2 bg-gray-600 bg-opacity-70 text-white p-2 rounded-full"
-                    >
-                      <RiDeleteBin6Line className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
+              <Tabs.TabPane tab="Payment" key="payment">
+                <VendorPayment/>
+              </Tabs.TabPane>
+            </Tabs>
           </div>
         </div>
 
@@ -319,8 +214,8 @@ const handleCancelComplete = () => {
                   <span className="text-gray-500 text-sm">Reel</span>
                 </div>
 
-            <hr className="my-4 border-gray-200" />
-                
+                <hr className="my-4 border-gray-200" />
+
 
                 {/* YouTube */}
                 <div className="flex items-center justify-between pb-2">
@@ -331,7 +226,7 @@ const handleCancelComplete = () => {
                   <span className="text-gray-500 text-sm">Short Video</span>
                 </div>
 
-            <hr className="my-4 border-gray-200" />
+                <hr className="my-4 border-gray-200" />
 
                 {/* Facebook */}
                 <div className="flex items-center justify-between">
@@ -380,7 +275,7 @@ const handleCancelComplete = () => {
                   </span>
                 ))}
               </div>
-            <hr className="my-4 border-gray-200" />
+              <hr className="my-4 border-gray-200" />
 
               {/* Social Counts */}
               <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-700">
@@ -397,7 +292,7 @@ const handleCancelComplete = () => {
                   <RiTiktokFill className="text-black" /> 2.1k
                 </span>
               </div>
-            <hr className="my-4 border-gray-200" />
+              <hr className="my-4 border-gray-200" />
 
               {/* Buttons */}
               <div className="flex gap-3 mt-4">
@@ -411,23 +306,23 @@ const handleCancelComplete = () => {
             </div>
 
             {/* Track Campaign */}
-          <div className="bg-white p-6 rounded-2xl">
-            <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
-            <div className="relative">
-              <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
-              {steps.map((step, idx) => (
-                <div key={idx} className="relative pl-10 pb-6">
-                  <span className="absolute left-0 top-1 text-gray-700">
-                    <RiCheckboxBlankCircleLine size={18} />
-                  </span>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">{step.name}</h4>
-                    <p className="text-sm text-gray-600">{step.date}</p>
+            <div className="bg-white p-6 rounded-2xl">
+              <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
+              <div className="relative">
+                <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
+                {steps.map((step, idx) => (
+                  <div key={idx} className="relative pl-10 pb-6">
+                    <span className="absolute left-0 top-1 text-gray-700">
+                      <RiCheckboxBlankCircleLine size={18} />
+                    </span>
+                    <div>
+                      <h4 className="font-semibold text-gray-800">{step.name}</h4>
+                      <p className="text-sm text-gray-600">{step.date}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
           </div>
         </div>
       </div>
@@ -443,22 +338,22 @@ const handleCancelComplete = () => {
         <p className="text-gray-600 mb-4">
           Are you sure you want to mark this campaign as completed?
         </p>
-            
+
         {/* Stars */}
-          <div className="flex items-center gap-1 mb-3">
-            <RiStarLine className="text-xl" />
-            <RiStarLine className="text-xl" />
-            <RiStarLine className="text-xl" />
-            <RiStarLine className="text-xl" />
-            <RiStarLine className="text-xl" />
-          </div>
+        <div className="flex items-center gap-1 mb-3">
+          <RiStarLine className="text-xl" />
+          <RiStarLine className="text-xl" />
+          <RiStarLine className="text-xl" />
+          <RiStarLine className="text-xl" />
+          <RiStarLine className="text-xl" />
+        </div>
 
         {/* Bio */}
         <div className="mb-4">
           <label className="block font-medium text-sm mb-1">
             Review <span className="text-red-500">*</span>
           </label>
-          
+
           <TextArea
             rows={4}
             placeholder="Write Your Review..."
@@ -488,7 +383,9 @@ const handleCancelComplete = () => {
         </div>
       </Modal>
 
-      
+
+
+
       {/* Cancel Campaign Modal */}
       <Modal
         open={isCancelModel}
@@ -500,33 +397,33 @@ const handleCancelComplete = () => {
         <p className="text-gray-600 mb-4">
           Are you sure you want to cancel this campaign?
         </p>
-      
+
         {/* Cancel Reasons */}
-      <div className="space-y-3 mb-2">
-        {["Cancel Reason 1", "Cancel Reason 2", "Cancel Reason 3", "Cancel Reason 4"].map(
-          (reason, index) => (
-            <label
-              key={index}
-              className="flex items-center gap-3 cursor-pointer text-gray-700"
-            >
-              <input
-                type="radio"
-                name="cancelReason"
-                value={reason}
-                checked={cancelReason === reason}
-                onChange={(e) => setCancelReason(e.target.value)}
-                className="accent-[#0f122f] w-4 h-4"
-              />
-              {reason}
-            </label>
-          )
+        <div className="space-y-3 mb-2">
+          {["Cancel Reason 1", "Cancel Reason 2", "Cancel Reason 3", "Cancel Reason 4"].map(
+            (reason, index) => (
+              <label
+                key={index}
+                className="flex items-center gap-3 cursor-pointer text-gray-700"
+              >
+                <input
+                  type="radio"
+                  name="cancelReason"
+                  value={reason}
+                  checked={cancelReason === reason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  className="accent-[#0f122f] w-4 h-4"
+                />
+                {reason}
+              </label>
+            )
+          )}
+        </div>
+        {errors.cancelReason && (
+          <p className="text-red-500 text-xs mt-1">{errors.cancelReason}</p>
         )}
-      </div>
-      {errors.cancelReason && (
-        <p className="text-red-500 text-xs mt-1">{errors.cancelReason}</p>
-      )}
-      
-      
+
+
         {/* Modal Actions */}
         <div className="flex justify-end gap-3">
           <button
