@@ -134,7 +134,7 @@ const App = () => {
 
                                                 <Route path='browse-influencers/favorites' element={<FavoritesLayout />} />
                                                 <Route path='browse-influencers/invited' element={<Invited />} />
-                                                <Route path='offers/influencer-details/:userId' element={<InfluencerProfile/>} />
+                                                <Route path='browse-influencers/influencer-details/:userId' element={<InfluencerProfile/>} />
 
                                                 <Route path='vendor-campaign/my-campaigns' element={<CreateCampaign />} />
                                                 <Route path='vendor-campaign/create-campaign' element={<CampaignWizard />} />
@@ -142,7 +142,7 @@ const App = () => {
                                                 <Route path='vendor-campaign' element={ <VendorCampaign/>} />
                                                 <Route path='vendor-campaign/campaignDetails/' element={<CampaignDetails />} />
 
-                                                
+
                                                 <Route path='messages' element={<ChatAppPageVendor />} />
 
 
