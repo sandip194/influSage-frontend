@@ -35,11 +35,11 @@ export default function ChatAppPage() {
 
 const insertMessage = async ({ conversationId, roleId, message, filePath = null }) => {
   try {
-    const payload = {
+     const payload = {
       p_conversationid: conversationId,
       p_roleid: roleId,
-      p_messages: Array.isArray(message) ? message : [message],
-      p_filepath: Array.isArray(filePath) ? filePath.join(",") : filePath || "",
+      p_messages: message,
+      p_filepath: filePath
     };
 
     const res = await axios.post(
