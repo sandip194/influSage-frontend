@@ -345,19 +345,19 @@ const Browse = () => {
                     src={`${BASE_URL}/${campaign.photopath}`}
                     alt="icon"
                     loading="lazy"
-                    className="w-10 h-10 rounded-full"
+                    className="w-10 h-10 rounded-full flex-shrink-0"
                   />
-                  <div className="max-w-full">
-                    <div className="font-semibold truncate  text-gray-900">
+                  <div className="flex-1 min-w-0"> {/* Keeps space management intact */}
+                    <div className="font-semibold text-gray-900"> {/* Removed 'truncate' to allow wrapping */}
                       {campaign.name}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500"> {/* Removed 'truncate' to allow wrapping; add back if needed */}
                       {campaign.businessname}
                     </div>
                   </div>
                 </div>
+                {/* Rest of the card remains the same */}
                 <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-
                   <div className="flex flex-col text-xs text-gray-500 gap-1">
                     {campaign.providercontenttype?.map((item, index) => (
                       <span key={index}>
@@ -365,7 +365,6 @@ const Browse = () => {
                       </span>
                     ))}
                   </div>
-
                   <RiExchangeDollarLine size={16} />
                   <span>{campaign.estimatedbudget}</span>
                 </div>
@@ -399,7 +398,7 @@ const Browse = () => {
                   <Tooltip title="Save Campaign">
                     <button
                       onClick={() => handleSave(campaign.id)}
-                      className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition"
+                      className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition flex-shrink-0"
                     >
                       {campaign.campaigsaved ? <RiFileCopyFill size={20} /> : <RiFileCopyLine size={20} />}
                     </button>
@@ -413,14 +412,12 @@ const Browse = () => {
                           : `/dashboard/browse/description/${campaign.id}`
                       }
                     >
-                      <button className="border bg-[#0f122f] text-white border-gray-200 w-10 h-10 p-0 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition">
+                      <button className="border bg-[#0f122f] text-white border-gray-200 w-10 h-10 p-0 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition flex-shrink-0">
                         <RiEyeLine size={20} />
-
                       </button>
                     </Link>
                   </Tooltip>
                 </div>
-
               </div>
             )))
             }
