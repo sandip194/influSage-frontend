@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import { useSelector } from "react-redux";
+import axios from "axios";
 import Sidebar from "./Sidebar";
 import ChatHeader from "./ChatHeader";
 import ChatMessages from "./ChatMessages";
@@ -33,82 +34,69 @@ export default function ChatAppPage() {
     return () => newSocket.disconnect();
   }, [token]);
 
-  // Start conversation via campaign
-  const startConversation = async (campaignApplicationId) => {
-    try {
-      const res = await fetch(`${BASE_URL}/chat/startconversation`, {
-        method: "POST",
+const insertMessage = async ({ conversationId, roleId, message, filePath = null }) => {
+  try {
+    const payload = {
+      p_conversationid: conversationId,
+      p_roleid: roleId,
+      p_messages: message,
+      p_filepath: filePath
+    };
+
+    const res = await axios.post(
+      `/chat/insertmessage`,
+      payload,
+      {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ p_campaignapplicationid: campaignApplicationId }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.p_status) throw new Error(data.message);
-      return data.conversationId;
-    } catch (err) {
-      console.error("❌ Start conversation error:", err);
-      return null;
-    }
-  };
-
-  // Call your insertMessage API
-  const insertMessage = async (conversationId, text, files = null) => {
-    try {
-      const formData = new FormData();
-      formData.append("p_conversationid", conversationId);
-      formData.append("p_roleid", currentUser.role);
-      formData.append("p_messages", text);
-      if (files) {
-        for (let file of files) {
-          formData.append("files", file);
+          Authorization: `Bearer ${token}`
         }
       }
+    );
 
-      // const res = await fetch(`${BASE_URL}/chat/message`, {
-      //   method: "POST",
-      //   headers: {
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: formData,
-      // });
+    const data = res.data;
 
-      const data = await res.json();
-      if (!res.ok || !data.p_status) throw new Error(data.message);
-      return data;
-    } catch (err) {
-      console.error("❌ Insert message error:", err);
-      return null;
-    }
-  };
+    if (!data.p_status) throw new Error(data.message || "Failed to send message");
 
-  // Handle sending message
-  const handleSendMessage = async ({ text, file }) => {
-    if (!activeChat) return;
+    return data;
+  } catch (err) {
+    console.error("Insert message error:", err);
+    return null;
+  }
+};
 
-    let conversationId = activeChat.id;
 
-    // If no conversation exists, start one
-    if (!conversationId) {
-      conversationId = await startConversation(activeChat.campaignApplicationId);
-      if (!conversationId) return;
-      setActiveChat({ ...activeChat, id: conversationId });
-    }
+const handleSendMessage = async ({ text, file }) => {
+  if (!activeChat?.id) {
+    console.warn("Conversation not started yet. Cannot send message.");
+    return;
+  }
 
-    const result = await insertMessage(conversationId, text, file ? [file] : null);
-    if (result?.p_status) {
-      const newMsg = {
-        id: Date.now(),
-        sender: currentUser.id,
-        content: text,
-        type: "text",
-        conversationId,
-      };
-      setMessages((prev) => [...prev, newMsg]);
-      socket?.emit("sendMessage", newMsg);
-    }
-  };
+  const conversationId = activeChat.id;
+
+const result = await insertMessage({
+  conversationId,
+  roleId: currentUser.role, 
+  message: text,
+  filePath: file ? [file] : null
+});
+
+
+  if (result?.p_status) {
+    const newMsg = {
+      id: Date.now(),
+      sender: currentUser.id,
+      content: text,
+      type: file ? "file" : "text",
+      conversationId,
+      files: result.filePaths || [],
+    };
+
+    setMessages((prev) => [...prev, newMsg]);
+    socket?.emit("sendMessage", newMsg);
+  }
+};
+
 
   return (
     <div className="h-[85vh] flex overflow-hidden">

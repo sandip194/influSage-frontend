@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
+import axios from "axios";
 import Sidebar from "./SidebarVendor";
 import ChatHeader from "./ChatHeaderVendor";
 import ChatMessages from "./ChatMessagesVendor";
@@ -8,7 +9,7 @@ import { useSelector } from "react-redux";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export default function ChatAppPageVendor() {
+export default function ChatAppPage() {
   const { token, userId, role } = useSelector((state) => state.auth);
 
   const [activeChat, setActiveChat] = useState(null);
@@ -32,96 +33,73 @@ export default function ChatAppPageVendor() {
     return () => newSocket.disconnect();
   }, [token]);
 
-  // Start conversation via campaign
-  const startConversation = async (campaignApplicationId) => {
-    try {
-      const res = await fetch(`${BASE_URL}/chat/startconversation`, {
-        method: "POST",
+const insertMessage = async ({ conversationId, roleId, message, filePath = null }) => {
+  try {
+    const payload = {
+      p_conversationid: conversationId,
+      p_roleid: roleId,
+      p_messages: Array.isArray(message) ? message : [message],
+      p_filepath: Array.isArray(filePath) ? filePath.join(",") : filePath || "",
+    };
+
+    const res = await axios.post(
+      `/chat/insertmessage`,
+      payload,
+      {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          p_campaignapplicationid: campaignApplicationId,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.p_status) throw new Error(data.message);
-      return data.conversationId;
-    } catch (err) {
-      console.error("❌ Start conversation error:", err);
-      return null;
-    }
-  };
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
 
-  // Send message via SP
-  const sendMessageToSP = async (conversationId, text) => {
-    try {
-      const res = await fetch(`${BASE_URL}/chat/message`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          p_action: "send",
-          p_conversationid: conversationId,
-          p_roleid: currentUser.role,
-          p_messages: text,
-          p_filepath: null,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.p_status) throw new Error(data.message);
-      return data;
-    } catch (err) {
-      console.error("❌ Send message error:", err);
-      return null;
-    }
-  };
+    const data = res.data;
 
-  // Handle sending message
-  const handleSendMessage = async (text) => {
-    if (!activeChat) return;
+    if (!data.p_status) throw new Error(data.message || "Failed to send message");
 
-    let conversationId = activeChat.id;
+    return data;
+  } catch (err) {
+    console.error("Insert message error:", err);
+    return null;
+  }
+};
 
-    // If no conversation exists, start one
-    if (!conversationId) {
-      conversationId = await startConversation(
-        activeChat.campaignApplicationId
-      );
-      if (!conversationId) return;
-      setActiveChat({ ...activeChat, id: conversationId });
-    }
+const handleSendMessage = async ({ text, file }) => {
+  if (!activeChat?.conversationid) return;
 
-    const result = await sendMessageToSP(conversationId, text);
-    if (result?.p_status) {
-      const newMsg = {
-        id: Date.now(),
-        sender: currentUser.id,
-        content: text,
-        type: "text",
-        conversationId,
-      };
-      setMessages((prev) => [...prev, newMsg]);
-      socket?.emit("sendMessage", newMsg);
-    }
-  };
+  const conversationId = activeChat.conversationid;
+
+  const result = await insertMessage({
+    conversationId,
+    roleId: currentUser.role,
+    message: text,
+    filePath: file ? file : "", 
+  });
+
+  if (result?.p_status) {
+    const newMsg = {
+      id: Date.now(),
+      sender: currentUser.id,
+      content: text,
+      type: file ? "file" : "text",
+      conversationId,
+      files: result.filePaths ? result.filePaths.split(",") : [],
+    };
+
+    setMessages((prev) => [...prev, newMsg]);
+    socket?.emit("sendMessage", newMsg);
+  }
+};
 
   return (
     <div className="h-[85vh] flex flex-row overflow-hidden gap-2">
-      {/* Sidebar (Expanded on desktop, full width on mobile) */}
-      <div
-        className={`w-full md:w-3/4 h-full ${
-          activeChat ? "hidden md:block" : "block"
-        }`}
-      >
-        <Sidebar onSelectChat={(chat) => setActiveChat(chat)} />
-      </div>
-
-      {/* Chat Area (Narrow, right-aligned on desktop) */}
-      {/* Chat Area (Expanded and right-aligned on desktop) */}
+     <Sidebar
+  onSelectChat={(chat) => {
+    const normalizedChat = chat.campaign ? { ...chat, conversationid: chat.campaign.conversationid } : chat;
+    setActiveChat(normalizedChat);
+    setMessages([]); 
+  }}
+/>
       <div
         className={`w-full md:w-[600px] h-full flex flex-col bg-white rounded-2xl shadow-md ${
           activeChat ? "flex" : "hidden md:flex"

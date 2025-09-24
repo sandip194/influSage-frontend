@@ -61,40 +61,42 @@ const OfferDetails = () => {
 
 
     const handleAcceptApplication = async () => {
-        try {
-            setLoading(true)
+  if (!offerDetails?.applicationid) {
+    toast.error("Application ID missing. Cannot accept offer.");
+    return;
+  }
 
-            const res = await axios.post(
-                `/vendor/application-status`,
-                {
-                    p_applicationid: Number(offerDetails?.applicationid),
-                    p_statusname: "Selected"
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            )
+  try {
+    setLoading(true);
+    const res = await axios.post(
+      `/chat/startconversation`,
+      {
+        p_campaignapplicationid: Number(offerDetails.applicationid),
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
-            if (res.status === 200) {
-                console.log(res)
-                toast.success("Application Selected For Your Campaign Successfully")
-            }
-        } catch (error) {
-            console.log(error)
-            toast.error(error)
-        } finally {
-            setLoading(false)
-        }
+    if (res.data.p_status) {
+      toast.success(res.data.message || "Conversation started successfully");
+    } else {
+      toast.error(res.data.message || "Failed to start conversation");
     }
+  } catch (error) {
+    console.error("Error starting conversation:", error);
+    toast.error(error.response?.data?.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
-    const handleConfirmAccept = () => {
-        console.log("Offer accepted:", offerDetails?.applicationid);
-        handleAcceptApplication()
-        setIsAcceptModalOpen(false);
-        // Handle accept logic here
-    };
+// Accept modal confirm handler
+const handleConfirmAccept = () => {
+  handleAcceptApplication();
+  setIsAcceptModalOpen(false);
+};
+
 
     const handleViewProfile = (userId) => {
     navigate(`/vendor-dashboard/offers/influencer-details/${userId}`);

@@ -1,87 +1,111 @@
 import { RiAddLine, RiArrowLeftLine } from "react-icons/ri";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
 export default function SidebarVendor({ onSelectChat }) {
+  const { token } = useSelector((state) => state.auth);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [campaigns, setCampaigns] = useState([]);
+  const [influencers, setInfluencers] = useState([]);
 
- const Influencer = [
-    {
-      name: "Sean Smith",
-      message: "Hi How Are you ?",
-      time: "05:00 PM",
-      unread: 2,
-      img: "https://randomuser.me/api/portraits/men/32.jpg",
-      campaignId: 1,
-    },
-    {
-      name: "Annette Black",
-      message: "Hi How Are you ?",
-      time: "05:00 PM",
-      img: "https://randomuser.me/api/portraits/women/44.jpg",
-      campaignId: 2,
-    },
-  ];
+  const fetchCampaigns = async () => {
+    if (!token) return;
 
-  const Campaigns = [
-    {
-      id: 1,
-      name: "Author One",
-      message: "Published new book!",
-      time: "02:30 PM",
-      img: "https://randomuser.me/api/portraits/men/12.jpg",
-    },
-    {
-      id: 2,
-      name: "Author Two",
-      message: "Working on a new article.",
-      time: "04:10 PM",
-      img: "https://randomuser.me/api/portraits/women/22.jpg",
-    },
-  ];
+    try {
+      const response = await axios.get(`/chat/conversationsdetails`, {
+        params: { p_search: "" },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.status === 200) {
+  const formatted = (response.data.data || []).map((c) => ({
+    ...c,
+    campaignphoto: c.campaignphoto
+      ? `${BASE_URL}/${c.campaignphoto.startsWith("src/") ? c.campaignphoto : `src/${c.campaignphoto}`}`
+      : null,
+  }));
+
+  setCampaigns(formatted);
+
+  const allInfluencers = formatted.flatMap((c) =>
+    (c.influencers || []).map((v) => ({
+      ...v,
+      campaignId: c.conversationid,
+      campaignName: c.campaignname,
+      campaignPhoto: c.campaignphoto,
+       img: v.userphoto
+      ? `${BASE_URL}/${v.userphoto.startsWith("src/") ? v.userphoto : `src/${v.userphoto}`}`
+      : null,
+      name: `${v.firstname} ${v.lastname}`,
+      message: v.lastmessage || "No message",
+      time: v.lastmessagedate || "",
+    }))
+  );
+
+  setInfluencers(allInfluencers);
+}
+
+    } catch (err) {
+      console.error("Error fetching campaigns:", err);
+      setCampaigns([]);
+      setInfluencers([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchCampaigns();
+  }, [token]);
 
   const filteredInfluencers = selectedCampaign
-    ? Influencer.filter((inf) => inf.campaignId === selectedCampaign.id)
+    ? influencers.filter((inf) => inf.campaignId === selectedCampaign.conversationid)
     : [];
 
   return (
-    <div className="h-full flex flex-col md:flex-row bg-white shadow-md rounded-2xl overflow-hidden">
+    <div className="h-full flex flex-col md:flex-row gap-4">
       {/* Campaigns Panel */}
-      <div className={`md:w-1/2 w-full border-r border-gray-200 flex flex-col
-                      ${selectedCampaign ? "hidden md:flex" : "flex"}`}>
-        <div className="p-4 flex items-center justify-between border-b border-gray-200">
-          <h2 className="font-semibold text-gray-700 text-sm md:text-base">Campaigns</h2>
+      <div
+        className={`flex-1 flex flex-col bg-white shadow-md rounded-2xl overflow-hidden
+                    ${selectedCampaign ? "hidden md:flex" : "flex"}`}
+      >
+        <div className="w-full p-4 flex items-center justify-between border-b border-gray-200">
+          <h2 className="font-semibold text-gray-700 text-sm md:text-base w-full text-left">
+            Campaigns
+          </h2>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {Campaigns.map((campaign) => (
+          {campaigns?.map((campaign) => (
             <div
-              key={campaign.id}
+              key={campaign?.conversationid}
               onClick={() => setSelectedCampaign(campaign)}
               className={`flex items-center justify-between p-4 cursor-pointer border-b border-gray-100 hover:bg-gray-100 transition ${
-                selectedCampaign?.id === campaign.id ? "bg-gray-200" : ""
+                selectedCampaign?.conversationid === campaign.conversationid ? "bg-gray-200" : ""
               }`}
             >
               <div className="flex items-center space-x-3">
                 <img
-                  src={campaign.img}
-                  alt={campaign.name}
+                  src={campaign.campaignphoto}
+                  alt={campaign.campaignname}
                   className="w-10 h-10 rounded-full object-cover"
                 />
                 <div className="overflow-hidden">
-                  <div className="font-semibold text-sm text-gray-800 truncate">{campaign.name}</div>
-                  <div className="text-xs text-gray-500 truncate">{campaign.message}</div>
+                  <div className="font-semibold text-sm text-gray-800 truncate">{campaign.campaignname}</div>
+                  <div className="text-xs text-gray-500 truncate">Click to chat</div>
                 </div>
               </div>
-              <span className="text-xs text-gray-400">{campaign.time}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Influencers Panel */}
-      <div className={`md:w-1/2 w-full flex flex-col
-                      ${!selectedCampaign ? "hidden md:flex" : "flex"}`}>
+      <div
+        className={`flex-1 flex flex-col bg-white shadow-md rounded-2xl overflow-hidden
+                    ${!selectedCampaign ? "hidden md:flex" : "flex"}`}
+      >
         <div className="p-4 flex items-center justify-between border-b border-gray-200">
-          {/* Back Button - only on mobile */}
           <button
             onClick={() => setSelectedCampaign(null)}
             className="md:hidden mr-2 p-2 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
@@ -100,8 +124,8 @@ export default function SidebarVendor({ onSelectChat }) {
           {filteredInfluencers.length > 0 ? (
             filteredInfluencers.map((inf) => (
               <div
-                key={inf.name}
-                onClick={() => onSelectChat(inf)}
+                key={inf.vendorid}
+                onClick={() => onSelectChat({ ...inf, campaign: selectedCampaign })}
                 className="flex items-center justify-between p-4 hover:bg-gray-100 cursor-pointer border-b border-gray-100 transition"
               >
                 <div className="flex items-center space-x-3">
@@ -115,7 +139,9 @@ export default function SidebarVendor({ onSelectChat }) {
                     <div className="text-xs text-gray-500 truncate">{inf.message}</div>
                   </div>
                 </div>
-                <span className="text-xs text-gray-400">{inf.time}</span>
+               <span className="text-xs text-gray-400">
+                {inf.time ? new Date(inf.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
+              </span>
               </div>
             ))
           ) : (
