@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Upload, Form, Input, message, Select, Spin } from 'antd';
 import { UploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
@@ -165,6 +165,8 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
 
   const handleRemove = useCallback((uid) => {
     setFileError('');
+    uploadedUIDsRef.current.delete(uid);
+
     if (uid.startsWith('existing-')) {
       const fileToRemove = existingFiles.find(f => f.uid === uid);
       if (!fileToRemove) return;
@@ -177,44 +179,50 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
     }
   }, [existingFiles, BASE_URL]);
 
+
+  const uploadedUIDsRef = useRef(new Set());
+
   const handleFileChange = useCallback((info) => {
-    const incoming = info.fileList
+    const rawFiles = (info.fileList || [])
       .map(f => f.originFileObj || f)
       .filter(Boolean);
 
-    // Pre-check count limit
-    const totalCount = existingFiles.length + fileList.length + incoming.length;
-    if (totalCount > MAX_FILES) {
-      const msg = `You can upload a maximum of ${MAX_FILES} files.`;
-      setFileError(msg);
-      message.error(msg);
-      return;
-    }
+    const newValidFiles = [];
+    const newErrors = [];
 
-    let newErrors = [];
-    const existingUIDs = new Set(combinedFiles.map(f => f.uid));
+    for (const file of rawFiles) {
+      const uid = getFileUID(file);
 
-    const newValidFiles = incoming.reduce((acc, file) => {
+      if (uploadedUIDsRef.current.has(uid)) continue; // Skip duplicates
+
       if (!ALLOWED_TYPES.includes(file.type)) {
         newErrors.push(`${file.name}: unsupported file type`);
-        return acc;
+        continue;
       }
+
       const sizeMb = file.size / 1024 / 1024;
       if (sizeMb > MAX_SIZE_MB) {
         newErrors.push(`${file.name}: exceeds ${MAX_SIZE_MB}MB`);
-        return acc;
+        continue;
       }
-      const uid = getFileUID(file);
-      if (existingUIDs.has(uid)) {
-        message.warning(`${file.name}: already uploaded`);
-        return acc;
-      }
+
       file.uid = uid;
       file.previewUrl = URL.createObjectURL(file);
-      existingUIDs.add(uid);
-      acc.push(file);
-      return acc;
-    }, []);
+      newValidFiles.push(file);
+      uploadedUIDsRef.current.add(uid);
+    }
+
+    const totalCount = existingFiles.length + fileList.length + newValidFiles.length;
+    if (totalCount > MAX_FILES) {
+      const allowedToAdd = MAX_FILES - (existingFiles.length + fileList.length);
+      if (allowedToAdd <= 0) {
+        newErrors.push(`You can upload a maximum of ${MAX_FILES} files.`);
+        newValidFiles.length = 0;
+      } else {
+        newErrors.push(`Only ${allowedToAdd} more file(s) allowed.`);
+        newValidFiles.length = allowedToAdd;
+      }
+    }
 
     if (newErrors.length > 0) {
       setFileError(newErrors.join('; '));
@@ -225,7 +233,9 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
     if (newValidFiles.length > 0) {
       setFileList(prev => [...prev, ...newValidFiles]);
     }
-  }, [existingFiles, fileList, combinedFiles, getFileUID]);
+  }, [existingFiles, fileList]);
+
+
 
   const handleSubmit = useCallback(async () => {
     // Prevent double submit
@@ -337,7 +347,10 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
             multiple
             fileList={[]}  // keeping this empty since we manage our own state
             beforeUpload={() => false}
-            onChange={handleFileChange}
+            onChange={(info) => {
+              handleFileChange(info);
+              info.fileList.length = 0; // Clear internal list
+            }}
             showUploadList={false}
           >
             <div className="py-10">
@@ -419,9 +432,8 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition ${
-                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className={`bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
             >
               {isSubmitting ? <Spin size="small" /> : (onNext ? 'Continue' : 'Save Changes')}
             </button>
