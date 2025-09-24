@@ -101,7 +101,7 @@ export const ProfileStepper = () => {
         <PersonalDetails
           data={profileData.profile}
           showControls={true}
-          showToast={true}
+         
           onChange={(updated) => updateProfileSection('profile', updated)}
           onNext={() => markStepComplete(0)}
         />
