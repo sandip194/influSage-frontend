@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { RiArrowLeftLine } from "react-icons/ri";
+import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -12,11 +13,12 @@ export default function ChatHeader({ chat, onBack }) {
   const timerRef = useRef(null);
 
   const [socket] = useState(() => io(BASE_URL, { autoConnect: true }));
+  const { userId } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (!chat?.id) return;
 
-    socket.emit("register", chat.id);
+    socket.emit("register",userId);
 
     socket.on("user-online", ({ userId }) => {
       if (userId === chat.id) {
@@ -38,12 +40,24 @@ export default function ChatHeader({ chat, onBack }) {
       }
     });
 
+    // ✅ Handle initial online users list
+    socket.on("online-users", ({ userIds }) => {
+      if (userIds.includes(chat.id)) {
+        setIsOnline(true);
+        setOnlineTime(0);
+        if (timerRef.current) clearInterval(timerRef.current);
+        timerRef.current = setInterval(() => setOnlineTime((prev) => prev + 1), 1000);
+      }
+    });
+
     return () => {
       socket.off("user-online");
       socket.off("user-offline");
+      socket.off("online-users");
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [chat?.id, socket]);
+  }, [chat?.id]);
+
 
   const formatLastSeen = (time) => {
     if (!time) return "Offline";
@@ -54,11 +68,11 @@ export default function ChatHeader({ chat, onBack }) {
   const formatOnlineTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `Online for ${mins}m ${secs}s`;
+    return `Online`;
   };
 
   return (
-      <div className="flex items-center space-x-3 p-4 bg-white  rounded-t-2xl">
+    <div className="flex items-center space-x-3 p-4 bg-white  rounded-t-2xl">
       <button onClick={onBack} className="md:hidden text-2xl text-gray-500 mr-2">
         <RiArrowLeftLine />
       </button>

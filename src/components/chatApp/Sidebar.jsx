@@ -70,7 +70,7 @@ export default function Sidebar({ onSelectChat }) {
       </div>
 
       {/* Campaign List */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {campaigns.length > 0 ? (
           campaigns.map((campaign) => {
             const isSelected = selectedCampaignId === campaign.conversationid;
@@ -86,7 +86,7 @@ export default function Sidebar({ onSelectChat }) {
                   });
                 }}
                 className={`flex items-center justify-between p-4 cursor-pointer border-b border-gray-100
-                  ${isSelected ? "bg-gray-200 scale-105" : "hover:bg-gray-100"} transition`}
+                  ${isSelected ? "bg-gray-100 scale-105" : "hover:bg-gray-100"} transition`}
               >
                 <div className="flex items-center space-x-3">
                   {campaign.campaignphoto && (

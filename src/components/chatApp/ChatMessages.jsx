@@ -6,7 +6,9 @@ export default function ChatMessages({ chat }) {
   const [messages, setMessages] = useState([]);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const scrollRef = useRef(null);
+
   const { token, id: userId, role } = useSelector((state) => state.auth) || {};
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     if (!chat?.id || !token) return;
@@ -30,7 +32,7 @@ export default function ChatMessages({ chat }) {
             content: (msg.message || "").replace(/^"|"$/g, ""),
             file: Array.isArray(msg.filepath) ? msg.filepath.join(",") : msg.filepath || "",
             time: msg.createddate
-          }));      
+          }));
 
           setMessages(formattedMessages);
         }
@@ -45,7 +47,7 @@ export default function ChatMessages({ chat }) {
   // Scroll to top so recent message is visible
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = 0;
+      scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     }
   }, [messages]);
 
@@ -73,9 +75,33 @@ export default function ChatMessages({ chat }) {
               </div>
             )}
 
-            <div className={`p-3 rounded-lg max-w-xs ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`}>
-              {msg.content}
+            <div className={`p-3 rounded-lg max-w-xs space-y-2 break-words ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`}>
+             
+
+              {msg.file && (
+                <div>
+                  {msg.file.match(/\.(jpeg|jpg|png|gif)$/i) ? (
+                    <img
+                      src={`${BASE_URL}/${msg.file}`}
+                      alt="attachment"
+                      className="max-w-[200px] rounded"
+                    />
+                  ) : (
+                    <a
+                      href={`${BASE_URL}/${msg.file}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
+                      📎 View file
+                    </a>
+                  )}
+                </div>
+              )}
+
+               {msg.content && <div>{msg.content}</div>}
             </div>
+
           </div>
         );
       })}

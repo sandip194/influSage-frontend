@@ -6,61 +6,70 @@ export default function ChatMessagesVendor({ chat }) {
   const [messages, setMessages] = useState([]);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const scrollRef = useRef(null);
+
+
   const { token, id: userId, role } = useSelector((state) => state.auth) || {};
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
- useEffect(() => {
-  console.log("Current chat:", chat);
-  if (!chat?.conversationid || !token) return;
+  useEffect(() => {
+    console.log("Current chat:", chat);
+    if (!chat?.conversationid || !token) return;
 
-  const fetchMessages = async () => {
-    try {
-      const res = await axios.get(`/chat/messages`, {
-        params: {
-          p_conversationid: chat.conversationid,
-          p_roleid: role,
-          p_limit: 50,
-          p_offset: 0
-        },
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    const fetchMessages = async () => {
+      try {
+        const res = await axios.get(`/chat/messages`, {
+          params: {
+            p_conversationid: chat.conversationid,
+            p_roleid: role,
+            p_limit: 50,
+            p_offset: 0
+          },
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      if (res.data?.data?.records) {
-         const formattedMessages = res.data.data.records.map((msg) => ({
+        if (res.data?.data?.records) {
+          const formattedMessages = res.data.data.records.map((msg) => ({
             id: msg.messageid,
             senderId: msg.roleid,
             content: (msg.message || "").replace(/^"|"$/g, ""),
             file: Array.isArray(msg.filepath) ? msg.filepath.join(",") : msg.filepath || "",
             time: msg.createddate
-          }));      
+          }));
 
 
-        setMessages(formattedMessages);
+          setMessages(formattedMessages);
+        }
+      } catch (err) {
+        console.error("Failed to fetch messages:", err);
       }
-    } catch (err) {
-      console.error("Failed to fetch messages:", err);
-    }
-  };
+    };
 
-  fetchMessages();
-}, [chat, token, role]);
+    fetchMessages();
+  }, [chat, token, role]);
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     }
   }, [messages]);
 
   if (!chat) return <div className="flex-1 p-4">Select a chat to start messaging</div>;
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-4">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-4" style={{
+      backgroundImage: 'url("https://www.transparenttextures.com/patterns/skulls.png")',
+      backgroundRepeat: 'repeat',
+      backgroundSize: 'auto',
+      backgroundPosition: 'center',
+      opacity: 0.9  // Optional: adjust for lighter feel
+    }}>
       {messages.map((msg) => {
         const isMe = msg.senderId === role || msg.senderId === userId;
 
         return (
           <div
             key={msg.id}
-            className={`flex relative ${isMe ? "justify-end" : "items-start space-x-2"}`}
+            className={`flex relative mb-1 ${isMe ? "justify-end" : "items-start space-x-2"}`}
             onMouseEnter={() => setHoveredMsgId(msg.id)}
             onMouseLeave={() => setHoveredMsgId(null)}
           >
@@ -74,8 +83,29 @@ export default function ChatMessagesVendor({ chat }) {
               </div>
             )}
 
-            <div className={`p-3 rounded-lg max-w-xs ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`}>
-              {msg.content}
+            <div className={`p-1 rounded-lg max-w-xs space-y-2 break-words ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`}>
+              {msg.content && <div className="px-2 py-1">{msg.content}</div>}
+
+              {msg.file && (
+                <div>
+                  {msg.file.match(/\.(jpeg|jpg|png|gif)$/i) ? (
+                    <img
+                      src={`${BASE_URL}/${msg.file}`}
+                      alt="attachment"
+                      className="max-w-[200px] rounded"
+                    />
+                  ) : (
+                    <a
+                      href={`${BASE_URL}/${msg.file}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
+                      📎 View file
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         );

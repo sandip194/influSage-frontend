@@ -17,31 +17,31 @@ const VendorCampaignOverview = ({ campaignData }) => {
     const Requirements = [
         {
             label: "Ship Products:",
-            value: campaignData?.p_vendorinfojson?.isproductshipping ? "Yes" : "No",
+            value: campaignData?.requirements?.isproductshipping ? "Yes" : "No",
         },
         {
             label: "Duration:",
-            value: `${campaignData?.p_objectivejson?.postdurationdays || "N/A"} Days`,
+            value: `${campaignData?.requirements?.postdurationdays || "N/A"} Days`,
         },
         {
             label: "Application Start Date:",
-            value: campaignData?.p_campaignjson?.applicationstartdate || "N/A",
+            value: campaignData?.applicationstartdate || "N/A",
         },
         {
             label: "Application End Date:",
-            value: campaignData?.p_campaignjson?.applicationenddate || "N/A",
+            value: campaignData?.applicationenddate || "N/A",
         },
         {
             label: "Campaign Start Date:",
-            value: campaignData?.p_campaignjson?.startdate || "N/A",
+            value: campaignData?.requirements?.startdate || "N/A",
         },
         {
             label: "Campaign End Date:",
-            value: campaignData?.p_campaignjson?.enddate || "N/A",
+            value: campaignData?.requirements?.enddate || "N/A",
         },
         {
             label: "Vendor Profile Link Included:",
-            value: campaignData?.p_objectivejson?.isincludevendorprofilelink
+            value: campaignData?.requirements?.isincludevendorprofilelink
                 ? "Yes"
                 : "No",
         },
@@ -58,8 +58,8 @@ const VendorCampaignOverview = ({ campaignData }) => {
     };
 
     useEffect(() => {
-        if (campaignData?.p_campaignfilejson) {
-            setImages(campaignData.p_campaignfilejson.map(file => file.filepath));
+        if (campaignData?.campaignfiles) {
+            setImages(campaignData.campaignfiles.map(file => file.filepath));
         }
     }, [campaignData]);
 
@@ -71,7 +71,7 @@ const VendorCampaignOverview = ({ campaignData }) => {
                     Campaign Description
                 </h3>
                 <p className="text-gray-700 leading-relaxed">
-                    {campaignData?.p_campaignjson?.description || "No description available."}
+                    {campaignData?.description || "No description available."}
                 </p>
 
             </div>

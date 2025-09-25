@@ -38,15 +38,19 @@ export default function ChatAppPage() {
     if (!activeChat) return;
 
     try {
-      const payload = {
-        p_conversationid: activeChat.id,
-        p_roleid: role,
-        p_messages: text,
-        p_filepath: file || null,
-      };
+      const formData = new FormData();
+      formData.append("p_conversationid", activeChat.id);
+      formData.append("p_roleid", role);
+      formData.append("p_messages", text);
+      if (file) {
+        formData.append("file", file); // The key must match what your backend expects
+      }
 
-      const res = await axios.post(`/chat/insertmessage`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await axios.post(`/chat/insertmessage`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data", // Let axios set this automatically; optional
+        },
       });
 
       if (res.data?.p_status) {
@@ -55,16 +59,17 @@ export default function ChatAppPage() {
           senderId: role,
           content: text,
           conversationId: activeChat.id,
+          fileUrl: res.data?.filepath || null, // If backend returns file path
         };
 
-        // Append locally and emit to Socket.IO
         setMessages((prev) => [...prev, newMsg]);
         socket?.emit("sendMessage", newMsg);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Failed to send message:", err);
     }
   };
+
 
   return (
     <div className="h-[85vh] flex overflow-hidden">

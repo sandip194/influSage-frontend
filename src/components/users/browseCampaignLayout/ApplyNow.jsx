@@ -187,7 +187,7 @@ const ApplyNow = () => {
 
 
   return (
-    <main className="w-full max-w-7xl mx-auto text-sm overflow-x-hidden">
+    <main className="w-full text-sm overflow-x-hidden">
       <button
         onClick={() => window.history.back()}
         className="text-gray-600 flex items-center gap-2 hover:text-gray-900 transition"

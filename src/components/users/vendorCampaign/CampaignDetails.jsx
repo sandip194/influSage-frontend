@@ -82,12 +82,14 @@ const CampaignDetails = () => {
   const getCampaignDetails = async () => {
     try {
       setLoading(true)
-      const res = await axios.get(`vendor/campaign-detail/${campaignId}`, {
+      const res = await axios.get(`vendor/singlecampaign`, {
+        params: {p_campaign : campaignId},
         headers: {
           Authorization: `Bearer ${token}`
         }
       })
 
+      console.log(res?.data?.data)
       setCampaignDetails(res?.data?.data)
     } catch (error) {
       console.log(error)
@@ -129,7 +131,7 @@ const CampaignDetails = () => {
                 className="w-full h-28 object-cover"
               /> */}
               <img
-                src={`${BASE_URL}/${campaignDetails?.p_campaignjson?.photopath}`}
+                src={`${BASE_URL}/${campaignDetails?.photopath}`}
                 alt="Logo"
                 className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover"
               />
@@ -138,8 +140,8 @@ const CampaignDetails = () => {
             <div className="p-4">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
                 <div>
-                  <h2 className="font-semibold text-lg">{campaignDetails?.p_campaignjson?.name}</h2>
-                  <p className="text-gray-500 text-sm">{campaignDetails?.p_campaignjson?.branddetail}</p>
+                  <h2 className="font-semibold text-lg">{campaignDetails?.name}</h2>
+                  <p className="text-gray-500 text-sm">{campaignDetails?.businessname}</p>
 
                 </div>
 
@@ -165,7 +167,7 @@ const CampaignDetails = () => {
                     <RiMoneyRupeeCircleLine className="w-5" />
                     <span>Budget</span>
                   </div>
-                  <p>₹{campaignDetails?.p_campaignjson?.estimatedbudget}</p>
+                  <p>₹{campaignDetails?.estimatedbudget}</p>
 
                 </div>
                 <div>
@@ -173,7 +175,7 @@ const CampaignDetails = () => {
                     <RiTranslate className="w-5" />
                     <span>Language</span>
                   </div>
-                  {campaignDetails?.p_vendorinfojson?.campaignlanguages?.map((lang) => (
+                  {campaignDetails?.campaignlanguages?.map((lang) => (
                     <p key={lang.languageid}>{lang.languagename}</p>
                   ))}
 
@@ -183,7 +185,7 @@ const CampaignDetails = () => {
                     <RiMenLine className="w-5" />
                     <span>Gender</span>
                   </div>
-                  {campaignDetails?.p_vendorinfojson?.genders?.map((gender) => (
+                  {campaignDetails?.campaigngenders?.map((gender) => (
                     <p key={gender.genderid}>{gender.gendername}</p>
                   ))}
 
@@ -229,32 +231,32 @@ const CampaignDetails = () => {
 
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Campaign Number</p>
-              <p>{campaignDetails?.p_campaignjson?.campaignnumber}</p>
+              <p>{campaignDetails?.branddetails?.campaignnumber}</p>
             </div>
 
 
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
               <p>
-                {campaignDetails?.p_campaignjson?.startdate} — {campaignDetails?.p_campaignjson?.enddate}
+                {campaignDetails?.startdate} — {campaignDetails?.enddate}
               </p>
             </div>
 
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Application Window</p>
               <p>
-                {campaignDetails?.p_campaignjson?.applicationstartdate} — {campaignDetails?.p_campaignjson?.applicationenddate}
+                {campaignDetails?.applicationstartdate} — {campaignDetails?.applicationenddate}
               </p>
             </div>
 
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Delivery Date</p>
-              <p>{campaignDetails?.p_campaignjson?.enddate}</p>
+              <p>{campaignDetails?.enddate}</p>
             </div>
 
             <div className="py-4">
               <p className="text-sm font-bold text-gray-900">Total Price</p>
-              <p>₹{campaignDetails?.p_campaignjson?.estimatedbudget}</p>
+              <p>₹{campaignDetails?.estimatedbudget}</p>
             </div>
           </div>
 
@@ -264,8 +266,8 @@ const CampaignDetails = () => {
             <div className="bg-white p-4 rounded-2xl">
               <h3 className="font-semibold text-lg py-3">Platform</h3>
               <div className="space-y-3">
-                {campaignDetails?.p_contenttypejson?.map((platform) => (
-                  <div key={platform.providerid} className="flex items-center justify-between pb-2">
+                {campaignDetails?.providercontenttype?.map((platform) => (
+                  <div key={platform.providercontenttypeid} className="flex items-center justify-between pb-2">
                     <div className="flex items-center gap-2">
                       {platform.providerid === 1 && <RiInstagramFill className="text-pink-600" />}
                       {platform.providerid === 2 && <RiYoutubeFill className="text-red-600" />}
@@ -273,7 +275,7 @@ const CampaignDetails = () => {
                       <span className="text-gray-700 font-medium">{platform.providername}</span>
                     </div>
                     <span className="text-gray-500 text-sm">
-                      {platform.contenttypes?.map((ct) => ct.contenttypename).join(', ')}
+                      {platform.contenttypename}
                     </span>
                   </div>
                 ))}
