@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   RiMenLine,
   RiMoneyRupeeCircleLine,
@@ -19,6 +19,10 @@ import VendorActivity from './VendorActivity';
 import VendorMessage from './VendorMessage';
 import VendorFilesMedia from './VendorFilesMedia';
 import VendorPayment from './VendorPayment';
+import axios from 'axios';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RiArrowLeftLine } from 'react-icons/ri';
 
 const { TextArea } = Input;
 
@@ -36,7 +40,15 @@ const CampaignDetails = () => {
   const [errors, setErrors] = useState({});
   const [cancelReason, setCancelReason] = useState("");
   const [isCancelModel, setCancelModel] = useState(false);
+  const [campaignDetails, setCampaignDetails] = useState(null)
+  const [loading, setLoading] = useState(false)
 
+
+
+  const navigate = useNavigate();
+  const { campaignId } = useParams()
+  const { token } = useSelector((state) => state.auth);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   // Complete action
   const handleComplete = () => {
@@ -67,17 +79,41 @@ const CampaignDetails = () => {
     setCancelModel(false);
   };
 
+  const getCampaignDetails = async () => {
+    try {
+      setLoading(true)
+      const res = await axios.get(`vendor/campaign-detail/${campaignId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
 
+      setCampaignDetails(res?.data?.data)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    getCampaignDetails()
+  }, [])
+
+
+
+  if (loading) return <div className="text-center">Loading campaign...</div>;
 
   return (
     <div className="w-full text-sm overflow-x-hidden">
       {/* Back */}
       <button
-        onClick={() => window.history.back()}
-        className="text-gray-600 flex items-center gap-2 hover:text-gray-900 transition"
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-gray-600 mb-2"
       >
-        <RiArrowLeftSLine /> Back
+        <RiArrowLeftLine /> Back
       </button>
+
 
       <h1 className="text-2xl font-semibold mb-4">Campaign Details</h1>
 
@@ -86,14 +122,14 @@ const CampaignDetails = () => {
         <div className="flex-1 space-y-4">
           {/* Banner + Profile */}
           <div className="bg-white rounded-2xl overflow-hidden">
-            <div className="relative h-40">
-              <img
+            <div className="relative h-40 bg-gray-200">
+              {/* <img
                 src="https://images.pexels.com/photos/33350497/pexels-photo-33350497.jpeg"
                 alt="Banner"
                 className="w-full h-28 object-cover"
-              />
+              /> */}
               <img
-                src="https://images.pexels.com/photos/25835001/pexels-photo-25835001.jpeg"
+                src={`${BASE_URL}/${campaignDetails?.p_campaignjson?.photopath}`}
                 alt="Logo"
                 className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover"
               />
@@ -102,8 +138,9 @@ const CampaignDetails = () => {
             <div className="p-4">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
                 <div>
-                  <h2 className="font-semibold text-lg">Instagram Campaign</h2>
-                  <p className="text-gray-500 text-sm">Tiktokstar</p>
+                  <h2 className="font-semibold text-lg">{campaignDetails?.p_campaignjson?.name}</h2>
+                  <p className="text-gray-500 text-sm">{campaignDetails?.p_campaignjson?.branddetail}</p>
+
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
@@ -122,30 +159,34 @@ const CampaignDetails = () => {
                 </div>
               </div>
               {/* Campaign Info */}
-              <div className="flex flex-wrap justify-around gap-6 border border-gray-200 rounded-2xl p-4">
+              <div className="flex flex-wrap justify-between gap-6 border border-gray-200 rounded-2xl p-4">
                 <div>
                   <div className="flex gap-2 items-center text-gray-400 mb-2">
                     <RiMoneyRupeeCircleLine className="w-5" />
                     <span>Budget</span>
                   </div>
-                  <p>$120-$150/Reel</p>
+                  <p>₹{campaignDetails?.p_campaignjson?.estimatedbudget}</p>
+
                 </div>
                 <div>
                   <div className="flex gap-2 items-center text-gray-400 mb-2">
                     <RiTranslate className="w-5" />
                     <span>Language</span>
                   </div>
-                  <p>English</p>
-                  <p>Hindi</p>
+                  {campaignDetails?.p_vendorinfojson?.campaignlanguages?.map((lang) => (
+                    <p key={lang.languageid}>{lang.languagename}</p>
+                  ))}
+
                 </div>
                 <div>
                   <div className="flex gap-2 items-center text-gray-400 mb-2">
                     <RiMenLine className="w-5" />
                     <span>Gender</span>
                   </div>
-                  <p>Male</p>
-                  <p>Female</p>
-                  <p>Other</p>
+                  {campaignDetails?.p_vendorinfojson?.genders?.map((gender) => (
+                    <p key={gender.genderid}>{gender.gendername}</p>
+                  ))}
+
                 </div>
               </div>
             </div>
@@ -155,7 +196,10 @@ const CampaignDetails = () => {
           <div className="bg-white p-5 rounded-2xl">
             <Tabs defaultActiveKey="overview">
               <Tabs.TabPane tab="Overview" key="overview">
-                <VendorCampaignOverview />
+                {campaignDetails && (
+                  <VendorCampaignOverview campaignData={campaignDetails} />
+                )}
+
               </Tabs.TabPane>
 
               <Tabs.TabPane tab="Activity" key="activity">
@@ -167,11 +211,11 @@ const CampaignDetails = () => {
               </Tabs.TabPane>
 
               <Tabs.TabPane tab="Files & Media" key="files&media">
-                <VendorFilesMedia/>
+                <VendorFilesMedia />
               </Tabs.TabPane>
 
               <Tabs.TabPane tab="Payment" key="payment">
-                <VendorPayment/>
+                <VendorPayment />
               </Tabs.TabPane>
             </Tabs>
           </div>
@@ -182,60 +226,58 @@ const CampaignDetails = () => {
           {/* Campaign Info Card */}
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="font-semibold text-lg">Campaign Details</h3>
-            <div className="py-4 border-b">
-              <p className="text-sm text-gray-500">Campaign Number</p>
-              <p>#251HJ8888410Kl</p>
+
+            <div className="py-4 border-b border-gray-200">
+              <p className="text-sm font-bold text-gray-900">Campaign Number</p>
+              <p>{campaignDetails?.p_campaignjson?.campaignnumber}</p>
             </div>
-            <div className="py-4 border-b">
-              <p className="text-sm text-gray-500">Order By</p>
-              <p>Tiktokstar</p>
+
+
+            <div className="py-4 border-b border-gray-200">
+              <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
+              <p>
+                {campaignDetails?.p_campaignjson?.startdate} — {campaignDetails?.p_campaignjson?.enddate}
+              </p>
             </div>
-            <div className="py-4 border-b">
-              <p className="text-sm text-gray-500">Delivery Date</p>
-              <p>22 June, 2025</p>
+
+            <div className="py-4 border-b border-gray-200">
+              <p className="text-sm font-bold text-gray-900">Application Window</p>
+              <p>
+                {campaignDetails?.p_campaignjson?.applicationstartdate} — {campaignDetails?.p_campaignjson?.applicationenddate}
+              </p>
             </div>
+
+            <div className="py-4 border-b border-gray-200">
+              <p className="text-sm font-bold text-gray-900">Delivery Date</p>
+              <p>{campaignDetails?.p_campaignjson?.enddate}</p>
+            </div>
+
             <div className="py-4">
-              <p className="text-sm text-gray-500">Total Price</p>
-              <p>250R</p>
+              <p className="text-sm font-bold text-gray-900">Total Price</p>
+              <p>₹{campaignDetails?.p_campaignjson?.estimatedbudget}</p>
             </div>
           </div>
+
 
           <div className="space-y-4 w-full max-w-xs">
             {/* Platform Card */}
             <div className="bg-white p-4 rounded-2xl">
               <h3 className="font-semibold text-lg py-3">Platform</h3>
               <div className="space-y-3">
-                {/* Instagram */}
-                <div className="flex items-center justify-between pb-2">
-                  <div className="flex items-center gap-2">
-                    <RiInstagramFill className="text-pink-600" />
-                    <span className="text-gray-700 font-medium">Instagram</span>
+                {campaignDetails?.p_contenttypejson?.map((platform) => (
+                  <div key={platform.providerid} className="flex items-center justify-between pb-2">
+                    <div className="flex items-center gap-2">
+                      {platform.providerid === 1 && <RiInstagramFill className="text-pink-600" />}
+                      {platform.providerid === 2 && <RiYoutubeFill className="text-red-600" />}
+                      {/* Add conditions for other platforms as needed */}
+                      <span className="text-gray-700 font-medium">{platform.providername}</span>
+                    </div>
+                    <span className="text-gray-500 text-sm">
+                      {platform.contenttypes?.map((ct) => ct.contenttypename).join(', ')}
+                    </span>
                   </div>
-                  <span className="text-gray-500 text-sm">Reel</span>
-                </div>
+                ))}
 
-                <hr className="my-4 border-gray-200" />
-
-
-                {/* YouTube */}
-                <div className="flex items-center justify-between pb-2">
-                  <div className="flex items-center gap-2">
-                    <RiYoutubeFill className="text-red-600" />
-                    <span className="text-gray-700 font-medium">YouTube</span>
-                  </div>
-                  <span className="text-gray-500 text-sm">Short Video</span>
-                </div>
-
-                <hr className="my-4 border-gray-200" />
-
-                {/* Facebook */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <RiFacebookFill className="text-blue-600" />
-                    <span className="text-gray-700 font-medium">Facebook</span>
-                  </div>
-                  <span className="text-gray-500 text-sm">Post</span>
-                </div>
               </div>
             </div>
 
@@ -266,14 +308,17 @@ const CampaignDetails = () => {
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mt-3">
-                {["Fashion", "Beauty", "Fitness", "Other"].map((tag) => (
+                {campaignDetails?.p_campaigncategoyjson?.flatMap(parent =>
+                  parent.categories.map(cat => cat.categoryname)
+                ).map((tag, idx) => (
                   <span
-                    key={tag}
+                    key={idx}
                     className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600"
                   >
                     {tag}
                   </span>
                 ))}
+
               </div>
               <hr className="my-4 border-gray-200" />
 

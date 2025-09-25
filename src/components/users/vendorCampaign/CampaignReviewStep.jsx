@@ -14,6 +14,7 @@ import {
   RiStackLine,
   RiTranslate,
   RiCloseLine,
+  RiCheckLine,
 } from "react-icons/ri";
 
 const CampaignReviewStep = ({ onEdit }) => {
@@ -96,37 +97,37 @@ const CampaignReviewStep = ({ onEdit }) => {
     }
   };
 
-const p_objectivejson = campaignData?.p_objectivejson || {};
-const p_vendorinfojson = campaignData?.p_vendorinfojson || {};
-const p_campaignjson = campaignData?.p_campaignjson || {};
-const p_campaignfilejson = campaignData?.p_campaignfilejson || [];  
-const p_contenttypejson = campaignData?.p_contenttypejson || [];
+  const p_objectivejson = campaignData?.p_objectivejson || {};
+  const p_vendorinfojson = campaignData?.p_vendorinfojson || {};
+  const p_campaignjson = campaignData?.p_campaignjson || {};
+  const p_campaignfilejson = campaignData?.p_campaignfilejson || [];
+  const p_contenttypejson = campaignData?.p_contenttypejson || [];
 
-const platforms =
-  p_contenttypejson.flatMap((p) =>
-    p.contenttypes?.map((ct) => `${p.providername} - ${ct.contenttypename}`)
-  ) || [];
+  const platforms =
+    p_contenttypejson.flatMap((p) =>
+      p.contenttypes?.map((ct) => `${p.providername} - ${ct.contenttypename}`)
+    ) || [];
 
-const languages =
-  p_vendorinfojson.campaignlanguages?.map((l) => l.languagename) || [];
+  const languages =
+    p_vendorinfojson.campaignlanguages?.map((l) => l.languagename) || [];
 
-const influencerTiers =
-  p_vendorinfojson.campaigninfluencertiers?.map(
-    (t) => t.influencertiername
-  ) || [];
+  const influencerTiers =
+    p_vendorinfojson.campaigninfluencertiers?.map(
+      (t) => t.influencertiername
+    ) || [];
 
-const genders = Array.isArray(p_vendorinfojson.genders)
-  ? p_vendorinfojson.genders.map((g) => ({
+  const genders = Array.isArray(p_vendorinfojson.genders)
+    ? p_vendorinfojson.genders.map((g) => ({
       genderid: g.genderid,
       gendername: g.gendername || "Unspecified",
     }))
-  : [];
+    : [];
 
-const camp_profile = p_campaignjson?.photopath
-  ? [getFullUrl(p_campaignjson.photopath)]
-  : [];
+  const camp_profile = p_campaignjson?.photopath
+    ? [getFullUrl(p_campaignjson.photopath)]
+    : [];
 
-const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
+  const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
 
   const handleCreateCampaign = async () => {
     try {
@@ -137,16 +138,16 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
       }
 
       const payload = {
-      userid: userId,
-      objective: campaignData?.p_objectivejson || {},
-      vendorinfo: {
-        ...p_vendorinfojson,
-        genders,
-      },
-      campaign: campaignData?.p_campaignjson || {},
-      references: campaignData?.p_campaignfilejson || [],
-      contenttypes: campaignData?.p_contenttypejson || [],
-    };
+        userid: userId,
+        objective: campaignData?.p_objectivejson || {},
+        vendorinfo: {
+          ...p_vendorinfojson,
+          genders,
+        },
+        campaign: campaignData?.p_campaignjson || {},
+        references: campaignData?.p_campaignfilejson || [],
+        contenttypes: campaignData?.p_contenttypejson || [],
+      };
 
       const res = await axios.post("/vendor/finalize-campaign", payload, {
         headers: {
@@ -168,7 +169,7 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
   if (loading) return <p>Loading...</p>;
   if (!campaignData) return <p>No campaign data found</p>;
 
- 
+
 
   return (
     <div className="w-full text-sm overflow-x-hidden">
@@ -230,7 +231,7 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
                     : "—"}
                 </div>
 
-              <div>
+                <div>
                   <div className="flex gap-2 items-center mb-2 text-gray-500">
                     <RiMenLine className="w-5" />
                     <span> Gender </span>
@@ -281,14 +282,14 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
             <div className="requirements py-4 border-b border-gray-200">
               <h3 className="font-semibold text-lg mb-4">Requirements</h3>
               <ul className="space-y-2 font-semibold">
-                <li className="flex items-start gap-2">
-                  <RiCheckboxCircleFill size={20} />
-               <span>
-                  Post Duration : <span className="text-gray-500">{p_objectivejson.postdurationdays || 0} days</span>
-                </span>
+                <li className="flex items-center gap-2">
+                  <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
+                  <span>
+                    Post Duration : <span className="text-gray-500">{p_objectivejson.postdurationdays || 0} days</span>
+                  </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <RiCheckboxCircleFill size={20} />
+                <li className="flex items-center gap-2">
+                  <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
                   <span>
                     Include Vendor Profile Link :{" "}
                     <span className="text-gray-500">
@@ -298,8 +299,8 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
                     </span>
                   </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <RiCheckboxCircleFill size={20} />
+                <li className="flex items-center gap-2">
+                  <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
                   <span>
                     Product Shipping :{" "}
                     <span className="text-gray-500">
@@ -307,8 +308,8 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
                     </span>
                   </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <RiCheckboxCircleFill size={20} />
+                <li className="flex items-center gap-2">
+                  <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
                   <span>
                     Influencer Tiers :{" "}
                     <span className="text-gray-500">
@@ -462,30 +463,30 @@ const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
               <p className='text-gray-500'>{p_campaignjson.branddetail || "—"}</p>
             </div>
             <div className="py-4 border-b border-gray-200">
-            <p className="text-sm mb-1 font-semibold">Campaign Dates</p>
-            <div className="flex justify-between">
-              <div>
-                <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
-                <p className='text-gray-500'>{p_campaignjson.startdate || "—"}</p>
+              <p className="text-sm mb-1 font-semibold">Campaign Dates</p>
+              <div className="flex justify-between">
+                <div>
+                  <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
+                  <p className='text-gray-500'>{p_campaignjson.startdate || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold mb-1 my-2">End Date</p>
+                  <p className='text-gray-500'>{p_campaignjson.enddate || "—"}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-semibold mb-1 my-2">End Date</p>
-                <p className='text-gray-500'>{p_campaignjson.enddate || "—"}</p>
-              </div>
-            </div>
               <hr className="my-4 border-gray-200" />
-            <p className="text-sm mb-1 mt-4 font-semibold">Application Dates</p>
-            <div className="flex justify-between">
-              <div>
-                <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
-                <p className='text-gray-500'>{p_campaignjson.applicationstartdate || "—"}</p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold mb-1 my-2">End Date</p>
-                <p className='text-gray-500'>{p_campaignjson.applicationenddate || "—"}</p>
+              <p className="text-sm mb-1 mt-4 font-semibold">Application Dates</p>
+              <div className="flex justify-between">
+                <div>
+                  <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
+                  <p className='text-gray-500'>{p_campaignjson.applicationstartdate || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold mb-1 my-2">End Date</p>
+                  <p className='text-gray-500'>{p_campaignjson.applicationenddate || "—"}</p>
+                </div>
               </div>
             </div>
-          </div>
 
             <div className="pt-4 pb-2">
               <p className="text-sm font-semibold mb-1">Total Budget</p>

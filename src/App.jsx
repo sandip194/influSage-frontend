@@ -140,7 +140,7 @@ const App = () => {
                                                 <Route path='vendor-campaign/create-campaign' element={<CampaignWizard />} />
 
                                                 <Route path='vendor-campaign' element={ <VendorCampaign/>} />
-                                                <Route path='vendor-campaign/campaignDetails/' element={<CampaignDetails />} />
+                                                <Route path='vendor-campaign/campaignDetails/:campaignId' element={<CampaignDetails />} />
 
 
                                                 <Route path='messages' element={<ChatAppPageVendor />} />
@@ -150,6 +150,7 @@ const App = () => {
                                                 <Route path='offers/view-all-offers/:id' element={<ViewAllOffers/>}/>
                                                 <Route path="offers/:id" element={<OfferDetails />}/>
                                                 <Route path='offers/influencer-details/:userId' element={<InfluencerProfile/>} />
+                                                <Route path='offers/campaignDetails/:campaignId' element={<CampaignDetails />} />
 
 
                                                 <Route path='edit-profile' element={<EditVendorProfile />} />

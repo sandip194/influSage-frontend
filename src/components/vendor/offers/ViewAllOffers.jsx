@@ -152,9 +152,13 @@ const ViewAllOffers = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start gap-4 sm:items-center justify-between mb-4">
         <h2 className="text-xl font-bold">View All Offers</h2>
-        <button className="px-4 py-2 bg-[#0D132D] text-white rounded-lg">
+        <button
+          onClick={() => navigate(`/vendor-dashboard/offers/campaignDetails/${id}`)}
+          className="px-4 py-2 bg-[#0D132D] text-white rounded-lg"
+        >
           View Campaign Details
         </button>
+
       </div>
 
 
