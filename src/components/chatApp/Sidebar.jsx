@@ -7,6 +7,7 @@ export default function Sidebar({ onSelectChat }) {
   const { token } = useSelector((state) => state.auth);
   const [campaigns, setCampaigns] = useState([]);
   const [search, setSearch] = useState("");
+  const [selectedCampaignId, setSelectedCampaignId] = useState(null); 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const fetchCampaigns = async () => {
@@ -18,18 +19,13 @@ export default function Sidebar({ onSelectChat }) {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // console.log("✅ Campaign response:", response.data.data);
-
       if (response.status === 200) {
         const formatted = (response.data.data || []).map((c) => ({
           ...c,
           campaignphoto: c.campaignphoto
-            ? `${BASE_URL}/${
-                c.campaignphoto.startsWith("src/") ? c.campaignphoto : `src/${c.campaignphoto}`
-              }`
+            ? `${BASE_URL}/${c.campaignphoto.startsWith("src/") ? c.campaignphoto : `src/${c.campaignphoto}`}`
             : null,
         }));
-
         setCampaigns(formatted);
       }
     } catch (error) {
@@ -74,33 +70,40 @@ export default function Sidebar({ onSelectChat }) {
       </div>
 
       {/* Campaign List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {campaigns.length > 0 ? (
-          campaigns.map((campaign) => (
-            <div
-              key={campaign.conversationid}
-              onClick={() =>
-                onSelectChat({
-                  id: campaign.conversationid, 
-                  name: campaign.campaignname,
-                  img: campaign.campaignphoto,
-                })
-              }
-              className="flex items-center justify-between p-4 hover:bg-gray-100 cursor-pointer border-b border-gray-100"
-            >
-              <div className="flex items-center space-x-3">
-                <img
-                  src={campaign.campaignphoto}
-                  alt={campaign.campaignname}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div>
-                  <div className="font-semibold text-sm">{campaign.campaignname}</div>
-                  <div className="text-xs text-gray-500">Click to chat</div>
+          campaigns.map((campaign) => {
+            const isSelected = selectedCampaignId === campaign.conversationid;
+            return (
+              <div
+                key={campaign.conversationid}
+                onClick={() => {
+                  setSelectedCampaignId(campaign.conversationid);
+                  onSelectChat({
+                    id: campaign.conversationid,
+                    name: campaign.campaignname,
+                    img: campaign.campaignphoto,
+                  });
+                }}
+                className={`flex items-center justify-between p-4 cursor-pointer border-b border-gray-100
+                  ${isSelected ? "bg-gray-200 scale-105" : "hover:bg-gray-100"} transition`}
+              >
+                <div className="flex items-center space-x-3">
+                  {campaign.campaignphoto && (
+                    <img
+                      src={campaign.campaignphoto}
+                      alt={campaign.campaignname}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  )}
+                  <div>
+                    <div className="font-semibold text-sm">{campaign.campaignname}</div>
+                    <div className="text-xs text-gray-500">Click to chat</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className="p-4 text-sm text-gray-500">No campaigns found</div>
         )}
