@@ -26,7 +26,7 @@ export default function ChatAppPageVendor() {
     newSocket.on("disconnect", () => console.log("❌ Disconnected"));
 
     newSocket.on("receiveMessage", (msg) => {
-      setMessages((prev) => [...prev, msg]); 
+      setMessages((prev) => [...prev, msg]);
     });
 
     return () => newSocket.disconnect();
@@ -37,15 +37,23 @@ export default function ChatAppPageVendor() {
     if (!activeChat) return;
 
     try {
-      const payload = {
-        p_conversationid: activeChat.id,
-        p_conversationid: activeChat.conversationid,
-        p_roleid: role,
-        p_messages: text,
-        p_filepath: file || null,
-      };
+      // const payload = {
+      //   // p_conversationid: activeChat.id,
+      //   p_conversationid: activeChat.conversationid,
+      //   p_roleid: role,
+      //   p_messages: text,
+      //   p_filepath: file || null,
+      // };
 
-      const res = await axios.post(`/chat/insertmessage`, payload, {
+      const formData = new FormData();
+      formData.append("p_conversationid", activeChat.conversationid);
+      formData.append("p_roleid", role);
+      formData.append("p_messages", text);
+      if (file) {
+        formData.append("file", file); // The key must match what your backend expects
+      }
+
+      const res = await axios.post(`/chat/insertmessage`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -54,10 +62,11 @@ export default function ChatAppPageVendor() {
           id: Date.now(),
           senderId: role,
           content: text,
-          conversationId: activeChat.id,
+          //conversationId: activeChat.id,
           conversationId: activeChat.conversationid,
         };
 
+        console.log(newMsg)
         // Append locally and emit to Socket.IO
         setMessages((prev) => [...prev, newMsg]);
         socket?.emit("sendMessage", newMsg);
@@ -67,62 +76,63 @@ export default function ChatAppPageVendor() {
     }
   };
 
-    return (
-  <div className="h-[85vh] flex flex-row gap-2 overflow-hidden">
-    {/* Sidebar */}
-    <Sidebar
-      onSelectChat={(chat) => {
-        const normalizedChat = chat.campaign
-          ? { ...chat, conversationid: chat.campaign.conversationid }
-          : chat;
+  return (
+    <div className="h-[85vh] flex flex-row gap-2 overflow-hidden">
+      {/* Sidebar */}
+      <Sidebar
+        onSelectChat={(chat) => {
+          const normalizedChat = chat.campaign
+            ? { ...chat, conversationid: chat.campaign.conversationid }
+            : chat;
 
-        setActiveChat(normalizedChat);
-        setMessages([]); 
-      }}
-      className="md:w-1/4 w-full h-full"
-    />
+          setActiveChat(normalizedChat);
+          setMessages([]);
+        }}
+        className="md:w-1/4 w-full h-full"
+      />
 
-    {/* Chat Area */}
-    <div
-      className={`flex-1 md:w-[600px] h-full flex flex-col bg-white rounded-2xl shadow-md ${
-        activeChat ? "flex" : "hidden md:flex"
-      }`}
-    >
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 rounded-t-2xl">
-        <ChatHeader chat={activeChat} onBack={() => setActiveChat(null)} />
-      </div>
+      {/* Chat Area */}
+      <div
+        className={`flex-1 md:w-[600px] h-full flex flex-col bg-white rounded-2xl shadow-md ${activeChat ? "flex" : "hidden md:flex"
+          }`}
+      >
+        {/* Header */}
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 rounded-t-2xl">
+          <ChatHeader chat={activeChat} onBack={() => setActiveChat(null)} />
+        </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4" style={{
-      backgroundImage: 'url("https://www.transparenttextures.com/patterns/skulls.png")',
-      backgroundRepeat: 'repeat',
-      backgroundSize: 'auto',
-      backgroundPosition: 'center',
-      opacity: 0.9  // Optional: adjust for lighter feel
-    }}>
-        {activeChat ? (
-          <ChatMessages
-            chat={{
-              ...activeChat,
-              myRoleId: role,
-              myUserId: userId,
-            }}
-            messages={messages}
-          />
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-400">
-            Select a chat to start messaging
-          </div>
-        )}
-      </div>
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4" style={{
+          backgroundImage: 'url("https://www.transparenttextures.com/patterns/food.png")',
+          backgroundRepeat: 'repeat',
+          backgroundSize: 'auto',
+          backgroundPosition: 'center',
+          backgroundBlendMode : "luminosity",
+          opacity: 0.9 ,  
+          
+        }}>
+          {activeChat ? (
+            <ChatMessages
+              chat={{
+                ...activeChat,
+                myRoleId: role,
+                myUserId: userId,
+              }}
+              messages={messages}
+            />
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-gray-400">
+              Select a chat to start messaging
+            </div>
+          )}
+        </div>
 
-      {/* Input */}
-      <div className="sticky bottom-0 bg-white border-t border-gray-100">
-        <ChatInput onSend={handleSendMessage} />
+        {/* Input */}
+        <div className="sticky bottom-0 bg-white border-t border-gray-100">
+          <ChatInput onSend={handleSendMessage} />
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 
 }

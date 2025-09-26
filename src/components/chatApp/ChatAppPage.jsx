@@ -83,10 +83,11 @@ export default function ChatAppPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto bg-white p-4" style={{
-          backgroundImage: 'url("https://www.transparenttextures.com/patterns/skulls.png")',
+          backgroundImage: 'url("https://www.transparenttextures.com/patterns/food.png")',
           backgroundRepeat: 'repeat',
           backgroundSize: 'auto',
           backgroundPosition: 'center',
+          backgroundBlendMode : "luminosity",
           opacity: 0.9  // Optional: adjust for lighter feel
         }}>
           <ChatMessages chat={{ ...activeChat, myRoleId: role, myUserId: userId }} messages={messages} />

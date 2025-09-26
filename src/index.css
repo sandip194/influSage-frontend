@@ -85,3 +85,7 @@ button:focus-visible {
   font-optical-sizing: auto;
   font-style: normal;
 }
+
+.inline-emoji {
+  @apply inline-block align-middle w-5 h-5;
+}
