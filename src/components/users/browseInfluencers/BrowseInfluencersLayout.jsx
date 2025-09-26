@@ -295,7 +295,7 @@ const BrowseInfluencersLayout = () => {
         </div>
 
         {/* Influencers List */}
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
+        <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
           {loading ? (
             <div className="col-span-full text-center py-10 text-gray-500">
               Loading influencers...

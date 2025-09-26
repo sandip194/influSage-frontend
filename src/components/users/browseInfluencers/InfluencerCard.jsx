@@ -3,108 +3,134 @@ import { Link, useNavigate } from "react-router-dom";
 import { RiHeartLine, RiHeartFill, RiUserAddLine } from "@remixicon/react";
 import { Tooltip } from "antd";
 
-
 const InfluencerCard = ({ influencer, onLike, onInvite, BASE_URL }) => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
+  const handleCardClick = () => {
+    navigate(`/vendor-dashboard/browse-influencers/influencer-details/${influencer?.id}`);
+  };
 
-    const handleCardClick = () => {
-        navigate(
-            `/vendor-dashboard/browse-influencers/influencer-details/${influencer?.id}`
-        );
-    };
+  return (
+    <div
+      onClick={handleCardClick}
+      className="relative group rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center p-4 bg-white/30 backdrop-blur-xl"
+    >
+      {/* Blob only in one corner (e.g., bottom-right) */}
+      <div
+        className="absolute w-30 h-30 bg-red-600 opacity-10 blur-2xl rounded-3xl z-0"
+        style={{
+          bottom: "180px",
+          right: "40px",
+          animation: "blob-bounce 6s ease-in-out infinite",
+        }}
+      ></div>
+      <div
+        className="absolute w-30 h-30 bg-blue-600 opacity-10 blur-2xl rounded-3xl z-0"
+        style={{
+          bottom: "60px",
+          right: "180px",
+          animation: "blob-bounce 6s ease-in-out infinite",
+        }}
+      ></div>
 
-    return (
-        <div
-            className="border rounded-2xl transition border-gray-200 bg-white p-5 flex flex-col cursor-pointer hover:bg-gray-100"
-            onClick={handleCardClick}
-        >
-            <div className="flex justify-between mb-3">
-                <div className="flex flex-col sm:flex-row items-start gap-3 flex-1 min-w-0">
-                    <img
-                        src={
-                            influencer?.photopath
-                                ? `${BASE_URL}/${influencer?.photopath}`
-                                : "https://via.placeholder.com/150"
-                        }
-                        alt="profile"
-                        loading="lazy"
-                        className="w-12 h-12 object-cover rounded-full flex-shrink-0"
-                    />
+      {/* Profile Image */}
+      <div className="z-10 mb-4 relative w-24 h-24 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden shadow-inner">
+        <img
+          src={
+            influencer?.photopath
+              ? `${BASE_URL}/${influencer?.photopath}`
+              : "https://via.placeholder.com/150"
+          }
+          alt="profile"
+          className="w-full h-full object-cover rounded-2xl"
+        />
+      </div>
 
-                </div>
+      {/* Name */}
+      <Link
+        to={`/vendor-dashboard/browse-influencers/influencer-details/${influencer?.id}`}
+        onClick={(e) => e.stopPropagation()}
+        className="z-10 text-base font-semibold text-gray-900 hover:underline"
+      >
+        {influencer?.firstname} {influencer?.lastname}
+      </Link>
 
-                <div className="flex gap-2 flex-shrink-0">
-                    <Tooltip title="Invite">
-                        <button
-                            aria-label="Invite"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onInvite(influencer?.id);
-                            }}
-                            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
-                        >
-                            <RiUserAddLine size={16} />
-                        </button>
-                    </Tooltip>
+      {/* Location */}
+      <div className="z-10 text-xs text-gray-500 mt-1">
+        {influencer?.statename}, {influencer?.countryname}
+      </div>
 
-                    <Tooltip title={influencer?.savedinfluencer ? "Unfavorite" : "Favorite"}>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onLike(influencer?.id);
-                            }}
-                            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
-                        >
-                            {influencer?.savedinfluencer ? (
-                                <RiHeartFill size={20} className="text-red-500 cursor-pointer" />
-                            ) : (
-                                <RiHeartLine size={20} className="text-gray-400 cursor-pointer" />
-                            )}
-                        </button>
-                    </Tooltip>
-                </div>
+      {/* Languages */}
+      <div className="z-10 text-xs text-gray-400 mt-1">
+        {influencer?.contentlanguages?.map((lang, idx) => (
+          <span key={idx}>
+            {lang.languagename}
+            {idx < influencer?.contentlanguages.length - 1 && ", "}
+          </span>
+        ))}
+      </div>
+
+      {/* Categories */}
+      <div className="z-10 flex flex-wrap gap-2 justify-center mt-3">
+        {influencer?.categories?.map((cat, idx) => (
+          <span
+            key={idx}
+            className="text-[10px] px-3 py-1 rounded-full bg-gray-200 text-gray-800"
+          >
+            {cat.categoryname}
+          </span>
+        ))}
+      </div>
+
+      {/* Followers */}
+      <div className="z-10 flex justify-center gap-4 mt-2 text-sm text-gray-700">
+        {influencer?.providers
+          ?.filter((p) => p.nooffollowers > 0)
+          .map((p) => (
+            <div key={p.providerid} className="flex items-center gap-1">
+              <img
+                src={`${BASE_URL}/${p.iconpath}`}
+                alt={p.providername}
+                className="w-5 h-5"
+              />
+              {p.nooffollowers}
             </div>
-            <div className="min-w-0">
-                <Link
-                    to={`/vendor-dashboard/browse-influencers/influencer-details/${influencer?.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="block max-w-full font-semibold text-gray-900 hover:text-blue-600 hover:underline"
-                >
-                    <span className="inline break-all">{influencer?.firstname}&nbsp;</span>
-                    <span className="inline break-words">{influencer?.lastname}</span>
-                </Link>
+          ))}
+      </div>
 
-            </div>
+      {/* Action Buttons */}
+      <div className="z-10 mt-5 flex gap-3 w-full justify-center">
+        <Tooltip title="Invite">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onInvite(influencer?.id);
+            }}
+            className="flex items-center gap-1 text-sm text-white px-4 py-1.5 rounded-full bg-[#141843] hover:bg-[#0e102b] transition"
+          >
+            <RiUserAddLine size={16} />
+            Invite
+          </button>
+        </Tooltip>
 
-            <div className="text-xs text-gray-500 mt-1">
-                {influencer?.statename}, {influencer?.countryname}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">
-                {influencer?.contentlanguages?.map((lang, idx) => (
-                    <span key={idx}>
-                        {lang.languagename}
-                        {idx < influencer?.contentlanguages.length - 1 && ", "}
-                    </span>
-                ))}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
-                {influencer?.providers
-                    ?.filter((p) => p.nooffollowers > 0)
-                    .map((p) => (
-                        <span key={p.providerid} className="flex items-center gap-1">
-                            <img
-                                src={`${BASE_URL}/${p.iconpath}`}
-                                alt={p.providername}
-                                className="w-4 h-4"
-                            />
-                            {p.nooffollowers}
-                        </span>
-                    ))}
-            </div>
-        </div>
-    );
+        <Tooltip title={influencer?.savedinfluencer ? "Unfavorite" : "Favorite"}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onLike(influencer?.id);
+            }}
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700"
+          >
+            {influencer?.savedinfluencer ? (
+              <RiHeartFill size={18} className="text-red-500" />
+            ) : (
+              <RiHeartLine size={18} />
+            )}
+          </button>
+        </Tooltip>
+      </div>
+    </div>
+  );
 };
 
 export default InfluencerCard;

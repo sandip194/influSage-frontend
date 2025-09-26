@@ -82,8 +82,7 @@ const CampaignDetails = () => {
   const getCampaignDetails = async () => {
     try {
       setLoading(true)
-      const res = await axios.get(`vendor/singlecampaign`, {
-        params: {p_campaign : campaignId},
+      const res = await axios.get(`vendor/singlecampaign/${campaignId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
