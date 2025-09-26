@@ -345,7 +345,7 @@ const Browse = () => {
                     src={`${BASE_URL}/${campaign.photopath}`}
                     alt="icon"
                     loading="lazy"
-                    className="w-10 h-10 rounded-full flex-shrink-0"
+                    className="w-10 h-10 object-cover rounded-full flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0"> {/* Keeps space management intact */}
                     <div className="font-semibold text-gray-900"> {/* Removed 'truncate' to allow wrapping */}

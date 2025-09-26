@@ -82,7 +82,13 @@ export default function ChatAppPage() {
           <ChatHeader chat={activeChat} onBack={() => setActiveChat(null)} />
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-white p-4">
+        <div className="flex-1 overflow-y-auto bg-white p-4" style={{
+          backgroundImage: 'url("https://www.transparenttextures.com/patterns/skulls.png")',
+          backgroundRepeat: 'repeat',
+          backgroundSize: 'auto',
+          backgroundPosition: 'center',
+          opacity: 0.9  // Optional: adjust for lighter feel
+        }}>
           <ChatMessages chat={{ ...activeChat, myRoleId: role, myUserId: userId }} messages={messages} />
         </div>
         <div className="sticky bottom-0 bg-white border-t border-gray-100">

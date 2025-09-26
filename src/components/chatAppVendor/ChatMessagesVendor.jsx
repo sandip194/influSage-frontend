@@ -56,13 +56,7 @@ export default function ChatMessagesVendor({ chat }) {
   if (!chat) return <div className="flex-1 p-4">Select a chat to start messaging</div>;
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-4" style={{
-      backgroundImage: 'url("https://www.transparenttextures.com/patterns/skulls.png")',
-      backgroundRepeat: 'repeat',
-      backgroundSize: 'auto',
-      backgroundPosition: 'center',
-      opacity: 0.9  // Optional: adjust for lighter feel
-    }}>
+    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-4" >
       {messages.map((msg) => {
         const isMe = msg.senderId === role || msg.senderId === userId;
 

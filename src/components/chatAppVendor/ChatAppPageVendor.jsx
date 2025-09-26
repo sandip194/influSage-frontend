@@ -94,7 +94,13 @@ export default function ChatAppPageVendor() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4" style={{
+      backgroundImage: 'url("https://www.transparenttextures.com/patterns/skulls.png")',
+      backgroundRepeat: 'repeat',
+      backgroundSize: 'auto',
+      backgroundPosition: 'center',
+      opacity: 0.9  // Optional: adjust for lighter feel
+    }}>
         {activeChat ? (
           <ChatMessages
             chat={{
@@ -112,7 +118,7 @@ export default function ChatAppPageVendor() {
       </div>
 
       {/* Input */}
-      <div className="sticky bottom-0 bg-white border-t border-gray-100 p-2">
+      <div className="sticky bottom-0 bg-white border-t border-gray-100">
         <ChatInput onSend={handleSendMessage} />
       </div>
     </div>
