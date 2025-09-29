@@ -96,10 +96,10 @@ export const SetPassword = () => {
         <SideImageSlider />
       </Suspense>
 
-      <div className="relative z-20 login-card h-90vh">
+      <div className="relative z-20 login-card">
 
         <div className="login-card-right">
-          <div className="mb-2 ">
+          <div className="mb-4 ">
             <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
           </div>
           <form onSubmit={handleSubmit(submitHandler)}>
@@ -171,7 +171,11 @@ export const SetPassword = () => {
               )}
             </div>
 
-            <button type="submit" className="login-btn" disabled={loading}>
+           <button
+              type="submit"
+              className="login-btn mt-4 mb-6"
+              disabled={loading}
+            >
               {loading ? "Saving..." : "Save"}
             </button>
           </form>

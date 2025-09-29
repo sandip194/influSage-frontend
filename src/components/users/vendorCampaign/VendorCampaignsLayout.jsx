@@ -395,7 +395,7 @@ const VendorCampaignsLayout = () => {
                       />
                       <span>{row.name}</span>
                     </td>
-                    <td className="p-4">{row.estimatedbudget}</td>
+                    <td className="p-4">₹ {row.estimatedbudget}</td>
                     <td className="p-4">{row.startdate}</td>
                     <td className="p-4">{row.enddate}</td>
                     <td className="p-4">
