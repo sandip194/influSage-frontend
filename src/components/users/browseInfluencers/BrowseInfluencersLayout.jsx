@@ -364,7 +364,7 @@ const BrowseInfluencersLayout = () => {
             <hr className="my-4 border-gray-200" />
 
             <div>
-              <h4 className="font-semibold mb-2">Platform</h4>
+              <h4 className="font-semibold mb-2">Platforms</h4>
               {platforms?.map((platform) => (
                 <label key={platform.id} className="flex items-center mb-2">
                   <input

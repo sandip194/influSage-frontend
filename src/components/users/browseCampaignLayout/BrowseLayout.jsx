@@ -348,9 +348,16 @@ const Browse = () => {
                     className="w-10 h-10 object-cover rounded-full flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0"> {/* Keeps space management intact */}
-                    <div className="font-semibold text-gray-900"> {/* Removed 'truncate' to allow wrapping */}
-                      {campaign.name}
-                    </div>
+                     <Link
+                        to={
+                          campaign.campaignapplied
+                            ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
+                            : `/dashboard/browse/description/${campaign.id}`
+                        }
+                        className="font-semibold text-gray-900 hover:underline"
+                      >
+                        {campaign.name}
+                      </Link>
                     <div className="text-xs text-gray-500"> {/* Removed 'truncate' to allow wrapping; add back if needed */}
                       {campaign.businessname}
                     </div>
@@ -366,9 +373,16 @@ const Browse = () => {
                     ))}
                   </div>
                   <RiExchangeDollarLine size={16} />
-                  <span>{campaign.estimatedbudget}</span>
+                  <span>₹{campaign.estimatedbudget}</span>
                 </div>
-                <p className="text-gray-700 text-sm mb-4 text-justify">
+                <p
+                  className="text-gray-700 text-sm mb-4 text-justify overflow-hidden"
+                  style={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                  }}
+                >
                   {campaign.description}
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -398,13 +412,17 @@ const Browse = () => {
                   <Tooltip title="Save Campaign">
                     <button
                       onClick={() => handleSave(campaign.id)}
-                      className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition flex-shrink-0"
+                      className="border border-[#0f122f] text-black w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer transition flex-shrink-0 bg-transparent"
                     >
-                      {campaign.campaigsaved ? <RiFileCopyFill size={20} /> : <RiFileCopyLine size={20} />}
+                      {campaign.campaigsaved ? (
+                        <RiFileCopyFill size={20} />
+                      ) : (
+                        <RiFileCopyLine size={20} />
+                      )}
                     </button>
                   </Tooltip>
 
-                  <Tooltip title="View Details">
+                  {/* <Tooltip title="View Details">
                     <Link
                       to={
                         campaign.campaignapplied
@@ -416,7 +434,7 @@ const Browse = () => {
                         <RiEyeLine size={20} />
                       </button>
                     </Link>
-                  </Tooltip>
+                  </Tooltip> */}
                 </div>
               </div>
             )))
@@ -465,7 +483,7 @@ const Browse = () => {
                 <hr className="my-4 border-gray-200" />
                 {/* Platform */}
                 <div>
-                  <h4 className="font-semibold mb-2">Platform</h4>
+                  <h4 className="font-semibold mb-2">Platforms</h4>
                   {platforms.length === 0 ? (
                     <p className="text-sm text-gray-500">No platforms available.</p>
                   ) : (
@@ -486,7 +504,7 @@ const Browse = () => {
 
                 {/* Type */}
                 <div className="mt-4">
-                  <h4 className="font-semibold mb-2">Type</h4>
+                  <h4 className="font-semibold mb-2">Content Type</h4>
                   {campaignTypes.map((type) => (
                     <label key={type.id} className="block mb-1">
                       <input

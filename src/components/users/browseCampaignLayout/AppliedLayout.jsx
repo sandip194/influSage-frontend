@@ -1,18 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   RiVideoAddLine,
   RiExchangeDollarLine,
   RiArrowDownSLine,
+  RiDeleteBinLine,
   RiEyeLine,
-} from '@remixicon/react';
-import { SearchOutlined } from '@ant-design/icons';
-import { Empty, Input, Pagination, Select, Skeleton, Tooltip } from 'antd';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
+} from "@remixicon/react";
+import { SearchOutlined } from "@ant-design/icons";
+import { Empty, Input, Pagination, Select, Skeleton, Tooltip } from "antd";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const AppliedLayout = () => {
-
   const [campaigns, setCampaigns] = useState([]);
   const [pagenumber, setPageNumber] = useState(1);
   const [pagesize, setPageSize] = useState(10); // or any default
@@ -23,7 +24,6 @@ const AppliedLayout = () => {
   const [searchInput, setSearchInput] = useState("");
 
   const [loading, setLoading] = useState(false);
-
 
   const { token } = useSelector((state) => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -81,15 +81,35 @@ const AppliedLayout = () => {
     }
   }, [sortby, sortorder, pagenumber, pagesize, token, searchTerm]);
 
+  const handleWithdraw = async (id) => {
+  try {
+    const res = await axios.post(
+      `/user/withdraw-application`,
+      {
+        p_applicationid: id,
+        p_statusname: "Withdrawn",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log(res.data);
+    toast.success(res.data?.message);
+
+  } catch (error) {
+    console.log(error)
+    toast.error(error);
+  }
+};
   useEffect(() => {
     getAllAppliedCampaigns();
   }, [getAllAppliedCampaigns]);
 
-
   return (
     <div className="appliedlayout">
-
-
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
       <p className="mb-6 text-gray-700 text-sm">
         Track your campaigns & Browse
@@ -101,10 +121,11 @@ const AppliedLayout = () => {
             key={id}
             onClick={() => handleClick(path)}
             className={`px-4 py-2 rounded-md border border-gray-300 transition
-      ${selectedButton === id
-                ? "bg-[#0f122f] text-white"
-                : "bg-white text-[#141843] hover:bg-gray-100"
-              }`}
+      ${
+        selectedButton === id
+          ? "bg-[#0f122f] text-white"
+          : "bg-white text-[#141843] hover:bg-gray-100"
+      }`}
           >
             {label}
           </button>
@@ -168,11 +189,13 @@ const AppliedLayout = () => {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 mt-6">
-          <div
-            className="grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-          >
+          <div className="grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {loading ? (
-              <Skeleton active paragraph={{ rows: 6 }} className="col-span-full" />
+              <Skeleton
+                active
+                paragraph={{ rows: 6 }}
+                className="col-span-full"
+              />
             ) : campaigns.length === 0 ? (
               <div className="col-span-full py-10">
                 <Empty description="No campaigns found." />
@@ -184,7 +207,8 @@ const AppliedLayout = () => {
                   className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
                 >
                   <span className="text-xs text-gray-500 mb-3">
-                    Applied on {new Date(campaign.createddate).toLocaleDateString()}
+                    Applied on{" "}
+                    {new Date(campaign.createddate).toLocaleDateString()}
                   </span>
                   <div className="flex items-center gap-3 mb-3">
                     <img
@@ -193,12 +217,22 @@ const AppliedLayout = () => {
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
-                      <div className="font-semibold text-gray-900">{campaign.name}</div>
-                      <div className="text-xs text-gray-500">{campaign.businessname}</div>
+                      <Link
+                        to={
+                          campaign.campaignapplied
+                            ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
+                            : `/dashboard/browse/description/${campaign.id}`
+                        }
+                        className="font-semibold text-gray-900 hover:underline"
+                      >
+                        {campaign.name}
+                      </Link>
+                      <div className="text-xs text-gray-500">
+                        {campaign.businessname}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-
                     <span>
                       {campaign?.providercontenttype?.[0]?.providername
                         ? `${campaign.providercontenttype[0].providername} - ${campaign.providercontenttype[0].contenttypename}`
@@ -207,7 +241,14 @@ const AppliedLayout = () => {
                     <RiExchangeDollarLine size={16} />
                     <span>₹{campaign.estimatedbudget}</span>
                   </div>
-                  <p className="text-gray-700 text-sm mb-4 line-clamp-2">
+                  <p
+                    className="text-gray-700 text-sm mb-4 text-justify overflow-hidden"
+                    style={{
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                    }}
+                  >
                     {campaign.description}
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
@@ -222,26 +263,27 @@ const AppliedLayout = () => {
                       )
                     )}
                   </div>
+
                   <div className="flex items-center justify-between mt-auto gap-4">
-                    <Link to={`/dashboard/browse/apply-now/${campaign.id}`} className="flex-1">
+                    <Link
+                      to={`/dashboard/browse/apply-now/${campaign.id}`}
+                      className="flex-1"
+                    >
                       <button className="w-full py-2 cursor-pointer rounded-3xl bg-[#0f122f] text-white font-semibold hover:bg-[#23265a] transition">
                         Edit Application
                       </button>
                     </Link>
-
-                    <Tooltip title="View Details">
-                      <Link to={`/dashboard/browse/applied-campaign-details/${campaign.id}`} className="flex-shrink-0">
-                        <div className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition">
-                          <RiEyeLine size={20} />
-                        </div>
-                      </Link>
-                    </Tooltip>
+                    <button
+                       onClick={() => handleWithdraw(campaign.id)}
+                      className="border border-red-500 text-red-500 hover:text-black w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-600 transition"
+                    >
+                      <RiDeleteBinLine size={18} />
+                    </button>
 
                   </div>
                 </div>
               ))
             )}
-
           </div>
         </div>
       </div>
@@ -257,7 +299,7 @@ const AppliedLayout = () => {
             setPageSize(pageSize);
           }}
           showSizeChanger
-          pageSizeOptions={['10', '15', '25', '50']}
+          pageSizeOptions={["10", "15", "25", "50"]}
         />
       </div>
     </div>

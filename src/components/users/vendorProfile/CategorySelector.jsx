@@ -178,8 +178,11 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
                             <li
                                 key={cat.parentcategoryid}
                                 onClick={() => setSelectedParentId(cat.parentcategoryid)}
-                                className={`cursor-pointer px-3 py-2 text-sm rounded-md hover:bg-gray-100 ${selectedParentId === cat.parentcategoryid ? 'bg-[#121A3F] text-white font-semibold' : 'text-gray-800'
-                                    }`}
+                               className={`cursor-pointer px-3 py-2 text-sm rounded-md 
+                                ${selectedParentId === cat.parentcategoryid
+                                    ? 'bg-[#121A3F] text-white font-semibold'
+                                    : 'text-gray-800 hover:text-black hover:bg-gray-100'
+                                }`}
                             >
                                 {cat.name}
                             </li>

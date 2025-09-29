@@ -221,7 +221,16 @@ const SavedLayout = () => {
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
-                      <div className="font-semibold text-gray-900">{campaign.name}</div>
+                     <Link
+                        to={
+                          campaign.campaignapplied
+                            ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
+                            : `/dashboard/browse/description/${campaign.id}`
+                        }
+                        className="font-semibold text-gray-900 hover:underline"
+                      >
+                        {campaign.name}
+                      </Link>
                       <div className="text-xs text-gray-500">{campaign.businessname}</div>
                     </div>
                   </div>
@@ -235,9 +244,16 @@ const SavedLayout = () => {
                     <RiExchangeDollarLine size={16} />
                     <span>₹{campaign.estimatedbudget}</span>
                   </div>
-                  <p className="text-gray-700 text-sm mb-4 line-clamp-2">
-                    {campaign.description}
-                  </p>
+                  <p
+                  className="text-gray-700 text-sm mb-4 text-justify overflow-hidden"
+                  style={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                  }}
+                >
+                  {campaign.description}
+                </p>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {[...(campaign.campaigncategories || [])].map(
                       (item, idx) => (
@@ -268,24 +284,12 @@ const SavedLayout = () => {
                     <Tooltip title="Unsave This Campaign">
                       <button
                         onClick={() => handleSave(campaign.id)}
-                        className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition"
+                        className="border border-[#0f122f] text-black w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer transition flex-shrink-0 bg-transparent"
                       >
                         <RiFileCopyFill size={20} />
 
                       </button>
                     </Tooltip>
-
-
-                    <Tooltip title="View Details">
-                      <Link to={campaign.campaignapplied
-                        ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
-                        : `/dashboard/browse/description/${campaign.id}`}>
-                        <button className="border border-gray-200 bg-[#0f122f] text-white w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition">
-                          <RiEyeLine size={20} />
-                        </button>
-                      </Link>
-                    </Tooltip>
-
                   </div>
                 </div>
               ))
