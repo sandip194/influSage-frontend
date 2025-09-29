@@ -7,7 +7,7 @@ export default function Sidebar({ onSelectChat }) {
   const { token } = useSelector((state) => state.auth);
   const [campaigns, setCampaigns] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectedCampaignId, setSelectedCampaignId] = useState(null); 
+  const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const fetchCampaigns = async () => {
@@ -71,18 +71,24 @@ export default function Sidebar({ onSelectChat }) {
 
       {/* Campaign List */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        {campaigns.length > 0 ? (
+        {campaigns?.length > 0 ? (
           campaigns.map((campaign) => {
-            const isSelected = selectedCampaignId === campaign.conversationid;
+            const vendor = campaign.vendors?.[0];
+            if (!vendor?.conversationid) return null; // safety check
+
+            const conversationId = vendor.conversationid;
+            const isSelected = selectedCampaignId === conversationId;
+
             return (
               <div
-                key={campaign.conversationid}
+                key={conversationId}
                 onClick={() => {
-                  setSelectedCampaignId(campaign.conversationid);
+                  setSelectedCampaignId(conversationId);
                   onSelectChat({
-                    id: campaign.conversationid,
+                    id: conversationId, // ✅ normalized id
                     name: campaign.campaignname,
                     img: campaign.campaignphoto,
+                    // add other fields if needed
                   });
                 }}
                 className={`flex items-center justify-between p-4 cursor-pointer border-b border-gray-100

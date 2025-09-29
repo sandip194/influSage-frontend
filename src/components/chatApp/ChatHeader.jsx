@@ -1,63 +1,98 @@
 import { useEffect, useState, useRef } from "react";
 import { RiArrowLeftLine } from "react-icons/ri";
 import { useSelector } from "react-redux";
-import { io } from "socket.io-client";
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { getSocket } from "../../sockets/socket";
 
 export default function ChatHeader({ chat, onBack }) {
   const initial = chat?.name?.charAt(0).toUpperCase() || "?";
   const [isOnline, setIsOnline] = useState(false);
   const [lastSeen, setLastSeen] = useState(null);
-  const [onlineTime, setOnlineTime] = useState(0);
+  // const [onlineTime, setOnlineTime] = useState(0); // Uncomment if needed in UI
   const timerRef = useRef(null);
+  const hasRequestedOnlineUsers = useRef(false);
+  const listenersAttached = useRef(false); // Prevent duplicate listener attachments
 
-  const [socket] = useState(() => io(BASE_URL, { autoConnect: true }));
-  const { userId } = useSelector((state) => state.auth);
+  const { id: userId } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (!chat?.id) return;
+    const socket = getSocket();
+    if (!chat?.id || !socket?.connected) {
+      console.warn("Socket not ready or chat.id missing");
+      return;
+    }
 
-    socket.emit("register",userId);
+    socket.emit("register", userId);
 
-    socket.on("user-online", ({ userId }) => {
-      if (userId === chat.id) {
-        setIsOnline(true);
-        setOnlineTime(0);
-        if (timerRef.current) clearInterval(timerRef.current);
-        timerRef.current = setInterval(() => setOnlineTime((prev) => prev + 1), 1000);
-      }
-    });
+    if (!hasRequestedOnlineUsers.current) {
+      socket.emit("online-users");
+      hasRequestedOnlineUsers.current = true;
+    }
 
-    socket.on("user-offline", ({ userId, lastSeen }) => {
-      if (userId === chat.id) {
-        setIsOnline(false);
-        setLastSeen(lastSeen);
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-          timerRef.current = null;
+    if (!listenersAttached.current) {
+      // Handle when a user comes online
+      const handleOnline = (...args) => {
+        const data = args[0];
+        // Extract userId from event data (handle object or primitive)
+        const uid = data?.userId ?? data ?? args[1];
+        if (String(uid) === String(chat.id)) {
+          setIsOnline(true);
+          if (timerRef.current) clearInterval(timerRef.current);
+          // Optionally start timer here if you want
         }
-      }
-    });
+      };
 
-    // ✅ Handle initial online users list
-    socket.on("online-users", ({ userIds }) => {
-      if (userIds.includes(chat.id)) {
-        setIsOnline(true);
-        setOnlineTime(0);
-        if (timerRef.current) clearInterval(timerRef.current);
-        timerRef.current = setInterval(() => setOnlineTime((prev) => prev + 1), 1000);
-      }
-    });
+      // Handle when a user goes offline
+      const handleOffline = (...args) => {
+        const data = args[0];
+        const uid = data?.userId ?? data ?? args[1];
+        const ls = data?.lastSeen ?? args[2];
+        if (String(uid) === String(chat.id)) {
+          setIsOnline(false);
+          setLastSeen(ls);
+          if (timerRef.current) clearInterval(timerRef.current);
+        }
+      };
+
+      // Handle initial list of online users
+      const handleInitialOnline = (...args) => {
+        let userIds = args[0];
+
+        // Normalize userIds to an array of strings
+        if (Array.isArray(userIds)) {
+          userIds = userIds.filter(id => id != null && id !== '' && id !== 'null').map(String);
+        } else if (userIds && typeof userIds === 'object' && userIds.userIds) {
+          userIds = (userIds.userIds || []).filter(id => id != null && id !== '' && id !== 'null').map(String);
+        } else {
+          userIds = userIds ? [String(userIds)] : [];
+        }
+
+        if (userIds.includes(String(chat.id))) {
+          setIsOnline(true);
+          if (timerRef.current) clearInterval(timerRef.current);
+          // Optionally start timer here if you want
+        } else {
+          setIsOnline(false);
+        }
+      };
+
+      socket.on("user-online", handleOnline);
+      socket.on("user-offline", handleOffline);
+      socket.on("online-users", handleInitialOnline);
+
+      listenersAttached.current = true;
+    }
 
     return () => {
-      socket.off("user-online");
-      socket.off("user-offline");
-      socket.off("online-users");
+      if (listenersAttached.current) {
+        socket.off("user-online");
+        socket.off("user-offline");
+        socket.off("online-users");
+        listenersAttached.current = false;
+      }
       if (timerRef.current) clearInterval(timerRef.current);
+      hasRequestedOnlineUsers.current = false;
     };
-  }, [chat?.id]);
-
+  }, [chat?.id, userId]);
 
   const formatLastSeen = (time) => {
     if (!time) return "Offline";
@@ -65,27 +100,17 @@ export default function ChatHeader({ chat, onBack }) {
     return `Last seen: ${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
   };
 
-  const formatOnlineTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `Online`;
-  };
 
   return (
-    <div className="flex items-center space-x-3 p-4 bg-white  rounded-t-2xl">
+    <div className="flex items-center space-x-3 p-4 bg-white rounded-t-2xl">
       <button onClick={onBack} className="md:hidden text-2xl text-gray-500 mr-2">
         <RiArrowLeftLine />
       </button>
 
-      {/* Profile image with online dot */}
       <div className="relative w-10 h-10">
         <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center text-white font-semibold text-lg overflow-hidden">
           {chat?.img ? (
-            <img
-              src={chat.img}
-              alt={chat.name}
-              className="w-full h-full object-cover rounded-full"
-            />
+            <img src={chat.img} alt={chat.name} className="w-full h-full object-cover rounded-full" />
           ) : (
             <span>{initial}</span>
           )}
@@ -95,11 +120,10 @@ export default function ChatHeader({ chat, onBack }) {
         )}
       </div>
 
-      {/* Name and dynamic status */}
       <div>
         <div className="font-semibold">{chat?.name || "Chat"}</div>
         <div className="text-sm text-gray-400">
-          {isOnline ? formatOnlineTime(onlineTime) : formatLastSeen(lastSeen)}
+          {isOnline ? "Online" : formatLastSeen(lastSeen)} {/* Add onlineTime if needed: `Online for ${onlineTime}s` */}
         </div>
       </div>
     </div>

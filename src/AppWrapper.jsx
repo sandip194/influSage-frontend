@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
-import { setNotifications, addNotification } from "./features/notifications/notificationSlice";
+import { setNotifications, addNotification } from "./features/socket/notificationSlice";
 import { messaging } from "./firebaseConfig";
 import { getToken, onMessage } from "firebase/messaging";
 

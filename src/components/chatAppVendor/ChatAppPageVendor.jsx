@@ -1,138 +1,147 @@
-import { useState, useEffect } from "react";
-import { io } from "socket.io-client";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import Sidebar from "./SidebarVendor";
-import ChatHeader from "./ChatHeaderVendor";
+import ChatHeaderVendor from "./ChatHeaderVendor";
 import ChatMessages from "./ChatMessagesVendor";
 import ChatInput from "./ChatInputVendor";
-import { useSelector } from "react-redux";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { getSocket } from "../../sockets/socket"; // Already connected globally
+import {
+  addMessage,
+  updateMessageStatus,
+  setActiveChat,
+} from "../../features/socket/chatSlice";
 
 export default function ChatAppPageVendor() {
+  const dispatch = useDispatch();
   const { token, id: userId, role } = useSelector((state) => state.auth);
-  const [activeChat, setActiveChat] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [socket, setSocket] = useState(null);
+  const socket = getSocket();
 
+  const activeChat = useSelector((state) => state.chat.activeChat);
+  const messages = useSelector((state) => state.chat.messages);
+  const showChatUI = activeChat && socket;
 
+  // 📦 Join/leave socket room
   useEffect(() => {
-    if (!token) return;
+    if (!socket || !activeChat?.conversationid) return;
 
-    const newSocket = io(BASE_URL, { auth: { token } });
-    setSocket(newSocket);
+    socket.emit("joinRoom", activeChat.conversationid);
+    return () => {
+      socket.emit("leaveRoom", activeChat.conversationid);
+    };
+  }, [activeChat?.conversationid, socket]);
 
-    newSocket.on("connect", () => console.log("✅ Connected:", newSocket.id));
-    newSocket.on("disconnect", () => console.log("❌ Disconnected"));
+  // 📥 Receive messages
+  useEffect(() => {
+    if (!socket) return;
 
-    newSocket.on("receiveMessage", (msg) => {
-      setMessages((prev) => [...prev, msg]);
-    });
+    const handleReceiveMessage = (msg) => {
+      dispatch(addMessage(msg));
+    };
 
-    return () => newSocket.disconnect();
-  }, [token]);
+    socket.on("receiveMessage", handleReceiveMessage);
+    return () => {
+      socket.off("receiveMessage", handleReceiveMessage);
+    };
+  }, [socket, dispatch]);
 
-  // Send message
+  // ✉️ Send message
   const handleSendMessage = async ({ text, file }) => {
     if (!activeChat) return;
 
-    try {
-      // const payload = {
-      //   // p_conversationid: activeChat.id,
-      //   p_conversationid: activeChat.conversationid,
-      //   p_roleid: role,
-      //   p_messages: text,
-      //   p_filepath: file || null,
-      // };
+    const tempMsg = {
+      id: Date.now(),
+      senderId: role,
+      content: text,
+      conversationId: activeChat.conversationid,
+      file: file || null,
+      status: "sending",
+    };
 
+    dispatch(addMessage(tempMsg));
+    socket?.emit("sendMessage", tempMsg);
+
+    try {
       const formData = new FormData();
       formData.append("p_conversationid", activeChat.conversationid);
       formData.append("p_roleid", role);
       formData.append("p_messages", text);
-      if (file) {
-        formData.append("file", file); // The key must match what your backend expects
-      }
+      if (file) formData.append("file", file);
 
       const res = await axios.post(`/chat/insertmessage`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       if (res.data?.p_status) {
-        const newMsg = {
-          id: Date.now(),
-          senderId: role,
-          content: text,
-          //conversationId: activeChat.id,
-          conversationId: activeChat.conversationid,
-        };
-
-        console.log(newMsg)
-        // Append locally and emit to Socket.IO
-        setMessages((prev) => [...prev, newMsg]);
-        socket?.emit("sendMessage", newMsg);
+        dispatch(
+          updateMessageStatus({
+            tempId: tempMsg.id,
+            newId: res.data.message_id,
+            fileUrl: res.data.filepath || null,
+          })
+        );
       }
     } catch (err) {
-      console.error(err);
+      console.error("Sending failed", err);
     }
   };
 
   return (
-    <div className="h-[85vh] flex flex-row gap-2 overflow-hidden">
+    <div className="h-[85vh] flex overflow-hidden">
       {/* Sidebar */}
-      <Sidebar
-        onSelectChat={(chat) => {
-          const normalizedChat = chat.campaign
-            ? { ...chat, conversationid: chat.campaign.conversationid }
-            : chat;
-
-          setActiveChat(normalizedChat);
-          setMessages([]);
-        }}
-        className="md:w-1/4 w-full h-full"
-      />
-
-      {/* Chat Area */}
       <div
-        className={`flex-1 md:w-[600px] h-full flex flex-col bg-white rounded-2xl shadow-md ${activeChat ? "flex" : "hidden md:flex"
+        className={`md:w-1/4 w-full h-full border-gray-200 flex-shrink-0 me-2 ${activeChat ? "hidden md:block" : "block"
           }`}
       >
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 rounded-t-2xl">
-          <ChatHeader chat={activeChat} onBack={() => setActiveChat(null)} />
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4" style={{
-          backgroundImage: 'url("https://www.transparenttextures.com/patterns/food.png")',
-          backgroundRepeat: 'repeat',
-          backgroundSize: 'auto',
-          backgroundPosition: 'center',
-          backgroundBlendMode : "luminosity",
-          opacity: 0.9 ,  
+        <Sidebar
+          onSelectChat={(chat) => 
+            dispatch(
+            setActiveChat(chat)
+          )}
           
-        }}>
-          {activeChat ? (
+        />
+      </div>
+
+      {/* Main Chat Area */}
+      {showChatUI && (
+        <div
+          className={`flex-1 h-full flex flex-col ${activeChat ? "flex" : "hidden md:flex"
+            }`}
+        >
+          <div className="sticky top-0 z-10 bg-white rounded-2xl border-b border-gray-200">
+            <ChatHeaderVendor
+              chat={activeChat}
+              onBack={() => dispatch(setActiveChat(null))}
+            />
+          </div>
+
+          <div
+            className="flex-1 overflow-y-auto bg-white p-4"
+            style={{
+              backgroundImage:
+                'url("https://www.transparenttextures.com/patterns/food.png")',
+              backgroundRepeat: "repeat",
+              backgroundSize: "auto",
+              backgroundPosition: "center",
+              backgroundBlendMode: "luminosity",
+              opacity: 0.9,
+            }}
+          >
             <ChatMessages
-              chat={{
-                ...activeChat,
-                myRoleId: role,
-                myUserId: userId,
-              }}
+              chat={{ ...activeChat, myRoleId: role, myUserId: userId }}
               messages={messages}
             />
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-400">
-              Select a chat to start messaging
-            </div>
-          )}
-        </div>
+          </div>
 
-        {/* Input */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-100">
-          <ChatInput onSend={handleSendMessage} />
+          <div className="sticky bottom-0 bg-white border-t border-gray-100">
+            <ChatInput onSend={handleSendMessage} />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
-
 }
