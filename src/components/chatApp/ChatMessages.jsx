@@ -4,14 +4,31 @@ import { RiReplyLine, RiEdit2Line, RiDeleteBinLine } from "react-icons/ri";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Image } from 'primereact/image';
+import { Tooltip } from "antd";
+
+// ⏱️ Consistent formatTime function (copied from ChatMessagesVendor)
+const formatTime = (timestamp) => {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffMins < 1440) {
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }
+  return date.toLocaleDateString();
+};
 
 export default function ChatMessages({ chat, setReplyToMessage }) {
   const [messages, setMessages] = useState([]);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
-  const [deletedMessage, setDeletedMessage] = useState({
-    id: null,
-    timestamp: null,
-  });
+  const [deletedMessage, setDeletedMessage] = useState({ id: null, timestamp: null });
   const scrollRef = useRef(null);
 
   const { token, id: userId, role } = useSelector((state) => state.auth) || {};
@@ -42,10 +59,10 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
               : msg.filepath || "",
             time: msg.createddate,
             replyId: msg.replyid || null,
+            deleted: msg.deleted || false,
           }));
 
           setMessages(formattedMessages);
-          setDeletedMessage({ id: null, timestamp: null }); // reset undo on new fetch
         }
       } catch (err) {
         console.error("Failed to fetch messages:", err);
@@ -61,7 +78,6 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
     }
   }, [messages]);
 
-  // DELETE message API call
   const handleDeleteMessage = async (messageId) => {
     try {
       const res = await axios.put(
@@ -88,7 +104,6 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
     }
   };
 
-  // UNDO message API call with 15 min expiry check
   const handleUndoMessage = async (messageId) => {
     if (!deletedMessage.id || deletedMessage.id !== messageId) {
       toast.error("No deleted message to undo.");
@@ -128,54 +143,23 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
     }
   };
 
-  // Function to format date in the format "Today 17:40", "Yesterday 17:40", or "Tuesday 17:40"
-  const formatDate = (date) => {
-    const d = new Date(date);
-    const now = new Date();
-
-    // Check if the message is sent today
-    const isToday = now.toDateString() === d.toDateString();
-    if (isToday) {
-      const hour = String(d.getHours()).padStart(2, "0"); // Add leading zero if necessary
-      const minute = String(d.getMinutes()).padStart(2, "0");
-      return `Today ${hour}:${minute}`;
-    }
-
-    // Check if the message is sent yesterday
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
-    const isYesterday = yesterday.toDateString() === d.toDateString();
-    if (isYesterday) {
-      const hour = String(d.getHours()).padStart(2, "0");
-      const minute = String(d.getMinutes()).padStart(2, "0");
-      return `Yesterday ${hour}:${minute}`;
-    }
-
-    // For other days, display full weekday and time
-    const dayOfWeek = d.toLocaleString("en-US", { weekday: "long" });
-    const hour = String(d.getHours()).padStart(2, "0");
-    const minute = String(d.getMinutes()).padStart(2, "0");
-    return `${dayOfWeek} ${hour}:${minute}`;
-  };
-
   if (!chat)
     return <div className="flex-1 p-4">Select a chat to start messaging</div>;
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
-      {messages.map((msg) => {
+    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-6 space-y-1">
+      {messages.map((msg, index) => {
         const isMe = msg.senderId === role || msg.senderId === userId;
+        const isLast = index === messages.length - 1;
 
         return (
           <div
             key={msg.id}
-            className={`flex relative ${
-              isMe ? "justify-end" : "items-start space-x-2"
-            }`}
+            ref={isLast ? scrollRef : null}
+            className={`flex relative ${isMe ? "justify-end" : "items-start space-x-2"}`}
             onMouseEnter={() => setHoveredMsgId(msg.id)}
             onMouseLeave={() => setHoveredMsgId(null)}
           >
-            {/* Avatar */}
             {!isMe && (
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
                 {chat?.img ? (
@@ -189,44 +173,81 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
                 )}
               </div>
             )}
-            <div className="relative">
-              <div
-                className={`absolute text-xs text-gray-500 mt-1 ${
-                  isMe ? "right-2 -top-8" : "left-2 -top-6"
-                }`}
-              >
-                {formatDate(msg.time)}
-              </div>
 
-              {/* Message Bubble */}
+            <div className={`relative flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+              {/* Message bubble */}
               <div
-                className={`p-3 rounded-lg max-w-xs space-y-2 break-words ${
-                  isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"
-                }`}
+                className={`px-3 py-1 rounded-lg max-w-xs break-words ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`}
               >
-                {/* Show file only if the message is not deleted */}
+                {/* FILE PREVIEW */}
                 {deletedMessage.id !== msg.id && msg.file && (
                   <div className="mb-2">
-                    {msg.file.match(/\.(jpeg|jpg|png|gif)$/i) ? (
-                      <img
-                        src={`${BASE_URL}/${msg.file}`}
-                        alt="attachment"
-                        className="max-w-[200px] rounded-md mb-2"
-                      />
-                    ) : (
-                      <a
-                        href={`${BASE_URL}/${msg.file}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                      >
-                        📎 View file
-                      </a>
-                    )}
+                    {(() => {
+                      const fileUrl = `${BASE_URL}/${msg.file}`;
+                      const fileName = msg.file.split("/").pop();
+                      const isImage = msg.file.match(/\.(jpeg|jpg|png|gif|webp|bmp)$/i);
+                      const isPDF = msg.file.match(/\.pdf$/i);
+                      const isVideo = msg.file.match(/\.(mp4|webm|ogg)$/i);
+                      const isDoc = msg.file.match(/\.(doc|docx|xls|xlsx|ppt|pptx)$/i);
+                      const isZip = msg.file.match(/\.(zip|rar|7z)$/i);
+
+                      if (isImage) {
+                        return (
+                          <img
+                            src={fileUrl}
+                            alt={fileName}
+                            className="max-w-[200px] max-h-[200px] rounded-md object-cover"
+                          />
+                        );
+                      } else if (isPDF) {
+                        return (
+                          <iframe
+                            src={fileUrl}
+                            title={fileName}
+                            className="w-full max-w-[250px] h-[200px] rounded-md border"
+                          ></iframe>
+                        );
+                      } else if (isVideo) {
+                        return (
+                          <video
+                            src={fileUrl}
+                            controls
+                            className="w-full max-w-[250px] rounded-md"
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        );
+                      } else if (isDoc || isZip) {
+                        return (
+                          <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-md text-sm">
+                            <span className="text-gray-600">📎 {fileName}</span>
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-500 underline"
+                            >
+                              Download
+                            </a>
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <a
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 text-sm underline break-all"
+                          >
+                            📎 {fileName}
+                          </a>
+                        );
+                      }
+                    })()}
                   </div>
                 )}
 
-                {/* Show "Message deleted" and undo button if the message is deleted */}
+                {/* TEXT or DELETED message */}
                 {deletedMessage.id === msg.id ? (
                   <div className="text-sm text-red-600">
                     Message deleted.
@@ -238,39 +259,46 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
                     </button>
                   </div>
                 ) : (
-                  <>
-                    {/* Text Content */}
-                    {msg.content && <div>{msg.content}</div>}
-                  </>
+                  <div>{msg.content}</div>
                 )}
               </div>
 
-              {/* Hover Actions */}
+              {/* TIMESTAMP */}
+              <div className="text-[10px] text-gray-500 mt-1 px-2">
+                {formatTime(msg.time)}
+              </div>
+
+              {/* HOVER ACTIONS */}
               {hoveredMsgId === msg.id && (
                 <div
-                  className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md ${
-                    isMe ? "right-0 -top-8" : "left-14 -top-8"
-                  }`}
+                  className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md z-10 transition-opacity duration-150 ${isMe ? "right-0 -top-8" : "left-0 -top-8"}`}
                 >
                   <button
                     onClick={() => setReplyToMessage?.(msg)}
                     className="p-1 rounded-full hover:bg-gray-100"
                   >
-                    <RiReplyLine size={18} />
+                    <Tooltip title="Replay">
+                      <RiReplyLine size={18} />
+                    </Tooltip>
                   </button>
+
                   {isMe && (
                     <>
                       <button
                         onClick={() => console.log("Edit", msg.id)}
                         className="p-1 rounded-full hover:bg-gray-100"
                       >
-                        <RiEdit2Line size={18} />
+                        <Tooltip title="Edit">
+                          <RiEdit2Line size={18} />
+                        </Tooltip>
                       </button>
                       <button
                         onClick={() => handleDeleteMessage(msg.id)}
                         className="p-1 rounded-full hover:bg-gray-100 text-red-500"
                       >
-                        <RiDeleteBinLine size={18} />
+                        <Tooltip title="Delete">
+                          <RiDeleteBinLine size={18} />
+                        </Tooltip>
                       </button>
                     </>
                   )}

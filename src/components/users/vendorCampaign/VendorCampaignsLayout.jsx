@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  RiMore2Fill,
   RiEyeLine,
-  RiCheckboxCircleLine,
-  RiCloseCircleLine,
   RiAddFill,
   RiEqualizerFill,
   RiCloseFill,
@@ -13,7 +10,7 @@ import {
 import { SearchOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { Pagination, Skeleton, Empty, Select, Input, DatePicker, Checkbox } from 'antd';
+import { Pagination, Skeleton, Empty, Select, Input, DatePicker, Checkbox, Tooltip } from 'antd';
 import { toast } from 'react-toastify'; // Optional: for error notifications; install if not present
 
 const { RangePicker } = DatePicker;
@@ -39,6 +36,14 @@ const statusLabels = {
   paused: "Paused",
 };
 
+  const sortOptions = [
+    { value: "createddate_desc", label: "Newest" },
+    { value: "createddate_asc", label: "Oldest" },
+    { value: "estimatedbudget_desc", label: "Budget: High to Low" },
+    { value: "estimatedbudget_asc", label: "Budget: Low to High" },
+  ];
+
+
 const getStatusKey = (status) => {
   if (!status) return '';
   if (typeof status === 'string') return status.toLowerCase();
@@ -59,7 +64,7 @@ const getImageUrl = (path) => {
 const VendorCampaignsLayout = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [searchText, setSearchText] = useState("");
+  //const [searchText, setSearchText] = useState("");
   const [searchInput, setSearchInput] = useState(""); // For controlled input
   const [loading, setLoading] = useState(false);
   const [campaigns, setCampaigns] = useState([]);
@@ -167,7 +172,7 @@ const VendorCampaignsLayout = () => {
     if (e.key === "Enter") {
       const trimmed = searchInput.trim();
       setFilters(prev => ({ ...prev, search: trimmed, pagenumber: 1 }));
-      setSearchText(trimmed);
+     // setSearchText(trimmed);
     }
   }, [searchInput]);
 
@@ -226,7 +231,7 @@ const VendorCampaignsLayout = () => {
     setFilters(resetFilters);
     setTempFilters(resetFilters);
     setStatusFilter("all");
-    setSearchText("");
+    // setSearchText("");
     setSearchInput("");
     fetchCampaigns(); // Refetch with reset
     setShowFilter(false);
@@ -263,12 +268,6 @@ const VendorCampaignsLayout = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const sortOptions = [
-    { value: "createddate_desc", label: "Newest" },
-    { value: "createddate_asc", label: "Oldest" },
-    { value: "estimatedbudget_desc", label: "Budget: High to Low" },
-    { value: "estimatedbudget_asc", label: "Budget: Low to High" },
-  ];
 
   const paginatedData = useMemo(() => campaigns, [campaigns]); // Server-side pagination, so full campaigns are the "paginated" data
 
@@ -362,7 +361,7 @@ const VendorCampaignsLayout = () => {
       <div className="bg-white rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left min-w-[750px]">
-            <thead className="bg-gray-50 text-gray-700 text-sm tracking-wide">
+            <thead className="bg-white text-gray-700 text-sm tracking-wide">
               <tr>
                 <th className="p-4">Campaign Name</th>
                 <th className="p-4">Budget</th>
@@ -411,10 +410,11 @@ const VendorCampaignsLayout = () => {
                         onClick={() =>
                           navigate(`/vendor-dashboard/vendor-campaign/campaignDetails/${row.id}`)
                         }
-                        className="flex items-center gap-1 text-[#141843] hover:text-[#1d214f] transition text-sm font-medium"
+                        className="flex items-center gap-1 cursor-pointer text-[#141843] hover:text-[#1d214f] transition text-sm font-medium"
                       >
-                        <RiEyeLine className="text-lg" />
-                        View Details
+                        <Tooltip title="View Details">
+                          <RiEyeLine className="text-lg" />
+                        </Tooltip>
                       </button>
                     </td>
                   </tr>

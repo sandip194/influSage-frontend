@@ -1,5 +1,5 @@
-import { RiArrowDownSLine } from "@remixicon/react";
-import { Pagination, Select, Empty, Input } from "antd";
+import { RiArrowDownSLine, RiEyeLine } from "@remixicon/react";
+import { Pagination, Select, Empty, Input, Skeleton, Tooltip } from "antd";
 import axios from "axios";
 import { SearchOutlined } from "@ant-design/icons";
 import React, { useState, useEffect, useCallback } from "react";
@@ -123,70 +123,74 @@ const OffersLayout = () => {
                 {/* Scrollable Table Container */}
                 <div className="w-full overflow-x-auto">
                     {/* Table Heading */}
-                    <div className="flex items-center px-4 py-4 text-gray-900 text-sm font-bold border-b border-gray-300 bg-gray-100 min-w-[900px]">
-                        <div className="flex items-center gap-4 w-1/4">
-                            <span>Campaign Name</span>
-                        </div>
-                        <div className="flex justify-between w-3/4 pr-2">
-                            <div className="w-1/5 text-center">Budget</div>
-                            <div className="w-1/5 text-center">Start Date</div>
-                            <div className="w-1/5 text-center">Due Date</div>
-                            <div className="w-1/5 text-center">Total Offers</div>
-                            <div className="w-1/5 text-center">Action</div>
-                        </div>
-                    </div>
+                    <table className="w-full text-left min-w-[750px]">
+                        <thead className="bg-white text-gray-700 text-sm tracking-wide">
+                            <tr>
+                                <th className="p-4">Campaign Name</th>
+                                <th className="p-4">Budget</th>
+                                <th className="p-4">Date Started</th>
+                                <th className="p-4">Due Date</th>
+                                <th className="p-4">Total Offers</th>
+                                <th className="p-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody className="text-sm text-gray-700">
+                            {/* Table Body */}
+                            {loading ? (
+                                [...Array(6)].map((_, index) => (
+                                    <tr key={index} className="border-t border-gray-200">
+                                        <td colSpan="6" className="p-4">
+                                            <Skeleton active paragraph={{ rows: 1 }} />
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : offers?.length > 0 ? (
+                                offers.map((offer) => (
 
-                    {/* Table Body */}
-                    {loading ? (
-                        <tr>
-                            <td colSpan="5" className="text-center py-10 text-gray-500">
-                                Loading Offers...
-                            </td>
-                        </tr>
-                    ) : offers.length === 0 ? (
-                        <tr>
-                            <td colSpan="5" className="text-center py-10">
-                                <Empty description="No Applications found." />
-                            </td>
-                        </tr>
-                    ) : (
-                        offers.map((offer) => (
-                            <div
-                                key={offer?.id}
-                                className="flex items-center justify-between px-4 py-2 border-b border-gray-200 hover:bg-gray-100 transition min-w-[900px]"
-                            >
-                                {/* Campaign Name and Icon */}
-                                <div className="flex items-center gap-4 w-1/4 min-w-0">
-                                    <img
-                                        src={`${BASE_URL}/${offer?.photopath}`}
-                                        alt="Platform"
-                                        className="w-10 h-10 object-cover rounded-full"
-                                    />
-                                    <div className="flex flex-col truncate">
-                                        <span className="font-medium truncate">{offer?.name}</span>
-                                    </div>
-                                </div>
+                                    <tr
+                                        key={offer.id}
+                                        className="border-t border-gray-200 hover:bg-gray-50 transition"
+                                    >
+                                        {/* Campaign Name and Icon */}
 
-                                {/* Info Columns */}
-                                <div className="flex items-center justify-between w-3/4 pr-2 text-sm text-gray-700">
-                                    <div className="w-1/5 text-center">{offer?.estimatedbudget}</div>
-                                    <div className="w-1/5 text-center">{offer?.startdate}</div>
-                                    <div className="w-1/5 text-center">{offer?.enddate}</div>
-                                    <div className="w-1/5 text-center font-medium">
-                                        {offer?.totaloffers} Offers
-                                    </div>
-                                    <div className="w-1/5 text-center">
-                                        <button
-                                            onClick={() => navigate(`/vendor-dashboard/offers/view-all-offers/${offer.id}`)}
-                                            className="bg-[#0f122f] hover:bg-[#1a1d3a] text-white px-4 py-2 rounded-full text-sm"
-                                        >
-                                            View Offers
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
+                                        <td className="p-4 flex items-center gap-3">
+                                            <img
+                                                src={`${BASE_URL}/${offer?.photopath}`}
+                                                alt={offer.name}
+                                                className="w-9 h-9 rounded-full object-cover"
+                                            />
+                                            <span>{offer.name}</span>
+                                        </td>
+
+                                        <td className="p-4">₹ {offer.estimatedbudget}</td>
+                                        <td className="p-4">{offer.startdate}</td>
+                                        <td className="p-4">{offer.enddate}</td>
+                                        <td className="p-4">{offer?.totaloffers} Offers</td>
+                                        <td className="p-4">
+                                            <button
+                                                onClick={() =>
+                                                    navigate(`/vendor-dashboard/offers/view-all-offers/${offer.id}`)
+                                                }
+                                                className="flex items-center cursor-pointer gap-1 text-[#141843] hover:text-[#1d214f] transition text-sm font-medium"
+                                            >
+                                                <Tooltip title="View Offers">
+                                                    <RiEyeLine className="text-lg" />
+                                                </Tooltip>
+                                            </button>
+                                        </td>
+
+                                    </tr>
+
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" className="text-center py-10">
+                                        <Empty description="No Offers found" />
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
 
             </div>

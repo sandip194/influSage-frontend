@@ -124,7 +124,7 @@ export default function ChatAppPageVendor() {
           </div>
 
           <div
-            className="flex-1 overflow-y-auto bg-white p-4"
+            className="flex-1 overflow-y-auto bg-white p-0"
             style={{
               backgroundImage:
                 'url("https://www.transparenttextures.com/patterns/food.png")',
