@@ -5,8 +5,8 @@ import { getSocket } from "../../sockets/socket";
 
 export default function ChatHeader({ chat, onBack }) {
 
-  console.log("ChatHeader rendered");
-  console.log("ChatHeader props chat:", chat);
+  // console.log("ChatHeader rendered");
+  // console.log("ChatHeader props chat:", chat);
 
   const initial = chat?.name?.charAt(0).toUpperCase() || "?";
   const [isOnline, setIsOnline] = useState(false);
@@ -18,7 +18,7 @@ export default function ChatHeader({ chat, onBack }) {
 
   const { userId } = useSelector((state) => state.auth);
   const socket = getSocket();
-  console.log("Socket instance in ChatHeader:", socket);
+  // console.log("Socket instance in ChatHeader:", socket);
 
 
 
@@ -59,7 +59,7 @@ export default function ChatHeader({ chat, onBack }) {
     };
 
     const handleInitialOnline = (data) => {
-      console.log("online-users event:", data);
+      // console.log("online-users event:", data);
       let userIds = [];
 
       if (Array.isArray(data)) {

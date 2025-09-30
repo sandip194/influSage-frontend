@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import Sidebar from "./SidebarVendor";
@@ -21,6 +21,7 @@ export default function ChatAppPageVendor() {
   const activeChat = useSelector((state) => state.chat.activeChat);
   const messages = useSelector((state) => state.chat.messages);
   const showChatUI = activeChat && socket;
+  const [selectedReplyMessage, setSelectedReplyMessage] = useState(null);
 
   // 📦 Join/leave socket room
   useEffect(() => {
@@ -47,7 +48,8 @@ export default function ChatAppPageVendor() {
   }, [socket, dispatch]);
 
   // ✉️ Send message
-  const handleSendMessage = async ({ text, file }) => {
+  const handleSendMessage = async ({ text, file, replyId }) => {
+  console.log("📨 Sending message with replyId:", replyId); 
     if (!activeChat) return;
 
     const tempMsg = {
@@ -56,6 +58,7 @@ export default function ChatAppPageVendor() {
       content: text,
       conversationId: activeChat.conversationid,
       file: file || null,
+      replyId: replyId || null,
       status: "sending",
     };
 
@@ -68,6 +71,7 @@ export default function ChatAppPageVendor() {
       formData.append("p_roleid", role);
       formData.append("p_messages", text);
       if (file) formData.append("file", file);
+      if (replyId) formData.append("p_replyid", replyId);
 
       const res = await axios.post(`/chat/insertmessage`, formData, {
         headers: {
@@ -134,11 +138,19 @@ export default function ChatAppPageVendor() {
             <ChatMessages
               chat={{ ...activeChat, myRoleId: role, myUserId: userId }}
               messages={messages}
+              setReplyToMessage={setSelectedReplyMessage}
             />
           </div>
 
           <div className="sticky bottom-0 bg-white border-t border-gray-100">
-            <ChatInput onSend={handleSendMessage} />
+            <ChatInput  onSend={(data) =>
+                handleSendMessage({
+                  ...data,
+                  replyId: selectedReplyMessage?.id || null,
+                })
+              }
+              replyTo={selectedReplyMessage}
+              onCancelReply={() => setSelectedReplyMessage(null)} />
           </div>
         </div>
       )}

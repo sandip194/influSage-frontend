@@ -7,18 +7,19 @@ import {
 } from "react-icons/ri";
 import EmojiPicker from "emoji-picker-react";
 
-export default function ChatInputVendor({ onSend }) {
+export default function ChatInputVendor({ onSend, replyTo, onCancelReply }) {
   const [text, setText] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [file, setFile] = useState(null);
   const fileInputRef = useRef(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (text.trim() || file) {
-      onSend({ text, file });
+      await onSend({ text, file, replyTo });
       setText("");
       setFile(null);
+      onCancelReply?.();
     }
   };
 
@@ -43,6 +44,18 @@ export default function ChatInputVendor({ onSend }) {
             height={370}
             width={300}
           />
+        </div>
+      )}
+
+      {replyTo && (
+        <div className="flex items-center justify-between bg-gray-100 border-l-4 border[0D132D] text-sm text-gray-700 px-4 py-2 rounded-md">
+          <div className="truncate">
+            <span className="font-semibold">Replying to: </span>
+            {replyTo.content || "Attachment"}
+          </div>
+          <button onClick={onCancelReply} className="text-gray-500 hover:text-red-500 ml-4">
+            <RiCloseLine />
+          </button>
         </div>
       )}
 

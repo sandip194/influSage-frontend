@@ -5,8 +5,8 @@ import { getSocket } from "../../sockets/socket";
 
 export default function ChatHeaderVendor({ chat, onBack }) {
 
-  console.log("ChatHeaderVendor rendered");
-  console.log("ChatHeaderVendor props chat:", chat);
+  // console.log("ChatHeaderVendor rendered");
+  // console.log("ChatHeaderVendor props chat:", chat);
   const initial = chat?.name?.charAt(0).toUpperCase() || "?";
   const [isOnline, setIsOnline] = useState(false);
   const [lastSeen, setLastSeen] = useState(null);
@@ -17,11 +17,11 @@ export default function ChatHeaderVendor({ chat, onBack }) {
 
   const { userId } = useSelector((state) => state.auth);
   const socket = getSocket();
-  console.log("Socket instance in ChatHeaderVendor:", socket);
+  // console.log("Socket instance in ChatHeaderVendor:", socket);
 
   useEffect(() => {
     const chatUserId = chat?.influencerid; // or chat?.id if you fix your data shape
-    console.log("ChatHeaderVendor useEffect:", { chatUserId, userId, socketConnected: socket?.connected });
+    // console.log("ChatHeaderVendor useEffect:", { chatUserId, userId, socketConnected: socket?.connected });
     if (!chatUserId || !userId || !socket?.connected) return;
 
   socket.emit("register", userId);
@@ -47,7 +47,7 @@ export default function ChatHeaderVendor({ chat, onBack }) {
     };
 
     const handleInitialOnlineUsers = (data) => {
-      console.log("Received online-users event:", data);
+      // console.log("Received online-users event:", data);
       let userIds = [];
 
       if (Array.isArray(data)) {
