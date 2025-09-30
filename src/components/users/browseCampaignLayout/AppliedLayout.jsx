@@ -81,12 +81,12 @@ const AppliedLayout = () => {
     }
   }, [sortby, sortorder, pagenumber, pagesize, token, searchTerm]);
 
-  const handleWithdraw = async (id) => {
+  const handleWithdraw = async (campaignapplicationid) => {
   try {
     const res = await axios.post(
       `/user/withdraw-application`,
       {
-        p_applicationid: id,
+         p_applicationid: campaignapplicationid,
         p_statusname: "Withdrawn",
       },
       {
@@ -97,6 +97,7 @@ const AppliedLayout = () => {
     );
 
     console.log(res.data);
+    // console.log("Withdraw request:", campaignapplicationid);
     toast.success(res.data?.message);
 
   } catch (error) {
@@ -274,7 +275,7 @@ const AppliedLayout = () => {
                       </button>
                     </Link>
                     <button
-                       onClick={() => handleWithdraw(campaign.id)}
+                        onClick={() => handleWithdraw(campaign.campaignapplicationid)} 
                       className="border border-red-500 text-red-500 hover:text-black w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-600 transition"
                     >
                       <RiDeleteBinLine size={18} />

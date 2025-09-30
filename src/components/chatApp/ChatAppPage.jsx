@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import Sidebar from "./Sidebar";
@@ -20,6 +20,7 @@ export default function ChatAppPage() {
 
   const activeChat = useSelector((state) => state.chat.activeChat);
   const messages = useSelector((state) => state.chat.messages);
+  const [selectedReplyMessage, setSelectedReplyMessage] = useState(null);
 
   // Emit via socket
   const showChatUI = activeChat && socket;
@@ -60,6 +61,7 @@ export default function ChatAppPage() {
       content: text,
       conversationId: activeChat.id,
       file: file || null,
+      replyId: replyToId || null,
       status: "sending",
     };
 
@@ -76,6 +78,7 @@ export default function ChatAppPage() {
       formData.append("p_roleid", role);
       formData.append("p_messages", text);
       if (file) formData.append("file", file);
+      if (replyToId) formData.append("p_replyid", replyToId); 
 
       const res = await axios.post(`/chat/insertmessage`, formData, {
         headers: {
@@ -137,6 +140,7 @@ export default function ChatAppPage() {
             <ChatMessages
               chat={{ ...activeChat, myRoleId: role, myUserId: userId }}
               messages={messages}
+              setReplyToMessage={setSelectedReplyMessage}
             />
           </div>
 
