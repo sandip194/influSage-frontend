@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   RiSendPlane2Fill,
   RiFileTextLine,
@@ -11,6 +11,7 @@ export default function ChatInput({ onSend, replyTo, onCancelReply }) {
   const [text, setText] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleSubmit = (e) => {
@@ -19,17 +20,35 @@ export default function ChatInput({ onSend, replyTo, onCancelReply }) {
       onSend({ text, file });
       setText("");
       setFile(null);
+      setPreviewUrl(null);
       onCancelReply();
     }
   };
 
   const handleEmojiClick = (emojiData) => {
     setText((prev) => prev + emojiData.emoji);
-    setShowEmojiPicker(false); // close picker after selecting emoji
+    setShowEmojiPicker(false);
   };
 
-  const handleFileChange = (e) => setFile(e.target.files[0]);
-  const removeFile = () => setFile(null);
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+
+    if (selectedFile && selectedFile.type.startsWith("image/")) {
+      const imageUrl = URL.createObjectURL(selectedFile);
+      setPreviewUrl(imageUrl);
+    } else {
+      setPreviewUrl(null);
+    }
+  };
+
+  const removeFile = () => {
+    setFile(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl); 
+    }
+    setPreviewUrl(null);
+  };
 
   return (
     <form
@@ -47,8 +66,9 @@ export default function ChatInput({ onSend, replyTo, onCancelReply }) {
         </div>
       )}
 
+      {/* Reply UI */}
       {replyTo && (
-        <div className="flex items-center justify-between bg-gray-100 border-l-4 border[0D132D] text-sm text-gray-700 px-4 py-2 rounded-md">
+        <div className="flex items-center justify-between bg-gray-100 border-l-4 border-[0D132D] text-sm text-gray-700 px-4 py-2 rounded-md">
           <div className="truncate">
             <span className="font-semibold">Replying to: </span>
             {replyTo.content || "Attachment"}
@@ -59,28 +79,45 @@ export default function ChatInput({ onSend, replyTo, onCancelReply }) {
         </div>
       )}
 
-      {/* Selected File Display */}
+      {/* File/Image Preview */}
       {file && (
-        <div className="flex items-center space-x-2 bg-gray-100 px-3 py-1 rounded-full max-w-xs">
-          <RiFileTextLine />
-          <span className="truncate">{file.name}</span>
-          <button type="button" onClick={removeFile}>
-            <RiCloseLine />
-          </button>
+        <div className="relative w-fit">
+          {previewUrl ? (
+            <div className="relative inline-block">
+              <img
+                src={previewUrl}
+                alt="preview"
+                className="h-25 w-auto rounded-lg shadow"
+              />
+              <button
+                type="button"
+                onClick={removeFile}
+                className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow hover:bg-red-100"
+              >
+                <RiCloseLine />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2 bg-gray-100 px-3 py-1 max-w-xs">
+              <RiFileTextLine />
+              <span className="truncate">{file.name}</span>
+              <button type="button" onClick={removeFile}>
+                <RiCloseLine />
+              </button>
+            </div>
+          )}
         </div>
       )}
 
       <div className="flex items-center space-x-2">
-        {/* Emoji Button */}
         <button
           type="button"
           onClick={() => setShowEmojiPicker((prev) => !prev)}
           className="text-xl text-gray-500"
         >
-          <RiEmotionHappyLine size={25}/>
+          <RiEmotionHappyLine size={25} />
         </button>
 
-        {/* File Upload Button */}
         <button
           type="button"
           onClick={() => fileInputRef.current.click()}
@@ -95,7 +132,6 @@ export default function ChatInput({ onSend, replyTo, onCancelReply }) {
           className="hidden"
         />
 
-        {/* Text Input */}
         <input
           type="text"
           className="flex-1 border border-black rounded-full px-6 py-3 outline-none text-sm"
@@ -103,7 +139,8 @@ export default function ChatInput({ onSend, replyTo, onCancelReply }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
-      <button
+
+        <button
           type="submit"
           className="bg-[#0D132D] hover:bg-indigo-700 text-white p-3 rounded-full shadow-md transition"
         >

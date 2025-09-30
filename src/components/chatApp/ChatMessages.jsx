@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { RiReplyLine, RiEdit2Line, RiDeleteBinLine } from "react-icons/ri";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { Image } from 'primereact/image';
 
 export default function ChatMessages({ chat, setReplyToMessage }) {
   const [messages, setMessages] = useState([]);

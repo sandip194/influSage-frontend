@@ -11,13 +11,14 @@ export default function SidebarVendor({ onSelectChat }) {
   const [selectedInfluencer, setSelectedInfluencer] = useState(null);
   const [campaigns, setCampaigns] = useState([]);
   const [influencers, setInfluencers] = useState([]);
+  const [search, setSearch] = useState("");
 
   const fetchCampaigns = async () => {
     if (!token) return;
 
     try {
       const response = await axios.get(`/chat/conversationsdetails`, {
-        params: { p_search: "" },
+        params: { p_search: search },
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -57,7 +58,7 @@ export default function SidebarVendor({ onSelectChat }) {
 
   useEffect(() => {
     fetchCampaigns();
-  }, [token]);
+  }, [token, search]);
 
   const filteredInfluencers = selectedCampaign
     ? influencers.filter((inf) => inf.campaignId === selectedCampaign.campaignid)
@@ -75,6 +76,30 @@ export default function SidebarVendor({ onSelectChat }) {
             Campaigns
           </h2>
         </div>
+
+    {/* Search */}
+      <div className="p-3">
+        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2">
+          <svg
+            className="w-5 h-5 text-gray-400 mr-2"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 12.65z" />
+          </svg>
+          <input
+            placeholder="Search campaigns..."
+            className="w-full outline-none text-sm"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
+       <hr className="my-2 border-gray-200" />
+
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {campaigns?.map((campaign) => {
             const isSelected = selectedCampaign?.campaignid === campaign.campaignid;
