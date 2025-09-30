@@ -94,7 +94,7 @@ export default function ChatAppPageVendor() {
     <div className="h-[85vh] flex overflow-hidden">
       {/* Sidebar */}
       <div
-        className={`md:w-1/4 w-full h-full border-gray-200 flex-shrink-0 me-2 ${activeChat ? "hidden md:block" : "block"
+        className={`md:w-1/2 w-full h-full border-gray-200 flex-shrink-0 me-2 ${activeChat ? "hidden md:block" : "block"
           }`}
       >
         <Sidebar

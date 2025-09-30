@@ -19,6 +19,7 @@ export default function ChatAppPage() {
   const socket = getSocket();
 
   const activeChat = useSelector((state) => state.chat.activeChat);
+  
   const messages = useSelector((state) => state.chat.messages);
   const [selectedReplyMessage, setSelectedReplyMessage] = useState(null);
 
@@ -28,13 +29,13 @@ export default function ChatAppPage() {
 
   // 👥 Join/leave chat room when activeChat changes
   useEffect(() => {
-  if (!socket || !activeChat?.id) return;
+    if (!socket || !activeChat?.id) return;
 
-  socket.emit("joinRoom", activeChat.id);
-  return () => {
-    socket.emit("leaveRoom", activeChat.id);
-  };
-}, [activeChat?.id]);
+    socket.emit("joinRoom", activeChat.id);
+    return () => {
+      socket.emit("leaveRoom", activeChat.id);
+    };
+  }, [activeChat?.id]);
 
 
   // 📥 Receive messages

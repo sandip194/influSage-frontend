@@ -4,6 +4,10 @@ import { useSelector } from "react-redux";
 import { getSocket } from "../../sockets/socket";
 
 export default function ChatHeader({ chat, onBack }) {
+
+  console.log("ChatHeader rendered");
+  console.log("ChatHeader props chat:", chat);
+
   const initial = chat?.name?.charAt(0).toUpperCase() || "?";
   const [isOnline, setIsOnline] = useState(false);
   const [lastSeen, setLastSeen] = useState(null);
@@ -12,16 +16,67 @@ export default function ChatHeader({ chat, onBack }) {
   const hasRequestedOnlineUsers = useRef(false);
   const listenersAttached = useRef(false); // Prevent duplicate listener attachments
 
-  const { id: userId } = useSelector((state) => state.auth);
+  const { userId } = useSelector((state) => state.auth);
+  const socket = getSocket();
+  console.log("Socket instance in ChatHeader:", socket);
+
+
 
   useEffect(() => {
-    const socket = getSocket();
-    if (!chat?.id || !socket?.connected) {
-      console.warn("Socket not ready or chat.id missing");
+    const chatUserId = chat?.vendorId; // update if needed
+    if (!chatUserId) {
+      console.warn("chatUser Id missing");
+      return;
+    }
+    if (!userId) {
+      console.warn("userId missing");
+      return;
+    }
+    if (!socket?.connected) {
+      console.warn("Socket not connected");
       return;
     }
 
     socket.emit("register", userId);
+
+    const handleOnline = (data) => {
+      const uid = data?.userId ?? data;
+      console.log("user-online event:", uid);
+      if (String(uid) === String(chatUserId)) {
+        setIsOnline(true);
+        setLastSeen(null);
+      }
+    };
+
+    const handleOffline = (data) => {
+      const uid = data?.userId ?? data;
+      const ls = data?.lastSeen;
+      console.log("user-offline event:", uid, ls);
+      if (String(uid) === String(chatUserId)) {
+        setIsOnline(false);
+        setLastSeen(ls);
+      }
+    };
+
+    const handleInitialOnline = (data) => {
+      console.log("online-users event:", data);
+      let userIds = [];
+
+      if (Array.isArray(data)) {
+        userIds = data;
+      } else if (data && data.userIds) {
+        userIds = data.userIds;
+      }
+
+      const normalizedUserIds = userIds.filter(id => id).map(String);
+
+      if (normalizedUserIds.includes(String(chatUserId))) {
+        setIsOnline(true);
+        setLastSeen(null);
+      } else {
+        setIsOnline(false);
+      }
+    };
 
     if (!hasRequestedOnlineUsers.current) {
       socket.emit("online-users");
@@ -29,52 +84,6 @@ export default function ChatHeader({ chat, onBack }) {
     }
 
     if (!listenersAttached.current) {
-      // Handle when a user comes online
-      const handleOnline = (...args) => {
-        const data = args[0];
-        // Extract userId from event data (handle object or primitive)
-        const uid = data?.userId ?? data ?? args[1];
-        if (String(uid) === String(chat.id)) {
-          setIsOnline(true);
-          if (timerRef.current) clearInterval(timerRef.current);
-          // Optionally start timer here if you want
-        }
-      };
-
-      // Handle when a user goes offline
-      const handleOffline = (...args) => {
-        const data = args[0];
-        const uid = data?.userId ?? data ?? args[1];
-        const ls = data?.lastSeen ?? args[2];
-        if (String(uid) === String(chat.id)) {
-          setIsOnline(false);
-          setLastSeen(ls);
-          if (timerRef.current) clearInterval(timerRef.current);
-        }
-      };
-
-      // Handle initial list of online users
-      const handleInitialOnline = (...args) => {
-        let userIds = args[0];
-
-        // Normalize userIds to an array of strings
-        if (Array.isArray(userIds)) {
-          userIds = userIds.filter(id => id != null && id !== '' && id !== 'null').map(String);
-        } else if (userIds && typeof userIds === 'object' && userIds.userIds) {
-          userIds = (userIds.userIds || []).filter(id => id != null && id !== '' && id !== 'null').map(String);
-        } else {
-          userIds = userIds ? [String(userIds)] : [];
-        }
-
-        if (userIds.includes(String(chat.id))) {
-          setIsOnline(true);
-          if (timerRef.current) clearInterval(timerRef.current);
-          // Optionally start timer here if you want
-        } else {
-          setIsOnline(false);
-        }
-      };
-
       socket.on("user-online", handleOnline);
       socket.on("user-offline", handleOffline);
       socket.on("online-users", handleInitialOnline);
@@ -84,15 +93,15 @@ export default function ChatHeader({ chat, onBack }) {
 
     return () => {
       if (listenersAttached.current) {
-        socket.off("user-online");
-        socket.off("user-offline");
-        socket.off("online-users");
+        socket.off("user-online", handleOnline);
+        socket.off("user-offline", handleOffline);
+        socket.off("online-users", handleInitialOnline);
         listenersAttached.current = false;
       }
       if (timerRef.current) clearInterval(timerRef.current);
       hasRequestedOnlineUsers.current = false;
     };
-  }, [chat?.id, userId]);
+  }, [chat?.id, userId, socket]);
 
   const formatLastSeen = (time) => {
     if (!time) return "Offline";
