@@ -149,12 +149,6 @@ export const LoginForm = () => {
         const { id, role, token, firstName, lastName } = res.data;
         dispatch(setCredentials({ token, id, role, firstName, lastName }));
 
-        // ✅ Initialize and connect socket
-        const socket = initSocket(token);
-        socket.connect();
-
-        // ✅ Register user on the socket server
-        socket.emit("register", id);
 
         if (role === 2) {
           navigate("/complate-vendor-profile");

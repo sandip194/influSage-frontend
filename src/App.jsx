@@ -53,6 +53,7 @@ import ViewAllOffers from './components/vendor/offers/ViewAllOffers';
 import OfferDetails from './components/vendor/offers/OfferDetails';
 import InfluencerProfile from './components/vendor/offers/InfluencerProfile';
 import EditVendorProfile from './components/users/EditProfile/EditVendorProfile';
+import SocketProvider from './sockets/SocketProvider';
 
 const App = () => {
 
@@ -72,6 +73,9 @@ const App = () => {
                                 pauseOnHover
                                 theme="light"
                         />
+                        <SocketProvider>
+
+                        
                         <Routes>
                                 <Route path='/' element={<Home />} />
                                 <Route path='/signup' element={<Signup />} />
@@ -159,6 +163,8 @@ const App = () => {
                                 </Route>
 
                         </Routes>
+
+                        </SocketProvider>
                 </Router>
         );
 };

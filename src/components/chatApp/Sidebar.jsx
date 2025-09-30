@@ -88,6 +88,7 @@ export default function Sidebar({ onSelectChat }) {
                     id: conversationId, // ✅ normalized id
                     name: campaign.campaignname,
                     img: campaign.campaignphoto,
+                    vendorId: vendor.vendorid || vendor.id, 
                     // add other fields if needed
                   });
                 }}
