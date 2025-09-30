@@ -53,55 +53,52 @@ export default function ChatAppPage() {
   }, [socket, dispatch]);
 
   // ✉️ Handle sending messages
-  const handleSendMessage = async ({ text, file }) => {
-    if (!activeChat) return;
+const handleSendMessage = async ({ text, file, replyId }) => {
+  console.log("📨 Sending message with replyId:", replyId); 
+  if (!activeChat) return;
 
-    const newMsg = {
-      id: Date.now(), // temporary ID
-      senderId: role,
-      content: text,
-      conversationId: activeChat.id,
-      file: file || null,
-      replyId: replyToId || null,
-      status: "sending",
-    };
-
-    // Optimistically add message to Redux
-    dispatch(addMessage(newMsg));
-
-
-    socket?.emit("sendMessage", newMsg);
-
-    // Save to backend
-    try {
-      const formData = new FormData();
-      formData.append("p_conversationid", activeChat.id);
-      formData.append("p_roleid", role);
-      formData.append("p_messages", text);
-      if (file) formData.append("file", file);
-      if (replyToId) formData.append("p_replyid", replyToId); 
-
-      const res = await axios.post(`/chat/insertmessage`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (res.data?.p_status) {
-        dispatch(
-          updateMessageStatus({
-            tempId: newMsg.id,
-            newId: res.data.message_id,
-            fileUrl: res.data.filepath || null,
-          })
-        );
-      }
-    } catch (err) {
-      console.error("Send failed", err);
-      // Optional: dispatch an error update to show "failed" in UI
-    }
+  const newMsg = {
+    id: Date.now(),
+    senderId: role,
+    content: text,
+    conversationId: activeChat.id,
+    file: file || null,
+    replyId: replyId || null,
+    status: "sending",
   };
+
+  dispatch(addMessage(newMsg));
+  socket?.emit("sendMessage", newMsg);
+
+  try {
+    const formData = new FormData();
+    formData.append("p_conversationid", activeChat.id);
+    formData.append("p_roleid", role);
+    formData.append("p_messages", text);
+    if (file) formData.append("file", file);
+    if (replyId) formData.append("p_replyid", replyId);
+
+    const res = await axios.post(`/chat/insertmessage`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (res.data?.p_status) {
+      dispatch(
+        updateMessageStatus({
+          tempId: newMsg.id,
+          newId: res.data.message_id,
+          fileUrl: res.data.filepath || null,
+        })
+      );
+    }
+  } catch (err) {
+    console.error("Send failed", err);
+  }
+};
+
 
   return (
     <div className="h-[85vh] flex overflow-hidden">
@@ -146,7 +143,16 @@ export default function ChatAppPage() {
           </div>
 
           <div className="sticky bottom-0 bg-white border-t border-gray-100">
-            <ChatInput onSend={handleSendMessage} />
+            <ChatInput
+              onSend={(data) =>
+                handleSendMessage({
+                  ...data,
+                  replyId: selectedReplyMessage?.id || null,
+                })
+              }
+              replyTo={selectedReplyMessage}
+              onCancelReply={() => setSelectedReplyMessage(null)}
+            />
           </div>
         </div>
       )}
