@@ -23,9 +23,21 @@ const chatSlice = createSlice({
                 msg.status = "sent";
                 if (fileUrl) msg.fileUrl = fileUrl;
             }
+        },
+        deleteMessage: (state, action) => {
+        const message = state.messages.find(msg => msg.id === action.payload);
+        if (message) {
+            message.deleted = true; 
+        }
+        },
+        undoDeleteMessage: (state, action) => {
+        const message = state.messages.find(msg => msg.id === action.payload);
+        if (message) {
+            message.deleted = false; 
+        }
         }
     },
 });
 
-export const { setActiveChat, addMessage, updateMessageStatus } = chatSlice.actions;
+export const { setActiveChat, addMessage, updateMessageStatus, deleteMessage, undoDeleteMessage } = chatSlice.actions;
 export default chatSlice.reducer;

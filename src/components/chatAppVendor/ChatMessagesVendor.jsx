@@ -1,9 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RiReplyLine, RiEdit2Line, RiDeleteBinLine } from "react-icons/ri";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Tooltip } from "antd";
+import { Image } from 'primereact/image';
+import { getSocket } from "../../sockets/socket";
+import {
+  deleteMessage,
+  undoDeleteMessage
+} from "../../features/socket/chatSlice";
+import 'primereact/resources/themes/saga-blue/theme.css';
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 
 const formatTime = (timestamp) => {
   const date = new Date(timestamp);
@@ -23,18 +32,17 @@ const formatTime = (timestamp) => {
 };
 
 export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
+  const dispatch = useDispatch();
+  const socket = getSocket();
   const [messages, setMessages] = useState([]);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
-  const [deletedMessage, setDeletedMessage] = useState({
-    id: null,
-    timestamp: null,
-  });
+  const [deletedMessage, setDeletedMessage] = useState({});
   const scrollRef = useRef(null);
 
   const { token, id: userId, role } = useSelector((state) => state.auth) || {};
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  useEffect(() => {
+
     if (!chat?.conversationid || !token) return;
 
     const fetchMessages = async () => {
@@ -69,8 +77,9 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
       }
     };
 
+  useEffect(() => {
     fetchMessages();
-  }, [chat, token, role]);
+  }, [chat, token, role])
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -78,23 +87,21 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
     }
   }, [messages]);
 
+  // Handle delete message
   const handleDeleteMessage = async (messageId) => {
     try {
       const res = await axios.put(
         `/chat/undodeletemessage`,
-        {
-          p_messageid: messageId,
-          p_roleid: role,
-          p_action: "delete",
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { p_messageid: messageId, p_roleid: role, p_action: "delete" },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data?.p_status) {
         toast.success(res.data.message);
-        setDeletedMessage({ id: messageId, timestamp: Date.now() });
+        socket.emit("deleteMessage", { messageId, conversationId: chat.conversationid });
+
+        setDeletedMessage((prev) => ({ ...prev, [messageId]: Date.now() }));
+        await fetchMessages(); // Refresh messages from API
       } else {
         toast.error(res.data.message || "Failed to delete message");
       }
@@ -104,15 +111,14 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
     }
   };
 
+  // Handle undo delete
   const handleUndoMessage = async (messageId) => {
-    if (!deletedMessage.id || deletedMessage.id !== messageId) {
+    if (!deletedMessage[messageId]) {
       toast.error("No deleted message to undo.");
       return;
     }
 
-    const now = Date.now();
-    const elapsedMinutes = (now - deletedMessage.timestamp) / (1000 * 60);
-
+    const elapsedMinutes = (Date.now() - deletedMessage[messageId]) / (1000 * 60);
     if (elapsedMinutes > 15) {
       toast.error("Undo time expired (15 minutes).");
       return;
@@ -121,19 +127,21 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
     try {
       const res = await axios.put(
         `/chat/undodeletemessage`,
-        {
-          p_messageid: messageId,
-          p_roleid: role,
-          p_action: "undo",
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { p_messageid: messageId, p_roleid: role, p_action: "undo" },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data?.p_status) {
         toast.success(res.data.message);
-        setDeletedMessage({ id: null, timestamp: null });
+        socket.emit("undoDeleteMessage", { messageId, conversationId: chat.conversationid });
+
+        setDeletedMessage((prev) => {
+          const updated = { ...prev };
+          delete updated[messageId];
+          return updated;
+        });
+
+        await fetchMessages(); // Refresh messages from API
       } else {
         toast.error(res.data.message || "Failed to undo delete");
       }
@@ -142,6 +150,23 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
       toast.error("Something went wrong while undoing.");
     }
   };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("deleteMessage", (messageId) => {
+      dispatch(deleteMessage(messageId)); 
+    });
+
+    socket.on("undoDeleteMessage", (messageId) => {
+      dispatch(undoDeleteMessage(messageId)); 
+    });
+
+    return () => {
+      socket.off("deleteMessage");
+      socket.off("undoDeleteMessage");
+    };
+  }, [socket, dispatch]);
 
   if (!chat)
     return <div className="flex-1 p-4">Select a chat to start messaging</div>;
@@ -178,7 +203,7 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
               className={`relative flex flex-col ${isMe ? "items-end" : "items-start"}`}
             >
               <div
-                className={`px-3 py-1 rounded-lg max-w-xs break-words ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`}
+                className={`px-1 py-1 rounded-lg max-w-xs break-words ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`}
                 style={{ wordBreak: "break-word" }}
               >
                 {msg.file && (
@@ -194,21 +219,35 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
 
                       if (isImage) {
                         return (
-                          <img
+                          <Image
                             src={fileUrl}
                             alt={fileName}
                             className="max-w-[200px] max-h-[200px] rounded-md object-cover"
+                            preview
                           />
                         );
-                      } else if (isPDF) {
-                        return (
+                      }else if (isPDF) {
+                      return (
+                        <div className="flex flex-col items-center gap-2">
                           <iframe
                             src={fileUrl}
                             title={fileName}
                             className="w-full max-w-[250px] h-[200px] rounded-md border"
                           ></iframe>
-                        );
-                      } else if (isVideo) {
+
+                          <a
+                            href={fileUrl}
+                            download={fileName}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline text-sm mt-2"
+                          >
+                            {fileName}
+                          </a>
+                        </div>
+                      );
+                }
+                else if (isVideo) {
                         return (
                           <video
                             src={fileUrl}
@@ -220,15 +259,13 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
                         );
                       } else if (isDoc || isZip) {
                         return (
-                          <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-md text-sm">
-                            <span className="text-gray-600">📎 {fileName}</span>
+                          <div className="flex items-center gap-2 text-sm">
                             <a
                               href={fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              download={fileName}
                               className="text-blue-500 underline"
                             >
-                              Download
+                              {fileName}
                             </a>
                           </div>
                         );
@@ -236,11 +273,10 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
                         return (
                           <a
                             href={fileUrl}
-                            target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 text-sm underline break-all"
+                            className="text-white text-sm underline break-all"
                           >
-                            📎 {fileName}
+                            {fileName}
                           </a>
                         );
                       }
@@ -250,7 +286,36 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
 
 
 
-                {deletedMessage.id === msg.id ? (
+                {/* Reply Preview */}
+                {msg.replyId && (
+                  <div
+                    className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] ${
+                      isMe
+                        ? "bg-gray-700 border-blue-400 text-gray-200"
+                        : "bg-gray-300 border-green-500 text-gray-800"
+                    }`}
+                  >
+                    {(() => {
+                      const repliedMsg = messages.find((m) => m.id === msg.replyId);
+
+                      if (!repliedMsg) return <span className="italic text-gray-500">Message deleted</span>;
+
+                      return (
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-[11px] text-blue-600">
+                            {repliedMsg.senderId === role || repliedMsg.senderId === userId
+                              ? "You"
+                              : chat?.name || "Unknown"}
+                          </span>
+                          {/* Quoted text (truncate if long) */}
+                          <span className="truncate">{repliedMsg.content}</span>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+               {deletedMessage[msg.id] ? (
                   <div className="text-sm text-red-600">
                     Message deleted.
                     <button
@@ -263,6 +328,7 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
                 ) : (
                   <div>{msg.content}</div>
                 )}
+
               </div>
 
               <div className="text-[10px] text-gray-500 mt-1 px-2">

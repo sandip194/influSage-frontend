@@ -49,7 +49,7 @@ export default function ChatAppPageVendor() {
 
   // ✉️ Send message
   const handleSendMessage = async ({ text, file, replyId }) => {
-  console.log("📨 Sending message with replyId:", replyId); 
+  // console.log("📨 Sending message with replyId:", replyId); 
     if (!activeChat) return;
 
     const tempMsg = {

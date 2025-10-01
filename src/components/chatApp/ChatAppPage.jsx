@@ -54,7 +54,7 @@ export default function ChatAppPage() {
 
   // ✉️ Handle sending messages
 const handleSendMessage = async ({ text, file, replyId }) => {
-  console.log("📨 Sending message with replyId:", replyId); 
+  // console.log("📨 Sending message with replyId:", replyId); 
   if (!activeChat) return;
 
   const newMsg = {

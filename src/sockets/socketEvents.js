@@ -1,5 +1,5 @@
 // src/sockets/socketEvents.js
-import { addMessage } from "../features/socket/chatSlice";
+import { addMessage, deleteMessage, undoDeleteMessage } from "../features/socket/chatSlice";
 import { addNotification } from "../features/socket/notificationSlice";
 import { setConnected, setOnlineUsers } from "../features/socket/socketSlice";
 
@@ -23,5 +23,15 @@ export const registerSocketEvents = (socket, dispatch, userId) => {
 
   socket.on("online-users", ({ userIds }) => {
     dispatch(setOnlineUsers(userIds));
+  });
+
+  // Listen for delete message event
+  socket.on("deleteMessage", (messageId) => {
+    dispatch(deleteMessage(messageId)); // Delete message locally in Redux
+  });
+
+  // Listen for undo delete message event
+  socket.on("undoDeleteMessage", (messageId) => {
+    dispatch(undoDeleteMessage(messageId)); // Undo delete locally in Redux
   });
 };

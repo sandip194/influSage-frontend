@@ -31,24 +31,34 @@ export default function ChatInputVendor({ onSend, replyTo, onCancelReply }) {
   };
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
+  const selectedFile = e.target.files[0];
+  setFile(selectedFile);
 
-    if (selectedFile && selectedFile.type.startsWith("image/")) {
-      const imageUrl = URL.createObjectURL(selectedFile);
-      setPreviewUrl(imageUrl);
-    } else {
-      setPreviewUrl(null);
-    }
-  };
+  if (!selectedFile) {
+    setPreviewUrl(null);
+    return;
+  }
+
+  const fileType = selectedFile.type;
+
+  if (fileType.startsWith("image/")) {
+    setPreviewUrl({ type: "image", url: URL.createObjectURL(selectedFile) });
+  } else if (fileType === "application/pdf") {
+    setPreviewUrl({ type: "pdf", url: URL.createObjectURL(selectedFile) });
+  } else if (fileType.startsWith("video/")) {
+    setPreviewUrl({ type: "video", url: URL.createObjectURL(selectedFile) });
+  } else {
+    setPreviewUrl({ type: "file", name: selectedFile.name });
+  }
+};
 
   const removeFile = () => {
-    setFile(null);
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl); 
-    }
-    setPreviewUrl(null);
-  };
+  if (previewUrl?.url) {
+    URL.revokeObjectURL(previewUrl.url);
+  }
+  setFile(null);
+  setPreviewUrl(null);
+};
 
   return (
     <form
@@ -69,7 +79,7 @@ export default function ChatInputVendor({ onSend, replyTo, onCancelReply }) {
       {/* Reply UI */}
       {replyTo && (
         <div className="flex items-center justify-between bg-gray-100 border-l-4 border-[0D132D] text-sm text-gray-700 px-4 py-2 rounded-md">
-          <div className="truncate">
+         <div className="w-full sm:w-80 md:w-96 lg:w-[350px] p-2">
             <span className="font-semibold">Replying to: </span>
             {replyTo.content || "Attachment"}
           </div>
@@ -80,34 +90,49 @@ export default function ChatInputVendor({ onSend, replyTo, onCancelReply }) {
       )}
 
       {/* File/Image Preview */}
-      {file && (
-        <div className="relative w-fit">
-          {previewUrl ? (
-            <div className="relative inline-block">
+      {file && previewUrl && (
+          <div className="relative w-fit max-w-xs">
+            {previewUrl.type === "image" && (
               <img
-                src={previewUrl}
+                src={previewUrl.url}
                 alt="preview"
-                className="h-25 w-auto rounded-lg shadow"
+                className="h-28 w-auto rounded-lg shadow cursor-pointer"
+                onClick={() => window.open(previewUrl.url, "_blank")}
               />
-              <button
-                type="button"
-                onClick={removeFile}
-                className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow hover:bg-red-100"
-              >
-                <RiCloseLine />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-2 bg-gray-100 px-3 py-1 max-w-xs">
-              <RiFileTextLine />
-              <span className="truncate">{file.name}</span>
-              <button type="button" onClick={removeFile}>
-                <RiCloseLine />
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+
+            {previewUrl.type === "pdf" && (
+              <iframe
+                src={previewUrl.url}
+                title="PDF Preview"
+                className="w-40 h-28 rounded border"
+              ></iframe>
+            )}
+
+            {previewUrl.type === "video" && (
+              <video
+                src={previewUrl.url}
+                controls
+                className="w-40 h-28 rounded shadow"
+              />
+            )}
+
+            {previewUrl.type === "file" && (
+              <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg shadow">
+                <RiFileTextLine />
+                <span className="truncate max-w-[120px] text-sm">{previewUrl.name}</span>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={removeFile}
+              className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow hover:bg-red-100"
+            >
+              <RiCloseLine />
+            </button>
+          </div>
+        )}
 
       <div className="flex items-center space-x-2">
         <button
