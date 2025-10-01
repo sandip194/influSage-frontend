@@ -55,11 +55,11 @@ const DescriptionLayout = () => {
     return [
       {
         label: "Start Date: ",
-        value: campaignDetails.startdate,
+        value: campaignDetails.requirements.startdate,
       },
       {
         label: "End Date: ",
-        value: campaignDetails.enddate,
+        value: campaignDetails.requirements.enddate,
       },
       {
         label: "Objective: ",
@@ -133,11 +133,11 @@ const DescriptionLayout = () => {
                   <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-900 font-medium">
                     <div>
                       <span className="font-semibold text-gray-900">Apply Before:</span>{" "}
-                      {campaignDetails.applicationenddate || "N/A"}
+                      {campaignDetails.requirements.applicationenddate || "N/A"}
                     </div>
                     <div>
                       <span className="font-semibold text-gray-900">Campaign Start:</span>{" "}
-                      {campaignDetails.startdate || "N/A"}
+                      {campaignDetails.requirements.startdate || "N/A"}
                     </div>
 
                   </div>

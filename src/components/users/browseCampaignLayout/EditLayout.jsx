@@ -43,6 +43,7 @@ const EditLayout = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null);
   const [showFullDetails, setShowFullDetails] = useState(false);
+  const [showFullBrandDesc, setShowFullBrandDesc] = useState(false);
 
 
 
@@ -55,11 +56,11 @@ const EditLayout = () => {
     return [
       {
         label: "Start Date: ",
-        value: campaignDetails.startdate,
+        value: campaignDetails.requirements.startdate,
       },
       {
         label: "End Date: ",
-        value: campaignDetails.enddate,
+        value: campaignDetails.requirements.enddate,
       },
       {
         label: "Objective: ",
@@ -169,11 +170,11 @@ const EditLayout = () => {
                   <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-500 font-medium">
                     <div>
                       <span className="font-semibold text-gray-700">Apply Before:</span>{" "}
-                      {campaignDetails?.applicationenddate || "N/A"}
+                      {campaignDetails?.requirements.applicationenddate || "N/A"}
                     </div>
                     <div>
                       <span className="font-semibold text-gray-700">Campaign Start:</span>{" "}
-                      {campaignDetails?.startdate || "N/A"}
+                      {campaignDetails?.requirements.startdate || "N/A"}
                     </div>
 
                   </div>
@@ -313,7 +314,7 @@ const EditLayout = () => {
                     <div className="mb-1">
                       <div className="flex flex-wrap gap-4">
                         {campaignDetails.campaignfiles.map(({ filepath }, i) => {
-                          const fileUrl = `${BASE_URL}/src/${filepath.replace(/^src\//, "")}`;
+                          const fileUrl = `${BASE_URL}/${filepath}`;
                           const extension = filepath.split(".").pop().toLowerCase();
 
                           const isImage = /\.(png|jpe?g|gif|svg)$/i.test(filepath);
@@ -461,26 +462,101 @@ const EditLayout = () => {
                 <h3 className="font-semibold text-base mb-2">Attached Files</h3>
                 <div className="flex gap-3 flex-wrap">
                   {appliedDetails.filepaths.map(({ filepath }, index) => {
-                    const fileUrl = `${BASE_URL}${filepath}`;
-                    const extension = filepath.split('.').pop().toLowerCase();
-                    const isDoc = ["doc", "docx", "txt"].includes(extension);
+                    const fileUrl = `${BASE_URL}/src${filepath}`;
+                    const extension = filepath.split(".").pop().toLowerCase();
+
+                    const isImage = /\.(png|jpe?g|gif|svg|webp)$/i.test(filepath);
+                    const isVideo = /\.(mp4|webm|ogg)$/i.test(filepath);
                     const isPdf = extension === "pdf";
+                    const isDoc = ["doc", "docx", "txt"].includes(extension);
 
                     return (
-                      <a
+                      <div
                         key={index}
-                        href={fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:underline"
+                        className="w-24 h-24 rounded-2xl overflow-hidden border border-gray-300 hover:shadow-lg transition flex items-center justify-center bg-gray-100"
+                        title="Open file in new tab"
                       >
-                        {isPdf ? "📄 PDF" : isDoc ? "📝 Document" : "📎 File"} {`#${index + 1}`}
-                      </a>
+                        {isImage ? (
+                          <a
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full h-full block"
+                          >
+                            <img
+                              src={fileUrl}
+                              alt={`File ${index + 1}`}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          </a>
+                        ) : isVideo ? (
+                          <video
+                            src={fileUrl}
+                            className="w-full h-full object-cover"
+                            muted
+                            playsInline
+                            controls
+                          />
+                        ) : isPdf ? (
+                          <a
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex flex-col items-center justify-center text-red-600 text-xs font-semibold w-full h-full"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-8 h-8 mb-1"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                            PDF
+                          </a>
+                        ) : isDoc ? (
+                          <a
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex flex-col items-center justify-center text-blue-600 text-xs font-semibold w-full h-full"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-8 h-8 mb-1"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M7 8h10M7 12h6m-6 4h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H9l-4 4v10a2 2 0 002 2z"
+                              />
+                            </svg>
+                            DOC
+                          </a>
+                        ) : (
+                          <a
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center text-gray-500 text-xs w-full h-full px-2 text-center"
+                          >
+                            View File
+                          </a>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
               </div>
             )}
+
 
           </div>
         </div>
@@ -491,19 +567,44 @@ const EditLayout = () => {
             <h3 className="font-semibold text-lg mb-4">About Brand</h3>
 
             <div className="space-y-3">
+              {/* Brand Description (Paragraph with toggle) */}
               <div>
                 <p className="text-gray-500">Brand Name</p>
-                <p className="font-medium text-gray-900">{campaignDetails.branddetails?.aboutbrand || "N/A"}</p>
+                <p
+                  className={`font-medium text-gray-900 whitespace-pre-line ${showFullBrandDesc ? "" : "line-clamp-2"
+                    }`}
+                >
+                  {campaignDetails.branddetails?.aboutbrand || "N/A"}
+                </p>
+                {campaignDetails.branddetails?.aboutbrand &&
+                  campaignDetails.branddetails.aboutbrand.length > 100 && (
+                    <button
+                      onClick={() => setShowFullBrandDesc((prev) => !prev)}
+                      className="text-blue-600 text-xs font-semibold mt-1 hover:underline"
+                    >
+                      {showFullBrandDesc ? "View Less" : "View More"}
+                    </button>
+                  )}
               </div>
+
               <hr className="border-gray-200" />
+
+              {/* Location */}
               <div>
                 <p className="text-gray-500">Location</p>
-                <p className="font-medium text-gray-900">{campaignDetails.branddetails?.location || "N/A"}</p>
+                <p className="font-medium text-gray-900">
+                  {campaignDetails.branddetails?.location || "N/A"}
+                </p>
               </div>
+
               <hr className="border-gray-200" />
+
+              {/* Industry */}
               <div>
                 <p className="text-gray-500">Industry</p>
-                <p className="font-medium text-gray-900">{campaignDetails.branddetails?.Industry || "N/A"}</p>
+                <p className="font-medium text-gray-900">
+                  {campaignDetails.branddetails?.Industry || "N/A"}
+                </p>
               </div>
             </div>
           </div>

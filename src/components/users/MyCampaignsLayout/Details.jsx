@@ -9,10 +9,15 @@ import {
   RiCheckboxBlankCircleLine,
   RiChatUploadLine,
   RiDeleteBin6Line,
+  RiInstagramFill,
+  RiYoutubeFill,
 } from '@remixicon/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Upload, Input } from 'antd';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import dayjs from 'dayjs';
 const { TextArea } = Input;
 
 const Requirements = [
@@ -74,11 +79,14 @@ const Details = () => {
   const [proposal, setProposal] = useState("");
   const [errors, setErrors] = useState({});
   const [fileList, setFileList] = useState([]);
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [selected, setSelected] = useState("overview");
+  const [campaign, setCampaign] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { campaignId } = useParams()
+  const { token } = useSelector((state) => state.auth);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleUpload = ({ fileList }) => {
     let newErrors = {};
@@ -111,6 +119,27 @@ const Details = () => {
 
     setFileList(fileList);
   };
+
+  const getCampaignDetail = async () => {
+    try {
+      setLoading(true)
+      const res = await axios.get(`user/influencer-campaign/${campaignId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      setCampaign(res.data.data)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    getCampaignDetail()
+  }, [])
 
   const handleComplete = () => {
     let newErrors = {};
@@ -161,362 +190,168 @@ const Details = () => {
 
   const selectedButton = buttons.find((b) => location.pathname === b.path)?.id;
 
+  if (!campaign) return <div>No campaign data available.</div>;
+
   return (
     <div className="w-full text-sm overflow-x-hidden">
-      <button
-        onClick={() => window.history.back()}
-        className="text-gray-600 flex items-center gap-2 hover:text-gray-900 transition"
-      >
-        <RiArrowLeftSLine /> Back
-      </button>
       <h1 className="text-2xl font-semibold mb-4">Campaign Details</h1>
+
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Left Side */}
+        {/* Left Section */}
         <div className="flex-1 space-y-4">
-          {/* Banner */}
           <div className="bg-white rounded-2xl overflow-hidden">
-            <div className="relative h-40">
+            <div className="relative h-40 bg-gray-200">
               <img
-                src="https://images.pexels.com/photos/33350497/pexels-photo-33350497.jpeg?_gl=1*1dx09le*_ga*MTYyNzc2NDMzNi4xNzM2MTY4MzY0*_ga_8JE65Q40S6*czE3NTU1ODI1NDQkbzIkZzEkdDE3NTU1ODMzNzgkajUyJGwwJGgw"
-                alt="Banner"
-                className="w-full h-28 object-cover"
-              />
-              <img
-                src="https://images.pexels.com/photos/25835001/pexels-photo-25835001.jpeg?_gl=1*vflnmv*_ga*MTYyNzc2NDMzNi4xNzM2MTY4MzY0*_ga_8JE65Q40S6*czE3NTU1ODI1NDQkbzIkZzEkdDE3NTU1ODI2ODEkajUwJGwwJGgw"
+                src={`${BASE_URL}/${campaign.photopath}`}
                 alt="Logo"
-                className="absolute rounded-full top-18 left-4 w-22 h-22 "
+                className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover"
               />
             </div>
 
             <div className="p-4">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                  <div>
-                    <h2 className="font-semibold text-lg">
-                      Instagram Campaign
-                    </h2>
-                    <p className="text-gray-500 text-sm">Tiktokstar</p>
-                  </div>
-                </div>
-
-                {/* Right: Buttons */}
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
-                  >
-                    Mark As Complete
-                  </button>
-                  <button className="p-2 rounded-full border border-gray-300 text-gray-500 hover:text-black hover:border-gray-500">
-                    <RiMoreFill className="w-4 h-4" />
-                  </button>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+                <div>
+                  <h2 className="font-semibold text-lg">{campaign.name}</h2>
+                  <p className="text-gray-500 text-sm">{campaign.businessname}</p>
                 </div>
               </div>
 
-              {/* Campaign Details Section */}
-              <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4">
-                <div className="flex-row items-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <RiStackLine className="w-5" />
-                    <span>Platform</span>
-                  </div>
-                  <p>Instagram Reels</p>
-                  <p>Youtube Video</p>
-                </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+              {/* Campaign Info */}
+              <div className="flex flex-wrap justify-between gap-6 border border-gray-200 rounded-2xl p-4">
+                <div>
+                  <div className="flex gap-2 items-center text-gray-400 mb-2">
                     <RiMoneyRupeeCircleLine className="w-5" />
                     <span>Budget</span>
                   </div>
-                  <p>$120-$150/Reel</p>
+                  <p>₹{campaign.estimatedbudget}</p>
                 </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+
+                <div>
+                  <div className="flex gap-2 items-center text-gray-400 mb-2">
                     <RiTranslate className="w-5" />
                     <span>Language</span>
                   </div>
-                  <p>English</p>
-                  <p>Hindi</p>
-                  <p>Gujarati</p>
-                  <p>Maliyalam</p>
-                  <p>Telugu</p>
+                  {campaign.campaignlanguages?.map(lang => (
+                    <p key={lang.languageid}>{lang.languagename}</p>
+                  ))}
                 </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+
+                <div>
+                  <div className="flex gap-2 items-center text-gray-400 mb-2">
                     <RiMenLine className="w-5" />
                     <span>Gender</span>
                   </div>
-                  <p>Male</p>
-                  <p>Female</p>
-                  <p>Othere</p>
+                  {campaign.campaigngenders?.map(gender => (
+                    <p key={gender.genderid || Math.random()}>
+                      {gender.gendername || 'Not specified'}
+                    </p>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl">
-            {/* Buttons */}
-            <div className="flex flex-wrap gap-3 mb-6">
-              {buttons.map(({ id, label, path }) => (
-                <button
-                  key={id}
-                  onClick={() => handleClick(path)}
-                  className={`px-4 py-2 rounded-md border border-gray-300 transition
-          ${
-            selectedButton === id
-              ? "bg-[#0f122f] text-white"
-              : "bg-white text-[#141843] hover:bg-gray-100"
-          }`}
-                >
-                  {label}
-                </button>
+          {/* Campaign Description */}
+          <div className="bg-white p-4 rounded-2xl">
+            <h3 className="text-lg font-semibold mb-2">Description</h3>
+            <p className="text-gray-600">{campaign.description}</p>
+          </div>
+
+          {/* Brand Info */}
+          <div className="bg-white p-4 rounded-2xl">
+            <h3 className="text-lg font-semibold mb-2">About Brand</h3>
+            <p className="text-gray-600">{campaign.branddetails?.aboutbrand}</p>
+            <p className="text-gray-500 text-sm mt-2">Location: {campaign.branddetails?.location}</p>
+            <p className="text-gray-500 text-sm">Industry: {campaign.branddetails?.Industry}</p>
+          </div>
+
+          {/* Campaign Files */}
+          <div className="bg-white p-4 rounded-2xl">
+            <h3 className="text-lg font-semibold mb-4">Campaign Files</h3>
+            <div className="flex gap-4 flex-wrap">
+              {campaign.campaignfiles?.map((file, idx) => (
+                <img
+                  key={idx}
+                  src={`${BASE_URL}/${file.filepath}`}
+                  alt={`Campaign File ${idx + 1}`}
+                  className="w-32 h-32 object-cover rounded-lg border"
+                />
               ))}
             </div>
+          </div>
+        </div>
 
-            <hr className="my-4 border-gray-200" />
+        {/* Right Section */}
+        <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
+          {/* Timeline */}
+          <div className="bg-white p-6 rounded-2xl">
+            <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
+            <div className="relative">
+              <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
+              {[
+                { name: "Campaign Created", date: campaign.trackcampaign?.createddate },
+                { name: "Campaign Started", date: campaign.trackcampaign?.startdate },
+                { name: "Campaign Ended", date: campaign.trackcampaign?.enddate },
+              ].map((step, idx) => {
+                const stepDate = dayjs(step.date, "DD-MM-YYYY HH:mm");
+                const now = dayjs();
+                const isCompleted = now.isAfter(stepDate) || now.isSame(stepDate);
 
-            {/* Description */}
-            <div className="campaign-description border-b border-gray-200">
-              <h3 className="font-semibold text-lg mb-2">
-                Campaign Description
-              </h3>
-              <p className="text-gray-700 leading-relaxed py-4">
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry...
-              </p>
-            </div>
-
-            {/* Requirements */}
-            <div className="requirements py-4 border-b-1 border-gray-200">
-              <h3 className="font-semibold text-lg mb-4">Requirements</h3>
-              <ul className="space-y-2 text-gray-700">
-                {Requirements.map((item, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <RiCheckboxCircleFill />
-                    <span>
-                      {item.label} <strong>{item.value}</strong>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <hr className="my-4 border-gray-200" />
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2 mt-4">
-                {["Fixed Price", "Expert", "Beauty", "Micro Influencer"].map(
-                  (tag, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
-                    >
-                      {tag}
-                    </span>
-                  )
-                )}
-              </div>
-
-              {/* Milestones */}
-              <h3 className="font-semibold text-base mb-2 my-4">Milestones</h3>
-              <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4 my-4">
-                <div className="flex-row items-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Project price</span>
-                  </div>
-                  <p>$195.00</p>
-                </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Milestones paid (5)</span>
-                  </div>
-                  <p>$195.00</p>
-                </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Milestones remaining (0)</span>
-                  </div>
-                  <p>$0.00</p>
-                </div>
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <span>Total earnings</span>
-                  </div>
-                  <p>$195.00</p>
-                </div>
-              </div>
-              <div className="relative">
-                {/* Timeline line */}
-                <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
-
-                {milestones.map((m, idx) => (
+                return (
                   <div key={idx} className="relative pl-10 pb-6">
-                    {/* Circle timeline */}
-                    <span className="absolute left-0 top-1 text-gray-700">
-                      <RiCheckboxBlankCircleLine size={18} />
+                    <span className="absolute left-0 top-1">
+                      {isCompleted ? (
+                        <RiCheckboxCircleFill className="text-[#0f122f]" size={20} />
+                      ) : (
+                        <RiCheckboxBlankCircleLine className="text-gray-400" size={18} />
+                      )}
                     </span>
-
-                    {/* Milestone Details */}
                     <div>
-                      <h4 className="font-semibold text-gray-800">{m.name}</h4>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                        <span className="font-medium">{m.amount}</span>
-                        <span>|</span>
-                        <span>Due On {m.dueDate}</span>
-                      </div>
-
-                      {/* Status Badge */}
-                      <span
-                        className={`inline-block mt-2 px-2 py-1 text-xs rounded-md font-medium ${getStatusColor(
-                          m.status
-                        )}`}
-                      >
-                        {m.status}
-                      </span>
+                      <h4 className={`font-semibold ${isCompleted ? "text-gray-800" : "text-gray-400"}`}>
+                        {step.name}
+                      </h4>
+                      <p className={`text-sm ${isCompleted ? "text-gray-600" : "text-gray-400"}`}>
+                        {step.date}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
           </div>
-        </div>
 
-        {/* Right Side */}
-        <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
-          {/* Campaign Details */}
+          {/* Platform Info */}
           <div className="bg-white p-4 rounded-2xl">
-            <h3 className="font-semibold text-lg">Campaign Details</h3>
-            <div className="felx py-4 border-b-1 border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Campaign Number</p>
-              <p>#251HJ8888410Kl</p>
-            </div>
-            <div className="felx py-4 border-b-1 border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Order By</p>
-              <p>Tiktokstar</p>
-            </div>
-            <div className="felx py-4 border-b-1 border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Delivery Date</p>
-              <p>22 June, 2025</p>
-            </div>
-            <div className="felx py-4 border-b-1 border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Total Price</p>
-              <p>250R</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl">
-            <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
-
-            <div className="relative">
-              {/* Vertical Dashed Line */}
-              <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
-
-              {steps.map((step, idx) => (
-                <div key={idx} className="relative pl-10 pb-6">
-                  {/* Circle Icon */}
-                  <span className="absolute left-0 top-1 text-gray-700">
-                    <RiCheckboxBlankCircleLine size={18} />
-                  </span>
-
-                  {/* Step Details */}
-                  <div>
-                    <h4 className="font-semibold text-gray-800">{step.name}</h4>
-                    <p className="text-sm text-gray-600">{step.date}</p>
-                  </div>
+            <h3 className="font-semibold text-lg mb-3">Platforms</h3>
+            {campaign.providercontenttype?.map((platform) => (
+              <div key={platform.providercontenttypeid} className="flex items-center justify-between pb-2">
+                <div className="flex items-center gap-2">
+                  {platform.providerid === 1 && <RiInstagramFill className="text-pink-600" />}
+                  {platform.providerid === 2 && <RiYoutubeFill className="text-red-600" />}
+                  <span className="text-gray-700 font-medium">{platform.providername}</span>
                 </div>
-              ))}
-            </div>
+                <span className="text-gray-500 text-sm">
+                  {platform.contenttypename}
+                </span>
+              </div>
+            ))}
           </div>
-        </div>
-      </div>
 
-      {/* Design Modal */}
-      <Modal
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        footer={null}
-        centered
-      >
-        <h2 className="text-xl font-semibold mb-4">Mark As Complete</h2>
-        <p className="text-gray-600 mb-4">
-          Are you sure you want to mark this campaign as completed?
-        </p>
-
-        <div className="mb-4">
-          <label className="block font-medium text-sm mb-1">
-            Description <span className="text-red-500">*</span>
-          </label>
-          <TextArea
-            rows={3}
-            placeholder="Enter your bio..."
-            value={proposal}
-            onChange={(e) => setProposal(e.target.value)}
-            status={errors.proposal ? "error" : ""}
-          />
-          {errors.proposal && (
-            <p className="text-red-500 text-xs mt-1">{errors.proposal}</p>
-          )}
-        </div>
-
-        <div className="mb-4">
-          <Upload.Dragger
-            beforeUpload={() => false}
-            maxCount={1}
-            fileList={fileList}
-            onChange={handleUpload}
-            accept=".png,.jpg,.jpeg,.pdf,.mp4"
-          >
-            <p className="ant-upload-drag-icon">
-              <RiChatUploadLine className="text-2xl text-gray-600 mx-auto" />
-            </p>
-            <p className="ant-upload-text font-semibold">
-              Click or drag to upload
-            </p>
-            <p className="ant-upload-hint text-sm text-gray-500">
-              Supported: PNG, JPG, MP4, PDF (Max 5MB)
-            </p>
-          </Upload.Dragger>
-          {errors.portfolioFile && (
-            <p className="text-red-500 text-xs mt-1">{errors.portfolioFile}</p>
-          )}
-        </div>
-
-        <div className="references py-4 border-b-1 border-gray-200">
-          <div className="flex gap-4">
-            {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="relative w-48 h-40 rounded-2xl overflow-hidden"
-              >
-                <img
-                  src={`https://images.pexels.com/photos/32429493/pexels-photo-32429493.jpeg?_gl=1*bt0pi*_ga*MTYyNzc2NDMzNi4xNzM2MTY4MzY0*_ga_8JE65Q40S6*czE3NTU1OTExMTYkbzMkZzEkdDE3NTU1OTExMjIkajU0JGwwJGgw`}
-                  alt="Reference"
-                  className="w-full h-full object-cover"
-                />
-                <button className="absolute cursor-pointer top-2 right-2 bg-gray-100 bg-opacity-10 text-black p-2 rounded-full">
-                  <RiDeleteBin6Line className="w-4 h-4" />
-                </button>
+          {/* Milestones */}
+          <div className="bg-white p-4 rounded-2xl">
+            <h3 className="font-semibold text-lg mb-3">Milestones</h3>
+            {campaign.milestones?.map((milestone, index) => (
+              <div key={index} className="mb-2">
+                <p className="font-medium text-gray-800">{milestone.description}</p>
+                <p className="text-sm text-gray-600">Due: {milestone.enddate}</p>
+                <p className="text-sm text-gray-600">Amount: ₹{milestone.amount}</p>
               </div>
             ))}
           </div>
         </div>
-
-        <div className="flex justify-end gap-3 mt-4">
-          <button
-            onClick={() => setIsModalOpen(false)}
-            className="px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-100"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleComplete}
-            className="px-6 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a]"
-          >
-            Complete
-          </button>
-        </div>
-      </Modal>
+      </div>
     </div>
   );
 };
 
-export default Details;
+export default Details

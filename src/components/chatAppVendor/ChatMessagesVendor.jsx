@@ -35,6 +35,7 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
+    
     if (!chat?.conversationid || !token) return;
 
     const fetchMessages = async () => {
