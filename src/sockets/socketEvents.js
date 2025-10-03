@@ -34,4 +34,10 @@ export const registerSocketEvents = (socket, dispatch, userId) => {
   socket.on("undoDeleteMessage", (messageId) => {
     dispatch(undoDeleteMessage(messageId)); // Undo delete locally in Redux
   });
-};
+
+ socket.on("updateMessageStatus", ({ messageId, readbyvendor, readbyinfluencer }) => {
+  console.log("Received read update:", { messageId, readbyvendor, readbyinfluencer });
+  dispatch(setMessageRead({ messageId, readbyvendor, readbyinfluencer }));
+});
+
+};  

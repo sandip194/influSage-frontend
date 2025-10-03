@@ -54,19 +54,20 @@ export default function ChatAppPage() {
 
   // ✉️ Handle sending messages
 const handleSendMessage = async ({ text, file, replyId }) => {
-  // console.log("📨 Sending message with replyId:", replyId); 
   if (!activeChat) return;
 
   const newMsg = {
-    id: Date.now(),
-    senderId: role,
-    content: text,
-    conversationId: activeChat.id,
-    file: file || null,
-    replyId: replyId || null,
-    status: "sending",
-  };
-
+  id: Date.now(),
+  senderId: userId,
+  content: text,
+  conversationId: activeChat.id,
+  file: file || null,
+  replyId: replyId || null,
+  time: new Date().toISOString(), 
+  status: "sending",
+  // readbyvendor: role === 1,      
+  // readbyinfluencer: role === 2,  
+};
   dispatch(addMessage(newMsg));
   socket?.emit("sendMessage", newMsg);
 

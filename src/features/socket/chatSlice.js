@@ -35,9 +35,28 @@ const chatSlice = createSlice({
         if (message) {
             message.deleted = false; 
         }
-        }
+        },
+      setMessageRead: (state, action) => {
+        const { messageId, readbyvendor, readbyinfluencer } = action.payload;
+        console.log("Before update:", state.messages.find(m => m.id === messageId));
+
+        state.messages = state.messages.map(msg =>
+            msg.id === messageId
+            ? {
+                ...msg,
+                readbyvendor: readbyvendor !== undefined ? readbyvendor : msg.readbyvendor,
+                readbyinfluencer: readbyinfluencer !== undefined ? readbyinfluencer : msg.readbyinfluencer,
+                }
+            : msg
+        );
+        },
+
+        setMessages: (state, action) => {
+        state.messages = action.payload;
+        },
     },
 });
 
-export const { setActiveChat, addMessage, updateMessageStatus, deleteMessage, undoDeleteMessage } = chatSlice.actions;
+export const { setActiveChat, addMessage, updateMessageStatus, deleteMessage, undoDeleteMessage, setMessageRead,setMessages } = chatSlice.actions;
 export default chatSlice.reducer;
+    

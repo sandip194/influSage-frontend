@@ -7,8 +7,11 @@ import { Tooltip } from "antd";
 import { Image } from "primereact/image";
 import { getSocket } from "../../sockets/socket";
 import {
+  setMessages,
+  addMessage,
   deleteMessage,
   undoDeleteMessage,
+  setMessageRead,
 } from "../../features/socket/chatSlice";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -36,7 +39,7 @@ const formatTime = (timestamp) => {
 export default function ChatMessages({ chat, setReplyToMessage }) {
   const dispatch = useDispatch();
   const socket = getSocket();
-  const [messages, setMessages] = useState([]);
+  const messages = useSelector((state) => state.chat.messages);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const [deletedMessage, setDeletedMessage] = useState({});
   const scrollRef = useRef(null);
@@ -46,14 +49,19 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
 
   const getMessageStatusIcon = (msg) => {
   const isMe = msg.senderId === role || msg.senderId === userId;
+  if (!isMe) return null;
 
-  if (!isMe) return null; 
-
-  if (role === 1) { 
-    return msg.readbyinfluencer ? "✔✔" : "✔";
-  } else {
-    return msg.readbyvendor ? "✔✔" : "✔";
+  if (role === 2) {
+    if (msg.readbyinfluencer) return "✔✔"; 
+    return "✔";
   }
+
+  // If role is influencer
+  if (role === 1) {
+    if (msg.readbyvendor) return "✔✔"; 
+    return "✔"; 
+  }
+  return "✔";
 };
 
 
@@ -64,12 +72,12 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
   }, [messages]);
 
   const handleDeleteMessage = async (messageId) => {
-    dispatch(deleteMessage(messageId));
-    socket.emit("deleteMessage", {
-      messageId,
-      conversationId: chat.id,
-    });
     try {
+      socket.emit("deleteMessage", {
+        messageId,
+        conversationId: chat.id,
+      });
+
       const res = await axios.put(
         `/chat/undodeletemessage`,
         { p_messageid: messageId, p_roleid: role, p_action: "delete" },
@@ -78,7 +86,6 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
 
       if (res.data?.p_status) {
         toast.success(res.data.message);
-
         setDeletedMessage((prev) => ({
           ...prev,
           [messageId]: Date.now(),
@@ -92,26 +99,25 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
     }
   };
 
+  // Handle undo delete
   const handleUndoMessage = async (messageId) => {
-      dispatch(undoDeleteMessage(messageId));
-    socket.emit("undoDeleteMessage", {
-      messageId,
-      conversationId: chat.id,
-    });
     if (!deletedMessage[messageId]) {
       toast.error("No deleted message to undo.");
       return;
     }
 
-    const elapsedMinutes =
-      (Date.now() - deletedMessage[messageId]) / (1000 * 60);
-
+    const elapsedMinutes = (Date.now() - deletedMessage[messageId]) / (1000 * 60);
     if (elapsedMinutes > 15) {
       toast.error("Undo time expired (15 minutes).");
       return;
     }
 
     try {
+      socket.emit("undoDeleteMessage", {
+        messageId,
+        conversationId: chat.id,
+      });
+
       const res = await axios.put(
         `/chat/undodeletemessage`,
         { p_messageid: messageId, p_roleid: role, p_action: "undo" },
@@ -120,7 +126,6 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
 
       if (res.data?.p_status) {
         toast.success(res.data.message);
-
         setDeletedMessage((prev) => {
           const updated = { ...prev };
           delete updated[messageId];
@@ -135,8 +140,13 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
     }
   };
 
+  // Socket event listeners
   useEffect(() => {
     if (!socket) return;
+
+    socket.on("newMessage", (msg) => {
+      dispatch(addMessage(msg));
+    });
 
     socket.on("deleteMessage", (messageId) => {
       dispatch(deleteMessage(messageId));
@@ -146,9 +156,17 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
       dispatch(undoDeleteMessage(messageId));
     });
 
+    socket.on("updateMessageStatus", ({ messageId, readbyvendor, readbyinfluencer }) => {
+      console.log("Read status update received:", { messageId, readbyvendor, readbyinfluencer });
+      dispatch(setMessageRead({ messageId, readbyvendor, readbyinfluencer }));
+    });
+
+
     return () => {
+      socket.off("newMessage");
       socket.off("deleteMessage");
       socket.off("undoDeleteMessage");
+      socket.off("updateMessageStatus");
     };
   }, [socket, dispatch]);
 
@@ -172,17 +190,14 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
             id: msg.messageid,
             senderId: msg.roleid,
             content: (msg.message || "").replace(/^"|"$/g, ""),
-            file: Array.isArray(msg.filepath)
-              ? msg.filepath.join(",")
-              : msg.filepath || "",
+            file: Array.isArray(msg.filepath) ? msg.filepath.join(",") : msg.filepath || "",
             time: msg.createddate,
             replyId: msg.replyid || null,
             deleted: msg.deleted || false,
-            readbyvendor: msg.readbyvendor,
-            readbyinfluencer: msg.readbyinfluencer,
+            readbyvendor: msg.readbyvendor ?? false,    
+            readbyinfluencer: msg.readbyinfluencer ?? false,
           }));
-
-          setMessages(formattedMessages);
+          dispatch(setMessages(formattedMessages));
         }
       } catch (err) {
         console.error("Failed to fetch messages:", err);
@@ -190,7 +205,7 @@ export default function ChatMessages({ chat, setReplyToMessage }) {
     };
 
     fetchMessages();
-  }, [chat, token, role]);
+  }, [chat?.id, token, role, dispatch]);
 
   if (!chat)
     return <div className="flex-1 p-4">Select a chat to start messaging</div>;

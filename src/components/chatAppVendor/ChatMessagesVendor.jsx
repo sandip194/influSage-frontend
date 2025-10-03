@@ -41,6 +41,22 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
 
   const { token, id: userId, role } = useSelector((state) => state.auth) || {};
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const getMessageStatusIcon = (msg) => {
+  const isMe = msg.senderId === role || msg.senderId === userId;
+  if (!isMe) return null;
+
+  if (role === 2) {
+    if (msg.readbyinfluencer) return "✔✔"; 
+    return "✔";
+  }
+
+  // If role is influencer
+  if (role === 1) {
+    if (msg.readbyvendor) return "✔✔"; 
+    return "✔"; 
+  }
+  return "✔";
+};
 
   useEffect(() => {
   if (!chat?.conversationid || !token) return;
@@ -90,6 +106,11 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
 
   // Handle delete message
   const handleDeleteMessage = async (messageId) => {
+    dispatch(deleteMessage(messageId));
+    socket.emit("deleteMessage", {
+      messageId,
+      conversationId: chat.id,
+    });
     try {
       const res = await axios.put(
         `/chat/undodeletemessage`,
@@ -99,10 +120,11 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
 
       if (res.data?.p_status) {
         toast.success(res.data.message);
-        socket.emit("deleteMessage", { messageId, conversationId: chat.conversationid });
 
-        setDeletedMessage((prev) => ({ ...prev, [messageId]: Date.now() }));
-        await fetchMessages(); // Refresh messages from API
+        setDeletedMessage((prev) => ({
+          ...prev,
+          [messageId]: Date.now(),
+        }));
       } else {
         toast.error(res.data.message || "Failed to delete message");
       }
@@ -112,14 +134,20 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
     }
   };
 
-  // Handle undo delete
   const handleUndoMessage = async (messageId) => {
+      dispatch(undoDeleteMessage(messageId));
+    socket.emit("undoDeleteMessage", {
+      messageId,
+      conversationId: chat.id,
+    });
     if (!deletedMessage[messageId]) {
       toast.error("No deleted message to undo.");
       return;
     }
 
-    const elapsedMinutes = (Date.now() - deletedMessage[messageId]) / (1000 * 60);
+    const elapsedMinutes =
+      (Date.now() - deletedMessage[messageId]) / (1000 * 60);
+
     if (elapsedMinutes > 15) {
       toast.error("Undo time expired (15 minutes).");
       return;
@@ -134,15 +162,12 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
 
       if (res.data?.p_status) {
         toast.success(res.data.message);
-        socket.emit("undoDeleteMessage", { messageId, conversationId: chat.conversationid });
 
         setDeletedMessage((prev) => {
           const updated = { ...prev };
           delete updated[messageId];
           return updated;
         });
-
-        await fetchMessages(); // Refresh messages from API
       } else {
         toast.error(res.data.message || "Failed to undo delete");
       }
@@ -329,12 +354,13 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
                 ) : (
                   <div>{msg.content}</div>
                 )}
-
               </div>
 
-              <div className="text-[10px] text-gray-500 mt-1 px-2">
-                {formatTime(msg.time)}
-              </div>
+              {/* TIMESTAMP */}
+                <div className="text-[10px] text-gray-500 mt-1 px-2 flex items-center gap-1 justify-end">
+                  <span>{formatTime(msg.time)}</span>
+                  <span className="text-blue-500">{getMessageStatusIcon(msg)}</span>
+                </div>
 
               {hoveredMsgId === msg.id && (
                 <div
