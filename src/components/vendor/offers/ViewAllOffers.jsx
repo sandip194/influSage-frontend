@@ -17,8 +17,9 @@ import { useSelector } from "react-redux";
 
 const statusLabels = {
   "Viewed": { text: "Viewed", style: "bg-blue-50 border border-blue-200 text-blue-700" },
-  "Applied": { text: "New", style: "bg-yellow-50 border border-yellow-200 text-yellow-700" },
+  "Applied": { text: "New", style: "bg-red-50 border border-red-200 text-red-700" },
   "Selected": { text: "Selected", style: "bg-green-50 border border-green-200 text-green-700" },
+  "Withdrawn": { text: "Withdrawn", style: "bg-yellow-50 border border-yellow-200 text-yellow-700" },
 };
 
 

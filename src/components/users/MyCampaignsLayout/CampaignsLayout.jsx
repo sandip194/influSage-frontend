@@ -51,6 +51,7 @@ const InfluencerCampaigns = () => {
     pagesize: 10,
     search: "",
     providers: [],
+    clients: [],
     minbudget: null,
     maxbudget: null,
     startdate: null,
@@ -59,6 +60,7 @@ const InfluencerCampaigns = () => {
 
   const [tempFilters, setTempFilters] = useState({
     providers: [],
+    clients: [],
     minbudget: null,
     maxbudget: null,
     startdate: null,
@@ -90,8 +92,8 @@ const InfluencerCampaigns = () => {
         p_pagenumber: filters.pagenumber,
         p_pagesize: filters.pagesize,
         p_search: filters.search?.trim() || undefined,
-        // Add filter params as needed
-        p_providers: filters.providers.length > 0 ? filters.providers.join(",") : undefined,
+        p_providers: filters.providers.length > 0 ? JSON.stringify(filters.providers) : undefined,
+        p_clients: filters.clients.length > 0 ? JSON.stringify(filters.clients) : undefined,
         p_minbudget: filters.minbudget || undefined,
         p_maxbudget: filters.maxbudget || undefined,
         p_startdate: filters.startdate || undefined,
@@ -202,6 +204,16 @@ const InfluencerCampaigns = () => {
     });
   };
 
+  const handleClientChange = (id) => {
+    setTempFilters((prev) => {
+      const clients = prev.clients.includes(id)
+        ? prev.clients.filter((c) => c !== id)
+        : [...prev.clients, id];
+      return { ...prev, clients };
+    });
+  };
+
+
   // Budget change (temp)
   const handleBudgetChange = (field, value) => {
     setTempFilters((prev) => ({ ...prev, [field]: value ? Number(value) : null }));
@@ -224,6 +236,7 @@ const InfluencerCampaigns = () => {
   const clearFilters = () => {
     setTempFilters({
       providers: [],
+      clients: [],
       minbudget: null,
       maxbudget: null,
       startdate: null,
@@ -232,6 +245,7 @@ const InfluencerCampaigns = () => {
     setFilters((prev) => ({
       ...prev,
       providers: [],
+      clients: [],
       minbudget: null,
       maxbudget: null,
       startdate: null,
@@ -246,6 +260,7 @@ const InfluencerCampaigns = () => {
     setFilters((prev) => ({
       ...prev,
       providers: tempFilters.providers,
+      clients: tempFilters.clients,
       minbudget: tempFilters.minbudget,
       maxbudget: tempFilters.maxbudget,
       startdate: tempFilters.startdate,
@@ -260,6 +275,7 @@ const InfluencerCampaigns = () => {
     if (showFilter) {
       setTempFilters({
         providers: filters.providers,
+        clients: filters.clients,
         minbudget: filters.minbudget,
         maxbudget: filters.maxbudget,
         startdate: filters.startdate,
@@ -273,7 +289,7 @@ const InfluencerCampaigns = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-gray-900">My Campaigns</h2>
-       
+
       </div>
 
       {/* Status Tabs */}
@@ -387,7 +403,7 @@ const InfluencerCampaigns = () => {
                     <td className="p-4">
                       <Tooltip title="View Details">
                         <button
-                          onClick={() => navigate(`/influencer-campaigns/${row.id}`)}
+                          onClick={() => navigate(`/dashboard/my-campaigns/details/${row.id}`)}
                           className="text-[#0f122f] cursor-pointer hover:text-[#1d214f]"
                         >
                           <RiEyeLine className="text-lg" />
@@ -481,8 +497,8 @@ const InfluencerCampaigns = () => {
                       className="flex items-center cursor-pointer"
                     >
                       <Checkbox
-                        checked={tempFilters.providers.includes(client.ownerid)}
-                        onChange={() => handleProviderChange(client.ownerid)}
+                        checked={tempFilters.clients.includes(client.ownerid)}
+                        onChange={() => handleClientChange(client.ownerid)}
                       />
                       <span className="text-sm text-gray-700 ml-2">
                         {client.businessname}

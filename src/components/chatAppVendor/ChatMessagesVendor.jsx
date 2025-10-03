@@ -42,44 +42,45 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
   const { token, id: userId, role } = useSelector((state) => state.auth) || {};
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-
-    if (!chat?.conversationid || !token) return;
-
-    const fetchMessages = async () => {
-      try {
-        const res = await axios.get(`/chat/messages`, {
-          params: {
-            p_conversationid: chat.conversationid,
-            p_roleid: role,
-            p_limit: 50,
-            p_offset: 0,
-          },
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.data?.data?.records) {
-          const formattedMessages = res.data.data.records.map((msg) => ({
-            id: msg.messageid,
-            senderId: msg.roleid,
-            content: (msg.message || "").replace(/^"|"$/g, ""),
-            file: Array.isArray(msg.filepath)
-              ? msg.filepath.join(",")
-              : msg.filepath || "",
-            time: msg.createddate,
-            replyId: msg.replyid || null,
-            deleted: msg.deleted || false,
-          }));
-
-          setMessages(formattedMessages);
-        }
-      } catch (err) {
-        console.error("Failed to fetch messages:", err);
-      }
-    };
-
   useEffect(() => {
-    fetchMessages();
-  }, [chat, token, role])
+  if (!chat?.conversationid || !token) return;
+
+  const fetchMessages = async () => {
+    try {
+      const res = await axios.get(`/chat/messages`, {
+        params: {
+          p_conversationid: chat.conversationid,
+          p_roleid: role,
+          p_limit: 50,
+          p_offset: 0,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data?.data?.records) {
+        const formattedMessages = res.data.data.records.map((msg) => ({
+          id: msg.messageid,
+          senderId: msg.roleid,
+          content: (msg.message || "").replace(/^"|"$/g, ""),
+          file: Array.isArray(msg.filepath)
+            ? msg.filepath.join(",")
+            : msg.filepath || "",
+          time: msg.createddate,
+          replyId: msg.replyid || null,
+          deleted: msg.deleted || false,
+        }));
+
+        setMessages(formattedMessages);
+      }
+    } catch (err) {
+      console.error("Failed to fetch messages:", err);
+    }
+  };
+
+  fetchMessages(); 
+
+}, [chat, token, role]); 
+
 
   useEffect(() => {
     if (scrollRef.current) {

@@ -105,7 +105,7 @@ const App = () => {
                                                 <Route path='browse/apply-now/:campaignId' element={<ApplyNow />} />
 
                                                 <Route path='my-campaigns' element={<CampaignsLayout />} />
-                                                <Route path='my-campaigns/details' element={<Details />} />
+                                                <Route path='my-campaigns/details/:campaignId' element={<Details />} />
 
                                                 <Route path='my-campaigns/activity' element={<Activity />} />
                                                 <Route path='my-campaigns/message' element={<Message />} />

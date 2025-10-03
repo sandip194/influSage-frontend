@@ -60,7 +60,7 @@ export default function ChatAppPageVendor() {
       file: file || null,
       replyId: replyId || null,
       status: "sending",
-    };
+    }; 
 
     dispatch(addMessage(tempMsg));
     socket?.emit("sendMessage", tempMsg);

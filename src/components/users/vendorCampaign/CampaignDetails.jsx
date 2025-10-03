@@ -3,17 +3,12 @@ import {
   RiMenLine,
   RiMoneyRupeeCircleLine,
   RiTranslate,
-  RiArrowLeftSLine,
   RiCheckboxBlankCircleLine,
   RiInstagramFill,
   RiYoutubeFill,
-  RiFacebookFill,
-  RiTiktokFill,
-  RiStarFill,
   RiStarLine,
 } from '@remixicon/react';
 import { Modal, Input, Tabs } from 'antd';
-import { RiStarLine as AntdStarLine } from '@remixicon/react'; // Note: Using Remixicon for stars in modal, but can adjust if needed
 import VendorCampaignOverview from './VendorCampaignOverview';
 import VendorActivity from './VendorActivity';
 import VendorMessage from './VendorMessage';
@@ -22,21 +17,16 @@ import VendorPayment from './VendorPayment';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RiArrowLeftLine } from 'react-icons/ri';
+import { RiArrowLeftLine, RiCheckboxCircleFill } from "react-icons/ri";
+
+import dayjs from 'dayjs';
 
 const { TextArea } = Input;
 
 
-
-const steps = [
-  { name: "Campaign Created", date: "16 Jun 2021, 05:00 PM" },
-  { name: "Campaign Processed", date: "16 Jun 2021, 05:00 PM" },
-  { name: "Campaign Delivered", date: "16 Jun 2021, 05:00 PM" },
-];
-
 const CampaignDetails = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [proposal, setProposal] = useState("");
+  const [proposal, setProposal] = useState(""); 
   const [errors, setErrors] = useState({});
   const [cancelReason, setCancelReason] = useState("");
   const [isCancelModel, setCancelModel] = useState(false);
@@ -237,7 +227,7 @@ const CampaignDetails = () => {
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
               <p>
-                {campaignDetails?.startdate} — {campaignDetails?.enddate}
+                {campaignDetails?.requirements.startdate} — {campaignDetails?.requirements.enddate}
               </p>
             </div>
 
@@ -250,7 +240,7 @@ const CampaignDetails = () => {
 
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Delivery Date</p>
-              <p>{campaignDetails?.enddate}</p>
+              <p>{campaignDetails?.requirements.enddate}</p>
             </div>
 
             <div className="py-4">
@@ -282,93 +272,95 @@ const CampaignDetails = () => {
               </div>
             </div>
 
-            {/* Influencer Details Card */}
-            <div className="bg-white p-4 rounded-2xl">
-              <h3 className="font-semibold text-lg">Influencer Details</h3>
-              <div className="flex items-center gap-3">
-                <img
-                  src="https://randomuser.me/api/portraits/women/44.jpg"
-                  alt="Profile"
-                  className="w-14 h-14 rounded-full object-cover"
-                />
-                <div>
-                  <h3 className="font-semibold text-gray-800">
-                    Courtney Henry
-                  </h3>
-                  <p className="text-sm text-gray-500">Ahmedabad, India</p>
-                  <div className="flex items-center text-yellow-500 text-sm">
-                    <RiStarFill />
-                    <RiStarFill />
-                    <RiStarFill />
-                    <RiStarFill />
-                    <RiStarLine className="text-gray-300" />
-                    <span className="ml-2 text-gray-700">4.2 (112)</span>
-                  </div>
-                </div>
-              </div>
 
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2 mt-3">
-                {campaignDetails?.p_campaigncategoyjson?.flatMap(parent =>
-                  parent.categories.map(cat => cat.categoryname)
-                ).map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600"
+            {/* Influencers List */}
+            <div className="bg-white p-4 rounded-2xl mt-6">
+              <h3 className="font-semibold text-lg mb-4">Influencers</h3>
+              {campaignDetails?.influencers?.length > 0 ? (
+                campaignDetails.influencers.map((influencer) => (
+                  <div
+                    key={influencer.influencerid}
+                    className="flex border border-gray-200 rounded-2xl items-start p-3 gap-4 mb-4 cursor-pointer hover:bg-gray-100"
+                    onClick={() =>
+                      navigate(`/vendor-dashboard/browse-influencers/influencer-details/${influencer.influencerid}`)
+                    }
                   >
-                    {tag}
-                  </span>
-                ))}
-
-              </div>
-              <hr className="my-4 border-gray-200" />
-
-              {/* Social Counts */}
-              <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-700">
-                <span className="flex items-center gap-1">
-                  <RiInstagramFill className="text-pink-600" /> 11.5k
-                </span>
-                <span className="flex items-center gap-1">
-                  <RiYoutubeFill className="text-red-600" /> 10.2k
-                </span>
-                <span className="flex items-center gap-1">
-                  <RiFacebookFill className="text-blue-600" /> 2.1k
-                </span>
-                <span className="flex items-center gap-1">
-                  <RiTiktokFill className="text-black" /> 2.1k
-                </span>
-              </div>
-              <hr className="my-4 border-gray-200" />
-
-              {/* Buttons */}
-              <div className="flex gap-3 mt-4">
-                <button className="flex-1 border border-gray-300 text-gray-800 rounded-full py-2 text-sm font-medium hover:bg-gray-100 transition">
-                  View Profile
-                </button>
-                <button className="flex-1 bg-[#141843] text-white rounded-full py-2 text-sm font-medium hover:bg-[#1d214f] transition">
-                  Message
-                </button>
-              </div>
+                    <img
+                      src={`${BASE_URL}/${influencer.userphoto}`}
+                      alt={`${influencer.firstname} ${influencer.lastname}`}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-800">
+                        {influencer.firstname} {influencer.lastname}
+                      </h4>
+                      <p className="text-sm text-gray-500">
+                        {influencer.statename}, {influencer.countryname}
+                      </p>
+                      <div className="flex gap-2 mt-1 flex-wrap">
+                        {influencer.providers.map((provider) => (
+                          <div key={provider.providerid} className="flex items-center gap-1 text-sm text-gray-600">
+                            <img
+                              src={`${BASE_URL}/${provider.iconpath}`}
+                              alt={provider.providername}
+                              className="w-4 h-4"
+                            />
+                            <span>{provider.nooffollowers.toLocaleString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-2 mt-1 flex-wrap text-xs text-gray-500">
+                        {influencer.categories.slice(0, 3).map((cat) => (
+                          <span key={cat.categoryid} className="bg-gray-100 px-2 py-0.5 rounded-full">
+                            {cat.categoryname}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">No influencers found.</p>
+              )}
             </div>
 
-            {/* Track Campaign */}
-            <div className="bg-white p-6 rounded-2xl">
+
+            <div className="bg-white p-6 rounded-2xl mt-6">
               <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
               <div className="relative">
                 <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
-                {steps.map((step, idx) => (
-                  <div key={idx} className="relative pl-10 pb-6">
-                    <span className="absolute left-0 top-1 text-gray-700">
-                      <RiCheckboxBlankCircleLine size={18} />
-                    </span>
-                    <div>
-                      <h4 className="font-semibold text-gray-800">{step.name}</h4>
-                      <p className="text-sm text-gray-600">{step.date}</p>
+                {[
+                  { name: "Campaign Created", date: campaignDetails?.trackcampaign?.createddate },
+                  { name: "Campaign Started", date: campaignDetails?.trackcampaign?.startdate },
+                  { name: "Campaign Ended", date: campaignDetails?.trackcampaign?.enddate },
+                ].map((step, idx) => {
+                  const stepDate = dayjs(step.date, "DD-MM-YYYY HH:mm");
+                  const now = dayjs();
+                  const isCompleted = now.isAfter(stepDate) || now.isSame(stepDate);
+
+                  return (
+                    <div key={idx} className="relative pl-10 pb-6">
+                      <span className="absolute left-0 top-1">
+                        {isCompleted ? (
+                          <RiCheckboxCircleFill className="text-[#0f122f]" size={20} />
+                        ) : (
+                          <RiCheckboxBlankCircleLine className="text-gray-400" size={18} />
+                        )}
+                      </span>
+                      <div>
+                        <h4 className={`font-semibold ${isCompleted ? "text-gray-800" : "text-gray-400"}`}>
+                          {step.name}
+                        </h4>
+                        <p className={`text-sm ${isCompleted ? "text-gray-600" : "text-gray-400"}`}>
+                          {step.date}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
+
           </div>
         </div>
       </div>
