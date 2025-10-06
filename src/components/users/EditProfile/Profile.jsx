@@ -5,8 +5,10 @@ import {
   RiStarFill,
   RiArrowUpSLine,
 } from '@remixicon/react';
+import axios from 'axios';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 const socialMediaData = [
@@ -115,11 +117,36 @@ const workHistoryData = [
 const Profile = () => {
   const [showAll, setShowAll] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   const visibleData = showAllHistory
     ? workHistoryData
     : workHistoryData.slice(0, 2);
   const visibleItems = showAll ? portfolioData : portfolioData.slice(0, 4);
+
+  const { token } = useSelector((state) => state.auth);
+
+  // const getMyProfileDetails = async () => {
+  //   try {
+  //     setLoading(true)
+  //     const res = await axios.get('user/myProfile', {
+  //       headers: {
+  //         Authorization: token
+  //       }
+  //     })
+  //     console.log(res.data)
+  //   } catch (error) {
+  //     console.log(error)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   getMyProfileDetails()
+  // }, [])
+
+
   return (
     <div className="w-full text-sm overflow-x-hidden">
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Profile</h2>
