@@ -40,4 +40,8 @@ export const registerSocketEvents = (socket, dispatch, userId) => {
   dispatch(setMessageRead({ messageId, readbyvendor, readbyinfluencer }));
 });
 
+socket.on("editMessage", ({ updatedMsg }) => {
+  dispatch(updateMessage(updatedMsg));;
+});
+
 };  
