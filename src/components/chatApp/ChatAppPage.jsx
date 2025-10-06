@@ -1,4 +1,4 @@
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import Sidebar from "./Sidebar";
@@ -9,6 +9,7 @@ import ChatInput from "./ChatInput";
 import { getSocket } from "../../sockets/socket";
 import {
   addMessage,
+  updateMessage,
   updateMessageStatus,
   setActiveChat,
 } from "../../features/socket/chatSlice";
@@ -19,7 +20,7 @@ export default function ChatAppPage() {
   const socket = getSocket();
 
   const activeChat = useSelector((state) => state.chat.activeChat);
-  
+
   const messages = useSelector((state) => state.chat.messages);
   const [selectedReplyMessage, setSelectedReplyMessage] = useState(null);
   const [editingMessage, setEditingMessage] = useState(null);
@@ -54,87 +55,87 @@ export default function ChatAppPage() {
   }, [socket, dispatch]);
 
   // ✉️ Handle sending messages
-const handleSendMessage = async ({ text, file, replyId }) => {
-  if (!activeChat) return;
+  const handleSendMessage = async ({ text, file, replyId }) => {
+    if (!activeChat) return;
 
-  const newMsg = {
-  id: Date.now(),
-  senderId: userId,
-  content: text,
-  conversationId: activeChat.id,
-  file: file || null,
-  replyId: replyId || null,
-  time: new Date().toISOString(), 
-  status: "sending",
-  // readbyvendor: role === 1,      
-  // readbyinfluencer: role === 2,  
-};
-  dispatch(addMessage(newMsg));
-  socket?.emit("sendMessage", newMsg);
+    const newMsg = {
+      id: Date.now(),
+      senderId: userId,
+      roleId: role, // ✅ Add this line
+      content: text,
+      conversationId: activeChat.id,
+      file: file || null,
+      replyId: replyId || null,
+      time: new Date().toISOString(),
+      status: "sending",
+    };
 
-  try {
-    const formData = new FormData();
-    formData.append("p_conversationid", activeChat.id);
-    formData.append("p_roleid", role);
-    formData.append("p_messages", text);
-    if (file) formData.append("file", file);
-    if (replyId) formData.append("p_replyid", replyId);
+    dispatch(addMessage(newMsg));
+    socket?.emit("sendMessage", newMsg);
 
-    const res = await axios.post(`/chat/insertmessage`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    try {
+      const formData = new FormData();
+      formData.append("p_conversationid", activeChat.id);
+      formData.append("p_roleid", role);
+      formData.append("p_messages", text);
+      if (file) formData.append("file", file);
+      if (replyId) formData.append("p_replyid", replyId);
 
-    if (res.data?.p_status) {
-      dispatch(
-        updateMessageStatus({
-          tempId: newMsg.id,
-          newId: res.data.message_id,
-          fileUrl: res.data.filepath || null,
-        })
-      );
+      const res = await axios.post(`/chat/insertmessage`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (res.data?.p_status) {
+        dispatch(
+          updateMessageStatus({
+            tempId: newMsg.id,
+            newId: res.data.message_id,
+            fileUrl: res.data.filepath || null,
+          })
+        );
+      }
+    } catch (err) {
+      console.error("Send failed", err);
     }
-  } catch (err) {
-    console.error("Send failed", err);
-  }
-};
+  };
 
-const handleEditMessage = async ({ id, content, file, replyId }) => {
-  if (!activeChat || !id) return console.error("Missing activeChat or message id");
+  const handleEditMessage = async ({ id, content, file, replyId }) => {
+    if (!activeChat || !id) return console.error("Missing activeChat or message id");
 
-  try {
-    const formData = new FormData();
-    formData.append("p_conversationid", activeChat.id); 
-    formData.append("p_roleid", role);
-    formData.append("p_messages", content);
-    formData.append("p_messageid", id);
-    if (file) formData.append("file", file);
-    if (replyId) formData.append("p_replyid", replyId);
+    try {
+      const formData = new FormData();
+      formData.append("p_conversationid", activeChat.id);
+      formData.append("p_roleid", role);
+      formData.append("p_messages", content);
+      formData.append("p_messageid", id);
+      if (file) formData.append("file", file);
+      if (replyId) formData.append("p_replyid", replyId);
 
-    const res = await axios.post(`/chat/insertmessage`, formData, {
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-    });
+      const res = await axios.post(`/chat/insertmessage`, formData, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+      });
 
-    if (res.data?.p_status) {
-      const updatedMessage = {
-        id, 
-        senderId: userId,
-        content,
-        file: file || res.data.filepath || null,
-        conversationId: activeChat.id,
-        replyId: replyId || null,
-      };
+      if (res.data?.p_status) {
+        const updatedMessage = {
+          id,
+          senderId: userId,
+          content,
+          file: file || res.data.filepath || null,
+          conversationId: activeChat.id,
+          replyId: replyId || null,
+        };
 
-      socket.emit("editMessage", updatedMessage);
-      dispatch(updateMessage(updatedMessage));
-      setEditingMessage(null);
+        socket.emit("editMessage", updatedMessage);
+        dispatch(updateMessage(updatedMessage));
+        setEditingMessage(null);
+      }
+    } catch (err) {
+      console.error("Edit failed", err);
     }
-  } catch (err) {
-    console.error("Edit failed", err);
-  }
-};
+  };
 
 
   return (

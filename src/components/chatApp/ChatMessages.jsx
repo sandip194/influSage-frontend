@@ -47,21 +47,23 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
   // console.log("role is :" , role)
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
- const getMessageStatusIcon = (msg) => {
-  const isMe = !msg.senderId || msg.senderId === userId;
+  const getMessageStatusIcon = (msg) => {
+    console.log("msg : ", msg)
+    console.log("stored userId : ", userId)
+    const isMe = msg.roleId === role;
 
-  if (!isMe) return null;
+    if (!isMe) return null;
 
-  if (role === 2) {
-    return msg.readbyinfluencer ? "✔✔" : "✔";
-  }
+    if (role === 2) {
+      return msg.readbyinfluencer ? "✔✔" : "✔";
+    }
 
-  if (role === 1) {
-    return msg.readbyvendor ? "✔✔" : "✔";
-  }
+    if (role === 1) {
+      return msg.readbyvendor ? "✔✔" : "✔";
+    }
 
-  return "✔";
-};
+    return "✔";
+  };
 
 
   useEffect(() => {
@@ -71,12 +73,13 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
   }, [messages]);
 
   const handleDeleteMessage = async (messageId) => {
-    try {
-      socket.emit("deleteMessage", {
-        messageId,
-        conversationId: chat.id,
-      });
+    dispatch(deleteMessage(messageId)); // <-- ADD THIS
+    socket.emit("deleteMessage", {
+      messageId,
+      conversationId: chat.id,
+    });
 
+    try {
       const res = await axios.put(
         `/chat/undodeletemessage`,
         { p_messageid: messageId, p_roleid: role, p_action: "delete" },
@@ -98,7 +101,7 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
     }
   };
 
-  // Handle undo delete
+
   const handleUndoMessage = async (messageId) => {
     if (!deletedMessage[messageId]) {
       toast.error("No deleted message to undo.");
@@ -111,12 +114,13 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
       return;
     }
 
-    try {
-      socket.emit("undoDeleteMessage", {
-        messageId,
-        conversationId: chat.id,
-      });
+    dispatch(undoDeleteMessage(messageId)); // <-- ADD THIS
+    socket.emit("undoDeleteMessage", {
+      messageId,
+      conversationId: chat.id,
+    });
 
+    try {
       const res = await axios.put(
         `/chat/undodeletemessage`,
         { p_messageid: messageId, p_roleid: role, p_action: "undo" },
@@ -138,6 +142,7 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
       toast.error("Something went wrong while undoing.");
     }
   };
+
 
   // Socket event listeners
   useEffect(() => {
@@ -178,7 +183,7 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
           params: {
             p_conversationid: chat.id,
             p_roleid: role,
-            p_limit: 50,
+           // p_limit: 500,
             p_offset: 0,
           },
           headers: { Authorization: `Bearer ${token}` },
@@ -194,7 +199,7 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
             time: msg.createddate,
             replyId: msg.replyid || null,
             deleted: msg.deleted || false,
-            readbyvendor: msg.readbyvendor ?? false,    
+            readbyvendor: msg.readbyvendor ?? false,
             readbyinfluencer: msg.readbyinfluencer ?? false,
           }));
           dispatch(setMessages(formattedMessages));
@@ -208,21 +213,22 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
   }, [chat?.id, token, role]);
 
   useEffect(() => {
-  if (!socket || !messages.length) return;
+    if (!socket || !messages.length) return;
 
-  messages.forEach(msg => {
-    const isMe = msg.senderId === userId;
-    const isUnread = !isMe && !msg.readbyvendor && !msg.readbyinfluencer;
+    messages.forEach(msg => {
+      const isMe = msg.roleId === role;
 
-    if (isUnread) {
-      socket.emit("messageSeen", {
-        messageId: msg.id,
-        conversationId: chat.id,
-        roleId: role,
-      });
-    }
-  });
-}, [messages, socket, userId, chat?.id, role]);
+      const isUnread = !isMe && !msg.readbyvendor && !msg.readbyinfluencer;
+
+      if (isUnread) {
+        socket.emit("messageSeen", {
+          messageId: msg.id,
+          conversationId: chat.id,
+          roleId: role,
+        });
+      }
+    });
+  }, [messages, socket, userId, chat?.id, role]);
 
   if (!chat)
     return <div className="flex-1 p-4">Select a chat to start messaging</div>;
@@ -230,7 +236,8 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
   return (
     <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-6 space-y-1">
       {messages.map((msg, index) => {
-       const isMe = !msg.senderId || msg.senderId === userId;
+        const isMe = msg.roleId === role;
+
 
         const isLast = index === messages.length - 1;
         // console.log("Message:", msg.content, "senderId:", msg.senderId, "userId:", userId, "isMe:", isMe);
@@ -239,9 +246,8 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
           <div
             key={msg.id}
             ref={isLast ? scrollRef : null}
-            className={`flex relative ${
-              isMe ? "justify-end" : "items-start space-x-2"
-            }`}
+            className={`flex relative ${isMe ? "justify-end" : "items-start space-x-2"
+              }`}
             onMouseEnter={() => setHoveredMsgId(msg.id)}
             onMouseLeave={() => setHoveredMsgId(null)}
           >
@@ -260,15 +266,13 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
             )}
 
             <div
-              className={`relative flex flex-col ${
-                isMe ? "items-end" : "items-start"
-              }`}
+              className={`relative flex flex-col ${isMe ? "items-end" : "items-start"
+                }`}
             >
               {/* Message bubble */}
               <div
-                className={`px-3 py-1 rounded-lg max-w-xs break-words ${
-                  isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"
-                }`}
+                className={`px-3 py-1 rounded-lg max-w-xs break-words ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"
+                  }`}
               >
                 {/* FILE PREVIEW */}
                 {deletedMessage.id !== msg.id && msg.file && (
@@ -354,61 +358,58 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
 
                 {/* Reply Preview */}
                 {msg.replyId && (
-                    <div
-                      className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] ${
-                        isMe
-                          ? "bg-gray-700 border-blue-400 text-gray-200"
-                          : "bg-gray-300 border-green-500 text-gray-800"
+                  <div
+                    className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] ${isMe
+                      ? "bg-gray-700 border-blue-400 text-gray-200"
+                      : "bg-gray-300 border-green-500 text-gray-800"
                       }`}
-                    >
-                      {(() => {
-                        const repliedMsg = messages.find((m) => m.id === msg.replyId);
+                  >
+                    {(() => {
+                      const repliedMsg = messages.find((m) => m.id === msg.replyId);
 
-                        if (!repliedMsg)
-                          return (
-                            <span className="italic text-gray-500">Message deleted</span>
-                          );
-
-                        const fileUrl = repliedMsg.file
-                          ? `${BASE_URL}/${repliedMsg.file}`
-                          : null;
-
+                      if (!repliedMsg)
                         return (
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-[11px] text-blue-600">
-                              {repliedMsg.senderId === role || repliedMsg.senderId === userId
-                                ? "You"
-                                : chat?.name || "Unknown"}
-                            </span>
-                            {/* Quoted text */}
-                            {repliedMsg.content && <span className="truncate">{repliedMsg.content}</span>}
-
-                            {/* Quoted file attachment */}
-                            {fileUrl && (
-                              <a
-                                href={fileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-500 text-[10px] underline mt-1"
-                              >
-                                {repliedMsg.file.split("/").pop()}
-                              </a>
-                            )}
-                          </div>
+                          <span className="italic text-gray-500">Message deleted</span>
                         );
-                      })()}
-                    </div>
-                  )}
 
-                {deletedMessage[msg.id] ? (
+                      const fileUrl = repliedMsg.file
+                        ? `${BASE_URL}/${repliedMsg.file}`
+                        : null;
+
+                      return (
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-[11px] text-blue-600">
+                            {repliedMsg.senderId === role || repliedMsg.senderId === userId
+                              ? "You"
+                              : chat?.name || "Unknown"}
+                          </span>
+                          {/* Quoted text */}
+                          {repliedMsg.content && <span className="truncate">{repliedMsg.content}</span>}
+
+                          {/* Quoted file attachment */}
+                          {fileUrl && (
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-500 text-[10px] underline mt-1"
+                            >
+                              {repliedMsg.file.split("/").pop()}
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+                {msg.deleted ? (
                   <div className="text-sm text-red-600">
                     Message deleted.
-                    <button
-                      onClick={() => handleUndoMessage(msg.id)}
-                      className="underline ml-2"
-                    >
-                      Undo
-                    </button>
+                    {isMe && (
+                      <button onClick={() => handleUndoMessage(msg.id)} className="underline ml-2">
+                        Undo
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div>{msg.content}</div>
@@ -416,17 +417,16 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
               </div>
 
               {/* TIMESTAMP */}
-                <div className="text-[10px] text-gray-500 mt-1 px-2 flex items-center gap-1 justify-end">
-                  <span>{formatTime(msg.time)}</span>
-                  <span className="text-blue-500">{getMessageStatusIcon(msg)}</span>
-                </div>
+              <div className="text-[10px] text-gray-500 mt-1 px-2 flex items-center gap-1 justify-end">
+                <span>{formatTime(msg.time)}</span>
+                <span className="text-blue-500">{getMessageStatusIcon(msg)}</span>
+              </div>
 
               {/* HOVER ACTIONS */}
               {hoveredMsgId === msg.id && (
                 <div
-                  className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md z-10 transition-opacity duration-150 ${
-                    isMe ? "right-0 -top-8" : "left-0 -top-8"
-                  }`}
+                  className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md z-10 transition-opacity duration-150 ${isMe ? "right-0 -top-8" : "left-0 -top-8"
+                    }`}
                 >
                   <button
                     onClick={() => setReplyToMessage?.(msg)}
@@ -440,10 +440,10 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
                   {isMe && (
                     <>
                       <button
-                         onClick={() => {
-                            setEditingMessage(msg); 
-                            setReplyToMessage?.(null);
-                          }}
+                        onClick={() => {
+                          setEditingMessage(msg);
+                          setReplyToMessage?.(null);
+                        }}
                         className="p-1 rounded-full hover:bg-gray-100"
                       >
                         <Tooltip title="Edit">

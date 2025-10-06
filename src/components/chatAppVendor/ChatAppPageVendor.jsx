@@ -9,7 +9,7 @@ import ChatInput from "./ChatInputVendor";
 import { getSocket } from "../../sockets/socket"; // Already connected globally
 import {
   addMessage,
-  updateMessageStatus,
+  updateMessage,
   setActiveChat,
 } from "../../features/socket/chatSlice";
 
@@ -50,18 +50,20 @@ export default function ChatAppPageVendor() {
 
   // ✉️ Send message
   const handleSendMessage = async ({ text, file, replyId }) => {
-  // console.log("📨 Sending message with replyId:", replyId); 
+    // console.log("📨 Sending message with replyId:", replyId); 
     if (!activeChat) return;
 
     const tempMsg = {
       id: Date.now(),
-      senderId: role,
+      senderId: userId,     // ✅ Correct user ID
+      roleId: role,         // ✅ Must include this!
       content: text,
       conversationId: activeChat.conversationid,
       file: file || null,
       replyId: replyId || null,
       status: "sending",
-    }; 
+    };
+
 
     dispatch(addMessage(tempMsg));
     socket?.emit("sendMessage", tempMsg);
@@ -83,7 +85,7 @@ export default function ChatAppPageVendor() {
 
       if (res.data?.p_status) {
         dispatch(
-          updateMessageStatus({
+          updateMessage({
             tempId: tempMsg.id,
             newId: res.data.message_id,
             fileUrl: res.data.filepath || null,
@@ -96,39 +98,39 @@ export default function ChatAppPageVendor() {
   };
 
   const handleEditMessage = async ({ id, content, file, replyId }) => {
-  if (!activeChat || !id) return console.error("Missing activeChat or message id");
+    if (!activeChat || !id) return console.error("Missing activeChat or message id");
 
-  try {
-    const formData = new FormData();
-    formData.append("p_conversationid", activeChat.id); 
-    formData.append("p_roleid", role);
-    formData.append("p_messages", content);
-    formData.append("p_messageid", id);
-    if (file) formData.append("file", file);
-    if (replyId) formData.append("p_replyid", replyId);
+    try {
+      const formData = new FormData();
+      formData.append("p_conversationid", activeChat.id);
+      formData.append("p_roleid", role);
+      formData.append("p_messages", content);
+      formData.append("p_messageid", id);
+      if (file) formData.append("file", file);
+      if (replyId) formData.append("p_replyid", replyId);
 
-    const res = await axios.post(`/chat/insertmessage`, formData, {
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-    });
+      const res = await axios.post(`/chat/insertmessage`, formData, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+      });
 
-    if (res.data?.p_status) {
-      const updatedMessage = {
-        id, 
-        senderId: userId,
-        content,
-        file: file || res.data.filepath || null,
-        conversationId: activeChat.id,
-        replyId: replyId || null,
-      };
+      if (res.data?.p_status) {
+        const updatedMessage = {
+          id,
+          senderId: userId,
+          content,
+          file: file || res.data.filepath || null,
+          conversationId: activeChat.id,
+          replyId: replyId || null,
+        };
 
-      socket.emit("editMessage", updatedMessage);
-      dispatch(updateMessage(updatedMessage));
-      setEditingMessage(null);
+        socket.emit("editMessage", updatedMessage);
+        dispatch(updateMessage(updatedMessage));
+        setEditingMessage(null);
+      }
+    } catch (err) {
+      console.error("Edit failed", err);
     }
-  } catch (err) {
-    console.error("Edit failed", err);
-  }
-};
+  };
 
   return (
     <div className="h-[85vh] flex overflow-hidden">
@@ -138,11 +140,11 @@ export default function ChatAppPageVendor() {
           }`}
       >
         <Sidebar
-          onSelectChat={(chat) => 
+          onSelectChat={(chat) =>
             dispatch(
-            setActiveChat(chat)
-          )}
-          
+              setActiveChat(chat)
+            )}
+
         />
       </div>
 
@@ -182,14 +184,14 @@ export default function ChatAppPageVendor() {
           <div className="sticky bottom-0 bg-white border-t border-gray-100">
             <ChatInput
               onSend={(data) =>
-              editingMessage
-                ? handleEditMessage({ ...editingMessage, ...data, replyId: selectedReplyMessage?.id })
-                : handleSendMessage({ ...data, replyId: selectedReplyMessage?.id })
+                editingMessage
+                  ? handleEditMessage({ ...editingMessage, ...data, replyId: selectedReplyMessage?.id })
+                  : handleSendMessage({ ...data, replyId: selectedReplyMessage?.id })
               }
-                replyTo={selectedReplyMessage}
-                onCancelReply={() => setSelectedReplyMessage(null)}
-                editingMessage={editingMessage}
-                onEditComplete={handleEditMessage}
+              replyTo={selectedReplyMessage}
+              onCancelReply={() => setSelectedReplyMessage(null)}
+              editingMessage={editingMessage}
+              onEditComplete={handleEditMessage}
             />
           </div>
         </div>
