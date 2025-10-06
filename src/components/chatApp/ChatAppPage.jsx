@@ -22,6 +22,7 @@ export default function ChatAppPage() {
   
   const messages = useSelector((state) => state.chat.messages);
   const [selectedReplyMessage, setSelectedReplyMessage] = useState(null);
+  const [editingMessage, setEditingMessage] = useState(null);
 
   // Emit via socket
   const showChatUI = activeChat && socket;
@@ -100,6 +101,41 @@ const handleSendMessage = async ({ text, file, replyId }) => {
   }
 };
 
+const handleEditMessage = async ({ id, content, file, replyId }) => {
+  if (!activeChat || !id) return console.error("Missing activeChat or message id");
+
+  try {
+    const formData = new FormData();
+    formData.append("p_conversationid", activeChat.id); 
+    formData.append("p_roleid", role);
+    formData.append("p_messages", content);
+    formData.append("p_messageid", id);
+    if (file) formData.append("file", file);
+    if (replyId) formData.append("p_replyid", replyId);
+
+    const res = await axios.post(`/chat/insertmessage`, formData, {
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+    });
+
+    if (res.data?.p_status) {
+      const updatedMessage = {
+        id, 
+        senderId: userId,
+        content,
+        file: file || res.data.filepath || null,
+        conversationId: activeChat.id,
+        replyId: replyId || null,
+      };
+
+      socket.emit("editMessage", updatedMessage);
+      dispatch(updateMessage(updatedMessage));
+      setEditingMessage(null);
+    }
+  } catch (err) {
+    console.error("Edit failed", err);
+  }
+};
+
 
   return (
     <div className="h-[85vh] flex overflow-hidden">
@@ -140,19 +176,21 @@ const handleSendMessage = async ({ text, file, replyId }) => {
               chat={{ ...activeChat, myRoleId: role, myUserId: userId }}
               messages={messages}
               setReplyToMessage={setSelectedReplyMessage}
+              setEditingMessage={setEditingMessage}
             />
           </div>
 
           <div className="sticky bottom-0 bg-white border-t border-gray-100">
             <ChatInput
               onSend={(data) =>
-                handleSendMessage({
-                  ...data,
-                  replyId: selectedReplyMessage?.id || null,
-                })
+                editingMessage
+                  ? handleEditMessage({ ...editingMessage, ...data, replyId: selectedReplyMessage?.id })
+                  : handleSendMessage({ ...data, replyId: selectedReplyMessage?.id })
               }
               replyTo={selectedReplyMessage}
               onCancelReply={() => setSelectedReplyMessage(null)}
+              editingMessage={editingMessage}
+              onEditComplete={handleEditMessage}
             />
           </div>
         </div>

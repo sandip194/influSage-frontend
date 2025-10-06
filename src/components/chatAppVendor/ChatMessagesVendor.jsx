@@ -7,8 +7,11 @@ import { Tooltip } from "antd";
 import { Image } from 'primereact/image';
 import { getSocket } from "../../sockets/socket";
 import {
+  setMessages,
+  addMessage,
   deleteMessage,
-  undoDeleteMessage
+  undoDeleteMessage,
+  setMessageRead,
 } from "../../features/socket/chatSlice";
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -31,32 +34,32 @@ const formatTime = (timestamp) => {
   return date.toLocaleDateString();
 };
 
-export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
+export default function ChatMessagesVendor({ chat, messages, setReplyToMessage, setEditingMessage }) {
   const dispatch = useDispatch();
   const socket = getSocket();
-  const [messages, setMessages] = useState([]);
+  // const [messages, setMessages] = useState([]);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const [deletedMessage, setDeletedMessage] = useState({});
   const scrollRef = useRef(null);
 
-  const { token, id: userId, role } = useSelector((state) => state.auth) || {};
+  const { token, userId, role } = useSelector((state) => state.auth) || {};
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const getMessageStatusIcon = (msg) => {
-  const isMe = msg.senderId === role || msg.senderId === userId;
+  const isMe = msg.roleId === role; 
   if (!isMe) return null;
 
   if (role === 2) {
-    if (msg.readbyinfluencer) return "✔✔"; 
-    return "✔";
+    return msg.readbyinfluencer ? "✔✔" : "✔";
   }
 
-  // If role is influencer
   if (role === 1) {
-    if (msg.readbyvendor) return "✔✔"; 
-    return "✔"; 
+    return msg.readbyvendor ? "✔✔" : "✔";
   }
+
   return "✔";
 };
+
 
   useEffect(() => {
   if (!chat?.conversationid || !token) return;
@@ -76,7 +79,8 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
       if (res.data?.data?.records) {
         const formattedMessages = res.data.data.records.map((msg) => ({
           id: msg.messageid,
-          senderId: msg.roleid,
+          senderId: msg.userid,
+          roleId: msg.roleid,
           content: (msg.message || "").replace(/^"|"$/g, ""),
           file: Array.isArray(msg.filepath)
             ? msg.filepath.join(",")
@@ -86,7 +90,7 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
           deleted: msg.deleted || false,
         }));
 
-        setMessages(formattedMessages);
+        dispatch(setMessages(formattedMessages));
       }
     } catch (err) {
       console.error("Failed to fetch messages:", err);
@@ -95,7 +99,7 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
 
   fetchMessages(); 
 
-}, [chat, token, role]); 
+}, [chat?.conversationid, token, role]); 
 
 
   useEffect(() => {
@@ -200,7 +204,7 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
   return (
     <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-1 pt-10  ">
       {messages.map((msg, index) => {
-        const isMe = msg.senderId === role || msg.senderId === userId;
+       const isMe = msg.roleId === role;
         const isLast = index === messages.length - 1;
 
         return (
@@ -229,7 +233,7 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
               className={`relative flex flex-col ${isMe ? "items-end" : "items-start"}`}
             >
               <div
-                className={`px-1 py-1 rounded-lg max-w-xs break-words ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`}
+                className={`px-3 py-1 rounded-lg max-w-xs break-words ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`}
                 style={{ wordBreak: "break-word" }}
               >
                 {msg.file && (
@@ -314,32 +318,51 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
 
                 {/* Reply Preview */}
                 {msg.replyId && (
-                  <div
-                    className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] ${
-                      isMe
-                        ? "bg-gray-700 border-blue-400 text-gray-200"
-                        : "bg-gray-300 border-green-500 text-gray-800"
-                    }`}
-                  >
-                    {(() => {
-                      const repliedMsg = messages.find((m) => m.id === msg.replyId);
+                    <div
+                      className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] ${
+                        isMe
+                          ? "bg-gray-700 border-blue-400 text-gray-200"
+                          : "bg-gray-300 border-green-500 text-gray-800"
+                      }`}
+                    >
+                      {(() => {
+                        const repliedMsg = messages.find((m) => m.id === msg.replyId);
 
-                      if (!repliedMsg) return <span className="italic text-gray-500">Message deleted</span>;
+                        if (!repliedMsg)
+                          return (
+                            <span className="italic text-gray-500">Message deleted</span>
+                          );
 
-                      return (
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-[11px] text-blue-600">
-                            {repliedMsg.senderId === role || repliedMsg.senderId === userId
-                              ? "You"
-                              : chat?.name || "Unknown"}
-                          </span>
-                          {/* Quoted text (truncate if long) */}
-                          <span className="truncate">{repliedMsg.content}</span>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
+                        const fileUrl = repliedMsg.file
+                          ? `${BASE_URL}/${repliedMsg.file}`
+                          : null;
+
+                        return (
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-[11px] text-blue-600">
+                              {repliedMsg.senderId === role || repliedMsg.senderId === userId
+                                ? "You"
+                                : chat?.name || "Unknown"}
+                            </span>
+                            {/* Quoted text */}
+                            {repliedMsg.content && <span className="truncate">{repliedMsg.content}</span>}
+
+                            {/* Quoted file attachment */}
+                            {fileUrl && (
+                              <a
+                                href={fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 text-[10px] underline mt-1"
+                              >
+                                {repliedMsg.file.split("/").pop()}
+                              </a>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
 
                {deletedMessage[msg.id] ? (
                   <div className="text-sm text-red-600">
@@ -378,7 +401,10 @@ export default function ChatMessagesVendor({ chat, setReplyToMessage }) {
                   {isMe && (
                     <>
                       <button
-                        onClick={() => console.log("Edit", msg.id)}
+                         onClick={() => {
+                            setEditingMessage(msg); 
+                            setReplyToMessage?.(null);
+                          }}
                         className="p-1 rounded-full hover:bg-gray-100"
                       >
                         <Tooltip title="Edit">

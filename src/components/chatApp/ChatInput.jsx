@@ -7,23 +7,41 @@ import {
 } from "react-icons/ri";
 import EmojiPicker from "emoji-picker-react";
 
-export default function ChatInput({ onSend, replyTo, onCancelReply }) {
+export default function ChatInput({ onSend, replyTo, onCancelReply, editingMessage, onEditComplete }) {
   const [text, setText] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (text.trim() || file) {
-      onSend({ text, file });
-      setText("");
-      setFile(null);
-      setPreviewUrl(null);
-      onCancelReply();
-    }
-  };
+const handleSubmit = (e) => {
+  e.preventDefault();
+  if (!text.trim() && !file) return;
+
+  if (editingMessage) {
+    // Editing an existing message
+    onEditComplete({
+      ...editingMessage,
+      content: text,
+      file: file || editingMessage.file,
+      replyId: replyTo?.id || null,
+    });
+  } else {
+    // Sending a new message
+    onSend({
+      text,
+      file,
+      replyId: replyTo?.id || null,
+    });
+  }
+
+  // Reset after sending or editing
+  setText("");
+  setFile(null);
+  setPreviewUrl(null);
+  onCancelReply && onCancelReply();
+};
+
 
   const handleEmojiClick = (emojiData) => {
     setText((prev) => prev + emojiData.emoji);
@@ -60,6 +78,12 @@ export default function ChatInput({ onSend, replyTo, onCancelReply }) {
   setPreviewUrl(null);
 };
 
+ useEffect(() => {
+    if (editingMessage?.file) {
+      setPreviewUrl({ type: "file", url: editingMessage.file, name: editingMessage.file.split("/").pop() });
+    }
+    setText(editingMessage?.content || "");
+  }, [editingMessage]);
   return (
     <form
       onSubmit={handleSubmit}
