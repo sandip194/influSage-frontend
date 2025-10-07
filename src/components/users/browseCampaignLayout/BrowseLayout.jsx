@@ -100,7 +100,7 @@ const Browse = () => {
         setPlatforms(res.data.data)
       }
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 
@@ -111,7 +111,7 @@ const Browse = () => {
       });
       setLanguages(res.data.languages || []);
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 
@@ -156,7 +156,7 @@ const Browse = () => {
       const res = await axios.get("content-type")
       setCampaignTypes(res.data.contentType)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 
@@ -171,14 +171,14 @@ const Browse = () => {
           },
         }
       );
-      console.log(res.data)
+     // console.log(res.data)
       toast.success(res.data?.message);
       if (res.status === 201) {
         getAllCampaigns()
       }
 
     } catch (error) {
-      console.log(error)
+      console.error(error)
       toast.error(error);
     }
   }

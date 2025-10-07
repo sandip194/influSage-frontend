@@ -78,7 +78,7 @@ const CampaignCategorySection = ({ data, onNext, onBack }) => {
             );
 
             if (res.status === 200) {
-                console.log("✅ Backend response:", res.data);
+               // console.log("✅ Backend response:", res.data);
             } else {
                 console.warn("❗ Unexpected response:", res);
             }

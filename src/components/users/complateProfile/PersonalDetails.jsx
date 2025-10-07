@@ -47,7 +47,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
       const res = await axios.get("genders")
       if (res) setGender(res.data.genders)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 
@@ -196,7 +196,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
       }
 
     } catch (errorInfo) {
-      console.log('❌ Validation Failed or API Error:', errorInfo);
+      console.error('❌ Validation Failed or API Error:', errorInfo);
       message.error('Submission failed, please try again.');
     }
   };

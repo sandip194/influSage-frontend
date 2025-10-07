@@ -99,7 +99,7 @@ const FavoritesLayout = () => {
         toast.error(response.data.message || "Failed to update favourite");
       }
     } catch (err) {
-      console.log(err)
+      console.error(err)
       toast.error("Something went wrong");
     }
   };

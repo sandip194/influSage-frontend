@@ -77,7 +77,7 @@ const PlatformSelector = ({ onBack, onNext }) => {
             return
         }
 
-        console.log("Saving to database:", payload);
+       // console.log("Saving to database:", payload);
         localStorage.setItem("PlatformsAndInfluencers", JSON.stringify(payload));
         // send to API
         onNext();

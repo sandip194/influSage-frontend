@@ -78,10 +78,10 @@ const CampaignDetails = () => {
         }
       })
 
-      console.log(res?.data?.data)
+     // console.log(res?.data?.data)
       setCampaignDetails(res?.data?.data)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     } finally {
       setLoading(false)
     }

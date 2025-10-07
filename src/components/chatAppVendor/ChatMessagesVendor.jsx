@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RiReplyLine, RiEdit2Line, RiDeleteBinLine } from "react-icons/ri";
+import { RiReplyLine, RiEdit2Line, RiDeleteBinLine, RiCheckLine, RiCheckDoubleLine } from "react-icons/ri";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Tooltip } from "antd";
@@ -8,12 +8,13 @@ import { Image } from 'primereact/image';
 import { getSocket } from "../../sockets/socket";
 import {
   setMessages,
+  addMessage,
   deleteMessage,
   undoDeleteMessage,
 } from "../../features/socket/chatSlice";
-import 'primereact/resources/themes/saga-blue/theme.css';
-import 'primereact/resources/primereact.min.css';
-import 'primeicons/primeicons.css';
+// import 'primereact/resources/themes/saga-blue/theme.css';
+// import 'primereact/resources/primereact.min.css';
+// import 'primeicons/primeicons.css ';
 
 const formatTime = (timestamp) => {
   const date = new Date(timestamp);
@@ -32,12 +33,17 @@ const formatTime = (timestamp) => {
   return date.toLocaleDateString();
 };
 
-export default function ChatMessagesVendor({ chat, messages, setReplyToMessage, setEditingMessage }) {
+export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, setReplyToMessage, setEditingMessage, editingMessage, onMessagesRefetch }) {
   const dispatch = useDispatch();
   const socket = getSocket();
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const [deletedMessage, setDeletedMessage] = useState({});
   const scrollRef = useRef(null);
+
+  const scrollContainerRef = useRef(null);
+  const bottomRef = useRef(null);
+  const [isNearBottom, setIsNearBottom] = useState(true);
+  const lastMessageId = useRef(null);
 
   const { token, userId, role } = useSelector((state) => state.auth) || {};
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -46,59 +52,63 @@ export default function ChatMessagesVendor({ chat, messages, setReplyToMessage, 
     const isMe = msg.roleId === role;
     if (!isMe) return null;
 
-    if (role === 2) {
-      return msg.readbyinfluencer ? "✔✔" : "✔";
+    const isRead = role === 2 ? msg.readbyinfluencer : msg.readbyvendor;
+
+    if (isRead) {
+      return <RiCheckDoubleLine className="text-blue-500 text-xs" />;
     }
 
-    if (role === 1) {
-      return msg.readbyvendor ? "✔✔" : "✔";
+    if (isRecipientOnline) {
+      return <RiCheckDoubleLine className="text-gray-500 text-xs" />;
     }
 
-    return "✔";
+    return <RiCheckLine className="text-gray-500 text-xs" />;
   };
 
-  useEffect(() => {
+
+
+  // 🟢 1. Define this outside useEffect so it can be reused
+  const fetchMessages = async () => {
     if (!chat?.conversationid || !token) return;
+    try {
+      const res = await axios.get(`/chat/messages`, {
+        params: {
+          p_conversationid: chat.conversationid,
+          p_roleid: role,
+          p_offset: 0,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    const fetchMessages = async () => {
-      try {
-        const res = await axios.get(`/chat/messages`, {
-          params: {
-            p_conversationid: chat.conversationid,
-            p_roleid: role,
-            p_offset: 0,
-          },
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      if (res.data?.data?.records) {
+        const formattedMessages = res.data.data.records.map((msg) => ({
+          id: msg.messageid,
+          senderId: msg.userid,
+          roleId: msg.roleid,
+          content: (msg.message || "").replace(/^"|"$/g, ""),
+          file: Array.isArray(msg.filepath) ? msg.filepath.join(",") : msg.filepath || "",
+          time: msg.createddate,
+          replyId: msg.replyid || null,
+          deleted: msg.deleted || false,
+          readbyinfluencer: msg.readbyinfluencer || false,
+          readbyvendor: msg.readbyvendor || false,
+        }));
 
-        if (res.data?.data?.records) {
-          const formattedMessages = res.data.data.records.map((msg) => ({
-            id: msg.messageid,
-            senderId: msg.userid,
-            roleId: msg.roleid,
-            content: (msg.message || "").replace(/^"|"$/g, ""),
-            file: Array.isArray(msg.filepath) ? msg.filepath.join(",") : msg.filepath || "",
-            time: msg.createddate,
-            replyId: msg.replyid || null,
-            deleted: msg.deleted || false,
-            readbyinfluencer: msg.readbyinfluencer || false,
-            readbyvendor: msg.readbyvendor || false,
-          }));
-
-          dispatch(setMessages(formattedMessages));
-        }
-      } catch (err) {
-        console.error("Failed to fetch messages:", err);
+        dispatch(setMessages(formattedMessages));
       }
-    };
-
-    fetchMessages();
-  }, [chat?.conversationid, token, role, dispatch]);
+    } catch (err) {
+      console.error("Failed to fetch messages:", err);
+    }
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
     }
+  }, []);
+  useEffect(() => {
+    // 🔁 Notify parent after refetch
+    onMessagesRefetch && onMessagesRefetch();
   }, [messages]);
 
   // Send message read status if unread messages exist
@@ -117,7 +127,7 @@ export default function ChatMessagesVendor({ chat, messages, setReplyToMessage, 
 
     if (unseenMessageIds.length > 0) {
       socket.emit("messageRead", {
-        messageId: unseenMessageIds[0],
+        messageIds: unseenMessageIds,
         conversationId: chat.id,
         role: role,
       });
@@ -190,8 +200,29 @@ export default function ChatMessagesVendor({ chat, messages, setReplyToMessage, 
     }
   };
 
+  const scrollToMessage = (msgId) => {
+    const msgElement = document.getElementById(`message-${msgId}`);
+    if (msgElement) {
+      msgElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Temporary highlight
+      msgElement.classList.add('bg-blue-50');
+
+      setTimeout(() => {
+        msgElement.classList.remove('bg-blue-50');
+      }, 2000);
+    }
+  };
+
+
+
+
   useEffect(() => {
     if (!socket) return;
+
+    socket.on("newMessage", (msg) => {
+      dispatch(addMessage(msg));
+    });
 
     socket.on("deleteMessage", (messageId) => {
       dispatch(deleteMessage(messageId));
@@ -209,11 +240,107 @@ export default function ChatMessagesVendor({ chat, messages, setReplyToMessage, 
     });
 
     return () => {
+      socket.off("newMessage");
       socket.off("deleteMessage");
       socket.off("undoDeleteMessage");
       socket.off("updateMessageStatus");
     };
   }, [socket, dispatch]);
+
+
+  useEffect(() => {
+    if (!chat?.conversationid || !token || !role) return;
+
+    const intervalId = setInterval(() => {
+      fetchMessages();
+    }, 3000); // fetch every 3 seconds
+
+    return () => clearInterval(intervalId); // cleanup on unmount or dependency change
+  }, [chat?.conversationid, token, role]);
+
+
+  useEffect(() => {
+    if (!socket || !messages.length) return;
+
+    messages.forEach(msg => {
+      const isMe = msg.roleId === role;
+
+      const isUnread = !isMe && !msg.readbyvendor && !msg.readbyinfluencer;
+
+      if (isUnread) {
+        socket.emit("messageSeen", {
+          messageId: msg.id,
+          conversationId: chat.id,
+          roleId: role,
+        });
+      }
+    });
+  }, [messages, socket, userId, chat?.id, role]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        editingMessage &&
+        scrollRef.current &&
+        !scrollRef.current.contains(event.target)
+      ) {
+        setEditingMessage(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [editingMessage, setEditingMessage]);
+
+  useEffect(() => {
+    setEditingMessage(null);
+  }, [chat?.id]);
+
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        setEditingMessage(null);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!scrollContainerRef.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+
+      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+      setIsNearBottom(distanceFromBottom < 100); // 100px threshold
+    };
+
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!messages || !messages.length) return;
+
+    const latest = messages[messages.length - 1]?.id;
+    if (lastMessageId.current !== latest && isNearBottom) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    lastMessageId.current = latest;
+  }, [messages, isNearBottom]);
 
   if (!chat) {
     return <div className="flex-1 p-4">Select a chat to start messaging</div>;
@@ -227,9 +354,13 @@ export default function ChatMessagesVendor({ chat, messages, setReplyToMessage, 
 
         return (
           <div
+            id={`message-${msg.id}`}
             key={msg.id}
-            ref={isLast ? scrollRef : null}
-            className={`flex ${isMe ? "justify-end" : "items-start space-x-2"}`}
+            ref={isLast ? bottomRef : null}
+            className={`flex relative ${isMe ? "justify-end mr-4" : "items-start space-x-2 ml-4"
+              } ${editingMessage?.id === msg.id ? "bg-blue-50 " : ""}`}
+            onMouseEnter={() => setHoveredMsgId(msg.id)}
+            onMouseLeave={() => setHoveredMsgId(null)}
           >
             {!isMe && (
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
@@ -246,8 +377,6 @@ export default function ChatMessagesVendor({ chat, messages, setReplyToMessage, 
             )}
 
             <div
-              onMouseEnter={() => setHoveredMsgId(msg.id)}
-              onMouseLeave={() => setHoveredMsgId(null)}
               className={`relative flex flex-col ${isMe ? "items-end" : "items-start"}`}
             >
               <div
@@ -291,36 +420,59 @@ export default function ChatMessagesVendor({ chat, messages, setReplyToMessage, 
                   </div>
                 )}
 
-                {/* Reply preview */}
+                {/* Reply Preview */}
                 {msg.replyId && (
-                  <div className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] ${isMe ? "bg-gray-700 border-blue-400 text-gray-200" : "bg-gray-300 border-green-500 text-gray-800"}`}>
+                  <div
+                    onClick={() => scrollToMessage(msg.replyId)}
+                    className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] ${isMe
+                      ? "bg-gray-700 border-blue-400 text-gray-200"
+                      : "bg-gray-300 border-green-500 text-gray-800"
+                      }`}
+                  >
                     {(() => {
                       const repliedMsg = messages.find((m) => m.id === msg.replyId);
-                      if (!repliedMsg) return <span className="italic text-gray-500">Message deleted</span>;
 
-                      const fileUrl = repliedMsg.file ? `${BASE_URL}/${repliedMsg.file}` : null;
+                      if (!repliedMsg)
+                        return (
+                          <span className="italic text-gray-500">Message deleted</span>
+                        );
+
+                      const fileUrl = repliedMsg.file
+                        ? `${BASE_URL}/${repliedMsg.file}`
+                        : null;
 
                       return (
                         <div className="flex flex-col">
                           <span className="font-semibold text-[11px] text-blue-600">
-                            {repliedMsg.roleId === role || repliedMsg.senderId === userId ? "You" : chat?.name || "Unknown"}
+                            {repliedMsg.senderId === role || repliedMsg.senderId === userId
+                              ? "You"
+                              : chat?.name || "Unknown"}
                           </span>
+                          {/* Quoted text */}
                           {repliedMsg.content && <span className="truncate">{repliedMsg.content}</span>}
-                          {fileUrl && <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-[10px] underline mt-1">{repliedMsg.file.split("/").pop()}</a>}
+
+                          {/* Quoted file attachment */}
+                          {fileUrl && (
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-500 text-[10px] underline mt-1"
+                            >
+                              {repliedMsg.file.split("/").pop()}
+                            </a>
+                          )}
                         </div>
                       );
                     })()}
                   </div>
                 )}
-
                 {/* Message content */}
                 {msg.deleted ? (
                   <div className="text-sm text-red-600">
                     Message deleted.
-                    {isMe && !(role === 1 ? msg.readbyinfluencer : msg.readbyvendor) && (
-                      <button onClick={() => handleUndoMessage(msg.id)} className="underline ml-2">
-                        Undo
-                      </button>
+                    {isMe && role === 1 && !msg.readbyinfluencer && (
+                      <button onClick={() => handleUndoMessage(msg.id)} className="underline ml-2">Undo</button>
                     )}
                   </div>
                 ) : (
@@ -328,28 +480,51 @@ export default function ChatMessagesVendor({ chat, messages, setReplyToMessage, 
                 )}
               </div>
 
-              {/* Timestamp and status ticks */}
+              {/* TIMESTAMP */}
               <div className="text-[10px] text-gray-500 mt-1 px-2 flex items-center gap-1 justify-end">
                 <span>{formatTime(msg.time)}</span>
                 <span className="text-blue-500">{getMessageStatusIcon(msg)}</span>
               </div>
 
-              {/* Message menu (reply/edit/delete) */}
+              {/* HOVER ACTIONS */}
               {hoveredMsgId === msg.id && (
-                <div className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md z-10 transition-opacity duration-150 ${isMe ? "right-0 -top-8" : "left-0 -top-8"}`}>
-                  <button onClick={() => setReplyToMessage?.(msg)} className="p-1 rounded-full hover:bg-gray-100">
-                    <Tooltip title="Reply"><RiReplyLine size={18} /></Tooltip>
+                <div
+                  className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md z-10 transition-opacity duration-150 
+                ${isMe ? "right-0 -top-8" : "left-0 -top-8"}`}
+                >
+                  <button
+                    onClick={() => {
+                      setReplyToMessage?.(msg);
+                      setEditingMessage?.(null);
+                    }}
+                    className="p-1 rounded-full hover:bg-gray-100"
+                  >
+                    <Tooltip title="Reply">
+                      <RiReplyLine size={18} />
+                    </Tooltip>
                   </button>
-                  {isMe && !(role === 1 ? msg.readbyinfluencer : msg.readbyvendor) && !msg.deleted && (
+                  {isMe && !msg.readbyinfluencer && !msg.deleted && (
                     <>
-                      <button onClick={() => {
-                        setEditingMessage(msg);
-                        setReplyToMessage?.(null);
-                      }} className="p-1 rounded-full hover:bg-gray-100">
-                        <Tooltip title="Edit"><RiEdit2Line size={18} /></Tooltip>
+                      <button
+                        onClick={() => {
+                          setEditingMessage(msg);
+                          setReplyToMessage?.(null);
+                        }}
+                        className="p-1 rounded-full hover:bg-gray-100"
+                      >
+                        <Tooltip title="Edit">
+                          <RiEdit2Line size={18} />
+                        </Tooltip>
                       </button>
-                      <button onClick={() => handleDeleteMessage(msg.id)} className="p-1 rounded-full hover:bg-gray-100 text-red-500">
-                        <Tooltip title="Delete"><RiDeleteBinLine size={18} /></Tooltip>
+                      <button
+                        onClick={
+                          () => handleDeleteMessage(msg.id)
+                        }
+                        className="p-1 rounded-full hover:bg-gray-100 text-red-500"
+                      >
+                        <Tooltip title="Delete">
+                          <RiDeleteBinLine size={18} />
+                        </Tooltip>
                       </button>
                     </>
                   )}
@@ -362,3 +537,8 @@ export default function ChatMessagesVendor({ chat, messages, setReplyToMessage, 
     </div>
   );
 }
+
+
+
+
+

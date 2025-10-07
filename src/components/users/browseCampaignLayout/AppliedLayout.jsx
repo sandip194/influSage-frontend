@@ -96,12 +96,12 @@ const AppliedLayout = () => {
       }
     );
 
-    console.log(res.data);
+   // console.log(res.data);
     // console.log("Withdraw request:", campaignapplicationid);
     toast.success(res.data?.message);
 
   } catch (error) {
-    console.log(error)
+    console.error(error)
     toast.error(error);
   }
 };

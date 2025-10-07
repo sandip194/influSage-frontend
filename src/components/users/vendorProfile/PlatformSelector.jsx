@@ -46,7 +46,7 @@ const PlatformSelector = ({ onBack, onNext }) => {
             return
         }
 
-        console.log("Saving to database:", payload);
+       // console.log("Saving to database:", payload);
         localStorage.setItem("PlatformsAndInfluencers", JSON.stringify(payload));
         // send to API
         onNext();
@@ -59,7 +59,7 @@ const PlatformSelector = ({ onBack, onNext }) => {
                 setInfluencerTiers(response.data.influencerTiers)
             }
         } catch (error) {
-            console.log(error)
+            console.error(error)
         }
     }
 

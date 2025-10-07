@@ -54,7 +54,7 @@ const OffersLayout = () => {
             setTotalOffers(totalcount)
 
         } catch (error) {
-            console.log(error)
+            console.error(error)
         } finally {
             setLoading(false)
         }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RiReplyLine, RiEdit2Line, RiDeleteBinLine } from "react-icons/ri";
+import { RiReplyLine, RiEdit2Line, RiDeleteBinLine, RiCheckDoubleLine, RiCheckLine } from "react-icons/ri";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Tooltip } from "antd";
@@ -9,9 +9,9 @@ import { getSocket } from "../../sockets/socket";
 import {
   setMessages,
   addMessage,
+  updateMessage,
   deleteMessage,
   undoDeleteMessage,
-  setMessageRead,
 } from "../../features/socket/chatSlice";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -36,33 +36,38 @@ const formatTime = (timestamp) => {
   return date.toLocaleDateString();
 };
 
-export default function ChatMessages({ chat, messages, setReplyToMessage, setEditingMessage }) {
+export default function ChatMessages({ chat, isRecipientOnline, messages, setReplyToMessage, setEditingMessage, editingMessage }) {
   const dispatch = useDispatch();
   const socket = getSocket();
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const [deletedMessage, setDeletedMessage] = useState({});
   const scrollRef = useRef(null);
 
+  const scrollContainerRef = useRef(null);
+  const bottomRef = useRef(null);
+  const [isNearBottom, setIsNearBottom] = useState(true);
+  const lastMessageId = useRef(null);
+
+
+
   const { token, userId, role } = useSelector((state) => state.auth) || {};
-  // console.log("role is :" , role)
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getMessageStatusIcon = (msg) => {
-    console.log("msg : ", msg)
-    console.log("stored userId : ", userId)
     const isMe = msg.roleId === role;
-
     if (!isMe) return null;
 
-    if (role === 2) {
-      return msg.readbyinfluencer ? "✔✔" : "✔";
+    const isRead = role === 2 ? msg.readbyinfluencer : msg.readbyvendor;
+
+    if (isRead) {
+      return <RiCheckDoubleLine className="text-blue-500 text-xs" />;
     }
 
-    if (role === 1) {
-      return msg.readbyvendor ? "✔✔" : "✔";
+    if (isRecipientOnline) {
+      return <RiCheckDoubleLine className="text-gray-500 text-xs" />;
     }
 
-    return "✔";
+    return <RiCheckLine className="text-gray-500 text-xs" />;
   };
 
 
@@ -70,7 +75,7 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
     }
-  }, [messages]);
+  }, []);
 
   const handleDeleteMessage = async (messageId) => {
     dispatch(deleteMessage(messageId)); // <-- ADD THIS
@@ -143,6 +148,19 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
     }
   };
 
+  const scrollToMessage = (msgId) => {
+    const msgElement = document.getElementById(`message-${msgId}`);
+    if (msgElement) {
+      msgElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Temporary highlight
+      msgElement.classList.add('bg-blue-50');
+
+      setTimeout(() => {
+        msgElement.classList.remove('bg-blue-50');
+      }, 2000);
+    }
+  };
 
   // Socket event listeners
   useEffect(() => {
@@ -160,9 +178,15 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
       dispatch(undoDeleteMessage(messageId));
     });
 
+    socket.on("editMessage", (updatedMessage) => {
+      dispatch(updateMessage(updatedMessage));
+    });
+
     socket.on("updateMessageStatus", ({ messageId, readbyvendor, readbyinfluencer }) => {
-      console.log("Read status update received:", { messageId, readbyvendor, readbyinfluencer });
-      dispatch(setMessageRead({ messageId, readbyvendor, readbyinfluencer }));
+      dispatch({
+        type: "chat/setMessageRead",
+        payload: { messageId, readbyvendor, readbyinfluencer },
+      });
     });
 
 
@@ -171,46 +195,57 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
       socket.off("deleteMessage");
       socket.off("undoDeleteMessage");
       socket.off("updateMessageStatus");
+      socket.off("editMessage");
     };
   }, [socket, dispatch]);
 
-  useEffect(() => {
+
+  // ⏱️ Move fetchMessages outside the effect so it can be reused
+  const fetchMessages = async () => {
     if (!chat?.id || !token) return;
 
-    const fetchMessages = async () => {
-      try {
-        const res = await axios.get(`/chat/messages`, {
-          params: {
-            p_conversationid: chat.id,
-            p_roleid: role,
-           // p_limit: 500,
-            p_offset: 0,
-          },
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    try {
+      const res = await axios.get(`/chat/messages`, {
+        params: {
+          p_conversationid: chat.id,
+          p_roleid: role,
+          p_offset: 0,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        if (res.data?.data?.records) {
-          const formattedMessages = res.data.data.records.map((msg) => ({
-            id: msg.messageid,
-            senderId: msg.userid ?? null,
-            roleId: msg.roleid,
-            content: (msg.message || "").replace(/^"|"$/g, ""),
-            file: Array.isArray(msg.filepath) ? msg.filepath.join(",") : msg.filepath || "",
-            time: msg.createddate,
-            replyId: msg.replyid || null,
-            deleted: msg.deleted || false,
-            readbyvendor: msg.readbyvendor ?? false,
-            readbyinfluencer: msg.readbyinfluencer ?? false,
-          }));
-          dispatch(setMessages(formattedMessages));
-        }
-      } catch (err) {
-        console.error("Failed to fetch messages:", err);
+      if (res.data?.data?.records) {
+        const formattedMessages = res.data.data.records.map((msg) => ({
+          id: msg.messageid,
+          senderId: msg.userid ?? null,
+          roleId: msg.roleid,
+          content: (msg.message || "").replace(/^"|"$/g, ""),
+          file: Array.isArray(msg.filepath) ? msg.filepath.join(",") : msg.filepath || "",
+          time: msg.createddate,
+          replyId: msg.replyid || null,
+          deleted: msg.deleted || false,
+          readbyvendor: msg.readbyvendor ?? false,
+          readbyinfluencer: msg.readbyinfluencer ?? false,
+        }));
+        dispatch(setMessages(formattedMessages));
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch messages:", err);
+    }
+  };
 
-    fetchMessages();
+
+  // 🔁 Poll messages every 5 seconds
+  useEffect(() => {
+    if (!chat?.id || !token || !role) return;
+
+    const intervalId = setInterval(() => {
+      fetchMessages();
+    }, 3000); // Every 3 seconds
+
+    return () => clearInterval(intervalId); // Cleanup on unmount or change
   }, [chat?.id, token, role]);
+
 
   useEffect(() => {
     if (!socket || !messages.length) return;
@@ -230,11 +265,80 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
     });
   }, [messages, socket, userId, chat?.id, role]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        editingMessage &&
+        scrollRef.current &&
+        !scrollRef.current.contains(event.target)
+      ) {
+        setEditingMessage(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [editingMessage, setEditingMessage]);
+
+  useEffect(() => {
+    setEditingMessage(null);
+  }, [chat?.id]);
+
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        setEditingMessage(null);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!scrollContainerRef.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+
+      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+      setIsNearBottom(distanceFromBottom < 100); // 100px threshold
+    };
+
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!messages || !messages.length) return;
+
+    const latest = messages[messages.length - 1]?.id;
+    if (lastMessageId.current !== latest && isNearBottom) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    lastMessageId.current = latest;
+  }, [messages, isNearBottom]);
+
+
+
+
+
   if (!chat)
     return <div className="flex-1 p-4">Select a chat to start messaging</div>;
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-6 space-y-1">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-0 pt-6 space-y-1">
       {messages.map((msg, index) => {
         const isMe = msg.roleId === role;
 
@@ -244,10 +348,11 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
 
         return (
           <div
+            id={`message-${msg.id}`}
             key={msg.id}
-            ref={isLast ? scrollRef : null}
-            className={`flex relative ${isMe ? "justify-end" : "items-start space-x-2"
-              }`}
+            ref={isLast ? bottomRef : null}
+            className={`flex relative ${isMe ? "justify-end mr-4" : "items-start space-x-2 ml-4"
+              } ${editingMessage?.id === msg.id ? "bg-blue-50 " : ""}`}
             onMouseEnter={() => setHoveredMsgId(msg.id)}
             onMouseLeave={() => setHoveredMsgId(null)}
           >
@@ -359,6 +464,7 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
                 {/* Reply Preview */}
                 {msg.replyId && (
                   <div
+                    onClick={() => scrollToMessage(msg.replyId)}
                     className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] ${isMe
                       ? "bg-gray-700 border-blue-400 text-gray-200"
                       : "bg-gray-300 border-green-500 text-gray-800"
@@ -429,7 +535,10 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
                     }`}
                 >
                   <button
-                    onClick={() => setReplyToMessage?.(msg)}
+                    onClick={() => {
+                      setReplyToMessage?.(msg);
+                      setEditingMessage?.(null);
+                    }}
                     className="p-1 rounded-full hover:bg-gray-100"
                   >
                     <Tooltip title="Replay">
@@ -437,7 +546,7 @@ export default function ChatMessages({ chat, messages, setReplyToMessage, setEdi
                     </Tooltip>
                   </button>
 
-                  {isMe && (
+                  {isMe && !msg.readbyvendor && !msg.deleted && (
                     <>
                       <button
                         onClick={() => {

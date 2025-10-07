@@ -18,7 +18,7 @@ const RoleDefault = () => {
       const res = await axios.get("roles")
       setRoles(res.data?.roles)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 

@@ -37,7 +37,7 @@ const InfluencerProfile = () => {
 
             if (res.status === 200) setInfluDetails(res?.data?.result)
         } catch (error) {
-            console.log(error)
+            console.error(error)
         } finally {
             setLoading(false)
         }

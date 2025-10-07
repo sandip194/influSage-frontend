@@ -156,7 +156,7 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
         // Save full data to localStorage or send to server
         localStorage.setItem('selectedFullCategoryData', JSON.stringify(selectedData));
 
-        console.log('✅ Saved category data:', selectedData);
+       // console.log('✅ Saved category data:', selectedData);
 
         if (onNext) onNext();
     };

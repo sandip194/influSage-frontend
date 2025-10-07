@@ -169,12 +169,12 @@ const ApplyNow = () => {
           };
         });
 
-        console.log(filesFromBackend)
+       // console.log(filesFromBackend)
 
         setExistingFiles(filesFromBackend);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setLoading(false);
     }

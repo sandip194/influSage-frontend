@@ -31,7 +31,7 @@ export const CategorySelector = ({ onBack, onNext }) => {
                 setSelectedParentId(data[0].parentcategoryid);
             }
 
-            console.log(data); // You should now see this in the console
+            // console.log(data); // You should now see this in the console
         }
     } catch (error) {
         console.error("Error fetching categories:", error);
@@ -68,7 +68,7 @@ export const CategorySelector = ({ onBack, onNext }) => {
             return;
         }
         localStorage.setItem('selectedChildCategoryIds', JSON.stringify(selectedChildren));
-        console.log('✅ Saved child category IDs:', selectedChildren);
+        // console.log('✅ Saved child category IDs:', selectedChildren);
         if (onNext) onNext();
     };
 

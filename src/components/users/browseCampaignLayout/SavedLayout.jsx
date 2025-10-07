@@ -96,14 +96,14 @@ const SavedLayout = () => {
           },
         }
       );
-      console.log(res.data)
+     // console.log(res.data)
       toast.success(res.data?.message);
       if (res.status === 201) {
         getAllSavedCampaigns()
       }
 
     } catch (error) {
-      console.log(error)
+      console.error(error)
       toast.error(error);
     }
   }

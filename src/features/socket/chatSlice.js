@@ -16,16 +16,19 @@ const chatSlice = createSlice({
             state.messages.push(action.payload);
         },
         updateMessage: (state, action) => {
-            const { id, content, file } = action.payload;
-            const index = state.messages.findIndex((msg) => msg.id === id);
+            const { tempId, newId, content, fileUrl } = action.payload;
+            const index = state.messages.findIndex((msg) => msg.id === tempId);
             if (index !== -1) {
                 state.messages[index] = {
                     ...state.messages[index],
-                    content,
-                    file: file || state.messages[index].file,
+                    id: newId,
+                    content: content || state.messages[index].content,
+                    file: fileUrl || state.messages[index].file,
+                    status: "sent",
                 };
             }
         },
+
         deleteMessage: (state, action) => {
             const message = state.messages.find(msg => msg.id === action.payload);
             if (message) {
@@ -39,22 +42,23 @@ const chatSlice = createSlice({
             }
         },
         setMessageRead: (state, action) => {
-            const { messageId, readbyvendor, readbyinfluencer } = action.payload;
+            const { messageId, messageIds, readbyvendor, readbyinfluencer } = action.payload;
 
-            state.messages = state.messages.map(msg =>
-                msg.id?.toString() === messageId?.toString()
-                    ? {
-                        ...msg,
-                        readbyvendor:
-                            readbyvendor !== undefined ? readbyvendor : msg.readbyvendor,
-                        readbyinfluencer:
-                            readbyinfluencer !== undefined
-                                ? readbyinfluencer
-                                : msg.readbyinfluencer,
-                    }
-                    : msg
-            );
+            const idsToUpdate = messageIds || (messageId ? [messageId] : []);
+
+            state.messages = state.messages.map((msg) => {
+                if (!idsToUpdate.includes(msg.id)) return msg;
+
+                return {
+                    ...msg,
+                    readbyvendor: readbyvendor !== undefined ? readbyvendor : msg.readbyvendor,
+                    readbyinfluencer: readbyinfluencer !== undefined
+                        ? readbyinfluencer
+                        : msg.readbyinfluencer,
+                };
+            });
         },
+
 
         setMessages: (state, action) => {
             state.messages = action.payload;
@@ -62,5 +66,5 @@ const chatSlice = createSlice({
     },
 });
 
-export const { setActiveChat, addMessage,updateMessage, updateMessageStatus, deleteMessage, undoDeleteMessage, setMessageRead, setMessages } = chatSlice.actions;
+export const { setActiveChat, addMessage, updateMessage, updateMessageStatus, deleteMessage, undoDeleteMessage, setMessageRead, setMessages } = chatSlice.actions;
 export default chatSlice.reducer;

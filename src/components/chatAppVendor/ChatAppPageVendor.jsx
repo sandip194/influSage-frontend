@@ -21,6 +21,9 @@ export default function ChatAppPageVendor() {
   const activeChat = useSelector((state) => state.chat.activeChat);
   const messages = useSelector((state) => state.chat.messages);
   const [editingMessage, setEditingMessage] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0); // key to trigger message reload
+  const [isRecipientOnline, setIsRecipientOnline] = useState(false);
+
   const showChatUI = activeChat && socket;
   const [selectedReplyMessage, setSelectedReplyMessage] = useState(null);
 
@@ -40,6 +43,7 @@ export default function ChatAppPageVendor() {
 
     const handleReceiveMessage = (msg) => {
       dispatch(addMessage(msg));
+      setRefreshKey((prev) => prev + 1);
     };
 
     socket.on("receiveMessage", handleReceiveMessage);
@@ -62,6 +66,7 @@ export default function ChatAppPageVendor() {
       file: file || null,
       replyId: replyId || null,
       status: "sending",
+      time: new Date().toISOString(),
     };
 
 
@@ -91,6 +96,7 @@ export default function ChatAppPageVendor() {
             fileUrl: res.data.filepath || null,
           })
         );
+        setRefreshKey((prev) => prev + 1);
       }
     } catch (err) {
       console.error("Sending failed", err);
@@ -157,6 +163,7 @@ export default function ChatAppPageVendor() {
           <div className="sticky top-0 z-10 bg-white rounded-2xl border-b border-gray-200">
             <ChatHeaderVendor
               chat={activeChat}
+              onOnlineStatusChange={setIsRecipientOnline}
               onBack={() => dispatch(setActiveChat(null))}
             />
           </div>
@@ -174,10 +181,13 @@ export default function ChatAppPageVendor() {
             }}
           >
             <ChatMessages
+              key={refreshKey}
               chat={{ ...activeChat, myRoleId: role, myUserId: userId }}
               messages={messages}
               setReplyToMessage={setSelectedReplyMessage}
+              editingMessage={editingMessage}
               setEditingMessage={setEditingMessage}
+              isRecipientOnline={isRecipientOnline}
             />
           </div>
 

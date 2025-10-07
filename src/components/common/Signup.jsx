@@ -34,7 +34,7 @@ export const Signup = () => {
       const response = await axios.post('/user/register', userData);
 
       if (response.status === 400) {
-        console.log("response", response.data.message);
+       // console.log("response", response.data.message);
         toast.error(response.data.message || "Email already exists", { id: loadingToast } , { position: "top-right", });
       }
 

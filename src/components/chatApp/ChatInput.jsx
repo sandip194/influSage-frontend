@@ -14,33 +14,41 @@ export default function ChatInput({ onSend, replyTo, onCancelReply, editingMessa
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
 
-const handleSubmit = (e) => {
-  e.preventDefault();
-  if (!text.trim() && !file) return;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!text.trim() && !file) return;
 
-  if (editingMessage) {
-    // Editing an existing message
-    onEditComplete({
-      ...editingMessage,
-      content: text,
-      file: file || editingMessage.file,
-      replyId: replyTo?.id || null,
-    });
-  } else {
-    // Sending a new message
-    onSend({
-      text,
-      file,
-      replyId: replyTo?.id || null,
-    });
-  }
+    if (editingMessage) {
+      // Editing an existing message
+      onEditComplete({
+        ...editingMessage,
+        content: text,
+        file: file || editingMessage.file,
+        replyId: replyTo?.id || null,
+      });
+    } else {
+      // Sending a new message
+      onSend({
+        text,
+        file,
+        replyId: replyTo?.id || null,
+      });
+    }
 
-  // Reset after sending or editing
-  setText("");
-  setFile(null);
-  setPreviewUrl(null);
-  onCancelReply && onCancelReply();
-};
+    // Reset after sending or editing
+    setText("");
+    setFile(null);
+    setPreviewUrl(null);
+    onCancelReply && onCancelReply();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
 
 
   const handleEmojiClick = (emojiData) => {
@@ -49,36 +57,36 @@ const handleSubmit = (e) => {
   };
 
   const handleFileChange = (e) => {
-  const selectedFile = e.target.files[0];
-  setFile(selectedFile);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
 
-  if (!selectedFile) {
-    setPreviewUrl(null);
-    return;
-  }
+    if (!selectedFile) {
+      setPreviewUrl(null);
+      return;
+    }
 
-  const fileType = selectedFile.type;
+    const fileType = selectedFile.type;
 
-  if (fileType.startsWith("image/")) {
-    setPreviewUrl({ type: "image", url: URL.createObjectURL(selectedFile) });
-  } else if (fileType === "application/pdf") {
-    setPreviewUrl({ type: "pdf", url: URL.createObjectURL(selectedFile) });
-  } else if (fileType.startsWith("video/")) {
-    setPreviewUrl({ type: "video", url: URL.createObjectURL(selectedFile) });
-  } else {
-    setPreviewUrl({ type: "file", name: selectedFile.name });
-  }
-};
+    if (fileType.startsWith("image/")) {
+      setPreviewUrl({ type: "image", url: URL.createObjectURL(selectedFile) });
+    } else if (fileType === "application/pdf") {
+      setPreviewUrl({ type: "pdf", url: URL.createObjectURL(selectedFile) });
+    } else if (fileType.startsWith("video/")) {
+      setPreviewUrl({ type: "video", url: URL.createObjectURL(selectedFile) });
+    } else {
+      setPreviewUrl({ type: "file", name: selectedFile.name });
+    }
+  };
 
   const removeFile = () => {
-  if (previewUrl?.url) {
-    URL.revokeObjectURL(previewUrl.url);
-  }
-  setFile(null);
-  setPreviewUrl(null);
-};
+    if (previewUrl?.url) {
+      URL.revokeObjectURL(previewUrl.url);
+    }
+    setFile(null);
+    setPreviewUrl(null);
+  };
 
- useEffect(() => {
+  useEffect(() => {
     if (editingMessage?.file) {
       setPreviewUrl({ type: "file", url: editingMessage.file, name: editingMessage.file.split("/").pop() });
     }
@@ -87,7 +95,7 @@ const handleSubmit = (e) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-4 bg-white flex flex-col space-y-2 border-t border-gray-200 relative"
+      className="p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative"
     >
       {/* Emoji Picker */}
       {showEmojiPicker && (
@@ -115,48 +123,48 @@ const handleSubmit = (e) => {
 
       {/* File/Image Preview */}
       {file && previewUrl && (
-          <div className="relative w-fit max-w-xs">
-            {previewUrl.type === "image" && (
-              <img
-                src={previewUrl.url}
-                alt="preview"
-                className="h-28 w-auto rounded-lg shadow cursor-pointer"
-                onClick={() => window.open(previewUrl.url, "_blank")}
-              />
-            )}
+        <div className="relative w-fit max-w-xs">
+          {previewUrl.type === "image" && (
+            <img
+              src={previewUrl.url}
+              alt="preview"
+              className="h-28 w-auto rounded-lg shadow cursor-pointer"
+              onClick={() => window.open(previewUrl.url, "_blank")}
+            />
+          )}
 
-            {previewUrl.type === "pdf" && (
-              <iframe
-                src={previewUrl.url}
-                title="PDF Preview"
-                className="w-40 h-28 rounded border"
-              ></iframe>
-            )}
+          {previewUrl.type === "pdf" && (
+            <iframe
+              src={previewUrl.url}
+              title="PDF Preview"
+              className="w-40 h-28 rounded border"
+            ></iframe>
+          )}
 
-            {previewUrl.type === "video" && (
-              <video
-                src={previewUrl.url}
-                controls
-                className="w-40 h-28 rounded shadow"
-              />
-            )}
+          {previewUrl.type === "video" && (
+            <video
+              src={previewUrl.url}
+              controls
+              className="w-40 h-28 rounded shadow"
+            />
+          )}
 
-            {previewUrl.type === "file" && (
-              <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg shadow">
-                <RiFileTextLine />
-                <span className="truncate max-w-[120px] text-sm">{previewUrl.name}</span>
-              </div>
-            )}
+          {previewUrl.type === "file" && (
+            <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg shadow">
+              <RiFileTextLine />
+              <span className="truncate max-w-[120px] text-sm">{previewUrl.name}</span>
+            </div>
+          )}
 
-            <button
-              type="button"
-              onClick={removeFile}
-              className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow hover:bg-red-100"
-            >
-              <RiCloseLine />
-            </button>
-          </div>
-        )}
+          <button
+            type="button"
+            onClick={removeFile}
+            className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow hover:bg-red-100"
+          >
+            <RiCloseLine />
+          </button>
+        </div>
+      )}
 
       <div className="flex items-center space-x-2">
         <button
@@ -183,10 +191,11 @@ const handleSubmit = (e) => {
 
         <input
           type="text"
-          className="flex-1 border border-black rounded-full px-6 py-3 outline-none text-sm"
+          className="flex-1 border border-gray-300 bg-gray-100 rounded-full px-6 py-3 outline-none text-sm"
           placeholder="Write your message"
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
 
         <button

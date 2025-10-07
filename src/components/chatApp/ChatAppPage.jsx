@@ -22,8 +22,11 @@ export default function ChatAppPage() {
   const activeChat = useSelector((state) => state.chat.activeChat);
 
   const messages = useSelector((state) => state.chat.messages);
+ 
   const [selectedReplyMessage, setSelectedReplyMessage] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0); // key to trigger message reload
   const [editingMessage, setEditingMessage] = useState(null);
+  const [isRecipientOnline, setIsRecipientOnline] = useState(false);
 
   // Emit via socket
   const showChatUI = activeChat && socket;
@@ -46,6 +49,7 @@ export default function ChatAppPage() {
 
     const handleReceiveMessage = (msg) => {
       dispatch(addMessage(msg));
+      setRefreshKey((prev) => prev + 1);
     };
 
     socket.on("receiveMessage", handleReceiveMessage);
@@ -96,6 +100,7 @@ export default function ChatAppPage() {
             fileUrl: res.data.filepath || null,
           })
         );
+        setRefreshKey((prev) => prev + 1);
       }
     } catch (err) {
       console.error("Send failed", err);
@@ -159,11 +164,11 @@ export default function ChatAppPage() {
             }`}
         >
           <div className="sticky top-0 z-10 bg-white rounded-2xl border-b border-gray-200">
-            <ChatHeader chat={activeChat} onBack={() => dispatch(setActiveChat(null))} />
+            <ChatHeader chat={activeChat} onOnlineStatusChange={setIsRecipientOnline} onBack={() => dispatch(setActiveChat(null))} />
           </div>
 
           <div
-            className="flex-1 overflow-y-auto bg-white p-4"
+            className="flex-1 overflow-y-auto bg-white p-0"
             style={{
               backgroundImage: 'url("https://www.transparenttextures.com/patterns/food.png")',
               backgroundRepeat: "repeat",
@@ -174,10 +179,13 @@ export default function ChatAppPage() {
             }}
           >
             <ChatMessages
+              key={refreshKey}
               chat={{ ...activeChat, myRoleId: role, myUserId: userId }}
               messages={messages}
               setReplyToMessage={setSelectedReplyMessage}
               setEditingMessage={setEditingMessage}
+              editingMessage={editingMessage} 
+              isRecipientOnline={isRecipientOnline}
             />
           </div>
 

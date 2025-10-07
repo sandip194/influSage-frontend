@@ -230,7 +230,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
   useEffect(() => {
     if (!data || Object.keys(data).length === 0) return;
 
-    console.log("first");
+    // console.log("first");
 
     const mappedValues = mapBackendToFormValues(data);
 

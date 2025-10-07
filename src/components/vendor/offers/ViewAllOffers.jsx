@@ -42,7 +42,7 @@ const ViewAllOffers = () => {
 
 
   const handleViewOffer = async (offer) => {
-    console.log(offer.status)
+   // console.log(offer.status)
     if (offer.status === "Applied" && offer.status !== "Viewed") {
       try {
         await axios.post(
@@ -126,12 +126,12 @@ const ViewAllOffers = () => {
       })
 
       const { records, totalcount } = res.data.data;
-      console.log(records)
+     // console.log(records)
       setApplications(records)
       setTotalOffers(totalcount)
 
     } catch (error) {
-      console.log(error)
+      console.error(error)
     } finally {
       setLoading(false)
     }

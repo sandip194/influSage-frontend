@@ -45,7 +45,7 @@ export const CategorySelector = ({ onBack, onNext }) => {
     }
     localStorage.setItem("selectedCategories", JSON.stringify(selected)); // ✅ Save
     setError(false);
-    console.log('Selected Categories:', selected);
+    // console.log('Selected Categories:', selected);
     if (onNext) onNext();
   };
 

@@ -99,7 +99,7 @@ const Invited = () => {
 
       fetchInvitedInfluencers()
     } catch (err) {
-      console.log(err)
+      console.error(err)
       toast.error("Something went wrong");
     }
   };

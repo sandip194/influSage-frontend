@@ -127,7 +127,7 @@ const BrowseInfluencersLayout = () => {
 
       getAllInfluencers()
     } catch (err) {
-      console.log(err)
+      console.error(err)
       toast.error("Something went wrong");
     }
   };
@@ -138,7 +138,7 @@ const BrowseInfluencersLayout = () => {
       const res = await axios.get("providers");
       if (res.status === 200) setPlatforms(res.data.data);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -150,7 +150,7 @@ const BrowseInfluencersLayout = () => {
       });
       setLanguages(res.data.languages || []);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -162,7 +162,7 @@ const BrowseInfluencersLayout = () => {
       });
       setGenderOptions(res.data.genders || []);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -173,7 +173,7 @@ const BrowseInfluencersLayout = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("Content types response:", res.data);
+      // console.log("Content types response:", res.data);
 
       setContentTypes(res.data.influencerType || []);
     } catch (error) {

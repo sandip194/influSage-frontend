@@ -136,7 +136,7 @@ const InfluencerCampaigns = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log(res.data.data)
+      //console.log(res.data.data)
       setClients(res.data.data || []);
     } catch (error) {
       console.error("Error fetching platforms:", error);

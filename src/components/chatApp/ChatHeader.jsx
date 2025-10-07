@@ -3,7 +3,7 @@ import { RiArrowLeftLine } from "react-icons/ri";
 import { useSelector } from "react-redux";
 import { getSocket } from "../../sockets/socket";
 
-export default function ChatHeader({ chat, onBack }) {
+export default function ChatHeader({ chat, onBack, onOnlineStatusChange }) {
 
   // console.log("ChatHeader rendered");
   // console.log("ChatHeader props chat:", chat);
@@ -41,20 +41,22 @@ export default function ChatHeader({ chat, onBack }) {
 
     const handleOnline = (data) => {
       const uid = data?.userId ?? data;
-      console.log("user-online event:", uid);
+      //console.log("user-online event:", uid);
       if (String(uid) === String(chatUserId)) {
         setIsOnline(true);
         setLastSeen(null);
+        onOnlineStatusChange(true)
       }
     };
 
     const handleOffline = (data) => {
       const uid = data?.userId ?? data;
       const ls = data?.lastSeen;
-      console.log("user-offline event:", uid, ls);
+      //console.log("user-offline event:", uid, ls);
       if (String(uid) === String(chatUserId)) {
         setIsOnline(false);
         setLastSeen(ls);
+        onOnlineStatusChange(false)
       }
     };
 
@@ -73,8 +75,10 @@ export default function ChatHeader({ chat, onBack }) {
       if (normalizedUserIds.includes(String(chatUserId))) {
         setIsOnline(true);
         setLastSeen(null);
+        onOnlineStatusChange(true)
       } else {
         setIsOnline(false);
+        onOnlineStatusChange(false)
       }
     };
 

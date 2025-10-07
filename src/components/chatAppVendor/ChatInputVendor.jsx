@@ -86,7 +86,7 @@ const handleSubmit = (e) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-4 bg-white flex flex-col space-y-2 border-t border-gray-200 relative"
+      className="p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative"
     >
       {/* Emoji Picker */}
       {showEmojiPicker && (
@@ -182,7 +182,7 @@ const handleSubmit = (e) => {
 
         <input
           type="text"
-          className="flex-1 border border-black rounded-full px-6 py-3 outline-none text-sm"
+          className="flex-1 border border-gray-300 bg-gray-100 rounded-full px-6 py-3 outline-none text-sm"
           placeholder="Write your message"
           value={text}
           onChange={(e) => setText(e.target.value)}

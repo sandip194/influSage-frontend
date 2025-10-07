@@ -19,7 +19,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
       const res = await axios.get("providers");
       setProviders(res.data.data);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

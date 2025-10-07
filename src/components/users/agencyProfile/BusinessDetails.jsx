@@ -92,7 +92,7 @@ export const BusinessDetails = ({ onNext }) => {
         const saved = localStorage.getItem('businessDetails');
         if (saved) {
             const parsed = JSON.parse(saved);
-            console.log(parsed);
+           // console.log(parsed);
 
             setProfileImage(parsed.profileImage || null);
             setPreview(parsed.preview || null);
@@ -155,11 +155,11 @@ export const BusinessDetails = ({ onNext }) => {
 
             localStorage.setItem('businessDetails', JSON.stringify(fullData));
 
-            console.log('✅ Submitted data:', fullData);
+           // console.log('✅ Submitted data:', fullData);
             message.success('Form submitted successfully!');
             onNext();
         } catch (errorInfo) {
-            console.log('❌ Validation Failed:', errorInfo);
+            console.error('❌ Validation Failed:', errorInfo);
         }
     };
 
