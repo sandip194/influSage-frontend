@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
 import { setNotifications, addNotification } from "./features/socket/notificationSlice";
 import { messaging } from "./firebaseConfig";
-import { getToken, onMessage } from "firebase/messaging";
+import { getToken, onMessage, isSupported } from "firebase/messaging";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -28,32 +28,48 @@ export default function AppWrapper({ children }) {
       dispatch(addNotification(notification));
     });
 
-    // 3️⃣ FCM: register service worker and request permission
-    const requestFCMPermission = async () => {
+    // 3️⃣ FCM: check support and request permission
+    let unsubscribeOnMessage = () => {};
+
+    const initFCM = async () => {
+      const supported = await isSupported();
+      if (!supported || !messaging) {
+        console.warn("Firebase Messaging not supported in this browser/context.");
+        return;
+      }
+
       try {
         const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+
         const fcmToken = await getToken(messaging, {
           vapidKey: "BC3o2GoDs5qgRB7NzIwKCbPhcGOpRuBSQ6EFxqKAtwpNXT52ZZYEBiwrvC7LUT6BJ8JaN4YlySDoCe-LaXYWwv8",
           serviceWorkerRegistration: registration,
         });
-        console.log("FCM Token:", fcmToken);
-        // Send this token to backend to save for this user
+
+        if (fcmToken) {
+          console.log("✅ FCM Token:", fcmToken);
+          // TODO: Send token to your backend if needed
+        } else {
+          console.warn("No FCM token retrieved.");
+        }
+
+        unsubscribeOnMessage = onMessage(messaging, (payload) => {
+          console.log("📥 FCM Message received: ", payload);
+          dispatch(addNotification(payload));
+        });
       } catch (err) {
-        console.error("FCM permission error:", err);
+        console.error("🔥 FCM initialization error:", err);
       }
     };
-    requestFCMPermission();
 
-    // 4️⃣ FCM: listen for foreground messages
-    const unsubscribeOnMessage = onMessage(messaging, (payload) => {
-      console.log("FCM Message received: ", payload);
-      dispatch(addNotification(payload));
-    });
+    initFCM();
 
-    // 5️⃣ Cleanup
+    // 4️⃣ Cleanup
     return () => {
       socket.disconnect();
-      unsubscribeOnMessage();
+      if (unsubscribeOnMessage) {
+        unsubscribeOnMessage();
+      }
     };
   }, [dispatch, token, userId]);
 
