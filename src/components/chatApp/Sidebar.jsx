@@ -8,8 +8,10 @@ export default function Sidebar({ onSelectChat }) {
   const [campaigns, setCampaigns] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
+  const [unreadMessages, setUnreadMessages] = useState([]);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+  // Fetch campaign list
   const fetchCampaigns = async () => {
     if (!token) return;
 
@@ -34,9 +36,38 @@ export default function Sidebar({ onSelectChat }) {
     }
   };
 
+  // Fetch unread messages
+  const fetchUnreadMessages = async () => {
+    if (!token) return;
+    try {
+      const res = await axios.get(`/chat/unread-messages`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data?.data) {
+        setUnreadMessages(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch unread messages:", err);
+    }
+  };
+
   useEffect(() => {
     fetchCampaigns();
+    fetchUnreadMessages();
+
+    // refresh unread every few seconds
+    const interval = setInterval(fetchUnreadMessages, 10000);
+    return () => clearInterval(interval);
   }, [token, search]);
+  
+  // check if this campaign/vendor has an unread message
+  const hasUnreadMessage = (vendor) => {
+    if (!vendor) return false;
+
+    const vendorId = vendor.vendorid || vendor.id || vendor.ownerid;
+    // check if any unread message has same ownerid as vendorId
+    return unreadMessages.some((msg) => String(msg.ownerid) === String(vendorId));
+  };
 
   return (
     <div className="h-full flex rounded-2xl flex-col bg-white">
@@ -74,10 +105,11 @@ export default function Sidebar({ onSelectChat }) {
         {campaigns?.length > 0 ? (
           campaigns.map((campaign) => {
             const vendor = campaign.vendors?.[0];
-            if (!vendor?.conversationid) return null; // safety check
+            if (!vendor?.conversationid) return null;
 
             const conversationId = vendor.conversationid;
             const isSelected = selectedCampaignId === conversationId;
+            const unread = hasUnreadMessage(vendor);
 
             return (
               <div
@@ -85,16 +117,21 @@ export default function Sidebar({ onSelectChat }) {
                 onClick={() => {
                   setSelectedCampaignId(conversationId);
                   onSelectChat({
-                    id: conversationId, // ✅ normalized id
+                    id: conversationId,
                     name: campaign.campaignname,
                     img: campaign.campaignphoto,
-                    vendorId: vendor.vendorid || vendor.id, 
-                    // add other fields if needed
+                    vendorId: vendor.vendorid || vendor.id,
                   });
+
+                  // remove from unread once clicked
+                  setUnreadMessages((prev) =>
+                    prev.filter((msg) => String(msg.ownerid) !== String(vendor.vendorid || vendor.id))
+                  );
                 }}
-                className={`flex items-center justify-between p-4 cursor-pointer border-b border-gray-100
-                  ${isSelected ? "bg-gray-100 scale-105" : "hover:bg-gray-100"} transition`}
-              >
+                className={`flex items-center justify-between p-4 border-b border-gray-100 rounded-lg transition-all duration-200 cursor-pointer
+                    ${isSelected ? "bg-blue-100 shadow-md transform scale-105" : "hover:bg-gray-100"}
+                    ${unread ? "bg-[#F0F4FF]" : ""}`}
+                >
                 <div className="flex items-center space-x-3">
                   {campaign.campaignphoto && (
                     <img
@@ -105,7 +142,9 @@ export default function Sidebar({ onSelectChat }) {
                   )}
                   <div>
                     <div className="font-semibold text-sm">{campaign.campaignname}</div>
-                    <div className="text-xs text-gray-500">Click to chat</div>
+                    <div className={`text-xs ${unread ? "text-[#0D132D] font-semibold" : "text-gray-500"}`}>
+                      {unread ? "New message" : "Click to chat"}
+                    </div>
                   </div>
                 </div>
               </div>

@@ -104,11 +104,14 @@ export default function ChatAppPageVendor() {
   };
 
   const handleEditMessage = async ({ id, content, file, replyId }) => {
-    if (!activeChat || !id) return console.error("Missing activeChat or message id");
+     if (!activeChat?.conversationid || !id) {
+        console.error("Missing conversation id or message id", { activeChat, id });
+        return;
+      }
 
     try {
       const formData = new FormData();
-      formData.append("p_conversationid", activeChat.id);
+      formData.append("p_conversationid", activeChat.conversationid);
       formData.append("p_roleid", role);
       formData.append("p_messages", content);
       formData.append("p_messageid", id);
