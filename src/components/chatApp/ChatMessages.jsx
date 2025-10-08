@@ -60,14 +60,14 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
     const isRead = role === 2 ? msg.readbyinfluencer : msg.readbyvendor;
 
     if (isRead) {
-      return <RiCheckDoubleLine className="text-blue-500 text-xs" />;
+      return <RiCheckDoubleLine className="text-blue-500 text-xs" size={17} />;
     }
 
     if (isRecipientOnline) {
-      return <RiCheckDoubleLine className="text-gray-500 text-xs" />;
+      return <RiCheckDoubleLine className="text-gray-500 text-xs" size={17} />;
     }
 
-    return <RiCheckLine className="text-gray-500 text-xs" />;
+    return <RiCheckLine className="text-gray-500 text-xs" size={17} />;
   };
 
 
@@ -223,7 +223,7 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
           file: Array.isArray(msg.filepath) ? msg.filepath.join(",") : msg.filepath || "",
           time: msg.createddate,
           replyId: msg.replyid || null,
-          deleted: msg.deleted || false,
+          deleted: msg.isdeleted  || false,
           readbyvendor: msg.readbyvendor ?? false,
           readbyinfluencer: msg.readbyinfluencer ?? false,
         }));
@@ -265,22 +265,22 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
     });
   }, [messages, socket, userId, chat?.id, role]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        editingMessage &&
-        scrollRef.current &&
-        !scrollRef.current.contains(event.target)
-      ) {
-        setEditingMessage(null);
-      }
-    };
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (
+  //       editingMessage &&
+  //       scrollRef.current &&
+  //       !scrollRef.current.contains(event.target)
+  //     ) {
+  //       setEditingMessage(null);
+  //     }
+  //   };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [editingMessage, setEditingMessage]);
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [editingMessage, setEditingMessage]);
 
   useEffect(() => {
     setEditingMessage(null);
@@ -380,83 +380,96 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
                   }`}
               >
                 {/* FILE PREVIEW */}
-                {deletedMessage.id !== msg.id && msg.file && (
+                {!msg.deleted && msg.file && (
                   <div className="mb-2">
                     {(() => {
-                      const fileUrl = `${BASE_URL}/${msg.file}`;
-                      const fileName = msg.file.split("/").pop();
-                      const isImage = msg.file.match(
-                        /\.(jpeg|jpg|png|gif|webp|bmp)$/i
-                      );
-                      const isPDF = msg.file.match(/\.pdf$/i);
-                      const isVideo = msg.file.match(/\.(mp4|webm|ogg)$/i);
-                      const isDoc = msg.file.match(
-                        /\.(doc|docx|xls|xlsx|ppt|pptx)$/i
-                      );
-                      const isZip = msg.file.match(/\.(zip|rar|7z)$/i);
+                      const files = Array.isArray(msg.file) ? msg.file : [msg.file];
 
-                      if (isImage) {
-                        return (
-                          <Image
-                            src={fileUrl}
-                            alt={fileName}
-                            className="max-w-[200px] max-h-[200px] rounded-md object-cover"
-                            preview
-                          />
-                        );
-                      } else if (isPDF) {
-                        return (
-                          <div className="flex flex-col items-center gap-2">
-                            <iframe
+                      return files.map((fileItem, idx) => {
+                        let fileUrl = "";
+                        let fileName = "";
+
+                        if (typeof fileItem === "string") {
+                          fileUrl = `${BASE_URL}/${fileItem}`;
+                          fileName = fileItem.split("/").pop();
+                        } else if (typeof fileItem === "object" && fileItem.url) {
+                          fileUrl = `${BASE_URL}/${fileItem.url}`;
+                          fileName = fileItem.name || fileItem.url.split("/").pop();
+                        } else {
+                          return null;
+                        }
+
+                        const isImage = fileName.match(/\.(jpeg|jpg|png|gif|webp|bmp)$/i);
+                        const isPDF = fileName.match(/\.pdf$/i);
+                        const isVideo = fileName.match(/\.(mp4|webm|ogg)$/i);
+                        const isDoc = fileName.match(/\.(doc|docx|xls|xlsx|ppt|pptx)$/i);
+                        const isZip = fileName.match(/\.(zip|rar|7z)$/i);
+
+                        if (isImage) {
+                          return (
+                            <Image
+                              key={idx}
                               src={fileUrl}
-                              title={fileName}
-                              className="w-full max-w-[250px] h-[200px] rounded-md border"
-                            ></iframe>
-
+                              alt={fileName}
+                              className="max-w-[200px] max-h-[200px] rounded-md object-cover"
+                              preview
+                            />
+                          );
+                        } else if (isPDF) {
+                          return (
+                            <div key={idx} className="flex flex-col items-center gap-2">
+                              <iframe
+                                src={fileUrl}
+                                title={fileName}
+                                className="w-full max-w-[250px] h-[200px] rounded-md border"
+                              ></iframe>
+                              <a
+                                href={fileUrl}
+                                download={fileName}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 underline text-sm mt-2"
+                              >
+                                {fileName}
+                              </a>
+                            </div>
+                          );
+                        } else if (isVideo) {
+                          return (
+                            <video
+                              key={idx}
+                              src={fileUrl}
+                              controls
+                              className="w-full max-w-[250px] rounded-md"
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          );
+                        } else if (isDoc || isZip) {
+                          return (
+                            <div key={idx} className="flex items-center gap-2 text-sm">
+                              <a
+                                href={fileUrl}
+                                download={fileName}
+                                className="text-blue-500 underline"
+                              >
+                                {fileName}
+                              </a>
+                            </div>
+                          );
+                        } else {
+                          return (
                             <a
+                              key={idx}
                               href={fileUrl}
-                              download={fileName}
-                              target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 underline text-sm mt-2"
+                              className="text-white text-sm underline break-all"
                             >
                               {fileName}
                             </a>
-                          </div>
-                        );
-                      } else if (isVideo) {
-                        return (
-                          <video
-                            src={fileUrl}
-                            controls
-                            className="w-full max-w-[250px] rounded-md"
-                          >
-                            Your browser does not support the video tag.
-                          </video>
-                        );
-                      } else if (isDoc || isZip) {
-                        return (
-                          <div className="flex items-center gap-2 text-sm">
-                            <a
-                              href={fileUrl}
-                              download={fileName}
-                              className="text-blue-500 underline"
-                            >
-                              {fileName}
-                            </a>
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <a
-                            href={fileUrl}
-                            rel="noopener noreferrer"
-                            className="text-white text-sm underline break-all"
-                          >
-                            {fileName}
-                          </a>
-                        );
-                      }
+                          );
+                        }
+                      });
                     })()}
                   </div>
                 )}

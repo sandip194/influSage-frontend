@@ -9,111 +9,120 @@ import EmojiPicker from "emoji-picker-react";
 
 export default function ChatInputVendor({ onSend, replyTo, onCancelReply, editingMessage, onEditComplete }) {
   const [text, setText] = useState("");
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [file, setFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const fileInputRef = useRef(null);
-
-const handleSubmit = (e) => {
-  e.preventDefault();
-  if (!text.trim() && !file) return;
-
-  if (editingMessage) {
-    // Editing an existing message
-    onEditComplete({
-      ...editingMessage,
-      content: text,
-      file: file || editingMessage.file,
-      replyId: replyTo?.id || null,
-    });
-  } else {
-    // Sending a new message
-    onSend({
-      text,
-      file,
-      replyId: replyTo?.id || null,
-    });
-  }
-
-  // Reset after sending or editing
-  setText("");
-  setFile(null);
-  setPreviewUrl(null);
-  onCancelReply && onCancelReply();
-};
-
-  const handleEmojiClick = (emojiData) => {
-    setText((prev) => prev + emojiData.emoji);
-    setShowEmojiPicker(false);
-  };
-
-  const handleFileChange = (e) => {
-  const selectedFile = e.target.files[0];
-  setFile(selectedFile);
-
-  if (!selectedFile) {
-    setPreviewUrl(null);
-    return;
-  }
-
-  const fileType = selectedFile.type;
-
-  if (fileType.startsWith("image/")) {
-    setPreviewUrl({ type: "image", url: URL.createObjectURL(selectedFile) });
-  } else if (fileType === "application/pdf") {
-    setPreviewUrl({ type: "pdf", url: URL.createObjectURL(selectedFile) });
-  } else if (fileType.startsWith("video/")) {
-    setPreviewUrl({ type: "video", url: URL.createObjectURL(selectedFile) });
-  } else {
-    setPreviewUrl({ type: "file", name: selectedFile.name });
-  }
-};
-
-  const removeFile = () => {
-  if (previewUrl?.url) {
-    URL.revokeObjectURL(previewUrl.url);
-  }
-  setFile(null);
-  setPreviewUrl(null);
-};
- useEffect(() => {
-    if (editingMessage?.file) {
-      setPreviewUrl({ type: "file", url: editingMessage.file, name: editingMessage.file.split("/").pop() });
-    }
-    setText(editingMessage?.content || "");
-  }, [editingMessage]);
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative"
-    >
-      {/* Emoji Picker */}
-      {showEmojiPicker && (
-        <div className="absolute bottom-20 left-4 z-10 bg-white shadow-lg rounded-lg">
-          <EmojiPicker
-            onEmojiClick={handleEmojiClick}
-            height={370}
-            width={300}
-          />
-        </div>
-      )}
-
-      {/* Reply UI */}
-      {replyTo && (
-        <div className="flex items-center justify-between bg-gray-100 border-l-4 border-[0D132D] text-sm text-gray-700 px-4 py-2 rounded-md">
-         <div className="w-full sm:w-80 md:w-96 lg:w-[350px] p-2">
-            <span className="font-semibold">Replying to: </span>
-            {replyTo.content || "Attachment"}
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [file, setFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const fileInputRef = useRef(null);
+  
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      if (!text.trim() && !file) return;
+  
+      if (editingMessage) {
+        // Editing an existing message
+        onEditComplete({
+          ...editingMessage,
+          content: text,
+          file: file || editingMessage.file,
+          replyId: replyTo?.id || null,
+        });
+      } else {
+        // Sending a new message
+        onSend({
+          text,
+          file,
+          replyId: replyTo?.id || null,
+        });
+      }
+  
+      // Reset after sending or editing
+      setText("");
+      setFile(null);
+      setPreviewUrl(null);
+      onCancelReply && onCancelReply();
+    };
+  
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSubmit(e);
+      }
+    };
+  
+  
+  
+    const handleEmojiClick = (emojiData) => {
+      setText((prev) => prev + emojiData.emoji);
+      setShowEmojiPicker(false);
+    };
+  
+    const handleFileChange = (e) => {
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+  
+      if (!selectedFile) {
+        setPreviewUrl(null);
+        return;
+      }
+  
+      const fileType = selectedFile.type;
+  
+      if (fileType.startsWith("image/")) {
+        setPreviewUrl({ type: "image", url: URL.createObjectURL(selectedFile) });
+      } else if (fileType === "application/pdf") {
+        setPreviewUrl({ type: "pdf", url: URL.createObjectURL(selectedFile) });
+      } else if (fileType.startsWith("video/")) {
+        setPreviewUrl({ type: "video", url: URL.createObjectURL(selectedFile) });
+      } else {
+        setPreviewUrl({ type: "file", name: selectedFile.name });
+      }
+    };
+  
+    const removeFile = () => {
+      if (previewUrl?.url) {
+        URL.revokeObjectURL(previewUrl.url);
+      }
+      setFile(null);
+      setPreviewUrl(null);
+    };
+  
+    useEffect(() => {
+      if (editingMessage?.file) {
+        setPreviewUrl({ type: "file", url: editingMessage.file, name: editingMessage.file.split("/").pop() });
+      }
+      setText(editingMessage?.content || "");
+    }, [editingMessage]);
+    return (
+      <form
+        onSubmit={handleSubmit}
+        className="p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative"
+      >
+        {/* Emoji Picker */}
+        {showEmojiPicker && (
+          <div className="absolute bottom-20 left-4 z-10 bg-white shadow-lg rounded-lg">
+            <EmojiPicker
+              onEmojiClick={handleEmojiClick}
+              height={370}
+              width={300}
+            />
           </div>
-          <button onClick={onCancelReply} className="text-gray-500 hover:text-red-500 ml-4">
-            <RiCloseLine />
-          </button>
-        </div>
-      )}
-
-      {/* File/Image Preview */}
-      {file && previewUrl && (
+        )}
+  
+        {/* Reply UI */}
+        {replyTo && (
+          <div className="flex items-center justify-between bg-gray-100 border-l-4 border-[0D132D] text-sm text-gray-700 px-4 py-2 rounded-md">
+            <div className="w-full sm:w-80 md:w-96 lg:w-[350px] p-2">
+              <span className="font-semibold">Replying to: </span>
+              {replyTo.content || "Attachment"}
+            </div>
+            <button onClick={onCancelReply} className="text-gray-500 hover:text-red-500 ml-4">
+              <RiCloseLine />
+            </button>
+          </div>
+        )}
+  
+        {/* File/Image Preview */}
+        {file && previewUrl && (
           <div className="relative w-fit max-w-xs">
             {previewUrl.type === "image" && (
               <img
@@ -157,44 +166,45 @@ const handleSubmit = (e) => {
           </div>
         )}
 
-      <div className="flex items-center space-x-2">
-        <button
-          type="button"
-          onClick={() => setShowEmojiPicker((prev) => !prev)}
-          className="text-xl text-gray-500"
-        >
-          <RiEmotionHappyLine size={25} />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => fileInputRef.current.click()}
-          className="text-xl text-gray-500"
-        >
-          <RiFileTextLine size={25} />
-        </button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          className="hidden"
-        />
-
-        <input
-          type="text"
-          className="flex-1 border border-gray-300 bg-gray-100 rounded-full px-6 py-3 outline-none text-sm"
-          placeholder="Write your message"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-
-        <button
-          type="submit"
-          className="bg-[#0D132D] hover:bg-indigo-700 text-white p-3 rounded-full shadow-md transition"
-        >
-          <RiSendPlane2Fill />
-        </button>
-      </div>
-    </form>
-  );
-}
+        <div className="flex items-center space-x-2">
+          <button
+            type="button"
+            onClick={() => setShowEmojiPicker((prev) => !prev)}
+            className="text-xl text-gray-500"
+          >
+            <RiEmotionHappyLine size={25} />
+          </button>
+  
+          <button
+            type="button"
+            onClick={() => fileInputRef.current.click()}
+            className="text-xl text-gray-500"
+          >
+            <RiFileTextLine size={25} />
+          </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+          />
+  
+          <input
+            type="text"
+            className="flex-1 border border-gray-300 bg-gray-100 rounded-full px-6 py-3 outline-none text-sm"
+            placeholder="Write your message"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+  
+          <button
+            type="submit"
+            className="bg-[#0D132D] hover:bg-indigo-700 text-white p-3 rounded-full shadow-md transition"
+          >
+            <RiSendPlane2Fill />
+          </button>
+        </div>
+      </form>
+    );
+  }

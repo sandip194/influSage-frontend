@@ -6,6 +6,7 @@ const MessageDropdown = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const { token, id: userId, role } = useSelector((state) => state.auth) || {};
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     const fetchUnreadMessages = async () => {
@@ -49,9 +50,12 @@ const MessageDropdown = () => {
           {messages.map((msg) => (
             <div key={msg.messageid} className="flex items-start gap-3 py-3">
               <img
-                src={msg.photopath}
-                className="w-10 h-10 rounded-full"
-                alt=""
+                src={
+                  msg.photopath
+                    ? `${BASE_URL}${ msg.photopath.startsWith("/") ? "" : "/" }${msg.photopath}`
+                    : ""
+                }
+                className="w-10 h-10 rounded-full object-cover"
               />
               <div>
                 <div className="flex items-center gap-3 text-sm">

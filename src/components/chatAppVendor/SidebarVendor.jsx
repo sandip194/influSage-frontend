@@ -12,6 +12,9 @@ export default function SidebarVendor({ onSelectChat }) {
   const [campaigns, setCampaigns] = useState([]);
   const [influencers, setInfluencers] = useState([]);
   const [search, setSearch] = useState("");
+  const [unreadMessages, setUnreadMessages] = useState([]);
+  const [loadingUnread, setLoadingUnread] = useState(false);
+
 
   const fetchCampaigns = async () => {
     if (!token) return;
@@ -56,9 +59,33 @@ export default function SidebarVendor({ onSelectChat }) {
     }
   };
 
+  const fetchUnreadMessages = async () => {
+  try {
+    setLoadingUnread(true);
+    const res = await axios.get(`/chat/unread-messages`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.data?.data) {
+      setUnreadMessages(res.data.data);
+    }
+  } catch (err) {
+    console.error("Failed to fetch unread messages:", err);
+  } finally {
+    setLoadingUnread(false);
+  }
+};
+
   useEffect(() => {
+  if (token) {
     fetchCampaigns();
-  }, [token, search]);
+    fetchUnreadMessages();
+  }
+  const interval = setInterval(fetchUnreadMessages, 10000);
+    return () => clearInterval(interval);
+}, [token, search]);
+
+
 
   const filteredInfluencers = selectedCampaign
     ? influencers.filter((inf) => inf.campaignId === selectedCampaign.campaignid)
@@ -157,8 +184,16 @@ export default function SidebarVendor({ onSelectChat }) {
         </div>
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {filteredInfluencers?.length > 0 ? (
-            filteredInfluencers?.map((inf) => {
+            filteredInfluencers.map((inf) => {
               const isSelected = selectedInfluencer === inf.influencerid;
+
+              // Find unread message for this influencer
+              const unreadMsg = unreadMessages.find(
+                (msg) => String(msg.userid) === String(inf.influencerid) && msg.readbyvendor === false
+              );
+
+              const displayMessage = unreadMsg ? 'New Message' : inf.message;
+              const highlight = !!unreadMsg;
 
               return (
                 <div
@@ -166,9 +201,15 @@ export default function SidebarVendor({ onSelectChat }) {
                   onClick={() => {
                     setSelectedInfluencer(inf.influencerid);
                     onSelectChat({ ...inf, campaign: selectedCampaign });
+
+                    // Remove from unread once clicked
+                    setUnreadMessages((prev) =>
+                      prev.filter((msg) => String(msg.userid) !== String(inf.influencerid))
+                    );
                   }}
                   className={`flex items-center justify-between p-4 border-b border-gray-100 rounded-lg transition-all duration-200 cursor-pointer
-                    ${isSelected ? "bg-blue-100 shadow-md transform scale-105" : "hover:bg-gray-100"}`}
+                    ${isSelected ? "bg-blue-100 transform scale-105" : "hover:bg-gray-100"}
+                    ${highlight ? "bg-[#F0F4FF]" : ""}`}
                 >
                   <div className="flex items-center space-x-3 min-w-0">
                     <img
@@ -178,7 +219,9 @@ export default function SidebarVendor({ onSelectChat }) {
                     />
                     <div className="overflow-hidden max-w-[140px] min-w-0">
                       <div className="font-semibold text-sm text-gray-800 truncate">{inf.name}</div>
-                      <div className="text-xs text-gray-500 truncate">{inf.message}</div>
+                      <div className={`text-xs truncate ${highlight ? "text-[#0D132D] font-semibold" : "text-gray-500"}`}>
+                        {displayMessage}
+                      </div>
                     </div>
                   </div>
                   <span className="text-xs text-gray-400 whitespace-nowrap">
