@@ -137,10 +137,8 @@ export default function SidebarVendor({ onSelectChat }) {
                   setSelectedCampaign(campaign);
                   setSelectedInfluencer(null); // reset selected influencer
                 }}
-                className={`flex items-center justify-between p-4 cursor-pointer border-b border-gray-100 rounded-lg transition-all duration-200
-                        ${isSelected
-                    ? "bg-blue-100 shadow-md transform scale-105"
-                    : "hover:bg-gray-100"}`}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-300
+                        ${isSelected ? "bg-gray-200 border-l-4 border-gray-500 shadow-sm scale-[1.01]" : "hover:bg-gray-100"}`}
               >
                 <div className="flex items-center space-x-3 min-w-0">
                   <img
@@ -183,59 +181,70 @@ export default function SidebarVendor({ onSelectChat }) {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
-          {filteredInfluencers?.length > 0 ? (
-            filteredInfluencers.map((inf) => {
-              const isSelected = selectedInfluencer === inf.influencerid;
+        {filteredInfluencers?.length > 0 ? (
+          filteredInfluencers.map((inf) => {
+            const isSelected = selectedInfluencer === inf.influencerid;
 
-              // Find unread message for this influencer
-              const unreadMsg = unreadMessages.find(
-                (msg) => String(msg.userid) === String(inf.influencerid) && msg.readbyvendor === false
-              );
+            // Find unread message for this influencer
+            const unread = unreadMessages.some(
+              (msg) => String(msg.userid) === String(inf.influencerid) && msg.readbyvendor === false
+            );
 
-              const displayMessage = unreadMsg ? 'New Message' : inf.message;
-              const highlight = !!unreadMsg;
+            return (
+              <div
+                key={inf.influencerid}
+                onClick={() => {
+                  setSelectedInfluencer(inf.influencerid);
+                  onSelectChat({ ...inf, campaign: selectedCampaign });
 
-              return (
-                <div
-                  key={inf.influencerid}
-                  onClick={() => {
-                    setSelectedInfluencer(inf.influencerid);
-                    onSelectChat({ ...inf, campaign: selectedCampaign });
-
-                    // Remove from unread once clicked
-                    setUnreadMessages((prev) =>
-                      prev.filter((msg) => String(msg.userid) !== String(inf.influencerid))
-                    );
-                  }}
-                  className={`flex items-center justify-between p-4 border-b border-gray-100 rounded-lg transition-all duration-200 cursor-pointer
-                    ${isSelected ? "bg-blue-100 transform scale-105" : "hover:bg-gray-100"}
-                    ${highlight ? "bg-[#F0F4FF]" : ""}`}
-                >
-                  <div className="flex items-center space-x-3 min-w-0">
+                  // Remove from unread once clicked
+                  setUnreadMessages((prev) =>
+                    prev.filter((msg) => String(msg.userid) !== String(inf.influencerid))
+                  );
+                }}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-300
+                  ${isSelected ? "bg-gray-200 border-l-4 border-gray-500 shadow-sm scale-[1.01]" : "hover:bg-gray-100"}
+                  ${unread ? "bg-gray-100 shadow-md scale-[1.02]" : ""}`}
+              >
+                <div className="flex items-center space-x-3 min-w-0">
+                  {inf.img ? (
                     <img
                       src={inf.img}
                       alt={inf.name}
                       className="w-10 h-10 rounded-full object-cover"
                     />
-                    <div className="overflow-hidden max-w-[140px] min-w-0">
-                      <div className="font-semibold text-sm text-gray-800 truncate">{inf.name}</div>
-                      <div className={`text-xs truncate ${highlight ? "text-[#0D132D] font-semibold" : "text-gray-500"}`}>
-                        {displayMessage}
-                      </div>
+                  ) : (
+                    <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-semibold">
+                      {inf.name?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+
+                  <div className="min-w-0">
+                    <div className="font-medium text-gray-900 truncate max-w-[160px]">
+                      {inf.name}
+                    </div>
+                    <div
+                      className={`text-sm truncate max-w-[180px] ${
+                        unread ? "text-gray-900 font-semibold" : "text-gray-500"
+                      }`}
+                    >
+                      {unread ? "New message" : "Click to chat"}
                     </div>
                   </div>
-                  <span className="text-xs text-gray-400 whitespace-nowrap">
-                    {inf.time ? new Date(inf.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
-                  </span>
                 </div>
-              );
-            })
-          ) : (
-            <div className="p-6 text-center text-gray-400 text-sm">
-              Please select a campaign to see influencers
-            </div>
-          )}
-        </div>
+
+                {unread && (
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></div>
+                )}
+              </div>
+            );
+          })
+        ) : (
+          <div className="p-6 text-center text-gray-400 text-sm">
+            Please select a campaign to see influencers
+          </div>
+        )}
+      </div>
       </div>
     </div>
   );

@@ -277,7 +277,13 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
               className="w-full rounded-xl"
               format="DD-MM-YYYY"
               style={{ height: 40 }}
-              disabledDate={(current) => current && current > dayjs().endOf('day')}
+              disabledDate={(current) => {
+                if (!current) return false;
+                const today = dayjs();
+                const fiveYearsAgo = today.subtract(5, 'year').endOf('year');
+                // Disable dates after today or in the previous 5 years
+                return current > today.endOf('day') || current >= fiveYearsAgo;
+              }}
             />
           </Form.Item>
         </div>

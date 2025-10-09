@@ -15,6 +15,7 @@ const InviteModal = ({
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   // Fetch campaigns on open
   useEffect(() => {
@@ -113,15 +114,25 @@ const InviteModal = ({
                   readOnly
                   className="w-4 h-4 accent-[#0f122f] mr-4"
                 />
-                <div className="flex-1">
-                  <h4 className="font-semibold text-[#0D132D]">
-                    {campaign.name}
-                  </h4>
-                  {campaign.startdate && campaign.enddate && (
-                    <p className="text-xs text-gray-500">
-                      {campaign.startdate} → {campaign.enddate}
-                    </p>
+                <div className="flex-1 flex items-center gap-3">
+                  {/* Campaign Photo */}
+                  {campaign.photopath && (
+                    <img
+                      src={`${BASE_URL}/${campaign.photopath}`}
+                      alt={campaign.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
                   )}
+                  <div>
+                    <h4 className="font-semibold text-[#0D132D]">
+                      {campaign.name}
+                    </h4>
+                    {campaign.startdate && campaign.enddate && (
+                      <p className="text-xs text-gray-500">
+                        {campaign.startdate} → {campaign.enddate}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

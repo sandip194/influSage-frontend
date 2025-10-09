@@ -18,10 +18,10 @@ import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RiArrowLeftLine, RiCheckboxCircleFill } from "react-icons/ri";
+import toast from 'react-hot-toast';
 
 import dayjs from 'dayjs';
 
-const { TextArea } = Input;
 
 
 const CampaignDetails = () => {
@@ -32,6 +32,8 @@ const CampaignDetails = () => {
   const [isCancelModel, setCancelModel] = useState(false);
   const [campaignDetails, setCampaignDetails] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [cancelReasons, setCancelReasons] = useState([]);
+  const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
 
 
 
@@ -40,39 +42,10 @@ const CampaignDetails = () => {
   const { token } = useSelector((state) => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  // Complete action
-  const handleComplete = () => {
-    let newErrors = {};
-    if (!proposal) newErrors.proposal = "Please add a review";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-    setErrors({});
-    setIsModalOpen(false);
-  };
-
-
-  const handleCancelComplete = () => {
-    let newErrors = {};
-
-    if (!cancelReason) {
-      newErrors.cancelReason = "Please select a reason for cancellation.";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    setCancelModel(false);
-  };
-
   const getCampaignDetails = async () => {
     try {
       setLoading(true)
-      const res = await axios.get(`vendor/singlecampaign/${campaignId}`, {
+      const res = await axios.get(`/vendor/singlecampaign/${campaignId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -90,6 +63,90 @@ const CampaignDetails = () => {
   useEffect(() => {
     getCampaignDetails()
   }, [])
+
+  useEffect(() => {
+    const fetchCancelReasons = async () => {
+      try {
+        const res = await axios.get(`/vendor/reason-list`);
+        setCancelReasons(res?.data?.data);
+      } catch (error) {
+        console.error("Error fetching cancel reasons:", error);
+      }
+    };
+
+    if (isCancelModel) {
+      fetchCancelReasons();
+    }
+  }, [isCancelModel]);
+
+  const handleCancelComplete = async () => {
+  const newErrors = {};
+  if (!cancelReason) newErrors.cancelReason = "Please select a reason for cancellation.";
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+  }
+
+  const selectedReason = cancelReasons.find(
+    (reason) => (reason.reason_name || reason.name) === cancelReason
+  );
+
+  try {
+    const payload = {
+      p_campaignid: campaignDetails?.campaignid || campaignId,
+      p_objectiveid: selectedReason.id,
+    };
+
+    console.log("Cancel payload:", payload);
+
+    const res = await axios.post(
+      `/vendor/cancle-campaign`,
+      payload,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (res.status === 200) {
+      toast.success(res.data?.message);
+      setCancelModel(false);
+      setCancelReason("");
+      setErrors({});
+      // getCampaignDetails();
+    } else {
+      toast.error(res.data?.message);
+    }
+  } catch (error) {
+    console.error("Cancel error:", error);
+    toast.error(error);
+  }
+};
+
+// Function to pause the campaign
+
+const handlePauseCampaign = async () => {
+  if (!campaignDetails?.id) {
+    toast.error("Campaign ID not found");
+    return;
+  }
+
+  try {
+    const res = await axios.post(
+      `/vendor/pause-campaign/${campaignDetails.id}`,
+      null,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (res.status === 200) {
+      toast.success(res.data?.message);
+      setIsPauseModalOpen(false);
+      // getCampaignDetails();
+    } else {
+      toast.error(res.data?.message);
+    }
+  } catch (error) {
+    console.error("Pause campaign error:", error);
+    toast.error(error);
+  }
+};
 
 
 
@@ -136,11 +193,12 @@ const CampaignDetails = () => {
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                   <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={() => setIsPauseModalOpen(true)}
                     className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
                   >
-                    Complete & Payment
+                    Pause Campaign
                   </button>
+
                   <button
                     onClick={() => setCancelModel(true)}
                     className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
@@ -367,56 +425,28 @@ const CampaignDetails = () => {
 
       {/* Modal */}
       <Modal
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        footer={null}
+        open={isPauseModalOpen}
+        onCancel={() => setIsPauseModalOpen(false)}
         centered
+        footer={null}
       >
-        <h2 className="text-xl font-semibold mb-4">Mark As Complete</h2>
-        <p className="text-gray-600 mb-4">
-          Are you sure you want to mark this campaign as completed?
+        <h2 className="text-xl font-semibold mb-2">Pause Campaign</h2>
+        <p className="text-gray-600">
+          Are you sure you want to pause this campaign? You can resume it later.
         </p>
 
-        {/* Stars */}
-        <div className="flex items-center gap-1 mb-3">
-          <RiStarLine className="text-xl" />
-          <RiStarLine className="text-xl" />
-          <RiStarLine className="text-xl" />
-          <RiStarLine className="text-xl" />
-          <RiStarLine className="text-xl" />
-        </div>
-
-        {/* Bio */}
-        <div className="mb-4">
-          <label className="block font-medium text-sm mb-1">
-            Review <span className="text-red-500">*</span>
-          </label>
-
-          <TextArea
-            rows={4}
-            placeholder="Write Your Review..."
-            value={proposal}
-            onChange={(e) => setProposal(e.target.value)}
-            status={errors.proposal ? "error" : ""}
-          />
-          {errors.proposal && (
-            <p className="text-red-500 text-xs mt-1">{errors.proposal}</p>
-          )}
-        </div>
-
-        {/* Modal Actions */}
         <div className="flex justify-end gap-3 mt-4">
           <button
-            onClick={() => setIsModalOpen(false)}
+            onClick={() => setIsPauseModalOpen(true)}
             className="px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-100"
           >
             Cancel
           </button>
           <button
-            onClick={handleComplete}
+            onClick={handlePauseCampaign}
             className="px-6 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a]"
           >
-            Complete
+            Pause
           </button>
         </div>
       </Modal>
@@ -438,8 +468,8 @@ const CampaignDetails = () => {
 
         {/* Cancel Reasons */}
         <div className="space-y-3 mb-2">
-          {["Cancel Reason 1", "Cancel Reason 2", "Cancel Reason 3", "Cancel Reason 4"].map(
-            (reason, index) => (
+          {cancelReasons.length > 0 ? (
+            cancelReasons.map((reason, index) => (
               <label
                 key={index}
                 className="flex items-center gap-3 cursor-pointer text-gray-700"
@@ -447,20 +477,21 @@ const CampaignDetails = () => {
                 <input
                   type="radio"
                   name="cancelReason"
-                  value={reason}
-                  checked={cancelReason === reason}
+                  value={reason.reason_name || reason.name}
+                  checked={cancelReason === (reason.reason_name || reason.name)}
                   onChange={(e) => setCancelReason(e.target.value)}
                   className="accent-[#0f122f] w-4 h-4"
                 />
-                {reason}
+                {reason.reason_name || reason.name}
               </label>
-            )
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm">Loading reasons...</p>
           )}
         </div>
         {errors.cancelReason && (
           <p className="text-red-500 text-xs mt-1">{errors.cancelReason}</p>
         )}
-
 
         {/* Modal Actions */}
         <div className="flex justify-end gap-3">

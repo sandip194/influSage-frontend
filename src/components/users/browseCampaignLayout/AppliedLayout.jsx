@@ -7,6 +7,7 @@ import {
   RiDeleteBinLine,
   RiEyeLine,
 } from "@remixicon/react";
+import { Modal } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { Empty, Input, Pagination, Select, Skeleton, Tooltip } from "antd";
 import axios from "axios";
@@ -22,6 +23,9 @@ const AppliedLayout = () => {
   const [sortorder, setSortOrder] = useState("desc");
   const [searchTerm, setSearchTerm] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [isWithdrawModalOpen, setWithdrawModalOpen] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState(null);
+
 
   const [loading, setLoading] = useState(false);
 
@@ -275,7 +279,10 @@ const AppliedLayout = () => {
                       </button>
                     </Link>
                     <button
-                        onClick={() => handleWithdraw(campaign.campaignapplicationid)} 
+                      onClick={() => {
+                        setSelectedApplicationId(campaign.campaignapplicationid);
+                        setWithdrawModalOpen(true);
+                      }}
                       className="border border-red-500 text-red-500 hover:text-black w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-600 transition"
                     >
                       <RiDeleteBinLine size={18} />
@@ -303,6 +310,37 @@ const AppliedLayout = () => {
           pageSizeOptions={["10", "15", "25", "50"]}
         />
       </div>
+
+      <Modal
+        open={isWithdrawModalOpen}
+        onCancel={() => setWithdrawModalOpen(false)}
+        centered
+        footer={null}
+      >
+        <h2 className="text-xl font-semibold mb-2">Withdraw Application</h2>
+        <p className="text-gray-600">
+          Are you sure you want to withdraw this application? You can’t undo this action.
+        </p>
+
+        <div className="flex justify-end gap-3 mt-4">
+          <button
+            onClick={() => setWithdrawModalOpen(false)}
+            className="px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              handleWithdraw(selectedApplicationId);
+              setWithdrawModalOpen(false);
+            }}
+            className="px-6 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a]"
+          >
+            Withdraw
+          </button>
+        </div>
+      </Modal>
+
     </div>
   );
 };

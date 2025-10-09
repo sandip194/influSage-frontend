@@ -51,14 +51,32 @@ export default function Sidebar({ onSelectChat }) {
     }
   };
 
-  useEffect(() => {
-    fetchCampaigns();
-    fetchUnreadMessages();
+  // useEffect(() => {
+  //   fetchCampaigns();
+  //   fetchUnreadMessages();
 
-    // refresh unread every few seconds
-    const interval = setInterval(fetchUnreadMessages, 10000);
-    return () => clearInterval(interval);
-  }, [token, search]);
+  //   // refresh unread every few seconds
+  //   const interval = setInterval(fetchUnreadMessages, 10000);
+  //   return () => clearInterval(interval);
+  // }, [token, search]);
+
+  useEffect(() => {
+  fetchCampaigns();
+  fetchUnreadMessages();
+
+  // refresh unread messages every 10 seconds
+  const unreadInterval = setInterval(fetchUnreadMessages, 3000);
+
+  // refresh campaigns every 3 seconds
+  const campaignsInterval = setInterval(fetchCampaigns, 3000);
+
+  // Cleanup intervals on unmount
+  return () => {
+    clearInterval(unreadInterval);
+    clearInterval(campaignsInterval);
+  };
+}, [token, search]);
+
   
   // check if this campaign/vendor has an unread message
   const hasUnreadMessage = (vendor) => {
@@ -111,7 +129,7 @@ export default function Sidebar({ onSelectChat }) {
             const isSelected = selectedCampaignId === conversationId;
             const unread = hasUnreadMessage(vendor);
 
-            return (
+           return (
               <div
                 key={conversationId}
                 onClick={() => {
@@ -128,27 +146,48 @@ export default function Sidebar({ onSelectChat }) {
                     prev.filter((msg) => String(msg.ownerid) !== String(vendor.vendorid || vendor.id))
                   );
                 }}
-                className={`flex items-center justify-between p-4 border-b border-gray-100 rounded-lg transition-all duration-200 cursor-pointer
-                    ${isSelected ? "bg-blue-100 shadow-md transform scale-105" : "hover:bg-gray-100"}
-                    ${unread ? "bg-[#F0F4FF]" : ""}`}
-                >
+                className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-300
+                  ${
+                    isSelected
+                      ? "bg-gray-200 border-l-4 border-gray-500 shadow-sm scale-[1.01]"
+                      : "hover:bg-gray-100"
+                  }
+                  ${unread ? "bg-gray-100 shadow-md scale-[1.02]" : ""}
+                `}
+              >
                 <div className="flex items-center space-x-3">
-                  {campaign.campaignphoto && (
+                  {campaign.campaignphoto ? (
                     <img
                       src={campaign.campaignphoto}
                       alt={campaign.campaignname}
                       className="w-10 h-10 rounded-full object-cover"
                     />
+                  ) : (
+                    <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-semibold">
+                      {campaign.campaignname?.charAt(0).toUpperCase()}
+                    </div>
                   )}
-                  <div>
-                    <div className="font-semibold text-sm">{campaign.campaignname}</div>
-                    <div className={`text-xs ${unread ? "text-[#0D132D] font-semibold" : "text-gray-500"}`}>
+
+                  <div className="min-w-0">
+                    <div className="font-medium text-gray-900 truncate max-w-[160px]">
+                      {campaign.campaignname}
+                    </div>
+                    <div
+                      className={`text-sm truncate max-w-[180px] ${
+                        unread ? "text-gray-900 font-semibold" : "text-gray-500"
+                      }`}
+                    >
                       {unread ? "New message" : "Click to chat"}
                     </div>
                   </div>
                 </div>
+
+                {unread && (
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></div>
+                )}
               </div>
             );
+
           })
         ) : (
           <div className="p-4 text-sm text-gray-500">No campaigns found</div>

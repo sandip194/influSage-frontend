@@ -94,104 +94,111 @@ export default function ChatInput({ onSend, replyTo, onCancelReply, editingMessa
   }, [editingMessage]);
   return (
     <form
-      onSubmit={handleSubmit}
-      className="p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative"
-    >
-      {/* Emoji Picker */}
-      {showEmojiPicker && (
-        <div className="absolute bottom-20 left-4 z-10 bg-white shadow-lg rounded-lg">
-          <EmojiPicker
-            onEmojiClick={handleEmojiClick}
-            height={370}
-            width={300}
-          />
+  onSubmit={handleSubmit}
+  className="p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative"
+>
+  {/* Emoji Picker */}
+  {showEmojiPicker && (
+    <div className="absolute bottom-20 left-2 sm:left-4 z-10 bg-white shadow-lg rounded-lg">
+      <EmojiPicker
+        onEmojiClick={handleEmojiClick}
+        height={370}
+        width={300}
+      />
+    </div>
+  )}
+
+  {/* Reply UI */}
+  {replyTo && (
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-gray-100 border-l-4 border-[#0D132D] text-sm text-gray-700 px-4 py-2 rounded-md space-y-2 sm:space-y-0">
+      <div className="flex-1 truncate">
+        <span className="font-semibold">Replying to: </span>
+        <span className="truncate">{replyTo.content || "Attachment"}</span>
+      </div>
+      <button
+        type="button"
+        onClick={onCancelReply}
+        className="text-gray-500 hover:text-red-500 ml-0 sm:ml-4 flex-shrink-0"
+      >
+        <RiCloseLine />
+      </button>
+    </div>
+  )}
+
+  {/* File/Image Preview */}
+  {file && previewUrl && (
+    <div className="relative w-full max-w-xs">
+      {previewUrl.type === "image" && (
+        <img
+          src={previewUrl.url}
+          alt="preview"
+          className="h-28 w-full object-cover rounded-lg shadow cursor-pointer"
+          onClick={() => window.open(previewUrl.url, "_blank")}
+        />
+      )}
+
+      {previewUrl.type === "pdf" && (
+        <iframe
+          src={previewUrl.url}
+          title="PDF Preview"
+          className="w-full h-28 rounded border"
+        ></iframe>
+      )}
+
+      {previewUrl.type === "video" && (
+        <video
+          src={previewUrl.url}
+          controls
+          className="w-full h-28 rounded shadow"
+        />
+      )}
+
+      {previewUrl.type === "file" && (
+        <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg shadow">
+          <RiFileTextLine />
+          <span className="truncate max-w-[120px] text-sm">{previewUrl.name}</span>
         </div>
       )}
 
-      {/* Reply UI */}
-      {replyTo && (
-        <div className="flex items-center justify-between bg-gray-100 border-l-4 border-[0D132D] text-sm text-gray-700 px-4 py-2 rounded-md">
-          <div className="w-full sm:w-80 md:w-96 lg:w-[350px] p-2">
-            <span className="font-semibold">Replying to: </span>
-            {replyTo.content || "Attachment"}
-          </div>
-          <button onClick={onCancelReply} className="text-gray-500 hover:text-red-500 ml-4">
-            <RiCloseLine />
+      <button
+        type="button"
+        onClick={removeFile}
+        className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow hover:bg-red-100"
+      >
+        <RiCloseLine />
+      </button>
+    </div>
+  )}
+
+  {/* Input + Actions */}
+  <div className="flex items-center space-x-2 w-full">
+        <div className="flex space-x-2">
+          <button
+            type="button"
+            onClick={() => setShowEmojiPicker((prev) => !prev)}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <RiEmotionHappyLine size={25} />
           </button>
-        </div>
-      )}
-
-      {/* File/Image Preview */}
-      {file && previewUrl && (
-        <div className="relative w-fit max-w-xs">
-          {previewUrl.type === "image" && (
-            <img
-              src={previewUrl.url}
-              alt="preview"
-              className="h-28 w-auto rounded-lg shadow cursor-pointer"
-              onClick={() => window.open(previewUrl.url, "_blank")}
-            />
-          )}
-
-          {previewUrl.type === "pdf" && (
-            <iframe
-              src={previewUrl.url}
-              title="PDF Preview"
-              className="w-40 h-28 rounded border"
-            ></iframe>
-          )}
-
-          {previewUrl.type === "video" && (
-            <video
-              src={previewUrl.url}
-              controls
-              className="w-40 h-28 rounded shadow"
-            />
-          )}
-
-          {previewUrl.type === "file" && (
-            <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg shadow">
-              <RiFileTextLine />
-              <span className="truncate max-w-[120px] text-sm">{previewUrl.name}</span>
-            </div>
-          )}
 
           <button
             type="button"
-            onClick={removeFile}
-            className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow hover:bg-red-100"
+            onClick={() => fileInputRef.current.click()}
+            className="text-gray-500 hover:text-gray-700"
           >
-            <RiCloseLine />
+            <RiFileTextLine size={25} />
           </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+          />
         </div>
-      )}
-
-      <div className="flex items-center space-x-2">
-        <button
-          type="button"
-          onClick={() => setShowEmojiPicker((prev) => !prev)}
-          className="text-xl text-gray-500"
-        >
-          <RiEmotionHappyLine size={25} />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => fileInputRef.current.click()}
-          className="text-xl text-gray-500"
-        >
-          <RiFileTextLine size={25} />
-        </button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          className="hidden"
-        />
 
         <input
           type="text"
-          className="flex-1 border border-gray-300 bg-gray-100 rounded-full px-6 py-3 outline-none text-sm"
+          className="flex-1 border border-gray-300 bg-gray-100 rounded-full px-4 sm:px-6 py-2 sm:py-3 outline-none text-sm w-full"
           placeholder="Write your message"
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -200,11 +207,12 @@ export default function ChatInput({ onSend, replyTo, onCancelReply, editingMessa
 
         <button
           type="submit"
-          className="bg-[#0D132D] hover:bg-indigo-700 text-white p-3 rounded-full shadow-md transition"
+          className="bg-[#0D132D] hover:bg-indigo-700 text-white p-3 rounded-full shadow-md transition flex-shrink-0"
         >
           <RiSendPlane2Fill />
         </button>
       </div>
-    </form>
+
+</form>
   );
 }
