@@ -96,7 +96,7 @@ const Sidebar = forwardRef((props, ref) => {
                     {isOpen && (
                         <NavLink to="/dashboard">
                             <img
-                                src="/public/influSage-logo.png"
+                                src="/influSage-logo.png"
                                 alt="Logo"
                                 className="h-8 w-auto px-3"
                             />

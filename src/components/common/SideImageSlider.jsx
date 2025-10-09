@@ -55,7 +55,7 @@ const SideImageSlider = () => {
 
           <div className="relative z-20 max-w-sm">
             <div className="mb-5">
-              <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+              <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
             </div>
             <div className={`branding ${fade ? '' : 'fade-out'}`}>
               <h1 className="text-md text-[#0f1533] font-bold mb-0">{title}</h1>

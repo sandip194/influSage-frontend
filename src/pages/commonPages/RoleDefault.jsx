@@ -63,7 +63,7 @@ const RoleDefault = () => {
         <div className="login-right">
           <div className="form-box">
             <div className="mb-2 ">
-              <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+              <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
             </div>
             <h2>Select Your Role</h2>
             <p>Select your role based on your requirements</p>

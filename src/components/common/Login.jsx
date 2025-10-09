@@ -76,7 +76,7 @@ export const LoginForm = () => {
       <div className="login-card h-90vh">
         <div className="login-card-left">
           <div className="branding">
-            <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+            <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
             <p>Built for Creators.<br />Backed by Brands.</p>
           </div>
         </div>

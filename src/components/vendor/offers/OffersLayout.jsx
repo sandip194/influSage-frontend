@@ -154,6 +154,7 @@ const OffersLayout = () => {
                                         {/* Campaign Name and Icon */}
 
                                         <td className="p-4 flex items-center gap-3">
+                                            
                                             <img
                                                 src={`${BASE_URL}/${offer?.photopath}`}
                                                 alt={offer.name}

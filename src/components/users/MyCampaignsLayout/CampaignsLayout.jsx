@@ -381,6 +381,7 @@ const InfluencerCampaigns = () => {
                     className="border-t border-gray-200 hover:bg-gray-50 transition"
                   >
                     <td className="p-4 flex items-center gap-3">
+                      
                       <img
                         src={getImageUrl(row.photopath)}
                         alt={row.businessname}

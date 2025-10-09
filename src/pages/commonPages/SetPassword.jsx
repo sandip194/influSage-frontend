@@ -100,7 +100,7 @@ export const SetPassword = () => {
 
         <div className="login-card-right">
           <div className="mb-4 ">
-            <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+            <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
           </div>
           <form onSubmit={handleSubmit(submitHandler)}>
             <h2>Set Password</h2>
