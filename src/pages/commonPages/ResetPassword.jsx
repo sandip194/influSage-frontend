@@ -62,7 +62,7 @@ export const ResetPassword = () => {
 
                 <div className="login-card-right">
                     <div className="mb-2 ">
-                        <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+                        <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
                     </div>
 
                     <form onSubmit={handleSubmit(onSubmit)}>

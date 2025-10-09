@@ -17,7 +17,7 @@ export const ProfileHeader = () => {
     <div className="header-container flex items-center h-18 justify-between bg-white p-2 shadow-none border-b border-gray-200 px-8">
       <div className="logo">
         <Link to="/">
-          <img src="/public/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+          <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
         </Link>
       </div>
 

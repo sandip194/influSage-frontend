@@ -42,7 +42,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
         {
           key: "1",
           icon: <UserOutlined />,
-          label: <Link to={`${basePath}/profile`}>My Profile</Link>,
+          label: <Link to={`${basePath}/my-profile`}>My Profile</Link>,
         },
         {
           key: "2",

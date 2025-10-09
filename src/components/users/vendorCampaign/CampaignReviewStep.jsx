@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
 
+import influencer from '../../../assets/influencer.jpg'
+
 import {
   RiCheckboxCircleFill,
   RiDeleteBin6Line,
@@ -181,7 +183,7 @@ const CampaignReviewStep = ({ onEdit }) => {
           <div className="bg-white rounded-2xl overflow-hidden">
             <div className="relative h-40">
               <img
-                src="/src/assets/influencer.jpg"
+                src={influencer}
                 alt="Banner"
                 className="w-full h-28 object-cover rounded-lg"
               />

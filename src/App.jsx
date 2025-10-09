@@ -54,6 +54,7 @@ import OfferDetails from './components/vendor/offers/OfferDetails';
 import InfluencerProfile from './components/vendor/offers/InfluencerProfile';
 import EditVendorProfile from './components/users/EditProfile/EditVendorProfile';
 import SocketProvider from './sockets/SocketProvider';
+import VendorMyProfile from './pages/vendor/dashboard/VendorMyProfile';
 
 const App = () => {
 
@@ -158,6 +159,7 @@ const App = () => {
 
 
                                                 <Route path='edit-profile' element={<EditVendorProfile />} />
+                                                <Route path='my-profile' element={<VendorMyProfile/>} />
                                         </Route>
                                         <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
                                 </Route>
