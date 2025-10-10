@@ -226,7 +226,7 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
           deleted: msg.isdeleted  || false,
           readbyvendor: msg.readbyvendor ?? false,
           readbyinfluencer: msg.readbyinfluencer ?? false,
-        }));
+        })).sort((a, b) => new Date(a.time) - new Date(b.time));
         dispatch(setMessages(formattedMessages));
       }
     } catch (err) {

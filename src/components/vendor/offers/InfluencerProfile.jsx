@@ -1,8 +1,9 @@
-import { RiArrowLeftLine, RiFile3Line, RiHeart3Fill, RiHeart3Line } from "@remixicon/react";
+import { RiArrowLeftLine, RiFile3Line, RiHeart3Fill, RiHeart3Line, RiMessage2Line } from "@remixicon/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { Tooltip } from "antd";
 
 
 
@@ -47,6 +48,29 @@ const InfluencerProfile = () => {
         getInfluencerDetails();
     }, [])
 
+    const handleMessageClick = () => {
+        navigate("/vendor-dashboard/messages", {
+            state: {
+            influencerId: influDetails.id,
+            influencerName: `${influDetails.firstname} ${influDetails.lastname}`,
+            influencerPhoto: influDetails.photopath
+                ? `${BASE_URL}/${influDetails.photopath}`
+                : null,
+            conversationId: influDetails.conversationid || null,
+
+
+            selectChatFromOutside: {
+                influencerid: influDetails.id,
+                influencerName: `${influDetails.firstname} ${influDetails.lastname}`,
+                influencerPhoto: influDetails.photopath
+                ? `${BASE_URL}/${influDetails.photopath}`
+                : null,
+                conversationId: influDetails.conversationid || null,
+            },
+            },
+        });
+    };
+
     return (
         <div className="">
             <button
@@ -88,9 +112,14 @@ const InfluencerProfile = () => {
 
                     <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-3">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
-                            <button className="bg-[#0f122f] text-white px-5 py-2 rounded-full hover:bg-[#23265a] transition w-full sm:w-auto">
-                                Send Message
-                            </button>
+                            <Tooltip title="Message">
+                                <button
+                                    onClick={handleMessageClick}
+                                    className="flex items-center justify-center gap-2 bg-[#0f122f] text-white px-4 py-2 rounded-3xl hover:bg-[#23265a]"
+                                >
+                                    <RiMessage2Line size={18} />Send Message
+                                </button>
+                            </Tooltip>
                             <button className="border border-gray-300 text-gray-900 px-5 py-2 rounded-full hover:bg-gray-100 transition w-full sm:w-auto">
                                 Invited
                             </button>
@@ -133,12 +162,12 @@ const InfluencerProfile = () => {
                         Personal Details
                     </h3>
                     <ul className="text-sm text-gray-700 space-y-3">
-                        <li>
+                        {/* <li>
                             <strong>Date of Birth:</strong> {formatDOB(influDetails?.dob)}
                         </li>
                         <li>
                             <strong>Address:</strong> {influDetails?.address1}
-                        </li>
+                        </li> */}
                         <li>
                             <strong>Gender:</strong> {influDetails?.genderid === 1 ? "Male" : "Female"}
                         </li>

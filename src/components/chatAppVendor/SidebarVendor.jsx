@@ -2,10 +2,12 @@ import { RiAddLine, RiArrowLeftLine } from "react-icons/ri";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 
 export default function SidebarVendor({ onSelectChat }) {
   const { token } = useSelector((state) => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const location = useLocation();
 
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [selectedInfluencer, setSelectedInfluencer] = useState(null);
@@ -14,6 +16,7 @@ export default function SidebarVendor({ onSelectChat }) {
   const [search, setSearch] = useState("");
   const [unreadMessages, setUnreadMessages] = useState([]);
   const [loadingUnread, setLoadingUnread] = useState(false);
+  const selectChatFromOutside = location.state?.selectChatFromOutside || null;
 
 
   const fetchCampaigns = async () => {
@@ -76,15 +79,48 @@ export default function SidebarVendor({ onSelectChat }) {
   }
 };
 
-  useEffect(() => {
-  if (token) {
-    fetchCampaigns();
-    fetchUnreadMessages();
-  }
-  const interval = setInterval(fetchUnreadMessages, 10000);
-    return () => clearInterval(interval);
-}, [token, search]);
+useEffect(() => {
+  fetchCampaigns();
+  fetchUnreadMessages();
 
+  // refresh unread messages every 10 seconds
+  const unreadInterval = setInterval(fetchUnreadMessages, 3000);
+
+  // refresh campaigns every 3 seconds
+  const campaignsInterval = setInterval(fetchCampaigns, 3000);
+
+  // Cleanup intervals on unmount
+  return () => {
+    clearInterval(unreadInterval);
+    clearInterval(campaignsInterval);
+  };
+}, [token, search]);
+useEffect(() => {
+  if (selectChatFromOutside && campaigns.length > 0) {
+    const { influencerid } = selectChatFromOutside;
+
+    const campaign = campaigns.find(c =>
+      c.influencers.some(i => i.influencerid === influencerid)
+    );
+
+    if (campaign) {
+      setSelectedCampaign(campaign);
+
+      const influencer = campaign.influencers.find(i => i.influencerid === influencerid);
+      if (influencer) {
+        setSelectedInfluencer(influencerid);
+
+        onSelectChat({
+          conversationid: influencer.conversationid,
+          id: influencer.conversationid,
+          name: `${influencer.firstname} ${influencer.lastname}`,
+          img: influencer.userphoto ? `${BASE_URL}/${influencer.userphoto}` : null,
+          influencerid: influencer.influencerid,
+        });
+      }
+    }
+  }
+}, [selectChatFromOutside, campaigns]);
 
 
   const filteredInfluencers = selectedCampaign

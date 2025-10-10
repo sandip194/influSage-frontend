@@ -26,6 +26,28 @@ const OfferDetails = () => {
     const { id } = useParams();
     const { token } = useSelector((state) => state.auth);
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    const handleMessageClick = () => {
+        navigate("/vendor-dashboard/messages", {
+            state: {
+            influencerId: offerDetails.influencerid,
+            influencerName: `${offerDetails.firstname} ${offerDetails.lastname}`,
+            influencerPhoto: offerDetails.photopath
+                ? `${BASE_URL}/${offerDetails.photopath}`
+                : null,
+            conversationId: offerDetails.conversationid || null,
+
+
+            selectChatFromOutside: {
+                influencerid: offerDetails.influencerid,
+                influencerName: `${offerDetails.firstname} ${offerDetails.lastname}`,
+                influencerPhoto: offerDetails.photopath
+                ? `${BASE_URL}/${offerDetails.photopath}`
+                : null,
+                conversationId: offerDetails.conversationid || null,
+            },
+            },
+        });
+    };
 
     useEffect(() => {
         const getApplicationDetails = async () => {
@@ -180,11 +202,10 @@ const handleConfirmAccept = () => {
                                 <RiEyeLine size={18} /> View Profile
                             </button>
 
-                            <Tooltip title="Message" className="w-full sm:w-auto">
+                            <Tooltip title="Message">
                                 <button
-                                    aria-label="Message"
-                                    className="w-full sm:w-auto flex-1 py-2 flex items-center justify-center 
-                  gap-2 rounded-3xl bg-[#0f122f] text-white hover:bg-[#23265a]"
+                                    onClick={handleMessageClick}
+                                    className="flex items-center justify-center gap-2 bg-[#0f122f] text-white px-4 py-2 rounded-3xl hover:bg-[#23265a]"
                                 >
                                     <RiMessage2Line size={18} /> Message
                                 </button>

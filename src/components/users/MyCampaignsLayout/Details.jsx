@@ -134,12 +134,12 @@ const Details = () => {
                   >
                     Complete & Payment
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => setCancelModel(true)}
                     className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
                   >
                     Cancel Campaign
-                  </button>
+                  </button> */}
                 </div>
               </div>
               {/* Campaign Info */}
