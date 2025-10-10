@@ -1,9 +1,23 @@
 
-import DashboardHomePage from '../admin/pages/DashboardHomePage';
+// import DashboardHomePage from '../admin/pages/DashboardHomePage';
+
+// export const Home = () => {
+
+//   return (
+//    <DashboardHomePage/>
+//   );
+// } 
+
+
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const Home = () => {
+  const navigate = useNavigate();
 
-  return (
-   <DashboardHomePage/>
-  );
-} 
+  useEffect(() => {
+    navigate('/login');
+  }, [navigate]);
+
+  return null; // Don't render anything
+};
