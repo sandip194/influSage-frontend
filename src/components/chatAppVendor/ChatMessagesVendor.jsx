@@ -92,7 +92,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
           deleted: msg.isdeleted  || false,
           readbyinfluencer: msg.readbyinfluencer || false,
           readbyvendor: msg.readbyvendor || false,
-        }));
+        })) .sort((a, b) => new Date(a.time) - new Date(b.time));
 
         dispatch(setMessages(formattedMessages));
       }

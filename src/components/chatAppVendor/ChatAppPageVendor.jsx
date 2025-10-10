@@ -5,6 +5,7 @@ import Sidebar from "./SidebarVendor";
 import ChatHeaderVendor from "./ChatHeaderVendor";
 import ChatMessages from "./ChatMessagesVendor";
 import ChatInput from "./ChatInputVendor";
+import { useLocation } from "react-router-dom";
 
 import { getSocket } from "../../sockets/socket"; // Already connected globally
 import {
@@ -17,6 +18,8 @@ export default function ChatAppPageVendor() {
   const dispatch = useDispatch();
   const { token, id: userId, role } = useSelector((state) => state.auth);
   const socket = getSocket();
+  const location = useLocation();
+  const [chatToSelect, setChatToSelect] = useState(null);
 
   const activeChat = useSelector((state) => state.chat.activeChat);
   const messages = useSelector((state) => state.chat.messages);
@@ -141,6 +144,27 @@ export default function ChatAppPageVendor() {
     }
   };
 
+  useEffect(() => {
+  if (location.state?.influencerId) {
+    const { influencerId, influencerName, influencerPhoto, conversationId } = location.state;
+
+    const chatData = {
+      id: conversationId || influencerId,
+      conversationid: conversationId,
+      name: influencerName,
+      img: influencerPhoto,
+      vendorId: userId,
+      influencerId,
+    };
+
+    dispatch(setActiveChat(chatData));
+
+    if (conversationId) {
+      fetchMessages(); 
+    }
+  }
+}, [location.state, dispatch, userId]);
+
   return (
     <div className="h-[85vh] flex overflow-hidden">
       {/* Sidebar */}
@@ -153,7 +177,7 @@ export default function ChatAppPageVendor() {
             dispatch(
               setActiveChat(chat)
             )}
-
+            selectChatFromOutside={chatToSelect}
         />
       </div>
 
