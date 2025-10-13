@@ -11,6 +11,7 @@ import CampaignStep4 from "../../../components/users/vendorCampaign/CampaignStep
 import CampaignStep5 from "../../../components/users/vendorCampaign/CampaignStep5";
 import CampaignReviewStep from "../../../components/users/vendorCampaign/CampaignReviewStep";
 import CampaignCategorySection from "../../../components/users/vendorCampaign/CampaignCategorySection";
+import { useParams } from 'react-router-dom';
 
 
 
@@ -20,6 +21,8 @@ const isNonEmptyArray = (arr) => Array.isArray(arr) && arr.length > 0;
 
 const CampaignWizard = () => {
   const { token } = useSelector((state) => state.auth);
+  const {campaignId} = useParams();
+  console.log("🚀 ~ file: CampaignWizard.jsx:15 ~ CampaignWizard ~ campaignId:", campaignId)
 
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false, false]);
@@ -68,7 +71,8 @@ const CampaignWizard = () => {
   // Fetch campaign data
   const getCampaignData = async () => {
     try {
-      const res = await axios.get("/vendor/campaign/01", {
+      const endpath = campaignId ? `${campaignId}` : '01';
+      const res = await axios.get(`/vendor/campaign/${endpath}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

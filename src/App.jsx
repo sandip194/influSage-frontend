@@ -145,6 +145,7 @@ const App = () => {
 
                                                 <Route path='vendor-campaign/my-campaigns' element={<CreateCampaign />} />
                                                 <Route path='vendor-campaign/create-campaign' element={<CampaignWizard />} />
+                                                <Route path='vendor-campaign/edit-campaign/:campaignId' element={<CampaignWizard />} />
 
                                                 <Route path='vendor-campaign' element={ <VendorCampaign/>} />
                                                 <Route path='vendor-campaign/campaignDetails/:campaignId' element={<CampaignDetails />} />

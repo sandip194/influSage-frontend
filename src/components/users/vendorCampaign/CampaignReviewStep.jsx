@@ -578,6 +578,13 @@ const CampaignReviewStep = ({ onEdit }) => {
         >
           Create Campaign
         </button>
+         <button
+          className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full"
+          // onClick={handleCreateCampaign}
+          type="button"
+        >
+          Save Draft
+        </button>
       </div>
     </div>
   );

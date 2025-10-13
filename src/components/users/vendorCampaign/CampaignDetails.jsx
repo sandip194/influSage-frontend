@@ -40,6 +40,7 @@ const CampaignDetails = () => {
   const navigate = useNavigate();
   const { campaignId } = useParams()
   const { token } = useSelector((state) => state.auth);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getCampaignDetails = async () => {
@@ -148,7 +149,14 @@ const handlePauseCampaign = async () => {
   }
 };
 
-
+ const handleEditClick = () => {
+    if (campaignDetails?.iseditable === true || campaignDetails?.iseditable === "Is editable") {
+     
+      navigate(`/vendor-dashboard/vendor-campaign/edit-campaign/${campaignDetails?.id}`);
+    } else {
+      setIsModalVisible(true);
+    }
+  };
 
   if (loading) return <div className="text-center">Loading campaign...</div>;
 
@@ -192,6 +200,13 @@ const handlePauseCampaign = async () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                  <button
+                      type="primary"
+                      onClick={handleEditClick}
+                      className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
+                    >
+                      Edit Campaign
+                    </button>
                   <button
                     onClick={() => setIsPauseModalOpen(true)}
                     className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
@@ -509,6 +524,16 @@ const handlePauseCampaign = async () => {
           </button>
         </div>
       </Modal>
+
+      <Modal
+          title="Edit Not Allowed"
+          open={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          footer={null}
+        >
+          <p>You cannot edit this campaign right now. Please contact admin or check campaign status.</p>
+      </Modal>
+
     </div>
   );
 };
