@@ -21,32 +21,32 @@ const stats = [
     { title: "Active Campaigns", value: 34, icon: RiBarChartLine, iconColor: "text-purple-500" },
 ];
 
-const userRequests = [
-    {
-        user: "Sarah Johnson",
-        email: "sarah.johnson@email.com",
-        role: "Content Creator",
-        date: "2024-01-15",
-        status: "Pending",
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    {
-        user: "Mike Chen",
-        email: "mike.chen@email.com",
-        role: "Brand Manager",
-        date: "2024-01-14",
-        status: "Pending",
-        avatar: "https://randomuser.me/api/portraits/men/45.jpg",
-    },
-    {
-        user: "Emma Davis",
-        email: "emma.davis@email.com",
-        role: "Influencer",
-        date: "2024-01-13",
-        status: "Approved",
-        avatar: "https://randomuser.me/api/portraits/women/46.jpg",
-    },
-];
+// const userRequests = [
+//     {
+//         user: "Sarah Johnson",
+//         email: "sarah.johnson@email.com",
+//         role: "Content Creator",
+//         date: "2024-01-15",
+//         status: "Pending",
+//         avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+//     },
+//     {
+//         user: "Mike Chen",
+//         email: "mike.chen@email.com",
+//         role: "Brand Manager",
+//         date: "2024-01-14",
+//         status: "Pending",
+//         avatar: "https://randomuser.me/api/portraits/men/45.jpg",
+//     },
+//     {
+//         user: "Emma Davis",
+//         email: "emma.davis@email.com",
+//         role: "Influencer",
+//         date: "2024-01-13",
+//         status: "Approved",
+//         avatar: "https://randomuser.me/api/portraits/women/46.jpg",
+//     },
+// ];
 
 const DashboardHomePage = () => {
     return (

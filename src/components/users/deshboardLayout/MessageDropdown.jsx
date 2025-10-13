@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 const MessageDropdown = () => {
@@ -7,6 +8,9 @@ const MessageDropdown = () => {
   const [loading, setLoading] = useState(true);
   const { token, id: userId, role } = useSelector((state) => state.auth) || {};
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const navigate = useNavigate();
+
+  const navigaetPath = role === 1 ? "/dashboard/messages" : "/vendor-dashboard/messages"
 
   useEffect(() => {
     const fetchUnreadMessages = async () => {
@@ -36,7 +40,10 @@ const MessageDropdown = () => {
     >
       <div className="flex justify-between items-center mb-3">
         <h2 className="font-semibold text-lg text-[#0b0d28]">Messages</h2>
-        <button className="text-sm text-[#0b0d28] font-medium hover:underline cursor-pointer">
+        <button 
+        className="text-sm text-[#0b0d28] font-medium hover:underline cursor-pointer"
+        onClick={() => navigate(navigaetPath)}
+          >
           View All
         </button>
       </div>

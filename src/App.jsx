@@ -55,6 +55,7 @@ import InfluencerProfile from './components/vendor/offers/InfluencerProfile';
 import EditVendorProfile from './components/users/EditProfile/EditVendorProfile';
 import SocketProvider from './sockets/SocketProvider';
 import VendorMyProfile from './pages/vendor/dashboard/VendorMyProfile';
+import DashboardHomePage from './components/admin/pages/DashboardHomePage';
 
 const App = () => {
 
@@ -79,6 +80,7 @@ const App = () => {
                         
                         <Routes>
                                 <Route path='/' element={<Home />} />
+                                <Route path='/admin' element={<DashboardHomePage />} />
                                 <Route path='/signup' element={<Signup />} />
                                 <Route path='/role' element={<Role />} />
                                 <Route path='/roledefault' element={<RoleDefault />} />
@@ -118,7 +120,7 @@ const App = () => {
 
                                                 <Route path='messages' element={<ChatAppPage />} />
 
-                                                <Route path='profile' element={<Profile />} />
+                                                <Route path='my-profile' element={<Profile />} />
 
                                                 <Route path='editProfile' element={<EditProfile />} />
 
