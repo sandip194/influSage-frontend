@@ -50,7 +50,8 @@ const stats = [
 
 const DashboardHomePage = () => {
     return (
-        <AdminDashboardLayout>
+        <>
+
             <div className="space-y-6">
                 {/* Stat Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -84,7 +85,7 @@ const DashboardHomePage = () => {
                 </div> */}
             </div>
 
-            <div className="mt-10">
+            {/* <div className="mt-10">
 
                 <UserTableLayout />
             </div>
@@ -92,8 +93,9 @@ const DashboardHomePage = () => {
             <div className="mt-10">
 
                 <CampaignTableLayout />
-            </div>
-        </AdminDashboardLayout>
+            </div> */}
+
+        </>
     )
 }
 
