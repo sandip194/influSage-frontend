@@ -10,12 +10,27 @@ import {
   RiEyeLine
 } from '@remixicon/react';
 import { SearchOutlined } from '@ant-design/icons';
-import { Empty, Input, Pagination, Select, Tooltip } from 'antd';
+import { Empty, Input, Pagination, Select, Tooltip, Skeleton } from 'antd';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 
 
+const buttons = [
+  { id: "browse", label: "Browse Campaign", path: "/dashboard/browse" },
+  {
+    id: "applied",
+    label: "Applied Campaign",
+    path: "/dashboard/browse/applied",
+  },
+  { id: "saved", label: "Saved Campaign", path: "/dashboard/browse/saved" },
+];
+
+const sortOptions = [
+  { value: "createddate_desc", label: "Newest" },
+  { value: "estimatedbudget_desc", label: "Price: High to Low" }, // desc = high to low
+  { value: "estimatedbudget_asc", label: "Price: Low to High" },  // asc = low to high
+];
 
 
 const Browse = () => {
@@ -54,27 +69,12 @@ const Browse = () => {
     navigate(path);
   }, [navigate]);
 
-  const buttons = [
-    { id: "browse", label: "Browse Campaign", path: "/dashboard/browse" },
-    {
-      id: "applied",
-      label: "Applied Campaign",
-      path: "/dashboard/browse/applied",
-    },
-    { id: "saved", label: "Saved Campaign", path: "/dashboard/browse/saved" },
-  ];
+
 
   const selectedButton = useMemo(
     () => buttons.find((b) => location.pathname === b.path)?.id,
     [location.pathname]
   );
-
-
-  const sortOptions = [
-    { value: "createddate_desc", label: "Newest" },
-    { value: "estimatedbudget_desc", label: "Price: High to Low" }, // desc = high to low
-    { value: "estimatedbudget_asc", label: "Price: Low to High" },  // asc = low to high
-  ];
 
 
   const handleBudgetChange = useCallback((type, value) => {
@@ -171,7 +171,7 @@ const Browse = () => {
           },
         }
       );
-     // console.log(res.data)
+      // console.log(res.data)
       toast.success(res.data?.message);
       if (res.status === 201) {
         getAllCampaigns()
@@ -325,9 +325,21 @@ const Browse = () => {
             className={`grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}
           >
             {loading ? (
-              <div className="col-span-full text-center py-10 text-gray-500">
-                Loading campaigns...
-              </div>
+              Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="border border-gray-200 rounded-2xl p-5 bg-white"
+                >
+                  <div className="mb-3">
+                    <Skeleton.Avatar active size="large" shape="circle" />
+                  </div>
+                  <Skeleton
+                    active
+                    paragraph={{ rows: 3 }}
+                    title={{ width: '60%' }}
+                  />
+                </div>
+              ))
             ) : campaigns.length === 0 ? (
               <div className="col-span-full py-10">
                 <Empty description="No campaigns found." />
@@ -348,16 +360,16 @@ const Browse = () => {
                     className="w-10 h-10 object-cover rounded-full flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0"> {/* Keeps space management intact */}
-                     <Link
-                        to={
-                          campaign.campaignapplied
-                            ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
-                            : `/dashboard/browse/description/${campaign.id}`
-                        }
-                        className="font-semibold text-gray-900 hover:underline"
-                      >
-                        {campaign.name}
-                      </Link>
+                    <Link
+                      to={
+                        campaign.campaignapplied
+                          ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
+                          : `/dashboard/browse/description/${campaign.id}`
+                      }
+                      className="font-semibold text-gray-900 hover:underline"
+                    >
+                      {campaign.name}
+                    </Link>
                     <div className="text-xs text-gray-500"> {/* Removed 'truncate' to allow wrapping; add back if needed */}
                       {campaign.businessname}
                     </div>

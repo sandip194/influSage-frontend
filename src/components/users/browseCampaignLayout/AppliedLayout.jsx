@@ -86,29 +86,29 @@ const AppliedLayout = () => {
   }, [sortby, sortorder, pagenumber, pagesize, token, searchTerm]);
 
   const handleWithdraw = async (campaignapplicationid) => {
-  try {
-    const res = await axios.post(
-      `/user/withdraw-application`,
-      {
-         p_applicationid: campaignapplicationid,
-        p_statusname: "Withdrawn",
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
+    try {
+      const res = await axios.post(
+        `/user/withdraw-application`,
+        {
+          p_applicationid: campaignapplicationid,
+          p_statusname: "Withdrawn",
         },
-      }
-    );
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-   // console.log(res.data);
-    // console.log("Withdraw request:", campaignapplicationid);
-    toast.success(res.data?.message);
+      // console.log(res.data);
+      // console.log("Withdraw request:", campaignapplicationid);
+      toast.success(res.data?.message);
 
-  } catch (error) {
-    console.error(error)
-    toast.error(error);
-  }
-};
+    } catch (error) {
+      console.error(error)
+      toast.error(error);
+    }
+  };
   useEffect(() => {
     getAllAppliedCampaigns();
   }, [getAllAppliedCampaigns]);
@@ -126,11 +126,10 @@ const AppliedLayout = () => {
             key={id}
             onClick={() => handleClick(path)}
             className={`px-4 py-2 rounded-md border border-gray-300 transition
-      ${
-        selectedButton === id
-          ? "bg-[#0f122f] text-white"
-          : "bg-white text-[#141843] hover:bg-gray-100"
-      }`}
+      ${selectedButton === id
+                ? "bg-[#0f122f] text-white"
+                : "bg-white text-[#141843] hover:bg-gray-100"
+              }`}
           >
             {label}
           </button>
@@ -196,11 +195,21 @@ const AppliedLayout = () => {
         <div className="flex flex-col lg:flex-row gap-6 mt-6">
           <div className="grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {loading ? (
-              <Skeleton
-                active
-                paragraph={{ rows: 6 }}
-                className="col-span-full"
-              />
+              Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="border border-gray-200 rounded-2xl p-5 bg-white"
+                >
+                  <div className="mb-3">
+                    <Skeleton.Avatar active size="large" shape="circle" />
+                  </div>
+                  <Skeleton
+                    active
+                    paragraph={{ rows: 3 }}
+                    title={{ width: '60%' }}
+                  />
+                </div>
+              ))
             ) : campaigns.length === 0 ? (
               <div className="col-span-full py-10">
                 <Empty description="No campaigns found." />
