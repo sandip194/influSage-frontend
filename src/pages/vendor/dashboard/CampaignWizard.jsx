@@ -12,6 +12,12 @@ import CampaignStep5 from "../../../components/users/vendorCampaign/CampaignStep
 import CampaignReviewStep from "../../../components/users/vendorCampaign/CampaignReviewStep";
 import CampaignCategorySection from "../../../components/users/vendorCampaign/CampaignCategorySection";
 
+
+
+const isNonEmptyObject = (obj) => obj && typeof obj === 'object' && !Array.isArray(obj) && Object.keys(obj).length > 0;
+const isNonEmptyArray = (arr) => Array.isArray(arr) && arr.length > 0;
+
+
 const CampaignWizard = () => {
   const { token } = useSelector((state) => state.auth);
 
@@ -72,7 +78,7 @@ const CampaignWizard = () => {
           expectation: parts.p_objectivejson || {},
           step2: parts.p_vendorinfojson || {},
           step3: parts.p_campaignjson || {},
-          categories: parts.p_campaigncategoyjson  || [],
+          categories: parts.p_campaigncategoyjson || [],
           step4: parts.p_campaignfilejson || [],
           step5: parts.p_contenttypejson || {},
           profileParts: parts,
@@ -80,25 +86,26 @@ const CampaignWizard = () => {
 
         // Determine which steps are completed
         const newCompletion = [
-          !!parts.p_objectivejson,
-          !!parts.p_vendorinfojson,
-          !!parts.p_campaignjson,
-          !!parts.p_campaigncategoyjson ,
-          !!(parts.p_campaignfilejson && parts.p_campaignfilejson.length > 0),
-          !!(parts.p_contenttypejson && Object.keys(parts.p_contenttypejson).length > 0), 
+          isNonEmptyObject(parts.p_objectivejson),
+          isNonEmptyObject(parts.p_vendorinfojson),
+          isNonEmptyObject(parts.p_campaignjson),
+          isNonEmptyArray(parts.p_campaigncategoyjson),
+          isNonEmptyArray(parts.p_campaignfilejson),
+          isNonEmptyObject(parts.p_contenttypejson),
         ];
+
 
         setCompletedSteps(newCompletion);
         localStorage.setItem("completedSteps", JSON.stringify(newCompletion));
 
-    // Find the first incomplete step
-    const firstIncomplete = newCompletion.findIndex((done) => !done);
-    if (firstIncomplete !== -1) {
-      setCurrentStep(firstIncomplete);
-    } else {
-      setCurrentStep("review"); 
-    }
-          }
+        // Find the first incomplete step
+        const firstIncomplete = newCompletion.findIndex((done) => !done);
+        if (firstIncomplete !== -1) {
+          setCurrentStep(firstIncomplete);
+        } else {
+          setCurrentStep("review");
+        }
+      }
     } catch (err) {
       console.error("❌ Error fetching campaign:", err);
       toast.error("Failed to fetch campaign data.");
@@ -112,26 +119,26 @@ const CampaignWizard = () => {
   }, [lastCompletedStep]);
 
 
-useEffect(() => {
-  const stored = localStorage.getItem("completedSteps");
-  if (stored) {
-    const parsed = JSON.parse(stored);
-    setCompletedSteps(parsed);
+  useEffect(() => {
+    const stored = localStorage.getItem("completedSteps");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      setCompletedSteps(parsed);
 
-    const lastIndex = parsed.lastIndexOf(true);
-    if (lastIndex !== -1) {
-      setLastCompletedStep(lastIndex);
-    }
+      const lastIndex = parsed.lastIndexOf(true);
+      if (lastIndex !== -1) {
+        setLastCompletedStep(lastIndex);
+      }
 
-    // Go to first incomplete step
-    const firstIncomplete = parsed.findIndex((done) => !done);
-    if (firstIncomplete !== -1) {
-      setCurrentStep(firstIncomplete);
-    } else {
-      setCurrentStep("review");
+      // Go to first incomplete step
+      const firstIncomplete = parsed.findIndex((done) => !done);
+      if (firstIncomplete !== -1) {
+        setCurrentStep(firstIncomplete);
+      } else {
+        setCurrentStep("review");
+      }
     }
-  }
-}, []);
+  }, []);
 
 
   // Define steps early so functions below can access it

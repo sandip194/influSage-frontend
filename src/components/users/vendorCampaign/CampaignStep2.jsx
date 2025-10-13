@@ -37,7 +37,9 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
 
   // Initialize formData with IDs extracted from incoming data JSON structure
   const [formData, setFormData] = useState({
-    genderid: Array.isArray(data?.genderid) ? data.genderid : [],
+    genderid: Array.isArray(data?.genders)
+      ? data.genders.map((g) => g.genderid)
+      : [],
     isproductshipping:
       typeof data?.isproductshipping === "boolean"
         ? data.isproductshipping
@@ -50,12 +52,13 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
       : [],
   });
 
+
   useEffect(() => {
     if (!data) return;
     setFormData({
-      genderid: Array.isArray(data?.genderid)
-      ? data.genderid.map(g => typeof g === 'object' ? g.genderid : g)
-      : [],
+      genderid: Array.isArray(data?.genders)
+        ? data.genders.map(g => g.genderid)
+        : [],
       isproductshipping:
         typeof data?.isproductshipping === "boolean"
           ? data.isproductshipping
@@ -128,9 +131,9 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
       const isSelected = prev.genderid.includes(id);
       return {
         ...prev,
-      genderid: isSelected
-        ? prev.genderid.filter((g) => g !== id)
-        : [...prev.genderid, id],
+        genderid: isSelected
+          ? prev.genderid.filter((g) => g !== id)
+          : [...prev.genderid, id],
       };
     });
     setErrors((prev) => ({ ...prev, genderid: false }));
@@ -160,42 +163,42 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
   };
 
   const handleContinue = async () => {
-     const newErrors = {
-    genderid: !formData.genderid.length,
-    isproductshipping: formData.isproductshipping === null,
-    campaigninfluencertiers: formData.campaigninfluencertiers.length === 0,
-    campaignlanguages: formData.campaignlanguages.length === 0,
-  };
+    const newErrors = {
+      genderid: !formData.genderid.length,
+      isproductshipping: formData.isproductshipping === null,
+      campaigninfluencertiers: formData.campaigninfluencertiers.length === 0,
+      campaignlanguages: formData.campaignlanguages.length === 0,
+    };
 
-  setErrors(newErrors);
-  if (Object.values(newErrors).some((e) => e)) return;
+    setErrors(newErrors);
+    if (Object.values(newErrors).some((e) => e)) return;
 
-  // Map IDs back to full objects
-  const campaigninfluencertiers = formData.campaigninfluencertiers.map((id) => {
-    const tier = influencerTiers.find((t) => t.id === id);
-    return { influencertierid: tier.id, influencertiername: tier.name };
-  });
+    // Map IDs back to full objects
+    const campaigninfluencertiers = formData.campaigninfluencertiers.map((id) => {
+      const tier = influencerTiers.find((t) => t.id === id);
+      return { influencertierid: tier.id, influencertiername: tier.name };
+    });
 
-  const campaignlanguages = formData.campaignlanguages.map((id) => {
-    const lang = languages.find((l) => l.id === id);
-    return { languageid: lang.id, languagename: lang.name };
-  });
+    const campaignlanguages = formData.campaignlanguages.map((id) => {
+      const lang = languages.find((l) => l.id === id);
+      return { languageid: lang.id, languagename: lang.name };
+    });
 
-  const gendersSelected = formData.genderid
-    .map((id) => {
-      const gender = genders.find((g) => g.id === id);
-      return gender
-        ? { genderid: gender.id, gendername: gender.name }
-        : null;
-    })
-    .filter(Boolean);
+    const gendersSelected = formData.genderid
+      .map((id) => {
+        const gender = genders.find((g) => g.id === id);
+        return gender
+          ? { genderid: gender.id, gendername: gender.name }
+          : null;
+      })
+      .filter(Boolean);
 
-  const p_vendorinfojson = {
-    genders: gendersSelected,
-    isproductshipping: formData.isproductshipping,
-    campaigninfluencertiers,
-    campaignlanguages,
-  };
+    const p_vendorinfojson = {
+      genders: gendersSelected,
+      isproductshipping: formData.isproductshipping,
+      campaigninfluencertiers,
+      campaignlanguages,
+    };
     try {
       setLoading(true);
       const fd = new FormData();
@@ -206,8 +209,8 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-     if(res.status === 200) onNext({ ...data, ...p_vendorinfojson });
-      
+      if (res.status === 200) onNext({ ...data, ...p_vendorinfojson });
+
     } catch (err) {
       console.error("API Error:", err.response?.data || err.message);
       alert("Failed to save campaign step. Try again.");
@@ -231,21 +234,19 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
               onClick={() => toggleGender(id)}
               className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all 
           w-full sm:w-32
-          ${
-            isSelected
-              ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-              : "bg-white text-black border-gray-300 hover:border-[#141843]"
-          }`}
+          ${isSelected
+                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                  : "bg-white text-black border-gray-300 hover:border-[#141843]"
+                }`}
             >
               <span className="capitalize font-medium text-sm">{name}</span>
 
               <div
                 className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
-            ${
-              isSelected
-                ? "bg-[#141843] border-[#0D132D26] text-white"
-                : "bg-transparent border-gray-400 text-transparent"
-            }`}
+            ${isSelected
+                    ? "bg-[#141843] border-[#0D132D26] text-white"
+                    : "bg-transparent border-gray-400 text-transparent"
+                  }`}
               >
                 <RiCheckLine size={14} />
               </div>
@@ -278,21 +279,19 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
               key={label}
               onClick={() => handleShipProducts(value)}
               className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all w-32
-            ${
-              isSelected
-                ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                : "bg-white text-black border-gray-300 hover:border-[#141843]"
-            }`}
+            ${isSelected
+                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                  : "bg-white text-black border-gray-300 hover:border-[#141843]"
+                }`}
             >
               <span className={`capitalize font-medium text-sm`}>{label}</span>
 
               <div
                 className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
-              ${
-                isSelected
-                  ? "bg-[#141843] border-[#0D132D26] text-white"
-                  : "bg-transparent border-gray-400 text-transparent"
-              }`}
+              ${isSelected
+                    ? "bg-[#141843] border-[#0D132D26] text-white"
+                    : "bg-transparent border-gray-400 text-transparent"
+                  }`}
               >
                 <RiCheckLine size={14} />
               </div>
@@ -317,19 +316,18 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
               onClick={() => toggleInfluencerTier(tier.id)}
               className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all 
           w-full sm:w-80 md:w-96
-          ${
-            isSelected
-              ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-              : "bg-white text-black border-gray-300 hover:border-[#141843]"
-          }`}
+          ${isSelected
+                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                  : "bg-white text-black border-gray-300 hover:border-[#141843]"
+                }`}
             >
               {/* Text */}
               <span className="text-sm flex-1">
                 {tier.name} Influencer (
                 {tier.maxfollowers
                   ? `${formatFollowers(tier.minfollowers)} - ${formatFollowers(
-                      tier.maxfollowers
-                    )}`
+                    tier.maxfollowers
+                  )}`
                   : `${formatFollowers(tier.minfollowers)}+`}{" "}
                 Followers)
               </span>
@@ -337,11 +335,10 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
               {/* Circle button */}
               <div
                 className={`w-5 h-5 flex-shrink-0 flex items-center justify-center rounded-full border transition-all
-            ${
-              isSelected
-                ? "bg-[#141843] border-[#0D132D26] text-white"
-                : "bg-transparent border-gray-400 text-transparent"
-            }`}
+            ${isSelected
+                    ? "bg-[#141843] border-[#0D132D26] text-white"
+                    : "bg-transparent border-gray-400 text-transparent"
+                  }`}
               >
                 <RiCheckLine size={14} />
               </div>
