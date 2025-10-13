@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { RiHeartLine, RiHeartFill, RiUserAddLine } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Input, Pagination, Modal, Spin, Empty, Tooltip } from "antd";
+import { Input, Pagination, Modal, Spin, Empty, Tooltip, Skeleton } from "antd";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import InviteModal from "./InviteModal";
@@ -189,11 +189,14 @@ const FavoritesLayout = () => {
         </div>
 
         {/* Influencers List */}
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
-          {loading ? (
-            <div className="col-span-full text-center py-10 text-gray-500">
-              Loading influencers...
-            </div>
+        <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
+         {loading ? (
+            Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="p-4 border border-gray-200 rounded-2xl">
+                <Skeleton.Avatar active size={64} shape="circle" />
+                <Skeleton active paragraph={{ rows: 2 }} />
+              </div>
+            ))
           ) : influencers.length === 0 ? (
             <div className="col-span-full py-10">
               <Empty description="No influencers found." />

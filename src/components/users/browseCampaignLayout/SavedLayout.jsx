@@ -8,7 +8,7 @@ import {
 
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Empty, Input, Pagination, Select, Tooltip, Modal } from "antd";
+import { Empty, Input, Pagination, Select, Tooltip, Modal, Skeleton } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -96,7 +96,7 @@ const SavedLayout = () => {
           },
         }
       );
-     // console.log(res.data)
+      // console.log(res.data)
       toast.success(res.data?.message);
       if (res.status === 201) {
         getAllSavedCampaigns()
@@ -197,9 +197,21 @@ const SavedLayout = () => {
             className="grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           >
             {loading ? (
-              <div className="col-span-full text-center py-10 text-gray-500">
-                Loading campaigns...
-              </div>
+              Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="border border-gray-200 rounded-2xl p-5 bg-white"
+                >
+                  <div className="mb-3">
+                    <Skeleton.Avatar active size="large" shape="circle" />
+                  </div>
+                  <Skeleton
+                    active
+                    paragraph={{ rows: 3 }}
+                    title={{ width: '60%' }}
+                  />
+                </div>
+              ))
             ) : campaigns.length === 0 ? (
               <div className="col-span-full py-10">
                 <Empty description="No campaigns found." />
@@ -211,8 +223,8 @@ const SavedLayout = () => {
                   className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
                 >
                   <span className="text-xs text-gray-500 mb-3">
-                    Applied on {campaign.campaigncreatedate} 
-                     {/* new Date(campaign.campaigncreatedate).toLocaleDateString() */}
+                    Applied on {campaign.campaigncreatedate}
+                    {/* new Date(campaign.campaigncreatedate).toLocaleDateString() */}
                   </span>
                   <div className="flex items-center gap-3 mb-3">
                     <img
@@ -221,7 +233,7 @@ const SavedLayout = () => {
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
-                     <Link
+                      <Link
                         to={
                           campaign.campaignapplied
                             ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
@@ -245,15 +257,15 @@ const SavedLayout = () => {
                     <span>₹{campaign.estimatedbudget}</span>
                   </div>
                   <p
-                  className="text-gray-700 text-sm mb-4 text-justify overflow-hidden"
-                  style={{
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                  }}
-                >
-                  {campaign.description}
-                </p>
+                    className="text-gray-700 text-sm mb-4 text-justify overflow-hidden"
+                    style={{
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                    }}
+                  >
+                    {campaign.description}
+                  </p>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {[...(campaign.campaigncategories || [])].map(
                       (item, idx) => (
