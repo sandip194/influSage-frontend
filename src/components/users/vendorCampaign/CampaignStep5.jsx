@@ -6,7 +6,7 @@ import { RiCheckLine } from '@remixicon/react';
 
 const { TextArea } = Input;
 
-const CampaignStep5 = ({ onNext, onBack, data }) => {
+const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
   const { token } = useSelector((state) => state.auth) || {};
   const [platforms, setPlatforms] = useState({});
   const [formState, setFormState] = useState({});
@@ -145,10 +145,9 @@ const CampaignStep5 = ({ onNext, onBack, data }) => {
     try {
       setLoading(true);
       
-
       await axios.post(
         "/vendor/update-campaign",
-        { p_contenttypejson: contenttypejson },
+        { p_contenttypejson: contenttypejson, campaignId : campaignId ? campaignId : null },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

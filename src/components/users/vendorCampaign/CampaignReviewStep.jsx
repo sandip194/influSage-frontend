@@ -149,6 +149,7 @@ const CampaignReviewStep = ({ onEdit }) => {
         campaign: campaignData?.p_campaignjson || {},
         references: campaignData?.p_campaignfilejson || [],
         contenttypes: campaignData?.p_contenttypejson || [],
+        status_name: "Draft",
       };
 
       const res = await axios.post("/vendor/finalize-campaign", payload, {
@@ -576,14 +577,14 @@ const CampaignReviewStep = ({ onEdit }) => {
           onClick={handleCreateCampaign}
           type="button"
         >
-          Create Campaign
+          Save Draft
         </button>
          <button
           className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full"
           // onClick={handleCreateCampaign}
           type="button"
         >
-          Save Draft
+          Send To Admin
         </button>
       </div>
     </div>

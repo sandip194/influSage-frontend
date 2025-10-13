@@ -14,7 +14,7 @@ import { PhotoProvider, PhotoView } from 'react-photo-view';
 
 const { Dragger } = Upload;
 
-const CampaignStep4 = ({ onBack, onNext, data }) => {
+const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
   const [fileList, setFileList] = useState([]);
   const [existingFiles, setExistingFiles] = useState([]);
   const [lightboxVideo, setLightboxVideo] = useState({ open: false, src: "" });
@@ -100,6 +100,7 @@ const CampaignStep4 = ({ onBack, onNext, data }) => {
       setLoading(true);
 
       const formData = new FormData();
+      if (campaignId) formData.append("campaignId", campaignId);
 
       [...existingFiles, ...fileList].forEach((file) => {
         if (file.isExisting) {

@@ -18,7 +18,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
-const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
+const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
   const token = useSelector((state) => state.auth.token);
 
   const [formData, setFormData] = useState({});
@@ -207,10 +207,8 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
     const fieldErrors = validateFields(formData, profileImage);
     const milestoneErrors = validateMilestones(formData.milestones, formData.startDate, formData.endDate);
 
-    const hasFieldErrors = Object.values(fieldErrors).some((val) => !!val);
-    const hasMilestoneErrors = milestoneErrors.some((m) =>
-      Object.values(m).some(Boolean)
-    );
+    const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
+    const hasMilestoneErrors = milestoneErrors.some((m) => Object.values(m).some(Boolean));
 
     if (hasFieldErrors || hasMilestoneErrors) {
       setErrors({ ...fieldErrors, milestones: milestoneErrors });
@@ -231,10 +229,14 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
 
     try {
       setLoading(true);
+
       const fd = buildFormData(payload, profileImage);
+      if (campaignId) fd.append("campaignId", campaignId);
+
       await axios.post("/vendor/update-campaign", fd, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       onNext();
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
@@ -243,7 +245,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="bg-white p-6 rounded-2xl">

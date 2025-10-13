@@ -71,8 +71,8 @@ const CampaignWizard = () => {
   // Fetch campaign data
   const getCampaignData = async () => {
     try {
-      const endpath = campaignId ? `${campaignId}` : '01';
-      const res = await axios.get(`/vendor/campaign/${endpath}`, {
+      const endpath = campaignId ? `/${campaignId}` : '01';
+      const res = await axios.get(`/vendor/campaign/${campaignId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -151,6 +151,7 @@ const CampaignWizard = () => {
       title: "Expectation",
       component: (
         <CampaignExpectationSelector
+          campaignId={campaignId}
           data={campaignData.expectation}
           onChange={(updated) => updateCampaignSection("expectation", updated)}
           onNext={() => markStepComplete(0)}
@@ -161,6 +162,7 @@ const CampaignWizard = () => {
       title: "Step 2",
       component: (
         <CampaignStep2
+          campaignId={campaignId}
           data={campaignData.step2}
           onChange={(updated) => updateCampaignSection("step2", updated)}
           onNext={() => markStepComplete(1)}
@@ -172,6 +174,7 @@ const CampaignWizard = () => {
       title: "Step 3",
       component: (
         <CampaignStep3
+          campaignId={campaignId}
           data={campaignData.step3}
           onChange={(updated) => updateCampaignSection("step3", updated)}
           onNext={() => markStepComplete(2)}
@@ -183,6 +186,7 @@ const CampaignWizard = () => {
       title: "Categories", // 👈 NEW STEP
       component: (
         <CampaignCategorySection
+          campaignId={campaignId}
           data={campaignData.categories || []} // 👈 you may need to adjust this based on saved data
           onNext={() => markStepComplete(3)}
           onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
@@ -193,6 +197,7 @@ const CampaignWizard = () => {
       title: "Step 4",
       component: (
         <CampaignStep4
+          campaignId={campaignId}
           data={campaignData.step4}
           onChange={(updated) => updateCampaignSection("step4", updated)}
           onNext={() => markStepComplete(4)}
@@ -204,6 +209,7 @@ const CampaignWizard = () => {
       title: "Step 5",
       component: (
         <CampaignStep5
+          campaignId={campaignId}
           data={campaignData.step5}
           onChange={(updated) => updateCampaignSection("step5", updated)}
           onNext={() => markStepComplete(5)}
@@ -212,6 +218,7 @@ const CampaignWizard = () => {
       ),
     },
   ];
+
 
   return (
     <div className="flex flex-col gap-4">
