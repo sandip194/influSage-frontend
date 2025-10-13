@@ -80,7 +80,7 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
       formData.append("p_userid", finalUserId);
       formData.append("p_objectivejson", JSON.stringify(p_objectivejson));
 
-      const res = await axios.post("/vendor/create-campaign", formData, {
+      const res = await axios.post("/vendor/update-campaign", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

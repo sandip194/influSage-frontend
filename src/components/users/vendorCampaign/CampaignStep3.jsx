@@ -232,7 +232,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack }) => {
     try {
       setLoading(true);
       const fd = buildFormData(payload, profileImage);
-      await axios.post("/vendor/create-campaign", fd, {
+      await axios.post("/vendor/update-campaign", fd, {
         headers: { Authorization: `Bearer ${token}` },
       });
       onNext();

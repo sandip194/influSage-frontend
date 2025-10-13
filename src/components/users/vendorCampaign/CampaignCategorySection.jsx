@@ -72,7 +72,7 @@ const CampaignCategorySection = ({ data, onNext, onBack }) => {
             setLoading(true);
 
             const res = await axios.post(
-                "/vendor/create-campaign",
+                "/vendor/update-campaign/",
                 { p_campaigncategoyjson: formattedData },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

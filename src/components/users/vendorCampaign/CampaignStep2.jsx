@@ -202,7 +202,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
       fd.append("p_userid", userId);
       fd.append("p_vendorinfojson", JSON.stringify(p_vendorinfojson));
 
-      const res = await axios.post("/vendor/create-campaign", fd, {
+      const res = await axios.post("/vendor/update-campaign", fd, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

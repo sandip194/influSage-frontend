@@ -147,7 +147,7 @@ const CampaignStep5 = ({ onNext, onBack, data }) => {
       
 
       await axios.post(
-        "/vendor/create-campaign",
+        "/vendor/update-campaign",
         { p_contenttypejson: contenttypejson },
         { headers: { Authorization: `Bearer ${token}` } }
       );

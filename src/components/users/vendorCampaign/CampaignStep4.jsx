@@ -109,7 +109,7 @@ const CampaignStep4 = ({ onBack, onNext, data }) => {
         }
       });
 
-      await axios.post(`${BASE_URL}/vendor/create-campaign`, formData, {
+      await axios.post(`/vendor/update-campaign`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
