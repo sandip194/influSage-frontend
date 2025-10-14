@@ -8,11 +8,7 @@ import {
   RiYoutubeFill,
   RiStarLine,
 } from '@remixicon/react';
-<<<<<<< HEAD
 import { Modal, Input, Tabs, DatePicker } from 'antd';
-=======
-import { Modal, Input, Tabs, Skeleton } from 'antd';
->>>>>>> e395f862a30f78a5b7940724666f482ae65f6057
 import VendorCampaignOverview from './VendorCampaignOverview';
 import VendorActivity from './VendorActivity';
 import VendorMessage from './VendorMessage';
