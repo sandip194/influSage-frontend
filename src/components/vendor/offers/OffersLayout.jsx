@@ -162,13 +162,33 @@ const OffersLayout = () => {
                         <tbody className="text-sm text-gray-700">
                             {/* Table Body */}
                             {loading ? (
-                                [...Array(6)].map((_, index) => (
-                                    <tr key={index} className="border-t border-gray-200">
-                                        <td colSpan="6" className="p-4">
-                                            <Skeleton active paragraph={{ rows: 1 }} />
+                                <>
+                                    {[...Array(5)].map((_, index) => (
+                                      <tr key={index} className="border-t border-gray-200">
+                                        <td className="p-4">
+                                          <div className="flex items-center gap-3">
+                                            <Skeleton.Avatar active size="large" shape="circle" />
+                                            <div className="flex-1">
+                                              <Skeleton.Input style={{ width: 120 }} active size="small" />
+                                              <Skeleton.Input style={{ width: 100, marginTop: 4 }} active size="small" />
+                                            </div>
+                                          </div>
                                         </td>
-                                    </tr>
-                                ))
+                                        <td className="p-4">
+                                          <Skeleton.Input style={{ width: 80 }} active size="small" />
+                                        </td>
+                                        <td className="p-4">
+                                          <Skeleton.Input style={{ width: 60 }} active size="small" />
+                                        </td>
+                                        <td className="p-4">
+                                          <Skeleton.Button active size="small" shape="round" />
+                                        </td>
+                                        <td className="p-4">
+                                          <Skeleton.Avatar active shape="circle" size="small" />
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </>
                             ) : offers?.length > 0 ? (
                                 offers.map((offer) => (
 

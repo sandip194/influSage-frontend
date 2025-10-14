@@ -11,6 +11,8 @@ import axios from "axios";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
+import { Skeleton } from "antd";
+
 
 
 const SimilarCampaigns = [
@@ -118,10 +120,65 @@ const EditLayout = () => {
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-40 text-gray-500">
-        Loading...
+      <div className="w-full max-w-7xl mx-auto">
+        <button
+          className="text-gray-600 flex items-center gap-2 mb-4"
+          disabled
+        >
+          <Skeleton.Avatar size="small" shape="circle" active />
+          <Skeleton.Input style={{ width: 80 }} active size="small" />
+        </button>
+
+        <Skeleton active paragraph={{ rows: 0 }} title={{ width: "30%" }} />
+
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Left Side Skeleton */}
+          <div className="flex-1 space-y-4">
+            {/* Campaign Card Skeleton */}
+            <div className="bg-white p-6 rounded-2xl">
+              <Skeleton.Image style={{ width: 96, height: 96 }} active />
+              <Skeleton
+                active
+                title={{ width: "60%" }}
+                paragraph={{ rows: 2, width: ["40%", "80%"] }}
+                className="mt-4"
+              />
+              <Skeleton paragraph={{ rows: 3 }} active className="mt-4" />
+            </div>
+
+            {/* Description Skeleton */}
+            <div className="bg-white p-6 rounded-2xl">
+              <Skeleton
+                active
+                title={{ width: "30%" }}
+                paragraph={{ rows: 4 }}
+              />
+            </div>
+
+            {/* Terms Skeleton */}
+            <div className="bg-white p-6 rounded-2xl">
+              <Skeleton
+                active
+                title={{ width: "40%" }}
+                paragraph={{ rows: 3 }}
+              />
+            </div>
+          </div>
+
+          {/* Right Side Skeleton */}
+          <div className="w-full md:w-[300px] flex-shrink-0">
+            <div className="bg-white p-6 rounded-2xl">
+              <Skeleton
+                active
+                title={{ width: "50%" }}
+                paragraph={{ rows: 5 }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     );
+
   if (error)
     return (
       <div className="text-red-600 text-center py-10">
@@ -166,14 +223,14 @@ const EditLayout = () => {
               <div className="flex flex-col gap-4 sm:flex-row justify-between items-start mb-5">
                 <div>
                   <h2 className="font-semibold text-lg">{campaignDetails?.name}</h2>
-                  <p className="text-gray-500 text-sm">{campaignDetails?.businessname}</p>
-                  <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-500 font-medium">
-                    <div>
-                      <span className="font-semibold text-gray-700">Apply Before:</span>{" "}
+                  <p className="text-gray-900 text-sm">{campaignDetails?.businessname}</p>
+                  <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-900 font-medium">
+                    <div className="text-gray-700 text-sm">
+                      <span className="font-semibold text-gray-900">Apply Before:</span>{" "}
                       {campaignDetails?.requirements.applicationenddate || "N/A"}
                     </div>
-                    <div>
-                      <span className="font-semibold text-gray-700">Campaign Start:</span>{" "}
+                    <div className="text-gray-700 text-sm">
+                      <span className="font-semibold text-gray-900">Campaign Start:</span>{" "}
                       {campaignDetails?.requirements.startdate || "N/A"}
                     </div>
 
@@ -183,13 +240,13 @@ const EditLayout = () => {
                 <div className="flex items-center gap-3">
                   <button
                     aria-label="Stack"
-                    className="p-2 rounded-full border border-gray-300 text-gray-500 hover:text-black hover:border-gray-500 transition"
+                    className="p-2 rounded-full border border-gray-300 text-gray-900 hover:text-black hover:border-gray-500 transition"
                   >
                     <RiStackLine size={16} />
                   </button>
                   <button
                     aria-label="Men"
-                    className="p-2 rounded-full border border-gray-300 text-gray-500 hover:text-black hover:border-gray-500 transition"
+                    className="p-2 rounded-full border border-gray-300 text-gray-900 hover:text-black hover:border-gray-500 transition"
                   >
                     <RiMenLine size={16} />
                   </button>
@@ -203,41 +260,41 @@ const EditLayout = () => {
 
               <div className="flex flex-wrap md:justify-around gap-6 border border-gray-200 rounded-2xl p-5">
                 <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
                     <RiStackLine size={20} />
                     <span>Platform</span>
                   </div>
                   {campaignDetails.providercontenttype?.map(({ providername, contenttypename }, i) => (
-                    <p key={`${providername}-${contenttypename}-${i}`} className="text-sm">
+                    <p key={`${providername}-${contenttypename}-${i}`} className="text-sm text-gray-800">
                       {providername} - {contenttypename}
                     </p>
                   ))}
                 </div>
                 <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
                     <RiMoneyRupeeCircleLine size={20} />
                     <span>Budget</span>
                   </div>
-                  <p className="text-sm font-medium">₹{campaignDetails.estimatedbudget}</p>
+                  <p className="text-sm text-gray-800 font-medium">₹{campaignDetails.estimatedbudget}</p>
                 </div>
                 <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
                     <RiTranslate size={20} />
                     <span>Language</span>
                   </div>
                   {campaignDetails.campaignlanguages?.map(({ languagename }, i) => (
-                    <p key={`${languagename}-${i}`} className="text-sm">
+                    <p key={`${languagename}-${i}`} className="text-sm text-gray-800">
                       {languagename}
                     </p>
                   ))}
                 </div>
                 <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
                     <RiMenLine size={20} />
                     <span>Gender</span>
                   </div>
                   {campaignDetails.campaigngenders?.map(({ gendername }, i) => (
-                    <p key={`${gendername || "any"}-${i}`} className="text-sm">
+                    <p key={`${gendername || "any"}-${i}`} className="text-sm text-gray-800">
                       {gendername || "Any"}
                     </p>
                   ))}
@@ -251,9 +308,13 @@ const EditLayout = () => {
           <div className="bg-white p-6 rounded-2xl">
             <div className="pb-6 border-b border-gray-200">
               <h3 className="font-semibold text-lg mb-3">Campaign Description</h3>
-              <p className="text-gray-700 leading-relaxed mb-4">
+              <p
+                className={`text-gray-700 leading-relaxed mb-4 ${showFullDetails ? "" : "line-clamp-3"
+                  }`}
+              >
                 {campaignDetails.description || "No description available."}
               </p>
+
 
               {!showFullDetails && (
                 <button
@@ -267,22 +328,22 @@ const EditLayout = () => {
             {showFullDetails && (
               <>
 
-                <div className="flex gap-2 items-center justify-start mb-2 text-gray-400">
+                <div className="flex gap-2 items-center justify-start mb-2 font-bold text-gray-900">
                   <span>Categories</span>
                 </div>
                 {campaignDetails.campaigncategories?.map(({ categoryname, categoryid }) => (
-                  <p key={categoryid || categoryname} className="text-sm">
+                  <p key={categoryid || categoryname} className="text-sm text-gray-800">
                     {categoryname}
                   </p>
                 ))}
                 <div className="pt-6 border-b border-gray-200">
                   <h3 className="font-semibold text-lg mb-4">Requirements</h3>
-                  <ul className="space-y-3 text-gray-700">
+                  <ul className="space-y-3 text-gray-900">
                     {requirements.map(({ label, value }, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <RiCheckLine size={16} className="text-gray-500 flex-shrink-0 border rounded" />
+                        <RiCheckLine size={16} className="text-gray-900 flex-shrink-0 border rounded" />
                         <span>
-                          {label} <strong>{value}</strong>
+                          <strong> {label} </strong>  {value}
                         </span>
                       </li>
                     ))}
@@ -413,13 +474,13 @@ const EditLayout = () => {
               <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4">
                 {/* Platforms */}
                 <div className="flex-row items-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
                     <RiStackLine className="w-5" />
                     <span>Platform</span>
                   </div>
                   {appliedDetails?.providercontenttype?.length > 0 ? (
                     appliedDetails.providercontenttype.map(({ providername, contenttypename }, i) => (
-                      <p key={`${providername}-${i}`}>
+                      <p key={`${providername}-${i}`} className="text-gray-800">
                         {providername} - {contenttypename}
                       </p>
                     ))
@@ -430,11 +491,11 @@ const EditLayout = () => {
 
                 {/* Budget */}
                 <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
                     <RiMoneyRupeeCircleLine className="w-5" />
                     <span>Budget</span>
                   </div>
-                  <p>₹{appliedDetails?.budget || "N/A"}</p>
+                  <p className="text-gray-800">₹{appliedDetails?.budget || "N/A"}</p>
                 </div>
 
                 {/* Deadline (Optional - You may remove this if backend doesn't provide) */}
@@ -452,7 +513,7 @@ const EditLayout = () => {
             {appliedDetails?.description && (
               <div className="mt-4">
                 <h3 className="font-semibold text-base mb-2">Description</h3>
-                <p className="text-gray-600">{appliedDetails.description}</p>
+                <p className="text-gray-800">{appliedDetails.description}</p>
               </div>
             )}
 
@@ -569,9 +630,9 @@ const EditLayout = () => {
             <div className="space-y-3">
               {/* Brand Description (Paragraph with toggle) */}
               <div>
-                <p className="text-gray-500">Brand Name</p>
+                <p className="font-medium text-gray-900">Brand Name</p>
                 <p
-                  className={`font-medium text-gray-900 whitespace-pre-line ${showFullBrandDesc ? "" : "line-clamp-2"
+                  className={` text-gray-800 whitespace-pre-line ${showFullBrandDesc ? "" : "line-clamp-2"
                     }`}
                 >
                   {campaignDetails.branddetails?.aboutbrand || "N/A"}
@@ -591,8 +652,8 @@ const EditLayout = () => {
 
               {/* Location */}
               <div>
-                <p className="text-gray-500">Location</p>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-gray-900">Location</p>
+                <p className="text-gray-800">
                   {campaignDetails.branddetails?.location || "N/A"}
                 </p>
               </div>
@@ -601,8 +662,8 @@ const EditLayout = () => {
 
               {/* Industry */}
               <div>
-                <p className="text-gray-500">Industry</p>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-gray-900">Industry</p>
+                <p className="text-gray-800">
                   {campaignDetails.branddetails?.Industry || "N/A"}
                 </p>
               </div>

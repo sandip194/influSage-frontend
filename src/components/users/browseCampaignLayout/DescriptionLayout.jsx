@@ -10,6 +10,7 @@ import axios from 'axios';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
+import {Skeleton } from 'antd';
 
 const DescriptionLayout = () => {
   const [campaignDetails, setCampaignDetails] = useState(null);
@@ -80,12 +81,103 @@ const DescriptionLayout = () => {
     ];
   }, [campaignDetails]);
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-40 text-gray-900">
-        Loading...
+ if (loading) {
+  return (
+    <div className="w-full text-sm overflow-x-hidden space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <Skeleton.Button active size="small" shape="circle" />
+        <Skeleton.Input active size="small" style={{ width: 100 }} />
       </div>
-    );
+
+      <Skeleton.Input active size="default" style={{ width: 200 }} />
+
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Left Side */}
+        <div className="flex-1 space-y-6">
+          {/* Banner Card */}
+          <div className="bg-white w-full rounded-2xl overflow-hidden">
+            <div className="p-6 space-y-4">
+              <Skeleton.Avatar active size={64} shape="circle" />
+              <Skeleton.Input active style={{ width: 200 }} size="small" />
+              <Skeleton.Input active style={{ width: 150 }} size="small" />
+              <div className="flex gap-4">
+                <Skeleton.Button active />
+                <Skeleton.Button active />
+              </div>
+              <div className="flex gap-6 flex-wrap mt-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="min-w-[120px] text-center">
+                    <Skeleton.Input active size="small" style={{ width: 100 }} />
+                    <Skeleton.Input active size="small" style={{ width: 80 }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Description & Requirements */}
+          <div className="bg-white p-6 rounded-2xl space-y-6">
+            <Skeleton.Input active size="default" style={{ width: 200 }} />
+            <Skeleton paragraph={{ rows: 3 }} active />
+
+            <Skeleton.Input active size="default" style={{ width: 180 }} />
+            <ul className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <Skeleton.Avatar size="small" shape="circle" active />
+                  <Skeleton.Input active size="small" style={{ width: 200 }} />
+                </li>
+              ))}
+            </ul>
+
+            <div>
+              <Skeleton.Input active size="default" style={{ width: 150 }} />
+              <div className="flex gap-2 flex-wrap mt-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton.Button key={i} active shape="round" size="small" />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Skeleton.Input active size="default" style={{ width: 220 }} />
+              <div className="flex gap-4 mt-4 flex-wrap">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton.Image key={i} active style={{ width: 96, height: 96 }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side */}
+        <aside className="w-full md:w-[300px] space-y-6 flex-shrink-0">
+          <div className="bg-white rounded-2xl p-6 space-y-4">
+            <Skeleton.Input active size="default" style={{ width: 160 }} />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i}>
+                <Skeleton.Input active size="small" style={{ width: 100 }} />
+                <Skeleton.Input active size="small" style={{ width: 200 }} />
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 space-y-4">
+            <Skeleton.Input active size="default" style={{ width: 200 }} />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i}>
+                <Skeleton.Input active size="small" style={{ width: 180 }} />
+                <Skeleton.Input active size="small" style={{ width: 140 }} />
+              </div>
+            ))}
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
   if (error)
     return (
       <div className="text-red-600 text-center py-10">
@@ -131,11 +223,11 @@ const DescriptionLayout = () => {
                   <h2 className="font-semibold text-lg">{campaignDetails?.name}</h2>
                   <p className="text-gray-900 text-sm">{campaignDetails?.businessname}</p>
                   <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-900 font-medium">
-                    <div>
+                    <div className='text-sm text-gray-700'>
                       <span className="font-semibold text-gray-900">Apply Before:</span>{" "}
                       {campaignDetails.requirements.applicationenddate || "N/A"}
                     </div>
-                    <div>
+                    <div className='text-sm text-gray-700 '>
                       <span className="font-semibold text-gray-900">Campaign Start:</span>{" "}
                       {campaignDetails.requirements.startdate || "N/A"}
                     </div>
@@ -166,7 +258,7 @@ const DescriptionLayout = () => {
 
               <div className="flex flex-wrap md:justify-around gap-6 border border-gray-200 rounded-2xl p-5">
                 <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900 font-semibold">
                     <RiStackLine size={20} />
                     <span>Platform</span>
                   </div>
@@ -177,14 +269,14 @@ const DescriptionLayout = () => {
                   ))}
                 </div>
                 <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900 font-semibold">
                     <RiMoneyRupeeCircleLine size={20} />
                     <span>Budget</span>
                   </div>
-                  <p className="text-sm font-medium">₹{campaignDetails.estimatedbudget}</p>
+                  <p className="text-sm ">₹{campaignDetails.estimatedbudget}</p>
                 </div>
                 <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900 font-semibold">
                     <RiTranslate size={20} />
                     <span>Language</span>
                   </div>
@@ -195,7 +287,7 @@ const DescriptionLayout = () => {
                   ))}
                 </div>
                 <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
+                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900 font-semibold">
                     <RiMenLine size={20} />
                     <span>Gender</span>
                   </div>

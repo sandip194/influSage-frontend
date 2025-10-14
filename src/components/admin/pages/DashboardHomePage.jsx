@@ -1,25 +1,16 @@
 
-import CampaignTable from '../chunks/CampaignTable';
-import CampaignTableLayout from '../chunks/CampaignTableLayout';
-import InfluencerTable from '../chunks/InfluencerTable';
+import { useEffect, useState } from 'react';
 import StatCard from '../chunks/StatCard';
-import UserRequestRow from '../chunks/UserRequestRow';
-import UserTableLayout from '../chunks/UserTableLayout';
-import AdminDashboardLayout from '../dashboard/AdminDashboardLayout'
 import {
     RiUserAddLine,
-    // RiUserCheckLine,
     RiTimeLine,
     RiBarChartLine,
 } from "react-icons/ri";
+import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 
-const stats = [
-    { title: "Pending Users", value: 12, icon: RiUserAddLine, iconColor: "text-blue-500" },
-    { title: "Approved Users", value: 248, icon: RiUserAddLine, iconColor: "text-green-500" },
-    { title: "Pending Campaigns", value: 8, icon: RiTimeLine, iconColor: "text-yellow-500" },
-    { title: "Active Campaigns", value: 34, icon: RiBarChartLine, iconColor: "text-purple-500" },
-];
+
 
 // const userRequests = [
 //     {
@@ -49,14 +40,55 @@ const stats = [
 // ];
 
 const DashboardHomePage = () => {
+    const [allCounts, setAllCounts] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const { token } = useSelector(state => state.auth);
+
+    const fetchCountsValues = async () => {
+        try {
+            setLoading(true);
+
+            const res = await axios.get('/admin/dashboard', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (res.status === 200) {
+                setAllCounts(res.data.data);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCountsValues();
+    }, []);
+
+    // Create dynamic stat cards from API data
+    const stats = allCounts ? [
+        { title: "Pending Users", value: allCounts.pendinguser, icon: RiUserAddLine, iconColor: "text-blue-500" },
+        { title: "Approved Users", value: allCounts.approveduser, icon: RiUserAddLine, iconColor: "text-green-500" },
+        { title: "Pending Campaigns", value: allCounts.pendingcampaign, icon: RiTimeLine, iconColor: "text-yellow-500" },
+        { title: "Active Campaigns", value: allCounts.activecampaign, icon: RiBarChartLine, iconColor: "text-purple-500" },
+    ] : [];
     return (
-        <AdminDashboardLayout>
+        <>
+
             <div className="space-y-6">
-                {/* Stat Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {stats.map((stat, idx) => (
-                        <StatCard key={idx} {...stat} />
-                    ))}
+                    {loading ? (
+                        // Optional: show skeleton or loading text
+                        <p className="col-span-4 text-center text-gray-500">Loading stats...</p>
+                    ) : (
+                        stats.map((stat, idx) => (
+                            <StatCard key={idx} {...stat} />
+                        ))
+                    )}
                 </div>
 
                 {/* User Requests Table */}
@@ -84,7 +116,7 @@ const DashboardHomePage = () => {
                 </div> */}
             </div>
 
-            <div className="mt-10">
+            {/* <div className="mt-10">
 
                 <UserTableLayout />
             </div>
@@ -92,9 +124,19 @@ const DashboardHomePage = () => {
             <div className="mt-10">
 
                 <CampaignTableLayout />
-            </div>
-        </AdminDashboardLayout>
+            </div> */}
+
+        </>
     )
 }
 
 export default DashboardHomePage
+
+
+
+
+
+
+
+
+

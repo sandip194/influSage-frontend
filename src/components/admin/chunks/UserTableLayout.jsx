@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Tabs, Input, Tooltip, Select, Drawer, Checkbox, Radio, Button } from "antd";
 import {
     RiEyeLine,
@@ -7,6 +7,8 @@ import {
     RiArrowDownSLine,
 } from "react-icons/ri";
 import { SearchOutlined } from "@ant-design/icons";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
 // Mock data
 const mockUsers = [
@@ -208,8 +210,10 @@ const categoryColors = {
 
 const UserTableLayout = () => {
     const [activeTab, setActiveTab] = useState("Approved");
+    const [statusList, setStatusList] = useState([])
     const [search, setSearch] = useState("");
     const [showFilters, setShowFilters] = useState(false);
+    // const [loading, setLoading] = useState(false)
     const [filters, setFilters] = useState({
         location: "",
         platforms: [],
@@ -219,6 +223,8 @@ const UserTableLayout = () => {
         language: "all",
     });
 
+    const { token } = useSelector(state => state.auth);
+
     // Filtered users (basic name/email search + status tab)
     const filteredUsers = mockUsers.filter(
         (user) =>
@@ -226,6 +232,24 @@ const UserTableLayout = () => {
             (user.name.toLowerCase().includes(search.toLowerCase()) ||
                 user.email.toLowerCase().includes(search.toLowerCase()))
     );
+
+    //fetch status list 
+    const fetchAllStatus = async () => {
+        try {
+            const res = await axios.get('/admin/dashboard/user-status', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            if(res.status === 200) setStatusList(res.data.data)
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    useEffect(() => {
+        fetchAllStatus()
+    }, [])
 
     return (
         <div className="w-full">

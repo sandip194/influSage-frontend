@@ -256,7 +256,7 @@ const BrowseInfluencersLayout = () => {
           <Input
             size="large"
             prefix={<SearchOutlined />}
-            placeholder="Search campaigns"
+            placeholder="Search Influencers"
             className="w-full sm:w-auto flex-1"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}

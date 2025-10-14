@@ -21,7 +21,8 @@ const isNonEmptyArray = (arr) => Array.isArray(arr) && arr.length > 0;
 
 const CampaignWizard = () => {
   const { token } = useSelector((state) => state.auth);
-  const {campaignId} = useParams();
+  const { campaignId } = useParams();
+  console.log("🚀 ~ file: CampaignWizard.jsx:15 ~ CampaignWizard ~ campaignId:", campaignId)
 
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false, false]);
@@ -48,24 +49,23 @@ const CampaignWizard = () => {
   };
 
   // Mark a step complete and move to the next
-  const markStepComplete = async (index) => {
+  const markStepComplete = (index) => {
     const updated = [...completedSteps];
     if (!updated[index]) {
       updated[index] = true;
       setCompletedSteps(updated);
       localStorage.setItem("completedSteps", JSON.stringify(updated));
       setLastCompletedStep(index);
-    }
-
-    // Fetch updated campaign data immediately
-    await getCampaignData();
-
-    if (index + 1 < steps.length) {
-      setCurrentStep(index + 1);
     } else {
-      setCurrentStep("review");
+      // Handle edge case: all completed, go to review
+      if (index + 1 >= steps.length) {
+        setCurrentStep("review");
+      } else {
+        setCurrentStep(index + 1);
+      }
     }
   };
+
 
   // Fetch campaign data
   const getCampaignData = async () => {
@@ -117,9 +117,19 @@ const CampaignWizard = () => {
 
   useEffect(() => {
     if (lastCompletedStep !== null) {
-      getCampaignData();
+      (async () => {
+        await getCampaignData();
+
+        // Move to next step or review
+        if (lastCompletedStep + 1 < steps.length) {
+          setCurrentStep(lastCompletedStep + 1);
+        } else {
+          setCurrentStep("review");
+        }
+      })();
     }
   }, [lastCompletedStep]);
+
 
 
   useEffect(() => {
