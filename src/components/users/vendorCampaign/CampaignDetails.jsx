@@ -8,7 +8,7 @@ import {
   RiYoutubeFill,
   RiStarLine,
 } from '@remixicon/react';
-import { Modal, Input, Tabs, DatePicker } from 'antd';
+import { Modal, Input, Tabs, DatePicker, Skeleton } from 'antd';
 import VendorCampaignOverview from './VendorCampaignOverview';
 import VendorActivity from './VendorActivity';
 import VendorMessage from './VendorMessage';
@@ -225,7 +225,6 @@ const validateDates = () => {
 
 
   if (loading) return <div className="text-center">Loading campaign...</div>;
-
    if (loading) {
     return (
       <div className="w-full text-sm overflow-x-hidden space-y-6">
@@ -321,6 +320,7 @@ const validateDates = () => {
         </div>
       </div>
     );
+  }
 
   return (
     <div className="w-full text-sm overflow-x-hidden">
