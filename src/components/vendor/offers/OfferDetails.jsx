@@ -7,7 +7,7 @@ import {
     RiEyeLine,
 } from "@remixicon/react";
 import AcceptOfferModal from "./models/AcceptOfferModal";
-import { Tooltip } from "antd";
+import { Tooltip, Skeleton } from "antd";
 import {
     FaFacebook,
     FaInstagram,
@@ -69,7 +69,40 @@ const OfferDetails = () => {
         getApplicationDetails();
     }, [id, token]);
 
-    if (loading || !offerDetails) return <div>Loading...</div>;
+    if (loading || !offerDetails) {
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Right Section Skeleton */}
+            <div className="order-1 md:order-2 bg-white p-6 rounded-2xl space-y-4 self-start">
+                <Skeleton.Avatar active size="large" />
+                <Skeleton active paragraph={{ rows: 2 }} />
+                <Skeleton.Input style={{ width: 150 }} active />
+                <Skeleton.Input style={{ width: 150 }} active />
+                <Skeleton.Button active />
+            </div>
+
+            {/* Left Section Skeleton */}
+            <div className="order-2 md:order-1 md:col-span-2 space-y-6">
+                <div className="bg-white p-6 rounded-2xl">
+                    <Skeleton active title paragraph={{ rows: 3 }} />
+                </div>
+                <div className="bg-white p-6 rounded-2xl">
+                    <Skeleton active title paragraph={{ rows: 1 }} />
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                        {[...Array(4)].map((_, idx) => (
+                            <Skeleton.Input
+                                key={idx}
+                                style={{ width: "100%", height: "7rem", borderRadius: "0.75rem" }}
+                                active
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 
     const followers = {};
     offerDetails.providers?.forEach((p) => {

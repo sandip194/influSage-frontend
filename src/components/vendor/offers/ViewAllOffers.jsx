@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Tabs, Dropdown, Menu, Pagination, Input, Select, Empty } from "antd";
+import { Tabs, Dropdown, Menu, Pagination, Input, Select, Empty, Skeleton } from "antd";
 import {
   RiMore2Fill,
   RiCheckboxCircleLine,
@@ -205,12 +205,35 @@ const ViewAllOffers = () => {
           <tbody className="text-sm text-gray-700">
 
             {loading ? (
-              <tr>
-                <td colSpan="5" className="text-center py-10 text-gray-500">
-                  Loading Offers...
-                </td>
-              </tr>
-            ) : applications.length === 0 ? (
+  <>
+    {[...Array(5)].map((_, index) => (
+      <tr key={index} className="border-t border-gray-200">
+        <td className="p-4">
+          <div className="flex items-center gap-3">
+            <Skeleton.Avatar active size="large" shape="circle" />
+            <div className="flex-1">
+              <Skeleton.Input style={{ width: 120 }} active size="small" />
+              <Skeleton.Input style={{ width: 100, marginTop: 4 }} active size="small" />
+            </div>
+          </div>
+        </td>
+        <td className="p-4">
+          <Skeleton.Input style={{ width: 80 }} active size="small" />
+        </td>
+        <td className="p-4">
+          <Skeleton.Input style={{ width: 60 }} active size="small" />
+        </td>
+        <td className="p-4">
+          <Skeleton.Button active size="small" shape="round" />
+        </td>
+        <td className="p-4">
+          <Skeleton.Avatar active shape="circle" size="small" />
+        </td>
+      </tr>
+    ))}
+  </>
+) 
+ : applications.length === 0 ? (
               <tr>
                 <td colSpan="5" className="text-center py-10">
                   <Empty description="No Applications found." />

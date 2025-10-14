@@ -176,11 +176,13 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
       formData.append('profilejson', JSON.stringify(profilePayload));
       formData.append('photo', profileImage);
 
-      const response = await axios.post("user/complete-profile", formData, {
+      const response = await axios.post("user/complete-profile", formData,
+         {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
+        // withCredentials: true
       });
 
       if (response.status === 200) {

@@ -3,9 +3,16 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { Tooltip } from "antd";
+import { Tooltip, Skeleton } from "antd";
 
-
+//  const formatDOB = (dob) => {
+//         const date = new Date(dob);
+//         return date.toLocaleDateString("en-US", {
+//             year: "numeric",
+//             month: "short",
+//             day: "numeric",
+//         });
+//     };
 
 const InfluencerProfile = () => {
     const [loading, setLoading] = useState(false)
@@ -17,14 +24,7 @@ const InfluencerProfile = () => {
     const { token } = useSelector((state) => state.auth);
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-    const formatDOB = (dob) => {
-        const date = new Date(dob);
-        return date.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-        });
-    };
+   
 
 
     const getInfluencerDetails = async () => {
@@ -80,7 +80,62 @@ const InfluencerProfile = () => {
                 <RiArrowLeftLine /> Back
             </button>
             <h2 className="text-2xl text-gray-900 font-semibold mb-6">Influencer Details</h2>
-            {/* Top Header */}
+
+             {loading ? (
+      <>
+        {/* Skeleton for top header */}
+        <div className="bg-white rounded-2xl p-6 mb-6">
+          <div className="flex flex-col md:flex-row gap-6">
+            <Skeleton.Avatar active size={112} shape="circle" />
+            <div className="flex-1 space-y-4">
+              <Skeleton.Input active size="large" style={{ width: 200 }} />
+              <Skeleton.Input active style={{ width: 250 }} />
+              <Skeleton.Input active style={{ width: 150 }} />
+              <div className="flex gap-4 mt-4">
+                <Skeleton.Button active shape="round" />
+                <Skeleton.Button active shape="round" />
+                <Skeleton.Button active shape="round" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Skeleton for bio & categories */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div className="bg-white rounded-2xl p-4 md:col-span-2 space-y-4">
+            <Skeleton active paragraph={{ rows: 4 }} />
+            <Skeleton.Input active style={{ width: 100 }} />
+            <div className="flex flex-wrap gap-2 mt-2">
+              {[...Array(3)].map((_, idx) => (
+                <Skeleton.Button key={idx} active size="small" style={{ width: 80 }} />
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-4">
+            <Skeleton active paragraph={{ rows: 4 }} />
+          </div>
+        </div>
+
+        {/* Skeleton for social media */}
+        <div className="mt-4 bg-white rounded-2xl p-4">
+          <Skeleton active title paragraph={{ rows: 3 }} />
+        </div>
+
+        {/* Skeleton for portfolio */}
+        <div className="mt-4 bg-white rounded-2xl p-4">
+          <Skeleton active title paragraph={{ rows: 1 }} />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            {[...Array(4)].map((_, idx) => (
+              <Skeleton.Input key={idx} active style={{ height: 192 }} />
+            ))}
+          </div>
+        </div>
+      </>
+    ) : (
+      <>
+        {/* Actual content goes here (your current JSX remains unchanged) */}
+        {/* Top Header */}
             <div className="flex bg-white rounded-2xl p-6 flex-col md:flex-row  md:items-start gap-6  pb-6">
                 <img
                     src={`${BASE_URL}/${influDetails?.photopath}`}
@@ -266,6 +321,10 @@ const InfluencerProfile = () => {
                     <p className="text-sm text-gray-500">No portfolio file uploaded.</p>
                 )}
             </div>
+        ...
+      </>
+    )}
+            
 
 
         </div>

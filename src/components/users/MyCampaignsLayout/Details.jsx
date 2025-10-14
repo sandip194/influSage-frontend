@@ -8,7 +8,7 @@ import {
   RiYoutubeFill,
   RiStarLine,
 } from '@remixicon/react';
-import { Modal, Input, Tabs } from 'antd';
+import { Modal, Input, Tabs, Skeleton } from 'antd';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -27,7 +27,7 @@ const UserPayment = () => <div>Payment content for user (implement as needed)</d
 
 const Details = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [proposal, setProposal] = useState(""); 
+  const [proposal, setProposal] = useState("");
   const [errors, setErrors] = useState({});
   const [cancelReason, setCancelReason] = useState("");
   const [isCancelModel, setCancelModel] = useState(false);
@@ -91,7 +91,103 @@ const Details = () => {
     getCampaignDetail()
   }, [])
 
-  if (loading) return <div className="text-center">Loading campaign...</div>;
+  if (loading) {
+    return (
+      <div className="w-full text-sm overflow-x-hidden space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-2">
+          <Skeleton.Button active size="small" shape="circle" />
+          <Skeleton.Input active size="small" style={{ width: 100 }} />
+        </div>
+
+        <Skeleton.Input active size="default" style={{ width: 200 }} />
+
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left Side */}
+          <div className="flex-1 space-y-6">
+            {/* Banner Card */}
+            <div className="bg-white w-full rounded-2xl overflow-hidden">
+              <div className="p-6 space-y-4">
+                <Skeleton.Avatar active size={64} shape="circle" />
+                <Skeleton.Input active style={{ width: 200 }} size="small" />
+                <Skeleton.Input active style={{ width: 150 }} size="small" />
+                <div className="flex gap-4">
+                  <Skeleton.Button active />
+                  <Skeleton.Button active />
+                </div>
+                <div className="flex gap-6 flex-wrap mt-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="min-w-[120px] text-center">
+                      <Skeleton.Input active size="small" style={{ width: 100 }} />
+                      <Skeleton.Input active size="small" style={{ width: 80 }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Description & Requirements */}
+            <div className="bg-white p-6 rounded-2xl space-y-6">
+              <Skeleton.Input active size="default" style={{ width: 200 }} />
+              <Skeleton paragraph={{ rows: 3 }} active />
+
+              <Skeleton.Input active size="default" style={{ width: 180 }} />
+              <ul className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <Skeleton.Avatar size="small" shape="circle" active />
+                    <Skeleton.Input active size="small" style={{ width: 200 }} />
+                  </li>
+                ))}
+              </ul>
+
+              <div>
+                <Skeleton.Input active size="default" style={{ width: 150 }} />
+                <div className="flex gap-2 flex-wrap mt-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Skeleton.Button key={i} active shape="round" size="small" />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Skeleton.Input active size="default" style={{ width: 220 }} />
+                <div className="flex gap-4 mt-4 flex-wrap">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton.Image key={i} active style={{ width: 96, height: 96 }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side */}
+          <aside className="w-full md:w-[300px] space-y-6 flex-shrink-0">
+            <div className="bg-white rounded-2xl p-6 space-y-4">
+              <Skeleton.Input active size="default" style={{ width: 160 }} />
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i}>
+                  <Skeleton.Input active size="small" style={{ width: 100 }} />
+                  <Skeleton.Input active size="small" style={{ width: 200 }} />
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 space-y-4">
+              <Skeleton.Input active size="default" style={{ width: 200 }} />
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i}>
+                  <Skeleton.Input active size="small" style={{ width: 180 }} />
+                  <Skeleton.Input active size="small" style={{ width: 140 }} />
+                </div>
+              ))}
+            </div>
+          </aside>
+        </div>
+      </div>
+    );
+  }
+
 
   if (!campaign) return <div>No campaign data available.</div>;
 
@@ -145,28 +241,28 @@ const Details = () => {
               {/* Campaign Info */}
               <div className="flex flex-wrap justify-between gap-6 border border-gray-200 rounded-2xl p-4">
                 <div>
-                  <div className="flex gap-2 items-center text-gray-400 mb-2">
-                    <RiMoneyRupeeCircleLine className="w-5" />
+                  <div className="flex gap-2 items-center text-gray-900 mb-2">
+                    <RiMoneyRupeeCircleLine className="w-5 font-semibold" />
                     <span>Budget</span>
                   </div>
-                  <p>₹{campaign?.estimatedbudget}</p>
+                  <p className='text-gray-800'>₹{campaign?.estimatedbudget}</p>
                 </div>
                 <div>
-                  <div className="flex gap-2 items-center text-gray-400 mb-2">
-                    <RiTranslate className="w-5" />
+                  <div className="flex gap-2 items-center text-gray-900 mb-2">
+                    <RiTranslate className="w-5 font-semibold" />
                     <span>Language</span>
                   </div>
                   {campaign?.campaignlanguages?.map((lang) => (
-                    <p key={lang.languageid}>{lang.languagename}</p>
+                    <p key={lang.languageid} className='text-gray-800'>{lang.languagename}</p>
                   ))}
                 </div>
                 <div>
-                  <div className="flex gap-2 items-center text-gray-400 mb-2">
-                    <RiMenLine className="w-5" />
+                  <div className="flex gap-2 items-center text-gray-900 mb-2">
+                    <RiMenLine className="w-5 font-semibold" />
                     <span>Gender</span>
                   </div>
                   {campaign?.campaigngenders?.map((gender) => (
-                    <p key={gender.genderid}>{gender.gendername}</p>
+                    <p key={gender.genderid} className='text-gray-800'>{gender.gendername}</p>
                   ))}
                 </div>
               </div>
@@ -178,7 +274,7 @@ const Details = () => {
             <Tabs defaultActiveKey="overview">
               <Tabs.TabPane tab="Overview" key="overview">
                 {campaign && (
-                  <VendorCampaignOverview campaignData={campaign} isEditable={false}/>
+                  <VendorCampaignOverview campaignData={campaign} isEditable={false} />
                 )}
               </Tabs.TabPane>
 
