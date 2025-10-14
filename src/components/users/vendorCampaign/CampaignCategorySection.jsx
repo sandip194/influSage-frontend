@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 
 const { Option } = Select;
 
-const CampaignCategorySection = ({ data, onNext, onBack }) => {
+const CampaignCategorySection = ({ data, onNext, onBack, campaignId }) => {
     const [categoryTree, setCategoryTree] = useState([]);
     const [selectedParentId, setSelectedParentId] = useState(null);
     const [selectedChildren, setSelectedChildren] = useState([]);
@@ -72,8 +72,8 @@ const CampaignCategorySection = ({ data, onNext, onBack }) => {
             setLoading(true);
 
             const res = await axios.post(
-                "/vendor/update-campaign/",
-                { p_campaigncategoyjson: formattedData },
+                "/vendor/update-campaign",
+                { p_campaigncategoyjson: formattedData, campaignId : campaignId ? campaignId : null },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import { Empty } from 'antd';
 
 const MessageDropdown = () => {
   const [messages, setMessages] = useState([]);
@@ -35,7 +36,7 @@ const MessageDropdown = () => {
 
   return (
     <div
-      className="w-60 sm:w-80 bg-white shadow-lg rounded-3xl p-4 mt-5"
+      className="w-64 sm:w-80 bg-white p-4 shadow-xl rounded-2xl"
       style={{ left: "-71px", position: "absolute" }}
     >
       <div className="flex justify-between items-center mb-3">
@@ -51,7 +52,9 @@ const MessageDropdown = () => {
       {loading ? (
         <p className="text-gray-500 text-sm">Loading...</p>
       ) : messages.length === 0 ? (
-        <p className="text-gray-500 text-sm">No unread messages</p>
+        <div className="flex justify-center py-5">
+          <Empty description="No Notifications" />
+        </div>
       ) : (
         <div className="divide-y divide-gray-200">
           {messages.map((msg) => (

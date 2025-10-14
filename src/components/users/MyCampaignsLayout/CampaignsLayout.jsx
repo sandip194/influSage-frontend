@@ -321,33 +321,35 @@ const InfluencerCampaigns = () => {
             onKeyDown={handleSearch}
           />
 
-          <div className="flex gap-2 w-full sm:w-auto justify-end">
-            <Select
-              size='large'
-              value={`${filters.sortby}_${filters.sortorder}`}
-              onChange={handleSortChange}
-              className="w-full sm:w-48"
-              placeholder="Sort By"
-              suffixIcon={<RiArrowDownSLine size={16} />}
-            >
-              {sortOptions.map((option) => (
-                <Option key={option.value} value={option.value}>
-                  {option.label}
-                </Option>
-              ))}
-            </Select>
+            {!showFilter && (
+              <div className="sm:static fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-200 flex gap-2 justify-between sm:flex-row sm:w-auto sm:border-none sm:p-0 z-50">
+                <Select
+                  size="large"
+                  value={`${filters.sortby}_${filters.sortorder}`}
+                  onChange={handleSortChange}
+                  className="flex-1 sm:w-48"
+                  placeholder="Sort By"
+                  suffixIcon={<RiArrowDownSLine size={16} />}
+                >
+                  {sortOptions.map((option) => (
+                    <Option key={option.value} value={option.value}>
+                      {option.label}
+                    </Option>
+                  ))}
+                </Select>
 
-            <button
-              onClick={() => {
-                setTempFilters(filters); // Sync temp with current filters
-                setShowFilter(true);
-              }}
-              className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition w-full sm:w-auto"
-            >
-              Filter
-              <RiEqualizerFill size={16} />
-            </button>
-          </div>
+                <button
+                  onClick={() => {
+                    setTempFilters(filters);
+                    setShowFilter(true); 
+                  }}
+                  className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition flex-1 sm:w-auto"
+                >
+                  Filter
+                  <RiEqualizerFill size={16} />
+                </button>
+              </div>
+            )}
         </div>
       </div>
 

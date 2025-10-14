@@ -217,7 +217,8 @@ const BrowseInfluencersLayout = () => {
   };
 
   return (
-    <div>
+        <div className="w-full text-sm pb-24 sm:pb-0">
+
       {/* Header */}
       <div className="header mb-4">
         <h3 className="text-2xl text-[#0D132D] font-bold mb-2">
@@ -229,7 +230,7 @@ const BrowseInfluencersLayout = () => {
       </div>
 
       {/* Tabs */}
-      <div className="bg-white p-4 rounded-lg mb-6 flex flex-col sm:flex-row gap-3">
+      <div className="bg-white p-4 rounded-lg mb-6 flex flex-row gap-2 flex-wrap sm:flex-nowrap">
         {buttons.map(({ id, label, path }) => (
           <button
             key={id}
@@ -237,7 +238,7 @@ const BrowseInfluencersLayout = () => {
               setActiveTab(id);
               navigate(path);
             }}
-            className={`px-4 py-2 rounded-md border transition
+            className={`flex-1 sm:flex-none px-3 py-2 rounded-md border border-gray-300 transition text-sm
               ${activeTab === id
                 ? "bg-[#141843] text-white border-[#141843]"
                 : "bg-white text-[#141843] border-gray-300 hover:bg-gray-100"
@@ -283,15 +284,29 @@ const BrowseInfluencersLayout = () => {
             }}
           />
 
-          <div className="flex gap-2 w-full sm:w-auto justify-end">
+         {/* Desktop view */}
+        <div className="hidden sm:flex gap-2 w-full sm:w-auto justify-end">
+          <button
+            onClick={() => setShowFilter(true)}
+            className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white hover:bg-gray-100"
+          >
+            Filter
+            <RiEqualizerFill size={16} />
+          </button>
+        </div>
+
+        {/* Mobile view: fixed at bottom */}
+        {!showFilter && (
+          <div className="sm:hidden fixed bottom-0 left-0 w-full z-50 bg-white p-3 flex justify-end shadow-md">
             <button
               onClick={() => setShowFilter(true)}
-              className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white hover:bg-gray-100"
+              className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white hover:bg-gray-100 w-full max-w-xs mx-auto"
             >
               Filter
               <RiEqualizerFill size={16} />
             </button>
           </div>
+        )}
         </div>
 
         {/* Influencers List */}

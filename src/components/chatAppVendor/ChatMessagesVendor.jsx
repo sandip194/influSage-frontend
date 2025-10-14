@@ -379,9 +379,11 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
             <div
               className={`relative flex flex-col ${isMe ? "items-end" : "items-start"}`}
             >
-              <div
-                className={`px-3 py-1 rounded-lg max-w-xs break-words ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`}
-              >
+              <div className={`px-3 py-1 rounded-lg 
+                max-w-[90%] sm:max-w-xs md:max-w-sm 
+                break-all overflow-hidden whitespace-pre-wrap 
+                ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`} >
+
                 {/* File attachments */}
                 {!msg.deleted && msg.file && (
                   <div className="mb-2">

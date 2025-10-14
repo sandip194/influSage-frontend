@@ -113,19 +113,19 @@ const SavedLayout = () => {
   }, [getAllSavedCampaigns]);
 
   return (
-    <div >
+    <div className='w-full text-sm pb-24 sm:pb-0' >
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
       <p className="mb-6 text-gray-700 text-sm">
         Track your campaigns & Browse
       </p>
 
-      <div className="bg-white p-4 rounded-lg mb-6 flex flex-col sm:flex-row gap-3">
+      <div className="bg-white p-4 rounded-lg mb-6 flex flex-row gap-2 flex-wrap sm:flex-nowrap">
         {buttons.map(({ id, label, path }) => (
           <button
             key={id}
             onClick={() => handleClick(path)}
-            className={`px-4 py-2 rounded-md border border-gray-300 transition
-      ${selectedButton === id
+            className={`flex-1 sm:flex-none px-3 py-2 rounded-md border border-gray-300 transition text-sm
+              ${selectedButton === id
                 ? "bg-[#0f122f] text-white"
                 : "bg-white text-[#141843] hover:bg-gray-100"
               }`}
@@ -164,7 +164,8 @@ const SavedLayout = () => {
 
           <div className="flex gap-2 w-full sm:w-auto justify-end">
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-end">
-              <div className="relative w-full sm:w-auto">
+              {/* Desktop view */}
+              <div className="hidden sm:block w-full sm:w-auto">
                 <Select
                   size="large"
                   value={`${sortby}_${sortorder}`}
@@ -172,9 +173,9 @@ const SavedLayout = () => {
                     const [newSortBy, newSortOrder] = value.split("_");
                     setSortBy(newSortBy);
                     setSortOrder(newSortOrder);
-                    setPageNumber(1); // Reset to first page on sort
+                    setPageNumber(1);
                   }}
-                  className="w-full sm:w-48"
+                  className="w-48"
                   placeholder="Sort By"
                   suffixIcon={<RiArrowDownSLine size={16} />}
                 >
@@ -184,9 +185,29 @@ const SavedLayout = () => {
                     </Select.Option>
                   ))}
                 </Select>
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <RiArrowDownSLine size={16} />
-                </span>
+              </div>
+
+              {/* Mobile view: fixed at bottom */}
+              <div className="sm:hidden fixed bottom-0 left-0 w-full z-50 bg-white p-4 shadow-md">
+                <Select
+                  size="large"
+                  value={`${sortby}_${sortorder}`}
+                  onChange={(value) => {
+                    const [newSortBy, newSortOrder] = value.split("_");
+                    setSortBy(newSortBy);
+                    setSortOrder(newSortOrder);
+                    setPageNumber(1);
+                  }}
+                  className="w-full"
+                  placeholder="Sort By"
+                  suffixIcon={<RiArrowDownSLine size={16} />}
+                >
+                  {sortOptions.map((option) => (
+                    <Select.Option key={option.value} value={option.value}>
+                      {option.label}
+                    </Select.Option>
+                  ))}
+                </Select>
               </div>
             </div>
           </div>
@@ -223,7 +244,7 @@ const SavedLayout = () => {
                   className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
                 >
                   <span className="text-xs text-gray-500 mb-3">
-                    Applied on {campaign.campaigncreatedate}
+                    Created on {campaign.campaigncreatedate}
                     {/* new Date(campaign.campaigncreatedate).toLocaleDateString() */}
                   </span>
                   <div className="flex items-center gap-3 mb-3">

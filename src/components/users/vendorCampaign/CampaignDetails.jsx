@@ -8,7 +8,7 @@ import {
   RiYoutubeFill,
   RiStarLine,
 } from '@remixicon/react';
-import { Modal, Input, Tabs } from 'antd';
+import { Modal, Input, Tabs, DatePicker } from 'antd';
 import VendorCampaignOverview from './VendorCampaignOverview';
 import VendorActivity from './VendorActivity';
 import VendorMessage from './VendorMessage';
@@ -18,10 +18,13 @@ import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RiArrowLeftLine, RiCheckboxCircleFill } from "react-icons/ri";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter"; // ✅ Add this
 import toast from 'react-hot-toast';
 
 import dayjs from 'dayjs';
-
+dayjs.extend(customParseFormat);
+dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
 
 const CampaignDetails = () => {
@@ -34,6 +37,11 @@ const CampaignDetails = () => {
   const [loading, setLoading] = useState(false)
   const [cancelReasons, setCancelReasons] = useState([]);
   const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
+  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    startDate: null,
+    endDate: null,
+  });
 
 
 
@@ -60,6 +68,9 @@ const CampaignDetails = () => {
       setLoading(false)
     }
   }
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   useEffect(() => {
     getCampaignDetails()
@@ -150,13 +161,68 @@ const handlePauseCampaign = async () => {
 };
 
  const handleEditClick = () => {
-    if (campaignDetails?.iseditable === true || campaignDetails?.iseditable === "Is editable") {
-     
-      navigate(`/vendor-dashboard/vendor-campaign/edit-campaign/${campaignDetails?.id}`);
-    } else {
-      setIsModalVisible(true);
-    }
+  if (campaignDetails?.iseditable === true || campaignDetails?.iseditable === "Is editable") {
+    navigate(`/vendor-dashboard/vendor-campaign/edit-campaign/${campaignDetails?.id}`);
+  } else {
+    setFormData({
+  startDate: campaignDetails?.requirements?.startdate
+    ? dayjs(campaignDetails.requirements.startdate, "DD-MM-YYYY")
+    : null,
+  endDate: campaignDetails?.requirements?.enddate
+    ? dayjs(campaignDetails.requirements.enddate, "DD-MM-YYYY")
+    : null,
+});
+
+    setIsDateModalOpen(true);
+  }
+};
+
+const validateDates = () => {
+  const newErrors = {};
+
+  if (!formData.startDate) newErrors.startDate = "Start date is required";
+  if (!formData.endDate) newErrors.endDate = "End date is required";
+  if (formData.startDate && formData.endDate && formData.endDate.isBefore(formData.startDate)) {
+    newErrors.endDate = "End date cannot be before start date";
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
+
+ const handleSaveDates = async () => {
+  if (!validateDates()) return;
+
+  const payload = {
+    campaignId: Number(campaignId),
+    p_campaignjson: {
+      startdate: formData.startDate?.format("DD-MM-YYYY"),
+      enddate: formData.endDate?.format("DD-MM-YYYY"),
+    },
   };
+
+  try {
+    setLoading(true);
+    const res = await axios.post("/vendor/update-campaign", payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.data?.success) {
+      toast.success(res.data?.message || "Campaign dates updated successfully!");
+      setIsDateModalOpen(false);
+      getCampaignDetails();
+    } else {
+      toast.error(res.data?.message || "Failed to update dates");
+    }
+  } catch (err) {
+    console.error("❌ API Error:", err.response?.data || err.message);
+    toast.error("Failed to update campaign dates. Try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   if (loading) return <div className="text-center">Loading campaign...</div>;
 
@@ -526,13 +592,57 @@ const handlePauseCampaign = async () => {
       </Modal>
 
       <Modal
-          title="Edit Not Allowed"
-          open={isModalVisible}
-          onCancel={() => setIsModalVisible(false)}
-          footer={null}
-        >
-          <p>You cannot edit this campaign right now. Please contact admin or check campaign status.</p>
-      </Modal>
+  title="Edit Campaign Dates"
+  open={isDateModalOpen}
+  onCancel={() => setIsDateModalOpen(false)}
+  footer={null}
+  className="rounded-xl"
+>
+  <div className="flex gap-4">
+    {/* Start Date */}
+    <div className="w-full">
+      <DatePicker
+        size="large"
+        style={{ width: "100%" }}
+        format="DD-MM-YYYY"
+        placeholder="Start Date"
+        value={formData.startDate}
+        disabledDate={(current) => current && current.isBefore(dayjs().startOf("day"))}
+        onChange={(date) => handleChange("startDate", date)}
+      />
+      {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>}
+    </div>
+
+    {/* End Date */}
+    <div className="w-full">
+      <DatePicker
+        size="large"
+        style={{ width: "100%" }}
+        format="DD-MM-YYYY"
+        placeholder="End Date"
+        value={formData.endDate}
+        disabledDate={(current) => current && formData.startDate && current.isBefore(formData.startDate)}
+        onChange={(date) => handleChange("endDate", date)}
+      />
+      {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>}
+    </div>
+  </div>
+
+  <div className="flex justify-end gap-3 mt-4">
+    <button
+      onClick={() => setIsDateModalOpen(false)}
+      className="px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-100"
+    >
+      Cancel
+    </button>
+    <button
+      onClick={handleSaveDates}
+      className="px-6 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a]"
+    >
+      Save
+    </button>
+  </div>
+</Modal>
 
     </div>
   );

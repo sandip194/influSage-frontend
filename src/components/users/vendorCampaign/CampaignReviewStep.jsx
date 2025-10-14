@@ -131,7 +131,7 @@ const CampaignReviewStep = ({ onEdit }) => {
 
   const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
 
-  const handleCreateCampaign = async () => {
+  const handleCreateCampaign = async (status) => {
     try {
       const authToken = token || localStorage.getItem("token");
       if (!authToken) {
@@ -149,7 +149,7 @@ const CampaignReviewStep = ({ onEdit }) => {
         campaign: campaignData?.p_campaignjson || {},
         references: campaignData?.p_campaignfilejson || [],
         contenttypes: campaignData?.p_contenttypejson || [],
-        status_name: "Draft",
+        p_statusname : status,
       };
 
       const res = await axios.post("/vendor/finalize-campaign", payload, {
@@ -574,14 +574,14 @@ const CampaignReviewStep = ({ onEdit }) => {
         </button>
         <button
           className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full"
-          onClick={handleCreateCampaign}
+          onClick={() => handleCreateCampaign("Draft")}
           type="button"
         >
           Save Draft
         </button>
          <button
           className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full"
-          // onClick={handleCreateCampaign}
+          onClick={() => handleCreateCampaign("ApprovalPending")}
           type="button"
         >
           Send To Admin

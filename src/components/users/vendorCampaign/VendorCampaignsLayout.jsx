@@ -1,17 +1,13 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  RiEyeLine,
-  RiAddFill,
-  RiEqualizerFill,
-  RiCloseFill,
-  RiArrowDownSLine,
-} from '@remixicon/react';
-import { SearchOutlined } from '@ant-design/icons';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { Pagination, Skeleton, Empty, Select, Input, DatePicker, Checkbox, Tooltip } from 'antd';
-import { toast } from 'react-toastify'; // Optional: for error notifications; install if not present
+  RiEyeLine, RiAddFill, RiEqualizerFill, RiCloseFill, RiArrowDownSLine } from "@remixicon/react";
+import { SearchOutlined } from "@ant-design/icons";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import {
+  Pagination, Skeleton, Empty, Select, Input, DatePicker, Checkbox, Tooltip} from "antd";
+import { toast } from "react-toastify"; // Optional: for error notifications; install if not present
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -36,18 +32,17 @@ const statusLabels = {
   paused: "Paused",
 };
 
-  const sortOptions = [
-    { value: "createddate_desc", label: "Newest" },
-    { value: "createddate_asc", label: "Oldest" },
-    { value: "estimatedbudget_desc", label: "Budget: High to Low" },
-    { value: "estimatedbudget_asc", label: "Budget: Low to High" },
-  ];
-
+const sortOptions = [
+  { value: "createddate_desc", label: "Newest" },
+  { value: "createddate_asc", label: "Oldest" },
+  { value: "estimatedbudget_desc", label: "Budget: High to Low" },
+  { value: "estimatedbudget_asc", label: "Budget: Low to High" },
+];
 
 const getStatusKey = (status) => {
-  if (!status) return '';
-  if (typeof status === 'string') return status.toLowerCase();
-  if (typeof status === 'object') {
+  if (!status) return "";
+  if (typeof status === "string") return status.toLowerCase();
+  if (typeof status === "object") {
     if (status.status) return String(status.status).toLowerCase();
     if (status.name) return String(status.name).toLowerCase();
   }
@@ -97,11 +92,19 @@ const VendorCampaignsLayout = () => {
       setLoading(true);
       const params = {
         p_statuslabelid: filters.status !== "all" ? filters.status : undefined,
-        p_providers: filters.providers.length ? JSON.stringify(filters.providers) : undefined,
-        p_minbudget: filters.minbudget !== "" ? Number(filters.minbudget) : undefined,
-        p_maxbudget: filters.maxbudget !== "" ? Number(filters.maxbudget) : undefined,
-        p_startdate: filters.startdate ? filters.startdate.format('YYYY-MM-DD') : undefined,
-        p_enddate: filters.enddate ? filters.enddate.format('YYYY-MM-DD') : undefined,
+        p_providers: filters.providers.length
+          ? JSON.stringify(filters.providers)
+          : undefined,
+        p_minbudget:
+          filters.minbudget !== "" ? Number(filters.minbudget) : undefined,
+        p_maxbudget:
+          filters.maxbudget !== "" ? Number(filters.maxbudget) : undefined,
+        p_startdate: filters.startdate
+          ? filters.startdate.format("YYYY-MM-DD")
+          : undefined,
+        p_enddate: filters.enddate
+          ? filters.enddate.format("YYYY-MM-DD")
+          : undefined,
         p_sortby: filters.sortby || undefined,
         p_sortorder: filters.sortorder || undefined,
         p_pagenumber: filters.pagenumber || 1,
@@ -157,60 +160,63 @@ const VendorCampaignsLayout = () => {
     if (statusItem === "All") {
       // For "All", clear statuslabelid
       setStatusFilter("all");
-      setFilters(prev => ({ ...prev, status: null, pagenumber: 1 }));
+      setFilters((prev) => ({ ...prev, status: null, pagenumber: 1 }));
     } else {
       // Assume statusItem is an object with 'id' and 'name'
       const statusId = statusItem.id; // Adjust if property is different, e.g., statusItem.statuslabelid
       const statusKey = getStatusKey(statusItem); // For UI highlighting
       setStatusFilter(statusKey);
-      setFilters(prev => ({ ...prev, status: statusId, pagenumber: 1 }));
+      setFilters((prev) => ({ ...prev, status: statusId, pagenumber: 1 }));
     }
   }, []);
 
   // Handle search (on Enter)
-  const handleSearch = useCallback((e) => {
-    if (e.key === "Enter") {
-      const trimmed = searchInput.trim();
-      setFilters(prev => ({ ...prev, search: trimmed, pagenumber: 1 }));
-     // setSearchText(trimmed);
-    }
-  }, [searchInput]);
+  const handleSearch = useCallback(
+    (e) => {
+      if (e.key === "Enter") {
+        const trimmed = searchInput.trim();
+        setFilters((prev) => ({ ...prev, search: trimmed, pagenumber: 1 }));
+        // setSearchText(trimmed);
+      }
+    },
+    [searchInput]
+  );
 
   // Handle sort change
   const handleSortChange = useCallback((value) => {
     const [sortby, sortorder] = value.split("_");
-    setFilters(prev => ({ ...prev, sortby, sortorder, pagenumber: 1 }));
+    setFilters((prev) => ({ ...prev, sortby, sortorder, pagenumber: 1 }));
   }, []);
 
   // Handle checkbox change for providers (modal-only)
   const handleProviderChange = useCallback((id) => {
-    setTempFilters(prev => {
+    setTempFilters((prev) => {
       const updated = prev.providers.includes(id)
-        ? prev.providers.filter(v => v !== id)
+        ? prev.providers.filter((v) => v !== id)
         : [...prev.providers, id];
       return { ...prev, providers: updated };
     });
   }, []);
   // Handle budget change (modal-only)
   const handleBudgetChange = useCallback((type, value) => {
-    setTempFilters(prev => ({ ...prev, [type]: value }));
+    setTempFilters((prev) => ({ ...prev, [type]: value }));
   }, []);
   // Handle date range change (modal-only)
   const handleDateChange = useCallback((dates) => {
     if (dates) {
-      setTempFilters(prev => ({
+      setTempFilters((prev) => ({
         ...prev,
         startdate: dates[0],
         enddate: dates[1],
       }));
     } else {
-      setTempFilters(prev => ({ ...prev, startdate: null, enddate: null }));
+      setTempFilters((prev) => ({ ...prev, startdate: null, enddate: null }));
     }
   }, []);
 
   // Handle pagination change
   const handlePaginationChange = useCallback((pageNumber, size) => {
-    setFilters(prev => ({ ...prev, pagenumber: pageNumber, pagesize: size }));
+    setFilters((prev) => ({ ...prev, pagenumber: pageNumber, pagesize: size }));
   }, []);
 
   // Clear all filters (resets both temp and main, refetches)
@@ -237,7 +243,6 @@ const VendorCampaignsLayout = () => {
     setShowFilter(false);
   }, [fetchCampaigns]);
 
-
   // Apply filters (merges temp to main, refetches, closes modal)
   const applyFilters = useCallback(() => {
     setFilters(tempFilters);
@@ -258,7 +263,7 @@ const VendorCampaignsLayout = () => {
   useEffect(() => {
     const handleResize = () => {
       const newPageSize = window.innerWidth < 640 ? 10 : 15;
-      setFilters(prev => ({
+      setFilters((prev) => ({
         ...prev,
         pagesize: newPageSize,
         pagenumber: 1,
@@ -268,19 +273,22 @@ const VendorCampaignsLayout = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-
   const paginatedData = useMemo(() => campaigns, [campaigns]); // Server-side pagination, so full campaigns are the "paginated" data
 
   return (
-    <div className="w-full text-sm">
+    <div className="w-full text-sm pb-24 sm:pb-0">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">My Campaigns</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            My Campaigns
+          </h2>
           <p className="text-gray-600 text-sm">Your Campaigns Overview</p>
         </div>
         <button
-          onClick={() => navigate("/vendor-dashboard/vendor-campaign/my-campaigns")}
+          onClick={() =>
+            navigate("/vendor-dashboard/vendor-campaign/my-campaigns")
+          }
           className="flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-[#141843] text-white font-medium hover:bg-[#1d214f] transition-all duration-200"
         >
           <RiAddFill />
@@ -297,16 +305,20 @@ const VendorCampaignsLayout = () => {
               : statusLabels[getStatusKey(statusItem.name)] || statusItem.name;
 
           // For key, use ID if available (for objects), else fallback to string key
-          const uniqueKey = typeof statusItem === "object" && statusItem.id ? statusItem.id : id;
+          const uniqueKey =
+            typeof statusItem === "object" && statusItem.id
+              ? statusItem.id
+              : id;
 
           return (
             <button
               key={uniqueKey} // Use ID for better uniqueness
               onClick={() => handleStatusFilter(statusItem)} // Pass full statusItem
-              className={`px-4 py-2 rounded-lg border transition font-medium ${statusFilter === id
-                ? "bg-[#141843] text-white border-[#141843]"
-                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                }`}
+              className={`px-4 py-2 rounded-lg border transition font-medium ${
+                statusFilter === id
+                  ? "bg-[#141843] text-white border-[#141843]"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+              }`}
             >
               {label}
             </button>
@@ -319,7 +331,7 @@ const VendorCampaignsLayout = () => {
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <Input
             prefix={<SearchOutlined />}
-            size='large'
+            size="large"
             placeholder="Search campaigns..."
             className="w-full sm:w-72"
             value={searchInput}
@@ -327,33 +339,35 @@ const VendorCampaignsLayout = () => {
             onKeyDown={handleSearch}
           />
 
-          <div className="flex gap-2 w-full sm:w-auto justify-end">
-            <Select
-              size='large'
-              value={`${filters.sortby}_${filters.sortorder}`}
-              onChange={handleSortChange}
-              className="w-full sm:w-48"
-              placeholder="Sort By"
-              suffixIcon={<RiArrowDownSLine size={16} />}
-            >
-              {sortOptions.map((option) => (
-                <Option key={option.value} value={option.value}>
-                  {option.label}
-                </Option>
-              ))}
-            </Select>
+          {!showFilter && (
+            <div className="sm:static fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-200 flex gap-2 justify-between sm:flex-row sm:w-auto sm:border-none sm:p-0 z-50">
+              <Select
+                size="large"
+                value={`${filters.sortby}_${filters.sortorder}`}
+                onChange={handleSortChange}
+                className="flex-1 sm:w-48"
+                placeholder="Sort By"
+                suffixIcon={<RiArrowDownSLine size={16} />}
+              >
+                {sortOptions.map((option) => (
+                  <Option key={option.value} value={option.value}>
+                    {option.label}
+                  </Option>
+                ))}
+              </Select>
 
-            <button
-              onClick={() => {
-                setTempFilters(filters); // Sync temp with current filters
-                setShowFilter(true);
-              }}
-              className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition w-full sm:w-auto"
-            >
-              Filter
-              <RiEqualizerFill size={16} />
-            </button>
-          </div>
+              <button
+                onClick={() => {
+                  setTempFilters(filters);
+                  setShowFilter(true);
+                }}
+                className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition flex-1 sm:w-auto"
+              >
+                Filter
+                <RiEqualizerFill size={16} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -387,7 +401,6 @@ const VendorCampaignsLayout = () => {
                     className="border-t border-gray-200 hover:bg-gray-50 transition"
                   >
                     <td className="p-4 flex items-center gap-3">
-                      
                       <img
                         src={getImageUrl(row.photopath)}
                         alt={row.name}
@@ -400,8 +413,10 @@ const VendorCampaignsLayout = () => {
                     <td className="p-4">{row.enddate}</td>
                     <td className="p-4">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[getStatusKey(row.status)] || 'bg-gray-100 text-gray-600'
-                          }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          statusStyles[getStatusKey(row.status)] ||
+                          "bg-gray-100 text-gray-600"
+                        }`}
                       >
                         {statusLabels[getStatusKey(row.status)] || row.status}
                       </span>
@@ -409,7 +424,9 @@ const VendorCampaignsLayout = () => {
                     <td className="p-4">
                       <button
                         onClick={() =>
-                          navigate(`/vendor-dashboard/vendor-campaign/campaignDetails/${row.id}`)
+                          navigate(
+                            `/vendor-dashboard/vendor-campaign/campaignDetails/${row.id}`
+                          )
                         }
                         className="flex items-center gap-1 cursor-pointer text-[#141843] hover:text-[#1d214f] transition text-sm font-medium"
                       >
@@ -443,7 +460,7 @@ const VendorCampaignsLayout = () => {
           pageSize={filters.pagesize}
           onChange={handlePaginationChange}
           showSizeChanger
-          pageSizeOptions={['10', '15', '25', '50']}
+          pageSizeOptions={["10", "15", "25", "50"]}
         />
       </div>
 
@@ -475,12 +492,17 @@ const VendorCampaignsLayout = () => {
               ) : (
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {platforms.map((platform) => (
-                    <label key={platform.id} className="flex items-center cursor-pointer">
+                    <label
+                      key={platform.id}
+                      className="flex items-center cursor-pointer"
+                    >
                       <Checkbox
                         checked={tempFilters.providers.includes(platform.id)} // Use tempFilters
                         onChange={() => handleProviderChange(platform.id)} // Updates temp only
                       />
-                      <span className="text-sm text-gray-700 ml-2">{platform.name}</span>
+                      <span className="text-sm text-gray-700 ml-2">
+                        {platform.name}
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -495,18 +517,24 @@ const VendorCampaignsLayout = () => {
                   placeholder="Min Budget"
                   type="number"
                   value={tempFilters.minbudget} // Use tempFilters
-                  onChange={(e) => handleBudgetChange("minbudget", e.target.value)} // Updates temp only
+                  onChange={(e) =>
+                    handleBudgetChange("minbudget", e.target.value)
+                  } // Updates temp only
                   className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#141843]"
                 />
                 <Input
                   placeholder="Max Budget"
                   type="number"
                   value={tempFilters.maxbudget} // Use tempFilters
-                  onChange={(e) => handleBudgetChange("maxbudget", e.target.value)} // Updates temp only
+                  onChange={(e) =>
+                    handleBudgetChange("maxbudget", e.target.value)
+                  } // Updates temp only
                   className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#141843]"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">Filter campaigns by estimated budget range.</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Filter campaigns by estimated budget range.
+              </p>
             </div>
 
             {/* Date Range */}
@@ -518,9 +546,11 @@ const VendorCampaignsLayout = () => {
                 format="YYYY-MM-DD"
                 placeholder={["Start Date", "End Date"]}
                 className="w-full"
-                style={{ padding: '8px 12px' }}
+                style={{ padding: "8px 12px" }}
               />
-              <p className="text-xs text-gray-500 mt-1">Filter by campaign start and end dates.</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Filter by campaign start and end dates.
+              </p>
             </div>
 
             {/* Buttons */}
@@ -546,10 +576,3 @@ const VendorCampaignsLayout = () => {
 };
 
 export default VendorCampaignsLayout;
-
-
-
-
-
-
-

@@ -64,7 +64,7 @@ const OffersLayout = () => {
         getAllOffers()
     }, [getAllOffers])
     return (
-        <div className="w-full ">
+            <div className="w-full text-sm pb-24 sm:pb-0">
 
             <div className="mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Offers</h2>
@@ -96,25 +96,50 @@ const OffersLayout = () => {
                     }}
                 />
 
-                <Select
-                    size="large"
-                    value={`${sortby}_${sortorder}`}
-                    onChange={(value) => {
-                        const [newSortBy, newSortOrder] = value.split("_");
-                        setSortBy(newSortBy);
-                        setSortOrder(newSortOrder);
-                        setPageNumber(1); // Reset to first page on sort
-                    }}
-                    className="w-full sm:w-48"
-                    placeholder="Sort By"
-                    suffixIcon={<RiArrowDownSLine size={16} />}
-                >
-                    {sortOptions.map((option) => (
-                        <Select.Option key={option.value} value={option.value}>
-                            {option.label}
-                        </Select.Option>
-                    ))}
-                </Select>
+                 <div className="hidden sm:block w-full sm:w-auto">
+                                <Select
+                                  size="large"
+                                  value={`${sortby}_${sortorder}`}
+                                  onChange={(value) => {
+                                    const [newSortBy, newSortOrder] = value.split("_");
+                                    setSortBy(newSortBy);
+                                    setSortOrder(newSortOrder);
+                                    setPageNumber(1);
+                                  }}
+                                  className="w-48"
+                                  placeholder="Sort By"
+                                  suffixIcon={<RiArrowDownSLine size={16} />}
+                                >
+                                  {sortOptions.map((option) => (
+                                    <Select.Option key={option.value} value={option.value}>
+                                      {option.label}
+                                    </Select.Option>
+                                  ))}
+                                </Select>
+                              </div>
+                
+                              {/* Mobile view: fixed at bottom */}
+                              <div className="sm:hidden fixed bottom-0 left-0 w-full z-50 bg-white p-4 shadow-md">
+                                <Select
+                                  size="large"
+                                  value={`${sortby}_${sortorder}`}
+                                  onChange={(value) => {
+                                    const [newSortBy, newSortOrder] = value.split("_");
+                                    setSortBy(newSortBy);
+                                    setSortOrder(newSortOrder);
+                                    setPageNumber(1);
+                                  }}
+                                  className="w-full"
+                                  placeholder="Sort By"
+                                  suffixIcon={<RiArrowDownSLine size={16} />}
+                                >
+                                  {sortOptions.map((option) => (
+                                    <Select.Option key={option.value} value={option.value}>
+                                      {option.label}
+                                    </Select.Option>
+                                  ))}
+                                </Select>
+                              </div>
             </div>
 
             {/* Card Wrapper */}
