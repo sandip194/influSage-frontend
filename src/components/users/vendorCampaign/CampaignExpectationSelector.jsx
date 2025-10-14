@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { RiCheckLine } from '@remixicon/react';
 
-const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
+const CampaignExpectationSelector = ({ data, onNext, userId: propUserId, campaignId }) => {
   const [options, setOptions] = useState([]);
   const [selected, setSelected] = useState(data?.contentExpectation || "");
   const [durationDays, setDurationDays] = useState(null);
@@ -66,7 +66,6 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
       message.error("User not authenticated.");
       return;
     }
-
     const p_objectivejson = {
       objectiveid: selected,
       postdurationdays: Number(durationDays),
@@ -78,6 +77,7 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId }) => {
 
       const formData = new FormData();
       formData.append("p_userid", finalUserId);
+      if (campaignId) formData.append("campaignId", campaignId);
       formData.append("p_objectivejson", JSON.stringify(p_objectivejson));
 
       const res = await axios.post("/vendor/update-campaign", formData, {

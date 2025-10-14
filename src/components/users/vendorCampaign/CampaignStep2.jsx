@@ -15,7 +15,7 @@ const formatFollowers = (num) => {
   return num.toString();
 };
 
-const CampaignStep2 = ({ data, onNext, onBack }) => {
+const CampaignStep2 = ({ data, onNext, onBack, campaignId }) => {
   const [languages, setLanguages] = useState([]);
   const [genders, setGenders] = useState([]);
   const [influencerTiers, setInfluencerTiers] = useState([]);
@@ -204,6 +204,7 @@ const CampaignStep2 = ({ data, onNext, onBack }) => {
       const fd = new FormData();
       fd.append("p_userid", userId);
       fd.append("p_vendorinfojson", JSON.stringify(p_vendorinfojson));
+      if (campaignId) fd.append("campaignId", campaignId);
 
       const res = await axios.post("/vendor/update-campaign", fd, {
         headers: { Authorization: `Bearer ${token}` },
