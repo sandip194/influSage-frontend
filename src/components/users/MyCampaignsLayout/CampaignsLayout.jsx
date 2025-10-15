@@ -84,9 +84,11 @@ const InfluencerCampaigns = () => {
   const fetchCampaigns = useCallback(async () => {
     try {
       setLoading(true);
+      const statusMap = {all: undefined, inprogress: 1, completed: 2, cancelled: 3 };
 
       const params = {
-        //p_statuslabelid: filters.status !== "all" ? filters.status : undefined,
+        // p_statuslabelid: filters.status !== "all" ? filters.status : undefined, 
+        p_statuslabelid: statusMap[filters.status],
         p_sortby: filters.sortby,
         p_sortorder: filters.sortorder,
         p_pagenumber: filters.pagenumber,

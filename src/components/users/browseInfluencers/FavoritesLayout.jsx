@@ -98,6 +98,7 @@ const FavoritesLayout = () => {
       } else {
         toast.error(response.data.message || "Failed to update favourite");
       }
+      getFavouriteInfluencers()
     } catch (err) {
       console.error(err)
       toast.error("Something went wrong");

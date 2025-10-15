@@ -105,7 +105,12 @@ const VendorMyProfile = () => {
                             />
                             {/* Profile Image */}
                             <img
-                                src={`${BASE_URL}/${profileData?.p_profile?.photopath}`} // Assuming public path
+                                src={
+                                    profileData?.p_profile?.photopath
+                                        ? `${BASE_URL}/${profileData.p_profile.photopath}`
+                                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData?.p_profile?.name || "User")}&background=E5E7EB&color=111827&size=128`
+
+                                }
                                 alt="Profile"
                                 className="absolute left-6 -bottom-10 w-20 h-20 rounded-full border-4 border-white shadow"
                             />
@@ -117,7 +122,10 @@ const VendorMyProfile = () => {
                                         {profileData?.p_profile?.firstname} {profileData?.p_profile?.lastname}
                                     </h2>
                                     <p className="text-gray-500 text-sm">
-                                        {profileData?.p_profile?.email} | {profileData?.p_profile?.phonenumber}
+                                        {profileData?.p_profile?.phonenumber}
+                                    </p>
+                                    <p className="text-gray-500 text-sm">
+                                        {profileData?.p_profile?.email}
                                     </p>
 
                                 </div>
@@ -178,14 +186,20 @@ const VendorMyProfile = () => {
                     {/* Objective Section */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm">
                         <h2 className="font-bold text-base mb-4">Objective</h2>
-                        <p className="text-gray-600 text-sm leading-relaxed">
-                            Lorem Ipsum is simply dummy text of the printing and typesetting
-                            industry. Lorem Ipsum has been the industry's standard dummy
-                            text ever since the 1500s, when an unknown printer took a galley
-                            of type and scrambled it to make a type specimen book. It has
-                            survived not only five centuries, but also the leap into electronic
-                            typesetting, remaining essentially unchanged.
-                        </p>
+                        {profileData?.p_objectives?.length > 0 ? (
+                            <div className="space-y-3">
+                                {profileData.p_objectives.map(obj => (
+                                    <div key={obj.objectiveid}>
+                                        <h3 className="font-semibold text-sm">{obj.name}</h3>
+                                        <p className="text-gray-600 text-sm leading-relaxed">{obj.description}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-600 text-sm leading-relaxed">
+                                No objectives available.
+                            </p>
+                        )}
                     </div>
 
                     <div className="bg-white p-4 rounded-2xl shadow-sm">
@@ -259,22 +273,27 @@ const VendorMyProfile = () => {
 
                         <div className="space-y-4">
                             <div>
-                                <p className="text-gray-500">Business Name</p>
-                                <p className="font-medium text-gray-900">{profileData?.p_profile?.businessname}</p>
+                                <p className="font-medium text-gray-900">Business Name</p>
+                                <p className="text-gray-500">{profileData?.p_profile?.businessname}</p>
                             </div>
+
+                            <hr className="my-4 border-gray-200" />
+                            <div>
+                                <p className="font-medium text-gray-900">How large is your company?</p>
+                                <p className="text-gray-500">
+                                    {profileData?.p_profile?.companysizename }{" "}
+                                    {profileData?.p_profile?.minemployees && profileData?.p_profile?.maxemployees
+                                    ? `(${profileData.p_profile.minemployees} - ${profileData.p_profile.maxemployees} Employees)`
+                                    : ""}
+                                </p>
+                            </div>
+
 
                             <hr className="my-4 border-gray-200" />
 
                             <div>
-                                <p className="text-gray-500">How large is your company?</p>
-                                <p className="font-medium text-gray-900">{profileData?.p_profile?.companysizeid === 1 ? "1-10 Employees" : "Unknown"}</p>
-                            </div>
-
-                            <hr className="my-4 border-gray-200" />
-
-                            <div>
-                                <p className="text-gray-500">Address</p>
-                                <p className="font-medium text-gray-900">
+                                <p className="font-medium text-gray-900">Address</p>
+                                <p className="text-gray-500">
                                     {profileData?.p_profile?.address1}, {profileData?.p_profile?.city}, {profileData?.p_profile?.statename}, {profileData?.p_profile?.countryname} - {profileData?.p_profile?.zip}
                                 </p>
                             </div>
@@ -283,17 +302,33 @@ const VendorMyProfile = () => {
                     </div>
 
                     <div className="bg-white rounded-2xl p-4 text-sm w-full">
-                        <h3 className="font-bold mb-4 text-base">Platform Requirements</h3>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                            {profileData?.p_providers?.map(provider => (
-                                <span
-                                    key={provider.providerid}
-                                    className="px-3 py-1 text-xs bg-gray-100 rounded-full text-gray-700"
-                                >
-                                    {provider.name}
-                                </span>
-                            ))}
+                        <h3 className="font-bold mb-4 text-base">Platforms</h3>
+                        <div className="flex flex-col gap-3">
+                            {profileData?.p_providers?.map((provider) => (
+                            <a
+                                key={provider.providerid}
+                                href={provider.handleslink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-4 border border-gray-200 p-4 rounded-lg hover:shadow-md transition"
+                            >
+                                {provider.iconpath ? (
+                                <img
+                                    src={`${BASE_URL}/${provider.iconpath}`}
+                                    alt={provider.name}
+                                    className="w-10 h-10 object-contain rounded-full"
+                                />
+                                ) : (
+                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+                                    ?
+                                </div>
+                                )}
 
+                                <div>
+                                <p className="font-medium text-base">{provider.name}</p>
+                                </div>
+                            </a>
+                            ))}
                         </div>
                     </div>
 

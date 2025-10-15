@@ -204,47 +204,65 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
   };
 
   const handleContinue = async () => {
-    const fieldErrors = validateFields(formData, profileImage);
-    const milestoneErrors = validateMilestones(formData.milestones, formData.startDate, formData.endDate);
+  const fieldErrors = validateFields(formData, profileImage);
+  const milestoneErrors = validateMilestones(formData.milestones, formData.startDate, formData.endDate);
 
-    const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
-    const hasMilestoneErrors = milestoneErrors.some((m) => Object.values(m).some(Boolean));
+  const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
+  const hasMilestoneErrors = milestoneErrors.some((m) => Object.values(m).some(Boolean));
 
-    if (hasFieldErrors || hasMilestoneErrors) {
-      setErrors({ ...fieldErrors, milestones: milestoneErrors });
+  if (hasFieldErrors || hasMilestoneErrors) {
+    setErrors({ ...fieldErrors, milestones: milestoneErrors });
+    return;
+  }
+
+  const totalMilestoneAmount = formData.milestones.reduce(
+    (sum, m) => sum + Number(m.amount || 0),
+    0
+  );
+
+  if (totalMilestoneAmount > Number(formData.budgetAmount)) {
+    toast.error("Total milestone amounts cannot exceed the campaign budget");
+    return;
+  }
+
+  const payload = buildPayload(formData, profileImage);
+
+  try {
+    setLoading(true);
+
+    const fd = buildFormData(payload, profileImage);
+    if (campaignId) fd.append("campaignId", campaignId);
+
+    // ✅ POST request
+    const res = await axios.post("/vendor/update-campaign", fd, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    // ✅ Handle duplicate title error from backend
+    if (res.data.message?.toLowerCase().includes("title already exists")) {
+      setErrors((prev) => ({ ...prev, title: "Campaign title already exists" }));
+      toast.error("Campaign title already exists");
       return;
     }
 
-    const totalMilestoneAmount = formData.milestones.reduce(
-      (sum, m) => sum + Number(m.amount || 0),
-      0
-    );
+    onNext();
+  } catch (err) {
+    console.error("❌ API Error:", err.response?.data || err.message);
 
-    if (totalMilestoneAmount > Number(formData.budgetAmount)) {
-      toast.error("Total milestone amounts cannot exceed the campaign budget");
-      return;
-    }
-
-    const payload = buildPayload(formData, profileImage);
-
-    try {
-      setLoading(true);
-
-      const fd = buildFormData(payload, profileImage);
-      if (campaignId) fd.append("campaignId", campaignId);
-
-      await axios.post("/vendor/update-campaign", fd, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      onNext();
-    } catch (err) {
-      console.error("❌ API Error:", err.response?.data || err.message);
+    // ✅ Frontend fallback if backend sends duplicate error
+    const msg = err.response?.data?.message;
+    if (msg && msg.toLowerCase().includes("title already exists")) {
+      setErrors((prev) => ({ ...prev, title: "Campaign title already exists" }));
+      toast.error("Campaign title already exists");
+    } else {
       toast.error("Failed to save campaign step. Try again.");
-    } finally {
-      setLoading(false);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   return (
     <div className="bg-white p-6 rounded-2xl">
@@ -402,7 +420,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
 
       <hr className="my-4 border-gray-200" />
       <label className="font-semibold block mb-2 flex items-center gap-2 mt-6">
-        Campaign Duration <span className="text-red-500">*</span>
+        Campaign Duration
         <div className="relative group">
           <RiInformationLine className="text-blue-600 cursor-pointer" size={18} />
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block w-64 bg-gray-900 text-white text-xs rounded px-2 py-1 z-10">
@@ -430,9 +448,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
             }}
             onChange={(date) => handleChange("startDate", date)}
           />
-          {errors.startDate && (
+          {/* {errors.startDate && (
             <p className="text-red-500 text-sm mt-1">Please select a valid campaign start date</p>
-          )}
+          )} */}
         </div>
 
         {/* Campaign End Date */}
@@ -451,9 +469,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
             }
             onChange={(date) => handleChange("endDate", date)}
           />
-          {errors.endDate && (
+          {/* {errors.endDate && (
             <p className="text-red-500 text-sm mt-1">Please select a valid campaign end date</p>
-          )}
+          )} */}
         </div>
       </div>
 

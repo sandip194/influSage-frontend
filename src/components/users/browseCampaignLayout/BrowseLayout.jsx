@@ -388,7 +388,7 @@ const Browse = () => {
                 className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
               >
                 <span className="text-xs text-gray-500 mb-3">
-                  Applied Till {campaign.applicationenddate}
+                  Apply Till {campaign.applicationenddate}
                 </span>
                 <div className="flex items-center gap-3 mb-3">
                   <img

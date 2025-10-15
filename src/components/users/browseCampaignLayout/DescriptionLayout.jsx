@@ -309,14 +309,18 @@ const DescriptionLayout = () => {
                 {campaignDetails.description || "No description available."}
               </p>
 
-              <div className="flex gap-2 items-center justify-start mb-2  font-semibold text-lg">
-                <span>Categories</span>
-              </div>
-              {campaignDetails.campaigncategories?.map(({ categoryname, categoryid }) => (
-                <p key={categoryid || categoryname} className="text-sm">
-                  {categoryname}
-                </p>
-              ))}
+              <h3 className="text-lg font-semibold mb-3">Categories</h3>
+                <div className="flex flex-wrap gap-2">
+                   {campaignDetails.campaigncategories?.map(({ categoryname, categoryid }) => (
+                    <span
+                      key={categoryid || categoryname}
+                      className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
+                    >
+                       {categoryname}
+                    </span>
+                  ))}
+                </div>
+      
             </div>
 
             <div className="pt-6 border-b border-gray-200">
@@ -472,25 +476,39 @@ const DescriptionLayout = () => {
           </div>
 
           {/* Provider Content Types with optional captions */}
-          <div className="bg-white rounded-2xl p-6 w-full text-sm   ">
-            <h3 className="font-semibold text-lg mb-4">Platform Content Types</h3>
-            <ul className="space-y-3 text-gray-900">
-              {campaignDetails.providercontenttype?.map(
-                ({ providercontenttypeid, providername, contenttypename, caption }) => (
-                  <li key={providercontenttypeid} className="border-b border-gray-200 pb-2 last:border-none">
-                    <p className="font-medium">
-                      {providername} - {contenttypename}
-                    </p>
-                    {caption && (
-                      <p className="text-gray-900 text-sm italic mt-1">{caption}</p>
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            <h3 className="font-semibold text-lg text-gray-900 mb-4">Platform Content Types</h3>
+
+            <div className="space-y-4">
+              {campaignDetails?.providercontenttype?.length > 0 ? (
+                campaignDetails.providercontenttype.map((platform) => (
+                  <div
+                    key={platform.providercontenttypeid}
+                    className="border-b border-gray-100 pb-3 last:border-none"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-900 font-medium">
+                          {platform.providername}
+                        </span>
+                      </div>
+
+                      <span className="text-gray-600 text-sm font-normal">
+                        {platform.contenttypename}
+                      </span>
+                    </div>
+
+                    {platform.caption && (
+                      <p className="text-gray-600 italic mt-2 border-l-2 border-gray-200 pl-3">
+                        {platform.caption}
+                      </p>
                     )}
-                  </li>
-                )
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">No platform content types available.</p>
               )}
-              {!campaignDetails.providercontenttype?.length && (
-                <li className="text-gray-900">No platform content types available.</li>
-              )}
-            </ul>
+            </div>
           </div>
         </aside>
       </div>

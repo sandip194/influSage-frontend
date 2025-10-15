@@ -1,9 +1,11 @@
-import { RiArrowLeftLine, RiFile3Line, RiHeart3Fill, RiHeart3Line, RiMessage2Line } from "@remixicon/react";
+import { RiArrowLeftLine, RiFile3Line, RiHeartFill, RiHeart3Line, RiMessage2Line } from "@remixicon/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tooltip, Skeleton } from "antd";
+import InviteModal from "../../users/browseInfluencers/InviteModal";
+import { toast } from "react-toastify";
 
 //  const formatDOB = (dob) => {
 //         const date = new Date(dob);
@@ -17,6 +19,8 @@ import { Tooltip, Skeleton } from "antd";
 const InfluencerProfile = () => {
     const [loading, setLoading] = useState(false)
     const [influDetails, setInfluDetails] = useState([])
+    const [isInviteModalVisible, setIsInviteModalVisible] = useState(false);
+    const [selectedInfluencer, setSelectedInfluencer] = useState(null);
 
 
     const navigate = useNavigate();
@@ -71,6 +75,50 @@ const InfluencerProfile = () => {
         });
     };
 
+    const handleInvite = () => {
+        if (!userId) return toast.error("User not logged in");
+
+        setSelectedInfluencer(influDetails.id);
+        setIsInviteModalVisible(true);
+    };
+
+    const handleLike = async () => {
+    if (!userId) {
+      toast.error("User not logged in");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "/vendor/addfavourite/influencer",
+        {
+          p_userId: userId,
+          p_influencerId: influDetails.id,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.status === 200) {
+
+        // Show toast for success
+        toast.success(response?.data?.message);
+         // Update the local state to reflect the new favourite status
+        setInfluDetails((prev) => ({
+            ...prev,
+            savedinfluencer: !prev.savedinfluencer,
+        }));
+
+      } else {
+        toast.error(response.data.message || "Failed to update favourite");
+      }
+
+    } catch (err) {
+      console.error(err)
+      toast.error("Something went wrong");
+    }
+  };
     return (
         <div className="">
             <button
@@ -150,6 +198,7 @@ const InfluencerProfile = () => {
                                 {influDetails?.firstname} {influDetails?.lastname}
                             </h2>
                             <p className="text-sm text-gray-900 mt-1">{influDetails?.email}</p>
+                            <p className="text-sm text-gray-900 mt-1">{influDetails?.genderid === 1 ? "Male" : "Female"}</p>
                             <p className="text-sm text-gray-900 mt-1">
                                 {influDetails?.statename}, {influDetails?.countryname}
                             </p>
@@ -160,7 +209,9 @@ const InfluencerProfile = () => {
                                 <p className="text-gray-900 font-bold text-xs uppercase tracking-wide">
                                     Total Campaign
                                 </p>
-                                <p className="text-lg font-semibold text-gray-900">{influDetails?.totalCampaign}</p>
+                                 <p className="text-lg font-semibold text-gray-900">
+                                    {typeof influDetails?.totalcampaign === "number"? influDetails?.totalcampaign: 0}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -175,12 +226,25 @@ const InfluencerProfile = () => {
                                     <RiMessage2Line size={18} />Send Message
                                 </button>
                             </Tooltip>
-                            <button className="border border-gray-300 text-gray-900 px-5 py-2 rounded-full hover:bg-gray-100 transition w-full sm:w-auto">
+                            <button onClick={handleInvite} className="border border-gray-300 text-gray-900 px-5 py-2 rounded-full hover:bg-gray-100 transition w-full sm:w-auto">
                                 Invited
                             </button>
-                            <button className="border border-gray-300 text-gray-900 rounded-full p-2 hover:bg-gray-100 transition w-full sm:w-auto flex justify-center">
-                                {influDetails?.savedinfluencer ? (<RiHeart3Fill className="text-red-700" />): (<RiHeart3Line className="text-gray-700" />)}
-                            </button>
+                            <Tooltip title={influDetails?.savedinfluencer ? "Unfavorite" : "Favorite"}>
+                                <button
+                                    onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleLike();
+                                    }}
+                                    className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border border-[#0e102b]"
+                                >
+                                    {influDetails?.savedinfluencer ? (
+                                    <RiHeartFill size={18} className="text-red-500" />
+                                    ) : (
+                                    <RiHeart3Line size={18} />
+                                    )}
+                                </button>
+                                </Tooltip>
+
                         </div>
 
                         <span className="sm:ml-auto bg-yellow-50 border border-yellow-200 text-yellow-700 px-3 py-2 rounded-2xl text-sm font-medium text-center">
@@ -192,10 +256,10 @@ const InfluencerProfile = () => {
             </div>
 
             {/* Bio & Personal Details */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 ">
+            <div className="mt-4 bg-white rounded-2xl p-4">
                 <div className="bg-white rounded-2xl p-4 md:col-span-2 space-y-4">
                     <h3 className="text-xl font-semibold text-gray-900">Bio</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed italic">
+                    <p className="text-gray-600 text-sm leading-relaxed">
                         {influDetails?.bio || "No bio available."}
                     </p>
 
@@ -212,22 +276,6 @@ const InfluencerProfile = () => {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl p-4">
-                    <h3 className="text-xl font-semibold mb-4 text-gray-900">
-                        Personal Details
-                    </h3>
-                    <ul className="text-sm text-gray-700 space-y-3">
-                        {/* <li>
-                            <strong>Date of Birth:</strong> {formatDOB(influDetails?.dob)}
-                        </li>
-                        <li>
-                            <strong>Address:</strong> {influDetails?.address1}
-                        </li> */}
-                        <li>
-                            <strong>Gender:</strong> {influDetails?.genderid === 1 ? "Male" : "Female"}
-                        </li>
-                    </ul>
-                </div>
             </div>
 
             {/* Social Media */}
@@ -242,7 +290,14 @@ const InfluencerProfile = () => {
                             rel="noopener noreferrer"
                             className="flex items-center gap-4 border border-gray-200 p-4 rounded-lg hover:shadow-md transition"
                         >
-                            {/* No icon as per request */}
+                            {/* Show icon if iconpath exists */}
+                            {provider.iconpath && (
+                                <img
+                                    src={`${BASE_URL}/${provider.iconpath}`}
+                                    alt={provider.providername}
+                                    className="w-10 h-10 object-contain rounded-full"
+                                />
+                            )}
                             <div>
                                 <p className="font-medium text-base">{provider.providername}</p>
                                 <p className="text-sm text-gray-500">
@@ -253,8 +308,6 @@ const InfluencerProfile = () => {
                     ))}
                 </div>
             </div>
-
-            {/* Portfolio */}
             <div className="mt-4 bg-white rounded-2xl p-4">
                 <h3 className="text-xl font-semibold mb-5 text-gray-900">Portfolio</h3>
 
@@ -321,11 +374,19 @@ const InfluencerProfile = () => {
                     <p className="text-sm text-gray-500">No portfolio file uploaded.</p>
                 )}
             </div>
-        ...
       </>
     )}
             
-
+ <InviteModal
+        visible={isInviteModalVisible}
+        influencerId={selectedInfluencer}
+        userId={userId}
+        token={token}
+        onClose={() => {
+          setIsInviteModalVisible(false);
+          setSelectedInfluencer(null);
+        }}
+      />
 
         </div>
     );

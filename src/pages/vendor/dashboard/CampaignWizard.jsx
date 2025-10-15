@@ -22,7 +22,6 @@ const isNonEmptyArray = (arr) => Array.isArray(arr) && arr.length > 0;
 const CampaignWizard = () => {
   const { token } = useSelector((state) => state.auth);
   const { campaignId } = useParams();
-  console.log("🚀 ~ file: CampaignWizard.jsx:15 ~ CampaignWizard ~ campaignId:", campaignId)
 
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false, false]);
@@ -102,55 +101,53 @@ const CampaignWizard = () => {
         localStorage.setItem("completedSteps", JSON.stringify(newCompletion));
 
         // Find the first incomplete step
-        const firstIncomplete = newCompletion.findIndex((done) => !done);
-        if (firstIncomplete !== -1) {
-          setCurrentStep(firstIncomplete);
-        } else {
-          setCurrentStep("review");
+      const firstIncomplete = newCompletion.findIndex((done) => !done);
+setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : (campaignId ? 0 : "review"));
         }
-      }
     } catch (err) {
       console.error("❌ Error fetching campaign:", err);
       toast.error("Failed to fetch campaign data.");
     }
   };
 
-  useEffect(() => {
-    if (lastCompletedStep !== null) {
-      (async () => {
-        await getCampaignData();
+  // useEffect(() => {
+  //   if (lastCompletedStep !== null) {
+  //     (async () => {
+  //       await getCampaignData();
+ 
+  //       if (campaignId) {
+  //         setCurrentStep(1)
+  //       }
+  //       else if (lastCompletedStep + 1 < steps.length) {
+  //         setCurrentStep(lastCompletedStep + 1);
+  //       } else {
+  //         setCurrentStep("review");
+  //       }
+  //     })();
+  //   }
+  // }, [lastCompletedStep]);
 
-        // Move to next step or review
-        if (lastCompletedStep + 1 < steps.length) {
-          setCurrentStep(lastCompletedStep + 1);
-        } else {
-          setCurrentStep("review");
-        }
-      })();
+
+useEffect(() => {
+  const fetchData = async () => {
+    await getCampaignData();
+
+    if (campaignId) {
+      // If campaignId exists, skip review completely
+      const firstIncompleteStep = completedSteps.findIndex((done) => !done);
+      setCurrentStep(firstIncompleteStep !== -1 ? firstIncompleteStep : 0);
+    } else {
+      // If no campaignId, allow review
+      const firstIncompleteStep = completedSteps.findIndex((done) => !done);
+      setCurrentStep(firstIncompleteStep !== -1 ? firstIncompleteStep : "review");
     }
-  }, [lastCompletedStep]);
+  };
 
-
+  fetchData();
+}, [campaignId]);
 
   useEffect(() => {
-    const stored = localStorage.getItem("completedSteps");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setCompletedSteps(parsed);
-
-      const lastIndex = parsed.lastIndexOf(true);
-      if (lastIndex !== -1) {
-        setLastCompletedStep(lastIndex);
-      }
-
-      // Go to first incomplete step
-      const firstIncomplete = parsed.findIndex((done) => !done);
-      if (firstIncomplete !== -1) {
-        setCurrentStep(firstIncomplete);
-      } else {
-        setCurrentStep("review");
-      }
-    }
+    getCampaignData();
   }, []);
 
 

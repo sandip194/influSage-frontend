@@ -201,18 +201,18 @@ const Profile = () => {
             <h3 className="font-semibold text-lg mb-4">Personal Details</h3>
             <div className="space-y-4">
               <div>
-                <p className="font-bold">Gender</p>
-                <p className="font-medium text-gray-700">{p_profile?.genderid === 1 ? "Male" : "Female"}</p>
+                <p className="font-medium text-gray-900">Gender</p>
+                <p className="text-gray-500">{p_profile?.genderid === 1 ? "Male" : "Female"}</p>
               </div>
               <hr className="my-4 border-gray-200" />
               <div>
-                <p className="font-bold">Date Of Birth</p>
-                <p className="font-medium text-gray-700">{p_profile?.dob}</p>
+                <p className="font-medium text-gray-900">Date Of Birth</p>
+                <p className="text-gray-500">{p_profile?.dob}</p>
               </div>
               <hr className="my-4 border-gray-200" />
               <div>
-                <p className="font-bold">Address</p>
-                <p className="font-medium text-gray-700">
+                <p className="font-medium text-gray-900">Address</p>
+                <p className="text-gray-500">
                   {p_profile?.address1}, {p_profile?.city}, {p_profile?.statename}, {p_profile?.zip}
                 </p>
               </div>
@@ -245,31 +245,31 @@ const Profile = () => {
             <h3 className="font-bold mb-4 text-base">Payment Details</h3>
             <div className="space-y-4">
               <div>
-                <p className="font-bold text-xs">Country</p>
-                <p className="text-gray-700 font-medium">{p_profile?.countryname}</p>
+                <p className="font-medium text-gray-900">Country</p>
+                <p className="text-gray-500">{p_profile?.countryname}</p>
               </div>
               <hr className="my-4 border-gray-200" />
               <div>
-                <p className="font-bold text-xs">Bank</p>
-                <p className="text-gray-700 font-medium">{p_paymentaccounts?.bankname || "N/A"}</p>
-              </div>
-              <hr className="my-4 border-gray-200" />
-
-              <div>
-                <p className="font-bold text-xs">Account Holder’s Name</p>
-                <p className="text-gray-700 font-medium">{p_paymentaccounts?.accountholdername || "N/A"}</p>
+                <p className="font-medium text-gray-900">Bank</p>
+                <p className="text-gray-500">{p_paymentaccounts?.bankname || "N/A"}</p>
               </div>
               <hr className="my-4 border-gray-200" />
 
               <div>
-                <p className="font-bold text-xs">Account Number</p>
-                <p className="text-gray-700 font-medium">{p_paymentaccounts?.accountnumber || "N/A"}</p>
+                <p className="font-medium text-gray-900">Account Holder’s Name</p>
+                <p className="text-gray-500">{p_paymentaccounts?.accountholdername || "N/A"}</p>
               </div>
               <hr className="my-4 border-gray-200" />
 
               <div>
-                <p className="font-bold text-xs">IFSC Code</p>
-                <p className="text-gray-700 font-medium">{p_paymentaccounts?.bankcode || "N/A"}</p>
+                <p className="font-medium text-gray-900">Account Number</p>
+                <p className="text-gray-500">{p_paymentaccounts?.accountnumber || "N/A"}</p>
+              </div>
+              <hr className="my-4 border-gray-200" />
+
+              <div>
+                <p className="font-medium text-gray-900">IFSC Code</p>
+                <p className="text-gray-500">{p_paymentaccounts?.bankcode || "N/A"}</p>
               </div>
             </div>
           </div>

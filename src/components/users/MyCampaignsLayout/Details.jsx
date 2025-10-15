@@ -302,12 +302,6 @@ const Details = () => {
           {/* Campaign Info Card */}
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="font-semibold text-lg">Campaign Details</h3>
-
-            <div className="py-4 border-b border-gray-200">
-              <p className="text-sm font-bold text-gray-900">Campaign Number</p>
-              <p>{campaign?.id || 'N/A'}</p> {/* Using ID as fallback since campaignnumber not in API */}
-            </div>
-
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
               <p>
@@ -341,8 +335,8 @@ const Details = () => {
                 {campaign?.providercontenttype?.map((platform) => (
                   <div key={platform.providercontenttypeid} className="flex items-center justify-between pb-2">
                     <div className="flex items-center gap-2">
-                      {platform.providerid === 1 && <RiInstagramFill className="text-pink-600" />}
-                      {platform.providerid === 2 && <RiYoutubeFill className="text-red-600" />}
+                      {/* {platform.providerid === 1 && <RiInstagramFill className="text-pink-600" />}
+                      {platform.providerid === 2 && <RiYoutubeFill className="text-red-600" />} */}
                       {/* Add conditions for other platforms as needed */}
                       <span className="text-gray-700 font-medium">{platform.providername}</span>
                     </div>
@@ -359,13 +353,22 @@ const Details = () => {
             {/* Milestones (adapted from your user component) */}
             <div className="bg-white p-4 rounded-2xl mt-6">
               <h3 className="font-semibold text-lg mb-3">Milestones</h3>
-              {campaign?.milestones?.map((milestone, index) => (
-                <div key={index} className="mb-2">
-                  <p className="font-medium text-gray-800">{milestone.description}</p>
-                  <p className="text-sm text-gray-600">Due: {milestone.enddate}</p>
-                  <p className="text-sm text-gray-600">Amount: ₹{milestone.amount}</p>
-                </div>
-              ))}
+              {campaign?.milestones?.length > 0 ? (
+                campaign.milestones.map((milestone, index) => (
+                  <div key={index} className="mb-2 border-b border-gray-100 pb-2 last:border-none">
+                    <p className="font-medium text-gray-800">{milestone.description}</p>
+                    <p className="text-sm text-gray-600">
+                      Due:{" "}
+                      {milestone.enddate
+                        ? dayjs(milestone.enddate).format("DD-MM-YYYY")
+                        : "N/A"}
+                    </p>
+                    <p className="text-sm text-gray-600">Amount: ₹{milestone.amount}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">No milestones available.</p>
+              )}
             </div>
 
             <div className="bg-white p-6 rounded-2xl mt-6">

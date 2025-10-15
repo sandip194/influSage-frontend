@@ -362,13 +362,15 @@ const validateDates = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                 {campaignDetails?.iseditable !== "Not editable" && (
                   <button
-                      type="primary"
-                      onClick={handleEditClick}
-                      className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
-                    >
-                      Edit Campaign
-                    </button>
+                    type="button"
+                    onClick={handleEditClick}
+                    className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
+                  >
+                    Edit Campaign
+                  </button>
+                )}
                   <button
                     onClick={() => setIsPauseModalOpen(true)}
                     className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
@@ -493,8 +495,8 @@ const validateDates = () => {
                 {campaignDetails?.providercontenttype?.map((platform) => (
                   <div key={platform.providercontenttypeid} className="flex items-center justify-between pb-2">
                     <div className="flex items-center gap-2">
-                      {platform.providerid === 1 && <RiInstagramFill className="text-pink-600" />}
-                      {platform.providerid === 2 && <RiYoutubeFill className="text-red-600" />}
+                      {/* {platform.providerid === 1 && <RiInstagramFill className="text-pink-600" />}
+                      {platform.providerid === 2 && <RiYoutubeFill className="text-red-600" />} */}
                       {/* Add conditions for other platforms as needed */}
                       <span className="text-gray-700 font-medium">{platform.providername}</span>
                     </div>
@@ -688,57 +690,57 @@ const validateDates = () => {
       </Modal>
 
       <Modal
-  title="Edit Campaign Dates"
-  open={isDateModalOpen}
-  onCancel={() => setIsDateModalOpen(false)}
-  footer={null}
-  className="rounded-xl"
->
-  <div className="flex gap-4">
-    {/* Start Date */}
-    <div className="w-full">
-      <DatePicker
-        size="large"
-        style={{ width: "100%" }}
-        format="DD-MM-YYYY"
-        placeholder="Start Date"
-        value={formData.startDate}
-        disabledDate={(current) => current && current.isBefore(dayjs().startOf("day"))}
-        onChange={(date) => handleChange("startDate", date)}
-      />
-      {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>}
-    </div>
+        title="Edit Campaign Dates"
+        open={isDateModalOpen}
+        onCancel={() => setIsDateModalOpen(false)}
+        footer={null}
+        className="rounded-xl"
+      >
+        <div className="flex gap-4">
+          {/* Start Date */}
+          <div className="w-full">
+            <DatePicker
+              size="large"
+              style={{ width: "100%" }}
+              format="DD-MM-YYYY"
+              placeholder="Start Date"
+              value={formData.startDate}
+              disabledDate={(current) => current && current.isBefore(dayjs().startOf("day"))}
+              onChange={(date) => handleChange("startDate", date)}
+            />
+            {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>}
+          </div>
 
-    {/* End Date */}
-    <div className="w-full">
-      <DatePicker
-        size="large"
-        style={{ width: "100%" }}
-        format="DD-MM-YYYY"
-        placeholder="End Date"
-        value={formData.endDate}
-        disabledDate={(current) => current && formData.startDate && current.isBefore(formData.startDate)}
-        onChange={(date) => handleChange("endDate", date)}
-      />
-      {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>}
-    </div>
-  </div>
+          {/* End Date */}
+          <div className="w-full">
+            <DatePicker
+              size="large"
+              style={{ width: "100%" }}
+              format="DD-MM-YYYY"
+              placeholder="End Date"
+              value={formData.endDate}
+              disabledDate={(current) => current && formData.startDate && current.isBefore(formData.startDate)}
+              onChange={(date) => handleChange("endDate", date)}
+            />
+            {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>}
+          </div>
+        </div>
 
-  <div className="flex justify-end gap-3 mt-4">
-    <button
-      onClick={() => setIsDateModalOpen(false)}
-      className="px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-100"
-    >
-      Cancel
-    </button>
-    <button
-      onClick={handleSaveDates}
-      className="px-6 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a]"
-    >
-      Save
-    </button>
-  </div>
-</Modal>
+        <div className="flex justify-end gap-3 mt-4">
+          <button
+            onClick={() => setIsDateModalOpen(false)}
+            className="px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSaveDates}
+            className="px-6 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a]"
+          >
+            Save
+          </button>
+        </div>
+      </Modal>
 
     </div>
   );

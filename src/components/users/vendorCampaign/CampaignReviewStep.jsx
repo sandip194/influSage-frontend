@@ -326,6 +326,7 @@ const CampaignReviewStep = ({ onEdit }) => {
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mt-4">
+                <h3 className="font-semibold text-lg mb-4">HashTags</h3>
                 {tags.length > 0
                   ? tags.map((tag, i) => (
                     <span
@@ -459,13 +460,14 @@ const CampaignReviewStep = ({ onEdit }) => {
         <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="font-semibold text-lg">Campaign Details</h3>
-            <div className="py-4 border-b border-gray-200">
+              <hr className="my-2 border-gray-200" />
+            {/* <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-semibold mb-1 text-justify">
                 About Brand
               </p>
               <p className='text-gray-500'>{p_campaignjson.branddetail || "—"}</p>
-            </div>
-            <div className="py-4 border-b border-gray-200">
+            </div> */}
+            <div className="py-2 border-b border-gray-200">
               <p className="text-sm mb-1 font-semibold">Campaign Dates</p>
               <div className="flex justify-between">
                 <div>

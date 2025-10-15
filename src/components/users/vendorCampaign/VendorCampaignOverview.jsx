@@ -89,6 +89,21 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
         </p>
       </div>
 
+
+      <h3 className="text-lg font-semibold mb-3">Categories</h3>
+        {categories.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-3 mb-6">
+            {categories.map((tag, idx) => (
+              <span
+                key={idx}
+                className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
       {/* Requirements */}
       <div className="pb-4 border-b border-gray-200">
         <h3 className="font-semibold text-lg sm:text-xl mb-4">Requirements</h3>
@@ -103,21 +118,22 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
           ))}
         </ul>
 
-        {/* Tags (Categories) - Conditionally render if categories exist */}
-        {categories.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-6 mb-6">
-            {categories.map((tag, idx) => (
-              <span
-                key={idx}
-                className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+        {/* Hashtags - Conditionally render if hashtags exist */}
+        {Array.isArray(campaignData?.hashtags) && campaignData.hashtags.length > 0 && (
+          <>
+            <h3 className="text-lg font-semibold mb-3mb-4 my-4">Hashtags</h3>
+            <div className="flex flex-wrap gap-2 mt-3 mb-6">
+              {campaignData.hashtags.map((item, idx) => (
+                <span
+                  key={idx}
+                  className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
+                >
+                  {item.hashtag}
+                </span>
+              ))}
+            </div>
+          </>
         )}
-
-        {/* References */}
         <h2 className="text-lg font-semibold mb-3">References</h2>
         <div className="flex gap-4 flex-wrap">
           {images.length > 0 ? (
