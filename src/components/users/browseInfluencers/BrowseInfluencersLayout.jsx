@@ -169,7 +169,7 @@ const BrowseInfluencersLayout = () => {
   // Fetch ContentTypes
   const getAllContentTypes = async () => {
     try {
-      const res = await axios.get("/vendor/influencer-type", {
+      const res = await axios.get("/influencer-type", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
