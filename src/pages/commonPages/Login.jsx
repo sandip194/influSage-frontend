@@ -87,20 +87,18 @@ export const LoginForm = () => {
     const email = params.get("email");
     const userId = params.get("userId");
     const roleId = params.get("roleId");
-    const firstName = params.get("firstName");
-    const lastName = params.get("lastName");
+    const name = params.get("name");
 
     if (token) {
       localStorage.setItem("auth_token", token);
       localStorage.setItem("userId", userId || "");
       localStorage.setItem("roleId", roleId || "");
-      localStorage.setItem("firstName", firstName || "");
-      localStorage.setItem("lastName", lastName || "");
+      localStorage.setItem("name", name || "");
       localStorage.setItem("email", email || "");
 
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       dispatch(
-        setCredentials({ token, id: userId, role: Number(roleId), firstName, lastName, email })
+        setCredentials({ token, id: userId, role: Number(roleId), name, email })
       );
 
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -112,7 +110,7 @@ export const LoginForm = () => {
       }
     } else if (email && !token) {
       navigate(
-        `/roledefault?email=${encodeURIComponent(email)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&roleId=${roleId}`
+        `/roledefault?email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&roleId=${roleId}`
       );
     }
   }, [dispatch, navigate]);
@@ -146,15 +144,24 @@ export const LoginForm = () => {
 
         toast.success(res.data.message || "Login successful!");
 
-        const { id, role, token, firstName, lastName } = res.data;
-        dispatch(setCredentials({ token, id, role, firstName, lastName }));
+        console.log(res.data)
+
+        const { id, role, token, name, p_code } = res.data;
+        dispatch(setCredentials({ token, id, role, name, }));
 
 
-        if (role === 2) {
+        if (Number(role) === 2 && p_code === "SUCCESS") {
+          navigate("/vendor-dashboard")
+        } else if (Number(role) === 2) {
           navigate("/complate-vendor-profile");
-        } else if (role === 1) {
-          navigate("/complate-profile");
         }
+        else if (Number(role) === 1 && p_code === "SUCCESS") {
+          navigate("/dashboard")
+        } else if (Number(role) === 1) {
+          navigate("/complate-profile");
+        } else if (Number(role) === 4){
+          navigate("/admin-dashboard")
+        } 
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed!");

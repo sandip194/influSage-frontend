@@ -5,14 +5,12 @@ import Cookies from 'js-cookie';
 const tokenFromCookie = Cookies.get("token");
 const userIdFromCookie = Cookies.get("userId");
 const roleFromCookie = Cookies.get("role");
-const firstNameFromCookie = Cookies.get("firstName")
-const lastNameFromCookie = Cookies.get("lastName")
+const nameFromCookie = Cookies.get("name")
 
 const initialState = {
   token: tokenFromCookie || null,
   userId: userIdFromCookie ? Number(userIdFromCookie) : null,
-  firstName: firstNameFromCookie || null,
-  lastName: lastNameFromCookie || null,
+  name: nameFromCookie || null,
   role: roleFromCookie ? Number(roleFromCookie) : null,
   user: null
 };
@@ -23,19 +21,17 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (state, action) => {
 
-      const { token, role, id, firstName, lastName } = action.payload;
+      const { token, role, id, name } = action.payload;
       state.token = token;
       state.userId = id;
-      state.firstName = firstName;
-      state.lastName = lastName;
+      state.name = name;
       state.role = role;
 
       const expiryDate = new Date(new Date().getTime() + 60 * 60 * 1000); // will expired in 1 hour
       Cookies.set("token", token, { expires: expiryDate });
       Cookies.set("role", role, { expires: expiryDate });
       Cookies.set("userId", id)
-      Cookies.set("firstName", firstName)
-      Cookies.set("lastName", lastName)
+      Cookies.set("name", name)
     },
     setUserProfile: (state, action) => {
       state.user = action.payload;
@@ -44,8 +40,7 @@ const authSlice = createSlice({
       state.token = null;
       state.userId = null;
       state.user = null;
-      state.firstName = null
-      state.lastName = null
+      state.name = null
       state.role = null
 
       // Remove from cookies

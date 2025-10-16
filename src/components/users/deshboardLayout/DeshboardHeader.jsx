@@ -38,7 +38,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [notifications, setNotifications] = useState([]); // Store notifications for Modal
 
-  const { role, firstName, lastName } = useSelector((state) => state.auth);
+  const { role, name } = useSelector((state) => state.auth);
   const basePath = role === 1 ? '/dashboard' : '/vendor-dashboard';
 
   const handleOpenModal = (notifData) => {
@@ -170,7 +170,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
         <Dropdown menu={profileMenu} trigger={['click']} arrow>
           <div className="flex items-center gap-2 cursor-pointer border border-gray-200 px-3 py-1 rounded-full">
             <Avatar src="https://api.dicebear.com/5.x/bottts/svg?seed=12345" />
-            <span className="hidden sm:inline text-sm font-medium">{firstName} {lastName}</span>
+            <span className="hidden sm:inline text-sm font-medium">{name}</span>
             <DownOutlined className="text-xs" />
           </div>
         </Dropdown>
