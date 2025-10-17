@@ -18,14 +18,13 @@ import facebookIcon from "../../assets/icons/facebook-logo.png";
 import appleIcon from "../../assets/icons/apple-logo.png";
 
 import { setCredentials } from "../../features/auth/authSlice";
-import { initSocket } from "../../sockets/socket";
 
-// ✅ Lazy-load SideImageSlider
+// Lazy-load SideImageSlider
 const SideImageSlider = React.lazy(() =>
   import("../../components/common/SideImageSlider")
 );
 
-// ✅ Validation schema moved outside the component
+// Validation schema
 const validationSchema = {
   emailValidator: {
     required: {
@@ -59,9 +58,8 @@ export const LoginForm = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const isLoggingInRef = useRef(false); // ✅ Ref to prevent multiple submissions
+  const isLoggingInRef = useRef(false);
 
-  // ✅ Prefill from localStorage
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
     const savedPassword = localStorage.getItem("rememberedPassword");
@@ -75,7 +73,7 @@ export const LoginForm = () => {
     }
   }, [setValue]);
 
-  // ✅ Check for OAuth redirect token
+  // OAuth redirect handling
   useEffect(() => {
     const storedToken = localStorage.getItem("auth_token");
     if (storedToken) {
@@ -88,6 +86,7 @@ export const LoginForm = () => {
     const userId = params.get("userId");
     const roleId = params.get("roleId");
     const name = params.get("name");
+    const p_code = params.get("p_code");
 
     if (token) {
       localStorage.setItem("auth_token", token);
@@ -95,10 +94,18 @@ export const LoginForm = () => {
       localStorage.setItem("roleId", roleId || "");
       localStorage.setItem("name", name || "");
       localStorage.setItem("email", email || "");
+      localStorage.setItem("p_code", p_code || "");
 
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       dispatch(
-        setCredentials({ token, id: userId, role: Number(roleId), name, email })
+        setCredentials({
+          token,
+          id: userId,
+          role: Number(roleId),
+          name,
+          email,
+          p_code,
+        })
       );
 
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -115,7 +122,6 @@ export const LoginForm = () => {
     }
   }, [dispatch, navigate]);
 
-  // ✅ Stable function for social login
   const handleGoogleLogin = useCallback(() => {
     const storedRole = localStorage.getItem("selected_role");
     const backendUrl = BASE_URL.replace(/\/$/, "");
@@ -144,24 +150,24 @@ export const LoginForm = () => {
 
         toast.success(res.data.message || "Login successful!");
 
-        console.log(res.data)
-
         const { id, role, token, name, p_code } = res.data;
-        dispatch(setCredentials({ token, id, role, name, }));
 
+        // ✅ Save p_code to Redux and localStorage
+        dispatch(setCredentials({ token, id, role, name, p_code }));
+        localStorage.setItem("p_code", p_code || "");
 
+        // 🔐 Navigate based on p_code
         if (Number(role) === 2 && p_code === "SUCCESS") {
-          navigate("/vendor-dashboard")
+          navigate("/vendor-dashboard");
         } else if (Number(role) === 2) {
           navigate("/complate-vendor-profile");
-        }
-        else if (Number(role) === 1 && p_code === "SUCCESS") {
-          navigate("/dashboard")
+        } else if (Number(role) === 1 && p_code === "SUCCESS") {
+          navigate("/dashboard");
         } else if (Number(role) === 1) {
           navigate("/complate-profile");
-        } else if (Number(role) === 4){
-          navigate("/admin-dashboard")
-        } 
+        } else if (Number(role) === 4) {
+          navigate("/admin-dashboard");
+        }
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed!");
@@ -176,10 +182,9 @@ export const LoginForm = () => {
       <Suspense fallback={<div className="loader">Loading...</div>}>
         <SideImageSlider />
       </Suspense>
-      <div className="relative z-20  login-card">
-
+      <div className="relative z-20 login-card">
         <div className="login-card-right">
-          <div className="mb-2 ">
+          <div className="mb-2">
             <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
           </div>
           <form onSubmit={handleSubmit(submitHandler)}>
@@ -188,7 +193,9 @@ export const LoginForm = () => {
               <p>Your Journey Awaits—Log in to Continue.</p>
             </div>
 
-            <label>Email<span className="text-red-500 text-sm">*</span></label>
+            <label>
+              Email<span className="text-red-500 text-sm">*</span>
+            </label>
             <input
               type="text"
               placeholder="Enter Your Email"
@@ -196,7 +203,9 @@ export const LoginForm = () => {
             />
             <span className="text-for-error">{errors.email?.message}</span>
 
-            <label>Password<span className="text-red-500 text-sm">*</span></label>
+            <label>
+              Password<span className="text-red-500 text-sm">*</span>
+            </label>
             <div className="password-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
@@ -217,8 +226,12 @@ export const LoginForm = () => {
             <span className="text-for-error">{errors.password?.message}</span>
 
             <div className="form-options flex items-center justify-between gap-4">
-              <div className="remember-label text-sm flex  items-center gap-2">
-                <input type="checkbox" {...register("rememberMe")} className="h-5 w-5" />
+              <div className="remember-label text-sm flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  {...register("rememberMe")}
+                  className="h-5 w-5"
+                />
                 <span>Remember Me</span>
               </div>
               <Link
