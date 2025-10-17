@@ -243,7 +243,7 @@ const SavedLayout = () => {
                   key={campaign.id}
                   className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
                 >
-                  <span className="text-xs text-gray-500 mb-3">
+                  <span className="text-xs font-semibold text-gray-900 mb-3">
                     Created on {campaign.campaigncreatedate}
                     {/* new Date(campaign.campaigncreatedate).toLocaleDateString() */}
                   </span>
