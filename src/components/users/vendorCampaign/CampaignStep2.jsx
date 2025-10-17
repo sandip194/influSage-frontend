@@ -113,7 +113,7 @@ const CampaignStep2 = ({ data, onNext, onBack, campaignId }) => {
     const fetchTiers = async () => {
       try {
         setLoadingTiers(true);
-        const res = await axios.get("/vendor/influencer-type", {
+        const res = await axios.get("/influencer-type", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setInfluencerTiers(res.data.influencerType || []);
