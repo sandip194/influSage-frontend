@@ -11,67 +11,67 @@ export default function AppWrapper({ children }) {
   const dispatch = useDispatch();
   const { token, userId } = useSelector((s) => s.auth);
 
-  useEffect(() => {
-    if (!token || !userId) return;
+  // useEffect(() => {
+  //   if (!token || !userId) return;
 
-    // 1️⃣ Fetch existing notifications from backend
-    fetch(`${BASE_URL}/chat/notifications`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => dispatch(setNotifications(data)));
+  //   // 1️⃣ Fetch existing notifications from backend
+  //   fetch(`${BASE_URL}/chat/notifications`, {
+  //     headers: { Authorization: `Bearer ${token}` },
+  //   })
+  //     .then((res) => res.json())
+  //     .then((data) => dispatch(setNotifications(data)));
 
-    // 2️⃣ Connect Socket.IO
-    const socket = io(BASE_URL, { auth: { token } });
-    socket.emit("register", userId);
-    socket.on("newNotification", (notification) => {
-      dispatch(addNotification(notification));
-    });
+  //   // 2️⃣ Connect Socket.IO
+  //   const socket = io(BASE_URL, { auth: { token } });
+  //   socket.emit("register", userId);
+  //   socket.on("newNotification", (notification) => {
+  //     dispatch(addNotification(notification));
+  //   });
 
-    // 3️⃣ FCM: check support and request permission
-    let unsubscribeOnMessage = () => {};
+  //   // 3️⃣ FCM: check support and request permission
+  //   let unsubscribeOnMessage = () => {};
 
-    const initFCM = async () => {
-      const supported = await isSupported();
-      if (!supported || !messaging) {
-        console.warn("Firebase Messaging not supported in this browser/context.");
-        return;
-      }
+  //   const initFCM = async () => {
+  //     const supported = await isSupported();
+  //     if (!supported || !messaging) {
+  //       console.warn("Firebase Messaging not supported in this browser/context.");
+  //       return;
+  //     }
 
-      try {
-        const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+  //     try {
+  //       const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
 
-        const fcmToken = await getToken(messaging, {
-          vapidKey: "BC3o2GoDs5qgRB7NzIwKCbPhcGOpRuBSQ6EFxqKAtwpNXT52ZZYEBiwrvC7LUT6BJ8JaN4YlySDoCe-LaXYWwv8",
-          serviceWorkerRegistration: registration,
-        });
+  //       const fcmToken = await getToken(messaging, {
+  //         vapidKey: "BC3o2GoDs5qgRB7NzIwKCbPhcGOpRuBSQ6EFxqKAtwpNXT52ZZYEBiwrvC7LUT6BJ8JaN4YlySDoCe-LaXYWwv8",
+  //         serviceWorkerRegistration: registration,
+  //       });
 
-        if (fcmToken) {
-          console.log("✅ FCM Token:", fcmToken);
-          // TODO: Send token to your backend if needed
-        } else {
-          console.warn("No FCM token retrieved.");
-        }
+  //       if (fcmToken) {
+  //         console.log("✅ FCM Token:", fcmToken);
+  //         // TODO: Send token to your backend if needed
+  //       } else {
+  //         console.warn("No FCM token retrieved.");
+  //       }
 
-        unsubscribeOnMessage = onMessage(messaging, (payload) => {
-          console.log("📥 FCM Message received: ", payload);
-          dispatch(addNotification(payload));
-        });
-      } catch (err) {
-        console.error("🔥 FCM initialization error:", err);
-      }
-    };
+  //       unsubscribeOnMessage = onMessage(messaging, (payload) => {
+  //         console.log("📥 FCM Message received: ", payload);
+  //         dispatch(addNotification(payload));
+  //       });
+  //     } catch (err) {
+  //       console.error("🔥 FCM initialization error:", err);
+  //     }
+  //   };
 
-    initFCM();
+  //   initFCM();
 
-    // 4️⃣ Cleanup
-    return () => {
-      socket.disconnect();
-      if (unsubscribeOnMessage) {
-        unsubscribeOnMessage();
-      }
-    };
-  }, [dispatch, token, userId]);
+  //   // 4️⃣ Cleanup
+  //   return () => {
+  //     socket.disconnect();
+  //     if (unsubscribeOnMessage) {
+  //       unsubscribeOnMessage();
+  //     }
+  //   };
+  // }, [dispatch, token, userId]);
 
   return children;
 }
