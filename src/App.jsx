@@ -172,11 +172,14 @@ const App = () => {
 
 
                                         {/* Admin Dashboard */}
-                                        <Route path='/admin-dashboard' element={<AdminDashboardLayout />}>
-                                                <Route path='' element={<DashboardHomePage />} />
-                                                <Route path='influencers' element={<InfluencersRequests />} />
-                                                <Route path='campaigns' element={<CampaignRequests />} />
+                                        <Route element={<PrivateRoute allowedRoles={[4]} />}>
+                                                <Route path='/admin-dashboard' element={<AdminDashboardLayout />}>
+                                                        <Route path='' element={<DashboardHomePage />} />
+                                                        <Route path='influencers' element={<InfluencersRequests />} />
+                                                        <Route path='campaigns' element={<CampaignRequests />} />
+                                                </Route>
                                         </Route>
+
                                 </Routes>
 
                         </SocketProvider>
