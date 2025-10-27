@@ -135,7 +135,7 @@ const UserTableLayout = () => {
     const handleSubmit = async (userID, statusName) => {
         try {
             const res = await axios.post('/admin/dashboard/approved-or-rejected', { p_userid: userID, p_statusname: statusName }, {
-                headers: { Authorization: `Bearer ${token}` }  // Fixed typo: removed extra 'headers' object
+                headers: { Authorization: `Bearer ${token}` }  
             });
             if (res.status === 200) {
                 // Refresh the user list after successful submission
@@ -156,8 +156,6 @@ const UserTableLayout = () => {
         setActionType(type);
         setIsModalOpen(true);
     };
-
-
 
     // Run initial fetches only once on mount
     useEffect(() => {
@@ -388,8 +386,6 @@ const UserTableLayout = () => {
                     ?
                 </p>
             </Modal>
-
-
 
 
             {/* Filter Drawer */}

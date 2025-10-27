@@ -59,6 +59,7 @@ import DashboardHomePage from './components/admin/pages/DashboardHomePage';
 import AdminDashboardLayout from './components/admin/dashboard/AdminDashboardLayout';
 import InfluencersRequests from './components/admin/pages/InfluencersRequests';
 import CampaignRequests from './components/admin/pages/CampaignRequests';
+import DashboardGuard from './routes/DashboardGuard';
 
 const App = () => {
 
@@ -99,38 +100,40 @@ const App = () => {
 
                                         {/* Influencer Dashboard*/}
                                         <Route element={<PrivateRoute allowedRoles={[1]} />}>
-                                                <Route path='/dashboard' element={<DashboardLayout />}>
 
-                                                        <Route path='' element={<DashboardPage />} />
-                                                        <Route path='browse' element={<BrowseCampaign />} />
-                                                        <Route path='browse/applied' element={<AppliedLayout />} />
-                                                        <Route path='browse/saved' element={<SavedLayout />} />
-                                                        <Route path='browse/description/:campaignId' element={<DescriptionLayout />} />
+                                                <Route element={<DashboardGuard />}>
+                                                        <Route path='/dashboard' element={<DashboardLayout />}>
 
-                                                        <Route path='browse/applied-campaign-details/:campaignId' element={<EditLayout />} />
-                                                        <Route path='browse/apply-now/:campaignId' element={<ApplyNow />} />
+                                                                <Route path='' element={<DashboardPage />} />
+                                                                <Route path='browse' element={<BrowseCampaign />} />
+                                                                <Route path='browse/applied' element={<AppliedLayout />} />
+                                                                <Route path='browse/saved' element={<SavedLayout />} />
+                                                                <Route path='browse/description/:campaignId' element={<DescriptionLayout />} />
 
-                                                        <Route path='my-campaigns' element={<CampaignsLayout />} />
-                                                        <Route path='my-campaigns/details/:campaignId' element={<Details />} />
+                                                                <Route path='browse/applied-campaign-details/:campaignId' element={<EditLayout />} />
+                                                                <Route path='browse/apply-now/:campaignId' element={<ApplyNow />} />
 
-                                                        <Route path='my-campaigns/activity' element={<Activity />} />
-                                                        <Route path='my-campaigns/message' element={<Message />} />
-                                                        <Route path='my-campaigns/filesmedia' element={<FilesMedia />} />
+                                                                <Route path='my-campaigns' element={<CampaignsLayout />} />
+                                                                <Route path='my-campaigns/details/:campaignId' element={<Details />} />
 
-                                                        <Route path='payment' element={<Payment />} />
+                                                                <Route path='my-campaigns/activity' element={<Activity />} />
+                                                                <Route path='my-campaigns/message' element={<Message />} />
+                                                                <Route path='my-campaigns/filesmedia' element={<FilesMedia />} />
 
-                                                        <Route path='analytics' element={<Analytics />} />
+                                                                <Route path='payment' element={<Payment />} />
 
-                                                        <Route path='messages' element={<ChatAppPage />} />
+                                                                <Route path='analytics' element={<Analytics />} />
 
-                                                        <Route path='my-profile' element={<Profile />} />
+                                                                <Route path='messages' element={<ChatAppPage />} />
 
-                                                        <Route path='editProfile' element={<EditProfile />} />
+                                                                <Route path='my-profile' element={<Profile />} />
 
-                                                        <Route path='setting' element={<Settings />} />
+                                                                <Route path='editProfile' element={<EditProfile />} />
 
+                                                                <Route path='setting' element={<Settings />} />
+
+                                                        </Route>
                                                 </Route>
-
                                                 <Route path='/dashboard/browse' element={<BrowseCampaign />} />
                                                 <Route path='/complate-profile' element={<ProfileStepper />} />
                                         </Route>
@@ -138,34 +141,37 @@ const App = () => {
 
                                         {/* Vendor Deshboard */}
                                         <Route element={<PrivateRoute allowedRoles={[2]} />}>
-                                                <Route path='/vendor-dashboard' element={<VenderDashboardLayout />}>
-                                                        <Route path='' element={<VenderDashboardPage />} />
-                                                        <Route path='browse-influencers' element={<BrowseInfluencerPage />} />
 
-                                                        <Route path='browse-influencers/favorites' element={<FavoritesLayout />} />
-                                                        <Route path='browse-influencers/invited' element={<Invited />} />
-                                                        <Route path='browse-influencers/influencer-details/:userId' element={<InfluencerProfile />} />
+                                                <Route element={<DashboardGuard />}>
+                                                        <Route path='/vendor-dashboard' element={<VenderDashboardLayout />}>
+                                                                <Route path='' element={<VenderDashboardPage />} />
+                                                                <Route path='browse-influencers' element={<BrowseInfluencerPage />} />
 
-                                                        <Route path='vendor-campaign/my-campaigns' element={<CreateCampaign />} />
-                                                        <Route path='vendor-campaign/create-campaign' element={<CampaignWizard />} />
-                                                        <Route path='vendor-campaign/edit-campaign/:campaignId' element={<CampaignWizard />} />
+                                                                <Route path='browse-influencers/favorites' element={<FavoritesLayout />} />
+                                                                <Route path='browse-influencers/invited' element={<Invited />} />
+                                                                <Route path='browse-influencers/influencer-details/:userId' element={<InfluencerProfile />} />
 
-                                                        <Route path='vendor-campaign' element={<VendorCampaign />} />
-                                                        <Route path='vendor-campaign/campaignDetails/:campaignId' element={<CampaignDetails />} />
+                                                                <Route path='vendor-campaign/my-campaigns' element={<CreateCampaign />} />
+                                                                <Route path='vendor-campaign/create-campaign' element={<CampaignWizard />} />
+                                                                <Route path='vendor-campaign/edit-campaign/:campaignId' element={<CampaignWizard />} />
 
-
-                                                        <Route path='messages' element={<ChatAppPageVendor />} />
-
-
-                                                        <Route path='offers' element={<OffersLayout />} />
-                                                        <Route path='offers/view-all-offers/:id' element={<ViewAllOffers />} />
-                                                        <Route path="offers/:id" element={<OfferDetails />} />
-                                                        <Route path='offers/influencer-details/:userId' element={<InfluencerProfile />} />
-                                                        <Route path='offers/campaignDetails/:campaignId' element={<CampaignDetails />} />
+                                                                <Route path='vendor-campaign' element={<VendorCampaign />} />
+                                                                <Route path='vendor-campaign/campaignDetails/:campaignId' element={<CampaignDetails />} />
 
 
-                                                        <Route path='edit-profile' element={<EditVendorProfile />} />
-                                                        <Route path='my-profile' element={<VendorMyProfile />} />
+                                                                <Route path='messages' element={<ChatAppPageVendor />} />
+
+
+                                                                <Route path='offers' element={<OffersLayout />} />
+                                                                <Route path='offers/view-all-offers/:id' element={<ViewAllOffers />} />
+                                                                <Route path="offers/:id" element={<OfferDetails />} />
+                                                                <Route path='offers/influencer-details/:userId' element={<InfluencerProfile />} />
+                                                                <Route path='offers/campaignDetails/:campaignId' element={<CampaignDetails />} />
+
+
+                                                                <Route path='edit-profile' element={<EditVendorProfile />} />
+                                                                <Route path='my-profile' element={<VendorMyProfile />} />
+                                                        </Route>
                                                 </Route>
                                                 <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
                                         </Route>
