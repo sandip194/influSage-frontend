@@ -29,8 +29,8 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
   const [existingPhotoPath, setExistingPhotoPath] = useState(null);
-
-  const { token, firstName, lastName } = useSelector(state => state.auth);
+  
+  const { token } = useSelector(state => state.auth);
 
 
   const countryAPI = "https://countriesnow.space/api/v0.1/countries/positions";
@@ -123,13 +123,20 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
 
 
   useEffect(() => {
-    if (!firstName || !lastName) return;
+    let first = "";
+    let last = "";
+
+    if (data?.name) {
+      const parts = data.name.trim().split(" ");
+      first = parts[0];
+      last = parts.slice(1).join(" ");
+    }
 
     form.setFieldsValue({
-      firstName: data?.firstname || firstName,
-      lastName: data?.lastname || lastName,
+      firstName: data?.firstname || first,
+      lastName: data?.lastname || last,
     });
-  }, [form, data, firstName, lastName]);
+  }, [form, data]);
 
 
   const handleImageChange = (e) => {

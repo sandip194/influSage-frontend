@@ -10,6 +10,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const workHistoryData = [
@@ -56,6 +57,7 @@ const VendorMyProfile = () => {
         : workHistoryData.slice(0, 2);
 
     const { token, userId } = useSelector((state) => state.auth);
+    const navigate = useNavigate();
 
     const getMyProfileData = async () => {
         try {
@@ -143,12 +145,12 @@ const VendorMyProfile = () => {
                             </div>
                         </div>
                         <div className="px-6 pb-6">
-                            <Link
-                                to="/vendor-dashboard/edit-profile"
+                             <button
+                                onClick={() => navigate("/vendor-dashboard/edit-profile")}
                                 className="bg-[#0f122f] text-white px-5 py-2 rounded-full font-medium hover:bg-[#23265a] transition inline-block"
                             >
                                 Edit Profile
-                            </Link>
+                            </button>
                         </div>
                     </div>
 

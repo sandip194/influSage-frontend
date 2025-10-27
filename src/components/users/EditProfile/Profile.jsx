@@ -10,6 +10,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [showAll, setShowAll] = useState(false);
@@ -17,6 +18,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const navigate = useNavigate();
 
   const { token, userId } = useSelector((state) => state.auth);
 
@@ -98,12 +100,10 @@ const Profile = () => {
             </div>
 
             <div className="px-6 pb-6">
-              <Link
-                to="/dashboard/editProfile"
-                className="bg-[#0f122f] text-white px-5 py-2 rounded-full font-medium hover:bg-[#23265a] transition inline-block"
-              >
-                Edit Profile
-              </Link>
+               <button
+                  onClick={() => navigate("/dashboard/editProfile")}
+                  className="bg-[#0f122f] text-white px-5 py-2 rounded-full font-medium hover:bg-[#23265a] transition inline-block"
+                > Edit Profile </button>
             </div>
           </div>
 

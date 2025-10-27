@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
-
+import { useParams } from "react-router-dom";
 import influencer from '../../../assets/influencer.jpg'
 
 import {
@@ -26,6 +26,7 @@ const CampaignReviewStep = ({ onEdit }) => {
   const navigate = useNavigate();
   const [lightboxVideo, setLightboxVideo] = useState({ open: false, src: "" });
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const { campaignId } = useParams();
 
   const getFullUrl = (path) => {
     if (!path) return null;
@@ -35,31 +36,37 @@ const CampaignReviewStep = ({ onEdit }) => {
   };
 
   useEffect(() => {
-    const fetchCampaign = async () => {
-      try {
-        const authToken = token || localStorage.getItem("token");
-        if (!authToken) {
-          toast.error("No token found. Please log in again.");
-          return;
-        }
-
-        const res = await axios.get(`/vendor/campaign/01`, {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
-
-        setCampaignData(res.data?.campaignParts || {});
-      } catch (error) {
-        console.error(error);
-        toast.error(
-          error.response?.data?.message || "Failed to fetch campaign data"
-        );
-      } finally {
-        setLoading(false);
+  const fetchCampaign = async () => {
+    try {
+      const authToken = token || localStorage.getItem("token");
+      if (!authToken) {
+        toast.error("No token found. Please log in again.");
+        return;
       }
-    };
 
-    fetchCampaign();
-  }, [token, userId]);
+      const isEdit = !!campaignId;
+
+      const url = isEdit
+        ? `/vendor/campaign/${campaignId}` 
+        : `/vendor/campaign/`;      
+
+      const res = await axios.get(url, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+
+      setCampaignData(res.data?.campaignParts || {});
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error.response?.data?.message || "Failed to fetch campaign data"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchCampaign();
+}, [token, userId, campaignId]);
 
   const handleDeleteReference = async (fileToDelete) => {
     if (!fileToDelete || !fileToDelete.filepath) {

@@ -109,42 +109,41 @@ setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : (campaignId ? 0 : "rev
       toast.error("Failed to fetch campaign data.");
     }
   };
-
-  // useEffect(() => {
-  //   if (lastCompletedStep !== null) {
-  //     (async () => {
-  //       await getCampaignData();
+  useEffect(() => {
+    if (lastCompletedStep !== null) {
+      (async () => {
+        await getCampaignData();
  
-  //       if (campaignId) {
-  //         setCurrentStep(1)
-  //       }
-  //       else if (lastCompletedStep + 1 < steps.length) {
-  //         setCurrentStep(lastCompletedStep + 1);
-  //       } else {
-  //         setCurrentStep("review");
-  //       }
-  //     })();
-  //   }
-  // }, [lastCompletedStep]);
-
-
-useEffect(() => {
-  const fetchData = async () => {
-    await getCampaignData();
-
-    if (campaignId) {
-      // If campaignId exists, skip review completely
-      const firstIncompleteStep = completedSteps.findIndex((done) => !done);
-      setCurrentStep(firstIncompleteStep !== -1 ? firstIncompleteStep : 0);
-    } else {
-      // If no campaignId, allow review
-      const firstIncompleteStep = completedSteps.findIndex((done) => !done);
-      setCurrentStep(firstIncompleteStep !== -1 ? firstIncompleteStep : "review");
+        if (campaignId) {
+          setCurrentStep(1)
+        }
+        else if (lastCompletedStep + 1 < steps.length) {
+          setCurrentStep(lastCompletedStep + 1);
+        } else {
+          setCurrentStep("review");
+        }
+      })();
     }
-  };
+  }, [lastCompletedStep]);
 
-  fetchData();
-}, [campaignId]);
+
+// useEffect(() => {
+//   const fetchData = async () => {
+//     await getCampaignData();
+
+//     if (campaignId) {
+//       // If campaignId exists, skip review completely
+//       const firstIncompleteStep = completedSteps.findIndex((done) => !done);
+//       setCurrentStep(firstIncompleteStep !== -1 ? firstIncompleteStep : 0);
+//     } else {
+//       // If no campaignId, allow review
+//       const firstIncompleteStep = completedSteps.findIndex((done) => !done);
+//       setCurrentStep(firstIncompleteStep !== -1 ? firstIncompleteStep : "review");
+//     }
+//   };
+
+//   fetchData();
+// }, [campaignId]);
 
   useEffect(() => {
     getCampaignData();

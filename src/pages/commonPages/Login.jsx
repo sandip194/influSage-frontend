@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 import "../../assets/login.css";
 import googleIcon from "../../assets/icons/google-logo.png";
 import facebookIcon from "../../assets/icons/facebook-logo.png";
-import appleIcon from "../../assets/icons/apple-logo.png";
+// import appleIcon from "../../assets/icons/apple-logo.png";
 
 import { setCredentials } from "../../features/auth/authSlice";
 
@@ -184,7 +184,7 @@ export const LoginForm = () => {
       </Suspense>
       <div className="relative z-20 login-card">
         <div className="login-card-right">
-          <div className="mb-2">
+          <div className="">
             <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
           </div>
           <form onSubmit={handleSubmit(submitHandler)}>
@@ -259,9 +259,9 @@ export const LoginForm = () => {
               <div className="social-btn" onClick={handleFacebookLogin}>
                 <img className="social-icon" src={facebookIcon} alt="Facebook" />
               </div>
-              <div className="social-btn">
+              {/* <div className="social-btn">
                 <img className="social-icon" src={appleIcon} alt="Apple" />
-              </div>
+              </div> */}
             </div>
 
             <div className="signup-link mb-4">

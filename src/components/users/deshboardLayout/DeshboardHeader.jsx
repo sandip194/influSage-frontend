@@ -57,26 +57,29 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   };
 
   const profileMenu = {
-    items: [
-      {
-        key: "1",
-        icon: <UserOutlined />,
-        label: <Link to={`${basePath}/my-profile`}>My Profile</Link>,
-      },
-      {
-        key: "2",
-        icon: <SettingOutlined />,
-        label: <Link to={`${basePath}/settings`}>Settings</Link>,
-      },
-      {
-        key: "3",
-        icon: <LogoutOutlined />,
-        label: "Logout",
-        danger: true,
-        onClick: handleLogout,
-      },
-    ],
-  };
+  items: [
+    {
+      key: "1",
+      icon: <UserOutlined />,
+      label: "My Profile",
+      onClick: () => navigate(`${basePath}/my-profile`),
+    },
+    {
+      key: "2",
+      icon: <SettingOutlined />,
+      label: "Settings",
+      onClick: () => navigate(`setting`),
+    },
+    {
+      key: "3",
+      icon: <LogoutOutlined />,
+      label: "Logout",
+      danger: true,
+      onClick: handleLogout,
+    },
+  ],
+};
+
 
   // Modal content (similar to previous drawer, but scrollable)
   const modalContent = (
