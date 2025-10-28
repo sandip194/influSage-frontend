@@ -109,22 +109,38 @@ setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : (campaignId ? 0 : "rev
       toast.error("Failed to fetch campaign data.");
     }
   };
+
+  // ✅ Handle back navigation — fetch latest data before showing previous step
+const handleBack = async (prevIndex) => {
+  try {
+    await getCampaignData(); // re-fetch from Redis/backend
+    setCurrentStep(prevIndex);
+  } catch (err) {
+    console.error("Error while going back:", err);
+  }
+};
+
+
   useEffect(() => {
-    if (lastCompletedStep !== null) {
-      (async () => {
-        await getCampaignData();
- 
-        if (campaignId) {
-          setCurrentStep(1)
-        }
-        else if (lastCompletedStep + 1 < steps.length) {
-          setCurrentStep(lastCompletedStep + 1);
-        } else {
-          setCurrentStep("review");
-        }
-      })();
-    }
-  }, [lastCompletedStep]);
+  if (!campaignId && lastCompletedStep !== null) {
+    let isMounted = true;
+    (async () => {
+      await getCampaignData();
+      if (!isMounted) return;
+
+      if (lastCompletedStep + 1 < steps.length) {
+        setCurrentStep(lastCompletedStep + 1);
+      } else {
+        setCurrentStep("review");
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }
+}, [lastCompletedStep]);
+
 
 
 // useEffect(() => {
@@ -145,9 +161,29 @@ setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : (campaignId ? 0 : "rev
 //   fetchData();
 // }, [campaignId]);
 
-  useEffect(() => {
-    getCampaignData();
-  }, []);
+ useEffect(() => {
+  const fetchData = async () => {
+    await getCampaignData();
+
+    if (campaignId) {
+      setCurrentStep(0);
+    } else {
+      const savedSteps = JSON.parse(localStorage.getItem("completedSteps") || "[]");
+
+      const firstIncompleteStep = savedSteps.findIndex((done) => !done);
+
+      if (firstIncompleteStep !== -1) {
+        setCurrentStep(firstIncompleteStep);
+      } else {
+        setCurrentStep("review");
+      }
+    }
+  };
+
+  fetchData();
+}, [campaignId]);
+
+
 
 
   // Define steps early so functions below can access it
@@ -171,7 +207,8 @@ setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : (campaignId ? 0 : "rev
           data={campaignData.step2}
           onChange={(updated) => updateCampaignSection("step2", updated)}
           onNext={() => markStepComplete(1)}
-          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+          onBack={() => handleBack(currentStep - 1)}
+
         />
       ),
     },
@@ -183,7 +220,8 @@ setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : (campaignId ? 0 : "rev
           data={campaignData.step3}
           onChange={(updated) => updateCampaignSection("step3", updated)}
           onNext={() => markStepComplete(2)}
-          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+          onBack={() => handleBack(currentStep - 1)}
+
         />
       ),
     },
@@ -194,7 +232,8 @@ setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : (campaignId ? 0 : "rev
           campaignId={campaignId}
           data={campaignData.categories || []} // 👈 you may need to adjust this based on saved data
           onNext={() => markStepComplete(3)}
-          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+          onBack={() => handleBack(currentStep - 1)}
+
         />
       ),
     },
@@ -206,7 +245,8 @@ setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : (campaignId ? 0 : "rev
           data={campaignData.step4}
           onChange={(updated) => updateCampaignSection("step4", updated)}
           onNext={() => markStepComplete(4)}
-          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+          onBack={() => handleBack(currentStep - 1)}
+
         />
       ),
     },
@@ -218,7 +258,8 @@ setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : (campaignId ? 0 : "rev
           data={campaignData.step5}
           onChange={(updated) => updateCampaignSection("step5", updated)}
           onNext={() => markStepComplete(5)}
-          onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+          onBack={() => handleBack(currentStep - 1)}
+
         />
       ),
     },

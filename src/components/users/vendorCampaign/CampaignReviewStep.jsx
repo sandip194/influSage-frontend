@@ -48,7 +48,7 @@ const CampaignReviewStep = ({ onEdit }) => {
 
       const url = isEdit
         ? `/vendor/campaign/${campaignId}` 
-        : `/vendor/campaign/`;      
+        : `/vendor/campaign/01`;      
 
       const res = await axios.get(url, {
         headers: { Authorization: `Bearer ${authToken}` },
@@ -148,6 +148,7 @@ const CampaignReviewStep = ({ onEdit }) => {
 
       const payload = {
         userid: userId,
+        p_campaignid: campaignId || null,
         objective: campaignData?.p_objectivejson || {},
         vendorinfo: {
           ...p_vendorinfojson,
@@ -260,7 +261,7 @@ const CampaignReviewStep = ({ onEdit }) => {
 
             {/* Categories */}
             <div className="py-4 border-b border-gray-200">
-              <p className="text-sm font-semibold mb-1">Categories</p>
+              <p className="font-semibold text-lg mb-2">Categories</p>
               <div className="flex flex-wrap gap-2 my-2">
                 {campaignData?.p_campaigncategoyjson?.[0]?.categories?.length > 0 ? (
                   campaignData.p_campaigncategoyjson[0].categories.slice(0, 5).map((subcat) => (
@@ -332,18 +333,20 @@ const CampaignReviewStep = ({ onEdit }) => {
               </ul>
 
               {/* Tags */}
-              <div className="flex flex-wrap gap-2 mt-4">
+                <div className="py-4">
                 <h3 className="font-semibold text-lg mb-4">HashTags</h3>
+                 <div className="flex flex-wrap gap-2 my-2">
                 {tags.length > 0
                   ? tags.map((tag, i) => (
                     <span
                       key={tag + i}
-                      className="px-3 py-1 bg-gray-100 rounded-full text-xs"
+                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
                     >
                       {tag}
                     </span>
                   ))
                   : "No tags"}
+                  </div>
               </div>
             </div>
 

@@ -38,20 +38,22 @@ export default function SidebarVendor({ onSelectChat }) {
 
         setCampaigns(formatted);
 
-        const allInfluencers = formatted.flatMap((c) =>
-          (c.influencers || []).map((v) => ({
-            ...v,
-            campaignId: c.campaignid,
-            campaignName: c.campaignname,
-            campaignPhoto: c.campaignphoto,
-            img: v.userphoto
-              ? `${BASE_URL}/${v.userphoto.startsWith("src/") ? v.userphoto : `src/${v.userphoto}`}`
-              : null,
-            name: `${v.firstname} ${v.lastname}`,
-            message: v.lastmessage || "No message",
-            time: v.lastmessagedate || "",
-          }))
-        );
+        const allInfluencers = formatted
+          .flatMap((c) =>
+            (c.influencers || []).map((v) => ({
+              ...v,
+              campaignId: c.campaignid,
+              campaignName: c.campaignname,
+              campaignPhoto: c.campaignphoto,
+              img: v.userphoto
+                ? `${BASE_URL}/${v.userphoto.startsWith("src/") ? v.userphoto : `src/${v.userphoto}`}`
+                : null,
+              name: `${v.firstname} ${v.lastname}`,
+              message: v.lastmessage || "No message",
+              time: v.lastmessagedate || "",
+            }))
+          )
+          .sort((a, b) => new Date(b.time) - new Date(a.time));
 
         setInfluencers(allInfluencers);
       }
@@ -166,15 +168,22 @@ useEffect(() => {
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {campaigns?.map((campaign) => {
             const isSelected = selectedCampaign?.campaignid === campaign.campaignid;
+            const hasUnread = unreadMessages.some(
+              (msg) =>
+                campaign.influencers?.some(
+                  (inf) => String(inf.influencerid) === String(msg.userid)
+                ) && msg.readbyvendor === false
+            );
             return (
               <div
                 key={campaign?.campaignid}
                 onClick={() => {
                   setSelectedCampaign(campaign);
-                  setSelectedInfluencer(null); // reset selected influencer
+                  setSelectedInfluencer(null);
                 }}
                 className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-300
-                        ${isSelected ? "bg-gray-200 border-l-4 border-gray-500 shadow-sm scale-[1.01]" : "hover:bg-gray-100"}`}
+                  ${isSelected ? "bg-gray-200 border-l-4 border-gray-500 shadow-sm scale-[1.01]" : "hover:bg-gray-100"}
+                  ${hasUnread ? "bg-gray-100 shadow-md scale-[1.02]" : ""}`}
               >
                 <div className="flex items-center space-x-3 min-w-0">
                   <img
@@ -183,10 +192,21 @@ useEffect(() => {
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div className="overflow-hidden max-w-[140px] min-w-0">
-                    <div className="font-semibold text-sm text-gray-800 truncate">{campaign.campaignname}</div>
-                    <div className="text-xs text-gray-500 truncate">Click to chat</div>
+                    <div className="font-semibold text-sm text-gray-800 truncate">
+                      {campaign.campaignname}
+                    </div>
+                    <div
+                      className={`text-xs truncate ${
+                        hasUnread ? "text-gray-900 font-semibold" : "text-gray-500"
+                      }`}
+                    >
+                      {hasUnread ? "New message" : "Click to chat"}
+                    </div>
                   </div>
                 </div>
+                {hasUnread && (
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></div>
+                )}
               </div>
             );
           })}
@@ -201,7 +221,7 @@ useEffect(() => {
         <div className="p-4 flex items-center justify-between border-b border-gray-200">
           <button
             onClick={() => {
-              setSelectedCampaign(null);
+              setSelectedCampaign(campaign);
               setSelectedInfluencer(null);
             }}
             className="md:hidden mr-2 p-2 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center"

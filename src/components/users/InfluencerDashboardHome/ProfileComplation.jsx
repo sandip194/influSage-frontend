@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { RiUserLine } from "@remixicon/react";
 import { useSelector } from "react-redux";
+import { Link } from 'react-router-dom';
+
 
 const ProfileComplation = () => {
   const [completion, setCompletion] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { token } = useSelector((state) => state.auth);
+  const { token , role } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchCompletion = async () => {
@@ -61,9 +63,11 @@ const ProfileComplation = () => {
         </div>
       </div>
 
-      <button className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D] mt-3 sm:mt-0">
-        Complete Profile
-      </button>
+     <Link to="/dashboard/my-profile" className="inline-block">
+        <button className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D] mt-3 sm:mt-0">
+          Complete Profile
+        </button>
+      </Link>
     </div>
   );
 };
