@@ -196,6 +196,7 @@ const validateDates = () => {
 
   const payload = {
     campaignId: Number(campaignId),
+    isFinalSubmit: true,
     p_campaignjson: {
       startdate: formData.startDate?.format("DD-MM-YYYY"),
       enddate: formData.endDate?.format("DD-MM-YYYY"),
@@ -204,7 +205,7 @@ const validateDates = () => {
 
   try {
     setLoading(true);
-    const res = await axios.post("/vendor/update-campaign", payload, {
+    const res = await axios.post(`${BASE_URL}/vendor/update-campaign`, payload, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

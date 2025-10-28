@@ -7,35 +7,15 @@ const GlobalSecurityBlocker = () => {
       e.stopPropagation();
     };
 
-    const stopContextMenu = (e) => {
-      const tag = e.target.tagName;
-      if (tag === "IMG") {
-        e.preventDefault();
-      }
-    };
-
-    const stopClickOpen = (e) => {
-      const tag = e.target.tagName;
-      if (tag === "A" || tag === "IMG") {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
+    // Block only drag & drop events
     ["dragstart", "dragover", "drop", "dragenter"].forEach((evt) =>
       window.addEventListener(evt, stopDrag, true)
     );
 
-    document.addEventListener("contextmenu", stopContextMenu, true);
-
-    document.addEventListener("click", stopClickOpen, true);
-
-    return () => {  
+    return () => {
       ["dragstart", "dragover", "drop", "dragenter"].forEach((evt) =>
         window.removeEventListener(evt, stopDrag, true)
       );
-      document.removeEventListener("contextmenu", stopContextMenu, true);
-      document.removeEventListener("click", stopClickOpen, true);
     };
   }, []);
 
