@@ -11,13 +11,13 @@ const AdminDashboardLayout = () => {
     return (
         <div className="min-h-screen bg-gray-50 text-gray-800">
             {/* Sidebar for desktop */}
-            <div className="hidden md:block fixed inset-y-0 left-0 w-60 bg-white shadow-lg z-30">
+            <div className="hidden md:block fixed inset-y-0 left-0 w-60 bg-white shadow-sm z-30">
                 <AdminSidebar isOpen={true} />
             </div>
 
             {/* Sidebar for mobile */}
             <div
-                className={`fixed inset-y-0 left-0 w-60 bg-white shadow-lg z-40 transform transition-transform duration-300 md:hidden ${
+                className={`fixed inset-y-0 left-0 w-60 bg-white shadow-sm z-40 transform transition-transform duration-300 md:hidden ${
                     isSidebarOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
             >

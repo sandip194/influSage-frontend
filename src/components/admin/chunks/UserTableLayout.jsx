@@ -18,10 +18,12 @@ import { SearchOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const UserTableLayout = () => {
     const { token } = useSelector((state) => state.auth);
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    const navigate = useNavigate();
 
     const [statusList, setStatusList] = useState([]); // Dynamic tabs
     const [activeStatusId, setActiveStatusId] = useState(null);
@@ -135,7 +137,7 @@ const UserTableLayout = () => {
     const handleSubmit = async (userID, statusName) => {
         try {
             const res = await axios.post('/admin/dashboard/approved-or-rejected', { p_userid: userID, p_statusname: statusName }, {
-                headers: { Authorization: `Bearer ${token}` }  
+                headers: { Authorization: `Bearer ${token}` }
             });
             if (res.status === 200) {
                 // Refresh the user list after successful submission
@@ -305,6 +307,11 @@ const UserTableLayout = () => {
                                                 <Tooltip title="View">
                                                     <button
                                                         className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition"
+                                                        onClick={() =>
+                                                            navigate(
+                                                                `/admin-dashboard/influencers/details/${user.id}`
+                                                            )
+                                                        }
                                                     >
                                                         <RiEyeLine size={18} />
                                                     </button>

@@ -60,6 +60,7 @@ import AdminDashboardLayout from './components/admin/dashboard/AdminDashboardLay
 import InfluencersRequests from './components/admin/pages/InfluencersRequests';
 import CampaignRequests from './components/admin/pages/CampaignRequests';
 import DashboardGuard from './routes/DashboardGuard';
+import InfluencerDetailView from './components/admin/pages/InfluencerDetailView';
 
 const App = () => {
 
@@ -182,6 +183,7 @@ const App = () => {
                                                 <Route path='/admin-dashboard' element={<AdminDashboardLayout />}>
                                                         <Route path='' element={<DashboardHomePage />} />
                                                         <Route path='influencers' element={<InfluencersRequests />} />
+                                                        <Route path='influencers/details/:userId' element={<InfluencerDetailView />} />
                                                         <Route path='campaigns' element={<CampaignRequests />} />
                                                 </Route>
                                         </Route>

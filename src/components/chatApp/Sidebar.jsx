@@ -37,19 +37,19 @@ export default function Sidebar({ onSelectChat }) {
   };
 
   // Fetch unread messages
-  const fetchUnreadMessages = async () => {
-    if (!token) return;
-    try {
-      const res = await axios.get(`/chat/unread-messages`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.data?.data) {
-        setUnreadMessages(res.data.data);
-      }
-    } catch (err) {
-      console.error("Failed to fetch unread messages:", err);
-    }
-  };
+  // const fetchUnreadMessages = async () => {
+  //   if (!token) return;
+  //   try {
+  //     const res = await axios.get(`/chat/unread-messages`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     if (res.data?.data) {
+  //       setUnreadMessages(res.data.data);
+  //     }
+  //   } catch (err) {
+  //     console.error("Failed to fetch unread messages:", err);
+  //   }
+  // };
 
   // useEffect(() => {
   //   fetchCampaigns();
@@ -61,30 +61,28 @@ export default function Sidebar({ onSelectChat }) {
   // }, [token, search]);
 
   useEffect(() => {
-  fetchCampaigns();
-  fetchUnreadMessages();
+    fetchCampaigns();
+    // fetchUnreadMessages();
 
-  // refresh unread messages every 10 seconds
-  const unreadInterval = setInterval(fetchUnreadMessages, 3000);
+    // // refresh unread messages every 10 seconds
+    // const unreadInterval = setInterval(fetchUnreadMessages, 3000);
 
-  // refresh campaigns every 3 seconds
-  const campaignsInterval = setInterval(fetchCampaigns, 3000);
+    // refresh campaigns every 3 seconds
+    const campaignsInterval = setInterval(fetchCampaigns, 3000);
 
-  // Cleanup intervals on unmount
-  return () => {
-    clearInterval(unreadInterval);
-    clearInterval(campaignsInterval);
-  };
-}, [token, search]);
+    // Cleanup intervals on unmount
+    return () => {
+      // clearInterval(unreadInterval);
+      clearInterval(campaignsInterval);
+    };
+  }, [token, search]);
 
-  
+
   // check if this campaign/vendor has an unread message
   const hasUnreadMessage = (vendor) => {
     if (!vendor) return false;
-
-    const vendorId = vendor.vendorid || vendor.id || vendor.ownerid;
-    // check if any unread message has same ownerid as vendorId
-    return unreadMessages.some((msg) => String(msg.ownerid) === String(vendorId));
+    if (!vendor.readbyinfluencer) return true
+    return false
   };
 
   return (
@@ -129,7 +127,7 @@ export default function Sidebar({ onSelectChat }) {
             const isSelected = selectedCampaignId === conversationId;
             const unread = hasUnreadMessage(vendor);
 
-           return (
+            return (
               <div
                 key={conversationId}
                 onClick={() => {
@@ -147,10 +145,9 @@ export default function Sidebar({ onSelectChat }) {
                   );
                 }}
                 className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-300
-                  ${
-                    isSelected
-                      ? "bg-gray-200 border-l-4 border-gray-500 shadow-sm scale-[1.01]"
-                      : "hover:bg-gray-100"
+                  ${isSelected
+                    ? "bg-gray-200 border-l-4 border-gray-500 shadow-sm scale-[1.01]"
+                    : "hover:bg-gray-100"
                   }
                   ${unread ? "bg-gray-100 shadow-md scale-[1.02]" : ""}
                 `}
@@ -173,9 +170,8 @@ export default function Sidebar({ onSelectChat }) {
                       {campaign.campaignname}
                     </div>
                     <div
-                      className={`text-sm truncate max-w-[180px] ${
-                        unread ? "text-gray-900 font-semibold" : "text-gray-500"
-                      }`}
+                      className={`text-sm truncate max-w-[180px] ${unread ? "text-gray-900 font-semibold" : "text-gray-500"
+                        }`}
                     >
                       {unread ? "New message" : "Click to chat"}
                     </div>
