@@ -72,10 +72,12 @@
 
 
 
+
 import React, { useState, useEffect } from "react";
-import { RiAddLine } from "@remixicon/react";
+import { RiAddLine, RiMore2Fill } from "@remixicon/react";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { Dropdown, Menu, Modal, message } from "antd";
 
 const TodoListCard = () => {
   const [todos, setTodos] = useState([]);
@@ -84,9 +86,16 @@ const TodoListCard = () => {
   const [selectedTodo, setSelectedTodo] = useState(null);
   const [formData, setFormData] = useState({ description: "", duedate: "" });
 
+  // ✅ New confirm modal state
+  const [confirmModal, setConfirmModal] = useState({
+    visible: false,
+    title: "",
+    onOk: null,
+  });
+
   const { token, user } = useSelector((state) => state.auth);
 
-  // Fetch Todos (example endpoint, adjust as needed)
+  // Fetch Todos
   const getTodoList = async () => {
     try {
       setLoading(true);
@@ -96,6 +105,7 @@ const TodoListCard = () => {
       setTodos(res.data.data || []);
     } catch (error) {
       console.error("Error fetching todos:", error);
+      message.error("Failed to fetch todos");
     } finally {
       setLoading(false);
     }
@@ -105,7 +115,7 @@ const TodoListCard = () => {
     getTodoList();
   }, []);
 
-  // 🧩 One unified API call
+  // Unified API call
   const handleTodoAction = async ({
     id,
     description,
@@ -133,10 +143,20 @@ const TodoListCard = () => {
       setFormData({ description: "", duedate: "" });
     } catch (error) {
       console.error("Error updating todo:", error);
+      message.error("Action failed");
     }
   };
 
-  // Form submit → add or edit
+  // ✅ Replacement for Modal.confirm
+  const showConfirm = ({ title, onOk }) => {
+    setConfirmModal({
+      visible: true,
+      title,
+      onOk,
+    });
+  };
+
+  // Handle form submit
   const handleSubmit = (e) => {
     e.preventDefault();
     handleTodoAction({
@@ -146,12 +166,15 @@ const TodoListCard = () => {
     });
   };
 
-  // Open modal
+  // Open modal for Add/Edit
   const openModal = (todo = null) => {
     setSelectedTodo(todo);
     setFormData(
       todo
-        ? { description: todo.title, duedate: todo.due }
+        ? {
+            description: todo.description,
+            duedate: todo.duedate?.split("T")[0] || "",
+          }
         : { description: "", duedate: "" }
     );
     setShowModal(true);
@@ -170,63 +193,109 @@ const TodoListCard = () => {
         </button>
       </div>
 
-      {/* Todos */}
+      {/* Todo List */}
       <div className="space-y-4">
         {loading ? (
           <p>Loading...</p>
         ) : todos.length === 0 ? (
           <p className="text-gray-400 text-sm">No todos yet.</p>
         ) : (
-          todos.map((todo) => (
-            <div
-              key={todo.id}
-              className="flex items-center gap-4 border-b border-gray-200 pb-3"
-            >
-              <input
-                type="checkbox"
-                checked={todo.completed}
-                onChange={() =>
-                  handleTodoAction({
-                    id: todo.id,
-                    isCompleted: !todo.completed,
-                  })
-                }
-                className="mt-1 form-checkbox h-5 w-5 text-blue-600 cursor-pointer"
-              />
-              <div>
-                <p
-                  className={`text-sm font-medium mb-1 ${
-                    todo.completed ? "line-through text-gray-400" : ""
-                  }`}
-                >
-                  {todo.title}
-                </p>
-                <p className="text-xs text-gray-500">Due In: {todo.due}</p>
-              </div>
+          todos.map((todo) => {
+            const isCompleted = todo.iscompleted;
 
-              {/* Action buttons */}
-              <div className="ml-auto flex items-center gap-2">
-                <button
-                  onClick={() => openModal(todo)}
-                  className="text-blue-500 text-xs font-medium hover:underline"
-                >
+            const menu = (
+              <Menu>
+                {!isCompleted && (
+                  <Menu.Item
+                    key="complete"
+                    onClick={() =>
+                      showConfirm({
+                        title: "Mark this todo as complete?",
+                        onOk: () =>
+                          handleTodoAction({
+                            id: todo.id,
+                            isCompleted: true,
+                          }),
+                      })
+                    }
+                  >
+                    Mark as Complete
+                  </Menu.Item>
+                )}
+                <Menu.Item key="edit" onClick={() => openModal(todo)}>
                   Edit
-                </button>
-                <button
+                </Menu.Item>
+                <Menu.Item
+                  key="delete"
+                  danger
                   onClick={() =>
-                    handleTodoAction({ id: todo.id, isDeleted: true })
+                    showConfirm({
+                      title: "Are you sure you want to delete this todo?",
+                      onOk: () =>
+                        handleTodoAction({ id: todo.id, isDeleted: true }),
+                    })
                   }
-                  className="text-red-500 text-xs font-medium hover:underline"
                 >
                   Delete
-                </button>
+                </Menu.Item>
+              </Menu>
+            );
+
+            return (
+              <div
+                key={todo.id}
+                className="flex items-center gap-4 border-b border-gray-200 pb-3"
+              >
+                <input
+                  type="checkbox"
+                  checked={isCompleted}
+                  disabled={isCompleted}
+                  onChange={() =>
+                    !isCompleted &&
+                    showConfirm({
+                      title: "Mark this todo as complete?",
+                      onOk: () =>
+                        handleTodoAction({
+                          id: todo.id,
+                          isCompleted: true,
+                        }),
+                    })
+                  }
+                  className="mt-1 form-checkbox h-5 w-5 text-blue-600 cursor-pointer disabled:opacity-50"
+                />
+
+                <div>
+                  <p
+                    className={`text-sm font-medium mb-1 ${
+                      isCompleted ? "line-through text-gray-400" : ""
+                    }`}
+                  >
+                    {todo.description}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Due: {todo.duedate?.split("T")[0]}
+                  </p>
+                </div>
+
+                {/* Dropdown menu */}
+                <div className="ml-auto">
+                  <Dropdown
+                    overlay={menu}
+                    trigger={["hover"]}
+                    placement="bottomRight"
+                  >
+                    <button className="p-1 rounded hover:bg-gray-100">
+                      <RiMore2Fill className="text-gray-600" />
+                    </button>
+                  </Dropdown>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
-      {/* Modal */}
+      {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/30 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-[90%] max-w-md">
@@ -278,13 +347,28 @@ const TodoListCard = () => {
                   type="submit"
                   className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm"
                 >
-                  {selectedTodo ? "Update" : "Add"}
+                  {selectedTodo ? "Update" : "Save"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* ✅ Confirmation Modal (React-based, works in React 19) */}
+      <Modal
+        open={confirmModal.visible}
+        title={confirmModal.title}
+        onOk={() => {
+          confirmModal.onOk?.();
+          setConfirmModal({ visible: false, title: "", onOk: null });
+        }}
+        onCancel={() =>
+          setConfirmModal({ visible: false, title: "", onOk: null })
+        }
+        okText="Yes"
+        cancelText="No"
+      />
     </div>
   );
 };
