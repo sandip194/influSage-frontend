@@ -11,6 +11,7 @@ import {
   Select,
   DatePicker,
   InputNumber,
+  Empty,
 } from "antd";
 import {
   SearchOutlined,
@@ -441,13 +442,11 @@ const CampaignTableLayout = () => {
           </table>
         ) : (
           // 🪶 Empty state
-          <div className="text-center py-16 text-gray-500">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png"
-              alt="empty"
-              className="w-20 h-20 mx-auto mb-3 opacity-60"
+          <div className="py-16 flex justify-center">
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={<span className="text-gray-500">No Campaign found for this status.</span>}
             />
-            <p className="text-gray-600 font-medium">No campaigns found</p>
           </div>
         )}
       </div>
