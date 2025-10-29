@@ -36,43 +36,12 @@ export default function Sidebar({ onSelectChat }) {
     }
   };
 
-  // Fetch unread messages
-  // const fetchUnreadMessages = async () => {
-  //   if (!token) return;
-  //   try {
-  //     const res = await axios.get(`/chat/unread-messages`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-  //     if (res.data?.data) {
-  //       setUnreadMessages(res.data.data);
-  //     }
-  //   } catch (err) {
-  //     console.error("Failed to fetch unread messages:", err);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchCampaigns();
-  //   fetchUnreadMessages();
-
-  //   // refresh unread every few seconds
-  //   const interval = setInterval(fetchUnreadMessages, 10000);
-  //   return () => clearInterval(interval);
-  // }, [token, search]);
 
   useEffect(() => {
     fetchCampaigns();
-    // fetchUnreadMessages();
-
-    // // refresh unread messages every 10 seconds
-    // const unreadInterval = setInterval(fetchUnreadMessages, 3000);
-
-    // refresh campaigns every 3 seconds
     const campaignsInterval = setInterval(fetchCampaigns, 3000);
 
-    // Cleanup intervals on unmount
     return () => {
-      // clearInterval(unreadInterval);
       clearInterval(campaignsInterval);
     };
   }, [token, search]);

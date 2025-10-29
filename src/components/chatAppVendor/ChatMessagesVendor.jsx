@@ -44,6 +44,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
   const bottomRef = useRef(null);
   const [isNearBottom, setIsNearBottom] = useState(true);
   const lastMessageId = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { token, userId, role } = useSelector((state) => state.auth) || {};
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -67,37 +68,43 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
 
 
 
-  // 🟢 1. Define this outside useEffect so it can be reused
   const fetchMessages = async () => {
-    if (!chat?.conversationid || !token) return;
-    try {
-      const res = await axios.get(`/chat/messages`, {
-        params: {
-          p_conversationid: chat.conversationid,
-          p_roleid: role,
-          p_offset: 0,
-        },
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  if (!chat?.conversationid || !token) return;
+  setIsLoading(true);
+  try {
+    const res = await axios.get(`/chat/messages`, {
+      params: {
+        p_conversationid: chat.conversationid,
+        p_roleid: role,
+        p_offset: 0,
+      },
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      if (res.data?.data?.records) {
-        const formattedMessages = res.data.data.records.map((msg) => ({
+    if (res.data?.data?.records) {
+      const formattedMessages = res.data.data.records
+        .map((msg) => ({
           id: msg.messageid,
           senderId: msg.userid,
           roleId: msg.roleid,
           content: (msg.message || "").replace(/^"|"$/g, ""),
-          file: Array.isArray(msg.filepath) ? msg.filepath.join(",") : msg.filepath || "",
+          file: Array.isArray(msg.filepath)
+            ? msg.filepath.join(",")
+            : msg.filepath || "",
           time: msg.createddate,
           replyId: msg.replyid || null,
-          deleted: msg.isdeleted  || false,
+          deleted: msg.isdeleted || false,
           readbyinfluencer: msg.readbyinfluencer || false,
           readbyvendor: msg.readbyvendor || false,
-        })) .sort((a, b) => new Date(a.time) - new Date(b.time));
+        }))
+        .sort((a, b) => new Date(a.time) - new Date(b.time));
 
         dispatch(setMessages(formattedMessages));
       }
     } catch (err) {
       console.error("Failed to fetch messages:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -107,7 +114,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
     }
   }, []);
   useEffect(() => {
-    // 🔁 Notify parent after refetch
+    // Notify parent after refetch
     onMessagesRefetch && onMessagesRefetch();
   }, [messages]);
 
@@ -248,15 +255,26 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
   }, [socket, dispatch]);
 
 
-  useEffect(() => {
-    if (!chat?.conversationid || !token || !role) return;
+    useEffect(() => {
+      if (!chat?.conversationid || !token || !role) return;
 
-    const intervalId = setInterval(() => {
-      fetchMessages();
-    }, 3000); // fetch every 3 seconds
+      let timer; 
 
-    return () => clearInterval(intervalId); // cleanup on unmount or dependency change
-  }, [chat?.conversationid, token, role]);
+      const loadMessagesOnce = async () => {
+        setIsLoading(true);
+
+        await Promise.all([
+      fetchMessages(),
+      new Promise((resolve) => setTimeout(resolve, 300)), 
+    ]);
+    setIsLoading(false);
+
+  };
+
+  loadMessagesOnce();
+
+  return () => clearTimeout(timer);
+}, [chat?.conversationid, token, role]);
 
 
   useEffect(() => {
@@ -333,17 +351,20 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
   }, []);
 
   useEffect(() => {
-    if (!messages || !messages.length) return;
-
-    const latest = messages[messages.length - 1]?.id;
-    if (lastMessageId.current !== latest && isNearBottom) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!isLoading && messages.length > 0) {
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     }
-    lastMessageId.current = latest;
-  }, [messages, isNearBottom]);
+  }, [isLoading, messages]);
 
-  if (!chat) {
-    return <div className="flex-1 p-4">Select a chat to start messaging</div>;
+  if (chat && isLoading) {
+    return (
+       <div className="flex items-center justify-center flex-1 h-full">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+      <span className="ml-3 text-gray-600">Loading messages...</span>
+    </div>
+    );
   }
 
   return (

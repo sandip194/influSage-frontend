@@ -47,6 +47,7 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
   const bottomRef = useRef(null);
   const [isNearBottom, setIsNearBottom] = useState(true);
   const lastMessageId = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
 
 
@@ -235,16 +236,21 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
   };
 
 
-  // 🔁 Poll messages every 5 seconds
   useEffect(() => {
-    if (!chat?.id || !token || !role) return;
+  if (!chat?.id || !token || !role) return;
 
-    const intervalId = setInterval(() => {
-      fetchMessages();
-    }, 3000); // Every 3 seconds
+  const loadMessagesOnce = async () => {
+    setIsLoading(true);
+    await Promise.all([
+      fetchMessages(),
+      new Promise((resolve) => setTimeout(resolve, 600)),
+    ]);
+    setIsLoading(false);
+  };
 
-    return () => clearInterval(intervalId); // Cleanup on unmount or change
-  }, [chat?.id, token, role]);
+  loadMessagesOnce();
+}, [chat?.id, token, role]);
+
 
 
   useEffect(() => {
@@ -321,21 +327,25 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
   }, []);
 
   useEffect(() => {
-    if (!messages || !messages.length) return;
-
-    const latest = messages[messages.length - 1]?.id;
-    if (lastMessageId.current !== latest && isNearBottom) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!isLoading && messages.length > 0) {
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     }
-    lastMessageId.current = latest;
-  }, [messages, isNearBottom]);
+  }, [isLoading, messages]);
 
 
 
 
 
-  if (!chat)
-    return <div className="flex-1 p-4">Select a chat to start messaging</div>;
+   if (chat && isLoading) {
+    return (
+       <div className="flex items-center justify-center flex-1 h-full">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+      <span className="ml-3 text-gray-600">Loading messages...</span>
+    </div>
+    );
+  }
 
   return (
     <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-0 pt-6 space-y-1">

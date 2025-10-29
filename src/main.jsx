@@ -12,7 +12,7 @@ createRoot(document.getElementById('root')).render(
   // <StrictMode>
     <Provider store={store}>
       <AppWrapper>
-        {/* <GlobalSecurityBlocker /> */}
+        <GlobalSecurityBlocker />
         <App />
       </AppWrapper>
     </Provider>

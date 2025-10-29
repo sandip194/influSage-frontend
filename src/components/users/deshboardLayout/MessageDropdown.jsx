@@ -1,59 +1,28 @@
-import React, { useEffect, useState } from "react";
+
 import { useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom';
-import axios from "axios";
-import { Empty } from 'antd';
 
-const MessageDropdown = () => {
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const { token, id: userId, role } = useSelector((state) => state.auth) || {};
+const MessageDropdown = ({ messages = [] }) => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
-
-  const navigaetPath = role === 1 ? "/dashboard/messages" : "/vendor-dashboard/messages"
-
-  useEffect(() => {
-    const fetchUnreadMessages = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`/chat/unread-messages`, {
-          headers: { Authorization: `Bearer ${token}` } 
-        });
-
-        if (res.data?.data) {
-          setMessages(res.data.data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch unread messages:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUnreadMessages();
-  }, []);
+  const { role } = useSelector((state) => state.auth);
+  const navigatePath = role === 1 ? "/dashboard/messages" : "/vendor-dashboard/messages";
 
   return (
-    <div
-      className="w-64 sm:w-80 bg-white p-4 shadow-xl rounded-2xl"
-      style={{ left: "-71px", position: "absolute" }}
-    >
+    <div className="w-64 sm:w-80 bg-white p-4 shadow-xl rounded-2xl">
       <div className="flex justify-between items-center mb-3">
         <h2 className="font-semibold text-lg text-[#0b0d28]">Messages</h2>
-        <button 
-        className="text-sm text-[#0b0d28] font-medium hover:underline cursor-pointer"
-        onClick={() => navigate(navigaetPath)}
-          >
+        <button
+          className="text-sm text-[#0b0d28] font-medium hover:underline cursor-pointer"
+          onClick={() => navigate(navigatePath)}
+        >
           View All
         </button>
       </div>
 
-      {loading ? (
-        <p className="text-gray-500 text-sm">Loading...</p>
-      ) : messages.length === 0 ? (
+      {messages.length === 0 ? (
         <div className="flex justify-center py-5">
-          <Empty description="No Notifications" />
+          <p className="text-gray-500 text-sm">No New Messages</p>
         </div>
       ) : (
         <div className="divide-y divide-gray-200">
@@ -62,16 +31,14 @@ const MessageDropdown = () => {
               <img
                 src={
                   msg.photopath
-                    ? `${BASE_URL}${ msg.photopath.startsWith("/") ? "" : "/" }${msg.photopath}`
+                    ? `${BASE_URL}${msg.photopath.startsWith("/") ? "" : "/"}${msg.photopath}`
                     : ""
                 }
                 className="w-10 h-10 rounded-full object-cover"
               />
               <div>
                 <div className="flex items-center gap-3 text-sm">
-                  <span className="font-bold text-[#0b0d28]">
-                    {msg.firstname}
-                  </span>
+                  <span className="font-bold text-[#0b0d28]">{msg.name}</span>
                   <span className="text-gray-400">
                     {msg.createddate
                       ? new Date(msg.createddate).toLocaleTimeString([], {
@@ -82,9 +49,7 @@ const MessageDropdown = () => {
                       : ""}
                   </span>
                 </div>
-                <p className="text-sm text-[#0b0d28] mt-1">
-                  {msg.message || "No content"}
-                </p>
+                <p className="text-sm text-[#0b0d28] mt-1">{msg.message || "No content"}</p>
               </div>
             </div>
           ))}

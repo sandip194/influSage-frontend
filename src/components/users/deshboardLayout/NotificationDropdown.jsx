@@ -1,57 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import axios from 'axios';
-import {
-  Skeleton,
-  Empty,
-  Typography,
-} from 'antd';
+import React from 'react';
+import { Skeleton, Empty, Typography } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
-const NotificationDropdown = ({ closeDropdown, onViewAll }) => {
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const { token } = useSelector((state) => state.auth);
-
-  const getAllNotification = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get('new/getallnotification', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = res.data?.data || [];
-
-      const formatted = data.map((item) => ({
-        id: item.notificationid,
-        title: item.title,
-        message: item.description,
-        time: new Date(item.createddate).toLocaleString(),
-      }));
-
-      setNotifications(formatted);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch only when dropdown mounts (i.e., opens)
-  useEffect(() => {
-    getAllNotification();
-  }, []); // Empty dependency: Runs once per mount
-
+const NotificationDropdown = ({ closeDropdown, onViewAll, onUnreadChange, notifications = [], loading = false }) => {
   const handleViewAll = () => {
-    closeDropdown(); // Close dropdown immediately for better UX
-    // Pass data to parent to open Modal
-    if (onViewAll) {
-      onViewAll(notifications);
-    }
+    closeDropdown();
+    onViewAll?.(notifications);
+    onUnreadChange?.(false);
   };
 
   return (
@@ -61,7 +18,7 @@ const NotificationDropdown = ({ closeDropdown, onViewAll }) => {
         <button
           onClick={handleViewAll}
           className="text-sm text-[#0b0d28] font-medium hover:underline cursor-pointer"
-          disabled={loading} // Disable while loading
+          disabled={loading}
         >
           View All
         </button>
