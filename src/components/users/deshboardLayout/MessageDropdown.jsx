@@ -31,8 +31,6 @@ const MessageDropdown = ({ messages = [] }) => {
               <img
                 src={
                   msg.photopath
-                    ? `${BASE_URL}${msg.photopath.startsWith("/") ? "" : "/"}${msg.photopath}`
-                    : ""
                 }
                 className="w-10 h-10 rounded-full object-cover"
               />
@@ -42,10 +40,10 @@ const MessageDropdown = ({ messages = [] }) => {
                   <span className="text-gray-400">
                     {msg.createddate
                       ? new Date(msg.createddate).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true,
-                        })
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
                       : ""}
                   </span>
                 </div>

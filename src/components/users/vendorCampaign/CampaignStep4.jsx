@@ -142,7 +142,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
           else if (ext === "pdf") type = "application/pdf";
           else if (["doc", "docx"].includes(ext)) type = "application/msword";
 
-          const fileUrl = `${BASE_URL}/${f.filepath.replace(/\\/g, "/")}`;
+          const fileUrl = f.filepath;
 
           return {
             name,

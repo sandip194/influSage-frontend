@@ -249,7 +249,7 @@ const SavedLayout = () => {
                   </span>
                   <div className="flex items-center gap-3 mb-3">
                     <img
-                      src={`${BASE_URL}/${campaign.photopath}`} // adjust if image path needs base URL
+                      src={campaign.photopath}
                       alt="icon"
                       className="w-10 h-10 rounded-full object-cover"
                     />

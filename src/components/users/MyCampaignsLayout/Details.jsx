@@ -210,7 +210,7 @@ const Details = () => {
           <div className="bg-white rounded-2xl overflow-hidden">
             <div className="relative h-40 bg-gray-200">
               <img
-                src={`${BASE_URL}/${campaign?.photopath}`}
+                src={campaign?.photopath}
                 alt="Logo"
                 className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover"
               />

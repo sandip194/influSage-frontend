@@ -30,7 +30,7 @@ const AppliedLayout = () => {
   const [loading, setLoading] = useState(false);
 
   const { token } = useSelector((state) => state.auth);
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+ // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -247,7 +247,7 @@ const AppliedLayout = () => {
                   </span>
                   <div className="flex items-center gap-3 mb-3">
                     <img
-                      src={`${BASE_URL}/${campaign.photopath}`} // adjust if image path needs base URL
+                      src={campaign.photopath} 
                       alt="icon"
                       className="w-10 h-10 rounded-full object-cover"
                     />

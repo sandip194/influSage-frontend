@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 
 const UserTableLayout = () => {
     const { token } = useSelector((state) => state.auth);
-    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
     const navigate = useNavigate();
 
     const [statusList, setStatusList] = useState([]); // Dynamic tabs
@@ -336,7 +336,7 @@ const UserTableLayout = () => {
                                     >
                                         <td className="px-4 py-3 flex items-center space-x-3">
                                             <img
-                                                src={`${BASE_URL}/${user.photopath}`}
+                                                src={user.photopath}
                                                 alt={user.firstname}
                                                 className="w-10 h-10 rounded-full object-cover"
                                             />

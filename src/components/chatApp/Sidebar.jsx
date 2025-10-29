@@ -9,7 +9,7 @@ export default function Sidebar({ onSelectChat }) {
   const [search, setSearch] = useState("");
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [unreadMessages, setUnreadMessages] = useState([]);
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   // Fetch campaign list
   const fetchCampaigns = async () => {
@@ -24,9 +24,7 @@ export default function Sidebar({ onSelectChat }) {
       if (response.status === 200) {
         const formatted = (response.data.data || []).map((c) => ({
           ...c,
-          campaignphoto: c.campaignphoto
-            ? `${BASE_URL}/${c.campaignphoto.startsWith("src/") ? c.campaignphoto : `src/${c.campaignphoto}`}`
-            : null,
+          campaignphoto: c.campaignphoto ? c.campaignphoto : null,
         }));
         setCampaigns(formatted);
       }

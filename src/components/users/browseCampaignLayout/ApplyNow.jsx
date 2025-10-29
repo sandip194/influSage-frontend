@@ -33,7 +33,7 @@ const ApplyNow = () => {
   const { campaignId } = useParams();
   const navigate = useNavigate()
   const token = useSelector((state) => state.auth.token);
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const allowedTypes = [
     "image/png",
@@ -320,7 +320,7 @@ const ApplyNow = () => {
                   file.type?.includes("officedocument");
 
                 const previewUrl = file.isExisting
-                  ? `${BASE_URL}/src${file.filepath}` // for backend files
+                  ? file.filepath                  // for backend files
                   : file.previewUrl || "";         // for new files
 
                 return (

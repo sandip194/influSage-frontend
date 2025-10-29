@@ -29,7 +29,7 @@ dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
 const CampaignDetails = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [proposal, setProposal] = useState(""); 
+  const [proposal, setProposal] = useState("");
   const [errors, setErrors] = useState({});
   const [cancelReason, setCancelReason] = useState("");
   const [isCancelModel, setCancelModel] = useState(false);
@@ -60,7 +60,7 @@ const CampaignDetails = () => {
         }
       })
 
-     // console.log(res?.data?.data)
+      // console.log(res?.data?.data)
       setCampaignDetails(res?.data?.data)
     } catch (error) {
       console.error(error)
@@ -92,141 +92,141 @@ const CampaignDetails = () => {
   }, [isCancelModel]);
 
   const handleCancelComplete = async () => {
-  const newErrors = {};
-  if (!cancelReason) newErrors.cancelReason = "Please select a reason for cancellation.";
-  if (Object.keys(newErrors).length > 0) {
-    setErrors(newErrors);
-    return;
-  }
+    const newErrors = {};
+    if (!cancelReason) newErrors.cancelReason = "Please select a reason for cancellation.";
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
-  const selectedReason = cancelReasons.find(
-    (reason) => (reason.reason_name || reason.name) === cancelReason
-  );
-
-  try {
-    const payload = {
-      p_campaignid: campaignDetails?.campaignid || campaignId,
-      p_objectiveid: selectedReason.id,
-    };
-
-    console.log("Cancel payload:", payload);
-
-    const res = await axios.post(
-      `/vendor/cancle-campaign`,
-      payload,
-      { headers: { Authorization: `Bearer ${token}` } }
+    const selectedReason = cancelReasons.find(
+      (reason) => (reason.reason_name || reason.name) === cancelReason
     );
 
-    if (res.status === 200) {
-      toast.success(res.data?.message);
-      setCancelModel(false);
-      setCancelReason("");
-      setErrors({});
-      // getCampaignDetails();
-    } else {
-      toast.error(res.data?.message);
+    try {
+      const payload = {
+        p_campaignid: campaignDetails?.campaignid || campaignId,
+        p_objectiveid: selectedReason.id,
+      };
+
+      console.log("Cancel payload:", payload);
+
+      const res = await axios.post(
+        `/vendor/cancle-campaign`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.status === 200) {
+        toast.success(res.data?.message);
+        setCancelModel(false);
+        setCancelReason("");
+        setErrors({});
+        // getCampaignDetails();
+      } else {
+        toast.error(res.data?.message);
+      }
+    } catch (error) {
+      console.error("Cancel error:", error);
+      toast.error(error);
     }
-  } catch (error) {
-    console.error("Cancel error:", error);
-    toast.error(error);
-  }
-};
-
-// Function to pause the campaign
-
-const handlePauseCampaign = async () => {
-  if (!campaignDetails?.id) {
-    toast.error("Campaign ID not found");
-    return;
-  }
-
-  try {
-    const res = await axios.post(
-      `/vendor/pause-campaign/${campaignDetails.id}`,
-      null,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    if (res.status === 200) {
-      toast.success(res.data?.message);
-      setIsPauseModalOpen(false);
-      // getCampaignDetails();
-    } else {
-      toast.error(res.data?.message);
-    }
-  } catch (error) {
-    console.error("Pause campaign error:", error);
-    toast.error(error);
-  }
-};
-
- const handleEditClick = () => {
-  if (campaignDetails?.iseditable === true || campaignDetails?.iseditable === "Is editable") {
-    navigate(`/vendor-dashboard/vendor-campaign/edit-campaign/${campaignDetails?.id}`);
-  } else {
-    setFormData({
-  startDate: campaignDetails?.requirements?.startdate
-    ? dayjs(campaignDetails.requirements.startdate, "DD-MM-YYYY")
-    : null,
-  endDate: campaignDetails?.requirements?.enddate
-    ? dayjs(campaignDetails.requirements.enddate, "DD-MM-YYYY")
-    : null,
-});
-
-    setIsDateModalOpen(true);
-  }
-};
-
-const validateDates = () => {
-  const newErrors = {};
-
-  if (!formData.startDate) newErrors.startDate = "Start date is required";
-  if (!formData.endDate) newErrors.endDate = "End date is required";
-  if (formData.startDate && formData.endDate && formData.endDate.isBefore(formData.startDate)) {
-    newErrors.endDate = "End date cannot be before start date";
-  }
-
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
-
-
- const handleSaveDates = async () => {
-  if (!validateDates()) return;
-
-  const payload = {
-    campaignId: Number(campaignId),
-    isFinalSubmit: true,
-    p_campaignjson: {
-      startdate: formData.startDate?.format("DD-MM-YYYY"),
-      enddate: formData.endDate?.format("DD-MM-YYYY"),
-    },
   };
 
-  try {
-    setLoading(true);
-    const res = await axios.post(`${BASE_URL}/vendor/update-campaign`, payload, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  // Function to pause the campaign
 
-    if (res.data?.success) {
-      toast.success(res.data?.message || "Campaign dates updated successfully!");
-      setIsDateModalOpen(false);
-      getCampaignDetails();
-    } else {
-      toast.error(res.data?.message || "Failed to update dates");
+  const handlePauseCampaign = async () => {
+    if (!campaignDetails?.id) {
+      toast.error("Campaign ID not found");
+      return;
     }
-  } catch (err) {
-    console.error("❌ API Error:", err.response?.data || err.message);
-    toast.error("Failed to update campaign dates. Try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+
+    try {
+      const res = await axios.post(
+        `/vendor/pause-campaign/${campaignDetails.id}`,
+        null,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.status === 200) {
+        toast.success(res.data?.message);
+        setIsPauseModalOpen(false);
+        // getCampaignDetails();
+      } else {
+        toast.error(res.data?.message);
+      }
+    } catch (error) {
+      console.error("Pause campaign error:", error);
+      toast.error(error);
+    }
+  };
+
+  const handleEditClick = () => {
+    if (campaignDetails?.iseditable === true || campaignDetails?.iseditable === "Is editable") {
+      navigate(`/vendor-dashboard/vendor-campaign/edit-campaign/${campaignDetails?.id}`);
+    } else {
+      setFormData({
+        startDate: campaignDetails?.requirements?.startdate
+          ? dayjs(campaignDetails.requirements.startdate, "DD-MM-YYYY")
+          : null,
+        endDate: campaignDetails?.requirements?.enddate
+          ? dayjs(campaignDetails.requirements.enddate, "DD-MM-YYYY")
+          : null,
+      });
+
+      setIsDateModalOpen(true);
+    }
+  };
+
+  const validateDates = () => {
+    const newErrors = {};
+
+    if (!formData.startDate) newErrors.startDate = "Start date is required";
+    if (!formData.endDate) newErrors.endDate = "End date is required";
+    if (formData.startDate && formData.endDate && formData.endDate.isBefore(formData.startDate)) {
+      newErrors.endDate = "End date cannot be before start date";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+
+  const handleSaveDates = async () => {
+    if (!validateDates()) return;
+
+    const payload = {
+      campaignId: Number(campaignId),
+      isFinalSubmit: true,
+      p_campaignjson: {
+        startdate: formData.startDate?.format("DD-MM-YYYY"),
+        enddate: formData.endDate?.format("DD-MM-YYYY"),
+      },
+    };
+
+    try {
+      setLoading(true);
+      const res = await axios.post(`/vendor/update-campaign`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data?.success) {
+        toast.success(res.data?.message || "Campaign dates updated successfully!");
+        setIsDateModalOpen(false);
+        getCampaignDetails();
+      } else {
+        toast.error(res.data?.message || "Failed to update dates");
+      }
+    } catch (err) {
+      console.error("❌ API Error:", err.response?.data || err.message);
+      toast.error("Failed to update campaign dates. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   if (loading) return <div className="text-center">Loading campaign...</div>;
-   if (loading) {
+  if (loading) {
     return (
       <div className="w-full text-sm overflow-x-hidden space-y-6">
         {/* Header */}
@@ -348,7 +348,7 @@ const validateDates = () => {
                 className="w-full h-28 object-cover"
               /> */}
               <img
-                src={`${BASE_URL}/${campaignDetails?.photopath}`}
+                src={campaignDetails?.photopath}
                 alt="Logo"
                 className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover"
               />
@@ -363,15 +363,15 @@ const validateDates = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                 {campaignDetails?.iseditable !== "Not editable" && (
-                  <button
-                    type="button"
-                    onClick={handleEditClick}
-                    className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
-                  >
-                    Edit Campaign
-                  </button>
-                )}
+                  {campaignDetails?.iseditable !== "Not editable" && (
+                    <button
+                      type="button"
+                      onClick={handleEditClick}
+                      className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
+                    >
+                      Edit Campaign
+                    </button>
+                  )}
                   <button
                     onClick={() => setIsPauseModalOpen(true)}
                     className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
@@ -524,7 +524,7 @@ const validateDates = () => {
                     }
                   >
                     <img
-                      src={`${BASE_URL}/${influencer.userphoto}`}
+                      src={influencer.userphoto}
                       alt={`${influencer.firstname} ${influencer.lastname}`}
                       className="w-12 h-12 rounded-full object-cover"
                     />
@@ -539,7 +539,7 @@ const validateDates = () => {
                         {influencer.providers.map((provider) => (
                           <div key={provider.providerid} className="flex items-center gap-1 text-sm text-gray-600">
                             <img
-                              src={`${BASE_URL}/${provider.iconpath}`}
+                              src={provider.iconpath}
                               alt={provider.providername}
                               className="w-4 h-4"
                             />

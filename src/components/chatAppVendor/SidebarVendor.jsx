@@ -6,7 +6,7 @@ import { useLocation } from "react-router-dom";
 
 export default function SidebarVendor({ onSelectChat }) {
   const { token } = useSelector((state) => state.auth);
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+ // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const location = useLocation();
 
   const [selectedCampaign, setSelectedCampaign] = useState(null);
@@ -31,9 +31,7 @@ export default function SidebarVendor({ onSelectChat }) {
       if (response.status === 200) {
         const formatted = (response.data.data || []).map((c) => ({
           ...c,
-          campaignphoto: c.campaignphoto
-            ? `${BASE_URL}/${c.campaignphoto.startsWith("src/") ? c.campaignphoto : `src/${c.campaignphoto}`}`
-            : null,
+          campaignphoto: c.campaignphoto ? c.campaignphoto : null,
         }));
 
         setCampaigns(formatted);
@@ -45,9 +43,7 @@ export default function SidebarVendor({ onSelectChat }) {
               campaignId: c.campaignid,
               campaignName: c.campaignname,
               campaignPhoto: c.campaignphoto,
-              img: v.userphoto
-                ? `${BASE_URL}/${v.userphoto.startsWith("src/") ? v.userphoto : `src/${v.userphoto}`}`
-                : null,
+              img: v.userphoto ? v.userphoto : null,
               name: `${v.firstname} ${v.lastname}`,
               message: v.lastmessage || "No message",
               time: v.lastmessagedate || "",
@@ -116,7 +112,7 @@ useEffect(() => {
           conversationid: influencer.conversationid,
           id: influencer.conversationid,
           name: `${influencer.firstname} ${influencer.lastname}`,
-          img: influencer.userphoto ? `${BASE_URL}/${influencer.userphoto}` : null,
+          img: influencer.userphoto ? influencer.userphoto : null,
           influencerid: influencer.influencerid,
         });
       }

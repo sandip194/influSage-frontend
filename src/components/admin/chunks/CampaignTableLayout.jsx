@@ -317,7 +317,7 @@ const CampaignTableLayout = () => {
                     <div className="flex items-center gap-3">
                       {c.photopath ? (
                         <img
-                          src={`${BASE_URL}/${c.photopath}`}
+                          src={c.photopath}
                           alt={c.name}
                           className="w-12 h-12 object-cover rounded-full border border-gray-200"
                         />

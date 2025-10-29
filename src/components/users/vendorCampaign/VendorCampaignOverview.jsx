@@ -138,7 +138,7 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
         <div className="flex gap-4 flex-wrap">
           {images.length > 0 ? (
             images.map((file, i) => {
-              const fileUrl = `${BASE_URL}/${file}`;
+              const fileUrl = file;
               const fileType = getFileType(file);
 
               return (

@@ -247,7 +247,7 @@ const ViewAllOffers = () => {
                 >
                   <td className="p-4 flex gap-3 items-center">
                     <img
-                      src={`${BASE_URL}/${offer.photopath}`}
+                      src={offer.photopath}
                       alt={offer.name}
                       className="w-10 h-10 rounded-full"
                     />

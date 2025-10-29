@@ -118,7 +118,7 @@ const InviteModal = ({
                   {/* Campaign Photo */}
                   {campaign.photopath && (
                     <img
-                      src={`${BASE_URL}/${campaign.photopath}`}
+                      src={campaign.photopath}
                       alt={campaign.name}
                       className="w-12 h-12 rounded-full object-cover"
                     />

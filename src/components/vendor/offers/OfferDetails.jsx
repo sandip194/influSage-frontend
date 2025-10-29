@@ -32,7 +32,7 @@ const OfferDetails = () => {
             influencerId: offerDetails.influencerid,
             influencerName: `${offerDetails.firstname} ${offerDetails.lastname}`,
             influencerPhoto: offerDetails.photopath
-                ? `${BASE_URL}/${offerDetails.photopath}`
+                ? offerDetails.photopath
                 : null,
             conversationId: offerDetails.conversationid || null,
 
@@ -41,7 +41,7 @@ const OfferDetails = () => {
                 influencerid: offerDetails.influencerid,
                 influencerName: `${offerDetails.firstname} ${offerDetails.lastname}`,
                 influencerPhoto: offerDetails.photopath
-                ? `${BASE_URL}/${offerDetails.photopath}`
+                ? offerDetails.photopath
                 : null,
                 conversationId: offerDetails.conversationid || null,
             },
@@ -110,7 +110,7 @@ const OfferDetails = () => {
         followers[key] = p.nooffollowers?.toLocaleString("en-IN");
     });
 
-    const profileImage = `${BASE_URL}/${offerDetails?.photopath}`;
+    const profileImage = offerDetails?.photopath;
     const influencerName = `${offerDetails?.firstname || ""} ${offerDetails?.lastname || ""}`;
     const location = `${offerDetails?.statename || ""}, ${offerDetails?.countryname || ""}`;
 
@@ -284,7 +284,7 @@ const handleConfirmAccept = () => {
                         <h2 className="text-lg font-semibold mb-4">Portfolio</h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {offerDetails?.filepaths?.map((file, idx) => {
-                                const fileUrl = `${BASE_URL}/src${file.filepath}`;
+                                const fileUrl = file.filepath;
                                 const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileUrl);
 
                                 return (

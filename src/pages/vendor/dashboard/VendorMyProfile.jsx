@@ -109,7 +109,7 @@ const VendorMyProfile = () => {
                             <img
                                 src={
                                     profileData?.p_profile?.photopath
-                                        ? `${BASE_URL}/${profileData.p_profile.photopath}`
+                                        ? profileData.p_profile.photopath
                                         : `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData?.p_profile?.name || "User")}&background=E5E7EB&color=111827&size=128`
 
                                 }
@@ -145,7 +145,7 @@ const VendorMyProfile = () => {
                             </div>
                         </div>
                         <div className="px-6 pb-6">
-                             <button
+                            <button
                                 onClick={() => navigate("/vendor-dashboard/edit-profile")}
                                 className="bg-[#0f122f] text-white px-5 py-2 rounded-full font-medium hover:bg-[#23265a] transition inline-block"
                             >
@@ -283,10 +283,10 @@ const VendorMyProfile = () => {
                             <div>
                                 <p className="font-medium text-gray-900">How large is your company?</p>
                                 <p className="text-gray-500">
-                                    {profileData?.p_profile?.companysizename }{" "}
+                                    {profileData?.p_profile?.companysizename}{" "}
                                     {profileData?.p_profile?.minemployees && profileData?.p_profile?.maxemployees
-                                    ? `(${profileData.p_profile.minemployees} - ${profileData.p_profile.maxemployees} Employees)`
-                                    : ""}
+                                        ? `(${profileData.p_profile.minemployees} - ${profileData.p_profile.maxemployees} Employees)`
+                                        : ""}
                                 </p>
                             </div>
 
@@ -307,29 +307,29 @@ const VendorMyProfile = () => {
                         <h3 className="font-bold mb-4 text-base">Platforms</h3>
                         <div className="flex flex-col gap-3">
                             {profileData?.p_providers?.map((provider) => (
-                            <a
-                                key={provider.providerid}
-                                href={provider.handleslink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-4 border border-gray-200 p-4 rounded-lg hover:shadow-md transition"
-                            >
-                                {provider.iconpath ? (
-                                <img
-                                    src={`${BASE_URL}/${provider.iconpath}`}
-                                    alt={provider.name}
-                                    className="w-10 h-10 object-contain rounded-full"
-                                />
-                                ) : (
-                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
-                                    ?
-                                </div>
-                                )}
+                                <a
+                                    key={provider.providerid}
+                                    href={provider.handleslink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-4 border border-gray-200 p-4 rounded-lg hover:shadow-md transition"
+                                >
+                                    {provider.iconpath ? (
+                                        <img
+                                            src={provider.iconpath}
+                                            alt={provider.name}
+                                            className="w-10 h-10 object-contain rounded-full"
+                                        />
+                                    ) : (
+                                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+                                            ?
+                                        </div>
+                                    )}
 
-                                <div>
-                                <p className="font-medium text-base">{provider.name}</p>
-                                </div>
-                            </a>
+                                    <div>
+                                        <p className="font-medium text-base">{provider.name}</p>
+                                    </div>
+                                </a>
                             ))}
                         </div>
                     </div>

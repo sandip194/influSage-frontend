@@ -201,7 +201,7 @@ const OffersLayout = () => {
                                         <td className="p-4 flex items-center gap-3">
                                             
                                             <img
-                                                src={`${BASE_URL}/${offer?.photopath}`}
+                                                src={offer?.photopath}
                                                 alt={offer.name}
                                                 className="w-9 h-9 rounded-full object-cover"
                                             />

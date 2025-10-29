@@ -28,12 +28,7 @@ const CampaignReviewStep = ({ onEdit }) => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { campaignId } = useParams();
 
-  const getFullUrl = (path) => {
-    if (!path) return null;
-    return path.startsWith("http")
-      ? path
-      : `${BASE_URL}/${path.replace(/^\/+/, "")}`;
-  };
+  
 
   useEffect(() => {
   const fetchCampaign = async () => {
@@ -133,7 +128,7 @@ const CampaignReviewStep = ({ onEdit }) => {
     : [];
 
   const camp_profile = p_campaignjson?.photopath
-    ? [getFullUrl(p_campaignjson.photopath)]
+    ? p_campaignjson?.photopath
     : [];
 
   const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
@@ -357,7 +352,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                 <div className="flex gap-4 flex-wrap justify-center">
                   {p_campaignfilejson.length > 0
                     ? p_campaignfilejson.map((file, i) => {
-                      const fileUrl = getFullUrl(file.filepath);
+                      const fileUrl = file.filepath;
                       const ext = fileUrl?.split(".").pop().toLowerCase();
 
                       const isImage = [

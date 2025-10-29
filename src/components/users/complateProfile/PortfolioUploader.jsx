@@ -120,9 +120,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
         const filesFromBackend = data.filepaths
           .filter(f => f.filepath)
           .map((f, index) => {
-            const fullUrl = f.filepath.startsWith('http')
-              ? f.filepath
-              : `${BASE_URL}/${f.filepath.replace(/^\/+/, '')}`;
+            const fullUrl = f.filepath
             const fileName = f.filepath.split('/').pop()?.toLowerCase() || '';
             const ext = fileName.split('.').pop() || '';
             const type = getFileTypeFromExt(ext);

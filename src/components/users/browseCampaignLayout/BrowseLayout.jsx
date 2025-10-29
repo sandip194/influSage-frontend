@@ -59,7 +59,7 @@ const Browse = () => {
   });
 
 
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { token } = useSelector((state) => state.auth);
 
   const navigate = useNavigate();
@@ -392,7 +392,7 @@ const Browse = () => {
                 </span>
                 <div className="flex items-center gap-3 mb-3">
                   <img
-                    src={`${BASE_URL}/${campaign.photopath}`}
+                    src={campaign.photopath}
                     alt="icon"
                     loading="lazy"
                     className="w-10 h-10 object-cover rounded-full flex-shrink-0"

@@ -39,7 +39,7 @@ const sortOptions = [
 ];
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const getImageUrl = (path) => (path ? `${BASE_URL}/${path}` : "/placeholder.jpg");
+const getImageUrl = (path) => (path ? path : "/placeholder.jpg");
 
 const InfluencerCampaigns = () => {
   const [searchInput, setSearchInput] = useState("");

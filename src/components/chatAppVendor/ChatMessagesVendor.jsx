@@ -47,7 +47,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
   const [isLoading, setIsLoading] = useState(true);
 
   const { token, userId, role } = useSelector((state) => state.auth) || {};
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+ // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getMessageStatusIcon = (msg) => {
     const isMe = msg.roleId === role;
@@ -416,10 +416,10 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
                         let fileName = "";
 
                         if (typeof fileItem === "string") {
-                          fileUrl = `${BASE_URL}/${fileItem}`;
+                          fileUrl = `${fileItem}`;
                           fileName = fileItem.split("/").pop();
                         } else if (typeof fileItem === "object" && fileItem.url) {
-                          fileUrl = `${BASE_URL}/${fileItem.url}`;
+                          fileUrl = `${fileItem.url}`;
                           fileName = fileItem.name || fileItem.url.split("/").pop();
                         } else {
                           return null;
@@ -518,7 +518,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
                         );
 
                       const fileUrl = repliedMsg.file
-                        ? `${BASE_URL}/${repliedMsg.file}`
+                        ? `${repliedMsg.file}`
                         : null;
 
                       return (

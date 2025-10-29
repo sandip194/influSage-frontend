@@ -2,16 +2,16 @@ import { RiCheckLine, RiUser2Line } from '@remixicon/react';
 
 export function SuccessCard({ title, iconColor = 'text-gray-900', features }) {
   return (
-    <div className="bg-white shadow rounded p-6 flex-1">
-      <h3 className={`font-semibold mb-4 flex items-center gap-2 ${iconColor}`}>
-        <RiUser2Line size={20} />
+    <div className="bg-white shadow-lg rounded-2xl p-8 flex-1 transition-shadow hover:shadow-indigo-300">
+      <h3 className={`font-extrabold text-xl mb-6 flex items-center gap-3 ${iconColor} tracking-wide`}>
+        <RiUser2Line size={24} />
         {title}
       </h3>
-      <ul className="space-y-2 text-sm text-gray-600">
+      <ul className="space-y-4 text-gray-600 text-base leading-relaxed">
         {features.map((feature, i) => (
-          <li key={i} className="flex items-center gap-2">
-            <RiCheckLine className="text-green-500" />
-            {feature}
+          <li key={i} className="flex items-start gap-3">
+            <RiCheckLine className="text-indigo-500 mt-1" size={20} />
+            <span>{feature}</span>
           </li>
         ))}
       </ul>
