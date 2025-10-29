@@ -35,7 +35,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
         providerid: provider.id,
         icon: (
           <img
-            src={`${BASE_URL}/${provider.iconpath.replace(/^\/+/, '')}`}
+            src={provider.iconpath}
             alt={provider.name}
             className="w-[24px]"
           />

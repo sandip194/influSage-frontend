@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 const InfluencerDetailView = () => {
     const { userId } = useParams();
     const { token } = useSelector((state) => state.auth);
-    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
@@ -106,7 +106,7 @@ const InfluencerDetailView = () => {
                                 className="w-full h-32 object-cover"
                             />
                             <img
-                                src={`${BASE_URL}/${influDetails?.p_profile?.photopath}`}
+                                src={influDetails?.p_profile?.photopath}
                                 alt="Profile"
                                 className="absolute left-6 -bottom-10 w-20 h-20 object-cover rounded-full border-4 bg-gray-200 border-white shadow"
                             />
@@ -201,9 +201,7 @@ const InfluencerDetailView = () => {
                                 <p className="font-medium text-gray-900 mb-1">Portfolio URL</p>
                                 <a
                                     href={
-                                        influDetails.p_portfolios.portfoliourl.startsWith("http")
-                                            ? influDetails.p_portfolios.portfoliourl
-                                            : `https://${influDetails.p_portfolios.portfoliourl}`
+                                        influDetails.p_portfolios.portfoliourl
                                     }
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -252,19 +250,19 @@ const InfluencerDetailView = () => {
                                         >
                                             {isImage && (
                                                 <img
-                                                    src={`${BASE_URL}/${file}`}
+                                                    src={file}
                                                     alt="portfolio"
                                                     className="w-full h-40 object-cover"
                                                 />
                                             )}
                                             {isVideo && (
                                                 <video className="w-full h-40 object-cover" controls>
-                                                    <source src={`${BASE_URL}/${file}`} type="video/mp4" />
+                                                    <source src={file} type="video/mp4" />
                                                 </video>
                                             )}
                                             {isDoc && (
                                                 <a
-                                                    href={`${BASE_URL}/${file}`}
+                                                    href={file}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="flex flex-col items-center justify-center w-full h-40 bg-gray-100 text-gray-700 p-2"
@@ -320,10 +318,7 @@ const InfluencerDetailView = () => {
                         <div className="space-y-4">
                             {influDetails?.p_socials?.map((item, index) => {
                                 // Normalize link: add https:// if missing
-                                const handleLink =
-                                    item.handleslink?.startsWith("http://") || item.handleslink?.startsWith("https://")
-                                        ? item.handleslink
-                                        : `https://${item.handleslink}`;
+                                const handleLink = item.handleslink
 
                                 return (
                                     <div
@@ -332,7 +327,7 @@ const InfluencerDetailView = () => {
                                         className="flex items-center gap-3 p-2 rounded-lg bg-gray-100 cursor-pointer hover:bg-gray-200 transition"
                                     >
                                         <img
-                                            src={`${BASE_URL}/${item.iconpath}`}
+                                            src={item.iconpath}
                                             alt="Social"
                                             className="w-8 h-8 rounded-full object-cover"
                                         />

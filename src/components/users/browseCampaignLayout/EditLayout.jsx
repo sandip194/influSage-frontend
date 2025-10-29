@@ -212,7 +212,7 @@ const EditLayout = () => {
           <div className="bg-white rounded-2xl overflow-hidden ">
             <div className="relative h-40 bg-gray-300">
               <img
-                src={`${BASE_URL}/${campaignDetails?.photopath}`}
+                src={campaignDetails?.photopath}
                 alt="Campaign"
                 className="absolute top-10 left-6 w-24 h-24 rounded-full object-cover border-4 border-white shadow"
                 loading="lazy"
@@ -375,7 +375,7 @@ const EditLayout = () => {
                     <div className="mb-1">
                       <div className="flex flex-wrap gap-4">
                         {campaignDetails.campaignfiles.map(({ filepath }, i) => {
-                          const fileUrl = `${BASE_URL}/${filepath}`;
+                          const fileUrl = filepath;
                           const extension = filepath.split(".").pop().toLowerCase();
 
                           const isImage = /\.(png|jpe?g|gif|svg)$/i.test(filepath);
@@ -523,7 +523,7 @@ const EditLayout = () => {
                 <h3 className="font-semibold text-base mb-2">Attached Files</h3>
                 <div className="flex gap-3 flex-wrap">
                   {appliedDetails.filepaths.map(({ filepath }, index) => {
-                    const fileUrl = `${BASE_URL}/src${filepath}`;
+                    const fileUrl = filepath;
                     const extension = filepath.split(".").pop().toLowerCase();
 
                     const isImage = /\.(png|jpe?g|gif|svg|webp)$/i.test(filepath);

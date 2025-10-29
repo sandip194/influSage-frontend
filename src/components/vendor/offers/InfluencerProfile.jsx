@@ -58,7 +58,7 @@ const InfluencerProfile = () => {
             influencerId: influDetails.id,
             influencerName: `${influDetails.firstname} ${influDetails.lastname}`,
             influencerPhoto: influDetails.photopath
-                ? `${BASE_URL}/${influDetails.photopath}`
+                ? influDetails.photopath
                 : null,
             conversationId: influDetails.conversationid || null,
 
@@ -67,7 +67,7 @@ const InfluencerProfile = () => {
                 influencerid: influDetails.id,
                 influencerName: `${influDetails.firstname} ${influDetails.lastname}`,
                 influencerPhoto: influDetails.photopath
-                ? `${BASE_URL}/${influDetails.photopath}`
+                ? influDetails.photopath
                 : null,
                 conversationId: influDetails.conversationid || null,
             },
@@ -186,7 +186,7 @@ const InfluencerProfile = () => {
         {/* Top Header */}
             <div className="flex bg-white rounded-2xl p-6 flex-col md:flex-row  md:items-start gap-6  pb-6">
                 <img
-                    src={`${BASE_URL}/${influDetails?.photopath}`}
+                    src={influDetails?.photopath}
                     alt="Profile"
                     className="w-28 h-28 rounded-full object-cover border-4 border-gray-200"
                 />
@@ -293,7 +293,7 @@ const InfluencerProfile = () => {
                             {/* Show icon if iconpath exists */}
                             {provider.iconpath && (
                                 <img
-                                    src={`${BASE_URL}/${provider.iconpath}`}
+                                    src={provider.iconpath}
                                     alt={provider.providername}
                                     className="w-10 h-10 object-contain rounded-full"
                                 />
@@ -329,7 +329,7 @@ const InfluencerProfile = () => {
                                 >
                                     {isImage && (
                                         <img
-                                            src={`${BASE_URL}/${url}`}
+                                            src={url}
                                             alt={`Portfolio ${index + 1}`}
                                             className="w-full h-48 object-cover rounded-2xl"
                                         />
@@ -340,14 +340,14 @@ const InfluencerProfile = () => {
                                             controls
                                             className="w-full h-48 rounded-2xl object-cover"
                                         >
-                                            <source src={`${BASE_URL}/${url}`} type={`video/${extension}`} />
+                                            <source src={url} type={`video/${extension}`} />
                                             Your browser does not support the video tag.
                                         </video>
                                     )}
 
                                     {isPDF && (
                                         <iframe
-                                            src={`${BASE_URL}/${url}`}
+                                            src={url}
                                             className="w-full h-48 rounded-2xl"
                                             title={`PDF ${index + 1}`}
                                         ></iframe>
@@ -357,7 +357,7 @@ const InfluencerProfile = () => {
                                         <div className="flex flex-col items-center justify-center text-center gap-2 py-4">
                                             <RiFile3Line className="w-16  h-16 text-gray-500" />
                                             <a
-                                                href={`${BASE_URL}/${url}`}
+                                                href={url}
                                                 download
                                                 className="text-blue-600 text-sm underline break-all"
                                             >

@@ -14,10 +14,10 @@ import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [showAll, setShowAll] = useState(false);
-  const [showAllHistory, setShowAllHistory] = useState(false);
+ // const [showAllHistory, setShowAllHistory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
 
   const { token, userId } = useSelector((state) => state.auth);
@@ -67,7 +67,7 @@ const Profile = () => {
                 className="w-full h-32 object-cover"
               />
               <img
-                src={`${BASE_URL}/${p_profile?.photopath}`}
+                src={p_profile?.photopath}
                 alt="Profile"
                 className="absolute left-6 -bottom-10 w-20 h-20 rounded-full border-4 border-white shadow"
               />
@@ -158,7 +158,7 @@ const Profile = () => {
                     <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200">
                       {isImage && (
                         <img
-                          src={`${BASE_URL}/${item.filepath}`}
+                          src={item.filepath}
                           alt="portfolio"
                           className="w-full h-40 object-cover"
                         />
@@ -167,7 +167,7 @@ const Profile = () => {
                       {isVideo && (
                         <div className="relative w-full h-40 bg-black/10 flex items-center justify-center">
                           <video className="w-full h-full object-cover" controls>
-                            <source src={`${BASE_URL}/${item.filepath}`} type="video/mp4" />
+                            <source src={item.filepath} type="video/mp4" />
                           </video>
                           <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition">
                             <RiPlayCircleFill className="text-white text-4xl" />
@@ -177,7 +177,7 @@ const Profile = () => {
 
                       {isDoc && (
                         <a
-                          href={`${BASE_URL}/${item.filepath}`}
+                          href={item.filepath}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex flex-col items-center justify-center w-full h-40 bg-gray-100 text-gray-700 p-2"
@@ -226,7 +226,7 @@ const Profile = () => {
               {p_socials.map((item, index) => (
                 <div key={index} className="flex items-center gap-3 p-2 rounded-lg">
                   <img
-                    src={`${BASE_URL}/${item?.iconpath}`} 
+                    src={item?.iconpath} 
                     alt="Social"
                     className="w-8 h-8 rounded-full object-cover"
                   />

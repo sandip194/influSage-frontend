@@ -37,7 +37,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
     data.p_campaignfilejson?.[0]?.filepath || data.photopath || null;
 
   const imageUrl = photoPath
-    ? `${BASE_URL}/${photoPath.replace(/^\/+/, "")}`
+    ? photoPath
     : null;
 
   // ✅ Ensure milestone amounts are numbers
@@ -189,7 +189,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       hashtags: formData.hashtags.map(tag => ({ hashtag: tag })),
       photopath: profileImage
         ? null
-        : formData.profileImageUrl?.replace(`${BASE_URL}/`, "") || null,
+        : formData.profileImageUrl,
       milestones: formData.milestones?.map(m => ({
         description: m.description,
         amount: Number(m.amount),

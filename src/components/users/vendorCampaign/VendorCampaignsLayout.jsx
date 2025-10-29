@@ -49,11 +49,11 @@ const getStatusKey = (status) => {
   return String(status).toLowerCase();
 };
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const getImageUrl = (path) => {
   if (!path) return "/placeholder.jpg";
-  return `${BASE_URL}/${path}`;
+  return path;
 };
 
 const VendorCampaignsLayout = () => {

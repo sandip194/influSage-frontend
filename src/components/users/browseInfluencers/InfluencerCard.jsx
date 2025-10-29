@@ -22,7 +22,7 @@ const InfluencerCard = ({ influencer, onLike, onInvite, BASE_URL }) => {
         <img
           src={
             influencer?.photopath
-              ? `${BASE_URL}/${influencer?.photopath}`
+              ? influencer.photopath
               : "https://via.placeholder.com/150"
           }
           alt="profile"
@@ -78,7 +78,7 @@ const InfluencerCard = ({ influencer, onLike, onInvite, BASE_URL }) => {
             .map((p) => (
               <div key={p.providerid} className="flex items-center gap-1">
                 <img
-                  src={`${BASE_URL}/${p.iconpath}`}
+                  src={p.iconpath}
                   alt={p.providername}
                   className="w-5 h-5"
                 />
