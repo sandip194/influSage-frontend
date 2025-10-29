@@ -56,7 +56,7 @@ export const Signup = () => {
       <div className="relative z-20 login-card">
 
         <div className="login-card-right">
-          <div className="mb-2 ">
+          <div >
             <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
           </div>
           
@@ -64,23 +64,30 @@ export const Signup = () => {
             <h2>Create Account</h2>
             <p>Start your journey with InfluSage today!</p>
 
-            {/* First Name */}
-            <label>First Name<span className="text-red-500 text-sm">*</span></label>
-            <input
-              type="text"
-              placeholder="Enter first name"
-              {...register('firstName', { required: "First name is required" })}
-            />
-            <span className="text-for-error">{errors.firstName?.message}</span>
+            {/* Name Fields Row */}
+            <div className="flex gap-4">
+              {/* First Name */}
+              <div className="flex-1">
+                <label>First Name<span className="text-red-500 text-sm">*</span></label>
+                <input
+                  type="text"
+                  placeholder="Enter first name"
+                  {...register('firstName', { required: "First name is required" })}
+                />
+                <span className="text-for-error">{errors.firstName?.message}</span>
+              </div>
 
-            {/* Last Name */}
-            <label>Last Name<span className="text-red-500 text-sm">*</span></label>
-            <input
-              type="text"
-              placeholder="Enter last name"
-              {...register('lastName', { required: "Last name is required" })}
-            />
-            <span className="text-for-error">{errors.lastName?.message}</span>
+              {/* Last Name */}
+              <div className="flex-1">
+                <label>Last Name<span className="text-red-500 text-sm">*</span></label>
+                <input
+                  type="text"
+                  placeholder="Enter last name"
+                  {...register('lastName', { required: "Last name is required" })}
+                />
+                <span className="text-for-error">{errors.lastName?.message}</span>
+              </div>
+            </div>
 
             {/* Email */}
             <label>Email<span className="text-red-500 text-sm">*</span></label>
