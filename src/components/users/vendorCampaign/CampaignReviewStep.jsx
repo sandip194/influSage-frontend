@@ -28,40 +28,40 @@ const CampaignReviewStep = ({ onEdit }) => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { campaignId } = useParams();
 
-  
+
 
   useEffect(() => {
-  const fetchCampaign = async () => {
-    try {
-      const authToken = token || localStorage.getItem("token");
-      if (!authToken) {
-        toast.error("No token found. Please log in again.");
-        return;
+    const fetchCampaign = async () => {
+      try {
+        const authToken = token || localStorage.getItem("token");
+        if (!authToken) {
+          toast.error("No token found. Please log in again.");
+          return;
+        }
+
+        const isEdit = !!campaignId;
+
+        const url = isEdit
+          ? `/vendor/campaign/${campaignId}`
+          : `/vendor/campaign/01`;
+
+        const res = await axios.get(url, {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+
+        setCampaignData(res.data?.campaignParts || {});
+      } catch (error) {
+        console.error(error);
+        toast.error(
+          error.response?.data?.message || "Failed to fetch campaign data"
+        );
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const isEdit = !!campaignId;
-
-      const url = isEdit
-        ? `/vendor/campaign/${campaignId}` 
-        : `/vendor/campaign/01`;      
-
-      const res = await axios.get(url, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-
-      setCampaignData(res.data?.campaignParts || {});
-    } catch (error) {
-      console.error(error);
-      toast.error(
-        error.response?.data?.message || "Failed to fetch campaign data"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchCampaign();
-}, [token, userId, campaignId]);
+    fetchCampaign();
+  }, [token, userId, campaignId]);
 
   const handleDeleteReference = async (fileToDelete) => {
     if (!fileToDelete || !fileToDelete.filepath) {
@@ -129,7 +129,7 @@ const CampaignReviewStep = ({ onEdit }) => {
 
   const camp_profile = p_campaignjson?.photopath
     ? p_campaignjson?.photopath
-    : [];
+    : null;
 
   const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
 
@@ -152,7 +152,7 @@ const CampaignReviewStep = ({ onEdit }) => {
         campaign: campaignData?.p_campaignjson || {},
         references: campaignData?.p_campaignfilejson || [],
         contenttypes: campaignData?.p_contenttypejson || [],
-        p_statusname : status,
+        p_statusname: status,
       };
 
       const res = await axios.post("/vendor/finalize-campaign", payload, {
@@ -191,9 +191,9 @@ const CampaignReviewStep = ({ onEdit }) => {
                 alt="Banner"
                 className="w-full h-28 object-cover rounded-lg"
               />
-              {camp_profile[0] && (
+              {camp_profile && (
                 <img
-                  src={camp_profile[0]}
+                  src={camp_profile}
                   alt="Campaign"
                   className="absolute object-cover rounded-full top-18 left-4 w-22 h-22"
                 />
@@ -328,20 +328,20 @@ const CampaignReviewStep = ({ onEdit }) => {
               </ul>
 
               {/* Tags */}
-                <div className="py-4">
+              <div className="py-4">
                 <h3 className="font-semibold text-lg mb-4">HashTags</h3>
-                 <div className="flex flex-wrap gap-2 my-2">
-                {tags.length > 0
-                  ? tags.map((tag, i) => (
-                    <span
-                      key={tag + i}
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
-                    >
-                      {tag}
-                    </span>
-                  ))
-                  : "No tags"}
-                  </div>
+                <div className="flex flex-wrap gap-2 my-2">
+                  {tags.length > 0
+                    ? tags.map((tag, i) => (
+                      <span
+                        key={tag + i}
+                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
+                      >
+                        {tag}
+                      </span>
+                    ))
+                    : "No tags"}
+                </div>
               </div>
             </div>
 
@@ -355,17 +355,10 @@ const CampaignReviewStep = ({ onEdit }) => {
                       const fileUrl = file.filepath;
                       const ext = fileUrl?.split(".").pop().toLowerCase();
 
-                      const isImage = [
-                        "jpg",
-                        "jpeg",
-                        "png",
-                        "gif",
-                        "webp",
-                      ].includes(ext);
-                      const isVideo = ["mp4", "webm", "ogg", "mov"].includes(
-                        ext
-                      );
+                      const isImage = ["jpg", "jpeg", "png", "gif", "webp"].includes(ext);
+                      const isVideo = ["mp4", "webm", "ogg", "mov"].includes(ext);
                       const isPdf = ext === "pdf";
+                      const isDoc = ["doc", "docx"].includes(ext);
 
                       return (
                         <div
@@ -405,9 +398,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                           {isPdf && (
                             <div className="flex flex-col items-center justify-center w-full h-full bg-gray-50 p-3 cursor-default">
                               <div className="w-12 h-12 flex items-center justify-center bg-red-100 rounded-lg mb-2">
-                                <span className="text-red-600 text-lg font-bold">
-                                  PDF
-                                </span>
+                                <span className="text-red-600 text-lg font-bold">PDF</span>
                               </div>
                               <a
                                 href={fileUrl}
@@ -416,6 +407,23 @@ const CampaignReviewStep = ({ onEdit }) => {
                                 className="mt-2 text-blue-500 underline text-xs font-medium hover:text-blue-700"
                               >
                                 View PDF
+                              </a>
+                            </div>
+                          )}
+
+                          {/* DOC/DOCX → show download link */}
+                          {isDoc && (
+                            <div className="flex flex-col items-center justify-center w-full h-full bg-gray-50 p-3 cursor-default">
+                              <div className="w-12 h-12 flex items-center justify-center bg-green-100 rounded-lg mb-2">
+                                <span className="text-green-600 text-lg font-bold">DOC</span>
+                              </div>
+                              <a
+                                href={fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-2 text-blue-500 underline text-xs font-medium hover:text-blue-700"
+                              >
+                                View DOC
                               </a>
                             </div>
                           )}
@@ -436,6 +444,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                     })
                     : "No references uploaded"}
                 </div>
+
               </PhotoProvider>
 
               {/* Custom modal for videos */}
@@ -465,7 +474,7 @@ const CampaignReviewStep = ({ onEdit }) => {
         <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="font-semibold text-lg">Campaign Details</h3>
-              <hr className="my-2 border-gray-200" />
+            <hr className="my-2 border-gray-200" />
             {/* <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-semibold mb-1 text-justify">
                 About Brand
@@ -586,7 +595,7 @@ const CampaignReviewStep = ({ onEdit }) => {
         >
           Save Draft
         </button>
-         <button
+        <button
           className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full"
           onClick={() => handleCreateCampaign("ApprovalPending")}
           type="button"
