@@ -8,6 +8,7 @@ import {
 } from "react-icons/ri";
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import { Skeleton } from 'antd';
 
 
 
@@ -81,14 +82,20 @@ const DashboardHomePage = () => {
 
             <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {loading ? (
-                        // Optional: show skeleton or loading text
-                        <p className="col-span-4 text-center text-gray-500">Loading stats...</p>
-                    ) : (
-                        stats.map((stat, idx) => (
-                            <StatCard key={idx} {...stat} />
+                    {loading
+                        ? Array.from({ length: 4 }).map((_, idx) => (
+                            <div key={idx} className="flex items-center p-4 shadow rounded-lg bg-white">
+                                {/* Left icon skeleton */}
+                                <Skeleton.Avatar active size="large" shape="circle" className="mr-4" />
+                                {/* Right text skeleton */}
+                                <div className="flex-1">
+                                    <Skeleton.Input active size="small" className="w-24 mb-2" />
+                                    <Skeleton.Input active size="default" className="w-16" />
+                                </div>
+                            </div>
                         ))
-                    )}
+                        : stats.map((stat, idx) => <StatCard key={idx} {...stat} />)
+                    }
                 </div>
 
                 {/* User Requests Table */}

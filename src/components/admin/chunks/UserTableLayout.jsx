@@ -8,6 +8,8 @@ import {
     Pagination,
     Tooltip,
     Modal,
+    Skeleton,
+    Empty,
 } from "antd";
 import {
     RiEyeLine,
@@ -247,7 +249,71 @@ const UserTableLayout = () => {
             <div className="bg-white shadow-sm rounded-b-2xl mt-0 border border-gray-100">
                 <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                     {loading ? (
-                        <p className="text-center py-10 text-gray-500">Loading...</p>
+                        <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full">
+                            <thead className="bg-gray-100 text-gray-700 text-xs sm:text-sm uppercase tracking-wide">
+                                <tr>
+                                    <th className="px-4 py-3 sm:px-4">User</th>
+                                    <th className="px-4 py-3 sm:px-4">Email</th>
+                                    <th className="px-4 py-3 sm:px-4">Followers</th>
+                                    <th className="px-4 py-3 sm:px-4">Category</th>
+                                    <th className="px-4 py-3 sm:px-4">Location</th>
+                                    <th className="px-4 py-3 sm:px-4">Applied On</th>
+                                    <th className="px-4 py-3 sm:px-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody className="text-sm bg-white text-gray-700">
+                                {[...Array(6)].map((_, i) => (
+                                    <tr
+                                        key={i}
+                                        className="border-t border-gray-200 hover:bg-gray-50 transition"
+                                    >
+                                        {/* User */}
+                                        <td className="px-4 py-3 flex items-center space-x-3">
+                                            <Skeleton.Avatar active size="large" shape="circle" />
+                                            <Skeleton.Input
+                                                active
+                                                size="small"
+                                                style={{ width: 100 }}
+                                            />
+                                        </td>
+
+                                        {/* Email */}
+                                        <td className="p-4">
+                                            <Skeleton.Input active size="small" style={{ width: 160 }} />
+                                        </td>
+
+                                        {/* Followers */}
+                                        <td className="p-4">
+                                            <Skeleton.Input active size="small" style={{ width: 100 }} />
+                                        </td>
+
+                                        {/* Category */}
+                                        <td className="p-4">
+                                            <Skeleton.Input active size="small" style={{ width: 120 }} />
+                                        </td>
+
+                                        {/* Location */}
+                                        <td className="p-4">
+                                            <Skeleton.Input active size="small" style={{ width: 90 }} />
+                                        </td>
+
+                                        {/* Applied On */}
+                                        <td className="p-4">
+                                            <Skeleton.Input active size="small" style={{ width: 80 }} />
+                                        </td>
+
+                                        {/* Actions */}
+                                        <td className="px-4 py-3 text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <Skeleton.Avatar active size="small" shape="circle" />
+                                                <Skeleton.Avatar active size="small" shape="circle" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     ) : userList.length > 0 ? (
                         <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full">
                             <thead className="bg-gray-100 text-gray-700 text-xs sm:text-sm uppercase tracking-wide">
@@ -346,9 +412,12 @@ const UserTableLayout = () => {
                             </tbody>
                         </table>
                     ) : (
-                        <p className="text-center py-10 text-gray-500">
-                            No users found for this status.
-                        </p>
+                        <div className="py-16 flex justify-center">
+                            <Empty
+                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                description={<span className="text-gray-500">No users found for this status.</span>}
+                            />
+                        </div>
                     )}
                 </div>
             </div>

@@ -27,7 +27,7 @@ const AdminDashboardLayout = () => {
             {/* Backdrop for mobile sidebar */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-30 z-30 md:hidden"
+                    className="fixed inset-0  bg-opacity-30 z-30 md:hidden"
                     onClick={toggleSidebar}
                 />
             )}

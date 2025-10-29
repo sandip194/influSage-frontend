@@ -61,6 +61,7 @@ import InfluencersRequests from './components/admin/pages/InfluencersRequests';
 import CampaignRequests from './components/admin/pages/CampaignRequests';
 import DashboardGuard from './routes/DashboardGuard';
 import InfluencerDetailView from './components/admin/pages/InfluencerDetailView';
+import HomePage from './pages/LandingPage/HomePage';
 
 const App = () => {
 
@@ -84,7 +85,7 @@ const App = () => {
 
 
                                 <Routes>
-                                        <Route path='/' element={<Home />} />
+                                        <Route path='/' element={<HomePage />} />
                                         <Route path='/admin' element={<DashboardHomePage />} />
                                         <Route path='/signup' element={<Signup />} />
                                         <Route path='/role' element={<Role />} />
