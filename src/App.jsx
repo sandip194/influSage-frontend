@@ -5,8 +5,8 @@ import { ToastContainer } from 'react-toastify';
 import './index.css'; // ✅ this imports tailwind styles
 
 
-import { Signup } from './pages/commonPages/Signup';
 import { LoginForm } from './pages/commonPages/Login';
+import Signup from './pages/commonPages/Signup'
 import { Home } from './components/common/Home';
 import { Role } from './pages/commonPages/Role';
 import { RoleDefault } from './pages/commonPages/RoleDefault';

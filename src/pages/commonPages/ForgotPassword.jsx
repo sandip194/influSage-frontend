@@ -1,28 +1,33 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import SideImageSlider from '../../components/common/SideImageSlider';
+import React, { useState, Suspense } from "react";
+import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+const SideImageSlider = React.lazy(() =>
+  import("../../components/common/SideImageSlider")
+);
 
 export const ForgotPassword = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
-  const [loading, setLoading] = useState(false); // ✅ loading state added
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data) => {
-    if (loading) return; // ✅ prevent multiple calls
-    setLoading(true); // ✅ set loading true before API call
-
+    if (loading) return;
+    setLoading(true);
     try {
-      const response = await axios.post('/user/forgot-password', { email: data.email });
-      if (response.status === 200) {
-        toast.success(response.data.message);
-      }
+      const response = await axios.post("/user/forgot-password", {
+        email: data.email,
+      });
+      if (response.status === 200) toast.success(response.data.message);
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong!");
     } finally {
-      setLoading(false); // ✅ reset loading after API call
-
+      setLoading(false);
     }
   };
 
@@ -30,49 +35,81 @@ export const ForgotPassword = () => {
     emailValidator: {
       required: {
         value: true,
-        message: "Email is required"
+        message: "Email is required",
       },
       pattern: {
         value: /^\w+[\+\.\w-]*@([\w-]+\.)*\w+[\w-]*\.([a-z]{2,4}|\d+)$/i,
-        message: "Please enter a valid email address"
-      }
-    }
-  }
+        message: "Please enter a valid email address",
+      },
+    },
+  };
 
   return (
-    <div className="login-container">
-      <SideImageSlider />
-      <div className="relative z-20 login-card">
+    <div className="relative flex justify-center items-center min-h-screen bg-gray-100 p-5 font-[Segoe_UI,Tahoma,Geneva,Verdana,sans-serif] overflow-hidden">
+      {/* 🔹 Background image slider */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <Suspense fallback={<div>Loading...</div>}>
+          <SideImageSlider />
+        </Suspense>
+      </div>
 
-        <div className="login-card-right">
-          <div className="mb-2 ">
-            <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
-          </div>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <h2>Forgot Password</h2>
-            <p>Please enter your email to reset your password.</p>
-
-            <label>Email
-              <span className='text-red-500 text-sm'>*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Enter Your Email"
-              {...register("email", validationSchema.emailValidator)}
+      {/* 🔹 Glass-style card */}
+      <div className="relative z-10 bg-white/40 backdrop-blur-lg rounded-2xl shadow-lg w-full max-w-md p-8">
+        <div className="flex flex-col gap-5">
+          {/* Logo */}
+          <div>
+            <img
+              src="/influSage-logo.png"
+              alt="Logo"
+              className="h-8 w-auto mb-2"
             />
-            <span className='text-for-error'>{errors.email?.message}</span>
+          </div>
 
+          {/* Header */}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Forgot Password</h2>
+            <p className="text-sm text-gray-700">
+              Please enter your email to reset your password.
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <div>
+              <label className="font-semibold text-sm">
+                Email<span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Enter your email"
+                {...register("email", validationSchema.emailValidator)}
+                className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
+              {errors.email && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            {/* Submit */}
             <button
               type="submit"
-              className="login-btn"
-              disabled={loading} // ✅ disable button while loading
+              disabled={loading}
+              className="w-full py-2 bg-[#0e1532] text-white font-semibold rounded-full hover:bg-gray-800 transition"
             >
-              {loading ? "Sending..." : "Send Reset Link"} {/* Optional text change */}
+              {loading ? "Sending..." : "Send Reset Link"}
             </button>
 
-            <p className="signup-link" style={{ marginTop: '20px' }}>
-              Back To
-              <Link to="/login" className="forgot-password-link" style={{ fontWeight: 'bold', cursor: 'pointer' }}> Login </Link>
+            {/* Back to Login */}
+            <p className="text-center text-sm text-gray-700 mt-4">
+              Back to{" "}
+              <Link
+                to="/login"
+                className="font-semibold text-gray-900 hover:underline"
+              >
+                Login
+              </Link>
             </p>
           </form>
         </div>
