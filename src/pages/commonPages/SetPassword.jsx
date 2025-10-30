@@ -1,26 +1,32 @@
-import React, { useState, useEffect, Suspense } from 'react';
-import { useForm } from 'react-hook-form';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { RiEyeLine, RiEyeOffLine } from '@remixicon/react';
-import '../../assets/login.css';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import { useDispatch } from 'react-redux';
-import { setCredentials } from '../../features/auth/authSlice';
-import SideImageSlider from '../../components/common/SideImageSlider';
+import React, { useState, useEffect, Suspense } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate, useLocation } from "react-router-dom";
+import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../../features/auth/authSlice";
+
+const SideImageSlider = React.lazy(() =>
+  import("../../components/common/SideImageSlider")
+);
 
 export const SetPassword = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
+  const [userInfo, setUserInfo] = useState({});
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
 
-  // Extract params from URL
-  const [userInfo, setUserInfo] = useState({});
+  // Extract params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     setUserInfo({
@@ -35,12 +41,6 @@ export const SetPassword = () => {
     setLoading(true);
     try {
       const { email, firstName, lastName, roleId } = userInfo;
-
-      // if (!email || !firstName || !lastName || !roleId) {
-      //   toast.error("Missing user info. Please login again.");
-      //   return navigate("/roledefault");
-      // }
-
       const payload = {
         email,
         firstName,
@@ -52,10 +52,8 @@ export const SetPassword = () => {
       const response = await axios.post("/auth/set-password", payload);
 
       if (response.status === 201) {
-        const token = response.data.token;
-        const user = response.data.user;
-
-        // Save token & user info
+        const { token, user } = response.data;
+        // Save token and user
         localStorage.setItem("auth_token", token);
         localStorage.setItem("userId", user.id);
         localStorage.setItem("roleId", user.role);
@@ -63,21 +61,19 @@ export const SetPassword = () => {
         localStorage.setItem("lastName", user.lastName);
         localStorage.setItem("email", user.email);
 
-        // Set axios default Authorization header
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-        // Update Redux store
-        dispatch(setCredentials({
-          token,
-          id: user.id,
-          role: user.role,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email
-        }));
+        dispatch(
+          setCredentials({
+            token,
+            id: user.id,
+            role: user.role,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+          })
+        );
 
         toast.success("Password set successfully!");
-
         if (user.role === 1) navigate("/complate-profile");
         else if (user.role === 2) navigate("/complate-vendor-profile");
         else navigate("/");
@@ -90,91 +86,99 @@ export const SetPassword = () => {
   };
 
   return (
-    <div className="login-container">
+    <div className="relative flex justify-center items-center min-h-screen bg-gray-100 p-5 font-[Segoe_UI,Tahoma,Geneva,Verdana,sans-serif] overflow-hidden">
+      {/* 🔹 Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <Suspense fallback={<div>Loading...</div>}>
+          <SideImageSlider />
+        </Suspense>
+      </div>
 
-      <Suspense fallback={<div className="loader">Loading...</div>}>
-        <SideImageSlider />
-      </Suspense>
-
-      <div className="relative z-20 login-card">
-
-        <div className="login-card-right">
-          <div className="mb-4 ">
-            <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+      {/* 🔹 Glass Card */}
+      <div className="relative z-10 bg-white/40 backdrop-blur-lg rounded-2xl shadow-lg w-full max-w-md p-8">
+        <div className="flex flex-col gap-5">
+          {/* Logo */}
+          <div>
+            <img
+              src="/influSage-logo.png"
+              alt="Logo"
+              className="h-8 w-auto mb-2"
+            />
           </div>
-          <form onSubmit={handleSubmit(submitHandler)}>
-            <h2>Set Password</h2>
-            {/* Password */}
-            <label>
-              Password <span className="text-red-500 text-sm">*</span>
-            </label>
-            <div className="password-wrapper">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Create a password"
-                {...register("password", {
-                  required: { value: true, message: "Password is required" },
-                  pattern: {
-                    value:
-                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
-                    message:
-                      "Must be 8+ chars, include uppercase, lowercase, number, special char",
-                  },
-                })}
-              />
-              <span
-                className="eye-icon"
-                onClick={() => setShowPassword((prev) => !prev)}
-              >
-                {showPassword ? (
-                  <RiEyeOffLine className="w-[18px]" />
-                ) : (
-                  <RiEyeLine className="w-[18px]" />
-                )}
-              </span>
-            </div>
-            {errors.password && (
-              <span className="text-for-error">{errors.password.message}</span>
-            )}
 
-            {/* Terms */}
-            <div
-              style={{
-                marginTop: "10px",
-                fontSize: "14px",
-                marginBottom: "10px",
-              }}
-            >
-              <label>
+          <form onSubmit={handleSubmit(submitHandler)} className="space-y-5">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Set Your Password
+              </h2>
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label className="text-sm font-semibold">
+                Password<span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
                 <input
-                  type="checkbox"
-                  {...register("terms", {
-                    required: {
-                      value: true,
-                      message: "Please accept terms & conditions",
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password"
+                  {...register("password", {
+                    required: "Password is required",
+                    pattern: {
+                      value:
+                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
+                      message:
+                        "Must have 8+ chars, 1 uppercase, 1 lowercase, 1 number, 1 special char",
                     },
                   })}
+                  className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
-                &nbsp;I agree to&nbsp;
                 <span
-                  style={{ color: "#0066cc", cursor: "pointer" }}
+                  className="absolute right-3 top-2.5 cursor-pointer text-gray-600"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? (
+                    <RiEyeOffLine className="w-5 h-5" />
+                  ) : (
+                    <RiEyeLine className="w-5 h-5" />
+                  )}
+                </span>
+              </div>
+              {errors.password && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            {/* Terms Checkbox */}
+            <div className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                {...register("terms", {
+                  required: "Please accept terms & conditions",
+                })}
+                className="mt-1 h-4 w-4"
+              />
+              <p>
+                I agree to{" "}
+                <span
+                  className="text-indigo-600 cursor-pointer font-medium"
                   onClick={() => setShowModal(true)}
                 >
                   Terms & Conditions
                 </span>
-              </label>
-              {/* Show error */}
-              {errors.terms && (
-                <span style={{ color: "red", fontSize: "12px" }}>
-                  {errors.terms.message}
-                </span>
-              )}
+              </p>
             </div>
+            {errors.terms && (
+              <p className="text-xs text-red-500">{errors.terms.message}</p>
+            )}
 
-           <button
+            {/* Save Button */}
+            <button
               type="submit"
-              className="login-btn mt-4 mb-6"
               disabled={loading}
+              className="w-full py-2 bg-[#0e1532] text-white font-semibold rounded-full hover:bg-gray-800 transition"
             >
               {loading ? "Saving..." : "Save"}
             </button>
@@ -182,31 +186,30 @@ export const SetPassword = () => {
         </div>
       </div>
 
-      {/* Modal for Terms and Conditions */}
+      {/* 🔹 Modal */}
       {showModal && (
-        <div style={{
-          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.5)", display: "flex",
-          justifyContent: "center", alignItems: "start", zIndex: 999,
-        }}>
-          <div style={{
-            background: "white", padding: "30px", borderRadius: "15px",
-            maxWidth: "780px", width: "90%", textAlign: "left", position: "relative", marginTop: "20px",
-            overflowY: "scroll", height: "90vh", scrollbarWidth: "none", scrollbarColor: "#999 #f1f1f1"
-          }}>
-            <h3 style={{ marginBottom: "10px" }}>Terms and Conditions</h3>
-            <p style={{ fontSize: "14px", lineHeight: "1.6", textAlign: "justify" }}>
-              By using this platform, you agree to comply with our policies and guidelines.
-              <br /><br />
-              This is a placeholder for your detailed terms. You can replace this with your actual T&C content.
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-start z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-3xl mt-10 overflow-y-auto max-h-[85vh]">
+            <h3 className="text-xl font-semibold mb-3">Terms and Conditions</h3>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              By using this platform, you agree to comply with our policies and
+              guidelines. <br />
               <br />
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia delectus iure voluptatibus libero quos dolorum obcaecati consequatur laborum, soluta totam saepe ipsam ducimus itaque nemo asperiores exercitationem harum aut officiis error facere amet similique placeat. Accusantium sapiente quasi facere voluptatibus et consequatur exercitationem. Eos nulla ipsum quod laborum vitae eum consectetur delectus saepe eligendi, labore architecto incidunt, iusto, vel ex. Ut provident expedita error! Aut laborum laudantium voluptate quod quaerat, ab cum totam adipisci. Id velit nulla autem et eos voluptates nemo. Porro nesciunt dolores maiores laboriosam debitis tempora aliquam dicta dignissimos omnis tenetur? Optio quasi iure aspernatur accusamus blanditiis, eaque dolore sapiente beatae dignissimos facilis ad itaque esse praesentium minus inventore omnis delectus rerum aliquam aliquid velit minima officiis quod explicabo? Beatae commodi nam exercitationem tenetur ut explicabo illo facere vero veniam atque reiciendis nulla nemo, odit, deserunt nesciunt. Repellendus blanditiis eligendi quo doloribus reprehenderit ipsum delectus molestiae sed, vel non voluptatum nostrum, voluptatem cumque tenetur laudantium, corrupti laborum dolores enim iure ab nihil nesciunt possimus voluptate provident! Impedit commodi laborum nisi id veritatis, mollitia cupiditate possimus ut ducimus quaerat excepturi aliquam eveniet delectus, sapiente consequatur, nostrum laudantium explicabo aliquid vero esse minima quod. Facere quo dolor accusamus nemo qui. Iste quidem sed ullam reiciendis enim voluptatem error maxime suscipit perspiciatis quibusdam. Sapiente eaque eos perspiciatis molestias cumque voluptatum praesentium repellat placeat fugit ullam, aliquid adipisci maiores deserunt ipsa, non nemo repellendus harum possimus nisi at enim quas, nihil nobis! Itaque similique animi dolores aliquid earum provident omnis deleniti autem reiciendis necessitatibus! Optio natus in sequi ad, est error culpa provident odio numquam deserunt omnis eaque blanditiis dicta iste veritatis aspernatur quo temporibus! Officiis praesentium quisquam porro dolorum unde tenetur sed deserunt doloribus fuga ipsum reprehenderit explicabo accusamus, sapiente expedita alias quo voluptate quos doloremque necessitatibus exercitationem! Non, porro? Iste provident animi voluptates natus a, cumque similique quaerat modi magni amet blanditiis assumenda nihil reiciendis eius architecto. Tempora fuga dicta iste quasi expedita quis aliquid nihil quae dolorum dolores iure quibusdam adipisci, tempore illo a possimus sint, aliquam voluptates. Tempore odio non eos libero aspernatur perspiciatis quo corrupti magnam iure beatae! Corrupti, veritatis fugiat necessitatibus fugit facere quasi voluptates nam consectetur similique voluptatum accusamus doloribus possimus incidunt minus error qui ex. Quibusdam reiciendis ut corrupti veritatis omnis, repellat est necessitatibus tenetur itaque molestiae alias, nulla ullam hic vel modi, ad atque. Alias aut voluptate illum eum exercitationem cum ad in quidem quos est? Velit, non. Asperiores exercitationem suscipit ex cupiditate nemo laudantium repellat accusamus modi quae consectetur debitis provident quis qui, omnis aspernatur! Delectus, accusantium dolores perspiciatis ducimus aliquam doloribus veniam eaque quod recusandae magni ipsum impedit eligendi officia temporibus sunt tempora numquam quam rem? Molestias voluptatibus sunt corporis quas nemo, similique tempora eum ad alias in accusamus quae deleniti quo tempore saepe iure libero ab at sapiente. Qui tempore placeat ipsum dolore, laborum eveniet quia consequatur architecto vel quam expedita facilis voluptates ullam dolores laudantium impedit debitis cumque, consequuntur ut atque pariatur soluta, similique assumenda. Blanditiis, odio dicta.
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia
+              delectus iure voluptatibus libero quos dolorum obcaecati
+              consequatur laborum, soluta totam saepe ipsam ducimus itaque nemo
+              asperiores exercitationem harum aut officiis error facere amet
+              similique placeat...
             </p>
-            <button onClick={() => setShowModal(false)} style={{
-              marginTop: "20px",
-              background: "#0d0e2f", color: "white", padding: "8px 16px",
-              borderRadius: "8px", cursor: "pointer", float: "right"
-            }}>Close</button>
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setShowModal(false)}
+                className="bg-[#0e1532] text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -214,4 +217,4 @@ export const SetPassword = () => {
   );
 };
 
-export default SetPassword
+export default SetPassword;
