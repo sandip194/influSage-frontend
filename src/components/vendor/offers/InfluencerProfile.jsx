@@ -218,16 +218,18 @@ const InfluencerProfile = () => {
 
                     <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-3">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
-                            <Tooltip title="Message">
-                                <button
+                           {influDetails?.invitedcampaigns !== null && (
+                                <Tooltip title="Message">
+                                    <button
                                     onClick={handleMessageClick}
                                     className="flex items-center justify-center gap-2 bg-[#0f122f] text-white px-4 py-2 rounded-3xl hover:bg-[#23265a]"
-                                >
-                                    <RiMessage2Line size={18} />Send Message
-                                </button>
-                            </Tooltip>
+                                    >
+                                    <RiMessage2Line size={18} /> Send Message
+                                    </button>
+                                </Tooltip>
+                                )}
                             <button onClick={handleInvite} className="border border-gray-300 text-gray-900 px-5 py-2 rounded-full hover:bg-gray-100 transition w-full sm:w-auto">
-                                Invited
+                                Invite
                             </button>
                             <Tooltip title={influDetails?.savedinfluencer ? "Unfavorite" : "Favorite"}>
                                 <button

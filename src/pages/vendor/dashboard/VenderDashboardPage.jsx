@@ -1,5 +1,9 @@
 import React from 'react'
-import ProfileComplation from '../../../components/users/InfluencerDashboardHome/ProfileComplation'
+import ProfileComplationVendor from '../VendorDashboardHome/ProfileComplationVendor'
+import CampaignCards from '../VendorDashboardHome/CampaignCards'
+import EarningsSummarySectionVendor from '../VendorDashboardHome/EarningsSummarySectionVendor'
+import ActiveCampaign from '../VendorDashboardHome/ActiveCampaign'
+import Campaign from '../VendorDashboardHome/Campaign'
 
 const VenderDashboardPage = () => {
     return (
@@ -9,7 +13,11 @@ const VenderDashboardPage = () => {
                 <p className='text-base text-[#0D132D]'>Track Your Campaign & Earning Progress</p>
             </div>
             <div className="mian-box">
-                <ProfileComplation />
+                <ProfileComplationVendor />
+                <CampaignCards />
+                <EarningsSummarySectionVendor />
+                <ActiveCampaign />
+                <Campaign />
             </div>
         </div>
     )

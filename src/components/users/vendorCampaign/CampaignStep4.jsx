@@ -170,7 +170,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
 
         const res = await axios.post(
           "/vendor/campaign/delete-file",
-          { filepath: fileToDelete.filepath },
+          {campaignId, filepath: fileToDelete.filepath },
           { headers: { Authorization: `Bearer ${authToken}` } }
         );
 

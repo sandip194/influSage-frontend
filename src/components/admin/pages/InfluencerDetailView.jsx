@@ -21,6 +21,19 @@ const InfluencerDetailView = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [actionType, setActionType] = useState(""); // 'Approved' or 'Rejected'
 
+    const formatPhoneNumber = (phone) => {
+    if (!phone) return "No phone";
+
+    const cleaned = phone.replace(/\D/g, "");
+
+    let number = cleaned;
+    if (number.startsWith("91")) {
+        number = number.slice(2);
+    }
+    return `+91 ${number.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3")}`;
+    };
+
+
     const getInfluencerDetails = async () => {
         try {
             setLoading(true);
@@ -119,7 +132,7 @@ const InfluencerDetailView = () => {
                                         {influDetails?.p_profile?.firstname} {influDetails?.p_profile?.lastname}
                                     </h2>
                                     <p className="text-gray-500 text-sm">
-                                        {influDetails?.p_profile?.phonenumber || "No phone"} <br />
+                                        {formatPhoneNumber(influDetails?.p_profile?.phonenumber)} <br />
                                         {influDetails?.p_profile?.email || "No email"}
                                     </p>
                                 </div>
