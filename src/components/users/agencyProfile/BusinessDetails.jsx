@@ -19,6 +19,7 @@ export const BusinessDetails = ({ onNext }) => {
     const [states, setStates] = useState([]);
     const [cities, setCities] = useState([]);
     const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [companySizes, setCompanySizes] = useState([
 
         {
@@ -137,6 +138,7 @@ export const BusinessDetails = ({ onNext }) => {
 
     const handleSubmit = async () => {
         try {
+            setIsSubmitting(true);
             if (!profileImage) {
                 setProfileError("Please Select Profile Image ! Profile Image Is Required")
             }
@@ -160,6 +162,8 @@ export const BusinessDetails = ({ onNext }) => {
             onNext();
         } catch (errorInfo) {
             console.error('❌ Validation Failed:', errorInfo);
+        }finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -376,11 +380,12 @@ export const BusinessDetails = ({ onNext }) => {
                 </Form.Item>
 
                 {/* Submit Button */}
-                <button
-                    className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
+               <button
                     onClick={handleSubmit}
-                >
-                    Continue
+                    disabled={isSubmitting}
+                    className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
+                    >
+                    {isSubmitting ? "Saving..." : "Continue"}
                 </button>
             </Form>
         </div>

@@ -248,11 +248,17 @@ const DescriptionLayout = () => {
                   >
                     <RiMenLine size={16} />
                   </button>
-                  <Link to={`/dashboard/browse/apply-now/${campaignId}`} className="flex-1">
-                    <button className="w-full px-6 py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition">
-                      Apply Now
+                  {campaignDetails?.campaignapplied ? (
+                    <button className="flex-1 px-6 py-2 rounded-3xl bg-[#9d9d9d] cursor-not-allowed text-white font-semibold transition min-w-0 truncate">
+                      Applied
                     </button>
-                  </Link>
+                  ) : (
+                    <Link to={`/dashboard/browse/apply-now/${campaignId}`} className="flex-1 min-w-0">
+                      <button className="w-full px-6 py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition truncate">
+                        Apply Now
+                      </button>
+                    </Link>
+                  )}
                 </div>
               </div>
 

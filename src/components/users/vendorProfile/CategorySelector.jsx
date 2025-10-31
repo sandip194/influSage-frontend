@@ -10,6 +10,7 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
     const [selectedParentId, setSelectedParentId] = useState(null); // default to first parent
     const [selectedChildren, setSelectedChildren] = useState([]);
     const [error, setError] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { token, role } = useSelector(state => state.auth);
 
@@ -71,6 +72,7 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
 
     const sendDataToBackend = async (data) => {
         try {
+            setIsSubmitting(true);
             const formData = new FormData();
             formData.append('categoriesjson', JSON.stringify(data));
 
@@ -124,10 +126,13 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
         } catch (error) {
             console.error("❌ Error sending data to backend:", error.response?.data || error.message);
         }
+         finally {
+            setIsSubmitting(false);
+        }
     };
 
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (selectedChildren.length === 0) {
             setError(true);
             return;
@@ -157,6 +162,7 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
         localStorage.setItem('selectedFullCategoryData', JSON.stringify(selectedData));
 
        // console.log('✅ Saved category data:', selectedData);
+       await sendDataToBackend(selectedData);
 
         if (onNext) onNext();
     };
@@ -240,10 +246,11 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
                 {/* Next / Save Button */}
                 {(showControls || onNext) && (
                     <button
-                        className="bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition"
+                    className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
                         onClick={handleSubmit}
+                        disabled={isSubmitting}
                     >
-                        {onNext ? "Continue" : "Save Changes"}
+                        {isSubmitting ? "Saving..." : "Save Changes"}
                     </button>
                 )}
 

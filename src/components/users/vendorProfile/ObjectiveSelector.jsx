@@ -12,6 +12,7 @@ const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSa
   const [objectives, setObjectives] = useState([]);
 
   const { token } = useSelector(state => state.auth);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSelection = (id) => {
     setSelected(id);
@@ -24,7 +25,7 @@ const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSa
     }
 
     setError("");
-
+    setIsSubmitting(true);
     const formData = new FormData();
     formData.append('objectivesjson', JSON.stringify([{ objectiveid: selected }]));
 
@@ -49,6 +50,9 @@ const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSa
       console.error("❌ Failed to save objective:", err);
       setError("Failed to save your objective. Please try again.");
     }
+    finally {
+            setIsSubmitting(false);
+        }
   };
 
   const fetchAllObjectives = async () => {
@@ -134,10 +138,11 @@ const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSa
         {/* Next / Save Button */}
         {(showControls || onNext) && (
           <button
-            className="bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition"
+            className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
             onClick={handleContinue}
+            disabled={isSubmitting}
           >
-            {onNext ? "Continue" : "Save Changes"}
+            {isSubmitting ? 'Saving...' : 'Save Changes'}
           </button>
         )}
 

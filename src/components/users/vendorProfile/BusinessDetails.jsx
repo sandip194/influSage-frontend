@@ -24,6 +24,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
     const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
     const [companySizes, setCompanySizes] = useState([]);
     const [existingPhotoPath, setExistingPhotoPath] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
 
     const { token } = useSelector(state => state.auth);
@@ -143,6 +144,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
     const handleSubmit = async () => {
         try {
+            setIsSubmitting(true);
             const values = await form.validateFields();
 
             if (!profileImage && !preview) {
@@ -190,6 +192,9 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
         } catch (error) {
             console.error("❌ Validation or API error:", error);
             message.error("Please correct the form errors.");
+        }
+        finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -397,10 +402,11 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                 {(showControls || onNext) && (
                     <div className="flex justify-start mt-6">
                         <button
-                            className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
+                            className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
                             onClick={handleSubmit}
+                            disabled={isSubmitting}
                         >
-                            {onNext ? 'Continue' : 'Save Changes'}
+                            {isSubmitting ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
                 )}

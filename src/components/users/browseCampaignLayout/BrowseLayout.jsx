@@ -399,11 +399,7 @@ const Browse = () => {
                   />
                   <div className="flex-1 min-w-0"> {/* Keeps space management intact */}
                     <Link
-                      to={
-                        campaign.campaignapplied
-                          ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
-                          : `/dashboard/browse/description/${campaign.id}`
-                      }
+                      to={`/dashboard/browse/description/${campaign.id}`}
                       className="font-semibold text-gray-900 hover:underline"
                     >
                       {campaign.name}
