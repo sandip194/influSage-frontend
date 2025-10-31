@@ -451,7 +451,9 @@ const CampaignDetails = () => {
         </div>
 
         {/* Right Section */}
-        <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
+        <div className=" w-full md:w-[350px] flex-shrink-0 flex flex-col gap-6
+            [@media(min-width:768px)_and_(max-width:1024px)]:w-full
+            [&>*]:w-full">
           {/* Campaign Info Card */}
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="font-semibold text-lg">Campaign Details</h3>
@@ -488,7 +490,7 @@ const CampaignDetails = () => {
           </div>
 
 
-          <div className="space-y-4 w-full max-w-xs">
+          <div className="space-y-6 w-full">
             {/* Platform Card */}
             <div className="bg-white p-4 rounded-2xl">
               <h3 className="font-semibold text-lg py-3">Platform</h3>

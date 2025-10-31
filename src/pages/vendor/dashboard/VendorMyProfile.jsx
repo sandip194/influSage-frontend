@@ -45,7 +45,17 @@ const workHistoryData = [
         rating: 3,
     },
 ];
+    const formatPhoneNumber = (phone) => {
+    if (!phone) return "No phone";
 
+    const cleaned = phone.replace(/\D/g, "");
+
+    let number = cleaned;
+    if (number.startsWith("91")) {
+        number = number.slice(2);
+    }
+    return `+91 ${number.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3")}`;
+    };
 const VendorMyProfile = () => {
     const [showAllHistory, setShowAllHistory] = useState(false);
     const [profileData, setProfileData] = useState(null);
@@ -97,7 +107,7 @@ const VendorMyProfile = () => {
             <div className="flex flex-col lg:flex-row gap-4">
                 {/* Left Side */}
                 <div className="flex-1 space-y-4">
-                    <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
+                    <div className="bg-white object-cover rounded-2xl overflow-hidden shadow-sm">
                         {/* Banner */}
                         <div className="relative">
                             <img
@@ -124,7 +134,7 @@ const VendorMyProfile = () => {
                                         {profileData?.p_profile?.firstname} {profileData?.p_profile?.lastname}
                                     </h2>
                                     <p className="text-gray-500 text-sm">
-                                        {profileData?.p_profile?.phonenumber}
+                                        {formatPhoneNumber(profileData?.p_profile?.phonenumber)}
                                     </p>
                                     <p className="text-gray-500 text-sm">
                                         {profileData?.p_profile?.email}
@@ -334,14 +344,14 @@ const VendorMyProfile = () => {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl p-4 text-sm w-full">
+                    {/* <div className="bg-white rounded-2xl p-4 text-sm w-full">
                         <h3 className="font-bold mb-4 text-base">Target Influencer</h3>
                         <div className="flex flex-col gap-1 mt-2">
                             <span className="text-xs text-gray-700">• Nano Influencer (5k - 10k Followers)</span>
                             <span className="text-xs text-gray-700">• Micro Influencer (10k - 100k Followers)</span>
                             <span className="text-xs text-gray-700">• Macro Influencer (100k - 1M Followers)</span>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Payment Details */}
                     {/* <div className="bg-white rounded-2xl p-4 text-sm w-full">

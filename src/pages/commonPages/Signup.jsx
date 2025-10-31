@@ -126,25 +126,25 @@ const Signup = () => {
 
             {/* Email */}
             <div>
-              <label className="font-semibold text-sm">
-                Email<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-                    message: "Invalid email format",
-                  },
-                })}
-                className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-              />
-              {errors.email && (
-                <p className="text-xs text-red-500">{errors.email.message}</p>
-              )}
-            </div>
+                    <label className="font-semibold text-sm">
+                    Email<span className="text-red-500">*</span>
+                    </label>
+                    <input
+                    type="email"
+                    placeholder="Enter your email"
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: {
+                      value: /^[a-z0-9.-]+@[a-z0-9-]+\.[a-z]{2,4}$/,
+                      message: "Invalid email format, use only lowercase letters",
+                      },
+                    })}
+                    className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                    {errors.email && (
+                    <p className="text-xs text-red-500">{errors.email.message}</p>
+                    )}
+                  </div>
 
             {/* Password */}
             <div>

@@ -270,9 +270,13 @@ const handleBack = async (prevIndex) => {
     <div className="flex flex-col gap-4">
       {currentStep === "review" ? (
         <CampaignReviewStep
-          campaignData={campaignData}
-          onEdit={() => setCurrentStep(0)}
-        />
+  campaignData={campaignData}
+  onEdit={async () => {
+    await getCampaignData(); // fetch latest from Redis
+    setCurrentStep(0); // go to first step
+  }}
+/>
+
       ) : (
         steps[currentStep]?.component
       )}
