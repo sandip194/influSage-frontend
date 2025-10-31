@@ -62,6 +62,7 @@ import CampaignRequests from './components/admin/pages/CampaignRequests';
 import DashboardGuard from './routes/DashboardGuard';
 import InfluencerDetailView from './components/admin/pages/InfluencerDetailView';
 import HomePage from './pages/LandingPage/HomePage';
+import CampaignDetailsView from './components/admin/pages/CampaignDetailsView';
 
 const App = () => {
 
@@ -186,6 +187,7 @@ const App = () => {
                                                         <Route path='influencers' element={<InfluencersRequests />} />
                                                         <Route path='influencers/details/:userId' element={<InfluencerDetailView />} />
                                                         <Route path='campaigns' element={<CampaignRequests />} />
+                                                        <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView/>} />
                                                 </Route>
                                         </Route>
 
