@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Upload, message } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import {
-RiCloseLine,
-RiUpload2Line,
-RiDeleteBin6Line,
-} from 'react-icons/ri';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import { useSelector } from 'react-redux';
-import 'react-photo-view/dist/react-photo-view.css';
-import { PhotoProvider, PhotoView } from 'react-photo-view';
+import React, { useState, useEffect } from "react";
+import { Upload, message } from "antd";
+import { RiCloseLine, RiUpload2Line, RiDeleteBin6Line } from "react-icons/ri";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import "react-photo-view/dist/react-photo-view.css";
+import { PhotoProvider, PhotoView } from "react-photo-view";
 
 const { Dragger } = Upload;
 
@@ -22,7 +17,6 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
   const [loading, setLoading] = useState(false);
 
   const { token } = useSelector((state) => state.auth);
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const allowedTypes = [
     "image/png",
@@ -38,7 +32,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
   const getFileUID = (file) =>
     `${file.name}-${file.size || 0}-${file.lastModified || Date.now()}`;
 
-  // File change handler
+  // ✅ Handle file change + duplicate prevention
   const handleFileChange = (info) => {
     const incomingFiles = info.fileList
       .map((f) => f.originFileObj || f)
@@ -48,27 +42,43 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
 
     setFileList((prevFiles) => {
       const combinedFiles = [...prevFiles, ...existingFiles];
+
+      // Track existing ones (from previous uploads + backend)
       const existingUIDs = new Set(combinedFiles.map((f) => f.uid));
+      const existingNames = new Set(
+        combinedFiles.map((f) => f.name?.toLowerCase().trim())
+      );
+
       const newValidFiles = [];
+      const newNames = new Set(); // ✅ track only for current batch
 
       for (const file of incomingFiles) {
         if (!allowedTypes.includes(file.type)) {
           errorMessages.add(`${file.name}: unsupported type`);
           continue;
         }
+
         if (file.size / 1024 / 1024 > 25) {
           errorMessages.add(`${file.name}: exceeds 25MB`);
           continue;
         }
 
         const uid = getFileUID(file);
-        if (existingUIDs.has(uid)) {
+        const fileNameLower = file.name?.toLowerCase().trim();
+
+        // ✅ check only against *previously existing* files
+        if (
+          existingUIDs.has(uid) ||
+          existingNames.has(fileNameLower) ||
+          newNames.has(fileNameLower)
+        ) {
+          errorMessages.add(`${file.name}: already uploaded`);
           continue;
         }
 
+        // ✅ max file limit check
         if (
-          prevFiles.length + newValidFiles.length + existingFiles.length >=
-          5
+          prevFiles.length + newValidFiles.length + existingFiles.length >= 5
         ) {
           errorMessages.add("Maximum 5 files allowed");
           break;
@@ -77,7 +87,9 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
         file.uid = uid;
         file.previewUrl = URL.createObjectURL(file);
         newValidFiles.push(file);
-        existingUIDs.add(uid);
+
+        // ✅ mark for this batch only
+        newNames.add(fileNameLower);
       }
 
       if (errorMessages.size > 0) {
@@ -90,6 +102,8 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
     });
   };
 
+
+  // ✅ Handle Continue (save)
   const handleContinue = async () => {
     if (fileList.length === 0 && existingFiles.length === 0) {
       setFileError("Please upload at least one reference file.");
@@ -127,12 +141,13 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
     }
   };
 
-  // useEffect for previewing existing backend files
+  // ✅ Map backend data for proper preview and name extraction
   useEffect(() => {
     if (data && Array.isArray(data)) {
       const filesFromBackend = data
         .filter((f) => f.filepath)
         .map((f) => {
+          // Extract only filename from full URL
           const name = f.filepath.split("/").pop() || "";
           const ext = name.split(".").pop()?.toLowerCase();
 
@@ -140,13 +155,12 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
           if (["png", "jpg", "jpeg"].includes(ext)) type = "image/png";
           else if (["mp4", "mov"].includes(ext)) type = "video/mp4";
           else if (ext === "pdf") type = "application/pdf";
-          else if (["doc", "docx"].includes(ext)) type = "application/msword";
-
-          const fileUrl = f.filepath;
+          else if (["doc", "docx"].includes(ext))
+            type = "application/msword";
 
           return {
-            name,
-            url: fileUrl,
+            name, // ✅ filename only (used for duplicate check)
+            url: f.filepath, // ✅ full path for preview
             filepath: f.filepath,
             status: "done",
             type,
@@ -158,7 +172,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
     }
   }, [data]);
 
-  // Handle Delete
+  // ✅ Delete Handler
   const handleDeleteReference = async (fileToDelete) => {
     if (fileToDelete.isExisting) {
       try {
@@ -170,7 +184,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
 
         const res = await axios.post(
           "/vendor/campaign/delete-file",
-          {campaignId, filepath: fileToDelete.filepath },
+          { campaignId, filepath: fileToDelete.filepath },
           { headers: { Authorization: `Bearer ${authToken}` } }
         );
 
@@ -217,13 +231,14 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
           </p>
         </div>
       </Dragger>
+
       {fileError && (
         <div className="text-red-500 text-sm mt-2 text-center whitespace-pre-line">
           {fileError}
         </div>
       )}
 
-      {/* Preview */}
+      {/* ✅ File Previews */}
       <PhotoProvider>
         <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
           {[...existingFiles, ...fileList].map((file, index) => {
@@ -240,7 +255,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
                 key={`${file.uid || file.name}-${index}`}
                 className="relative w-28 h-28 rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center"
               >
-                {/* Image Preview with react-photo-view */}
+                {/* ✅ Image */}
                 {isImage && (
                   <PhotoView src={previewUrl}>
                     <img
@@ -251,6 +266,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
                   </PhotoView>
                 )}
 
+                {/* ✅ Video */}
                 {isVideo && (
                   <div
                     className="w-full h-full cursor-pointer relative"
@@ -268,7 +284,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
                   </div>
                 )}
 
-                {/* PDF Preview */}
+                {/* ✅ PDF */}
                 {isPDF && (
                   <div className="flex flex-col items-center justify-center w-full h-full text-gray-700">
                     <div className="w-10 h-10 flex items-center justify-center bg-red-100 rounded-lg mb-1">
@@ -290,7 +306,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
                   </div>
                 )}
 
-                {/* Doc/Docx Preview */}
+                {/* ✅ DOC / DOCX */}
                 {isDoc && (
                   <div className="flex flex-col items-center justify-center w-full h-full text-gray-700">
                     <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg mb-1">
@@ -324,6 +340,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
                   </a>
                 )}
 
+                {/* Delete Button */}
                 <button
                   className="absolute top-1 right-1 bg-black flex items-center justify-center w-7 h-7 hover:bg-black/80 text-white p-1 rounded-full"
                   onClick={() => handleDeleteReference(file)}
@@ -337,7 +354,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
         </div>
       </PhotoProvider>
 
-      {/* Custom modal for videos */}
+      {/* ✅ Video Lightbox */}
       {lightboxVideo.open && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
           <div className="relative w-[90%] max-w-4xl">
@@ -351,7 +368,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
               className="absolute top-2 right-2 bg-white/60 flex items-center justify-center w-7 h-7 text-black p-1 rounded-full"
               onClick={() => setLightboxVideo({ open: false, src: "" })}
             >
-            <RiCloseLine/>
+              <RiCloseLine />
             </button>
           </div>
         </div>

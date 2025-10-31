@@ -26,6 +26,7 @@ import {
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const { RangePicker } = DatePicker;
 
@@ -39,6 +40,7 @@ const sortOptions = [
 
 const CampaignTableLayout = () => {
   const { token } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   // 🧩 State Management
@@ -293,13 +295,13 @@ const CampaignTableLayout = () => {
           <table className="min-w-[1100px] w-full text-left text-sm">
             <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
               <tr>
-                <th className="p-4">Campaign</th>
-                <th className="p-4">Vendor</th>
-                <th className="p-4">Categories</th>
-                <th className="p-4">Platforms</th>
-                <th className="p-4">Budget</th>
-                <th className="p-4 whitespace-nowrap">Start Date</th>
-                <th className="p-4 whitespace-nowrap">End Date</th>
+                <th className="p-4 min-w-[300px]">Campaign</th>
+                <th className="p-4 min-w-[100px]">Vendor</th>
+                <th className="p-4 min-w-[150px]">Categories</th>
+                <th className="p-4 min-w-[150px]">Platforms</th>
+                <th className="p-4 min-w-[100px]">Budget</th>
+                <th className="p-4 whitespace-nowrap min-w-[100px]">Start Date</th>
+                <th className="p-4 whitespace-nowrap min-w-[100px]">End Date</th>
                 {/* Status column visible only in "All" tab */}
                 {activeStatusId === "all" && <th className="p-4">Status</th>}
                 <th className="p-4 text-right">Actions</th>
@@ -407,6 +409,11 @@ const CampaignTableLayout = () => {
                       <Tooltip title="View">
                         <button
                           className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition"
+                          onClick={() =>
+                            navigate(
+                              `/admin-dashboard/campaigns/details/${c.id}`
+                            )
+                          }
                         >
                           <RiEyeLine size={18} />
                         </button>

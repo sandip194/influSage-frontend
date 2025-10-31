@@ -33,8 +33,7 @@ const CampaignReviewStep = ({ onEdit }) => {
   useEffect(() => {
     const fetchCampaign = async () => {
       try {
-        const authToken = token || localStorage.getItem("token");
-        if (!authToken) {
+        if (!token) {
           toast.error("No token found. Please log in again.");
           return;
         }
@@ -46,7 +45,7 @@ const CampaignReviewStep = ({ onEdit }) => {
           : `/vendor/campaign/01`;
 
         const res = await axios.get(url, {
-          headers: { Authorization: `Bearer ${authToken}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         setCampaignData(res.data?.campaignParts || {});

@@ -318,12 +318,12 @@ const UserTableLayout = () => {
                         <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full">
                             <thead className="bg-gray-100 text-gray-700 text-xs sm:text-sm uppercase tracking-wide">
                                 <tr>
-                                    <th className="px-4 py-3 sm:px-4">User</th>
-                                    <th className="px-4 py-3 sm:px-4">Email</th>
-                                    <th className="px-4 py-3 sm:px-4">Followers</th>
-                                    <th className="px-4 py-3 sm:px-4">Category</th>
-                                    <th className="px-4 py-3 sm:px-4">Location</th>
-                                    <th className="px-4 py-3 sm:px-4">Applied On</th>
+                                    <th className="px-4 py-3 sm:px-4 min-w-[200px]">User</th>
+                                    <th className="px-4 py-3 sm:px-4 min-w-[150px]">Email</th>
+                                    <th className="px-4 py-3 sm:px-4 min-w-[150px]">Followers</th>
+                                    <th className="px-4 py-3 sm:px-4 min-w-[150px]">Category</th>
+                                    <th className="px-4 py-3 sm:px-4 min-w-[100px]">Location</th>
+                                    <th className="px-4 py-3 sm:px-4 min-w-[100px]">Applied On</th>
                                     <th className="px-4 py-3 sm:px-4 text-right">Actions</th>
                                 </tr>
                             </thead>
