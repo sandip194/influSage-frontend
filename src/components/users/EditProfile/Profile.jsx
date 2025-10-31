@@ -22,6 +22,18 @@ const Profile = () => {
 
   const { token, userId } = useSelector((state) => state.auth);
 
+      const formatPhoneNumber = (phone) => {
+    if (!phone) return "No phone";
+
+    const cleaned = phone.replace(/\D/g, "");
+
+    let number = cleaned;
+    if (number.startsWith("91")) {
+        number = number.slice(2);
+    }
+    return `+91 ${number.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3")}`;
+    };
+    
   // Fetch profile data
   const getMyProfileDetails = async () => {
     try {
@@ -80,9 +92,9 @@ const Profile = () => {
                     {p_profile?.firstname} {p_profile?.lastname}
                   </h2>
                   <p className="text-gray-500 text-sm">
-                    {p_profile?.phonenumber || "No phone"} <br />
+                    {formatPhoneNumber(p_profile?.phonenumber)} <br />
                     {p_profile?.email || "No email"}
-                    </p>
+                  </p>
 
                 </div>
               </div>
