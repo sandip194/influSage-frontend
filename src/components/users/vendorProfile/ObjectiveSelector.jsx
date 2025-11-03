@@ -142,7 +142,7 @@ const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSa
             onClick={handleContinue}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Saving...' : 'Save Changes'}
+            {isSubmitting ? 'Saving...' : 'Continue'}
           </button>
         )}
 

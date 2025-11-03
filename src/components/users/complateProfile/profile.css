@@ -1,34 +1,42 @@
+/* Default Step icon */
 .ant-steps-item-icon {
-    background: #f5f5f5 !important;
-    color: black !important;
-    border-color: #333 !important;
+  background: #f5f5f5 !important;
+  color: black !important;
+  border-color: #333 !important;
 }
 
+/* Step icon inner icon color */
 .ant-steps-icon {
-    color: #fff;
-}
-.inputs-padding{
-    padding: 8px 12px;
+  color: #fff;
 }
 
-:where(.css-dev-only-do-not-override-7t2xvq).ant-steps .ant-steps-item-finish .ant-steps-item-icon {
-    background-color: #0D132D !important;
-    border-color: #0D132D !important;
-    color: #fff !important;
+/* Input padding helper class */
+.inputs-padding {
+  padding: 8px 12px;
 }
 
-
-:where(.css-dev-only-do-not-override-7t2xvq).ant-steps .ant-steps-item-finish .ant-steps-item-icon >.ant-steps-icon{
-    color: #fff !important;
+/* Finished Step icon */
+.ant-steps-item-finish .ant-steps-item-icon {
+  background-color: #0D132D !important;
+  border-color: #0D132D !important;
+  color: #fff !important;
 }
 
-:where(.css-dev-only-do-not-override-7t2xvq).ant-steps .ant-steps-item-process .ant-steps-item-icon {
-    background-color: #0D132D !important;
-    border-color: #0D132D !important;
+/* Finished Step icon inner icon */
+.ant-steps-item-finish .ant-steps-item-icon > .ant-steps-icon {
+  color: #fff !important;
 }
 
+/* Current (in-progress) Step */
+.ant-steps-item-process .ant-steps-item-icon {
+  background-color: #0D132D !important;
+  border-color: #0D132D !important;
+  color: #fff !important;
+}
+
+/* Connector line between steps */
 .ant-steps-item-finish .ant-steps-item-tail::after {
-    width: 1px;
-    height: 20px !important;
-    background-color: #0D132D !important;
+  width: 1px;
+  height: 20px !important;
+  background-color: #0D132D !important;
 }

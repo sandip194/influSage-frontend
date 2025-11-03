@@ -59,6 +59,7 @@ export default function ChatAppPageVendor() {
   const handleSendMessage = async ({ text, file, replyId }) => {
     // console.log("📨 Sending message with replyId:", replyId); 
     if (!activeChat) return;
+    console.log("Active Chat:", activeChat);
 
     const tempMsg = {
       id: Date.now(),
@@ -81,6 +82,10 @@ export default function ChatAppPageVendor() {
       formData.append("p_conversationid", activeChat.conversationid);
       formData.append("p_roleid", role);
       formData.append("p_messages", text);
+      formData.append("campaignid", activeChat.campaignId);
+      formData.append("campaignName", activeChat.campaignName);
+      formData.append("influencerId", activeChat.influencerid);
+      formData.append("influencerName", activeChat.name);
       if (file) formData.append("file", file);
       if (replyId) formData.append("p_replyid", replyId);
 
@@ -138,6 +143,7 @@ export default function ChatAppPageVendor() {
         socket.emit("editMessage", updatedMessage);
         dispatch(updateMessage(updatedMessage));
         setEditingMessage(null);
+        setRefreshKey((prev) => prev + 1);
       }
     } catch (err) {
       console.error("Edit failed", err);

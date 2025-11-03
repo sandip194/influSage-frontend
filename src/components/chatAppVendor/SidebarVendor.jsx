@@ -24,7 +24,7 @@ export default function SidebarVendor({ onSelectChat }) {
 
     try {
       const response = await axios.get(`/chat/conversationsdetails`, {
-        params: { p_search: search },
+        params: { p_search: search.trim() || "" },
         headers: { Authorization: `Bearer ${token}` },
       });
 

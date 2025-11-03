@@ -37,13 +37,13 @@ const ThankYouScreen = () => {
                         you'll be able to access and start using the platform fully. We appreciate your patience!
                     </span>
                 </p>
-                <button
+                {/* <button
                     onClick={handleGoToHome}
                     className="bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer text-white font-semibold px-6 py-3 rounded-full shadow-md"
                 >
 
                     Go To Home
-                </button>
+                </button> */}
             </div>
         </div>
     );

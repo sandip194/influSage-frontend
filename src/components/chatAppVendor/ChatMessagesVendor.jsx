@@ -38,7 +38,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
   const socket = getSocket();
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const [deletedMessage, setDeletedMessage] = useState({});
-  const scrollRef = useRef(null);
+  // const scrollRef = useRef(null);
 
   const scrollContainerRef = useRef(null);
   const bottomRef = useRef(null);
@@ -108,15 +108,25 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
     }
   };
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
-    }
-  }, []);
-  useEffect(() => {
-    // Notify parent after refetch
-    onMessagesRefetch && onMessagesRefetch();
-  }, [messages]);
+useEffect(() => {
+  if (!isLoading && messages.length > 0) {
+    bottomRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+  }
+}, [isLoading]);
+
+useEffect(() => {
+  if (isLoading || messages.length === 0) return;
+
+  const lastMsg = messages[messages.length - 1];
+  const isSentByMe = lastMsg?.roleId === role;
+
+  // scroll only when user is near bottom or sent message
+  if (isNearBottom || isSentByMe) {
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+  }
+}, [messages]);
 
   // Send message read status if unread messages exist
   useEffect(() => {
@@ -350,13 +360,6 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
     };
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && messages.length > 0) {
-      setTimeout(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    }
-  }, [isLoading, messages]);
 
   if (chat && isLoading) {
     return (
@@ -368,7 +371,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
   }
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-1 pt-10">
+     <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-1 pt-10">
       {messages.map((msg, index) => {
         const isMe = msg.roleId === role;
         const isLast = index === messages.length - 1;

@@ -17,7 +17,7 @@ export default function Sidebar({ onSelectChat }) {
 
     try {
       const response = await axios.get(`/chat/conversationsdetails`, {
-        params: { p_search: search },
+        params: { p_search: search.trim() || "" },
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -104,6 +104,8 @@ export default function Sidebar({ onSelectChat }) {
                     name: campaign.campaignname,
                     img: campaign.campaignphoto,
                     vendorId: vendor.vendorid || vendor.id,
+                    campaignid: campaign.campaignid,
+                    campaignname: campaign.campaignname,
                   });
 
                   // remove from unread once clicked

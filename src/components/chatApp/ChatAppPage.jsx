@@ -59,8 +59,9 @@ export default function ChatAppPage() {
   }, [socket, dispatch]);
 
   // ✉️ Handle sending messages
-  const handleSendMessage = async ({ text, file, replyId }) => {
+    const handleSendMessage = async ({ text, file, replyId }) => {
     if (!activeChat) return;
+    console.log("Active Chat:", activeChat);
 
     const newMsg = {
       id: Date.now(),
@@ -82,6 +83,8 @@ export default function ChatAppPage() {
       formData.append("p_conversationid", activeChat.id);
       formData.append("p_roleid", role);
       formData.append("p_messages", text);
+      formData.append("campaignid", activeChat.campaignid);
+      formData.append("campaignName", activeChat.campaignname); 
       if (file) formData.append("file", file);
       if (replyId) formData.append("p_replyid", replyId);
 
@@ -106,6 +109,7 @@ export default function ChatAppPage() {
       console.error("Send failed", err);
     }
   };
+
 
   const handleEditMessage = async ({ id, content, file, replyId }) => {
     if (!activeChat || !id) return console.error("Missing activeChat or message id");
@@ -136,6 +140,7 @@ export default function ChatAppPage() {
         socket.emit("editMessage", updatedMessage);
         dispatch(updateMessage(updatedMessage));
         setEditingMessage(null);
+        setRefreshKey((prev) => prev + 1);
       }
     } catch (err) {
       console.error("Edit failed", err);

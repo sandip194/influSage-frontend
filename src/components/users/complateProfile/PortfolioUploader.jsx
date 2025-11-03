@@ -83,9 +83,9 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
-    setIsSubmitting(true);
 
     try {
+    setIsSubmitting(true);
       const hasFiles = fileList.length > 0 || existingFiles.length > 0;
       const isValidUrl = /^https?:\/\/.+/.test(portfolioUrl);
 

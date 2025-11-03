@@ -224,37 +224,39 @@ const CampaignStep2 = ({ data, onNext, onBack, campaignId }) => {
     <div className="bg-white p-6 rounded-2xl">
       {/* Gender */}
       <h2 className="text-xl font-semibold mb-4">
-        Please select the gender(s) of influencers you'd like to work with
+        Please select the genders of influencers you'd like to work with
       </h2>
       <div className="flex flex-wrap gap-4 mb-2">
-        {genders.map(({ id, name }) => {
-          const isSelected = formData.genderid.includes(id);
-          return (
-            <div
-              key={id}
-              onClick={() => toggleGender(id)}
-              className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all 
-          w-full sm:w-32
-          ${isSelected
-                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                  : "bg-white text-black border-gray-300 hover:border-[#141843]"
-                }`}
-            >
-              <span className="capitalize font-medium text-sm">{name}</span>
+      {genders.map(({ id, name }) => {
+        const isSelected = formData.genderid.includes(id);
+        return (
+          <div
+            key={id}
+            onClick={() => toggleGender(id)}
+            className={`flex items-center justify-between gap-3 px-6 py-3 rounded-xl border cursor-pointer transition-all 
+            w-full sm:w-32
+            ${
+              isSelected
+                ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                : "bg-white text-black border-gray-300 hover:border-[#141843]"
+            }`}
+          >
+            <span className="capitalize font-medium text-sm">{name}</span>
 
-              <div
-                className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all
-            ${isSelected
-                    ? "bg-[#141843] border-[#0D132D26] text-white"
-                    : "bg-transparent border-gray-400 text-transparent"
-                  }`}
-              >
-                <RiCheckLine size={14} />
-              </div>
+            <div
+              className={`w-5 h-5 flex items-center justify-center rounded-sm border transition-all
+              ${
+                isSelected
+                  ? "bg-[#141843] border-[#0D132D26] text-white"
+                  : "bg-transparent border-gray-400 text-transparent"
+              }`}
+            >
+              <RiCheckLine size={14} />
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
+    </div>
 
       {errors.genderid && (
         <div className="text-red-500 text-sm mb-4">

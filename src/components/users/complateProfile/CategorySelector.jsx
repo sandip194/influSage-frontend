@@ -15,6 +15,7 @@ const categories = [
 export const CategorySelector = ({ onBack, onNext }) => {
   const [selected, setSelected] = useState([]);
   const [error, setError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -39,15 +40,18 @@ export const CategorySelector = ({ onBack, onNext }) => {
   };
 
   const handleSubmit = () => {
-    if (selected.length === 0) {
-      setError(true);
-      return;
-    }
-    localStorage.setItem("selectedCategories", JSON.stringify(selected)); // ✅ Save
-    setError(false);
-    // console.log('Selected Categories:', selected);
+  if (selected.length === 0) {
+    setError(true);
+    return;
+  }
+  setIsSubmitting(true);
+  localStorage.setItem("selectedCategories", JSON.stringify(selected));
+  setTimeout(() => {
+    setIsSubmitting(false);
     if (onNext) onNext();
-  };
+  }, 400);
+};
+
 
   return (
     <div className="bg-white p-6 rounded-3xl shadow-md max-w-6xl mx-auto">
@@ -97,9 +101,10 @@ export const CategorySelector = ({ onBack, onNext }) => {
         </button>
         <button
           onClick={handleSubmit}
-          className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
+          className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
+          disabled={isSubmitting}
         >
-          Continue
+          {isSubmitting ? 'Saving...' : 'Continue'}
         </button>
       </div>
     </div>

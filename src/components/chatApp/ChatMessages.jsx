@@ -73,10 +73,13 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
 
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    if (isLoading || messages.length === 0) return;
+
+    if (isNearBottom) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, []);
+  }, [messages]);
+
 
   const handleDeleteMessage = async (messageId) => {
     dispatch(deleteMessage(messageId)); // <-- ADD THIS

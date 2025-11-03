@@ -406,7 +406,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                             onClick={handleSubmit}
                             disabled={isSubmitting}
                         >
-                            {isSubmitting ? 'Saving...' : 'Save Changes'}
+                            {isSubmitting ? 'Saving...' : 'Continue'}
                         </button>
                     </div>
                 )}

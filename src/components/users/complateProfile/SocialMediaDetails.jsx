@@ -10,6 +10,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
   const [providers, setProviders] = useState([]);
   const { token, userId } = useSelector(state => state.auth);
   const [customValidationError, setCustomValidationError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -50,6 +51,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
 
   const onFinish = async (values) => {
     try {
+      setIsSubmitting(true);
       if (!token || !userId) {
         message.error("User not authenticated.");
         return;
@@ -102,6 +104,9 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
     } catch (error) {
       console.error('❌ Failed to submit social links:', error);
       message.error('Failed to submit social links.');
+    }
+    finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -251,10 +256,11 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
           {/* Next / Save Button */}
           {(showControls || onNext) && (
             <button
-              className="bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition"
+              className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
               onClick={onFinish}
+              disabled={isSubmitting}
             >
-              {onNext ? "Continue" : "Save Changes"}
+            {isSubmitting ? 'Saving...' : 'Continue'}
             </button>
           )}
 
