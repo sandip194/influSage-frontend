@@ -83,6 +83,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [loadingLanguages, setLoadingLanguages] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showLanguageError, setShowLanguageError] = useState(false);
 
   // Combine existing + new for previews etc, memoized to avoid recomputation
   const combinedFiles = useMemo(() => [...existingFiles, ...fileList], [existingFiles, fileList]);

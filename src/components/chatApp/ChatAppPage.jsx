@@ -61,7 +61,7 @@ export default function ChatAppPage() {
   // ✉️ Handle sending messages
     const handleSendMessage = async ({ text, file, replyId }) => {
     if (!activeChat) return;
-    // console.log("Active Chat:", activeChat);
+    console.log("Active Chat:", activeChat);
 
     const newMsg = {
       id: Date.now(),
@@ -85,6 +85,8 @@ export default function ChatAppPage() {
       formData.append("p_messages", text);
       formData.append("campaignid", activeChat.campaignid);
       formData.append("campaignName", activeChat.campaignname); 
+      formData.append("influencerId", senderId);
+      // formData.append("influencerName", `${authUser?.firstname || ""} ${authUser?.lastname || ""}`.trim() || authUser?.name || "");
       if (file) formData.append("file", file);
       if (replyId) formData.append("p_replyid", replyId);
 
