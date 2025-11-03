@@ -142,6 +142,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
         dayjs(formData.applicationenddate).isAfter(dayjs(formData.startDate))),
     aboutBrand: !formData.aboutBrand?.trim(),
     profileImage: !profileImage && !formData.profileImageUrl,
+    hashtags: !Array.isArray(formData.hashtags) || formData.hashtags.length === 0,
   };
 
   if (budgetAmount > 0 && milestoneTotal !== budgetAmount) {
@@ -361,7 +362,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       <hr className="my-4 border-gray-200" />
 
       {/* Hashtags */}
-      <label className="font-semibold block mb-2">Hashtags</label>
+      <label className="font-semibold block mb-2">Hashtags <span className="text-red-500">*</span></label>
       <Select
         mode="tags"
         style={{ width: "100%" }}
@@ -370,6 +371,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
         value={formData.hashtags}
         onChange={(value) => handleChange("hashtags", value)}
       />
+      {errors.hashtags && (
+        <p className="text-red-500 text-sm mt-1">Please enter hashtages</p>
+      )}
 
       <hr className="my-4 border-gray-200" />
 

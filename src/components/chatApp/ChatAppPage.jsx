@@ -140,6 +140,7 @@ export default function ChatAppPage() {
         socket.emit("editMessage", updatedMessage);
         dispatch(updateMessage(updatedMessage));
         setEditingMessage(null);
+        setRefreshKey((prev) => prev + 1);
       }
     } catch (err) {
       console.error("Edit failed", err);
