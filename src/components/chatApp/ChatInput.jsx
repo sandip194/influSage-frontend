@@ -53,7 +53,6 @@ export default function ChatInput({ onSend, replyTo, onCancelReply, editingMessa
 
   const handleEmojiClick = (emojiData) => {
     setText((prev) => prev + emojiData.emoji);
-    setShowEmojiPicker(false);
   };
 
   const handleFileChange = (e) => {

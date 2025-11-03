@@ -581,10 +581,10 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
             {(showControls || onNext) && (
               <button
                 className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
-                onClick={onFinish}
-                disabled={isSubmitting}
+                onClick={form.submit}
+                disabled={submitting}
               >
-                {isSubmitting ? 'Saving...' : 'Continue'}
+                {submitting ? 'Saving...' : 'Continue'}
               </button>
             )}
 

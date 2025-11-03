@@ -85,8 +85,6 @@ export default function ChatAppPage() {
       formData.append("p_messages", text);
       formData.append("campaignid", activeChat.campaignid);
       formData.append("campaignName", activeChat.campaignname); 
-      formData.append("influencerId", senderId);
-      // formData.append("influencerName", `${authUser?.firstname || ""} ${authUser?.lastname || ""}`.trim() || authUser?.name || "");
       if (file) formData.append("file", file);
       if (replyId) formData.append("p_replyid", replyId);
 

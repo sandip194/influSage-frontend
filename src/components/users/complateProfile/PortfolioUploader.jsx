@@ -83,7 +83,6 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [loadingLanguages, setLoadingLanguages] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showLanguageError, setShowLanguageError] = useState(false);
 
   // Combine existing + new for previews etc, memoized to avoid recomputation
   const combinedFiles = useMemo(() => [...existingFiles, ...fileList], [existingFiles, fileList]);
@@ -239,9 +238,9 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
   const handleSubmit = useCallback(async () => {
     // Prevent double submit
     if (isSubmitting) return;
-    setIsSubmitting(true);
 
     try {
+    setIsSubmitting(true);
       const hasFiles = fileList.length > 0 || existingFiles.length > 0;
       const isValidUrl = /^https?:\/\/.+/.test(portfolioUrl);
 
@@ -431,10 +430,9 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+              className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
             >
-              {isSubmitting ? <Spin size="small" /> : (onNext ? 'Continue' : 'Save Changes')}
+            {isSubmitting ? 'Saving...' : 'Continue'}
             </button>
           )}
         </div>

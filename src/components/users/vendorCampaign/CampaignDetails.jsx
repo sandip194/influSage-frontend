@@ -565,22 +565,24 @@ const CampaignDetails = () => {
             </div>
 
 
-            <div className="bg-white p-6 rounded-2xl mt-6">
+           <div className="bg-white p-6 rounded-2xl mt-6">
               <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
               <div className="relative">
-                <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
                 {[
                   { name: "Campaign Created", date: campaignDetails?.trackcampaign?.createddate },
                   { name: "Campaign Started", date: campaignDetails?.trackcampaign?.startdate },
                   { name: "Campaign Ended", date: campaignDetails?.trackcampaign?.enddate },
-                ].map((step, idx) => {
+                ].map((step, idx, arr) => {
                   const stepDate = dayjs(step.date, "DD-MM-YYYY HH:mm");
                   const now = dayjs();
                   const isCompleted = now.isAfter(stepDate) || now.isSame(stepDate);
 
                   return (
-                    <div key={idx} className="relative pl-10 pb-6">
-                      <span className="absolute left-0 top-1">
+                    <div key={idx} className="relative pl-10 pb-6 last:pb-0">
+                      {idx !== arr.length - 1 && (
+                        <div className="absolute left-[8px] top-5 h-full border-l-2 border-dashed border-gray-300"></div>
+                      )}
+                      <span className="absolute left-0 top-1 z-10">
                         {isCompleted ? (
                           <RiCheckboxCircleFill className="text-[#0f122f]" size={20} />
                         ) : (
@@ -592,7 +594,7 @@ const CampaignDetails = () => {
                           {step.name}
                         </h4>
                         <p className={`text-sm ${isCompleted ? "text-gray-600" : "text-gray-400"}`}>
-                          {step.date}
+                          {step.date || "Pending"}
                         </p>
                       </div>
                     </div>
