@@ -34,6 +34,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
   const [ifscValid, setIfscValid] = useState(null); // null, true, false
   const [bankDetails, setBankDetails] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { token, role } = useSelector(state => state.auth);
 
@@ -196,6 +197,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
 
     const decodeHexAccountNumber = (hexString) => {
       try {
+        setIsSubmitting(true);
         const cleanHex = hexString.replace(/\\x/g, "");
         return cleanHex
           .match(/.{1,2}/g)
@@ -204,6 +206,9 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
       } catch (e) {
         return hexString;
       }
+      finally {
+      setIsSubmitting(false); // ✅ Stop loading
+    }
     };
 
     return {
@@ -571,10 +576,11 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
             {/* Next / Save Button */}
             {(showControls || onNext) && (
               <button
-                className="bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition"
+                className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
                 onClick={onFinish}
+                disabled={isSubmitting}
               >
-                {onNext ? "Complate Profile" : "Save Changes"}
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
               </button>
             )}
 

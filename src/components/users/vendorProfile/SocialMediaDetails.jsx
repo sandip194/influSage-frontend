@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToast, onSave }) => {
   const [providers, setProviders] = useState([])
   const [form] = Form.useForm();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { token } = useSelector(state => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -47,6 +48,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
 
   const onFinish = async (values) => {
     try {
+      setIsSubmitting(true);
       // Transform filled values into required array
       const providersjson = platforms
         .filter(p => values[p.field]) // Only filled-in links
@@ -85,6 +87,9 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
     } catch (error) {
       console.error('❌ Failed to submit social links:', error);
       message.error('Failed to submit social links.');
+    }
+    finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -158,10 +163,11 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
           {/* Next / Save Button */}
           {(showControls || onNext) && (
             <button
-              className="bg-[#0D132D] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition"
+              className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
               type='submit'
+              disabled={isSubmitting}
             >
-              {onNext ? "Continue" : "Save Changes"}
+            {isSubmitting ? 'Saving...' : 'Save Changes'}
             </button>
           )}
 
