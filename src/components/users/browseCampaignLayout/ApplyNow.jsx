@@ -1,20 +1,14 @@
-
 import React, { useEffect, useState } from "react";
-import { PhotoProvider, PhotoView } from "react-photo-view";
-import {
-  RiUpload2Line,
-  RiDeleteBin6Line,
-  RiCloseLine,
-  RiFilePdf2Line,
-  RiFileWord2Line,
-  RiFile3Line,
-} from "react-icons/ri";
-import { Modal, Input, Button, Upload, message } from "antd";
+import { Input, Button, Upload, Modal, } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { RiArrowLeftSLine, RiVerifiedBadgeLine } from "@remixicon/react";
+import { RiArrowLeftSLine, RiVerifiedBadgeLine, RiUpload2Line } from "@remixicon/react";
+
+// Import the reusable hook and component
+import useFileUpload from "../../../hooks/useFileUpload"; // Adjust path as needed
+import FilePreview from "../../common/FilePreview"; // Adjust path as needed
 
 const { TextArea } = Input;
 
@@ -24,31 +18,22 @@ const ApplyNow = () => {
   const [errors, setErrors] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [loading, setLoading] = useState(false)
-  const [fileList, setFileList] = useState([]);
-  const [existingFiles, setExistingFiles] = useState([]);
-  const [deletedFilePaths, setDeletedFilePaths] = useState([]);
-  const [fileError, setFileError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Use the hook for all file handling
+  const {
+    fileList,
+    existingFiles,
+    deletedFilePaths,
+    fileError,
+    setExistingFiles,
+    handleFileChange,
+    handleRemove,
+  } = useFileUpload();
 
   const { campaignId } = useParams();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const token = useSelector((state) => state.auth.token);
-  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-  const allowedTypes = [
-    "image/png",
-    "image/jpeg",
-    "image/jpg",
-    "video/mp4",
-    "video/quicktime",
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ];
-
-  const getFileUID = (file) =>
-    `${file.name}-${file.size || 0}-${file.lastModified || Date.now()}`;
-
 
   const validate = () => {
     const newErrors = {};
@@ -59,15 +44,14 @@ const ApplyNow = () => {
       newErrors.proposal = "Please describe your proposal.";
     }
 
+    // Use hook's states for file validation
     if (fileList.length + existingFiles.length < 1) {
       newErrors.portfolioFile = "Please upload at least one portfolio file.";
-      setFileError("Please upload at least one portfolio file.");
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,12 +66,12 @@ const ApplyNow = () => {
     const formData = new FormData();
     formData.append("applycampaignjson", JSON.stringify(applycampaignjson));
 
-    // Append new files
+    // Append new files from hook
     fileList.forEach((file) => {
       formData.append("portfolioFiles", file);
     });
 
-    // Delete removed files
+    // Delete removed files using hook's deletedFilePaths
     for (const path of deletedFilePaths) {
       try {
         await axios.post(
@@ -103,7 +87,6 @@ const ApplyNow = () => {
         console.error(`Failed to delete file: ${path}`, err);
       }
     }
-
 
     try {
       setLoading(true);
@@ -121,7 +104,6 @@ const ApplyNow = () => {
         navigate("/dashboard/browse/applied");
       }
       toast.success(response.data.message);
-      setDeletedFilePaths([]);
     } catch (err) {
       console.error(err);
       toast.error("Application not submitted");
@@ -129,8 +111,6 @@ const ApplyNow = () => {
       setLoading(false);
     }
   };
-
-
 
   const getAppliedCampiagnDetails = async () => {
     try {
@@ -150,7 +130,7 @@ const ApplyNow = () => {
       }
 
       if (data.filepaths?.length > 0) {
-        const filesFromBackend = data.filepaths.map((f) => {
+        const filesFromBackend = data.filepaths.map((f, index) => {
           const name = f.filepath.split("/").pop() || "";
           const ext = name.split(".").pop()?.toLowerCase();
           let type = "";
@@ -161,17 +141,15 @@ const ApplyNow = () => {
           else if (["doc", "docx"].includes(ext)) type = "application/msword";
 
           return {
+            uid: `existing-${index}`, // Unique ID for hook/FilePreview
             name,
-            url: f.filepath,
+            url: f.filepath, // For previews
             filepath: f.filepath,
             type,
-            isExisting: true,
           };
         });
 
-       // console.log(filesFromBackend)
-
-        setExistingFiles(filesFromBackend);
+        setExistingFiles(filesFromBackend); // Use hook's setter
       }
     } catch (error) {
       console.error(error);
@@ -180,11 +158,9 @@ const ApplyNow = () => {
     }
   };
 
-
   useEffect(() => {
     getAppliedCampiagnDetails();
-  }, [])
-
+  }, []);
 
   return (
     <main className="w-full text-sm overflow-x-hidden">
@@ -196,7 +172,6 @@ const ApplyNow = () => {
       </button>
       <h1 className="text-2xl font-semibold mb-4">Apply Now</h1>
       <div className="bg-white p-4 rounded-lg mb-6 flex flex-col">
-
         {isEdit && (
           <div className="p-3 mb-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded">
             You’ve already applied to this campaign. You can update your proposal and files below.
@@ -236,56 +211,11 @@ const ApplyNow = () => {
             <Upload.Dragger
               name="Files"
               multiple
-              fileList={[]}
+              fileList={[]} // Keep empty to avoid AntD conflicts
               beforeUpload={() => false}
               onChange={(info) => {
-                const incomingFiles = info.fileList
-                  .map((f) => f.originFileObj || f)
-                  .filter(Boolean);
-
-                let errorMessages = new Set();
-
-                setFileList((prevFiles) => {
-                  const combinedFiles = [...prevFiles, ...existingFiles];
-                  const existingUIDs = new Set(combinedFiles.map((f) => f.uid));
-                  const newValidFiles = [];
-
-                  for (const file of incomingFiles) {
-                    if (!allowedTypes.includes(file.type)) {
-                      errorMessages.add(`${file.name}: unsupported file type`);
-                      continue;
-                    }
-
-                    if (file.size / 1024 / 1024 > 25) {
-                      errorMessages.add(`${file.name}: exceeds 25MB`);
-                      continue;
-                    }
-
-                    const uid = getFileUID(file);
-                    if (existingUIDs.has(uid)) continue;
-
-                    if (
-                      prevFiles.length + newValidFiles.length + existingFiles.length >=
-                      5
-                    ) {
-                      errorMessages.add("Maximum 5 files allowed");
-                      break;
-                    }
-
-                    file.uid = uid;
-                    file.previewUrl = URL.createObjectURL(file);
-                    newValidFiles.push(file);
-                    existingUIDs.add(uid);
-                  }
-
-                  if (errorMessages.size > 0) {
-                    setFileError(Array.from(errorMessages).join("\n"));
-                  } else {
-                    setFileError("");
-                  }
-
-                  return [...prevFiles, ...newValidFiles];
-                });
+                handleFileChange(info); // Hook handles all validations and additions
+                info.fileList.length = 0; // Reset AntD internal list
               }}
               showUploadList={false}
               accept=".png,.jpg,.jpeg,.pdf,.mp4,.mov,.doc,.docx"
@@ -302,85 +232,28 @@ const ApplyNow = () => {
               </div>
             </Upload.Dragger>
 
+            {/* Display file errors from the hook in the UI */}
             {fileError && (
-              <p className="text-red-500 text-sm mt-2 whitespace-pre-line text-center">
+              <p className="text-red-500 text-sm mt-2 text-center whitespace-pre-line">
                 {fileError}
+              </p>
+            )}
+            {/* Existing validation error */}
+            {errors.portfolioFile && (
+              <p className="text-red-500 text-sm mt-2 text-center">
+                {errors.portfolioFile}
               </p>
             )}
           </section>
 
-          <PhotoProvider>
-            <div className="flex flex-wrap items-center gap-4 mt-4">
-              {[...existingFiles, ...fileList].map((file, ) => {
-                const isImage = file.type?.includes("image");
-                const isVideo = file.type?.includes("video");
-                const isPDF = file.type?.includes("pdf");
-                const isDoc =
-                  file.type?.includes("word") ||
-                  file.type?.includes("officedocument");
+          {/* Use FilePreview component */}
+          <FilePreview
+            files={[...existingFiles, ...fileList]}
+            onRemove={(file) => handleRemove(file.uid)} // Pass full file object
+          />
 
-                const previewUrl = file.isExisting
-                  ? file.filepath                  // for backend files
-                  : file.previewUrl || "";         // for new files
-
-                return (
-                  <div
-                    key={file.uid || file.filepath || file.name}
-                    className="relative w-24 h-24 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center"
-                  >
-                    {isImage ? (
-                      <PhotoView src={previewUrl}>
-                        <img
-                          src={previewUrl}
-                          alt="preview"
-                          className="object-cover w-full h-full cursor-pointer"
-                        />
-                      </PhotoView>
-                    ) : isVideo ? (
-                      <video src={previewUrl} autoPlay loop controls muted className="object-cover w-full h-full" />
-                    ) : isPDF ? (
-                      <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs underline text-red-600 flex flex-col items-center">
-                        <RiFilePdf2Line size={42} /> View PDF
-                      </a>
-                    ) : isDoc ? (
-                      <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs underline text-blue-600 flex flex-col items-center">
-                        <RiFileWord2Line size={42} /> View Doc
-                      </a>
-                    ) : (
-                      <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs underline flex flex-col items-center">
-                        <RiFile3Line size={42} /> View File
-                      </a>
-                    )}
-
-                    {/* Delete Button */}
-                    <button
-                      type="button"
-                      className="absolute top-1 right-1 bg-black text-white p-1 rounded-full"
-                      onClick={() => {
-                        if (file.isExisting) {
-                          setDeletedFilePaths((prev) => [...prev, file.filepath]); // ✅ Track deleted
-                          setExistingFiles((prev) =>
-                            prev.filter((f) => f.filepath !== file.filepath)
-                          );
-                        } else {
-                          setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
-                        }
-                      }}
-
-                    >
-                      <RiDeleteBin6Line />
-                    </button>
-                  </div>
-                );
-              })}
-
-            </div>
-          </PhotoProvider>
           {/* Proposal Breakdown */}
           <section>
-
-
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block font-medium text-sm mb-1">
@@ -395,21 +268,19 @@ const ApplyNow = () => {
                   onChange={(e) => setAmount(e.target.value)}
                   status={errors.amount ? "error" : ""}
                 />
-
                 {errors.amount && (
                   <p className="text-red-500 text-sm">{errors.amount}</p>
                 )}
               </div>
-
             </div>
           </section>
           <button
             type="submit"
             disabled={loading}
-            className="w-42 py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition">
+            className="w-42 py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition"
+          >
             {loading ? (isEdit ? "Saving..." : "Applying...") : (isEdit ? "Save" : "Apply Now")}
           </button>
-
         </form>
       </div>
 
