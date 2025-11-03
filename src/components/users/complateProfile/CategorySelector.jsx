@@ -15,6 +15,7 @@ const categories = [
 export const CategorySelector = ({ onBack, onNext }) => {
   const [selected, setSelected] = useState([]);
   const [error, setError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -39,6 +40,7 @@ export const CategorySelector = ({ onBack, onNext }) => {
   };
 
   const handleSubmit = () => {
+      setIsSubmitting(true);
     if (selected.length === 0) {
       setError(true);
       return;

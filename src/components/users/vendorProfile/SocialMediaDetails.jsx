@@ -167,7 +167,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
               type='submit'
               disabled={isSubmitting}
             >
-            {isSubmitting ? 'Saving...' : 'Save Changes'}
+            {isSubmitting ? 'Saving...' : 'Continue'}
             </button>
           )}
 

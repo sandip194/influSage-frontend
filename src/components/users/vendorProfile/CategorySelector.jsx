@@ -250,7 +250,7 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
                         onClick={handleSubmit}
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? "Saving..." : "Save Changes"}
+                        {isSubmitting ? "Saving..." : "Continue"}
                     </button>
                 )}
 

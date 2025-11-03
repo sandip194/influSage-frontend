@@ -60,54 +60,56 @@ export default function ChatAppPage() {
 
   // ✉️ Handle sending messages
     const handleSendMessage = async ({ text, file, replyId }) => {
-      if (!activeChat) return;
+    if (!activeChat) return;
+    // console.log("Active Chat:", activeChat);
 
-      const newMsg = {
-        id: Date.now(),
-        senderId: userId,
-        roleId: role,
-        content: text,
-        conversationId: activeChat.conversationid,
-        file: file || null,
-        replyId: replyId || null,
-        time: new Date().toISOString(),
-        status: "sending",
-      };
-
-      dispatch(addMessage(newMsg));
-      socket?.emit("sendMessage", newMsg);
-
-      try {
-        const formData = new FormData();
-        formData.append("p_conversationid", activeChat.conversationid);
-        formData.append("p_roleid", role);
-        formData.append("p_messages", text);
-        formData.append("campaignid", activeChat.campaignId);
-        formData.append("campaignName", activeChat.campaignName);
-        if (file) formData.append("file", file);
-        if (replyId) formData.append("p_replyid", replyId);
-
-        const res = await axios.post(`/chat/insertmessage`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        if (res.data?.p_status) {
-          dispatch(
-            updateMessageStatus({
-              tempId: newMsg.id,
-              newId: res.data.message_id,
-              fileUrl: res.data.filepath || null,
-            })
-          );
-          setRefreshKey((prev) => prev + 1);
-        }
-      } catch (err) {
-        console.error("Send failed", err);
-      }
+    const newMsg = {
+      id: Date.now(),
+      senderId: userId,
+      roleId: role, // ✅ Add this line
+      content: text,
+      conversationId: activeChat.id,
+      file: file || null,
+      replyId: replyId || null,
+      time: new Date().toISOString(),
+      status: "sending",
     };
+
+    dispatch(addMessage(newMsg));
+    socket?.emit("sendMessage", newMsg);
+
+    try {
+      const formData = new FormData();
+      formData.append("p_conversationid", activeChat.id);
+      formData.append("p_roleid", role);
+      formData.append("p_messages", text);
+      formData.append("campaignid", activeChat.campaignid);
+      formData.append("campaignName", activeChat.campaignname); 
+      if (file) formData.append("file", file);
+      if (replyId) formData.append("p_replyid", replyId);
+
+      const res = await axios.post(`/chat/insertmessage`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (res.data?.p_status) {
+        dispatch(
+          updateMessageStatus({
+            tempId: newMsg.id,
+            newId: res.data.message_id,
+            fileUrl: res.data.filepath || null,
+          })
+        );
+        setRefreshKey((prev) => prev + 1);
+      }
+    } catch (err) {
+      console.error("Send failed", err);
+    }
+  };
+
 
   const handleEditMessage = async ({ id, content, file, replyId }) => {
     if (!activeChat || !id) return console.error("Missing activeChat or message id");

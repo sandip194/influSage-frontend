@@ -29,6 +29,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
   const [existingPhotoPath, setExistingPhotoPath] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { token } = useSelector(state => state.auth);
 
@@ -159,6 +160,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
 
   const handleSubmit = async () => {
     try {
+      setIsSubmitting(true);
       if (!profileImage && !preview) {
         setProfileError("Please select profile image! Profile image is required.");
         return;
@@ -207,6 +209,9 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
     } catch (errorInfo) {
       console.error('❌ Validation Failed or API Error:', errorInfo);
       message.error('Submission failed, please try again.');
+    }
+    finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -466,10 +471,11 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
         {(showControls || onNext) && (
           <div className="flex justify-start mt-6">
             <button
-              className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
+              className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
               onClick={handleSubmit}
+              disabled={isSubmitting}
             >
-              {onNext ? 'Continue' : 'Save Changes'}
+             {isSubmitting ? 'Saving...' : 'Continue'}
             </button>
           </div>
         )}

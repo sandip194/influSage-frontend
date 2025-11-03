@@ -389,9 +389,13 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
             <Col xs={24} sm={12}>
               {/* Phone Number */}
               <Form.Item
-                label="Phone Number"
+                label={<b>Phone Number</b>}
                 name="phone"
                 rules={[
+                  {
+                    required: true,
+                    message: 'Phone number is required',
+                  },
                   {
                     validator: (_, value) => {
                       if (!value || value.trim() === '') {
@@ -580,7 +584,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
                 onClick={onFinish}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                {isSubmitting ? 'Saving...' : 'Continue'}
               </button>
             )}
 
