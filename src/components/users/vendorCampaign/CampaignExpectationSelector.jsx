@@ -23,19 +23,25 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId, campaig
 
   // Fetch campaign objectives from API
   useEffect(() => {
-    const fetchObjectives = async () => {
-      try {
-        const res = await axios.get("/vendor/campaign/objectives", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setOptions(res.data.objectives || []);
-      } catch (err) {
-        console.error("Error fetching objectives:", err);
-        message.error("Failed to load campaign objectives.");
+  const fetchObjectives = async () => {
+    try {
+      const res = await axios.get("/vendor/campaign/objectives", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const fetchedOptions = res.data.objectives || [];
+      setOptions(fetchedOptions);
+
+      if (fetchedOptions.length > 0 && !data?.objectiveid && !selected) {
+        setSelected(fetchedOptions[0].id);
       }
-    };
-    fetchObjectives();
-  }, [token]);
+
+    } catch (err) {
+      console.error("Error fetching objectives:", err);
+      message.error("Failed to load campaign objectives.");
+    }
+  };
+  fetchObjectives();
+}, [token, data, selected]);
 
   useEffect(() => {
     setSelected(data?.objectiveid || "");

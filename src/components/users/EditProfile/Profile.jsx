@@ -232,24 +232,70 @@ const Profile = () => {
           </div>
 
           {/* Social Media */}
-          <div className="bg-white rounded-2xl p-4 text-sm w-full">
-            <h3 className="font-bold mb-4 text-base">Social Media</h3>
-            <div className="space-y-4">
-              {p_socials.map((item, index) => (
-                <div key={index} className="flex items-center gap-3 p-2 rounded-lg">
-                  <img
-                    src={item?.iconpath} 
-                    alt="Social"
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="font-medium text-gray-900">{item?.name}</p>
-                    <p className="text-gray-500 text-xs">{item?.handleslink}</p>
-                    <p className="text-gray-500 text-xs">Followers: {item?.nooffollowers?.toLocaleString() || 0}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="bg-white rounded-2xl p-4 text-sm w-full shadow-sm border border-gray-100">
+            <h3 className="font-bold mb-4 text-base text-gray-800">Social Media</h3>
+
+            {p_socials?.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {p_socials.map((item, index) => {
+                  const handleLink =
+                    item?.handleslink?.startsWith("http")
+                      ? item.handleslink
+                      : item?.handleslink
+                      ? `https://${item.handleslink}`
+                      : null;
+
+                  return (
+                    <a
+                      key={index}
+                      href={handleLink || "#"}
+                      target={handleLink ? "_blank" : "_self"}
+                      rel="noopener noreferrer"
+                      className={`flex items-center gap-4 border border-gray-200 p-3 rounded-xl hover:shadow-md hover:border-gray-300 transition-all duration-200 ${
+                        handleLink ? "cursor-pointer" : "cursor-default"
+                      }`}
+                    >
+                      {/* Icon */}
+                      {item?.iconpath ? (
+                        <img
+                          src={item.iconpath}
+                          alt={item.name}
+                          className="w-10 h-10 rounded-full object-cover border border-gray-100"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">
+                          ?
+                        </div>
+                      )}
+
+                      {/* Info */}
+                      <div className="flex flex-col">
+                        <p className="font-medium text-gray-800 text-sm">{item?.name}</p>
+
+                        {handleLink ? (
+                          <span  className="text-blue-600 text-xs underline break-all">
+                            {item.handleslink}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-xs italic">No link provided</span>
+                        )}
+
+                        <p className="text-gray-500 text-xs">
+                          Followers:{" "}
+                          <span className=" text-gray-500">
+                            {item?.nooffollowers
+                              ? item.nooffollowers.toLocaleString()
+                              : "0"}
+                          </span>
+                        </p>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm italic">No social media accounts added yet.</p>
+            )}
           </div>
 
           {/* Payment Details */}

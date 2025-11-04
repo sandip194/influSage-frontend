@@ -414,8 +414,11 @@ const Browse = () => {
                 placement="left"
               >
                 <button
-                  onClick={() => handleSave(campaign.id)}
-                  className="border border-[#0f122f] text-black w-9 h-9 p-2 flex justify-center items-center rounded-full cursor-pointer transition bg-white hover:bg-gray-50 shadow-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSave(campaign.id);
+                  }}
+                  className="border border-[#0f122f] text-black w-7 h-7 p-2 flex justify-center items-center rounded-full cursor-pointer transition bg-white hover:bg-gray-50 shadow-sm"
                 >
                   {campaign.campaigsaved ? (
                     <RiFileCopyFill size={18} className="text-[#0f122f]" />

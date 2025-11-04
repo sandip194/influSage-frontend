@@ -57,6 +57,10 @@ const SavedLayout = () => {
     { value: "estimatedbudget_desc", label: "Price: High to Low" },
   ];
 
+  const handleCardClick = (id) => {
+    navigate(`/dashboard/browse/description/${id}`);
+  };
+
   const getAllSavedCampaigns = useCallback(async () => {
     try {
       setLoading(true);
@@ -254,8 +258,34 @@ const SavedLayout = () => {
               campaigns.map((campaign) => (
                 <div
                   key={campaign.id}
-                  className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
+                  onClick={() => handleCardClick(campaign.id)}
+                  className="border rounded-2xl transition border-gray-200 bg-white p-5 flex flex-col cursor-pointer hover:bg-gray-100 relative"
                 >
+                  <div className="absolute top-3 right-4 flex items-center gap-2">
+              {campaign.campaignapplied && (
+                <span className="bg-[#0f122f] text-white text-xs font-semibold px-3 py-1 rounded-full">
+                  Applied
+                </span>
+              )}
+              <Tooltip
+                title={campaign.campaigsaved ? "Unsave Campaign" : "Save Campaign"}
+                placement="left"
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSave(campaign.id);
+                  }}
+                  className="border border-[#0f122f] text-black w-7 h-7 p-2 flex justify-center items-center rounded-full cursor-pointer transition bg-white hover:bg-gray-50 shadow-sm"
+                >
+                  {campaign.campaigsaved ? (
+                    <RiFileCopyFill size={18} className="text-[#0f122f]" />
+                  ) : (
+                    <RiFileCopyLine size={18} className="text-[#0f122f]" />
+                  )}
+                </button>
+              </Tooltip>
+            </div>
                   <span className="text-xs font-semibold text-gray-900 mb-3">
                     Created on {campaign.campaigncreatedate}
                     {/* new Date(campaign.campaigncreatedate).toLocaleDateString() */}
@@ -311,31 +341,6 @@ const SavedLayout = () => {
                         </span>
                       )
                     )}
-                  </div>
-                  <div className="flex items-center justify-between mt-auto gap-4">
-
-                    {campaign.campaignapplied ? (
-                      <button className="w-full py-2 rounded-3xl bg-[#9d9d9d] cursor-pointer text-white font-semibold  transition">
-                        Applied
-                      </button>
-                    ) : (
-                      <Link to={`/dashboard/browse/apply-now/${campaign.id}`} className="flex-1">
-                        <button className="w-full py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition">
-                          Apply Now
-                        </button>
-                      </Link>
-
-                    )}
-
-                    <Tooltip title="Unsave This Campaign">
-                      <button
-                        onClick={() => handleSave(campaign.id)}
-                        className="border border-[#0f122f] text-black w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer transition flex-shrink-0 bg-transparent"
-                      >
-                        <RiFileCopyFill size={20} />
-
-                      </button>
-                    </Tooltip>
                   </div>
                 </div>
               ))

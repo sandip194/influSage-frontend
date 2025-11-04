@@ -193,13 +193,13 @@ const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
                     {label}
 
                     {/* Checkmark inside button */}
-                    <div
-                      className={`w-5 h-5 flex items-center justify-center rounded-full border ml-2
+                  <div
+                    className={`w-5 h-5 flex-shrink-0 flex items-center justify-center rounded-md border transition-all
                       ${isSelected
-                          ? "bg-[#141843] border-[#0D132D26] text-white"
-                          : "bg-transparent border-gray-400 text-transparent"
-                        }
-                    `}
+                        ? "bg-[#141843] border-[#0D132D26] text-white"
+                        : "bg-transparent border-gray-400 text-transparent"
+                      }`}
+
                     >
                       <RiCheckLine size={14} />
                     </div>
