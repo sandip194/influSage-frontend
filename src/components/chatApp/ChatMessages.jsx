@@ -13,6 +13,7 @@ import {
   deleteMessage,
   undoDeleteMessage,
 } from "../../features/socket/chatSlice";
+import DOMPurify from "dompurify";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
@@ -36,6 +37,20 @@ const formatTime = (timestamp) => {
   return date.toLocaleDateString();
 };
 
+const addBaseUrlToLinks = (html) => {
+  const base = window.location.origin;
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  div.querySelectorAll("a[href], img[src]").forEach((element) => {
+    const attr = element.tagName === 'A' ? 'href' : 'src';
+    const url = element.getAttribute(attr);
+    if (url && !url.startsWith('http') && !url.startsWith('https')) {
+      element.setAttribute(attr, `${base}/${url}`);
+    }
+  });
+  return div.innerHTML;
+};
+
 export default function ChatMessages({ chat, isRecipientOnline, messages, setReplyToMessage, setEditingMessage, editingMessage }) {
   const dispatch = useDispatch();
   const socket = getSocket();
@@ -52,7 +67,7 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
 
 
   const { token, userId, role } = useSelector((state) => state.auth) || {};
- // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getMessageStatusIcon = (msg) => {
     const isMe = msg.roleId === role;
@@ -227,7 +242,7 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
           file: Array.isArray(msg.filepath) ? msg.filepath.join(",") : msg.filepath || "",
           time: msg.createddate,
           replyId: msg.replyid || null,
-          deleted: msg.isdeleted  || false,
+          deleted: msg.isdeleted || false,
           readbyvendor: msg.readbyvendor ?? false,
           readbyinfluencer: msg.readbyinfluencer ?? false,
         })).sort((a, b) => new Date(a.time) - new Date(b.time));
@@ -240,19 +255,19 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
 
 
   useEffect(() => {
-  if (!chat?.id || !token || !role) return;
+    if (!chat?.id || !token || !role) return;
 
-  const loadMessagesOnce = async () => {
-    setIsLoading(true);
-    await Promise.all([
-      fetchMessages(),
-      new Promise((resolve) => setTimeout(resolve, 600)),
-    ]);
-    setIsLoading(false);
-  };
+    const loadMessagesOnce = async () => {
+      setIsLoading(true);
+      await Promise.all([
+        fetchMessages(),
+        new Promise((resolve) => setTimeout(resolve, 600)),
+      ]);
+      setIsLoading(false);
+    };
 
-  loadMessagesOnce();
-}, [chat?.id, token, role]);
+    loadMessagesOnce();
+  }, [chat?.id, token, role]);
 
 
 
@@ -341,12 +356,12 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
 
 
 
-   if (chat && isLoading) {
+  if (chat && isLoading) {
     return (
-       <div className="flex items-center justify-center flex-1 h-full">
-      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
-      <span className="ml-3 text-gray-600">Loading messages...</span>
-    </div>
+      <div className="flex items-center justify-center flex-1 h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+        <span className="ml-3 text-gray-600">Loading messages...</span>
+      </div>
     );
   }
 
@@ -388,10 +403,10 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
                 }`}
             >
               {/* Message bubble */}
-               <div className={`px-3 py-1 rounded-lg 
-                max-w-[90%] sm:max-w-xs md:max-w-sm 
-                break-all overflow-hidden whitespace-pre-wrap 
-                ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`} >
+              <div className={`px-3 py-1 rounded-lg 
+                  max-w-[90%] sm:max-w-xs md:max-w-sm 
+                  break-all overflow-hidden whitespace-pre-wrap 
+                  ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`} >
                 {/* FILE PREVIEW */}
                 {!msg.deleted && msg.file && (
                   <div className="mb-2">
@@ -544,8 +559,20 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
                     )}
                   </div>
                 ) : (
-                  <div>{msg.content}</div>
+                  // 🧠 Detect if message contains HTML tags (like <div>, <p>, <a>, etc.)
+                  /<[a-z][\s\S]*>/i.test(msg.content) ? (
+                    <div
+                      className="text-sm w-full"
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(addBaseUrlToLinks(msg.content)),
+                      }}
+                    />
+                  ) : (
+                    <div className="text-sm break-words">{msg.content}</div>
+                  )
                 )}
+
+
               </div>
 
               {/* TIMESTAMP */}
