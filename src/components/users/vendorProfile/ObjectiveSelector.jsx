@@ -3,6 +3,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from "react";
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import { Spin } from "antd";
 
 const STORAGE_KEY = 'selected_objective'; // optional fallback storage
 
@@ -142,7 +143,7 @@ const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSa
             onClick={handleContinue}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Saving...' : 'Continue'}
+            {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
           </button>
         )}
 

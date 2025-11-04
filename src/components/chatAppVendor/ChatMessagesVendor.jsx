@@ -128,28 +128,6 @@ useEffect(() => {
   }
 }, [messages]);
 
-  // Send message read status if unread messages exist
-  useEffect(() => {
-    if (!socket || !chat?.conversationid || !messages.length) return;
-
-    const unseenMessageIds = messages
-      .filter(msg => {
-        const isMe = msg.roleId === role;
-        if (isMe) return false;
-
-        const hasBeenRead = role === 2 ? msg.readbyinfluencer : msg.readbyvendor;
-        return !hasBeenRead;
-      })
-      .map(msg => msg.id);
-
-    if (unseenMessageIds.length > 0) {
-      socket.emit("messageRead", {
-        messageIds: unseenMessageIds,
-        conversationId: chat.id,
-        role: role,
-      });
-    }
-  }, [messages, chat?.conversationid, socket, role]);
 
   const handleDeleteMessage = async (messageId) => {
     dispatch(deleteMessage(messageId));
@@ -265,26 +243,18 @@ useEffect(() => {
   }, [socket, dispatch]);
 
 
-    useEffect(() => {
-      if (!chat?.conversationid || !token || !role) return;
+   useEffect(() => {
+  if (!chat?.conversationid || !token || !role) return;
 
-      let timer; 
-
-      const loadMessagesOnce = async () => {
-        setIsLoading(true);
-
-        await Promise.all([
-      fetchMessages(),
-      new Promise((resolve) => setTimeout(resolve, 300)), 
-    ]);
+  const loadMessagesOnce = async () => {
+    setIsLoading(true);
+    await fetchMessages();
     setIsLoading(false);
-
   };
 
   loadMessagesOnce();
-
-  return () => clearTimeout(timer);
 }, [chat?.conversationid, token, role]);
+
 
 
   useEffect(() => {
@@ -361,14 +331,14 @@ useEffect(() => {
   }, []);
 
 
-  if (chat && isLoading) {
-    return (
-       <div className="flex items-center justify-center flex-1 h-full">
+  if (chat && isLoading && messages.length === 0) {
+  return (
+    <div className="flex items-center justify-center flex-1 h-full">
       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
       <span className="ml-3 text-gray-600">Loading messages...</span>
     </div>
-    );
-  }
+  );
+}
 
   return (
      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-1 pt-10">

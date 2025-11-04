@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckOutlined } from '@ant-design/icons';
+import { Spin } from "antd";
 
 const categories = [
   { key: 'beauty', name: 'Beauty', image: './public/assets/imgs/beauty.png' },
@@ -104,7 +105,7 @@ export const CategorySelector = ({ onBack, onNext }) => {
           className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Saving...' : 'Continue'}
+          {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
         </button>
       </div>
     </div>

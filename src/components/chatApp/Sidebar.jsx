@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { RiAddLine } from "react-icons/ri";
+import { CloseCircleFilled } from "@ant-design/icons";
+import { Tooltip } from "antd";
+import { useNavigate } from "react-router-dom";
 
 export default function Sidebar({ onSelectChat }) {
   const { token } = useSelector((state) => state.auth);
@@ -9,6 +12,7 @@ export default function Sidebar({ onSelectChat }) {
   const [search, setSearch] = useState("");
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [unreadMessages, setUnreadMessages] = useState([]);
+  const navigate = useNavigate();
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   // Fetch campaign list
@@ -57,14 +61,19 @@ export default function Sidebar({ onSelectChat }) {
       {/* Header */}
       <div className="p-4 border-b-2 border-gray-100 font-bold text-xl flex justify-between items-center">
         <span>Conversations</span>
-        <button className="w-10 h-10 bg-[#0D132D] text-white rounded-full text-xl flex items-center justify-center">
-          <RiAddLine />
-        </button>
+          <Tooltip title="Search Campaign">
+            <button
+              onClick={() => navigate("/dashboard/browse")}
+              className="w-10 h-10 bg-[#0D132D] text-white rounded-full text-xl flex items-center justify-center hover:bg-[#1a1f3f] transition"
+            >
+              <RiAddLine />
+            </button>
+          </Tooltip>
       </div>
 
       {/* Search */}
       <div className="p-4">
-        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2">
+        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 relative w-[250px]">
           <svg
             className="w-5 h-5 text-gray-400 mr-2"
             fill="none"
@@ -74,12 +83,22 @@ export default function Sidebar({ onSelectChat }) {
           >
             <path d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 12.65z" />
           </svg>
+
           <input
             placeholder="Search campaigns..."
-            className="w-full outline-none text-sm"
+            className="w-full outline-none text-sm pr-8"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+
+          {search && (
+            <Tooltip title="Clear search" placement="top">
+              <CloseCircleFilled
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors duration-150"
+              />
+            </Tooltip>
+          )}
         </div>
       </div>
 
@@ -106,6 +125,7 @@ export default function Sidebar({ onSelectChat }) {
                     vendorId: vendor.vendorid || vendor.id,
                     campaignid: campaign.campaignid,
                     campaignname: campaign.campaignname,
+                    vendorName: `${vendor.firstname || ""} ${vendor.lastname || ""}`.trim(),
                   });
 
                   // remove from unread once clicked

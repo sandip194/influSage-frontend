@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Form, Input, InputNumber } from 'antd';
 import axios from 'axios';
-import { message } from 'antd';
+import { message, Spin } from 'antd';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
@@ -260,7 +260,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
               onClick={onFinish}
               disabled={isSubmitting}
             >
-            {isSubmitting ? 'Saving...' : 'Continue'}
+            {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
             </button>
           )}
 

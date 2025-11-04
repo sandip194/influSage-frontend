@@ -9,7 +9,7 @@ import {
   RiFileCopyFill,
   RiEyeLine
 } from '@remixicon/react';
-import { SearchOutlined } from '@ant-design/icons';
+import { SearchOutlined, CloseCircleFilled } from '@ant-design/icons';
 import { Empty, Input, Pagination, Select, Tooltip, Skeleton } from 'antd';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -69,7 +69,9 @@ const Browse = () => {
     navigate(path);
   }, [navigate]);
 
-
+  const handleCardClick = (id) => {
+    navigate(`/dashboard/browse/description/${id}`);
+  };
 
   const selectedButton = useMemo(
     () => buttons.find((b) => location.pathname === b.path)?.id,
@@ -273,6 +275,19 @@ const Browse = () => {
                 }));
               }
             }}
+            suffix={
+              searchInput ? (
+                <Tooltip title="Clear search" placement="top">
+                  <CloseCircleFilled
+                    onClick={() => {
+                      setSearchInput("");
+                      setSearchTerm("");
+                    }}
+                    className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                  />
+                </Tooltip>
+              ) : null
+            }
           />
 
 
@@ -383,10 +398,33 @@ const Browse = () => {
                 <Empty description="No campaigns found." />
               </div>
             ) : (campaigns.map((campaign) => (
-              <div
-                key={campaign.id}
-                className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
+                <div
+                  key={campaign.id}
+                  onClick={() => handleCardClick(campaign.id)}
+                  className="border rounded-2xl transition border-gray-200 bg-white p-5 flex flex-col cursor-pointer hover:bg-gray-100 relative"
+                >
+            <div className="absolute top-3 right-4 flex items-center gap-2">
+              {campaign.campaignapplied && (
+                <span className="bg-[#0f122f] text-white text-xs font-semibold px-3 py-1 rounded-full">
+                  Applied
+                </span>
+              )}
+              <Tooltip
+                title={campaign.campaigsaved ? "Unsave Campaign" : "Save Campaign"}
+                placement="left"
               >
+                <button
+                  onClick={() => handleSave(campaign.id)}
+                  className="border border-[#0f122f] text-black w-9 h-9 p-2 flex justify-center items-center rounded-full cursor-pointer transition bg-white hover:bg-gray-50 shadow-sm"
+                >
+                  {campaign.campaigsaved ? (
+                    <RiFileCopyFill size={18} className="text-[#0f122f]" />
+                  ) : (
+                    <RiFileCopyLine size={18} className="text-[#0f122f]" />
+                  )}
+                </button>
+              </Tooltip>
+            </div>
                 <span className="text-xs font-semibold text-gray-900 mb-3">
                   Apply Till {campaign.applicationenddate}
                 </span>
@@ -442,46 +480,6 @@ const Browse = () => {
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between mt-auto gap-4 min-w-0">
-                  {campaign.campaignapplied ? (
-                    <button className="flex-1 py-2 rounded-3xl bg-[#9d9d9d] cursor-pointer text-white font-semibold transition min-w-0 truncate">
-                      Applied
-                    </button>
-                  ) : (
-                    <Link to={`/dashboard/browse/apply-now/${campaign.id}`} className="flex-1 min-w-0">
-                      <button className="py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition w-full truncate">
-                        Apply Now
-                      </button>
-                    </Link>
-                  )}
-
-                  <Tooltip title="Save Campaign">
-                    <button
-                      onClick={() => handleSave(campaign.id)}
-                      className="border border-[#0f122f] text-black w-10 h-10 p-2 flex justify-center items-center rounded-3xl cursor-pointer transition flex-shrink-0 bg-transparent"
-                    >
-                      {campaign.campaigsaved ? (
-                        <RiFileCopyFill size={20} />
-                      ) : (
-                        <RiFileCopyLine size={20} />
-                      )}
-                    </button>
-                  </Tooltip>
-
-                  {/* <Tooltip title="View Details">
-                    <Link
-                      to={
-                        campaign.campaignapplied
-                          ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
-                          : `/dashboard/browse/description/${campaign.id}`
-                      }
-                    >
-                      <button className="border bg-[#0f122f] text-white border-gray-200 w-10 h-10 p-0 flex justify-center items-center rounded-3xl cursor-pointer hover:bg-[#23265a] transition flex-shrink-0">
-                        <RiEyeLine size={20} />
-                      </button>
-                    </Link>
-                  </Tooltip> */}
-                </div>
               </div>
             )))
             }

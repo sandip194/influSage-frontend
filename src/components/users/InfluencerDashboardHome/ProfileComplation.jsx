@@ -63,7 +63,7 @@ const ProfileComplation = () => {
         </div>
       </div>
 
-     <Link to="/dashboard/my-profile" className="inline-block">
+     <Link to="/dashboard/editProfile" className="inline-block">
         <button className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D] mt-3 sm:mt-0">
           Complete Profile
         </button>

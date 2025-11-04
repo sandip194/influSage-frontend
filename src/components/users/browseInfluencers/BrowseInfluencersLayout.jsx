@@ -5,8 +5,8 @@ import {
   RiEqualizerFill,
   RiCloseFill,
 } from "@remixicon/react";
-import { SearchOutlined } from "@ant-design/icons";
-import { Input, Pagination, Empty, Skeleton } from "antd";
+import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
+import { Input, Pagination, Empty, Skeleton, Tooltip } from "antd";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import InviteModal from "./InviteModal";
@@ -282,6 +282,19 @@ const BrowseInfluencersLayout = () => {
                 }));
               }
             }}
+            suffix={
+              searchInput ? (
+                <Tooltip title="Clear search" placement="top">
+                  <CloseCircleFilled
+                    onClick={() => {
+                      setSearchInput("");
+                      setSearchTerm("");
+                    }}
+                    className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                  />
+                </Tooltip>
+              ) : null
+            }
           />
 
          {/* Desktop view */}

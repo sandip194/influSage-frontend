@@ -5,9 +5,10 @@ import {
   RiSettings3Line,
   RiUser3Line,
   RiCloseLine,
-  RiLogoutBoxRLine,
+  RiShutDownLine,
 } from "@remixicon/react";
 import { useDispatch } from "react-redux";
+import { Tooltip } from 'antd';
 import { logout } from "../../../features/auth/authSlice";
 
 const navItems = [
@@ -70,13 +71,21 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
 
       {/* Logout button at the bottom */}
       <div className="px-4 py-2 mt-auto">
-        <button
-          onClick={handleLogout}
-          className="flex items-center border border-red-200 gap-2 w-full cursor-pointer text-sm font-medium text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg transition"
+        <Tooltip
+          title="Logout"
+          placement="right"
+          disabled={isOpen}
         >
-          <RiLogoutBoxRLine />
-          Logout
-        </button>
+          <button
+            onClick={handleLogout}
+            className={`flex items-center cursor-pointer ${
+              isOpen ? "justify-between px-6" : "justify-center"
+            } w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm`}
+          >
+            {isOpen && <span>Logout</span>}
+            <RiShutDownLine />
+          </button>
+        </Tooltip>
       </div>
     </aside>
   );

@@ -10,6 +10,7 @@ import {
   Row,
   Col,
   Button,
+  Spin
 } from 'antd';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -584,7 +585,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
                 onClick={form.submit}
                 disabled={submitting}
               >
-                {submitting ? 'Saving...' : 'Continue'}
+                {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
               </button>
             )}
 

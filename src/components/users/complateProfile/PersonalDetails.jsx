@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Form, Input, DatePicker, Select, message } from 'antd';
+import { Form, Input, DatePicker, Select, message, Spin} from 'antd';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { RiImageAddLine } from 'react-icons/ri';
@@ -475,7 +475,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
               onClick={handleSubmit}
               disabled={isSubmitting}
             >
-             {isSubmitting ? 'Saving...' : 'Continue'}
+            {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
             </button>
           </div>
         )}

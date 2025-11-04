@@ -8,7 +8,7 @@ import {
   RiEyeLine,
 } from "@remixicon/react";
 import { Modal } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import { Empty, Input, Pagination, Select, Skeleton, Tooltip } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -160,6 +160,19 @@ const AppliedLayout = () => {
                 setPageNumber(1);
               }
             }}
+            suffix={
+              searchInput ? (
+                <Tooltip title="Clear search" placement="top">
+                  <CloseCircleFilled
+                    onClick={() => {
+                      setSearchInput("");
+                      setSearchTerm("");
+                    }}
+                    className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                  />
+                </Tooltip>
+              ) : null
+            }
           />
 
           <div className="flex gap-2 w-full sm:w-auto justify-end">

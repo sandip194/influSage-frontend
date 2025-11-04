@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input } from 'antd';
+import { Form, Input, Spin } from 'antd';
 import axios from 'axios';
 import { message } from 'antd';
 import { useSelector } from 'react-redux';
@@ -167,7 +167,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
               type='submit'
               disabled={isSubmitting}
             >
-            {isSubmitting ? 'Saving...' : 'Continue'}
+            {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
             </button>
           )}
 

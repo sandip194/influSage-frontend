@@ -15,7 +15,7 @@ const ProfileComplationVendor = () => {
       try {
         const authToken = token || localStorage.getItem("token");
 
-        const response = await axios.get(`user/dashboard/profile-completion`, {
+        const response = await axios.get(`vendor/dashboard/profile-completion-perctange`, {
           headers: {
             Authorization: `Bearer ${authToken}`,
           },
@@ -63,7 +63,7 @@ const ProfileComplationVendor = () => {
         </div>
       </div>
 
-     <Link to="/vendor-dashboard/edit-profile" className="inline-block">
+     <Link to="/vendor-dashboard/my-profile" className="inline-block">
         <button className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D] mt-3 sm:mt-0">
           Complete Profile
         </button>
