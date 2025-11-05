@@ -14,7 +14,7 @@ const AcceptOfferModal = ({ open, onCancel, onConfirm, offer }) => {
         </div>
 
         {/* Title */}
-        <h2 className="text-lg font-semibold">Accept Offer</h2>
+        <h2 className="text-lg font-semibold">Accept Application</h2>
 
         {/* Message */}
         <p className="mt-2 text-gray-700">

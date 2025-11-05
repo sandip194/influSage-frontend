@@ -244,12 +244,11 @@ const CampaignStep2 = ({ data, onNext, onBack, campaignId }) => {
             <span className="capitalize font-medium text-sm">{name}</span>
 
             <div
-              className={`w-5 h-5 flex items-center justify-center rounded-sm border transition-all
-              ${
-                isSelected
+              className={`w-5 h-5 flex-shrink-0 flex items-center justify-center rounded-md border transition-all
+                ${isSelected
                   ? "bg-[#141843] border-[#0D132D26] text-white"
                   : "bg-transparent border-gray-400 text-transparent"
-              }`}
+                }`}
             >
               <RiCheckLine size={14} />
             </div>
@@ -337,8 +336,8 @@ const CampaignStep2 = ({ data, onNext, onBack, campaignId }) => {
 
               {/* Circle button */}
               <div
-                className={`w-5 h-5 flex-shrink-0 flex items-center justify-center rounded-full border transition-all
-            ${isSelected
+                className={`w-5 h-5 flex-shrink-0 flex items-center justify-center rounded-md border transition-all
+                  ${isSelected
                     ? "bg-[#141843] border-[#0D132D26] text-white"
                     : "bg-transparent border-gray-400 text-transparent"
                   }`}

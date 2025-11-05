@@ -128,28 +128,6 @@ useEffect(() => {
   }
 }, [messages]);
 
-  // Send message read status if unread messages exist
-  useEffect(() => {
-    if (!socket || !chat?.conversationid || !messages.length) return;
-
-    const unseenMessageIds = messages
-      .filter(msg => {
-        const isMe = msg.roleId === role;
-        if (isMe) return false;
-
-        const hasBeenRead = role === 2 ? msg.readbyinfluencer : msg.readbyvendor;
-        return !hasBeenRead;
-      })
-      .map(msg => msg.id);
-
-    if (unseenMessageIds.length > 0) {
-      socket.emit("messageRead", {
-        messageIds: unseenMessageIds,
-        conversationId: chat.id,
-        role: role,
-      });
-    }
-  }, [messages, chat?.conversationid, socket, role]);
 
   const handleDeleteMessage = async (messageId) => {
     dispatch(deleteMessage(messageId));
@@ -265,26 +243,18 @@ useEffect(() => {
   }, [socket, dispatch]);
 
 
-    useEffect(() => {
-      if (!chat?.conversationid || !token || !role) return;
+   useEffect(() => {
+  if (!chat?.conversationid || !token || !role) return;
 
-      let timer; 
-
-      const loadMessagesOnce = async () => {
-        setIsLoading(true);
-
-        await Promise.all([
-      fetchMessages(),
-      new Promise((resolve) => setTimeout(resolve, 300)), 
-    ]);
+  const loadMessagesOnce = async () => {
+    setIsLoading(true);
+    await fetchMessages();
     setIsLoading(false);
-
   };
 
   loadMessagesOnce();
-
-  return () => clearTimeout(timer);
 }, [chat?.conversationid, token, role]);
+
 
 
   useEffect(() => {
@@ -361,14 +331,14 @@ useEffect(() => {
   }, []);
 
 
-  if (chat && isLoading) {
-    return (
-       <div className="flex items-center justify-center flex-1 h-full">
+  if (chat && isLoading && messages.length === 0) {
+  return (
+    <div className="flex items-center justify-center flex-1 h-full">
       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
       <span className="ml-3 text-gray-600">Loading messages...</span>
     </div>
-    );
-  }
+  );
+}
 
   return (
      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-1 pt-10">
@@ -507,22 +477,25 @@ useEffect(() => {
                 {msg.replyId && (
                   <div
                     onClick={() => scrollToMessage(msg.replyId)}
-                    className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] ${isMe
-                      ? "bg-gray-700 border-blue-400 text-gray-200"
-                      : "bg-gray-300 border-green-500 text-gray-800"
-                      }`}
+                    className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] cursor-pointer ${
+                      isMe
+                        ? "bg-gray-700 border-blue-400 text-gray-200"
+                        : "bg-gray-300 border-green-500 text-gray-800"
+                    }`}
                   >
                     {(() => {
                       const repliedMsg = messages.find((m) => m.id === msg.replyId);
 
-                      if (!repliedMsg)
+                      // Handle missing or deleted replied message
+                      if (!repliedMsg || repliedMsg.deleted) {
                         return (
-                          <span className="italic text-gray-500">Message deleted</span>
+                          <span className="italic text-gray-500">
+                            This message has been deleted
+                          </span>
                         );
+                      }
 
-                      const fileUrl = repliedMsg.file
-                        ? `${repliedMsg.file}`
-                        : null;
+                      const fileUrl = repliedMsg.file ? `${repliedMsg.file}` : null;
 
                       return (
                         <div className="flex flex-col">
@@ -532,7 +505,9 @@ useEffect(() => {
                               : chat?.name || "Unknown"}
                           </span>
                           {/* Quoted text */}
-                          {repliedMsg.content && <span className="truncate">{repliedMsg.content}</span>}
+                          {repliedMsg.content && (
+                            <span className="truncate">{repliedMsg.content}</span>
+                          )}
 
                           {/* Quoted file attachment */}
                           {fileUrl && (
@@ -553,7 +528,7 @@ useEffect(() => {
                 {/* Message content */}
                 {msg.deleted ? (
                   <div className="text-sm text-red-600">
-                    Message deleted.
+                    This message has been deleted
                     {isMe && (
                       <button onClick={() => handleUndoMessage(msg.id)} className="underline ml-2">
                         Undo
@@ -574,20 +549,23 @@ useEffect(() => {
               {/* HOVER ACTIONS */}
               {hoveredMsgId === msg.id && (
                 <div
-                  className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md z-10 transition-opacity duration-150 
-                ${isMe ? "right-0 -top-8" : "left-0 -top-8"}`}
+                  className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md z-10 transition-opacity duration-150
+                    ${isMe ? "right-0 -top-8" : "left-0 -top-8"}`}
                 >
-                  <button
-                    onClick={() => {
-                      setReplyToMessage?.(msg);
-                      setEditingMessage?.(null);
-                    }}
-                    className="p-1 rounded-full hover:bg-gray-100"
-                  >
-                    <Tooltip title="Reply">
-                      <RiReplyLine size={18} />
-                    </Tooltip>
-                  </button>
+                  {!msg.deleted && (
+                    <button
+                      onClick={() => {
+                        setReplyToMessage?.(msg);
+                        setEditingMessage?.(null);
+                      }}
+                      className="p-1 rounded-full hover:bg-gray-100"
+                    >
+                      <Tooltip title="Reply">
+                        <RiReplyLine size={18} />
+                      </Tooltip>
+                    </button>
+                  )}
+
                   {isMe && !msg.readbyinfluencer && !msg.deleted && (
                     <>
                       <button
@@ -601,10 +579,9 @@ useEffect(() => {
                           <RiEdit2Line size={18} />
                         </Tooltip>
                       </button>
+
                       <button
-                        onClick={
-                          () => handleDeleteMessage(msg.id)
-                        }
+                        onClick={() => handleDeleteMessage(msg.id)}
                         className="p-1 rounded-full hover:bg-gray-100 text-red-500"
                       >
                         <Tooltip title="Delete">

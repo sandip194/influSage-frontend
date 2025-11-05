@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   RiEyeLine, RiAddFill, RiEqualizerFill, RiCloseFill, RiArrowDownSLine } from "@remixicon/react";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import {
@@ -337,6 +337,19 @@ const VendorCampaignsLayout = () => {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={handleSearch}
+            suffix={
+              searchInput ? (
+                <Tooltip title="Clear search" placement="top">
+                <CloseCircleFilled
+                onClick={() => {
+                setSearchInput("");
+                setSearchTerm("");
+              }}
+              className="text-gray-400 hover:text-gray-600 cursor-pointer"
+            />
+          </Tooltip>
+            ) : null
+          }
           />
 
           {!showFilter && (

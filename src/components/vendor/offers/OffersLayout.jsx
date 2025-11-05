@@ -1,7 +1,7 @@
 import { RiArrowDownSLine, RiEyeLine } from "@remixicon/react";
 import { Pagination, Select, Empty, Input, Skeleton, Tooltip } from "antd";
 import axios from "axios";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import React, { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -94,6 +94,19 @@ const OffersLayout = () => {
                             setPageNumber(1);
                         }
                     }}
+                    suffix={
+                      searchInput ? (
+                      <Tooltip title="Clear search" placement="top">
+                      <CloseCircleFilled
+                      onClick={() => {
+                      setSearchInput("");
+                      setSearchTerm("");
+                    }}
+                    className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                   />
+                    </Tooltip>
+                  ) : null
+                }
                 />
 
                  <div className="hidden sm:block w-full sm:w-auto">

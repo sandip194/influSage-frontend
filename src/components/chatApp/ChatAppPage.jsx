@@ -61,8 +61,7 @@ export default function ChatAppPage() {
   // ✉️ Handle sending messages
     const handleSendMessage = async ({ text, file, replyId }) => {
     if (!activeChat) return;
-    console.log("Active Chat:", activeChat);
-
+    
     const newMsg = {
       id: Date.now(),
       senderId: userId,
@@ -80,11 +79,14 @@ export default function ChatAppPage() {
 
     try {
       const formData = new FormData();
+      
       formData.append("p_conversationid", activeChat.id);
       formData.append("p_roleid", role);
       formData.append("p_messages", text);
       formData.append("campaignid", activeChat.campaignid);
       formData.append("campaignName", activeChat.campaignname); 
+      formData.append("vendorId", activeChat.vendorId);
+      formData.append("vendorName", activeChat.vendorName);
       if (file) formData.append("file", file);
       if (replyId) formData.append("p_replyid", replyId);
 

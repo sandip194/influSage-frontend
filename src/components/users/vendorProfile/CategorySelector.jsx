@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { RiCheckLine } from '@remixicon/react';
 import { toast } from 'react-toastify';
+import { Spin } from "antd";
 
 export const CategorySelector = ({ onBack, onNext, data, showControls, showToast, onSave }) => {
     const [categoryTree, setCategoryTree] = useState([])
@@ -250,7 +251,7 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
                         onClick={handleSubmit}
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? "Saving..." : "Continue"}
+                        {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
                     </button>
                 )}
 

@@ -255,19 +255,19 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
 
 
   useEffect(() => {
-    if (!chat?.id || !token || !role) return;
+  if (!chat?.id || !token || !role) return;
 
-    const loadMessagesOnce = async () => {
-      setIsLoading(true);
-      await Promise.all([
-        fetchMessages(),
-        new Promise((resolve) => setTimeout(resolve, 600)),
-      ]);
-      setIsLoading(false);
-    };
+  const loadMessagesOnce = async () => {
+    setIsLoading(true);
+    await Promise.all([
+      fetchMessages(),
+      new Promise((resolve) => setTimeout(resolve, 600)),
+    ]);
+    setIsLoading(false);
+  };
 
-    loadMessagesOnce();
-  }, [chat?.id, token, role]);
+  loadMessagesOnce();
+}, [chat?.id, token, role]);
 
 
 
@@ -356,12 +356,12 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
 
 
 
-  if (chat && isLoading) {
+   if (chat && isLoading) {
     return (
-      <div className="flex items-center justify-center flex-1 h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
-        <span className="ml-3 text-gray-600">Loading messages...</span>
-      </div>
+       <div className="flex items-center justify-center flex-1 h-full">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+      <span className="ml-3 text-gray-600">Loading messages...</span>
+    </div>
     );
   }
 
@@ -506,40 +506,48 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
                 {msg.replyId && (
                   <div
                     onClick={() => scrollToMessage(msg.replyId)}
-                    className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] ${isMe
-                      ? "bg-gray-700 border-blue-400 text-gray-200"
-                      : "bg-gray-300 border-green-500 text-gray-800"
+                    className={`mb-1 px-3 py-2 rounded-lg text-xs cursor-pointer max-w-[250px] transition-all duration-200 
+                      ${isMe
+                        ? "bg-gray-700 border-l-4 border-blue-400 text-gray-100"
+                        : "bg-gray-100 border-l-4 border-green-500 text-gray-800"
                       }`}
                   >
                     {(() => {
                       const repliedMsg = messages.find((m) => m.id === msg.replyId);
 
-                      if (!repliedMsg)
+                      if (!repliedMsg || repliedMsg.deleted) {
                         return (
-                          <span className="italic text-gray-500">Message deleted</span>
+                          <div className="italic text-gray-500">This message has been deleted</div>
                         );
+                      }
 
-                      const fileUrl = repliedMsg.file
-                        ? `${repliedMsg.file}`
-                        : null;
+                      const fileUrl = repliedMsg.file ? `${repliedMsg.file}` : null;
 
                       return (
-                        <div className="flex flex-col">
+                        <div className="flex flex-col gap-1">
+                          {/* Sender */}
                           <span className="font-semibold text-[11px] text-blue-600">
                             {repliedMsg.senderId === role || repliedMsg.senderId === userId
                               ? "You"
                               : chat?.name || "Unknown"}
                           </span>
-                          {/* Quoted text */}
-                          {repliedMsg.content && <span className="truncate">{repliedMsg.content}</span>}
 
-                          {/* Quoted file attachment */}
+                          {/* Quoted Text */}
+                          {repliedMsg.content ? (
+                            <span className="truncate max-w-[230px]">{repliedMsg.content}</span>
+                          ) : fileUrl ? (
+                            <span className="text-gray-500 italic">Attachment</span>
+                          ) : (
+                            <span className="text-gray-400 italic">No text content</span>
+                          )}
+
+                          {/* Quoted File */}
                           {fileUrl && (
                             <a
                               href={fileUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-500 text-[10px] underline mt-1"
+                              className="text-blue-500 text-[10px] underline mt-1 break-all"
                             >
                               {repliedMsg.file.split("/").pop()}
                             </a>
@@ -551,7 +559,7 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
                 )}
                 {msg.deleted ? (
                   <div className="text-sm text-red-600">
-                    Message deleted.
+                    This message has been deleted
                     {isMe && (
                       <button onClick={() => handleUndoMessage(msg.id)} className="underline ml-2">
                         Undo
@@ -582,11 +590,12 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
               </div>
 
               {/* HOVER ACTIONS */}
-              {hoveredMsgId === msg.id && (
+               {hoveredMsgId === msg.id && (
                 <div
                   className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md z-10 transition-opacity duration-150 ${isMe ? "right-0 -top-8" : "left-0 -top-8"
-                    }`}
+                  }`}
                 >
+                {!msg.deleted && (
                   <button
                     onClick={() => {
                       setReplyToMessage?.(msg);
@@ -594,35 +603,37 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
                     }}
                     className="p-1 rounded-full hover:bg-gray-100"
                   >
-                    <Tooltip title="Replay">
+                    <Tooltip title="Reply">
                       <RiReplyLine size={18} />
                     </Tooltip>
                   </button>
+                )}
 
-                  {isMe && !msg.readbyvendor && !msg.deleted && (
-                    <>
-                      <button
-                        onClick={() => {
-                          setEditingMessage(msg);
-                          setReplyToMessage?.(null);
-                        }}
-                        className="p-1 rounded-full hover:bg-gray-100"
-                      >
-                        <Tooltip title="Edit">
-                          <RiEdit2Line size={18} />
-                        </Tooltip>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteMessage(msg.id)}
-                        className="p-1 rounded-full hover:bg-gray-100 text-red-500"
-                      >
-                        <Tooltip title="Delete">
-                          <RiDeleteBinLine size={18} />
-                        </Tooltip>
-                      </button>
-                    </>
-                  )}
-                </div>
+                {isMe && !msg.readbyvendor && !msg.deleted && (
+                  <>
+                    <button
+                      onClick={() => {
+                        setEditingMessage(msg);
+                        setReplyToMessage?.(null);
+                      }}
+                      className="p-1 rounded-full hover:bg-gray-100"
+                    >
+                      <Tooltip title="Edit">
+                        <RiEdit2Line size={18} />
+                      </Tooltip>
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteMessage(msg.id)}
+                      className="p-1 rounded-full hover:bg-gray-100 text-red-500"
+                    >
+                      <Tooltip title="Delete">
+                        <RiDeleteBinLine size={18} />
+                      </Tooltip>
+                    </button>
+                  </>
+                )}
+              </div>
               )}
             </div>
           </div>

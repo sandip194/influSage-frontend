@@ -8,7 +8,7 @@ import {
   RiEyeLine,
 } from "@remixicon/react";
 import { Modal } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import { Empty, Input, Pagination, Select, Skeleton, Tooltip } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -59,6 +59,10 @@ const AppliedLayout = () => {
     { value: "estimatedbudget_asc", label: "Price: Low to High" },
     { value: "estimatedbudget_desc", label: "Price: High to Low" },
   ];
+
+  const handleCardClick = (id) => {
+    navigate(`/dashboard/browse/applied-campaign-details/${id}`);
+  };
 
   const getAllAppliedCampaigns = useCallback(async () => {
     setLoading(true);
@@ -160,6 +164,19 @@ const AppliedLayout = () => {
                 setPageNumber(1);
               }
             }}
+            suffix={
+              searchInput ? (
+                <Tooltip title="Clear search" placement="top">
+                  <CloseCircleFilled
+                    onClick={() => {
+                      setSearchInput("");
+                      setSearchTerm("");
+                    }}
+                    className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                  />
+                </Tooltip>
+              ) : null
+            }
           />
 
           <div className="flex gap-2 w-full sm:w-auto justify-end">
@@ -239,7 +256,8 @@ const AppliedLayout = () => {
               campaigns.map((campaign) => (
                 <div
                   key={campaign.id}
-                  className="border rounded-2xl transition hover:shadow-sm border-gray-200 bg-white p-5 flex flex-col"
+                  onClick={() => handleCardClick(campaign.id)}
+                  className="border rounded-2xl transition border-gray-200 bg-white p-5 flex flex-col cursor-pointer hover:bg-gray-100 relative"
                 >
                   <span className="text-xs font-semibold text-gray-900 mb-3">
                     Applied on{" "}
@@ -300,14 +318,17 @@ const AppliedLayout = () => {
                   </div>
 
                   <div className="flex items-center justify-between mt-auto gap-4">
-                    <Link
-                      to={`/dashboard/browse/apply-now/${campaign.id}`}
-                      className="flex-1"
-                    >
-                      <button className="w-full py-2 cursor-pointer rounded-3xl bg-[#0f122f] text-white font-semibold hover:bg-[#23265a] transition">
-                        Edit Application
-                      </button>
-                    </Link>
+                      <div
+                        className="flex-1"
+                        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                      >
+                        <Link to={`/dashboard/browse/apply-now/${campaign.id}`}>
+                          <button className="w-full py-2 cursor-pointer rounded-3xl bg-[#0f122f] text-white font-semibold hover:bg-[#23265a] transition">
+                            Edit Application
+                          </button>
+                        </Link>
+                      </div>
+
                     <button
                       onClick={() => {
                         setSelectedApplicationId(campaign.campaignapplicationid);

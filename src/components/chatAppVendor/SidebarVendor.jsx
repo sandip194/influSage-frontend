@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
+import { CloseCircleFilled } from "@ant-design/icons";
+import { Tooltip } from "antd";
+import { useNavigate } from "react-router-dom";
 
 export default function SidebarVendor({ onSelectChat }) {
   const { token } = useSelector((state) => state.auth);
@@ -17,6 +20,7 @@ export default function SidebarVendor({ onSelectChat }) {
   const [unreadMessages, setUnreadMessages] = useState([]);
   const [loadingUnread, setLoadingUnread] = useState(false);
   const selectChatFromOutside = location.state?.selectChatFromOutside || null;
+  const navigate = useNavigate();
 
 
   const fetchCampaigns = async () => {
@@ -140,7 +144,7 @@ useEffect(() => {
 
     {/* Search */}
       <div className="p-3">
-        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2">
+        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 relative w-[250px]">
           <svg
             className="w-5 h-5 text-gray-400 mr-2"
             fill="none"
@@ -150,12 +154,22 @@ useEffect(() => {
           >
             <path d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 12.65z" />
           </svg>
+
           <input
             placeholder="Search campaigns..."
-            className="w-full outline-none text-sm"
+            className="w-full outline-none text-sm pr-8"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+
+          {search && (
+            <Tooltip title="Clear search" placement="top">
+              <CloseCircleFilled
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors duration-150"
+              />
+            </Tooltip>
+          )}
         </div>
       </div>
 
@@ -228,9 +242,13 @@ useEffect(() => {
           <h2 className="font-semibold text-gray-700 text-sm md:text-base flex-grow">
             Influencers
           </h2>
-          <button className="w-9 h-9 bg-[#0D132D] text-white rounded-full flex items-center justify-center hover:bg-[#0a0e1f] transition">
-            <RiAddLine />
-          </button>
+          <Tooltip title="Search Influencers">
+            <button
+              onClick={() => navigate("/vendor-dashboard/browse-influencers")}
+              className="w-9 h-9 bg-[#0D132D] text-white rounded-full flex items-center justify-center hover:bg-[#0a0e1f] transition">
+              <RiAddLine />
+            </button>
+          </Tooltip>
         </div>
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
         {filteredInfluencers?.length > 0 ? (

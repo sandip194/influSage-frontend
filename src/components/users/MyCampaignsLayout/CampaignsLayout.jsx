@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import {
   Pagination,
   Input,
@@ -321,6 +321,19 @@ const InfluencerCampaigns = () => {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={handleSearch}
+            suffix={
+              searchInput ? (
+                <Tooltip title="Clear search" placement="top">
+                  <CloseCircleFilled
+                    onClick={() => {
+                      setSearchInput("");
+                      setSearchTerm("");
+                    }}
+                    className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                  />
+                </Tooltip>
+              ) : null
+            }
           />
 
             {!showFilter && (

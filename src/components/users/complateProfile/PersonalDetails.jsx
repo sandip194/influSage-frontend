@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Form, Input, DatePicker, Select, message } from 'antd';
+import { Form, Input, DatePicker, Select, message, Spin} from 'antd';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { RiImageAddLine } from 'react-icons/ri';
@@ -31,7 +31,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
   const [existingPhotoPath, setExistingPhotoPath] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { token } = useSelector(state => state.auth);
+  const { token , name} = useSelector(state => state.auth);
 
 
   const countryAPI = "https://countriesnow.space/api/v0.1/countries/positions";
@@ -123,21 +123,24 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
   }, [data, form]);
 
 
-  useEffect(() => {
-    let first = "";
-    let last = "";
+useEffect(() => {
+  if (!data && !name) return;
+  
+  let firstName = data?.firstname || "";
+  let lastName = data?.lastname || "";
 
-    if (data?.name) {
-      const parts = data.name.trim().split(" ");
-      first = parts[0];
-      last = parts.slice(1).join(" ");
-    }
+  if ((!firstName || !lastName) && name) {
+    const parts = name.trim().split(" ");
+    firstName = parts[0] || "";
+    lastName = parts.slice(1).join(" ") || "";
+  }
 
-    form.setFieldsValue({
-      firstName: data?.firstname || first,
-      lastName: data?.lastname || last,
-    });
-  }, [form, data]);
+  const currentValues = form.getFieldsValue();
+  if (!currentValues.firstName && !currentValues.lastName) {
+    form.setFieldsValue({ firstName, lastName });
+  }
+}, [form, data, name]);
+
 
 
   const handleImageChange = (e) => {
@@ -475,7 +478,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
               onClick={handleSubmit}
               disabled={isSubmitting}
             >
-             {isSubmitting ? 'Saving...' : 'Continue'}
+            {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
             </button>
           </div>
         )}
