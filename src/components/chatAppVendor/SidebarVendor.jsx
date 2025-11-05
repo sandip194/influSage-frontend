@@ -144,7 +144,7 @@ useEffect(() => {
 
     {/* Search */}
       <div className="p-3">
-        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 relative w-[250px]">
+        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 relative">
           <svg
             className="w-5 h-5 text-gray-400 mr-2"
             fill="none"

@@ -58,6 +58,7 @@ const workHistoryData = [
     };
 const VendorMyProfile = () => {
     const [showAllHistory, setShowAllHistory] = useState(false);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [profileData, setProfileData] = useState(null);
 
     const [loading, setLoading] = useState(false)
@@ -117,15 +118,31 @@ const VendorMyProfile = () => {
                             />
                             {/* Profile Image */}
                             <img
-                                src={
-                                    profileData?.p_profile?.photopath
-                                        ? profileData.p_profile.photopath
-                                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData?.p_profile?.name || "User")}&background=E5E7EB&color=111827&size=128`
-
-                                }
+                                src={profileData?.p_profile?.photopath}
                                 alt="Profile"
-                                className="absolute left-6 -bottom-10 w-20 h-20 rounded-full border-4 border-white shadow"
+                                onClick={() => setIsPreviewOpen(true)}
+                                className="absolute left-6 -bottom-10 w-20 h-20 rounded-full border-4 border-white shadow cursor-pointer"
                             />
+
+                            {isPreviewOpen && (
+                                <div
+                                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                                onClick={() => setIsPreviewOpen(false)} 
+                                >
+                                <button
+                                    onClick={() => setIsPreviewOpen(false)}
+                                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                                >
+                                    &times;
+                                </button>
+                                <img
+                                    src={profileData?.p_profile?.photopath}
+                                    alt="Profile Preview"
+                                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                                </div>
+                            )}
                         </div>
                         <div className="p-6 pt-14 flex flex-col md:flex-row justify-between items-center">
                             <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
