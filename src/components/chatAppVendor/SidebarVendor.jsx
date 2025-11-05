@@ -41,8 +41,10 @@ export default function SidebarVendor({ onSelectChat }) {
         setCampaigns(formatted);
 
         const allInfluencers = formatted
-          .flatMap((c) =>
-            (c.influencers || []).map((v) => ({
+        .flatMap((c) =>
+          (c.influencers || [])
+            .filter((v) => v.canstartchat === true)
+            .map((v) => ({
               ...v,
               campaignId: c.campaignid,
               campaignName: c.campaignname,
@@ -52,8 +54,8 @@ export default function SidebarVendor({ onSelectChat }) {
               message: v.lastmessage || "No message",
               time: v.lastmessagedate || "",
             }))
-          )
-          .sort((a, b) => new Date(b.time) - new Date(a.time));
+        )
+        .sort((a, b) => new Date(b.time) - new Date(a.time));
 
         setInfluencers(allInfluencers);
       }

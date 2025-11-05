@@ -108,7 +108,7 @@ export default function Sidebar({ onSelectChat }) {
           campaigns.map((campaign) => {
             const vendor = campaign.vendors?.[0];
             if (!vendor?.conversationid) return null;
-
+            if (!vendor?.conversationid || campaign.canstartchat !== true) return null;           
             const conversationId = vendor.conversationid;
             const isSelected = selectedCampaignId === conversationId;
             const unread = hasUnreadMessage(vendor);

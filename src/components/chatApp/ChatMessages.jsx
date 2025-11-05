@@ -356,14 +356,14 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
 
 
 
-   if (chat && isLoading) {
-    return (
-       <div className="flex items-center justify-center flex-1 h-full">
+  if (chat && isLoading && messages.length === 0) {
+  return (
+    <div className="flex items-center justify-center flex-1 h-full">
       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
       <span className="ml-3 text-gray-600">Loading messages...</span>
     </div>
-    );
-  }
+  );
+}
 
   return (
     <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-0 pt-6 space-y-1">
