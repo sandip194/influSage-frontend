@@ -7,7 +7,9 @@ import {
   RiEqualizerFill,
   RiCloseFill,
   RiFileCopyFill,
-  RiEyeLine
+  RiEyeLine,
+  RiEraserLine,
+  RiCheckLine
 } from '@remixicon/react';
 import { SearchOutlined, CloseCircleFilled } from '@ant-design/icons';
 import { Empty, Input, Pagination, Select, Tooltip, Skeleton } from 'antd';
@@ -375,7 +377,7 @@ const Browse = () => {
 
           {/* Campaign Card */}
           <div
-            className={`grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}
+            className={`grid gap-6 flex-1 grid-cols-1 sm:grid-cols-1 lg:grid-cols-1`}
           >
             {loading ? (
               Array.from({ length: 6 }).map((_, idx) => (
@@ -418,7 +420,7 @@ const Browse = () => {
                     e.stopPropagation();
                     handleSave(campaign.id);
                   }}
-                  className="border border-[#0f122f] text-black w-7 h-7 p-2 flex justify-center items-center rounded-full cursor-pointer transition bg-white hover:bg-gray-50 shadow-sm"
+                  className="border border-[#0f122f] text-black w-10 h-10 p-2 flex justify-center items-center rounded-full cursor-pointer transition bg-white hover:bg-gray-50 shadow-sm"
                 >
                   {campaign.campaigsaved ? (
                     <RiFileCopyFill size={18} className="text-[#0f122f]" />
@@ -436,12 +438,12 @@ const Browse = () => {
                     src={campaign.photopath}
                     alt="icon"
                     loading="lazy"
-                    className="w-10 h-10 object-cover rounded-full flex-shrink-0"
+                    className="w-12 h-12 object-cover rounded-full flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0"> {/* Keeps space management intact */}
                     <Link
                       to={`/dashboard/browse/description/${campaign.id}`}
-                      className="font-semibold text-gray-900 hover:underline"
+                      className="text-lg font-semibold text-gray-900 hover:underline hover:text-[#0f122f] transition-colors duration-150"
                     >
                       {campaign.name}
                     </Link>
@@ -452,18 +454,23 @@ const Browse = () => {
                 </div>
                 {/* Rest of the card remains the same */}
                 <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                  <div className="flex flex-col text-xs text-gray-500 gap-1">
+                  <div className="flex flex-wrap items-center text-xs text-gray-500 gap-x-2">
                     {campaign.providercontenttype?.map((item, index) => (
-                      <span key={index}>
+                      <span key={index} className="whitespace-nowrap">
                         {item.providername} - {item.contenttypename}
+                        {index < campaign.providercontenttype.length - 1 && ","}
                       </span>
                     ))}
                   </div>
-                  <RiExchangeDollarLine size={16} />
-                  <span>₹{campaign.estimatedbudget}</span>
                 </div>
+                <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                    <RiExchangeDollarLine size={16} />
+                    <span className="text-gray-900">
+                      Estimated Budget : <span className=" text-gray-900">₹{campaign.estimatedbudget}</span>
+                    </span>
+                  </div>
                 <p
-                  className="text-gray-700 text-sm mb-4 text-justify overflow-hidden"
+                  className="text-black text-sm mb-4 text-justify overflow-hidden"
                   style={{
                     display: "-webkit-box",
                     WebkitLineClamp: 2,
@@ -519,12 +526,52 @@ const Browse = () => {
 
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold">Filter Options</h3>
-                  <button
-                    onClick={() => setShowFilter(false)}
-                    className="text-gray-500 hover:text-gray-900"
-                  >
-                    <RiCloseFill />
-                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <Tooltip title="Clear Filters">
+                      <button
+                        onClick={() => {
+                          setFilters({
+                            providers: [],
+                            contenttypes: [],
+                            languages: [],
+                            maxbudget: "",
+                            minbudget: "",
+                            sortby: "createddate",
+                            sortorder: "desc",
+                            pagenumber: 1,
+                            pagesize: 10,
+                          });
+                          setShowFilter(false);
+                          getAllCampaigns(); // refresh list with default filters
+                        }}
+                        className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
+                      >
+                        <RiEraserLine size={18} />
+                      </button>
+                    </Tooltip>
+
+                    <Tooltip title="Apply Filters">
+                      <button
+                        onClick={() => {
+                          getAllCampaigns();
+                          setShowFilter(false);
+                        }}
+                        className="p-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
+                      >
+                        <RiCheckLine size={18} />
+                      </button>
+                    </Tooltip>
+
+                    <Tooltip title="Close">
+                      <button
+                        onClick={() => setShowFilter(false)}
+                        className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition"
+                      >
+                        <RiCloseFill size={20} />
+                      </button>
+                    </Tooltip>
+                  </div>
                 </div>
 
                 <hr className="my-4 border-gray-200" />
@@ -608,39 +655,7 @@ const Browse = () => {
                   </div>
                 </div>
 
-                {/* Buttons */}
-                <div className="flex gap-3 mt-4 px-4">
-                  <button
-                    className="flex-1 py-2 bg-gray-200 rounded-full hover:bg-gray-300"
-                    onClick={() => {
-                      setFilters({
-                        providers: [],
-                        contenttypes: [],
-                        languages: [],
-                        maxbudget: "",
-                        minbudget: "",
-                        sortby: "createddate",
-                        sortorder: "desc",
-                        pagenumber: 1,
-                        pagesize: 10,
-                      });
-                      setShowFilter(false);
-                      getAllCampaigns(); // refresh list with default filters
-                    }}
-                  >
-                    Clear
-                  </button>
-
-                  <button
-                    className="flex-1 py-2 bg-[#0f122f] text-white rounded-full hover:bg-[#23265a]"
-                    onClick={() => {
-                      getAllCampaigns();
-                      setShowFilter(false);
-                    }}
-                  >
-                    Apply
-                  </button>
-                </div>
+                
               </div>
             </>
           )}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
+import { SearchOutlined, CloseCircleFilled, } from "@ant-design/icons";
 import {
   Pagination,
   Input,
@@ -13,7 +13,7 @@ import {
 } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { RiEyeLine, RiArrowDownSLine, RiCloseFill } from "react-icons/ri";
+import { RiEyeLine, RiArrowDownSLine, RiCloseFill, RiCheckLine, RiEraserLine  } from "react-icons/ri";
 import { RiEqualizerFill } from "@remixicon/react";
 
 const { Option } = Select;
@@ -467,12 +467,35 @@ const InfluencerCampaigns = () => {
           <div className="fixed top-0 right-0 w-80 h-full bg-white p-4 z-50 shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Filter Options</h3>
-              <button
-                onClick={() => setShowFilter(false)}
-                className="text-gray-500 hover:text-gray-900"
-              >
-                <RiCloseFill size={20} />
-              </button>
+
+              <div className="flex items-center gap-2">
+                <Tooltip title="Clear Filters">
+                  <button
+                    onClick={clearFilters}
+                    className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
+                  >
+                    <RiEraserLine size={18} />
+                  </button>
+                </Tooltip>
+
+                <Tooltip title="Apply Filters">
+                  <button
+                    onClick={applyFilters}
+                    className="p-2 rounded-full bg-[#141843] text-white hover:bg-[#1d214f] transition"
+                  >
+                    <RiCheckLine size={18} />
+                  </button>
+                </Tooltip>
+
+                <Tooltip title="Close">
+                  <button
+                    onClick={() => setShowFilter(false)}
+                    className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition"
+                  >
+                    <RiCloseFill size={20} />
+                  </button>
+                </Tooltip>
+              </div>
             </div>
 
             <hr className="my-4 border-gray-200" />
@@ -564,21 +587,7 @@ const InfluencerCampaigns = () => {
               <p className="text-xs text-gray-500 mt-1">Filter by campaign start and end dates.</p>
             </div>
 
-            {/* Buttons */}
-            <div className="flex gap-3 mt-6 px-2">
-              <button
-                className="flex-1 py-2.5 px-4 bg-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-300 transition-colors"
-                onClick={clearFilters}
-              >
-                Clear All
-              </button>
-              <button
-                className="flex-1 py-2.5 px-4 bg-[#141843] text-white rounded-full font-medium hover:bg-[#1d214f] transition-colors"
-                onClick={applyFilters}
-              >
-                Apply Filters
-              </button>
-            </div>
+            
           </div>
         </>
       )}

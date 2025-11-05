@@ -9,7 +9,7 @@ const ThankYouScreen = () => {
     const navigate = useNavigate();
 
     const handleGoToHome = () => {
-        const roleId = parseInt(role); // Make sure it's stored as a number
+        const roleId = Number(role); // Make sure it's stored as a number
 
         if (roleId === 1) {
             navigate("/dashboard");
@@ -37,7 +37,7 @@ const ThankYouScreen = () => {
                         you'll be able to access and start using the platform fully. We appreciate your patience!
                     </span>
                 </p>
-                {role === '2' && (
+                 {Number(role) === 2 && (
                     <button
                         onClick={handleGoToHome}
                         className="bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer text-white font-semibold px-6 py-3 rounded-full shadow-md"
