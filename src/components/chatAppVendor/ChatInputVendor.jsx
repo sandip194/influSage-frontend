@@ -6,98 +6,124 @@ import {
   RiCloseLine,
 } from "react-icons/ri";
 import EmojiPicker from "emoji-picker-react";
+import { toast } from "react-toastify";
 
-export default function ChatInputVendor({ onSend, replyTo, onCancelReply, editingMessage, onEditComplete }) {
+export default function ChatInputVendor({
+  canstartchat = true, // 👈 new prop (default true)
+  onSend,
+  replyTo,
+  onCancelReply,
+  editingMessage,
+  onEditComplete,
+}) {
   const [text, setText] = useState("");
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-    const [file, setFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(null);
-    const fileInputRef = useRef(null);
-  
-    const handleSubmit = (e) => {
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // Block input actions when chat not allowed
+  const handleBlockedAction = () => {
+    toast.warning("You cannot send messages for this campaign yet.");
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!canstartchat) {
+      handleBlockedAction();
+      return;
+    }
+
+    if (!text.trim() && !file) return;
+
+    if (editingMessage) {
+      onEditComplete({
+        ...editingMessage,
+        content: text,
+        file: file || editingMessage.file,
+        replyId: replyTo?.id || null,
+      });
+    } else {
+      onSend({
+        text,
+        file,
+        replyId: replyTo?.id || null,
+      });
+    }
+
+    setText("");
+    setFile(null);
+    setPreviewUrl(null);
+    onCancelReply && onCancelReply();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (!text.trim() && !file) return;
-  
-      if (editingMessage) {
-        // Editing an existing message
-        onEditComplete({
-          ...editingMessage,
-          content: text,
-          file: file || editingMessage.file,
-          replyId: replyTo?.id || null,
-        });
-      } else {
-        // Sending a new message
-        onSend({
-          text,
-          file,
-          replyId: replyTo?.id || null,
-        });
-      }
-  
-      // Reset after sending or editing
-      setText("");
-      setFile(null);
+      handleSubmit(e);
+    }
+  };
+
+  const handleEmojiClick = (emojiData) => {
+    if (!canstartchat) {
+      handleBlockedAction();
+      return;
+    }
+    setText((prev) => prev + emojiData.emoji);
+  };
+
+  const handleFileChange = (e) => {
+    if (!canstartchat) {
+      handleBlockedAction();
+      return;
+    }
+
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+
+    if (!selectedFile) {
       setPreviewUrl(null);
-      onCancelReply && onCancelReply();
-    };
-  
-    const handleKeyDown = (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSubmit(e);
-      }
-    };
-  
-  
-  
-    const handleEmojiClick = (emojiData) => {
-      setText((prev) => prev + emojiData.emoji);
-    };
-  
-    const handleFileChange = (e) => {
-      const selectedFile = e.target.files[0];
-      setFile(selectedFile);
-  
-      if (!selectedFile) {
-        setPreviewUrl(null);
-        return;
-      }
-  
-      const fileType = selectedFile.type;
-  
-      if (fileType.startsWith("image/")) {
-        setPreviewUrl({ type: "image", url: URL.createObjectURL(selectedFile) });
-      } else if (fileType === "application/pdf") {
-        setPreviewUrl({ type: "pdf", url: URL.createObjectURL(selectedFile) });
-      } else if (fileType.startsWith("video/")) {
-        setPreviewUrl({ type: "video", url: URL.createObjectURL(selectedFile) });
-      } else {
-        setPreviewUrl({ type: "file", name: selectedFile.name });
-      }
-    };
-  
-    const removeFile = () => {
-      if (previewUrl?.url) {
-        URL.revokeObjectURL(previewUrl.url);
-      }
-      setFile(null);
-      setPreviewUrl(null);
-    };
-  
-    useEffect(() => {
-      if (editingMessage?.file) {
-        setPreviewUrl({ type: "file", url: editingMessage.file, name: editingMessage.file.split("/").pop() });
-      }
-      setText(editingMessage?.content || "");
-    }, [editingMessage]);
-    return (
-      <form
+      return;
+    }
+
+    const fileType = selectedFile.type;
+    if (fileType.startsWith("image/")) {
+      setPreviewUrl({ type: "image", url: URL.createObjectURL(selectedFile) });
+    } else if (fileType === "application/pdf") {
+      setPreviewUrl({ type: "pdf", url: URL.createObjectURL(selectedFile) });
+    } else if (fileType.startsWith("video/")) {
+      setPreviewUrl({ type: "video", url: URL.createObjectURL(selectedFile) });
+    } else {
+      setPreviewUrl({ type: "file", name: selectedFile.name });
+    }
+  };
+
+  const removeFile = () => {
+    if (previewUrl?.url) URL.revokeObjectURL(previewUrl.url);
+    setFile(null);
+    setPreviewUrl(null);
+  };
+
+  useEffect(() => {
+    if (editingMessage?.file) {
+      setPreviewUrl({
+        type: "file",
+        url: editingMessage.file,
+        name: editingMessage.file.split("/").pop(),
+      });
+    }
+    setText(editingMessage?.content || "");
+  }, [editingMessage]);
+
+  return (
+    <form
       onSubmit={handleSubmit}
-      className="p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative"
+      className={`p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative ${
+        !canstartchat ? "opacity-70 cursor-not-allowed" : ""
+      }`}
     >
       {/* Emoji Picker */}
-      {showEmojiPicker && (
+      {showEmojiPicker && canstartchat && (
         <div className="absolute bottom-20 left-4 z-10 bg-white shadow-lg rounded-lg">
           <EmojiPicker
             onEmojiClick={handleEmojiClick}
@@ -107,7 +133,7 @@ export default function ChatInputVendor({ onSend, replyTo, onCancelReply, editin
         </div>
       )}
 
-      {/* Reply UI */}
+      {/* Reply Preview */}
       {replyTo && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-gray-100 border-l-4 border-[#0D132D] text-sm text-gray-700 px-4 py-2 rounded-md space-y-2 sm:space-y-0">
           <div className="flex-1 truncate">
@@ -124,7 +150,7 @@ export default function ChatInputVendor({ onSend, replyTo, onCancelReply, editin
         </div>
       )}
 
-      {/* File/Image Preview */}
+      {/* File Preview */}
       {file && previewUrl && (
         <div className="relative w-full max-w-xs">
           {previewUrl.type === "image" && (
@@ -135,7 +161,6 @@ export default function ChatInputVendor({ onSend, replyTo, onCancelReply, editin
               onClick={() => window.open(previewUrl.url, "_blank")}
             />
           )}
-
           {previewUrl.type === "pdf" && (
             <iframe
               src={previewUrl.url}
@@ -143,7 +168,6 @@ export default function ChatInputVendor({ onSend, replyTo, onCancelReply, editin
               className="w-full h-28 rounded border"
             ></iframe>
           )}
-
           {previewUrl.type === "video" && (
             <video
               src={previewUrl.url}
@@ -151,14 +175,14 @@ export default function ChatInputVendor({ onSend, replyTo, onCancelReply, editin
               className="w-full h-28 rounded shadow"
             />
           )}
-
           {previewUrl.type === "file" && (
             <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg shadow">
               <RiFileTextLine />
-              <span className="truncate max-w-[120px] text-sm">{previewUrl.name}</span>
+              <span className="truncate max-w-[120px] text-sm">
+                {previewUrl.name}
+              </span>
             </div>
           )}
-
           <button
             type="button"
             onClick={removeFile}
@@ -169,12 +193,16 @@ export default function ChatInputVendor({ onSend, replyTo, onCancelReply, editin
         </div>
       )}
 
-      {/* Input + Actions */}
+      {/* Input */}
       <div className="flex items-center space-x-2 w-full">
         <div className="flex space-x-2">
           <button
             type="button"
-            onClick={() => setShowEmojiPicker((prev) => !prev)}
+            onClick={() =>
+              canstartchat
+                ? setShowEmojiPicker((prev) => !prev)
+                : handleBlockedAction()
+            }
             className="text-gray-500 hover:text-gray-700"
           >
             <RiEmotionHappyLine size={25} />
@@ -182,7 +210,9 @@ export default function ChatInputVendor({ onSend, replyTo, onCancelReply, editin
 
           <button
             type="button"
-            onClick={() => fileInputRef.current.click()}
+            onClick={() =>
+              canstartchat ? fileInputRef.current.click() : handleBlockedAction()
+            }
             className="text-gray-500 hover:text-gray-700"
           >
             <RiFileTextLine size={25} />
@@ -200,17 +230,30 @@ export default function ChatInputVendor({ onSend, replyTo, onCancelReply, editin
           className="flex-1 border border-gray-300 bg-gray-100 rounded-full px-4 sm:px-6 py-2 sm:py-3 outline-none text-sm w-full"
           placeholder="Write your message"
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            if (!canstartchat) {
+              handleBlockedAction();
+              return;
+            }
+            setText(e.target.value);
+          }}
+          onClick={() => {
+            if (!canstartchat) handleBlockedAction();
+          }}
           onKeyDown={handleKeyDown}
         />
-
         <button
           type="submit"
-          className="bg-[#0D132D] hover:bg-indigo-700 text-white p-3 rounded-full shadow-md transition flex-shrink-0"
+          disabled={!canstartchat}
+          className={`${
+            canstartchat
+              ? "bg-[#0D132D] hover:bg-indigo-700"
+              : "bg-gray-400 cursor-not-allowed"
+          } text-white p-3 rounded-full shadow-md transition flex-shrink-0`}
         >
           <RiSendPlane2Fill />
         </button>
       </div>
     </form>
-    );
-  }
+  );
+}

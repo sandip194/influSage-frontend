@@ -41,10 +41,8 @@ export default function SidebarVendor({ onSelectChat }) {
         setCampaigns(formatted);
 
         const allInfluencers = formatted
-        .flatMap((c) =>
-          (c.influencers || [])
-            .filter((v) => v.canstartchat === true)
-            .map((v) => ({
+          .flatMap((c) =>
+            (c.influencers || []).map((v) => ({
               ...v,
               campaignId: c.campaignid,
               campaignName: c.campaignname,
@@ -54,8 +52,8 @@ export default function SidebarVendor({ onSelectChat }) {
               message: v.lastmessage || "No message",
               time: v.lastmessagedate || "",
             }))
-        )
-        .sort((a, b) => new Date(b.time) - new Date(a.time));
+          )
+          .sort((a, b) => new Date(b.time) - new Date(a.time));
 
         setInfluencers(allInfluencers);
       }
@@ -267,7 +265,11 @@ useEffect(() => {
                 key={inf.influencerid}
                 onClick={() => {
                   setSelectedInfluencer(inf.influencerid);
-                  onSelectChat({ ...inf, campaign: selectedCampaign });
+                  onSelectChat({
+                  ...inf,
+                  campaign: selectedCampaign,
+                  canstartchat: inf.canstartchat,
+                });
 
                   // Remove from unread once clicked
                   setUnreadMessages((prev) =>

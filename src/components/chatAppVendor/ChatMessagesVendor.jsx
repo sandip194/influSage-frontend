@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RiReplyLine, RiEdit2Line, RiDeleteBinLine, RiCheckLine, RiCheckDoubleLine } from "react-icons/ri";
+import { RiReplyLine, RiEdit2Line, RiDeleteBinLine, RiCheckLine, RiCheckDoubleLine, RiDownload2Line } from "react-icons/ri";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Tooltip } from "antd";
@@ -405,16 +405,41 @@ useEffect(() => {
                         const isZip = fileName.match(/\.(zip|rar|7z)$/i);
 
                         if (isImage) {
-                          return (
-                            <Image
-                              key={idx}
-                              src={fileUrl}
-                              alt={fileName}
-                              className="max-w-[200px] max-h-[200px] rounded-md object-cover"
-                              preview
-                            />
-                          );
-                        } else if (isPDF) {
+                            const handleDownload = async () => {
+                              try {
+                                const response = await fetch(fileUrl, { mode: "cors" });
+                                const blob = await response.blob();
+                                const blobUrl = window.URL.createObjectURL(blob);
+                                const link = document.createElement("a");
+                                link.href = blobUrl;
+                                link.download = fileName;
+                                document.body.appendChild(link);
+                                link.click();
+                                link.remove();
+                                window.URL.revokeObjectURL(blobUrl);
+                              } catch (error) {
+                                console.error("Download failed:", error);
+                              }
+                            };
+                            return (
+                              <div key={idx} className="flex flex-col items-center gap-2">
+                                <Image
+                                  key={idx}
+                                  src={fileUrl}
+                                  alt={fileName}
+                                  className="max-w-[200px] max-h-[200px] rounded-md object-cover"
+                                  preview
+                                />
+                                <button
+                                  onClick={handleDownload}
+                                  className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm mt-1"
+                                >
+                                  <RiDownload2Line size={16} />
+                                  Download
+                                </button>
+                              </div>
+                            );
+                          }else if (isPDF) {
                           return (
                             <div key={idx} className="flex flex-col items-center gap-2">
                               <iframe

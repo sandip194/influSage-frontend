@@ -197,6 +197,7 @@ export default function ChatAppPage() {
 
           <div className="sticky bottom-0 bg-white border-t border-gray-100">
             <ChatInput
+              canstartchat={activeChat?.canstartchat}
               onSend={(data) =>
                 editingMessage
                   ? handleEditMessage({ ...editingMessage, ...data, replyId: selectedReplyMessage?.id })

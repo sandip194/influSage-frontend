@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RiReplyLine, RiEdit2Line, RiDeleteBinLine, RiCheckDoubleLine, RiCheckLine } from "react-icons/ri";
+import {
+  RiReplyLine,
+  RiEdit2Line,
+  RiDeleteBinLine,
+  RiCheckDoubleLine,
+  RiCheckLine,
+  RiDownload2Line ,
+} from "react-icons/ri";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Tooltip } from "antd";
@@ -18,7 +25,7 @@ import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
-// ⏱️ Consistent formatTime function 
+// ⏱️ Consistent formatTime function
 const formatTime = (timestamp) => {
   const date = new Date(timestamp);
   const now = new Date();
@@ -42,16 +49,23 @@ const addBaseUrlToLinks = (html) => {
   const div = document.createElement("div");
   div.innerHTML = html;
   div.querySelectorAll("a[href], img[src]").forEach((element) => {
-    const attr = element.tagName === 'A' ? 'href' : 'src';
+    const attr = element.tagName === "A" ? "href" : "src";
     const url = element.getAttribute(attr);
-    if (url && !url.startsWith('http') && !url.startsWith('https')) {
+    if (url && !url.startsWith("http") && !url.startsWith("https")) {
       element.setAttribute(attr, `${base}/${url}`);
     }
   });
   return div.innerHTML;
 };
 
-export default function ChatMessages({ chat, isRecipientOnline, messages, setReplyToMessage, setEditingMessage, editingMessage }) {
+export default function ChatMessages({
+  chat,
+  isRecipientOnline,
+  messages,
+  setReplyToMessage,
+  setEditingMessage,
+  editingMessage,
+}) {
   const dispatch = useDispatch();
   const socket = getSocket();
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
@@ -63,8 +77,6 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
   const [isNearBottom, setIsNearBottom] = useState(true);
   const lastMessageId = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
-
-
 
   const { token, userId, role } = useSelector((state) => state.auth) || {};
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -86,7 +98,6 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
     return <RiCheckLine className="text-gray-500 text-xs" size={17} />;
   };
 
-
   useEffect(() => {
     if (isLoading || messages.length === 0) return;
 
@@ -94,7 +105,6 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
-
 
   const handleDeleteMessage = async (messageId) => {
     dispatch(deleteMessage(messageId)); // <-- ADD THIS
@@ -125,14 +135,14 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
     }
   };
 
-
   const handleUndoMessage = async (messageId) => {
     if (!deletedMessage[messageId]) {
       toast.error("No deleted message to undo.");
       return;
     }
 
-    const elapsedMinutes = (Date.now() - deletedMessage[messageId]) / (1000 * 60);
+    const elapsedMinutes =
+      (Date.now() - deletedMessage[messageId]) / (1000 * 60);
     if (elapsedMinutes > 15) {
       toast.error("Undo time expired (15 minutes).");
       return;
@@ -170,13 +180,13 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
   const scrollToMessage = (msgId) => {
     const msgElement = document.getElementById(`message-${msgId}`);
     if (msgElement) {
-      msgElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      msgElement.scrollIntoView({ behavior: "smooth", block: "center" });
 
       // Temporary highlight
-      msgElement.classList.add('bg-blue-50');
+      msgElement.classList.add("bg-blue-50");
 
       setTimeout(() => {
-        msgElement.classList.remove('bg-blue-50');
+        msgElement.classList.remove("bg-blue-50");
       }, 2000);
     }
   };
@@ -201,13 +211,15 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
       dispatch(updateMessage(updatedMessage));
     });
 
-    socket.on("updateMessageStatus", ({ messageId, readbyvendor, readbyinfluencer }) => {
-      dispatch({
-        type: "chat/setMessageRead",
-        payload: { messageId, readbyvendor, readbyinfluencer },
-      });
-    });
-
+    socket.on(
+      "updateMessageStatus",
+      ({ messageId, readbyvendor, readbyinfluencer }) => {
+        dispatch({
+          type: "chat/setMessageRead",
+          payload: { messageId, readbyvendor, readbyinfluencer },
+        });
+      }
+    );
 
     return () => {
       socket.off("newMessage");
@@ -217,7 +229,6 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
       socket.off("editMessage");
     };
   }, [socket, dispatch]);
-
 
   // ⏱️ Move fetchMessages outside the effect so it can be reused
   const fetchMessages = async () => {
@@ -234,18 +245,22 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
       });
 
       if (res.data?.data?.records) {
-        const formattedMessages = res.data.data.records.map((msg) => ({
-          id: msg.messageid,
-          senderId: msg.userid ?? null,
-          roleId: msg.roleid,
-          content: (msg.message || "").replace(/^"|"$/g, ""),
-          file: Array.isArray(msg.filepath) ? msg.filepath.join(",") : msg.filepath || "",
-          time: msg.createddate,
-          replyId: msg.replyid || null,
-          deleted: msg.isdeleted || false,
-          readbyvendor: msg.readbyvendor ?? false,
-          readbyinfluencer: msg.readbyinfluencer ?? false,
-        })).sort((a, b) => new Date(a.time) - new Date(b.time));
+        const formattedMessages = res.data.data.records
+          .map((msg) => ({
+            id: msg.messageid,
+            senderId: msg.userid ?? null,
+            roleId: msg.roleid,
+            content: (msg.message || "").replace(/^"|"$/g, ""),
+            file: Array.isArray(msg.filepath)
+              ? msg.filepath.join(",")
+              : msg.filepath || "",
+            time: msg.createddate,
+            replyId: msg.replyid || null,
+            deleted: msg.isdeleted || false,
+            readbyvendor: msg.readbyvendor ?? false,
+            readbyinfluencer: msg.readbyinfluencer ?? false,
+          }))
+          .sort((a, b) => new Date(a.time) - new Date(b.time));
         dispatch(setMessages(formattedMessages));
       }
     } catch (err) {
@@ -253,28 +268,25 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
     }
   };
 
-
   useEffect(() => {
-  if (!chat?.id || !token || !role) return;
+    if (!chat?.id || !token || !role) return;
 
-  const loadMessagesOnce = async () => {
-    setIsLoading(true);
-    await Promise.all([
-      fetchMessages(),
-      new Promise((resolve) => setTimeout(resolve, 600)),
-    ]);
-    setIsLoading(false);
-  };
+    const loadMessagesOnce = async () => {
+      setIsLoading(true);
+      await Promise.all([
+        fetchMessages(),
+        new Promise((resolve) => setTimeout(resolve, 600)),
+      ]);
+      setIsLoading(false);
+    };
 
-  loadMessagesOnce();
-}, [chat?.id, token, role]);
-
-
+    loadMessagesOnce();
+  }, [chat?.id, token, role]);
 
   useEffect(() => {
     if (!socket || !messages.length) return;
 
-    messages.forEach(msg => {
+    messages.forEach((msg) => {
       const isMe = msg.roleId === role;
 
       const isUnread = !isMe && !msg.readbyvendor && !msg.readbyinfluencer;
@@ -326,7 +338,8 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
   useEffect(() => {
     const handleScroll = () => {
       if (!scrollContainerRef.current) return;
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+      const { scrollTop, scrollHeight, clientHeight } =
+        scrollContainerRef.current;
 
       const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
       setIsNearBottom(distanceFromBottom < 100); // 100px threshold
@@ -334,12 +347,12 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
 
     const container = scrollContainerRef.current;
     if (container) {
-      container.addEventListener('scroll', handleScroll);
+      container.addEventListener("scroll", handleScroll);
     }
 
     return () => {
       if (container) {
-        container.removeEventListener('scroll', handleScroll);
+        container.removeEventListener("scroll", handleScroll);
       }
     };
   }, []);
@@ -352,24 +365,22 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
     }
   }, [isLoading, messages]);
 
-
-
-
-
   if (chat && isLoading && messages.length === 0) {
-  return (
-    <div className="flex items-center justify-center flex-1 h-full">
-      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
-      <span className="ml-3 text-gray-600">Loading messages...</span>
-    </div>
-  );
-}
+    return (
+      <div className="flex items-center justify-center flex-1 h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+        <span className="ml-3 text-gray-600">Loading messages...</span>
+      </div>
+    );
+  }
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-0 pt-6 space-y-1">
+    <div
+      ref={scrollRef}
+      className="flex-1 overflow-y-auto overflow-x-hidden px-0 pt-6 space-y-1"
+    >
       {messages.map((msg, index) => {
         const isMe = msg.roleId === role;
-
 
         const isLast = index === messages.length - 1;
         // console.log("Message:", msg.content, "senderId:", msg.senderId, "userId:", userId, "isMe:", isMe);
@@ -379,8 +390,9 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
             id={`message-${msg.id}`}
             key={msg.id}
             ref={isLast ? bottomRef : null}
-            className={`flex relative ${isMe ? "justify-end mr-4" : "items-start space-x-2 ml-4"
-              } ${editingMessage?.id === msg.id ? "bg-blue-50 " : ""}`}
+            className={`flex relative ${
+              isMe ? "justify-end mr-4" : "items-start space-x-2 ml-4"
+            } ${editingMessage?.id === msg.id ? "bg-blue-50 " : ""}`}
             onMouseEnter={() => setHoveredMsgId(msg.id)}
             onMouseLeave={() => setHoveredMsgId(null)}
           >
@@ -399,19 +411,28 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
             )}
 
             <div
-              className={`relative flex flex-col ${isMe ? "items-end" : "items-start"
-                }`}
+              className={`relative flex flex-col ${
+                isMe ? "items-end" : "items-start"
+              }`}
             >
               {/* Message bubble */}
-              <div className={`px-3 py-1 rounded-lg 
+              <div
+                className={`px-3 py-1 rounded-lg 
                   max-w-[90%] sm:max-w-xs md:max-w-sm 
                   break-all overflow-hidden whitespace-pre-wrap 
-                  ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`} >
+                  ${
+                    isMe
+                      ? "bg-[#0D132D] text-white"
+                      : "bg-gray-200 text-gray-900"
+                  }`}
+              >
                 {/* FILE PREVIEW */}
                 {!msg.deleted && msg.file && (
                   <div className="mb-2">
                     {(() => {
-                      const files = Array.isArray(msg.file) ? msg.file : [msg.file];
+                      const files = Array.isArray(msg.file)
+                        ? msg.file
+                        : [msg.file];
 
                       return files.map((fileItem, idx) => {
                         let fileUrl = "";
@@ -420,32 +441,73 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
                         if (typeof fileItem === "string") {
                           fileUrl = `${fileItem}`;
                           fileName = fileItem.split("/").pop();
-                        } else if (typeof fileItem === "object" && fileItem.url) {
+                        } else if (
+                          typeof fileItem === "object" &&
+                          fileItem.url
+                        ) {
                           fileUrl = `${fileItem.url}`;
-                          fileName = fileItem.name || fileItem.url.split("/").pop();
+                          fileName =
+                            fileItem.name || fileItem.url.split("/").pop();
                         } else {
                           return null;
                         }
 
-                        const isImage = fileName.match(/\.(jpeg|jpg|png|gif|webp|bmp)$/i);
+                        const isImage = fileName.match(
+                          /\.(jpeg|jpg|png|gif|webp|bmp)$/i
+                        );
                         const isPDF = fileName.match(/\.pdf$/i);
                         const isVideo = fileName.match(/\.(mp4|webm|ogg)$/i);
-                        const isDoc = fileName.match(/\.(doc|docx|xls|xlsx|ppt|pptx)$/i);
+                        const isDoc = fileName.match(
+                          /\.(doc|docx|xls|xlsx|ppt|pptx)$/i
+                        );
                         const isZip = fileName.match(/\.(zip|rar|7z)$/i);
 
                         if (isImage) {
+                          const handleDownload = async () => {
+                            try {
+                              const response = await fetch(fileUrl, {
+                                mode: "cors",
+                              });
+                              const blob = await response.blob();
+                              const blobUrl = window.URL.createObjectURL(blob);
+                              const link = document.createElement("a");
+                              link.href = blobUrl;
+                              link.download = fileName;
+                              document.body.appendChild(link);
+                              link.click();
+                              link.remove();
+                              window.URL.revokeObjectURL(blobUrl);
+                            } catch (error) {
+                              console.error("Download failed:", error);
+                            }
+                          };
                           return (
-                            <Image
+                            <div
                               key={idx}
-                              src={fileUrl}
-                              alt={fileName}
-                              className="max-w-[200px] max-h-[200px] rounded-md object-cover"
-                              preview
-                            />
+                              className="flex flex-col items-center gap-2"
+                            >
+                              <Image
+                                key={idx}
+                                src={fileUrl}
+                                alt={fileName}
+                                className="max-w-[200px] max-h-[200px] rounded-md object-cover"
+                                preview
+                              />
+                              <button
+                                onClick={handleDownload}
+                                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm mt-1"
+                              >
+                                <RiDownload2Line size={16} />
+                                Download
+                              </button>
+                            </div>
                           );
                         } else if (isPDF) {
                           return (
-                            <div key={idx} className="flex flex-col items-center gap-2">
+                            <div
+                              key={idx}
+                              className="flex flex-col items-center gap-2"
+                            >
                               <iframe
                                 src={fileUrl}
                                 title={fileName}
@@ -475,7 +537,10 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
                           );
                         } else if (isDoc || isZip) {
                           return (
-                            <div key={idx} className="flex items-center gap-2 text-sm">
+                            <div
+                              key={idx}
+                              className="flex items-center gap-2 text-sm"
+                            >
                               <a
                                 href={fileUrl}
                                 download={fileName}
@@ -507,38 +572,52 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
                   <div
                     onClick={() => scrollToMessage(msg.replyId)}
                     className={`mb-1 px-3 py-2 rounded-lg text-xs cursor-pointer max-w-[250px] transition-all duration-200 
-                      ${isMe
-                        ? "bg-gray-700 border-l-4 border-blue-400 text-gray-100"
-                        : "bg-gray-100 border-l-4 border-green-500 text-gray-800"
+                      ${
+                        isMe
+                          ? "bg-gray-700 border-l-4 border-blue-400 text-gray-100"
+                          : "bg-gray-100 border-l-4 border-green-500 text-gray-800"
                       }`}
                   >
                     {(() => {
-                      const repliedMsg = messages.find((m) => m.id === msg.replyId);
+                      const repliedMsg = messages.find(
+                        (m) => m.id === msg.replyId
+                      );
 
                       if (!repliedMsg || repliedMsg.deleted) {
                         return (
-                          <div className="italic text-gray-500">This message has been deleted</div>
+                          <div className="italic text-gray-500">
+                            This message has been deleted
+                          </div>
                         );
                       }
 
-                      const fileUrl = repliedMsg.file ? `${repliedMsg.file}` : null;
+                      const fileUrl = repliedMsg.file
+                        ? `${repliedMsg.file}`
+                        : null;
 
                       return (
                         <div className="flex flex-col gap-1">
                           {/* Sender */}
                           <span className="font-semibold text-[11px] text-blue-600">
-                            {repliedMsg.senderId === role || repliedMsg.senderId === userId
+                            {repliedMsg.senderId === role ||
+                            repliedMsg.senderId === userId
                               ? "You"
                               : chat?.name || "Unknown"}
                           </span>
 
                           {/* Quoted Text */}
                           {repliedMsg.content ? (
-                            <span className="truncate max-w-[230px]">{repliedMsg.content}</span>
+                            <span className="truncate max-w-[230px]">
+                              {repliedMsg.content}
+                            </span>
                           ) : fileUrl ? (
-                            <span className="text-gray-500 italic">Attachment</span>
+                            <span className="text-gray-500 italic">
+                              Attachment
+                            </span>
                           ) : (
-                            <span className="text-gray-400 italic">No text content</span>
+                            <span className="text-gray-400 italic">
+                              No text content
+                            </span>
                           )}
 
                           {/* Quoted File */}
@@ -561,79 +640,83 @@ export default function ChatMessages({ chat, isRecipientOnline, messages, setRep
                   <div className="text-sm text-red-600">
                     This message has been deleted
                     {isMe && (
-                      <button onClick={() => handleUndoMessage(msg.id)} className="underline ml-2">
+                      <button
+                        onClick={() => handleUndoMessage(msg.id)}
+                        className="underline ml-2"
+                      >
                         Undo
                       </button>
                     )}
                   </div>
+                ) : // 🧠 Detect if message contains HTML tags (like <div>, <p>, <a>, etc.)
+                /<[a-z][\s\S]*>/i.test(msg.content) ? (
+                  <div
+                    className="text-sm w-full"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(
+                        addBaseUrlToLinks(msg.content)
+                      ),
+                    }}
+                  />
                 ) : (
-                  // 🧠 Detect if message contains HTML tags (like <div>, <p>, <a>, etc.)
-                  /<[a-z][\s\S]*>/i.test(msg.content) ? (
-                    <div
-                      className="text-sm w-full"
-                      dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(addBaseUrlToLinks(msg.content)),
-                      }}
-                    />
-                  ) : (
-                    <div className="text-sm break-words">{msg.content}</div>
-                  )
+                  <div className="text-sm break-words">{msg.content}</div>
                 )}
-
-
               </div>
 
               {/* TIMESTAMP */}
               <div className="text-[10px] text-gray-500 mt-1 px-2 flex items-center gap-1 justify-end">
                 <span>{formatTime(msg.time)}</span>
-                <span className="text-blue-500">{getMessageStatusIcon(msg)}</span>
+                <span className="text-blue-500">
+                  {getMessageStatusIcon(msg)}
+                </span>
               </div>
 
               {/* HOVER ACTIONS */}
-               {hoveredMsgId === msg.id && (
+              {hoveredMsgId === msg.id && (
                 <div
-                  className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md z-10 transition-opacity duration-150 ${isMe ? "right-0 -top-8" : "left-0 -top-8"
+                  className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md z-10 transition-opacity duration-150 ${
+                    isMe ? "right-0 -top-8" : "left-0 -top-8"
                   }`}
                 >
-                {!msg.deleted && (
-                  <button
-                    onClick={() => {
-                      setReplyToMessage?.(msg);
-                      setEditingMessage?.(null);
-                    }}
-                    className="p-1 rounded-full hover:bg-gray-100"
-                  >
-                    <Tooltip title="Reply">
-                      <RiReplyLine size={18} />
-                    </Tooltip>
-                  </button>
-                )}
-
-                {isMe && !msg.readbyvendor && !msg.deleted && (
-                  <>
+                  {!msg.deleted && (
                     <button
                       onClick={() => {
-                        setEditingMessage(msg);
-                        setReplyToMessage?.(null);
+                        setReplyToMessage?.(msg);
+                        setEditingMessage?.(null);
                       }}
                       className="p-1 rounded-full hover:bg-gray-100"
                     >
-                      <Tooltip title="Edit">
-                        <RiEdit2Line size={18} />
+                      <Tooltip title="Reply">
+                        <RiReplyLine size={18} />
                       </Tooltip>
                     </button>
+                  )}
 
-                    <button
-                      onClick={() => handleDeleteMessage(msg.id)}
-                      className="p-1 rounded-full hover:bg-gray-100 text-red-500"
-                    >
-                      <Tooltip title="Delete">
-                        <RiDeleteBinLine size={18} />
-                      </Tooltip>
-                    </button>
-                  </>
-                )}
-              </div>
+                  {isMe && !msg.readbyvendor && !msg.deleted && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setEditingMessage(msg);
+                          setReplyToMessage?.(null);
+                        }}
+                        className="p-1 rounded-full hover:bg-gray-100"
+                      >
+                        <Tooltip title="Edit">
+                          <RiEdit2Line size={18} />
+                        </Tooltip>
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteMessage(msg.id)}
+                        className="p-1 rounded-full hover:bg-gray-100 text-red-500"
+                      >
+                        <Tooltip title="Delete">
+                          <RiDeleteBinLine size={18} />
+                        </Tooltip>
+                      </button>
+                    </>
+                  )}
+                </div>
               )}
             </div>
           </div>

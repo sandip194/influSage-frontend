@@ -53,15 +53,7 @@ const DescriptionLayout = () => {
 
   const requirements = useMemo(() => {
     if (!campaignDetails) return [];
-    return [
-      {
-        label: "Start Date: ",
-        value: campaignDetails.requirements.startdate,
-      },
-      {
-        label: "End Date: ",
-        value: campaignDetails.requirements.enddate,
-      },
+    return [  
       {
         label: "Objective: ",
         value: campaignDetails.requirements?.objectivename,
@@ -77,6 +69,14 @@ const DescriptionLayout = () => {
       {
         label: "Include Profile Link: ",
         value: campaignDetails.requirements?.isincludevendorprofilelink ? "Yes" : "No",
+      },
+      {
+        label: "Start Date: ",
+        value: campaignDetails.requirements.startdate,
+      },
+      {
+        label: "End Date: ",
+        value: campaignDetails.requirements.enddate,
       },
     ];
   }, [campaignDetails]);

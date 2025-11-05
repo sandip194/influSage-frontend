@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { RiCheckLine, RiLoader4Line } from "@remixicon/react";
+import { RiCheckLine, RiLoopLeftLine } from "@remixicon/react";
 import { useSelector } from "react-redux";
 
 const CampaignStats = () => {
@@ -25,7 +25,7 @@ const CampaignStats = () => {
           {
             label: "In-Progress Campaigns",
             value: data.inprogresscampaign,
-            icon: <RiLoader4Line />,
+            icon: <RiLoopLeftLine />,
           },
           {
             label: "Completed Campaigns",
