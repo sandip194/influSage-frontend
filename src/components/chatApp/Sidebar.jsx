@@ -73,7 +73,7 @@ export default function Sidebar({ onSelectChat }) {
 
       {/* Search */}
       <div className="p-4">
-        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 relative w-[250px]">
+        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 relative">
           <svg
             className="w-5 h-5 text-gray-400 mr-2"
             fill="none"
@@ -125,7 +125,8 @@ export default function Sidebar({ onSelectChat }) {
                     vendorId: vendor.vendorid || vendor.id,
                     campaignid: campaign.campaignid,
                     campaignname: campaign.campaignname,
-                    vendorName: `${vendor.firstname || ""} ${vendor.lastname || ""}`.trim(),
+                    vendorName: `${vendor.firstname || ""}_${vendor.lastname || ""}`.trim(),
+                    canstartchat: vendor.canstartchat, 
                   });
 
                   // remove from unread once clicked

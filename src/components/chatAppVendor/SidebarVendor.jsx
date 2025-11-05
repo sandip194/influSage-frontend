@@ -48,7 +48,7 @@ export default function SidebarVendor({ onSelectChat }) {
               campaignName: c.campaignname,
               campaignPhoto: c.campaignphoto,
               img: v.userphoto ? v.userphoto : null,
-              name: `${v.firstname} ${v.lastname}`,
+              name: `${v.firstname}_${v.lastname}`,
               message: v.lastmessage || "No message",
               time: v.lastmessagedate || "",
             }))
@@ -144,7 +144,7 @@ useEffect(() => {
 
     {/* Search */}
       <div className="p-3">
-        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 relative w-[250px]">
+        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 relative">
           <svg
             className="w-5 h-5 text-gray-400 mr-2"
             fill="none"
@@ -265,7 +265,11 @@ useEffect(() => {
                 key={inf.influencerid}
                 onClick={() => {
                   setSelectedInfluencer(inf.influencerid);
-                  onSelectChat({ ...inf, campaign: selectedCampaign });
+                  onSelectChat({
+                  ...inf,
+                  campaign: selectedCampaign,
+                  canstartchat: inf.canstartchat,
+                });
 
                   // Remove from unread once clicked
                   setUnreadMessages((prev) =>

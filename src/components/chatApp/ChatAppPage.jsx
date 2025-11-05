@@ -10,7 +10,6 @@ import { getSocket } from "../../sockets/socket";
 import {
   addMessage,
   updateMessage,
-  updateMessageStatus,
   setActiveChat,
 } from "../../features/socket/chatSlice";
 
@@ -99,7 +98,7 @@ export default function ChatAppPage() {
 
       if (res.data?.p_status) {
         dispatch(
-          updateMessageStatus({
+          updateMessage({
             tempId: newMsg.id,
             newId: res.data.message_id,
             fileUrl: res.data.filepath || null,
@@ -198,6 +197,7 @@ export default function ChatAppPage() {
 
           <div className="sticky bottom-0 bg-white border-t border-gray-100">
             <ChatInput
+              canstartchat={activeChat?.canstartchat}
               onSend={(data) =>
                 editingMessage
                   ? handleEditMessage({ ...editingMessage, ...data, replyId: selectedReplyMessage?.id })

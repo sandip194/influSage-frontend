@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [showAll, setShowAll] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
  // const [showAllHistory, setShowAllHistory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
@@ -81,8 +82,29 @@ const Profile = () => {
               <img
                 src={p_profile?.photopath}
                 alt="Profile"
-                className="absolute left-6 -bottom-10 w-20 h-20 rounded-full border-4 border-white shadow"
+                onClick={() => setIsPreviewOpen(true)}
+                className="absolute left-6 -bottom-10 w-20 h-20 rounded-full border-4 border-white shadow cursor-pointer"
               />
+              {isPreviewOpen && (
+                <div
+                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                  onClick={() => setIsPreviewOpen(false)}
+                >
+                  <button
+                    onClick={() => setIsPreviewOpen(false)}
+                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                  >
+                    &times;
+                  </button>
+
+                  <img
+                    src={p_profile?.photopath}
+                    alt="Preview"
+                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="p-6 pt-14 flex flex-col md:flex-row justify-between items-center">
