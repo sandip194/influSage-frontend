@@ -126,7 +126,7 @@ const ApplyNow = () => {
       if (data) {
         setAmount(data.budget || "");
         setProposal(data.description || "");
-        setIsEdit(true);
+        if (data.budget !== null && data.description !== null) setIsEdit(true);
       }
 
       if (data.filepaths?.length > 0) {
