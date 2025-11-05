@@ -38,9 +38,9 @@ const CampaignDetailsView = () => {
         }
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         getCamapignDetails()
-    },[])
+    }, [])
 
     return (
         <div className="w-full text-sm overflow-x-hidden bg-gray-50">
@@ -49,62 +49,78 @@ const CampaignDetailsView = () => {
             <div className="flex flex-col lg:flex-row gap-4">
                 {/* LEFT SIDE */}
                 <div className="flex-1 space-y-4">
-                    {/* Banner */}
+                    {/* Campaign Header */}
                     <div className="bg-white rounded-2xl overflow-hidden">
-                        <div className="relative h-40">
+                        {/* Banner placeholder */}
+                        <div className="relative h-40 bg-gray-200">
                             <img
-                                src="https://via.placeholder.com/600x112"
-                                alt="Banner"
-                                className="w-full h-28 object-cover rounded-lg"
-                            />
-                            <img
-                                src="https://via.placeholder.com/80"
-                                alt="Campaign"
-                                className="absolute object-cover rounded-full top-12 left-4 w-22 h-22"
+                                src={cmapignDetails?.photoPath}
+                                alt="Logo"
+                                className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover"
                             />
                         </div>
+
                         <div className="p-4">
-                            <h2 className="font-semibold text-lg mb-1">Sample Campaign</h2>
-                            <p className="text-gray-500">Brand Details Here</p>
-
-                            <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4">
-                                {/* Platforms */}
+                            {/* Title + Buttons Row */}
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
                                 <div>
-                                    <div className="flex gap-2 items-center mb-2 text-gray-500">
-                                        <RiStackLine className="w-5" />
-                                        <span> Platforms</span>
-                                    </div>
-                                    <p>Instagram</p>
-                                    <p>Youtube</p>
+                                    <h2 className="font-semibold text-lg">{cmapignDetails?.name || "Sample Campaign"}</h2>
+                                    <p className="text-gray-500 text-sm">{cmapignDetails?.businessName || "ABC Marketing Pvt. Ltd."}</p>
                                 </div>
 
-                                {/* Budget */}
+                                {/* Action Buttons */}
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                                    <button
+                                        type="button"
+                                        className="w-full sm:w-auto bg-green-600 text-white font-semibold rounded-full px-6 py-2 hover:bg-green-700 transition"
+                                    >
+                                        Approve
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="w-full sm:w-auto bg-red-500 text-white font-semibold rounded-full px-6 py-2 hover:bg-red-600 transition"
+                                    >
+                                        Reject
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="w-full sm:w-auto bg-gray-700 text-white font-semibold rounded-full px-6 py-2 hover:bg-gray-800 transition"
+                                    >
+                                        Block
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Campaign Info Grid */}
+                            <div className="flex flex-wrap justify-between gap-6 border border-gray-200 rounded-2xl p-4">
                                 <div>
-                                    <div className="flex gap-2 items-center mb-2 text-gray-500">
+                                    <div className="flex gap-2 items-center text-gray-400 mb-2">
                                         <RiMoneyRupeeCircleLine className="w-5" />
-                                        <span> Budget </span>
+                                        <span>Budget</span>
                                     </div>
-                                    <p>₹50,000</p>
+                                    <p>₹{cmapignDetails?.estimatedBudget || "50,000"}</p>
                                 </div>
 
-                                {/* Languages */}
                                 <div>
-                                    <div className="flex gap-2 items-center mb-2 text-gray-500">
+                                    <div className="flex gap-2 items-center text-gray-400 mb-2">
                                         <RiTranslate className="w-5" />
-                                        <span> Languages </span>
+                                        <span>Languages</span>
                                     </div>
-                                    <p>English</p>
-                                    <p>Hindi</p>
+                                    {cmapignDetails?.campaignLanguages?.map((lang) => (
+                                        <p key={lang.languageId}>{lang.languageName}</p>
+                                    )) || <p>English, Hindi</p>}
                                 </div>
 
-                                {/* Gender */}
                                 <div>
-                                    <div className="flex gap-2 items-center mb-2 text-gray-500">
+                                    <div className="flex gap-2 items-center text-gray-400 mb-2">
                                         <RiMenLine className="w-5" />
-                                        <span> Gender </span>
+                                        <span>Gender</span>
                                     </div>
-                                    <p>Male</p>
-                                    <p>Female</p>
+                                    {cmapignDetails?.campaignGenders?.map((gender) => (
+                                        <p key={gender.genderId}>{gender.genderName}</p>
+                                    )) || <p>Male, Female</p>}
                                 </div>
                             </div>
                         </div>
@@ -177,6 +193,48 @@ const CampaignDetailsView = () => {
                             <p className='text-gray-500'>₹50,000</p>
                         </div>
                     </div>
+
+                    {/* Vendor Info Card */}
+                    <div className="bg-white p-4 rounded-2xl shadow-sm">
+                        <h3 className="font-semibold text-lg">Vendor Details</h3>
+                        <hr className="my-2 border-gray-200" />
+
+                        {/* Profile Section */}
+                        <div className="flex items-center gap-3 mb-4">
+                            <img
+                                src="https://images.pexels.com/photos/34547643/pexels-photo-34547643.jpeg?_gl=1*1g07vmo*_ga*MTc1NTg2NDU4MC4xNzYxNzIyNDQ3*_ga_8JE65Q40S6*czE3NjIzMjE3OTYkbzIkZzEkdDE3NjIzMjE4MjckajI5JGwwJGgw"
+                                alt="Vendor Profile"
+                                className="w-16 h-16 rounded-full object-cover border"
+                            />
+                            <div>
+                                <p className="text-base font-semibold">John Doe</p>
+                                <p className="text-sm text-gray-500">Vendor</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div>
+                                <p className="text-sm font-semibold">Business Name</p>
+                                <p className="text-gray-500">ABC Marketing Pvt. Ltd.</p>
+                            </div>
+
+                            <div>
+                                <p className="text-sm font-semibold">Email</p>
+                                <p className="text-gray-500 break-words">johndoe@example.com</p>
+                            </div>
+
+                            <div>
+                                <p className="text-sm font-semibold">Phone</p>
+                                <p className="text-gray-500">+91 9876543210</p>
+                            </div>
+
+                            <div className="pt-2 border-t border-gray-200">
+                                <p className="text-sm font-semibold">Total Campaigns</p>
+                                <p className="text-gray-500">12</p>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 

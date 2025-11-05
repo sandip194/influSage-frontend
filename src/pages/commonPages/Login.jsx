@@ -78,8 +78,10 @@ export const LoginForm = () => {
       dispatch(setCredentials({ token, id: userId, role: Number(roleId), name, email, p_code }));
       window.history.replaceState({}, document.title, window.location.pathname);
 
-      if (Number(roleId) === 1) navigate("/complate-profile");
-      else if (Number(roleId) === 2) navigate("/complate-vendor-profile");
+       if (Number(roleId) === 2 && p_code === "SUCCESS") navigate("/vendor-dashboard");
+        else if (Number(roleId) === 2) navigate("/complate-vendor-profile");
+        else if (Number(roleId) === 1 && p_code === "SUCCESS") navigate("/dashboard");
+        else if (Number(roleId) === 1) navigate("/complate-profile");
     } else if (email && !token) {
       navigate(`/roledefault?email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&roleId=${roleId}`);
     }

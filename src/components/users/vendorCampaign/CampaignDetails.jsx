@@ -28,15 +28,15 @@ dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
 
 const CampaignDetails = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [proposal, setProposal] = useState("");
+  //  const [isModalOpen, setIsModalOpen] = useState(false);
+  //  const [proposal, setProposal] = useState("");
   const [errors, setErrors] = useState({});
   const [cancelReason, setCancelReason] = useState("");
   const [isCancelModel, setCancelModel] = useState(false);
   const [campaignDetails, setCampaignDetails] = useState(null)
   const [loading, setLoading] = useState(false)
   const [cancelReasons, setCancelReasons] = useState([]);
-  const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
+  // const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     startDate: null,
@@ -48,7 +48,7 @@ const CampaignDetails = () => {
   const navigate = useNavigate();
   const { campaignId } = useParams()
   const { token } = useSelector((state) => state.auth);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  // const [isModalVisible, setIsModalVisible] = useState(false);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getCampaignDetails = async () => {
@@ -134,31 +134,31 @@ const CampaignDetails = () => {
 
   // Function to pause the campaign
 
-  const handlePauseCampaign = async () => {
-    if (!campaignDetails?.id) {
-      toast.error("Campaign ID not found");
-      return;
-    }
+  // const handlePauseCampaign = async () => {
+  //   if (!campaignDetails?.id) {
+  //     toast.error("Campaign ID not found");
+  //     return;
+  //   }
 
-    try {
-      const res = await axios.post(
-        `/vendor/pause-campaign/${campaignDetails.id}`,
-        null,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  //   try {
+  //     const res = await axios.post(
+  //       `/vendor/pause-campaign/${campaignDetails.id}`,
+  //       null,
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
 
-      if (res.status === 200) {
-        toast.success(res.data?.message);
-        setIsPauseModalOpen(false);
-        // getCampaignDetails();
-      } else {
-        toast.error(res.data?.message);
-      }
-    } catch (error) {
-      console.error("Pause campaign error:", error);
-      toast.error(error);
-    }
-  };
+  //     if (res.status === 200) {
+  //       toast.success(res.data?.message);
+  //       setIsPauseModalOpen(false);
+  //       // getCampaignDetails();
+  //     } else {
+  //       toast.error(res.data?.message);
+  //     }
+  //   } catch (error) {
+  //     console.error("Pause campaign error:", error);
+  //     toast.error(error);
+  //   }
+  // };
 
   const handleEditClick = () => {
     if (campaignDetails?.iseditable === true || campaignDetails?.iseditable === "Is editable") {
@@ -367,21 +367,21 @@ const CampaignDetails = () => {
                     <button
                       type="button"
                       onClick={handleEditClick}
-                      className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
+                      className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
                     >
                       Edit Campaign
                     </button>
                   )}
-                  <button
+                  {/* <button
                     onClick={() => setIsPauseModalOpen(true)}
                     className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
                   >
                     Pause Campaign
-                  </button>
+                  </button> */}
 
                   <button
                     onClick={() => setCancelModel(true)}
-                    className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
+                    className="w-full sm:w-auto px-6 py-2 rounded-full border border-red-400 text-red-900 font-semibold hover:bg-gray-50"
                   >
                     Cancel Campaign
                   </button>
@@ -564,8 +564,8 @@ const CampaignDetails = () => {
               )}
             </div>
 
-
-           <div className="bg-white p-6 rounded-2xl mt-6">
+            {/* Track Campaign */}
+            <div className="bg-white p-6 rounded-2xl mt-6">
               <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
               <div className="relative">
                 {[
@@ -607,8 +607,8 @@ const CampaignDetails = () => {
         </div>
       </div>
 
-      {/* Modal */}
-      <Modal
+      {/* Pause Campaign Modal */}
+      {/* <Modal
         open={isPauseModalOpen}
         onCancel={() => setIsPauseModalOpen(false)}
         centered
@@ -633,7 +633,7 @@ const CampaignDetails = () => {
             Pause
           </button>
         </div>
-      </Modal>
+      </Modal> */}
 
 
 
@@ -694,6 +694,7 @@ const CampaignDetails = () => {
         </div>
       </Modal>
 
+      {/* Edit Campaign Modal */}
       <Modal
         title="Edit Campaign Dates"
         open={isDateModalOpen}

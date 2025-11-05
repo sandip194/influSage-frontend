@@ -15,6 +15,7 @@ import {
     RiEyeLine,
     RiCheckLine,
     RiCloseLine,
+    RiProhibitedLine,
 } from "react-icons/ri";
 import { SearchOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
@@ -53,7 +54,7 @@ const UserTableLayout = () => {
     const [currentUser, setCurrentUser] = useState(null); // store full user object
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
-    const [actionType, setActionType] = useState(""); // 'Approved' or 'Rejected'
+    const [actionType, setActionType] = useState(""); // 'Approved', 'Rejected', or 'Blocked'
 
 
     const fetchStatusList = async () => {
@@ -387,7 +388,7 @@ const UserTableLayout = () => {
                                                     <>
                                                         <Tooltip title="Approve">
                                                             <button
-                                                                onClick={() => openConfirmationModal(user, 'Approved')}  // Added onClick handler
+                                                                onClick={() => openConfirmationModal(user, 'Approved')}
                                                                 className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
                                                             >
                                                                 <RiCheckLine size={18} />
@@ -396,13 +397,35 @@ const UserTableLayout = () => {
 
                                                         <Tooltip title="Reject">
                                                             <button
-                                                                onClick={() => openConfirmationModal(user, 'Rejected')}  // Added onClick handler
+                                                                onClick={() => openConfirmationModal(user, 'Rejected')}
                                                                 className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
                                                             >
                                                                 <RiCloseLine size={18} />
                                                             </button>
                                                         </Tooltip>
                                                     </>
+                                                )}
+
+                                                {user.status === "Approved" && (
+                                                    <Tooltip title="Block">
+                                                        <button
+                                                            onClick={() => openConfirmationModal(user, 'Blocked')}
+                                                            className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
+                                                        >
+                                                            <RiProhibitedLine size={18} />
+                                                        </button>
+                                                    </Tooltip>
+                                                )}
+
+                                                {user.status === "Rejected" && (
+                                                    <Tooltip title="Approve">
+                                                        <button
+                                                            onClick={() => openConfirmationModal(user, 'Approved')}
+                                                            className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
+                                                        >
+                                                            <RiCheckLine size={18} />
+                                                        </button>
+                                                    </Tooltip>
                                                 )}
                                             </div>
                                         </td>
@@ -449,8 +472,8 @@ const UserTableLayout = () => {
                 okText={`Yes, ${actionType}`}
                 cancelText="Cancel"
                 okButtonProps={{
-                    type: actionType === 'Rejected' ? 'default' : 'primary',
-                    danger: actionType === 'Rejected',
+                    type: actionType === 'Rejected' || actionType === 'Blocked' ? 'default' : 'primary',
+                    danger: actionType === 'Rejected' || actionType === 'Blocked',
                     className: actionType === 'Approved' ? 'bg-green-600 hover:bg-green-700 text-white' : '',
                 }}
             >
@@ -558,3 +581,5 @@ const UserTableLayout = () => {
 };
 
 export default UserTableLayout;
+
+
