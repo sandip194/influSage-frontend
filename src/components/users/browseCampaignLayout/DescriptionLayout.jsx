@@ -236,18 +236,7 @@ const DescriptionLayout = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <button
-                    aria-label="Stack"
-                    className="p-2 rounded-full border border-gray-300 text-gray-900 hover:text-black hover:border-gray-500 transition"
-                  >
-                    <RiStackLine size={16} />
-                  </button>
-                  <button
-                    aria-label="Men"
-                    className="p-2 rounded-full border border-gray-300 text-gray-900 hover:text-black hover:border-gray-500 transition"
-                  >
-                    <RiMenLine size={16} />
-                  </button>
+                  
                   {campaignDetails?.campaignapplied ? (
                     <button className="flex-1 px-6 py-2 rounded-3xl bg-[#9d9d9d] cursor-not-allowed text-white font-semibold transition min-w-0 truncate">
                       Applied
@@ -482,7 +471,7 @@ const DescriptionLayout = () => {
           </div>
 
           {/* Provider Content Types with optional captions */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm">
+          <div className="bg-white p-6 rounded-2xl">
             <h3 className="font-semibold text-lg text-gray-900 mb-4">Platform Content Types</h3>
 
             <div className="space-y-4">

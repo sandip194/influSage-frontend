@@ -72,7 +72,7 @@ const Profile = () => {
         {/* Left Side */}
         <div className="flex-1 space-y-4">
           {/* Profile Card */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-white rounded-2xl overflow-hidden ">
             <div className="relative">
               <img
                 src="https://images.pexels.com/photos/33350497/pexels-photo-33350497.jpeg"
@@ -83,7 +83,7 @@ const Profile = () => {
                 src={p_profile?.photopath}
                 alt="Profile"
                 onClick={() => setIsPreviewOpen(true)}
-                className="absolute left-6 -bottom-10 w-20 h-20 rounded-full border-4 border-white shadow cursor-pointer"
+                className="absolute left-6 -bottom-10 w-20 h-20  object-cover rounded-full border-4 border-white shadow cursor-pointer"
               />
               {isPreviewOpen && (
                 <div
@@ -142,7 +142,7 @@ const Profile = () => {
           </div>
 
           {/* Bio */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm">
+          <div className="bg-white p-6 rounded-2xl ">
             <h2 className="font-bold text-base mb-3">Bio</h2>
             <p className="text-gray-600 text-sm leading-relaxed">{p_profile?.bio}</p>
 
@@ -231,7 +231,7 @@ const Profile = () => {
         {/* Right Side */}
         <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
           {/* Personal Details */}
-          <div className="bg-white rounded-2xl p-4 shadow-sm w-full text-sm">
+          <div className="bg-white rounded-2xl p-4  w-full text-sm">
             <h3 className="font-semibold text-lg mb-4">Personal Details</h3>
             <div className="space-y-4">
               <div>
@@ -254,7 +254,7 @@ const Profile = () => {
           </div>
 
           {/* Social Media */}
-          <div className="bg-white rounded-2xl p-4 text-sm w-full shadow-sm border border-gray-100">
+          <div className="bg-white rounded-2xl p-4 text-sm w-full  border border-gray-100">
             <h3 className="font-bold mb-4 text-base text-gray-800">Social Media</h3>
 
             {p_socials?.length > 0 ? (

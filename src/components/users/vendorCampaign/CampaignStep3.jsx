@@ -31,23 +31,23 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
   const fileInputRef = useRef();
 
   useEffect(() => {
-  if (!data) return;
+    if (!data) return;
 
-  const photoPath =
-    data.p_campaignfilejson?.[0]?.filepath || data.photopath || null;
+    const photoPath =
+      data.p_campaignfilejson?.[0]?.filepath || data.photopath || null;
 
-  const imageUrl = photoPath
-    ? photoPath
-    : null;
+    const imageUrl = photoPath
+      ? photoPath
+      : null;
 
-  // ✅ Ensure milestone amounts are numbers
-  const initialMilestones = Array.isArray(data.milestones)
-    ? data.milestones.map((m) => ({
+    // ✅ Ensure milestone amounts are numbers
+    const initialMilestones = Array.isArray(data.milestones)
+      ? data.milestones.map((m) => ({
         description: m.description || "",
         amount: Number(m.amount) || 0,
         enddate: m.enddate ? dayjs(m.enddate, "DD-MM-YYYY") : null,
       }))
-    : [
+      : [
         {
           description: "",
           amount: 0,
@@ -55,36 +55,45 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
         },
       ];
 
-  // ✅ Ensure budget is number, not string
-  setFormData({
-    title: data.name || "",
-    description: data.description || "",
-    hashtags: Array.isArray(data.hashtags)
-      ? data.hashtags.map((tag) => tag.hashtag)
-      : [],
-    budgetType: data.budgetType || "Fixed Price",
-    budgetAmount: Number(data.estimatedbudget) || "", // ✅ Fix here
-    currency: data.currency || "₹",
-    startDate: data.startdate ? dayjs(data.startdate, "DD-MM-YYYY") : null,
-    endDate: data.enddate ? dayjs(data.enddate, "DD-MM-YYYY") : null,
-    applicationstartdate: data.applicationstartdate
-      ? dayjs(data.applicationstartdate, "DD-MM-YYYY")
-      : null,
-    applicationenddate: data.applicationenddate
-      ? dayjs(data.applicationenddate, "DD-MM-YYYY")
-      : null,
-    aboutBrand: data.branddetail || "",
-    profileImageUrl: imageUrl,
-    milestones: initialMilestones,
-  });
+    // ✅ Ensure budget is number, not string
+    setFormData({
+      title: data.name || "",
+      description: data.description || "",
+      hashtags: Array.isArray(data.hashtags)
+        ? data.hashtags.map((tag) => tag.hashtag)
+        : [],
+      budgetType: data.budgetType || "Fixed Price",
+      budgetAmount: Number(data.estimatedbudget) || "", // ✅ Fix here
+      currency: data.currency || "₹",
+      startDate: data.startdate ? dayjs(data.startdate, "DD-MM-YYYY") : null,
+      endDate: data.enddate ? dayjs(data.enddate, "DD-MM-YYYY") : null,
+      applicationstartdate: data.applicationstartdate
+        ? dayjs(data.applicationstartdate, "DD-MM-YYYY")
+        : null,
+      applicationenddate: data.applicationenddate
+        ? dayjs(data.applicationenddate, "DD-MM-YYYY")
+        : null,
+      aboutBrand: data.branddetail || "",
+      profileImageUrl: imageUrl,
+      milestones: initialMilestones,
+    });
 
-  setPreview(imageUrl);
-}, [data, BASE_URL]);
+    setPreview(imageUrl);
+  }, [data, BASE_URL]);
 
   const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    let newValue = value;
+
+    // If the field is "title", sanitize the input
+    if (field === "title") {
+      // Allow only letters, numbers, spaces, hyphens, and underscores
+      newValue = value.replace(/[^a-zA-Z0-9\s-_]/g, "");
+    }
+
+    setFormData((prev) => ({ ...prev, [field]: newValue }));
     setErrors((prev) => ({ ...prev, [field]: false }));
   };
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -118,39 +127,39 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
   };
 
   const validateFields = (formData, profileImage, milestones = []) => {
-  const budgetAmount = Number(formData.budgetAmount) || 0;
+    const budgetAmount = Number(formData.budgetAmount) || 0;
 
-  // Use whichever milestone array actually has data
-  const effectiveMilestones =
-    milestones?.length > 0 ? milestones : formData.milestones || [];
+    // Use whichever milestone array actually has data
+    const effectiveMilestones =
+      milestones?.length > 0 ? milestones : formData.milestones || [];
 
-  const milestoneTotal = effectiveMilestones.reduce(
-    (sum, m) => sum + Number(m.amount || 0),
-    0
-  );
+    const milestoneTotal = effectiveMilestones.reduce(
+      (sum, m) => sum + Number(m.amount || 0),
+      0
+    );
 
-  const errors = {
-    title: !formData.title?.trim(),
-    description: !formData.description?.trim(),
-    budgetAmount: budgetAmount <= 0,
-    applicationstartdate: !formData.applicationstartdate,
-    applicationenddate:
-      !formData.applicationenddate ||
-      (formData.applicationstartdate &&
-        dayjs(formData.applicationenddate).isBefore(dayjs(formData.applicationstartdate))) ||
-      (formData.startDate &&
-        dayjs(formData.applicationenddate).isAfter(dayjs(formData.startDate))),
-    aboutBrand: !formData.aboutBrand?.trim(),
-    profileImage: !profileImage && !formData.profileImageUrl,
-    hashtags: !Array.isArray(formData.hashtags) || formData.hashtags.length === 0,
+    const errors = {
+      title: !formData.title?.trim(),
+      description: !formData.description?.trim(),
+      budgetAmount: budgetAmount <= 0,
+      applicationstartdate: !formData.applicationstartdate,
+      applicationenddate:
+        !formData.applicationenddate ||
+        (formData.applicationstartdate &&
+          dayjs(formData.applicationenddate).isBefore(dayjs(formData.applicationstartdate))) ||
+        (formData.startDate &&
+          dayjs(formData.applicationenddate).isAfter(dayjs(formData.startDate))),
+      aboutBrand: !formData.aboutBrand?.trim(),
+      profileImage: !profileImage && !formData.profileImageUrl,
+      hashtags: !Array.isArray(formData.hashtags) || formData.hashtags.length === 0,
+    };
+
+    if (budgetAmount > 0 && milestoneTotal !== budgetAmount) {
+      errors.milestoneMismatch = `Total milestones amount (${milestoneTotal}) must equal campaign budget (${budgetAmount}).`;
+    }
+
+    return errors;
   };
-
-  if (budgetAmount > 0 && milestoneTotal !== budgetAmount) {
-    errors.milestoneMismatch = `Total milestones amount (${milestoneTotal}) must equal campaign budget (${budgetAmount}).`;
-  }
-
-  return errors;
-};
 
 
   const validateMilestones = (milestones = [], campaignStart, campaignEnd) => {
@@ -211,86 +220,86 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
   };
 
   const handleContinue = async () => {
-  const fieldErrors = validateFields(formData, profileImage);
-  const milestoneErrors = validateMilestones(
-    formData.milestones,
-    formData.startDate,
-    formData.endDate
-  );
-
-  const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
-  const hasMilestoneErrors = milestoneErrors.some((m) =>
-    Object.values(m).some(Boolean)
-  );
-
-  // Handle field or milestone errors first
-  if (hasFieldErrors || hasMilestoneErrors) {
-    setErrors({ ...fieldErrors, milestones: milestoneErrors });
-
-    // Show clear toast messages
-    if (fieldErrors.milestoneMismatch) {
-      toast.error(fieldErrors.milestoneMismatch);
-    } else {
-      toast.error("Please fill all required fields before continuing.");
-    }
-    return;
-  }
-
-  // Check milestone total against budget (extra guard)
-  const totalMilestoneAmount = formData.milestones.reduce(
-    (sum, m) => sum + Number(m.amount || 0),
-    0
-  );
-
-  if (totalMilestoneAmount > Number(formData.budgetAmount)) {
-    toast.error("Total milestone amounts cannot exceed the campaign budget.");
-    return;
-  } else if (totalMilestoneAmount < Number(formData.budgetAmount)) {
-    toast.warning(
-      `Milestone total (${totalMilestoneAmount}) is less than campaign budget (${formData.budgetAmount}).`
+    const fieldErrors = validateFields(formData, profileImage);
+    const milestoneErrors = validateMilestones(
+      formData.milestones,
+      formData.startDate,
+      formData.endDate
     );
-    return;
-  }
 
-  const payload = buildPayload(formData, profileImage);
+    const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
+    const hasMilestoneErrors = milestoneErrors.some((m) =>
+      Object.values(m).some(Boolean)
+    );
 
-  try {
-    setLoading(true);
+    // Handle field or milestone errors first
+    if (hasFieldErrors || hasMilestoneErrors) {
+      setErrors({ ...fieldErrors, milestones: milestoneErrors });
 
-    const fd = buildFormData(payload, profileImage);
-    if (campaignId) fd.append("campaignId", campaignId);
-
-    const res = await axios.post("/vendor/update-campaign", fd, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (res.data.message?.toLowerCase().includes("title already exists")) {
-      setErrors((prev) => ({
-        ...prev,
-        title: "Campaign title already exists",
-      }));
-      toast.error("Campaign title already exists.");
+      // Show clear toast messages
+      if (fieldErrors.milestoneMismatch) {
+        toast.error(fieldErrors.milestoneMismatch);
+      } else {
+        toast.error("Please fill all required fields before continuing.");
+      }
       return;
     }
 
-    onNext();
-  } catch (err) {
-    console.error("❌ API Error:", err.response?.data || err.message);
-    const msg = err.response?.data?.message;
+    // Check milestone total against budget (extra guard)
+    const totalMilestoneAmount = formData.milestones.reduce(
+      (sum, m) => sum + Number(m.amount || 0),
+      0
+    );
 
-    if (msg && msg.toLowerCase().includes("title already exists")) {
-      setErrors((prev) => ({
-        ...prev,
-        title: "Campaign title already exists",
-      }));
-      toast.error("Campaign title already exists.");
-    } else {
-      toast.error("Failed to save campaign step. Try again.");
+    if (totalMilestoneAmount > Number(formData.budgetAmount)) {
+      toast.error("Total milestone amounts cannot exceed the campaign budget.");
+      return;
+    } else if (totalMilestoneAmount < Number(formData.budgetAmount)) {
+      toast.warning(
+        `Milestone total (${totalMilestoneAmount}) is less than campaign budget (${formData.budgetAmount}).`
+      );
+      return;
     }
-  } finally {
-    setLoading(false);
-  }
-};
+
+    const payload = buildPayload(formData, profileImage);
+
+    try {
+      setLoading(true);
+
+      const fd = buildFormData(payload, profileImage);
+      if (campaignId) fd.append("campaignId", campaignId);
+
+      const res = await axios.post("/vendor/update-campaign", fd, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data.message?.toLowerCase().includes("title already exists")) {
+        setErrors((prev) => ({
+          ...prev,
+          title: "Campaign title already exists",
+        }));
+        toast.error("Campaign title already exists.");
+        return;
+      }
+
+      onNext();
+    } catch (err) {
+      console.error("❌ API Error:", err.response?.data || err.message);
+      const msg = err.response?.data?.message;
+
+      if (msg && msg.toLowerCase().includes("title already exists")) {
+        setErrors((prev) => ({
+          ...prev,
+          title: "Campaign title already exists",
+        }));
+        toast.error("Campaign title already exists.");
+      } else {
+        toast.error("Failed to save campaign step. Try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 

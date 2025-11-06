@@ -22,6 +22,7 @@ import {
   RiCheckLine,
   RiCloseLine,
   RiArrowDownSLine,
+  RiProhibitedLine,
 } from "react-icons/ri";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -45,7 +46,7 @@ const CampaignTableLayout = () => {
 
   // 🧩 State Management
   const [statusList, setStatusList] = useState([]);
-  const [activeStatusId, setActiveStatusId] = useState("all");
+  const [activeStatusId, setActiveStatusId] = useState();
   const [campaignList, setCampaignList] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -106,7 +107,7 @@ const CampaignTableLayout = () => {
     try {
       setLoading(true);
       const params = {
-        p_statuslabelid: activeStatusId === "all" ? null : activeStatusId,
+        p_statuslabelid: activeStatusId,
         p_providers:
           appliedFilters.providers.length > 0
             ? JSON.stringify(appliedFilters.providers)
@@ -158,9 +159,19 @@ const CampaignTableLayout = () => {
   };
   // 🧠 Hooks
   useEffect(() => {
-    fetchStatusList();
-    fetchPlatforms();
+    const init = async () => {
+      await fetchStatusList();
+      await fetchPlatforms();
+    };
+    init();
   }, []);
+
+  useEffect(() => {
+    if (statusList.length > 0 && !activeStatusId) {
+      setActiveStatusId(String(statusList[0].id)); // ✅ Select first tab automatically
+    }
+  }, [statusList]);
+
 
   useEffect(() => {
     fetchCampaigns();
@@ -201,6 +212,11 @@ const CampaignTableLayout = () => {
     setIsModalOpen(true);
   };
 
+
+
+  const activeStatusName = statusList.find(s => String(s.id) === String(activeStatusId))?.name;
+
+
   // 🧱 UI
   return (
     <div className="w-full">
@@ -222,7 +238,6 @@ const CampaignTableLayout = () => {
           setPage(1);
         }}
         items={[
-          { key: "all", label: "All" },
           ...statusList.map((status) => ({
             key: String(status.id),
             label: status.name,
@@ -293,6 +308,7 @@ const CampaignTableLayout = () => {
           </div>
         ) : campaignList.length > 0 ? (
           <table className="min-w-[1100px] w-full text-left text-sm">
+            {/* Table Header */}
             <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
               <tr>
                 <th className="p-4 min-w-[300px]">Campaign</th>
@@ -302,11 +318,14 @@ const CampaignTableLayout = () => {
                 <th className="p-4 min-w-[100px]">Budget</th>
                 <th className="p-4 whitespace-nowrap min-w-[100px]">Start Date</th>
                 <th className="p-4 whitespace-nowrap min-w-[100px]">End Date</th>
-                {/* Status column visible only in "All" tab */}
-                {activeStatusId === "all" && <th className="p-4">Status</th>}
+
+                {/* ✅ Show Status column only for "Approved" tab */}
+                {activeStatusName === "Approved" && <th className="p-4 min-w-[150px]">Campaign Status</th>}
+
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
+
 
             <tbody>
               {campaignList.map((c) => (
@@ -387,7 +406,7 @@ const CampaignTableLayout = () => {
                   </td>
 
                   {/* Status (only in All tab) */}
-                  {activeStatusId === "all" && (
+                  {activeStatusName === "Approved" && (
                     <td className="p-4">
                       <span
                         className={`text-xs font-medium px-2 py-0.5 rounded-full ${c.status === "Approved"
@@ -405,26 +424,24 @@ const CampaignTableLayout = () => {
                   {/* Actions */}
                   <td className="p-4 text-right space-x-2">
                     <div className="flex justify-start items-center gap-1">
-
+                      {/* Always show View button */}
                       <Tooltip title="View">
                         <button
                           className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition"
                           onClick={() =>
-                            navigate(
-                              `/admin-dashboard/campaigns/details/${c.id}`
-                            )
+                            navigate(`/admin-dashboard/campaigns/details/${c.id}`)
                           }
                         >
                           <RiEyeLine size={18} />
                         </button>
                       </Tooltip>
 
-                      {/* Only show Approve/Reject when NOT in Rejected tab */}
-                      {c.status !== "Rejected" && (
+                      {/* Conditional buttons based on activeStatusName */}
+                      {activeStatusName === "ApprovalPending" && (
                         <>
                           <Tooltip title="Approve">
                             <button
-                              onClick={() => openConfirmationModal(c, 'Approved')}  // Added onClick handler
+                              onClick={() => openConfirmationModal(c, 'Approved')}
                               className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
                             >
                               <RiCheckLine size={18} />
@@ -432,17 +449,42 @@ const CampaignTableLayout = () => {
                           </Tooltip>
                           <Tooltip title="Reject">
                             <button
-                              onClick={() => openConfirmationModal(c, 'Rejected')}  // Added onClick handler
+                              onClick={() => openConfirmationModal(c, 'Rejected')}
                               className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
                             >
                               <RiCloseLine size={18} />
                             </button>
                           </Tooltip>
+                          
                         </>
                       )}
 
+                      {activeStatusName === "Approved" && (
+                        <Tooltip title="Block">
+                          <button
+                            onClick={() => openConfirmationModal(c, 'Blocked')}
+                            className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
+                          >
+                            <RiProhibitedLine size={18} />
+                          </button>
+                        </Tooltip>
+                      )}
+
+                      {activeStatusName === "Rejected" && (
+                        <Tooltip title="Approve">
+                          <button
+                            onClick={() => openConfirmationModal(c, 'Approved')}
+                            className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
+                          >
+                            <RiCheckLine size={18} />
+                          </button>
+                        </Tooltip>
+                      )}
+
+                      
                     </div>
                   </td>
+
                 </tr>
               ))}
             </tbody>
@@ -491,7 +533,7 @@ const CampaignTableLayout = () => {
         }}
       >
         <p>
-          Are you sure you want to <strong>{actionType.toLowerCase()}</strong> user{" "}
+          Are you sure you want to <strong>{actionType.toLowerCase()}</strong> Campaign{" "}
           <span className="font-bold text-gray-800">
             {currentCampaign?.name}
           </span>

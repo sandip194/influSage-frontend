@@ -165,11 +165,11 @@ const App = () => {
                                                                 <Route path='messages' element={<ChatAppPageVendor />} />
 
 
-                                                                <Route path='offers' element={<OffersLayout />} />
-                                                                <Route path='offers/view-all-offers/:id' element={<ViewAllOffers />} />
-                                                                <Route path="offers/:id" element={<OfferDetails />} />
-                                                                <Route path='offers/influencer-details/:userId' element={<InfluencerProfile />} />
-                                                                <Route path='offers/campaignDetails/:campaignId' element={<CampaignDetails />} />
+                                                                <Route path='applications' element={<OffersLayout />} />
+                                                                <Route path='applications/view-all-offers/:id' element={<ViewAllOffers />} />
+                                                                <Route path="applications/:id" element={<OfferDetails />} />
+                                                                <Route path='applications/influencer-details/:userId' element={<InfluencerProfile />} />
+                                                                <Route path='applications/campaignDetails/:campaignId' element={<CampaignDetails />} />
 
 
                                                                 <Route path='edit-profile' element={<EditVendorProfile />} />

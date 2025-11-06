@@ -12,6 +12,7 @@ import {
   deleteMessage,
   undoDeleteMessage,
 } from "../../features/socket/chatSlice";
+import DOMPurify from "dompurify";
 // import 'primereact/resources/themes/saga-blue/theme.css';
 // import 'primereact/resources/primereact.min.css';
 // import 'primeicons/primeicons.css ';
@@ -33,6 +34,16 @@ const formatTime = (timestamp) => {
   return date.toLocaleDateString();
 };
 
+/* 🧹 Unescape escaped HTML */
+const unescapeHtml = (str) => {
+  if (!str) return "";
+  str = str.replace(/\\\\/g, "\\");
+  str = str.replace(/\\"/g, '"');
+  str = str.replace(/\\'/g, "'");
+  str = str.replace(/\\n/g, "\n").replace(/\\t/g, "\t");
+  return str;
+};
+
 export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, setReplyToMessage, setEditingMessage, editingMessage, onMessagesRefetch }) {
   const dispatch = useDispatch();
   const socket = getSocket();
@@ -47,7 +58,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
   const [isLoading, setIsLoading] = useState(true);
 
   const { token, userId, role } = useSelector((state) => state.auth) || {};
- // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getMessageStatusIcon = (msg) => {
     const isMe = msg.roleId === role;
@@ -60,7 +71,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
     }
 
     if (isRecipientOnline) {
-      return <RiCheckDoubleLine className="text-gray-500 text-xs" size={17}/>;
+      return <RiCheckDoubleLine className="text-gray-500 text-xs" size={17} />;
     }
 
     return <RiCheckLine className="text-gray-500 text-xs" size={17} />;
@@ -69,35 +80,42 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
 
 
   const fetchMessages = async () => {
-  if (!chat?.conversationid || !token) return;
-  setIsLoading(true);
-  try {
-    const res = await axios.get(`/chat/messages`, {
-      params: {
-        p_conversationid: chat.conversationid,
-        p_roleid: role,
-        p_offset: 0,
-      },
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    if (!chat?.conversationid || !token) return;
+    setIsLoading(true);
+    try {
+      const res = await axios.get(`/chat/messages`, {
+        params: {
+          p_conversationid: chat.conversationid,
+          p_roleid: role,
+          p_offset: 0,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    if (res.data?.data?.records) {
-      const formattedMessages = res.data.data.records
-        .map((msg) => ({
-          id: msg.messageid,
-          senderId: msg.userid,
-          roleId: msg.roleid,
-          content: (msg.message || "").replace(/^"|"$/g, ""),
-          file: Array.isArray(msg.filepath)
-            ? msg.filepath.join(",")
-            : msg.filepath || "",
-          time: msg.createddate,
-          replyId: msg.replyid || null,
-          deleted: msg.isdeleted || false,
-          readbyinfluencer: msg.readbyinfluencer || false,
-          readbyvendor: msg.readbyvendor || false,
-        }))
-        .sort((a, b) => new Date(a.time) - new Date(b.time));
+      if (res.data?.data?.records) {
+        const formattedMessages = res.data.data.records
+          .map((msg) => {
+            const raw = (msg.message || "").replace(/^"|"$/g, "");
+            const unescaped = unescapeHtml(raw);
+            const isHtml = /<\/?[a-z][\s\S]*>/i.test(unescaped);
+
+          return {
+              id: msg.messageid,
+              senderId: msg.userid ?? null,
+              roleId: msg.roleid,
+              content: unescaped,
+              file: Array.isArray(msg.filepath)
+                ? msg.filepath.join(",")
+                : msg.filepath || "",
+              time: msg.createddate,
+              replyId: msg.replyid || null,
+              deleted: msg.isdeleted || false,
+              readbyvendor: msg.readbyvendor ?? false,
+              readbyinfluencer: msg.readbyinfluencer ?? false,
+              ishtml: isHtml,
+            };
+          })
+          .sort((a, b) => new Date(a.time) - new Date(b.time));
 
         dispatch(setMessages(formattedMessages));
       }
@@ -108,25 +126,25 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
     }
   };
 
-useEffect(() => {
-  if (!isLoading && messages.length > 0) {
-    bottomRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
-  }
-}, [isLoading]);
+  useEffect(() => {
+    if (!isLoading && messages.length > 0) {
+      bottomRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+    }
+  }, [isLoading]);
 
-useEffect(() => {
-  if (isLoading || messages.length === 0) return;
+  useEffect(() => {
+    if (isLoading || messages.length === 0) return;
 
-  const lastMsg = messages[messages.length - 1];
-  const isSentByMe = lastMsg?.roleId === role;
+    const lastMsg = messages[messages.length - 1];
+    const isSentByMe = lastMsg?.roleId === role;
 
-  // scroll only when user is near bottom or sent message
-  if (isNearBottom || isSentByMe) {
-    requestAnimationFrame(() => {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-    });
-  }
-}, [messages]);
+    // scroll only when user is near bottom or sent message
+    if (isNearBottom || isSentByMe) {
+      requestAnimationFrame(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      });
+    }
+  }, [messages]);
 
 
   const handleDeleteMessage = async (messageId) => {
@@ -243,17 +261,17 @@ useEffect(() => {
   }, [socket, dispatch]);
 
 
-   useEffect(() => {
-  if (!chat?.conversationid || !token || !role) return;
+  useEffect(() => {
+    if (!chat?.conversationid || !token || !role) return;
 
-  const loadMessagesOnce = async () => {
-    setIsLoading(true);
-    await fetchMessages();
-    setIsLoading(false);
-  };
+    const loadMessagesOnce = async () => {
+      setIsLoading(true);
+      await fetchMessages();
+      setIsLoading(false);
+    };
 
-  loadMessagesOnce();
-}, [chat?.conversationid, token, role]);
+    loadMessagesOnce();
+  }, [chat?.conversationid, token, role]);
 
 
 
@@ -332,16 +350,16 @@ useEffect(() => {
 
 
   if (chat && isLoading && messages.length === 0) {
-  return (
-    <div className="flex items-center justify-center flex-1 h-full">
-      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
-      <span className="ml-3 text-gray-600">Loading messages...</span>
-    </div>
-  );
-}
+    return (
+      <div className="flex items-center justify-center flex-1 h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+        <span className="ml-3 text-gray-600">Loading messages...</span>
+      </div>
+    );
+  }
 
   return (
-     <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-1 pt-10">
+    <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-1 pt-10">
       {messages.map((msg, index) => {
         const isMe = msg.roleId === role;
         const isLast = index === messages.length - 1;
@@ -405,41 +423,41 @@ useEffect(() => {
                         const isZip = fileName.match(/\.(zip|rar|7z)$/i);
 
                         if (isImage) {
-                            const handleDownload = async () => {
-                              try {
-                                const response = await fetch(fileUrl, { mode: "cors" });
-                                const blob = await response.blob();
-                                const blobUrl = window.URL.createObjectURL(blob);
-                                const link = document.createElement("a");
-                                link.href = blobUrl;
-                                link.download = fileName;
-                                document.body.appendChild(link);
-                                link.click();
-                                link.remove();
-                                window.URL.revokeObjectURL(blobUrl);
-                              } catch (error) {
-                                console.error("Download failed:", error);
-                              }
-                            };
-                            return (
-                              <div key={idx} className="flex flex-col items-center gap-2">
-                                <Image
-                                  key={idx}
-                                  src={fileUrl}
-                                  alt={fileName}
-                                  className="max-w-[200px] max-h-[200px] rounded-md object-cover"
-                                  preview
-                                />
-                                <button
-                                  onClick={handleDownload}
-                                  className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm mt-1"
-                                >
-                                  <RiDownload2Line size={16} />
-                                  Download
-                                </button>
-                              </div>
-                            );
-                          }else if (isPDF) {
+                          const handleDownload = async () => {
+                            try {
+                              const response = await fetch(fileUrl, { mode: "cors" });
+                              const blob = await response.blob();
+                              const blobUrl = window.URL.createObjectURL(blob);
+                              const link = document.createElement("a");
+                              link.href = blobUrl;
+                              link.download = fileName;
+                              document.body.appendChild(link);
+                              link.click();
+                              link.remove();
+                              window.URL.revokeObjectURL(blobUrl);
+                            } catch (error) {
+                              console.error("Download failed:", error);
+                            }
+                          };
+                          return (
+                            <div key={idx} className="flex flex-col items-center gap-2">
+                              <Image
+                                key={idx}
+                                src={fileUrl}
+                                alt={fileName}
+                                className="max-w-[200px] max-h-[200px] rounded-md object-cover"
+                                preview
+                              />
+                              <button
+                                onClick={handleDownload}
+                                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm mt-1"
+                              >
+                                <RiDownload2Line size={16} />
+                                Download
+                              </button>
+                            </div>
+                          );
+                        } else if (isPDF) {
                           return (
                             <div key={idx} className="flex flex-col items-center gap-2">
                               <iframe
@@ -502,11 +520,10 @@ useEffect(() => {
                 {msg.replyId && (
                   <div
                     onClick={() => scrollToMessage(msg.replyId)}
-                    className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] cursor-pointer ${
-                      isMe
+                    className={`mb-1 px-2 py-1 rounded-md border-l-4 text-xs max-w-[220px] cursor-pointer ${isMe
                         ? "bg-gray-700 border-blue-400 text-gray-200"
                         : "bg-gray-300 border-green-500 text-gray-800"
-                    }`}
+                      }`}
                   >
                     {(() => {
                       const repliedMsg = messages.find((m) => m.id === msg.replyId);
@@ -561,7 +578,14 @@ useEffect(() => {
                     )}
                   </div>
                 ) : (
-                  <div>{msg.content}</div>
+                  <div
+                    className={`text-sm break-words ${msg.ishtml ? "bg-white text-gray-900 p-2 rounded-md" : ""}`}
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(
+                        msg.ishtml ? msg.content : msg.content.replace(/\n/g, "<br>")
+                      ),
+                    }}
+                  />
                 )}
               </div>
 

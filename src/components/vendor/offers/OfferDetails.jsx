@@ -154,7 +154,7 @@ const handleConfirmAccept = () => {
 
 
     const handleViewProfile = (userId) => {
-    navigate(`/vendor-dashboard/offers/influencer-details/${userId}`);
+    navigate(`/vendor-dashboard/applications/influencer-details/${userId}`);
   };
 
     return (
@@ -274,7 +274,7 @@ const handleConfirmAccept = () => {
                                 onClick={() => setIsAcceptModalOpen(true)}
                                 className="bg-[#0D132D] text-white px-6 py-2 rounded-full hover:bg-[#0D132Ded]"
                             >
-                                Accept Offer
+                                Accept Applications
                             </button>
                         </div>
                     </div>

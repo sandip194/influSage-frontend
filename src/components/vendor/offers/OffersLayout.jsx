@@ -67,8 +67,8 @@ const OffersLayout = () => {
             <div className="w-full text-sm pb-24 sm:pb-0">
 
             <div className="mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Offers</h2>
-                <p className="text-gray-600 text-sm">Track Your Offers Here</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Applications</h2>
+                <p className="text-gray-600 text-sm">Track All Applications Here</p>
             </div>
 
             {/* Top Controls */}
@@ -168,7 +168,7 @@ const OffersLayout = () => {
                                 <th className="p-4">Budget</th>
                                 <th className="p-4">Date Started</th>
                                 <th className="p-4">Due Date</th>
-                                <th className="p-4">Total Offers</th>
+                                <th className="p-4">Total Application</th>
                                 <th className="p-4">Action</th>
                             </tr>
                         </thead>
@@ -224,15 +224,15 @@ const OffersLayout = () => {
                                         <td className="p-4">₹ {offer.estimatedbudget}</td>
                                         <td className="p-4">{offer.startdate}</td>
                                         <td className="p-4">{offer.enddate}</td>
-                                        <td className="p-4">{offer?.totaloffers} Offers</td>
+                                        <td className="p-4">{offer?.totaloffers} Applications</td>
                                         <td className="p-4">
                                             <button
                                                 onClick={() =>
-                                                    navigate(`/vendor-dashboard/offers/view-all-offers/${offer.id}`)
+                                                    navigate(`/vendor-dashboard/applications/view-all-offers/${offer.id}`)
                                                 }
                                                 className="flex items-center cursor-pointer gap-1 text-[#141843] hover:text-[#1d214f] transition text-sm font-medium"
                                             >
-                                                <Tooltip title="View Offers">
+                                                <Tooltip title="View Application">
                                                     <RiEyeLine className="text-lg" />
                                                 </Tooltip>
                                             </button>
@@ -244,7 +244,7 @@ const OffersLayout = () => {
                             ) : (
                                 <tr>
                                     <td colSpan="6" className="text-center py-10">
-                                        <Empty description="No Offers found" />
+                                        <Empty description="No Applications found" />
                                     </td>
                                 </tr>
                             )}

@@ -2,35 +2,52 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import {
-    RiStackLine,
     RiMoneyRupeeCircleLine,
     RiTranslate,
     RiMenLine,
     RiCheckLine,
-    RiDeleteBin6Line,
-    RiCloseLine,
+    RiArrowLeftLine,
 } from "react-icons/ri";
+import { CheckOutlined, CloseOutlined, StopOutlined } from "@ant-design/icons";
+import { Button, Modal, Tooltip, Empty, Skeleton } from "antd";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
-
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 
 const CampaignDetailsView = () => {
 
     const { campaignId } = useParams();
+    const navigate = useNavigate();
     const { token } = useSelector((state) => state.auth);
 
     const [cmapignDetails, setCampaignDetails] = useState(null)
+    const [actionLoading, setActionLoading] = useState(false);
+
+
+    // For approval/rejection modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [actionType, setActionType] = useState(""); // 'Approved' or 'Rejected'
+
+    // For image modal
+    const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+    const [selectedImage, setSelectedImage] = useState("");
+
+
+
     const [loading, setLoading] = useState(false)
+
 
     const getCamapignDetails = async () => {
         try {
             setLoading(true)
-            const res = await axios.get(`/vendor/campaign/${campaignId}`, {
+            const res = await axios.get("/admin/dashboard/campaign-detail", {
                 headers: { Authorization: `Bearer ${token}` },
+                params: { p_campaignid: campaignId },
             });
 
-            console.log(res.status)
+            if (res.status === 200) setCampaignDetails(res.data.campaignDetails)
+
         } catch (error) {
             console.error(error)
         } finally {
@@ -38,12 +55,70 @@ const CampaignDetailsView = () => {
         }
     }
 
+    const openConfirmationModal = (type) => {
+        setActionType(type);
+        setIsModalOpen(true);
+    };
+
+    const openImageModal = (imageSrc) => {
+        setSelectedImage(imageSrc);
+        setIsImageModalOpen(true);
+    };
+
+
+
+    const handleSubmit = async (statusName) => {
+        try {
+            setActionLoading(true);
+            const res = await axios.post(
+                "/admin/dashboard/approved-or-rejected",
+                { p_campaignid: campaignId, p_statusname: statusName },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (res.status === 200) {
+                toast.success(res.data?.message);
+                getCamapignDetails(); // Refresh details
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Action failed");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     useEffect(() => {
         getCamapignDetails()
     }, [])
 
+
+    if (loading) {
+        return (
+            <div className="p-6">
+                <Skeleton active paragraph={{ rows: 10 }} />
+            </div>
+        );
+    }
+
+    if (!cmapignDetails) {
+        return (
+            <div className="flex justify-center py-10">
+                <Empty description={<span className="text-gray-500 text-sm">No Campaign details found</span>} />
+            </div>
+        );
+    }
+
+
     return (
         <div className="w-full text-sm overflow-x-hidden bg-gray-50">
+            <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 text-gray-600 mb-2"
+            >
+                <RiArrowLeftLine /> Back
+            </button>
+
             <h1 className="text-2xl font-semibold mb-4">View Campaign Details</h1>
 
             <div className="flex flex-col lg:flex-row gap-4">
@@ -54,7 +129,7 @@ const CampaignDetailsView = () => {
                         {/* Banner placeholder */}
                         <div className="relative h-40 bg-gray-200">
                             <img
-                                src={cmapignDetails?.photoPath}
+                                src={cmapignDetails?.photopath}
                                 alt="Logo"
                                 className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover"
                             />
@@ -70,26 +145,77 @@ const CampaignDetailsView = () => {
 
                                 {/* Action Buttons */}
                                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                                    <button
-                                        type="button"
-                                        className="w-full sm:w-auto bg-green-600 text-white font-semibold rounded-full px-6 py-2 hover:bg-green-700 transition"
-                                    >
-                                        Approve
-                                    </button>
+                                    {cmapignDetails?.statusname === "ApprovalPending" && (
+                                        <>
+                                            {/* ✅ Approve Button */}
+                                            <Button
+                                                type="text"
+                                                icon={<CheckOutlined />}
+                                                disabled={actionLoading}
+                                                onClick={() => openConfirmationModal("Approved")}
+                                                className="!border !border-green-600 !text-green-600 !bg-transparent hover:!bg-green-600 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
+                                            >
+                                                Approve
+                                            </Button>
 
-                                    <button
-                                        type="button"
-                                        className="w-full sm:w-auto bg-red-500 text-white font-semibold rounded-full px-6 py-2 hover:bg-red-600 transition"
-                                    >
-                                        Reject
-                                    </button>
+                                            {/* ❌ Reject Button */}
+                                            <Button
+                                                type="text"
+                                                icon={<CloseOutlined />}
+                                                disabled={actionLoading}
+                                                onClick={() => openConfirmationModal("Rejected")}
+                                                className="!border !border-red-600 !text-red-600 !bg-transparent hover:!bg-red-600 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
+                                            >
+                                                Reject
+                                            </Button>
 
-                                    <button
-                                        type="button"
-                                        className="w-full sm:w-auto bg-gray-700 text-white font-semibold rounded-full px-6 py-2 hover:bg-gray-800 transition"
-                                    >
-                                        Block
-                                    </button>
+                                            {/* 🚫 Block Button */}
+                                            <Button
+                                                type="text"
+                                                icon={<StopOutlined />}
+                                                disabled={actionLoading}
+                                                onClick={() => openConfirmationModal("Blocked")}
+                                                className="!border !border-gray-600 !text-gray-700 !bg-transparent hover:!bg-gray-800 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
+                                            >
+                                                Block
+                                            </Button>
+                                        </>
+                                    )}
+
+                                    {cmapignDetails?.statusname === "Rejected" && (
+                                        <>
+                                            {/* ✅ Approve Button */}
+                                            <Button
+                                                type="text"
+                                                icon={<CheckOutlined />}
+                                                disabled={actionLoading}
+                                                onClick={() => openConfirmationModal("Approved")}
+                                                className="!border !border-green-600 !text-green-600 !bg-transparent hover:!bg-green-600 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
+                                            >
+                                                Approve
+                                            </Button>
+                                        </>
+                                    )}
+
+                                    {cmapignDetails?.statusname === "Blocked" && null}
+
+                                    {cmapignDetails?.statusname !== "ApprovalPending" &&
+                                        cmapignDetails?.statusname !== "Rejected" &&
+                                        cmapignDetails?.statusname !== "Blocked" && (
+                                            <>
+                                                {/* 🚫 Block Button */}
+                                                <Button
+                                                    type="text"
+                                                    icon={<StopOutlined />}
+                                                    disabled={actionLoading}
+                                                    onClick={() => openConfirmationModal("Blocked")}
+                                                    className="!border !border-gray-600 !text-gray-700 !bg-transparent hover:!bg-gray-800 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
+                                                >
+                                                    Block
+                                                </Button>
+                                            </>
+                                        )}
+
                                 </div>
                             </div>
 
@@ -100,7 +226,7 @@ const CampaignDetailsView = () => {
                                         <RiMoneyRupeeCircleLine className="w-5" />
                                         <span>Budget</span>
                                     </div>
-                                    <p>₹{cmapignDetails?.estimatedBudget || "50,000"}</p>
+                                    <p>₹{cmapignDetails?.estimatedbudget || "50,000"}</p>
                                 </div>
 
                                 <div>
@@ -108,9 +234,9 @@ const CampaignDetailsView = () => {
                                         <RiTranslate className="w-5" />
                                         <span>Languages</span>
                                     </div>
-                                    {cmapignDetails?.campaignLanguages?.map((lang) => (
-                                        <p key={lang.languageId}>{lang.languageName}</p>
-                                    )) || <p>English, Hindi</p>}
+                                    {cmapignDetails?.campaignlanguages?.map((lang) => (
+                                        <p key={lang.languageid}>{lang.languagename}</p>
+                                    )) || <p> - </p>}
                                 </div>
 
                                 <div>
@@ -118,10 +244,12 @@ const CampaignDetailsView = () => {
                                         <RiMenLine className="w-5" />
                                         <span>Gender</span>
                                     </div>
-                                    {cmapignDetails?.campaignGenders?.map((gender) => (
-                                        <p key={gender.genderId}>{gender.genderName}</p>
-                                    )) || <p>Male, Female</p>}
+                                    {cmapignDetails?.campaigngenders?.map((gender) => (
+                                        <p key={gender.genderid}>{gender.gendername}</p>
+                                    )) || <p> - </p>}
                                 </div>
+
+
                             </div>
                         </div>
                     </div>
@@ -132,12 +260,18 @@ const CampaignDetailsView = () => {
                         <div className="py-4 border-b border-gray-200">
                             <p className="font-semibold text-lg mb-2">Categories</p>
                             <div className="flex flex-wrap gap-2 my-2">
-                                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
-                                    Fashion
-                                </span>
-                                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
-                                    Lifestyle
-                                </span>
+                                {cmapignDetails?.campaigncategories?.length > 0 ? (
+                                    cmapignDetails.campaigncategories.map((cat) => (
+                                        <span
+                                            key={cat.categoryid}
+                                            className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
+                                        >
+                                            {cat.categoryname}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="text-gray-500 text-sm">No categories</span>
+                                )}
                             </div>
                         </div>
 
@@ -145,7 +279,7 @@ const CampaignDetailsView = () => {
                         <div className="campaign-description py-4 border-b border-gray-200">
                             <h3 className="font-semibold text-lg mb-2">Campaign Description</h3>
                             <p className="text-gray-700 leading-relaxed text-justify">
-                                This is a sample campaign description. Details about the campaign goals and expectations go here.
+                                {cmapignDetails?.description || "No description available."}
                             </p>
                         </div>
 
@@ -155,21 +289,93 @@ const CampaignDetailsView = () => {
                             <ul className="space-y-2 font-semibold">
                                 <li className="flex items-center gap-2">
                                     <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
-                                    <span>Post Duration: <span className="text-gray-500">7 days</span></span>
+                                    <span>
+                                        Post Duration:{" "}
+                                        <span className="text-gray-500">
+                                            {cmapignDetails?.requirements?.postdurationdays
+                                                ? `${cmapignDetails.requirements.postdurationdays} days`
+                                                : "-"}
+                                        </span>
+                                    </span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
-                                    <span>Include Vendor Profile Link: <span className="text-gray-500">Yes</span></span>
+                                    <span>
+                                        Include Vendor Profile Link:{" "}
+                                        <span className="text-gray-500">
+                                            {cmapignDetails?.requirements?.isincludevendorprofilelink ? "Yes" : "No"}
+                                        </span>
+                                    </span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
-                                    <span>Product Shipping: <span className="text-gray-500">No</span></span>
+                                    <span>
+                                        Product Shipping:{" "}
+                                        <span className="text-gray-500">
+                                            {cmapignDetails?.requirements?.isproductshipping ? "Yes" : "No"}
+                                        </span>
+                                    </span>
                                 </li>
                             </ul>
                         </div>
+
+                        <div className="py-4 border-b border-gray-200">
+                            <h3 className="font-semibold text-lg mb-4">References</h3>
+                            {Array.isArray(cmapignDetails?.campaignfiles) &&
+                                cmapignDetails.campaignfiles.some((f) => f.filepath) ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                    {cmapignDetails.campaignfiles.map((item, index) => {
+                                        const file = item?.filepath;
+                                        if (!file) return null;
+
+                                        const fileExtension = file.split(".").pop()?.toLowerCase();
+                                        const isImage = ["jpg", "jpeg", "png", "gif"].includes(fileExtension);
+                                        const isVideo = ["mp4", "mov", "webm"].includes(fileExtension);
+                                        const isDoc = ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(fileExtension);
+
+                                        return (
+                                            <div
+                                                key={index}
+                                                className="relative group rounded-lg overflow-hidden border border-gray-200"
+                                            >
+                                                {isImage && (
+                                                    <img
+                                                        src={file}
+                                                        alt="portfolio"
+                                                        className="w-full h-40 object-cover cursor-pointer"
+                                                        onClick={() => openImageModal(file)}
+                                                    />
+                                                )}
+                                                {isVideo && (
+                                                    <video className="w-full h-40 object-cover" controls>
+                                                        <source src={file} type="video/mp4" />
+                                                    </video>
+                                                )}
+                                                {isDoc && (
+                                                    <a
+                                                        href={file}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex flex-col items-center justify-center w-full h-40 bg-gray-100 text-gray-700 p-2"
+                                                    >
+                                                        <span className="text-xs text-center truncate">{file.split("/").pop()}</span>
+                                                    </a>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="flex justify-center py-6">
+                                    <Empty
+                                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                        description={<span className="text-gray-500 text-sm">No portfolio files</span>}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-
                 {/* RIGHT SIDE */}
                 <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
                     <div className="bg-white p-4 rounded-2xl">
@@ -180,17 +386,23 @@ const CampaignDetailsView = () => {
                             <div className="flex justify-between">
                                 <div>
                                     <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
-                                    <p className='text-gray-500'>01-11-2025</p>
+                                    <p className="text-gray-500">
+                                        {cmapignDetails?.requirements?.campaignstartdate || "-"}
+                                    </p>
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold mb-1 my-2">End Date</p>
-                                    <p className='text-gray-500'>30-11-2025</p>
+                                    <p className="text-gray-500">
+                                        {cmapignDetails?.requirements?.campaignenddate || "-"}
+                                    </p>
                                 </div>
                             </div>
                         </div>
                         <div className="pt-4 pb-2">
                             <p className="text-sm font-semibold mb-1">Total Budget</p>
-                            <p className='text-gray-500'>₹50,000</p>
+                            <p className="text-gray-500">
+                                ₹{cmapignDetails?.estimatedbudget?.toLocaleString() || "-"}
+                            </p>
                         </div>
                     </div>
 
@@ -202,43 +414,93 @@ const CampaignDetailsView = () => {
                         {/* Profile Section */}
                         <div className="flex items-center gap-3 mb-4">
                             <img
-                                src="https://images.pexels.com/photos/34547643/pexels-photo-34547643.jpeg?_gl=1*1g07vmo*_ga*MTc1NTg2NDU4MC4xNzYxNzIyNDQ3*_ga_8JE65Q40S6*czE3NjIzMjE3OTYkbzIkZzEkdDE3NjIzMjE4MjckajI5JGwwJGgw"
-                                alt="Vendor Profile"
-                                className="w-16 h-16 rounded-full object-cover border"
+                                src={cmapignDetails?.vendorphoto}
+                                alt={cmapignDetails?.name || "Vendor"}
+                                className="w-12 h-12 rounded-full object-cover border border-gray-100"
                             />
                             <div>
-                                <p className="text-base font-semibold">John Doe</p>
-                                <p className="text-sm text-gray-500">Vendor</p>
+                                <p className="text-base font-semibold">{cmapignDetails?.businessname || "N/A"}</p>
+                                <p className="text-sm text-gray-500">{cmapignDetails?.fullname || "N/A"}</p>
                             </div>
                         </div>
 
                         <div className="space-y-3">
-                            <div>
-                                <p className="text-sm font-semibold">Business Name</p>
-                                <p className="text-gray-500">ABC Marketing Pvt. Ltd.</p>
-                            </div>
+
 
                             <div>
                                 <p className="text-sm font-semibold">Email</p>
-                                <p className="text-gray-500 break-words">johndoe@example.com</p>
+                                <p className="text-gray-500 break-words">{cmapignDetails?.email || "N/A"}</p>
                             </div>
 
                             <div>
                                 <p className="text-sm font-semibold">Phone</p>
-                                <p className="text-gray-500">+91 9876543210</p>
+                                <p className="text-gray-500">+{cmapignDetails?.phonenumber || "N/A"}</p>
                             </div>
 
                             <div className="pt-2 border-t border-gray-200">
                                 <p className="text-sm font-semibold">Total Campaigns</p>
-                                <p className="text-gray-500">12</p>
+                                <p className="text-gray-500">{cmapignDetails?.totalcampaign || 0}</p>
                             </div>
                         </div>
                     </div>
-
                 </div>
+
             </div>
 
-        </div>
+
+
+            <Modal
+                title={`Confirm ${actionType}`}
+                open={isModalOpen}
+                onOk={() => {
+                    handleSubmit(actionType); // Call the API with the action type
+                    setIsModalOpen(false);
+                }}
+                onCancel={() => setIsModalOpen(false)}
+                okText={`Yes, ${actionType}`}
+                cancelText="Cancel"
+                okButtonProps={{
+                    type: actionType === "Rejected" ? "default" : "primary",
+                    danger: actionType === "Rejected",
+                    className:
+                        actionType === "Approved"
+                            ? "bg-green-600 hover:bg-green-700 text-white"
+                            : actionType === "Blocked"
+                                ? "bg-gray-600 hover:bg-gray-700 text-white"
+                                : "",
+                }}
+            >
+                <p>
+                    Are you sure you want to{" "}
+                    <strong>{actionType.toLowerCase()}</strong> Campaign{" "}
+                    <span className="font-bold text-gray-800">
+                        {cmapignDetails?.name}
+                    </span>
+                    ?
+                </p>
+            </Modal>
+
+
+
+
+            {/* 🖼️ Image Modal */}
+            <Modal
+                open={isImageModalOpen}
+                onCancel={() => setIsImageModalOpen(false)}
+                footer={null}
+                width={800}
+                centered
+            >
+                <div className="p-6">
+                    <img
+                        src={selectedImage}
+                        alt="Full view"
+                        className="w-full max-h-[70vh] object-contain"
+                    />
+                </div>
+
+            </Modal>
+        </div >
     );
 }
 

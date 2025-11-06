@@ -70,11 +70,11 @@ const ViewAllOffers = () => {
       }
     }
 
-    navigate(`/vendor-dashboard/offers/${offer.applicationid}`);
+    navigate(`/vendor-dashboard/applications/${offer.applicationid}`);
   };
 
   const handleViewProfile = (offer) => {
-    navigate(`/vendor-dashboard/offers/influencer-details/${offer.id}`);
+    navigate(`/vendor-dashboard/applications/influencer-details/${offer.id}`);
   };
 
   // Action handler map
@@ -97,7 +97,7 @@ const ViewAllOffers = () => {
         {
           key: "view",
           icon: <RiEyeLine />,
-          label: "View Offer Details",
+          label: "View Application Details",
           onClick: () => handleAction("view", offer),
         },
         {
@@ -152,9 +152,9 @@ const ViewAllOffers = () => {
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start gap-4 sm:items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">View All Offers</h2>
+        <h2 className="text-xl font-bold">View All Applications</h2>
         <button
-          onClick={() => navigate(`/vendor-dashboard/offers/campaignDetails/${id}`)}
+          onClick={() => navigate(`/vendor-dashboard/applications/campaignDetails/${id}`)}
           className="px-4 py-2 bg-[#0D132D] text-white rounded-lg"
         >
           View Campaign Details
@@ -168,7 +168,7 @@ const ViewAllOffers = () => {
         <Input
           size="large"
           prefix={<SearchOutlined />}
-          placeholder="Search campaigns"
+          placeholder="Search Application"
           className="w-full sm:w-auto flex-1"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
@@ -196,7 +196,7 @@ const ViewAllOffers = () => {
             <tr>
               <th className="p-4">Influencer Name</th>
               <th className="p-4">Category</th>
-              <th className="p-4">Offer</th>
+              <th className="p-4">Offered Budget</th>
 
               <th className="p-4">Status</th>
               <th className="p-4">Action</th>

@@ -18,7 +18,7 @@ const AcceptOfferModal = ({ open, onCancel, onConfirm, offer }) => {
 
         {/* Message */}
         <p className="mt-2 text-gray-700">
-          Are you sure you want to accept the offer from{" "}
+          Are you sure you want to accept the applications from{" "}
           <span className="font-medium">{offer?.name}</span>?
         </p>
 
@@ -30,7 +30,7 @@ const AcceptOfferModal = ({ open, onCancel, onConfirm, offer }) => {
             className="bg-[#0D132D] text-white px-6 py-2 rounded-full cursor-pointer"
             onClick={() => onConfirm(offer)}
           >
-            Accept Offer
+            Accept Applications
           </button>
         </div>
       </div>
