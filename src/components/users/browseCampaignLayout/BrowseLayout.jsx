@@ -9,13 +9,14 @@ import {
   RiFileCopyFill,
   RiEyeLine,
   RiEraserLine,
-  RiCheckLine
+  RiAddLine
 } from '@remixicon/react';
 import { SearchOutlined, CloseCircleFilled } from '@ant-design/icons';
 import { Empty, Input, Pagination, Select, Tooltip, Skeleton } from 'antd';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import CampaignCardGrid from "./CampaignCard";
 
 
 const buttons = [
@@ -376,125 +377,12 @@ const Browse = () => {
         <div className="flex flex-col gap-6 mt-6">
 
           {/* Campaign Card */}
-          <div
-            className={`grid gap-6 flex-1 grid-cols-1 sm:grid-cols-1 lg:grid-cols-1`}
-          >
-            {loading ? (
-              Array.from({ length: 6 }).map((_, idx) => (
-                <div
-                  key={idx}
-                  className="border border-gray-200 rounded-2xl p-5 bg-white"
-                >
-                  <div className="mb-3">
-                    <Skeleton.Avatar active size="large" shape="circle" />
-                  </div>
-                  <Skeleton
-                    active
-                    paragraph={{ rows: 3 }}
-                    title={{ width: '60%' }}
-                  />
-                </div>
-              ))
-            ) : campaigns.length === 0 ? (
-              <div className="col-span-full py-10">
-                <Empty description="No campaigns found." />
-              </div>
-            ) : (campaigns.map((campaign) => (
-                <div
-                  key={campaign.id}
-                  onClick={() => handleCardClick(campaign.id)}
-                  className="border rounded-2xl transition border-gray-200 bg-white p-5 flex flex-col cursor-pointer hover:bg-gray-100 relative"
-                >
-            <div className="absolute top-3 right-4 flex items-center gap-2">
-              {campaign.campaignapplied && (
-                <span className="bg-[#0f122f] text-white text-xs font-semibold px-3 py-1 rounded-full">
-                  Applied
-                </span>
-              )}
-              <Tooltip
-                title={campaign.campaigsaved ? "Unsave Campaign" : "Save Campaign"}
-                placement="left"
-              >
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSave(campaign.id);
-                  }}
-                  className="border border-[#0f122f] text-black w-10 h-10 p-2 flex justify-center items-center rounded-full cursor-pointer transition bg-white hover:bg-gray-50 shadow-sm"
-                >
-                  {campaign.campaigsaved ? (
-                    <RiFileCopyFill size={18} className="text-[#0f122f]" />
-                  ) : (
-                    <RiFileCopyLine size={18} className="text-[#0f122f]" />
-                  )}
-                </button>
-              </Tooltip>
-            </div>
-                <span className="text-xs font-semibold text-gray-900 mb-3">
-                  Apply Till {campaign.applicationenddate}
-                </span>
-                <div className="flex items-center gap-3 mb-3">
-                  <img
-                    src={campaign.photopath}
-                    alt="icon"
-                    loading="lazy"
-                    className="w-12 h-12 object-cover rounded-full flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0"> {/* Keeps space management intact */}
-                    <Link
-                      to={`/dashboard/browse/description/${campaign.id}`}
-                      className="text-lg font-semibold text-gray-900 hover:underline hover:text-[#0f122f] transition-colors duration-150"
-                    >
-                      {campaign.name}
-                    </Link>
-                    <div className="text-xs text-gray-500"> {/* Removed 'truncate' to allow wrapping; add back if needed */}
-                      {campaign.businessname}
-                    </div>
-                  </div>
-                </div>
-                {/* Rest of the card remains the same */}
-                <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                  <div className="flex flex-wrap items-center text-xs text-gray-500 gap-x-2">
-                    {campaign.providercontenttype?.map((item, index) => (
-                      <span key={index} className="whitespace-nowrap">
-                        {item.providername} - {item.contenttypename}
-                        {index < campaign.providercontenttype.length - 1 && ","}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                    <RiExchangeDollarLine size={16} />
-                    <span className="text-gray-900">
-                      Estimated Budget : <span className=" text-gray-900">₹{campaign.estimatedbudget}</span>
-                    </span>
-                  </div>
-                <p
-                  className="text-black text-sm mb-4 text-justify overflow-hidden"
-                  style={{
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                  }}
-                >
-                  {campaign.description}
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {campaign.campaigncategories?.map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-1 bg-gray-100 rounded-xl text-xs"
-                    >
-                      {tag.categoryname}
-                    </span>
-                  ))}
-                </div>
-
-              </div>
-            )))
-            }
-
-          </div>
+          <CampaignCardGrid
+            campaigns={campaigns}
+            loading={loading}
+            handleCardClick={handleCardClick}
+            handleSave={handleSave}
+          />
 
           {/* Pagination */}
           <div className="mt-6 flex justify-center">
@@ -559,7 +447,7 @@ const Browse = () => {
                         }}
                         className="p-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
                       >
-                        <RiCheckLine size={18} />
+                        <RiAddLine size={18} />
                       </button>
                     </Tooltip>
 

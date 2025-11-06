@@ -72,28 +72,31 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     if (!token) return;
 
     const getAllNotification = async () => {
-      try {
-        setLoadingNotifications(true);
-        const res = await axios.get('new/getallnotification', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    if (!token) return;
+    try {
+      setLoadingNotifications(true);
+      const res = await axios.get("new/getallnotification", {
+        params: { limitedData },
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        const data = res.data?.data || [];
-        const formatted = data.map((item) => ({
-          id: item.notificationid,
-          title: item.title,
-          message: item.description,
-          time: new Date(item.createddate).toLocaleString(),
-        }));
+      const data = res.data?.data || [];
+      const formatted = data.map((item) => ({
+        id: item.notificationid,
+        title: item.title,
+        message: item.description,
+        isRead: item.isread,
+        time: new Date(item.createddate).toLocaleString(),
+      }));
 
-        setNotifications(formatted);
-        setHasUnreadNotifications(formatted.length > 0);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      } finally {
-        setLoadingNotifications(false);
-      }
-    };
+      setNotifications(formatted);
+      setHasUnreadNotifications(formatted.some((n) => !n.isRead));
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
 
     getAllNotification();
     const interval = setInterval(getAllNotification, 3000);
@@ -106,7 +109,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
         key: "1",
         icon: <UserOutlined />,
         label: "My Profile",
-        onClick: () => navigate(`${basePath}/my-profile`),
+        onClick: () => navigate(`/my-profile`),
       },
       {
         key: "2",

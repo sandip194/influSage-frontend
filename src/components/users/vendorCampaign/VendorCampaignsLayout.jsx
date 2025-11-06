@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  RiEyeLine, RiAddFill, RiEqualizerFill, RiCloseFill, RiArrowDownSLine } from "@remixicon/react";
+  RiEyeLine, RiAddFill, RiEqualizerFill, RiCloseFill, RiArrowDownSLine, RiEraserLine, RiAddLine } from "@remixicon/react";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -487,12 +487,34 @@ const VendorCampaignsLayout = () => {
           <div className="fixed top-0 right-0 w-80 h-full bg-white p-4 z-50 shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Filter Options</h3>
-              <button
-                onClick={() => setShowFilter(false)}
-                className="text-gray-500 hover:text-gray-900"
-              >
-                <RiCloseFill size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                <Tooltip title="Clear Filters">
+                  <button
+                    onClick={clearFilters}
+                    className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
+                  >
+                    <RiEraserLine size={18} />
+                  </button>
+                </Tooltip>
+
+                <Tooltip title="Apply Filters">
+                  <button
+                    onClick={applyFilters}
+                    className="p-2 rounded-full bg-[#141843] text-white hover:bg-[#1d214f] transition"
+                  >
+                    <RiAddLine size={18} />
+                  </button>
+                </Tooltip>
+
+                <Tooltip title="Close">
+                  <button
+                    onClick={() => setShowFilter(false)}
+                    className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition"
+                  >
+                    <RiCloseFill size={20} />
+                  </button>
+                </Tooltip>
+              </div>
             </div>
 
             <hr className="my-4 border-gray-200" />
@@ -564,22 +586,6 @@ const VendorCampaignsLayout = () => {
               <p className="text-xs text-gray-500 mt-1">
                 Filter by campaign start and end dates.
               </p>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex gap-3 mt-6 px-2">
-              <button
-                className="flex-1 py-2.5 px-4 bg-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-300 transition-colors"
-                onClick={clearFilters} // Resets and refetches
-              >
-                Clear All
-              </button>
-              <button
-                className="flex-1 py-2.5 px-4 bg-[#141843] text-white rounded-full font-medium hover:bg-[#1d214f] transition-colors"
-                onClick={applyFilters} // Merges temp to filters, refetches, closes
-              >
-                Apply Filters
-              </button>
             </div>
           </div>
         </>
