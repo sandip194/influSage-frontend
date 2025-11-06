@@ -6,7 +6,7 @@ import {
   RiDeleteBinLine,
   RiCheckDoubleLine,
   RiCheckLine,
-  RiDownload2Line ,
+  RiDownload2Line,
 } from "react-icons/ri";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -44,18 +44,14 @@ const formatTime = (timestamp) => {
   return date.toLocaleDateString();
 };
 
-const addBaseUrlToLinks = (html) => {
-  const base = window.location.origin;
-  const div = document.createElement("div");
-  div.innerHTML = html;
-  div.querySelectorAll("a[href], img[src]").forEach((element) => {
-    const attr = element.tagName === "A" ? "href" : "src";
-    const url = element.getAttribute(attr);
-    if (url && !url.startsWith("http") && !url.startsWith("https")) {
-      element.setAttribute(attr, `${base}/${url}`);
-    }
-  });
-  return div.innerHTML;
+/* 🧹 Unescape escaped HTML */
+const unescapeHtml = (str) => {
+  if (!str) return "";
+  str = str.replace(/\\\\/g, "\\");
+  str = str.replace(/\\"/g, '"');
+  str = str.replace(/\\'/g, "'");
+  str = str.replace(/\\n/g, "\n").replace(/\\t/g, "\t");
+  return str;
 };
 
 export default function ChatMessages({
@@ -246,20 +242,27 @@ export default function ChatMessages({
 
       if (res.data?.data?.records) {
         const formattedMessages = res.data.data.records
-          .map((msg) => ({
-            id: msg.messageid,
-            senderId: msg.userid ?? null,
-            roleId: msg.roleid,
-            content: (msg.message || "").replace(/^"|"$/g, ""),
-            file: Array.isArray(msg.filepath)
-              ? msg.filepath.join(",")
-              : msg.filepath || "",
-            time: msg.createddate,
-            replyId: msg.replyid || null,
-            deleted: msg.isdeleted || false,
-            readbyvendor: msg.readbyvendor ?? false,
-            readbyinfluencer: msg.readbyinfluencer ?? false,
-          }))
+          .map((msg) => {
+            const raw = (msg.message || "").replace(/^"|"$/g, "");
+            const unescaped = unescapeHtml(raw);
+            const isHtml = /<\/?[a-z][\s\S]*>/i.test(unescaped);
+
+            return {
+              id: msg.messageid,
+              senderId: msg.userid ?? null,
+              roleId: msg.roleid,
+              content: unescaped,
+              file: Array.isArray(msg.filepath)
+                ? msg.filepath.join(",")
+                : msg.filepath || "",
+              time: msg.createddate,
+              replyId: msg.replyid || null,
+              deleted: msg.isdeleted || false,
+              readbyvendor: msg.readbyvendor ?? false,
+              readbyinfluencer: msg.readbyinfluencer ?? false,
+              ishtml: isHtml,
+            };
+          })
           .sort((a, b) => new Date(a.time) - new Date(b.time));
         dispatch(setMessages(formattedMessages));
       }
@@ -390,9 +393,8 @@ export default function ChatMessages({
             id={`message-${msg.id}`}
             key={msg.id}
             ref={isLast ? bottomRef : null}
-            className={`flex relative ${
-              isMe ? "justify-end mr-4" : "items-start space-x-2 ml-4"
-            } ${editingMessage?.id === msg.id ? "bg-blue-50 " : ""}`}
+            className={`flex relative ${isMe ? "justify-end mr-4" : "items-start space-x-2 ml-4"
+              } ${editingMessage?.id === msg.id ? "bg-blue-50 " : ""}`}
             onMouseEnter={() => setHoveredMsgId(msg.id)}
             onMouseLeave={() => setHoveredMsgId(null)}
           >
@@ -411,19 +413,17 @@ export default function ChatMessages({
             )}
 
             <div
-              className={`relative flex flex-col ${
-                isMe ? "items-end" : "items-start"
-              }`}
+              className={`relative flex flex-col ${isMe ? "items-end" : "items-start"
+                }`}
             >
               {/* Message bubble */}
               <div
                 className={`px-3 py-1 rounded-lg 
                   max-w-[90%] sm:max-w-xs md:max-w-sm 
                   break-all overflow-hidden whitespace-pre-wrap 
-                  ${
-                    isMe
-                      ? "bg-[#0D132D] text-white"
-                      : "bg-gray-200 text-gray-900"
+                  ${isMe
+                    ? "bg-[#0D132D] text-white"
+                    : "bg-gray-200 text-gray-900"
                   }`}
               >
                 {/* FILE PREVIEW */}
@@ -572,10 +572,9 @@ export default function ChatMessages({
                   <div
                     onClick={() => scrollToMessage(msg.replyId)}
                     className={`mb-1 px-3 py-2 rounded-lg text-xs cursor-pointer max-w-[250px] transition-all duration-200 
-                      ${
-                        isMe
-                          ? "bg-gray-700 border-l-4 border-blue-400 text-gray-100"
-                          : "bg-gray-100 border-l-4 border-green-500 text-gray-800"
+                      ${isMe
+                        ? "bg-gray-700 border-l-4 border-blue-400 text-gray-100"
+                        : "bg-gray-100 border-l-4 border-green-500 text-gray-800"
                       }`}
                   >
                     {(() => {
@@ -600,7 +599,7 @@ export default function ChatMessages({
                           {/* Sender */}
                           <span className="font-semibold text-[11px] text-blue-600">
                             {repliedMsg.senderId === role ||
-                            repliedMsg.senderId === userId
+                              repliedMsg.senderId === userId
                               ? "You"
                               : chat?.name || "Unknown"}
                           </span>
@@ -648,18 +647,15 @@ export default function ChatMessages({
                       </button>
                     )}
                   </div>
-                ) : // 🧠 Detect if message contains HTML tags (like <div>, <p>, <a>, etc.)
-                /<[a-z][\s\S]*>/i.test(msg.content) ? (
+                ) :(
                   <div
-                    className="text-sm w-full"
+                    className={`text-sm break-words ${msg.ishtml ? "bg-white text-gray-900 p-2 rounded-md" : ""}`}
                     dangerouslySetInnerHTML={{
                       __html: DOMPurify.sanitize(
-                        addBaseUrlToLinks(msg.content)
+                        msg.ishtml ? msg.content : msg.content.replace(/\n/g, "<br>")
                       ),
                     }}
                   />
-                ) : (
-                  <div className="text-sm break-words">{msg.content}</div>
                 )}
               </div>
 
@@ -674,9 +670,8 @@ export default function ChatMessages({
               {/* HOVER ACTIONS */}
               {hoveredMsgId === msg.id && (
                 <div
-                  className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md z-10 transition-opacity duration-150 ${
-                    isMe ? "right-0 -top-8" : "left-0 -top-8"
-                  }`}
+                  className={`absolute flex gap-2 items-center px-3 py-1 bg-white shadow-md rounded-md z-10 transition-opacity duration-150 ${isMe ? "right-0 -top-8" : "left-0 -top-8"
+                    }`}
                 >
                   {!msg.deleted && (
                     <button
@@ -725,3 +720,5 @@ export default function ChatMessages({
     </div>
   );
 }
+
+
