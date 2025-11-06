@@ -68,10 +68,10 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     return () => clearInterval(interval);
   }, [token]);
 
-  useEffect(() => {
-    if (!token) return;
+useEffect(() => {
+  if (!token) return;
 
-    const getAllNotification = async () => {
+  const getAllNotification = async (limitedData = null) => {
     if (!token) return;
     try {
       setLoadingNotifications(true);
@@ -80,7 +80,10 @@ const DeshboardHeader = ({ toggleSidebar }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const data = res.data?.data || [];
+      let data = res.data?.data || [];
+
+      data = data.filter((item) => item.isread === false);
+
       const formatted = data.map((item) => ({
         id: item.notificationid,
         title: item.title,
@@ -90,7 +93,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
       }));
 
       setNotifications(formatted);
-      setHasUnreadNotifications(formatted.some((n) => !n.isRead));
+      setHasUnreadNotifications(formatted.length > 0);
     } catch (error) {
       console.error("Error fetching notifications:", error);
     } finally {
@@ -98,10 +101,10 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     }
   };
 
-    getAllNotification();
-    const interval = setInterval(getAllNotification, 3000);
-    return () => clearInterval(interval);
-  }, [token]);
+  getAllNotification();
+  const interval = setInterval(getAllNotification, 3000);
+  return () => clearInterval(interval);
+}, [token]);
 
   const profileMenu = {
     items: [
@@ -109,7 +112,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
         key: "1",
         icon: <UserOutlined />,
         label: "My Profile",
-        onClick: () => navigate(`/my-profile`),
+        onClick: () => navigate(`${basePath}/my-profile`),
       },
       {
         key: "2",
