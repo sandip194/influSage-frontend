@@ -4,6 +4,7 @@ import axios from "axios";
 import {
   RiEqualizerFill,
   RiCloseFill,
+  RiEraserLine, RiAddLine,
 } from "@remixicon/react";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import { Input, Pagination, Empty, Skeleton, Tooltip } from "antd";
@@ -376,9 +377,52 @@ const BrowseInfluencersLayout = () => {
           <div className="fixed top-0 right-0 w-80 h-full bg-white p-4 z-50 shadow-lg overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Filter Options</h3>
-              <button onClick={() => setShowFilter(false)}>
-                <RiCloseFill />
-              </button>
+              <div className="flex items-center gap-2">
+                <Tooltip title="Clear Filters">
+                  <button
+                    onClick={() => {
+                      const cleared = {
+                        providers: [],
+                        languages: [],
+                        influencertiers: [],
+                        gender: [],
+                        sortby: "createddate",
+                        sortorder: "desc",
+                        pagenumber: 1,
+                        pagesize: 15,
+                        location: ""
+                      };
+                      setDraftFilters(cleared);
+                      setFilters(cleared);
+                      setShowFilter(false);
+                    }}
+                    className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
+                  >
+                    <RiEraserLine size={18} />
+                  </button>
+                </Tooltip>
+
+                <Tooltip title="Apply Filters">
+                  <button
+                    onClick={() => {
+                      setFilters(draftFilters);
+                      setShowFilter(false);
+                    }}
+                    className="p-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
+                  >
+                    <RiAddLine size={18} />
+                  </button>
+                </Tooltip>
+
+                <Tooltip title="Close">
+                  <button
+                    onClick={() => setShowFilter(false)}
+                    className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition"
+                  >
+                    <RiCloseFill size={20} />
+                  </button>
+                </Tooltip>
+              </div>
             </div>
 
             <div className="mt-4">
@@ -469,40 +513,6 @@ const BrowseInfluencersLayout = () => {
               ))}
             </div>
             <hr className="my-4 border-gray-200" />
-
-            <div className="flex gap-3 mt-4 px-4">
-              <button
-                className="flex-1 py-2 bg-gray-200 rounded-full"
-                onClick={() => {
-                  const cleared = {
-                    providers: [],
-                    languages: [],
-                    influencertiers: [],
-                    gender: [],
-                    sortby: "createddate",
-                    sortorder: "desc",
-                    pagenumber: 1,
-                    pagesize: 15,
-                    location: ""
-                  };
-                  setDraftFilters(cleared);
-                  setFilters(cleared); // <-- trigger API call
-                  setShowFilter(false);
-                }}
-              >
-                Clear
-              </button>
-
-              <button
-                className="flex-1 py-2 bg-[#0f122f] text-white rounded-full"
-                onClick={() => {
-                  setFilters(draftFilters);
-                  setShowFilter(false);
-                }}
-              >
-                Apply
-              </button>
-            </div>
           </div>
         </>
       )}
