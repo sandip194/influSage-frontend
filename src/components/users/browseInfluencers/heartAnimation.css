@@ -1,0 +1,72 @@
+@keyframes floatHearts {
+  0% {
+    transform: translateY(0) scale(0.6) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(-40px) scale(1.1) rotate(-10deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(-80px) scale(1) rotate(10deg);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(-120px) scale(1.2) rotate(-5deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-160px) scale(0.9) rotate(15deg);
+    opacity: 0;
+  }
+}
+
+/* ❤️ Container for floating hearts */
+.heart-animation {
+  position: absolute;
+  bottom: 40px;
+  right: 70px;
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* ❤️ Actual heart shape */
+.heart {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #ff4d4f;
+  transform: rotate(-45deg);
+  animation: floatHearts 2.5s ease-in-out forwards;
+  opacity: 0;
+}
+
+.heart::before,
+.heart::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #ff4d4f;
+  border-radius: 50%;
+}
+
+.heart::before {
+  top: -10px;
+  left: 0;
+}
+
+.heart::after {
+  left: 10px;
+  top: 0;
+}
+
+/* Random variety */
+.heart:nth-child(odd) {
+  animation-duration: 2.8s;
+  transform: rotate(-40deg);
+}
+.heart:nth-child(even) {
+  animation-duration: 3s;
+  transform: rotate(-50deg);
+}

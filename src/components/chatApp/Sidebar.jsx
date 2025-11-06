@@ -125,7 +125,7 @@ export default function Sidebar({ onSelectChat }) {
                     vendorId: vendor.vendorid || vendor.id,
                     campaignid: campaign.campaignid,
                     campaignname: campaign.campaignname,
-                    vendorName: `${vendor.firstname || ""}_${vendor.lastname || ""}`.trim(),
+                    vendorName: `${vendor.firstname }`,
                     canstartchat: vendor.canstartchat, 
                   });
 

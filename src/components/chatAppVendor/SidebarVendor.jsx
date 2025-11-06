@@ -52,7 +52,7 @@ export default function SidebarVendor({ onSelectChat }) {
               campaignName: c.campaignname,
               campaignPhoto: c.campaignphoto,
               img: v.userphoto ? v.userphoto : null,
-              name: `${v.firstname}_${v.lastname}`,
+              name: `${v.firstname}`,
               message: v.lastmessage || "No message",
               time: v.lastmessagedate || "",
             }))
