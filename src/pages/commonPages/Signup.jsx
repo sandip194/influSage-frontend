@@ -14,6 +14,7 @@ const Signup = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm();
 
@@ -51,6 +52,20 @@ const Signup = () => {
     },
     [navigate]
   );
+
+
+  // 🔹 Helper: handle lowercase email
+  const handleEmailChange = (e) => {
+    const lowerEmail = e.target.value.toLowerCase();
+    setValue("email", lowerEmail, { shouldValidate: true });
+  };
+
+  // 🔹 Helper: prevent special chars in names
+  const handleNameChange = (e, field) => {
+    const onlyLetters = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+    setValue(field, onlyLetters, { shouldValidate: true });
+  };
+
 
   return (
     <div className="relative flex justify-center items-center min-h-screen bg-gray-100 p-5 font-[Segoe_UI,Tahoma,Geneva,Verdana,sans-serif] overflow-hidden">
@@ -94,7 +109,12 @@ const Signup = () => {
                   placeholder="Enter first name"
                   {...register("firstName", {
                     required: "First name is required",
+                    pattern: {
+                      value: /^[A-Za-z\s]+$/,
+                      message: "Only alphabets are allowed",
+                    },
                   })}
+                  onChange={(e) => handleNameChange(e, "firstName")}
                   className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
                 {errors.firstName && (
@@ -113,7 +133,12 @@ const Signup = () => {
                   placeholder="Enter last name"
                   {...register("lastName", {
                     required: "Last name is required",
+                    pattern: {
+                      value: /^[A-Za-z\s]+$/,
+                      message: "Only alphabets are allowed",
+                    },
                   })}
+                  onChange={(e) => handleNameChange(e, "lastName")}
                   className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
                 {errors.lastName && (
@@ -126,25 +151,26 @@ const Signup = () => {
 
             {/* Email */}
             <div>
-                    <label className="font-semibold text-sm">
-                    Email<span className="text-red-500">*</span>
-                    </label>
-                    <input
-                    type="email"
-                    placeholder="Enter your email"
-                    {...register("email", {
-                      required: "Email is required",
-                      pattern: {
-                      value: /^[a-z0-9.-]+@[a-z0-9-]+\.[a-z]{2,4}$/,
-                      message: "Invalid email format, use only lowercase letters",
-                      },
-                    })}
-                    className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                    />
-                    {errors.email && (
-                    <p className="text-xs text-red-500">{errors.email.message}</p>
-                    )}
-                  </div>
+              <label className="font-semibold text-sm">
+                Email<span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
+                    message: "Invalid email format (use lowercase letters only)",
+                  },
+                })}
+                onChange={handleEmailChange}
+                className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
+              {errors.email && (
+                <p className="text-xs text-red-500">{errors.email.message}</p>
+              )}
+            </div>
 
             {/* Password */}
             <div>
@@ -269,3 +295,6 @@ const Signup = () => {
 };
 
 export default Signup;
+
+
+

@@ -21,7 +21,7 @@ export const ForgotPassword = () => {
     setLoading(true);
     try {
       const response = await axios.post("/user/forgot-password", {
-        email: data.email,
+        email: data.email.toLowerCase(),
       });
       if (response.status === 200) toast.success(response.data.message);
     } catch (error) {

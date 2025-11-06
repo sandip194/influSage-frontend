@@ -78,10 +78,10 @@ export const LoginForm = () => {
       dispatch(setCredentials({ token, id: userId, role: Number(roleId), name, email, p_code }));
       window.history.replaceState({}, document.title, window.location.pathname);
 
-       if (Number(roleId) === 2 && p_code === "SUCCESS") navigate("/vendor-dashboard");
-        else if (Number(roleId) === 2) navigate("/complate-vendor-profile");
-        else if (Number(roleId) === 1 && p_code === "SUCCESS") navigate("/dashboard");
-        else if (Number(roleId) === 1) navigate("/complate-profile");
+      if (Number(roleId) === 2 && p_code === "SUCCESS") navigate("/vendor-dashboard");
+      else if (Number(roleId) === 2) navigate("/complate-vendor-profile");
+      else if (Number(roleId) === 1 && p_code === "SUCCESS") navigate("/dashboard");
+      else if (Number(roleId) === 1) navigate("/complate-profile");
     } else if (email && !token) {
       navigate(`/roledefault?email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&roleId=${roleId}`);
     }
@@ -105,7 +105,12 @@ export const LoginForm = () => {
     setIsLoggingIn(true);
 
     try {
-      const res = await axios.post("/user/login", data);
+      const payload = {
+        ...data,
+        email: data.email.toLowerCase(),
+      };
+
+      const res = await axios.post("/user/login", payload);
       if (res.status === 200) {
         if (data.rememberMe) {
           localStorage.setItem("rememberedEmail", data.email);

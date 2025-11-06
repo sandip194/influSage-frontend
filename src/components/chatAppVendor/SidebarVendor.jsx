@@ -1,16 +1,15 @@
 import { RiAddLine, RiArrowLeftLine } from "react-icons/ri";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { CloseCircleFilled } from "@ant-design/icons";
 import { Tooltip } from "antd";
-import { useNavigate } from "react-router-dom";
 
 export default function SidebarVendor({ onSelectChat }) {
   const { token } = useSelector((state) => state.auth);
- // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [selectedInfluencer, setSelectedInfluencer] = useState(null);
@@ -20,10 +19,9 @@ export default function SidebarVendor({ onSelectChat }) {
   const [unreadMessages, setUnreadMessages] = useState([]);
   const [loadingUnread, setLoadingUnread] = useState(false);
   const selectChatFromOutside = location.state?.selectChatFromOutside || null;
-  const navigate = useNavigate();
 
-
-  const fetchCampaigns = async () => {
+  // ✅ useCallback to memoize function references
+  const fetchCampaigns = useCallback(async () => {
     if (!token) return;
 
     try {
@@ -38,7 +36,13 @@ export default function SidebarVendor({ onSelectChat }) {
           campaignphoto: c.campaignphoto ? c.campaignphoto : null,
         }));
 
-        setCampaigns(formatted);
+        // Only update state if data actually changed
+        setCampaigns((prev) => {
+          if (JSON.stringify(prev) !== JSON.stringify(formatted)) {
+            return formatted;
+          }
+          return prev;
+        });
 
         const allInfluencers = formatted
           .flatMap((c) =>
@@ -55,135 +59,150 @@ export default function SidebarVendor({ onSelectChat }) {
           )
           .sort((a, b) => new Date(b.time) - new Date(a.time));
 
-        setInfluencers(allInfluencers);
+        setInfluencers((prev) => {
+          if (JSON.stringify(prev) !== JSON.stringify(allInfluencers)) {
+            return allInfluencers;
+          }
+          return prev;
+        });
       }
     } catch (err) {
       console.error("Error fetching campaigns:", err);
-      setCampaigns([]);
-      setInfluencers([]);
     }
-  };
+  }, [token, search]);
 
-  const fetchUnreadMessages = async () => {
-  try {
-    setLoadingUnread(true);
-    const res = await axios.get(`/chat/unread-messages`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (res.data?.data) {
-      setUnreadMessages(res.data.data);
-    }
-  } catch (err) {
-    console.error("Failed to fetch unread messages:", err);
-  } finally {
-    setLoadingUnread(false);
-  }
-};
-
-useEffect(() => {
-  fetchCampaigns();
-  fetchUnreadMessages();
-
-  // refresh unread messages every 10 seconds
-  const unreadInterval = setInterval(fetchUnreadMessages, 3000);
-
-  // refresh campaigns every 3 seconds
-  const campaignsInterval = setInterval(fetchCampaigns, 3000);
-
-  // Cleanup intervals on unmount
-  return () => {
-    clearInterval(unreadInterval);
-    clearInterval(campaignsInterval);
-  };
-}, [token, search]);
-useEffect(() => {
-  if (selectChatFromOutside && campaigns.length > 0) {
-    const { influencerid } = selectChatFromOutside;
-
-    const campaign = campaigns.find(c =>
-      c.influencers.some(i => i.influencerid === influencerid)
-    );
-
-    if (campaign) {
-      setSelectedCampaign(campaign);
-
-      const influencer = campaign.influencers.find(i => i.influencerid === influencerid);
-      if (influencer) {
-        setSelectedInfluencer(influencerid);
-
-        onSelectChat({
-          conversationid: influencer.conversationid,
-          id: influencer.conversationid,
-          name: `${influencer.firstname} ${influencer.lastname}`,
-          img: influencer.userphoto ? influencer.userphoto : null,
-          influencerid: influencer.influencerid,
+  const fetchUnreadMessages = useCallback(async () => {
+    try {
+      setLoadingUnread(true);
+      const res = await axios.get(`/chat/unread-messages`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data?.data) {
+        setUnreadMessages((prev) => {
+          if (JSON.stringify(prev) !== JSON.stringify(res.data.data)) {
+            return res.data.data;
+          }
+          return prev;
         });
       }
+    } catch (err) {
+      console.error("Failed to fetch unread messages:", err);
+    } finally {
+      setLoadingUnread(false);
     }
-  }
-}, [selectChatFromOutside, campaigns]);
+  }, [token]);
 
+  // ✅ keep your existing polling logic
+  useEffect(() => {
+    fetchCampaigns();
+    fetchUnreadMessages();
 
-  const filteredInfluencers = selectedCampaign
-    ? influencers.filter((inf) => inf.campaignId === selectedCampaign.campaignid)
-    : [];
+    const unreadInterval = setInterval(fetchUnreadMessages, 3000);
+    const campaignsInterval = setInterval(fetchCampaigns, 3000);
+
+    return () => {
+      clearInterval(unreadInterval);
+      clearInterval(campaignsInterval);
+    };
+  }, [fetchCampaigns, fetchUnreadMessages]);
+
+  // ✅ useMemo for derived data
+  const filteredInfluencers = useMemo(() => {
+    if (!selectedCampaign) return [];
+    return influencers.filter(
+      (inf) => inf.campaignId === selectedCampaign.campaignid
+    );
+  }, [influencers, selectedCampaign]);
+
+  // ✅ handle outside chat selection
+  useEffect(() => {
+    if (selectChatFromOutside && campaigns.length > 0) {
+      const { influencerid } = selectChatFromOutside;
+
+      const campaign = campaigns.find((c) =>
+        c.influencers.some((i) => i.influencerid === influencerid)
+      );
+
+      if (campaign) {
+        setSelectedCampaign(campaign);
+
+        const influencer = campaign.influencers.find(
+          (i) => i.influencerid === influencerid
+        );
+        if (influencer) {
+          setSelectedInfluencer(influencerid);
+
+          onSelectChat({
+            conversationid: influencer.conversationid,
+            id: influencer.conversationid,
+            name: `${influencer.firstname} ${influencer.lastname}`,
+            img: influencer.userphoto ? influencer.userphoto : null,
+            influencerid: influencer.influencerid,
+          });
+        }
+      }
+    }
+  }, [selectChatFromOutside, campaigns, onSelectChat]);
 
   return (
     <div className="h-full flex flex-col md:flex-row gap-4">
-      {/* Campaigns Panel */}
+      {/* --- Campaigns Panel --- */}
       <div
         className={`flex-1 w-full h-full flex flex-col bg-white shadow-md rounded-2xl overflow-hidden
               ${selectedCampaign ? "hidden md:flex" : "flex"}`}
       >
+        {/* Header */}
         <div className="w-full p-4 flex items-center justify-between border-b border-gray-200">
           <h2 className="font-semibold text-gray-700 text-sm md:text-base w-full text-left">
             Campaigns
           </h2>
         </div>
 
-    {/* Search */}
-      <div className="p-3">
-        <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 relative">
-          <svg
-            className="w-5 h-5 text-gray-400 mr-2"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 12.65z" />
-          </svg>
+        {/* Search */}
+        <div className="p-3">
+          <div className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 relative">
+            <svg
+              className="w-5 h-5 text-gray-400 mr-2"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 12.65z" />
+            </svg>
 
-          <input
-            placeholder="Search campaigns..."
-            className="w-full outline-none text-sm pr-8"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+            <input
+              placeholder="Search campaigns..."
+              className="w-full outline-none text-sm pr-8"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
 
-          {search && (
-            <Tooltip title="Clear search" placement="top">
-              <CloseCircleFilled
-                onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors duration-150"
-              />
-            </Tooltip>
-          )}
+            {search && (
+              <Tooltip title="Clear search" placement="top">
+                <CloseCircleFilled
+                  onClick={() => setSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors duration-150"
+                />
+              </Tooltip>
+            )}
+          </div>
         </div>
-      </div>
 
-       <hr className="my-2 border-gray-200" />
+        <hr className="my-2 border-gray-200" />
 
+        {/* Campaign List */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {campaigns?.map((campaign) => {
-            const isSelected = selectedCampaign?.campaignid === campaign.campaignid;
+            const isSelected =
+              selectedCampaign?.campaignid === campaign.campaignid;
             const hasUnread = unreadMessages.some(
               (msg) =>
                 campaign.influencers?.some(
                   (inf) => String(inf.influencerid) === String(msg.userid)
                 ) && msg.readbyvendor === false
             );
+
             return (
               <div
                 key={campaign?.campaignid}
@@ -192,7 +211,11 @@ useEffect(() => {
                   setSelectedInfluencer(null);
                 }}
                 className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-300
-                  ${isSelected ? "bg-gray-200 border-l-4 border-gray-500 shadow-sm scale-[1.01]" : "hover:bg-gray-100"}
+                  ${
+                    isSelected
+                      ? "bg-gray-200 border-l-4 border-gray-500 shadow-sm scale-[1.01]"
+                      : "hover:bg-gray-100"
+                  }
                   ${hasUnread ? "bg-gray-100 shadow-md scale-[1.02]" : ""}`}
               >
                 <div className="flex items-center space-x-3 min-w-0">
@@ -207,7 +230,9 @@ useEffect(() => {
                     </div>
                     <div
                       className={`text-xs truncate ${
-                        hasUnread ? "text-gray-900 font-semibold" : "text-gray-500"
+                        hasUnread
+                          ? "text-gray-900 font-semibold"
+                          : "text-gray-500"
                       }`}
                     >
                       {hasUnread ? "New message" : "Click to chat"}
@@ -223,7 +248,7 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Influencers Panel */}
+      {/* --- Influencers Panel --- */}
       <div
         className={`flex-1 w-full h-full flex flex-col bg-white shadow-md rounded-2xl overflow-hidden
               ${!selectedCampaign ? "hidden md:flex" : "flex"}`}
@@ -231,7 +256,7 @@ useEffect(() => {
         <div className="p-4 flex items-center justify-between border-b border-gray-200">
           <button
             onClick={() => {
-              setSelectedCampaign(campaign);
+              setSelectedCampaign(null);
               setSelectedInfluencer(null);
             }}
             className="md:hidden mr-2 p-2 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
@@ -245,80 +270,89 @@ useEffect(() => {
           <Tooltip title="Search Influencers">
             <button
               onClick={() => navigate("/vendor-dashboard/browse-influencers")}
-              className="w-9 h-9 bg-[#0D132D] text-white rounded-full flex items-center justify-center hover:bg-[#0a0e1f] transition">
+              className="w-9 h-9 bg-[#0D132D] text-white rounded-full flex items-center justify-center hover:bg-[#0a0e1f] transition"
+            >
               <RiAddLine />
             </button>
           </Tooltip>
         </div>
+
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        {filteredInfluencers?.length > 0 ? (
-          filteredInfluencers.map((inf) => {
-            const isSelected = selectedInfluencer === inf.influencerid;
+          {filteredInfluencers?.length > 0 ? (
+            filteredInfluencers.map((inf) => {
+              const isSelected = selectedInfluencer === inf.influencerid;
+              const unread = unreadMessages.some(
+                (msg) =>
+                  String(msg.userid) === String(inf.influencerid) &&
+                  msg.readbyvendor === false
+              );
 
-            // Find unread message for this influencer
-            const unread = unreadMessages.some(
-              (msg) => String(msg.userid) === String(inf.influencerid) && msg.readbyvendor === false
-            );
+              return (
+                <div
+                  key={inf.influencerid}
+                  onClick={() => {
+                    setSelectedInfluencer(inf.influencerid);
+                    onSelectChat({
+                      ...inf,
+                      campaign: selectedCampaign,
+                      canstartchat: inf.canstartchat,
+                    });
 
-            return (
-              <div
-                key={inf.influencerid}
-                onClick={() => {
-                  setSelectedInfluencer(inf.influencerid);
-                  onSelectChat({
-                  ...inf,
-                  campaign: selectedCampaign,
-                  canstartchat: inf.canstartchat,
-                });
+                    setUnreadMessages((prev) =>
+                      prev.filter(
+                        (msg) => String(msg.userid) !== String(inf.influencerid)
+                      )
+                    );
+                  }}
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-300
+                    ${
+                      isSelected
+                        ? "bg-gray-200 border-l-4 border-gray-500 shadow-sm scale-[1.01]"
+                        : "hover:bg-gray-100"
+                    }
+                    ${unread ? "bg-gray-100 shadow-md scale-[1.02]" : ""}`}
+                >
+                  <div className="flex items-center space-x-3 min-w-0">
+                    {inf.img ? (
+                      <img
+                        src={inf.img}
+                        alt={inf.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-semibold">
+                        {inf.name?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
 
-                  // Remove from unread once clicked
-                  setUnreadMessages((prev) =>
-                    prev.filter((msg) => String(msg.userid) !== String(inf.influencerid))
-                  );
-                }}
-                className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-300
-                  ${isSelected ? "bg-gray-200 border-l-4 border-gray-500 shadow-sm scale-[1.01]" : "hover:bg-gray-100"}
-                  ${unread ? "bg-gray-100 shadow-md scale-[1.02]" : ""}`}
-              >
-                <div className="flex items-center space-x-3 min-w-0">
-                  {inf.img ? (
-                    <img
-                      src={inf.img}
-                      alt={inf.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-semibold">
-                      {inf.name?.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-
-                  <div className="min-w-0">
-                    <div className="font-medium text-gray-900 truncate max-w-[160px]">
-                      {inf.name}
-                    </div>
-                    <div
-                      className={`text-sm truncate max-w-[180px] ${
-                        unread ? "text-gray-900 font-semibold" : "text-gray-500"
-                      }`}
-                    >
-                      {unread ? "New message" : "Click to chat"}
+                    <div className="min-w-0">
+                      <div className="font-medium text-gray-900 truncate max-w-[160px]">
+                        {inf.name}
+                      </div>
+                      <div
+                        className={`text-sm truncate max-w-[180px] ${
+                          unread
+                            ? "text-gray-900 font-semibold"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {unread ? "New message" : "Click to chat"}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {unread && (
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></div>
-                )}
-              </div>
-            );
-          })
-        ) : (
-          <div className="p-6 text-center text-gray-400 text-sm">
-            Please select a campaign to see influencers
-          </div>
-        )}
-      </div>
+                  {unread && (
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></div>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <div className="p-6 text-center text-gray-400 text-sm">
+              Please select a campaign to see influencers
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
