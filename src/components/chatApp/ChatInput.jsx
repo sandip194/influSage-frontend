@@ -220,8 +220,9 @@ export default function ChatInput({
 
         <input
           type="text"
-          className="flex-1 border border-gray-300 bg-gray-100 rounded-full px-4 sm:px-6 py-2 sm:py-3 outline-none text-sm w-full"  
-          placeholder= "Write your message" 
+          className="flex-1 border border-gray-300 bg-gray-100 rounded-full px-4 sm:px-6 py-2 sm:py-3 outline-none text-sm w-full"
+          placeholder={canstartchat ? "Write your message" : "You can’t send messages right now"}
+          disabled={!canstartchat}
           value={text}
           onClick={() => {
             if (!canstartchat) handleBlockedAction();

@@ -31,10 +31,6 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId, campaig
       const fetchedOptions = res.data.objectives || [];
       setOptions(fetchedOptions);
 
-      if (fetchedOptions.length > 0 && !data?.objectiveid && !selected) {
-        setSelected(fetchedOptions[0].id);
-      }
-
     } catch (err) {
       console.error("Error fetching objectives:", err);
       message.error("Failed to load campaign objectives.");
@@ -134,7 +130,7 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId, campaig
                     : "bg-transparent border-gray-400 text-transparent"
                   }`}
               >
-                {isSelected && <RiCheckLine size={16} className="sm:w-5 sm:h-5" />}
+                {isSelected && <RiCheckLine size={16} className="sm:w-5 sm:h-5" />} 
               </div>
             </div>
           );

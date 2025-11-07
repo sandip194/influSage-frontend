@@ -16,7 +16,7 @@ import { Empty, Input, Pagination, Select, Tooltip, Skeleton } from 'antd';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import CampaignCardGrid from "./CampaignCard";
+import CampaignCardGrid from "./BrowseCampaignCard";
 
 
 const buttons = [
@@ -252,7 +252,7 @@ const Browse = () => {
           <Input
             size="large"
             prefix={<SearchOutlined />}
-            placeholder="Search campaigns"
+            placeholder="Search for anything here..."
             className="w-full sm:w-auto flex-1"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}

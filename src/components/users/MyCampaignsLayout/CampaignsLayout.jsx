@@ -316,7 +316,7 @@ const InfluencerCampaigns = () => {
           <Input
             prefix={<SearchOutlined />}
             size='large'
-            placeholder="Search campaigns..."
+            placeholder="Search campaigns, Budget, Status..."
             className="w-full sm:w-72"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}

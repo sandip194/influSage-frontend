@@ -12,6 +12,7 @@ import { Empty, Input, Pagination, Select, Tooltip, Modal, Skeleton } from "antd
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import SavedCampaignCard from "./SavedCampaignCard";
 
 
 const SavedLayout = () => {
@@ -144,7 +145,7 @@ const SavedLayout = () => {
           <Input
             size="large"
             prefix={<SearchOutlined />}
-            placeholder="Search campaigns"
+            placeholder="Search for anything here..."
             className="w-full sm:w-auto flex-1"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -231,122 +232,12 @@ const SavedLayout = () => {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 mt-6">
-          <div
-            className="grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {loading ? (
-              Array.from({ length: 6 }).map((_, idx) => (
-                <div
-                  key={idx}
-                  className="border border-gray-200 rounded-2xl p-5 bg-white"
-                >
-                  <div className="mb-3">
-                    <Skeleton.Avatar active size="large" shape="circle" />
-                  </div>
-                  <Skeleton
-                    active
-                    paragraph={{ rows: 3 }}
-                    title={{ width: '60%' }}
-                  />
-                </div>
-              ))
-            ) : campaigns.length === 0 ? (
-              <div className="col-span-full py-10">
-                <Empty description="No campaigns found." />
-              </div>
-            ) : (
-              campaigns.map((campaign) => (
-                <div
-                  key={campaign.id}
-                  onClick={() => handleCardClick(campaign.id)}
-                  className="border rounded-2xl transition border-gray-200 bg-white p-5 flex flex-col cursor-pointer hover:bg-gray-100 relative"
-                >
-                  <div className="absolute top-3 right-4 flex items-center gap-2">
-              {campaign.campaignapplied && (
-                <span className="bg-[#0f122f] text-white text-xs font-semibold px-3 py-1 rounded-full">
-                  Applied
-                </span>
-              )}
-              <Tooltip
-                title={campaign.campaigsaved ? "Unsave Campaign" : "Save Campaign"}
-                placement="left"
-              >
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSave(campaign.id);
-                  }}
-                  className="border border-[#0f122f] text-black w-7 h-7 p-2 flex justify-center items-center rounded-full cursor-pointer transition bg-white hover:bg-gray-50 shadow-sm"
-                >
-                  {campaign.campaigsaved ? (
-                    <RiFileCopyFill size={18} className="text-[#0f122f]" />
-                  ) : (
-                    <RiFileCopyLine size={18} className="text-[#0f122f]" />
-                  )}
-                </button>
-              </Tooltip>
-            </div>
-                  <span className="text-xs font-semibold text-gray-900 mb-3">
-                    Created on {campaign.campaigncreatedate}
-                    {/* new Date(campaign.campaigncreatedate).toLocaleDateString() */}
-                  </span>
-                  <div className="flex items-center gap-3 mb-3">
-                    <img
-                      src={campaign.photopath}
-                      alt="icon"
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div>
-                      <Link
-                        to={
-                          campaign.campaignapplied
-                            ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
-                            : `/dashboard/browse/description/${campaign.id}`
-                        }
-                        className="font-semibold text-gray-900 hover:underline"
-                      >
-                        {campaign.name}
-                      </Link>
-                      <div className="text-xs text-gray-500">{campaign.businessname}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-
-                    <span>
-                      {campaign?.providercontenttype?.[0]?.providername
-                        ? `${campaign.providercontenttype[0].providername} - ${campaign.providercontenttype[0].contenttypename}`
-                        : "N/A"}
-                    </span>
-                    <RiExchangeDollarLine size={16} />
-                    <span>₹{campaign.estimatedbudget}</span>
-                  </div>
-                  <p
-                    className="text-gray-700 text-sm mb-4 text-justify overflow-hidden"
-                    style={{
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                    }}
-                  >
-                    {campaign.description}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {[...(campaign.campaigncategories || [])].map(
-                      (item, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-1 bg-gray-100 rounded text-xs"
-                        >
-                          {item.categoryname}
-                        </span>
-                      )
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-
-          </div>
+           <SavedCampaignCard
+              campaigns={campaigns}
+              loading={loading}
+              handleCardClick={handleCardClick}
+              handleSave={handleSave}
+            />
         </div>
       </div>
 

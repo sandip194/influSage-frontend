@@ -1,27 +1,8 @@
 import React from "react";
 import { Tooltip, Skeleton, Empty } from "antd";
-import { RiBookmarkLine, RiBookmarkFill,   RiInstagramFill,
-  RiYoutubeFill,
-  RiTwitterXFill,
-  RiFacebookCircleFill,} from "@remixicon/react";
+import { RiBookmarkLine, RiBookmarkFill } from "@remixicon/react";
 import { Link } from "react-router-dom";
 
-const getProviderIcon = (provider) => {
-  switch (provider?.toLowerCase()) {
-    case "instagram":
-      return <RiInstagramFill className="text-pink-600" size={16} />;
-    case "youtube":
-      return <RiYoutubeFill className="text-red-600" size={16} />;
-    case "twitter":
-      return <RiTwitterXFill className="text-black" size={16} />;
-    case "facebook":
-      return <RiFacebookCircleFill className="text-blue-600" size={16} />;
-    default:
-      return (
-        <span className="inline-block w-3 h-3 bg-gray-400 rounded-full"></span>
-      ); // fallback
-  }
-};
 const CampaignCardGrid = ({
   campaigns,
   loading,
@@ -117,16 +98,22 @@ const CampaignCardGrid = ({
 
             {/* --- Tags --- */}
             <div className="flex flex-wrap gap-2 mb-4">
-  {campaign.providercontenttype?.map((item, index) => (
-    <span
-      key={index}
-      className="flex items-center gap-2 px-3 py-1 text-xs text-black rounded-full"
-    >
-      {getProviderIcon(item.providername)}
-      {item.contenttypename}
-    </span>
-  ))}
-</div>
+              {campaign.providercontenttype?.map((item, index) => (
+                <span
+                  key={index}
+                  className="flex items-center gap-2 px-1 py-1 text-xs text-black rounded-full"
+                >
+                  {item.iconpath && (
+                    <img
+                      src={item.iconpath}
+                      alt={item.name}
+                      className="w-4 h-4 object-contain"
+                    />
+                  )}
+                  {item.contenttypename || item.name}
+                </span>
+              ))}
+            </div>
 
 
             {/* --- Description --- */}
@@ -189,168 +176,6 @@ const CampaignCardGrid = ({
 
 export default CampaignCardGrid;
 
-
-
-
-
-// import React from "react";
-// import { Tooltip, Skeleton, Empty } from "antd";
-// import { RiBookmarkLine, RiBookmarkFill, RiArrowRightLine } from "@remixicon/react";
-// import { Link } from "react-router-dom";
-
-// const CampaignCardGrid = ({ campaigns, loading, handleCardClick, handleSave }) => {
-//   return (
-//     <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-//       {loading ? (
-//         Array.from({ length: 6 }).map((_, idx) => (
-//           <div
-//             key={idx}
-//             className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
-//           >
-//             <Skeleton.Avatar active size="large" shape="circle" className="mb-4" />
-//             <Skeleton active paragraph={{ rows: 3 }} />
-//           </div>
-//         ))
-//       ) : campaigns.length === 0 ? (
-//         <div className="col-span-full py-10">
-//           <Empty description="No campaigns found." />
-//         </div>
-//       ) : (
-//         campaigns.map((campaign) => (
-//           <div
-//             key={campaign.id}
-//             onClick={() => handleCardClick(campaign.id)}
-//             className="group relative flex flex-col bg-white rounded-3xl border border-gray-200 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-//           >
-//             {/* Top Banner */}
-//             <div className="h-2 bg-gradient-to-r from-[#0f122f] to-[#4b4b70]" />
-
-//             {/* Card Content */}
-//             <div className="flex flex-col p-6 flex-grow">
-//               {/* Header */}
-//               <div className="flex justify-between items-start mb-4">
-//                 <div className="flex items-center gap-3">
-//                   <img
-//                     src={campaign.photopath}
-//                     alt={campaign.name}
-//                     className="w-12 h-12 rounded-lg object-cover border border-gray-200"
-//                   />
-//                   <div>
-//                     <h3 className="text-lg font-semibold text-gray-900">
-//                       {campaign.name}
-//                     </h3>
-//                     <p className="text-sm text-gray-500">{campaign.businessname}</p>
-//                   </div>
-//                 </div>
-
-//                 {/* Save Button */}
-//                 <Tooltip title={campaign.campaigsaved ? "Unsave" : "Save"}>
-//                   <button
-//                     onClick={(e) => {
-//                       e.stopPropagation();
-//                       handleSave(campaign.id);
-//                     }}
-//                     className={`flex items-center gap-1 px-3 py-1 text-xs font-medium border rounded-full transition-all
-//                       ${
-//                         campaign.campaigsaved
-//                           ? "bg-[#0f122f] text-white border-[#0f122f]"
-//                           : "border-gray-300 text-gray-600 hover:bg-gray-100"
-//                       }`}
-//                   >
-//                     {campaign.campaigsaved ? (
-//                       <>
-//                         <RiBookmarkFill size={14} /> Saved
-//                       </>
-//                     ) : (
-//                       <>
-//                         <RiBookmarkLine size={14} /> Save
-//                       </>
-//                     )}
-//                   </button>
-//                 </Tooltip>
-//               </div>
-
-//               {/* Date */}
-//               <p className="text-xs text-gray-500 mb-3">
-//                 Apply Till:{" "}
-//                 <span className="font-medium text-gray-800">
-//                   {campaign.applicationenddate}
-//                 </span>
-//               </p>
-
-//               {/* Tags */}
-//               <div className="flex flex-wrap gap-2 mb-3">
-//                 {campaign.providercontenttype?.map((item, index) => (
-//                   <span
-//                     key={index}
-//                     className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full border border-gray-200"
-//                   >
-//                     {item.providername} - {item.contenttypename}
-//                   </span>
-//                 ))}
-//               </div>
-
-//               {/* Description */}
-//               <p
-//                 className="text-sm text-gray-700 mb-4 line-clamp-2"
-//                 style={{
-//                   display: "-webkit-box",
-//                   WebkitLineClamp: 2,
-//                   WebkitBoxOrient: "vertical",
-//                 }}
-//               >
-//                 {campaign.description}
-//               </p>
-
-//               {/* Categories */}
-//               <div className="flex flex-wrap gap-2 mb-6">
-//                 {campaign.campaigncategories?.map((tag, idx) => (
-//                   <span
-//                     key={idx}
-//                     className="text-xs font-medium bg-gray-50 border border-gray-200 text-gray-700 px-2 py-1 rounded-md"
-//                   >
-//                     {tag.categoryname}
-//                   </span>
-//                 ))}
-//               </div>
-
-//               {/* Footer */}
-//               <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-auto">
-//                 <div>
-//                   <p className="text-sm font-semibold text-gray-900">
-//                     ₹{campaign.estimatedbudget}
-//                   </p>
-//                   <p className="text-xs text-gray-500">Estimated Budget</p>
-//                 </div>
-
-//                 {campaign.campaignapplied ? (
-//                   <button
-//                     className="px-5 py-2 text-sm font-medium rounded-full bg-gray-300 text-white cursor-not-allowed"
-//                     disabled
-//                   >
-//                     Applied
-//                   </button>
-//                 ) : (
-//                   <Link
-//                     to={`/dashboard/browse/apply-now/${campaign.id}`}
-//                     onClick={(e) => e.stopPropagation()}
-//                   >
-//                     <button className="flex items-center gap-1 px-5 py-2 text-sm font-semibold rounded-full bg-[#0f122f] text-white hover:bg-[#1c1f40] transition">
-//                       Apply Now
-//                       <RiArrowRightLine size={14} />
-//                     </button>
-//                   </Link>
-//                 )}
-//               </div>
-//             </div>
-//           </div>
-//         ))
-//       )}
-//     </div>
-//   );
-// };
-
-// export default CampaignCardGrid;
 
 
 
