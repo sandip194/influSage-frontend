@@ -324,7 +324,7 @@ const BrowseInfluencersLayout = () => {
         </div>
 
         {/* Influencers List */}
-        <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
           {loading ? (
             Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="p-4 border border-gray-200 rounded-2xl">

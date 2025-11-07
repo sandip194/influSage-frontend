@@ -36,6 +36,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
   const [bankDetails, setBankDetails] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormChanged, setIsFormChanged] = useState(false);
 
   const { token, role } = useSelector(state => state.auth);
 
@@ -138,7 +139,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
         if (res.status === 200) {
           onChange?.(payload.paymentjson);
           if (showToast) toast.success('Profile updated successfully!');
-
+          setIsFormChanged(false);
           // Stepper: Go to next
           if (onNext) onNext();
 
@@ -164,6 +165,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
         if (res.status === 200) {
           onChange?.(payload.paymentjson);
           if (showToast) toast.success('Profile updated successfully!');
+          setIsFormChanged(false);
 
           // Stepper: Go to next
           if (onNext) onNext();
@@ -264,7 +266,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
           form={form}
           layout="vertical"
           onFinish={onFinish}
-
+          onValuesChange={() => setIsFormChanged(true)}
         >
 
           <Row gutter={16}>
@@ -581,11 +583,16 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
             {/* Next / Save Button */}
             {(showControls || onNext) && (
               <button
-                className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
-                onClick={form.submit}
-                disabled={submitting}
+                type="submit"
+                disabled={!isFormChanged || isSubmitting}
+                className={`px-8 py-3 rounded-full text-white font-medium transition
+                ${
+                  isFormChanged && !isSubmitting
+                    ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
               >
-                {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
+                {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
               </button>
             )}
 

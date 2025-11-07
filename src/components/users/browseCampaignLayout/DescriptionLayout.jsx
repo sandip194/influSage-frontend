@@ -20,6 +20,7 @@ const DescriptionLayout = () => {
   const { token } = useSelector((state) => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { campaignId } = useParams();
+  const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
 
   const fetchCampaignDetails = useCallback(async () => {
     if (!campaignId || !token) return;
@@ -209,19 +210,46 @@ const DescriptionLayout = () => {
           {/* Banner */}
           <div className="bg-white rounded-2xl overflow-hidden ">
             <div className="relative h-40 bg-gray-300">
+              <div className="relative">
+              {/* Campaign Image */}
               <img
                 src={campaignDetails?.photopath}
                 alt="Campaign"
-                className="absolute top-10 left-6 w-24 h-24 rounded-full object-cover border-4 border-white shadow"
+                onClick={() => setIsCampaignPreviewOpen(true)}
+                className="absolute top-10 left-6 w-24 h-24 rounded-full object-cover border-4 border-white shadow cursor-pointer"
                 loading="lazy"
               />
+
+              {/* Image Preview Modal */}
+              {isCampaignPreviewOpen && (
+                <div
+                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                  onClick={() => setIsCampaignPreviewOpen(false)}
+                >
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setIsCampaignPreviewOpen(false)}
+                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                  >
+                    &times;
+                  </button>
+
+                  {/* Enlarged Image */}
+                  <img
+                    src={campaignDetails?.photopath}
+                    alt="Campaign Preview"
+                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
+            </div>
             </div>
 
             <div className="p-6">
               <div className="flex flex-col gap-4 sm:flex-row justify-between items-start mb-5">
                 <div>
                   <h2 className="font-semibold text-lg">{campaignDetails?.name}</h2>
-                  <p className="text-gray-900 text-sm">{campaignDetails?.businessname}</p>
                   <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-900 font-medium">
                     <div className='text-sm text-gray-700'>
                       <span className="font-semibold text-gray-900">Apply Before:</span>{" "}
@@ -257,11 +285,27 @@ const DescriptionLayout = () => {
                     <RiStackLine size={20} />
                     <span>Platform</span>
                   </div>
-                  {campaignDetails.providercontenttype?.map(({ providername, contenttypename }, i) => (
-                    <p key={`${providername}-${contenttypename}-${i}`} className="text-sm">
-                      {providername} - {contenttypename}
-                    </p>
-                  ))}
+                  {campaignDetails?.providercontenttype?.length > 0 ? (
+                    campaignDetails.providercontenttype.map(
+                      ({ providername, contenttypename, iconpath }, i) => (
+                        <div
+                          key={`${providername}-${contenttypename}-${i}`}
+                          className="flex items-center justify-center gap-2 mb-1 text-sm text-gray-800"
+                        >
+                          {iconpath && (
+                            <img
+                              src={iconpath}
+                              alt={providername}
+                              className="w-5 h-5 object-contain"
+                            />
+                          )}
+                          <span>{contenttypename}</span>
+                        </div>
+                      )
+                    )
+                  ) : (
+                    <p className="text-sm text-gray-500">No platform data</p>
+                  )}
                 </div>
                 <div className="min-w-[120px] text-center">
                   <div className="flex gap-2 items-center justify-center mb-2 text-gray-900 font-semibold">

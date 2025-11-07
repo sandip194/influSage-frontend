@@ -11,6 +11,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
   const { token, userId } = useSelector(state => state.auth);
   const [customValidationError, setCustomValidationError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormChanged, setIsFormChanged] = useState(false);
 
 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -92,6 +93,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
 
       if (response.status == 200) {
         if (showToast) toast.success('Profile updated successfully!');
+          onClick={handleSubmit}
 
         // Stepper: Go to next
         if (onNext) onNext();
@@ -152,6 +154,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
           }
         }}
         onValuesChange={() => {
+          setIsFormChanged(true); 
           const values = form.getFieldsValue();
           const socialData = platforms
             .filter(p => values[p.urlField])
@@ -256,11 +259,14 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
           {/* Next / Save Button */}
           {(showControls || onNext) && (
             <button
-              className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
               onClick={onFinish}
-              disabled={isSubmitting}
-            >
-            {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
+              disabled={!isFormChanged || isSubmitting}
+              className={`px-8 py-3 rounded-full text-white font-medium transition
+              ${
+                isFormChanged && !isSubmitting ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer": "bg-gray-400 cursor-not-allowed"
+              }`}
+              >
+              {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
             </button>
           )}
 

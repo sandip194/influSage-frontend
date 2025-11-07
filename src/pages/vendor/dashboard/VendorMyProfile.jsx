@@ -144,7 +144,7 @@ const VendorMyProfile = () => {
                                 </div>
                             )}
                         </div>
-                        <div className="p-6 pt-14 flex flex-col md:flex-row justify-between items-center">
+                        <div className="p-6 pt-14 flex flex-col md:flex-row justify-between items-start">
                             <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
                                 <div>
                                     <h2 className="text-lg font-semibold">

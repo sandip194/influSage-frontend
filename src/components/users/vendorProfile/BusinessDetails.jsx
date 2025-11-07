@@ -25,6 +25,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
     const [companySizes, setCompanySizes] = useState([]);
     const [existingPhotoPath, setExistingPhotoPath] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isFormChanged, setIsFormChanged] = useState(false);
 
 
     const { token } = useSelector(state => state.auth);
@@ -140,6 +141,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
         setPreview(URL.createObjectURL(file));
         setProfileImage(file);
         setProfileError('');
+        setIsFormChanged(true);
     };
 
     const handleSubmit = async () => {
@@ -179,6 +181,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
             if (response.status === 200 || response.status === 201) {
                 if (showToast) toast.success('Profile updated successfully!');
+                setIsFormChanged(false);
 
                 // Stepper: Go to next
                 if (onNext) onNext();
@@ -204,7 +207,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Business Details</h2>
             <p className="text-gray-600">Please provide your Business details to complete your profile.</p>
 
-            <Form form={form} layout="vertical" className="mt-6">
+            <Form form={form} layout="vertical" className="mt-6" onValuesChange={() => setIsFormChanged(true)}>
                 {/* Profile Image Upload */}
                 <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
                     <div className="relative m-auto w-30 h-30 rounded-full overflow-hidden bg-[#0D132D0D] hover:opacity-90 cursor-pointer border border-gray-100 group">
@@ -400,15 +403,20 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
                 {/* Submit Button */}
                 {(showControls || onNext) && (
-                    <div className="flex justify-start mt-6">
-                        <button
-                            className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
-                            onClick={handleSubmit}
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
-                        </button>
-                    </div>
+                <div className="flex justify-start mt-6">
+                    <button
+                    className={`px-8 py-3 rounded-full text-white font-medium transition
+                        ${
+                        isFormChanged && !isSubmitting
+                            ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                            : "bg-gray-400 cursor-not-allowed"
+                        }`}
+                    onClick={handleSubmit}
+                    disabled={!isFormChanged || isSubmitting}
+                    >
+                    {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
+                    </button>
+                </div>
                 )}
             </Form>
         </div>

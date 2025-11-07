@@ -78,12 +78,12 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
         >
           <button
             onClick={handleLogout}
-            className={`flex items-center cursor-pointer ${
-              isOpen ? "justify-between px-6" : "justify-center"
-            } w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm`}
-          >
-            {isOpen && <span>Logout</span>}
+              className={`flex items-center cursor-pointer ${
+                isOpen ? "justify-between px-6" : "justify-center"
+                } w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm gap-2`}
+            >
             <RiShutDownLine />
+            {isOpen && <span>Logout</span>}
           </button>
         </Tooltip>
       </div>

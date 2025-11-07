@@ -13,8 +13,6 @@ import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import { Skeleton } from "antd";
 
-
-
 const SimilarCampaigns = [
   {
     name: "Instagram Campaign",
@@ -39,31 +37,21 @@ const SimilarCampaigns = [
 ];
 
 const EditLayout = () => {
-
-  const [campaignDetails, setCampaignDetails] = useState(null)
-  const [appliedDetails, setAppliedDetails] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [campaignDetails, setCampaignDetails] = useState(null);
+  const [appliedDetails, setAppliedDetails] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showFullDetails, setShowFullDetails] = useState(false);
   const [showFullBrandDesc, setShowFullBrandDesc] = useState(false);
 
-
-
   const { token } = useSelector((state) => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
   const { campaignId } = useParams();
 
   const requirements = useMemo(() => {
     if (!campaignDetails) return [];
     return [
-      {
-        label: "Start Date: ",
-        value: campaignDetails.requirements.startdate,
-      },
-      {
-        label: "End Date: ",
-        value: campaignDetails.requirements.enddate,
-      },
       {
         label: "Objective: ",
         value: campaignDetails.requirements?.objectivename,
@@ -78,7 +66,17 @@ const EditLayout = () => {
       },
       {
         label: "Include Profile Link: ",
-        value: campaignDetails.requirements?.isincludevendorprofilelink ? "Yes" : "No",
+        value: campaignDetails.requirements?.isincludevendorprofilelink
+          ? "Yes"
+          : "No",
+      },
+      {
+        label: "Start Date: ",
+        value: campaignDetails.requirements.startdate,
+      },
+      {
+        label: "End Date: ",
+        value: campaignDetails.requirements.enddate,
       },
     ];
   }, [campaignDetails]);
@@ -88,18 +86,20 @@ const EditLayout = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.get(`user/applied-campaign-details/${campaignId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await axios.get(
+        `user/applied-campaign-details/${campaignId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const campaignData = res.data.data.campaignDetails[0];
-      const appliedData = res.data.data.appliedDetails
+      const appliedData = res.data.data.appliedDetails;
 
       setCampaignDetails(campaignData);
-      setAppliedDetails(appliedData)
-
+      setAppliedDetails(appliedData);
     } catch (err) {
       console.error(err);
       setError("Failed to fetch campaign details.");
@@ -116,15 +116,10 @@ const EditLayout = () => {
     window.history.back();
   }, []);
 
-
-
   if (loading)
     return (
       <div className="w-full max-w-7xl mx-auto">
-        <button
-          className="text-gray-600 flex items-center gap-2 mb-4"
-          disabled
-        >
+        <button className="text-gray-600 flex items-center gap-2 mb-4" disabled>
           <Skeleton.Avatar size="small" shape="circle" active />
           <Skeleton.Input style={{ width: 80 }} active size="small" />
         </button>
@@ -192,9 +187,11 @@ const EditLayout = () => {
       </div>
     );
   if (!campaignDetails)
-    return <div className="text-center py-10 text-gray-500">No campaign details found.</div>;
-
-
+    return (
+      <div className="text-center py-10 text-gray-500">
+        No campaign details found.
+      </div>
+    );
 
   return (
     <div className="w-full max-w-7xl mx-auto text-sm overflow-x-hidden">
@@ -211,46 +208,73 @@ const EditLayout = () => {
           {/* Banner */}
           <div className="bg-white rounded-2xl overflow-hidden ">
             <div className="relative h-40 bg-gray-300">
+             <div className="relative">
+              {/* Campaign Image */}
               <img
                 src={campaignDetails?.photopath}
                 alt="Campaign"
-                className="absolute top-10 left-6 w-24 h-24 rounded-full object-cover border-4 border-white shadow"
+                onClick={() => setIsCampaignPreviewOpen(true)}
+                className="absolute top-10 left-6 w-24 h-24 rounded-full object-cover border-4 border-white shadow cursor-pointer"
                 loading="lazy"
               />
+
+              {/* Image Preview Modal */}
+              {isCampaignPreviewOpen && (
+                <div
+                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                  onClick={() => setIsCampaignPreviewOpen(false)}
+                >
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setIsCampaignPreviewOpen(false)}
+                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                  >
+                    &times;
+                  </button>
+
+                  {/* Enlarged Image */}
+                  <img
+                    src={campaignDetails?.photopath}
+                    alt="Campaign Preview"
+                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
+            </div>
             </div>
 
             <div className="p-6">
               <div className="flex flex-col gap-4 sm:flex-row justify-between items-start mb-5">
                 <div>
-                  <h2 className="font-semibold text-lg">{campaignDetails?.name}</h2>
-                  <p className="text-gray-900 text-sm">{campaignDetails?.businessname}</p>
+                  <h2 className="font-semibold text-lg">
+                    {campaignDetails?.name}
+                  </h2>
+                  <p className="text-gray-900 text-sm">
+                    {campaignDetails?.businessname}
+                  </p>
                   <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-900 font-medium">
                     <div className="text-gray-700 text-sm">
-                      <span className="font-semibold text-gray-900">Apply Before:</span>{" "}
-                      {campaignDetails?.requirements.applicationenddate || "N/A"}
+                      <span className="font-semibold text-gray-900">
+                        Apply Before:
+                      </span>{" "}
+                      {campaignDetails?.requirements.applicationenddate ||
+                        "N/A"}
                     </div>
                     <div className="text-gray-700 text-sm">
-                      <span className="font-semibold text-gray-900">Campaign Start:</span>{" "}
+                      <span className="font-semibold text-gray-900">
+                        Campaign Start:
+                      </span>{" "}
                       {campaignDetails?.requirements.startdate || "N/A"}
                     </div>
-
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <button
-                    aria-label="Stack"
-                    className="p-2 rounded-full border border-gray-300 text-gray-900 hover:text-black hover:border-gray-500 transition"
+                  <Link
+                    to={`/dashboard/browse/apply-now/${campaignId}`}
+                    className="flex-1"
                   >
-                    <RiStackLine size={16} />
-                  </button>
-                  <button
-                    aria-label="Men"
-                    className="p-2 rounded-full border border-gray-300 text-gray-900 hover:text-black hover:border-gray-500 transition"
-                  >
-                    <RiMenLine size={16} />
-                  </button>
-                  <Link to={`/dashboard/browse/apply-now/${campaignId}`} className="flex-1">
                     <button className="w-full px-6 py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition">
                       Edit Application
                     </button>
@@ -260,33 +284,56 @@ const EditLayout = () => {
 
               <div className="flex flex-wrap md:justify-around gap-6 border border-gray-200 rounded-2xl p-5">
                 <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
+                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900 font-semibold">
                     <RiStackLine size={20} />
                     <span>Platform</span>
                   </div>
-                  {campaignDetails.providercontenttype?.map(({ providername, contenttypename }, i) => (
-                    <p key={`${providername}-${contenttypename}-${i}`} className="text-sm text-gray-800">
-                      {providername} - {contenttypename}
-                    </p>
-                  ))}
+                  {campaignDetails?.providercontenttype?.length > 0 ? (
+                    campaignDetails.providercontenttype.map(
+                      ({ providername, contenttypename, iconpath }, i) => (
+                        <div
+                          key={`${providername}-${contenttypename}-${i}`}
+                          className="flex items-center justify-center gap-2 mb-1 text-sm text-gray-800"
+                        >
+                          {iconpath && (
+                            <img
+                              src={iconpath}
+                              alt={providername}
+                              className="w-5 h-5 object-contain"
+                            />
+                          )}
+                          <span>{contenttypename}</span>
+                        </div>
+                      )
+                    )
+                  ) : (
+                    <p className="text-sm text-gray-500">No platform data</p>
+                  )}
                 </div>
                 <div className="min-w-[120px] text-center">
                   <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
                     <RiMoneyRupeeCircleLine size={20} />
                     <span>Budget</span>
                   </div>
-                  <p className="text-sm text-gray-800 font-medium">₹{campaignDetails.estimatedbudget}</p>
+                  <p className="text-sm text-gray-800 font-medium">
+                    ₹{campaignDetails.estimatedbudget}
+                  </p>
                 </div>
                 <div className="min-w-[120px] text-center">
                   <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
                     <RiTranslate size={20} />
                     <span>Language</span>
                   </div>
-                  {campaignDetails.campaignlanguages?.map(({ languagename }, i) => (
-                    <p key={`${languagename}-${i}`} className="text-sm text-gray-800">
-                      {languagename}
-                    </p>
-                  ))}
+                  {campaignDetails.campaignlanguages?.map(
+                    ({ languagename }, i) => (
+                      <p
+                        key={`${languagename}-${i}`}
+                        className="text-sm text-gray-800"
+                      >
+                        {languagename}
+                      </p>
+                    )
+                  )}
                 </div>
                 <div className="min-w-[120px] text-center">
                   <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
@@ -294,7 +341,10 @@ const EditLayout = () => {
                     <span>Gender</span>
                   </div>
                   {campaignDetails.campaigngenders?.map(({ gendername }, i) => (
-                    <p key={`${gendername || "any"}-${i}`} className="text-sm text-gray-800">
+                    <p
+                      key={`${gendername || "any"}-${i}`}
+                      className="text-sm text-gray-800"
+                    >
                       {gendername || "Any"}
                     </p>
                   ))}
@@ -303,18 +353,19 @@ const EditLayout = () => {
             </div>
           </div>
 
-
           {/* Description & Requirements */}
           <div className="bg-white p-6 rounded-2xl">
             <div className="pb-6 border-b border-gray-200">
-              <h3 className="font-semibold text-lg mb-3">Campaign Description</h3>
+              <h3 className="font-semibold text-lg mb-3">
+                Campaign Description
+              </h3>
               <p
-                className={`text-gray-700 leading-relaxed mb-4 ${showFullDetails ? "" : "line-clamp-3"
-                  }`}
+                className={`text-gray-700 text-justify leading-relaxed mb-4 ${
+                  showFullDetails ? "" : "line-clamp-3"
+                }`}
               >
                 {campaignDetails.description || "No description available."}
               </p>
-
 
               {!showFullDetails && (
                 <button
@@ -327,23 +378,30 @@ const EditLayout = () => {
             </div>
             {showFullDetails && (
               <>
-
-                <div className="flex gap-2 items-center justify-start mb-2 font-bold text-gray-900">
-                  <span>Categories</span>
+                <h3 className="text-lg font-semibold mb-3">Categories</h3>
+                <div className="flex flex-wrap gap-2">
+                  {campaignDetails.campaigncategories?.map(
+                    ({ categoryname, categoryid }) => (
+                      <p
+                        key={categoryid || categoryname}
+                        className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
+                      >
+                        {categoryname}
+                      </p>
+                    )
+                  )}
                 </div>
-                {campaignDetails.campaigncategories?.map(({ categoryname, categoryid }) => (
-                  <p key={categoryid || categoryname} className="text-sm text-gray-800">
-                    {categoryname}
-                  </p>
-                ))}
                 <div className="pt-6 border-b border-gray-200">
                   <h3 className="font-semibold text-lg mb-4">Requirements</h3>
                   <ul className="space-y-3 text-gray-900">
                     {requirements.map(({ label, value }, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <RiCheckLine size={16} className="text-gray-900 flex-shrink-0 border rounded" />
+                        <RiCheckLine
+                          size={16}
+                          className="text-gray-900 flex-shrink-0 border rounded"
+                        />
                         <span>
-                          <strong> {label} </strong>  {value}
+                          <strong> {label} </strong> {value}
                         </span>
                       </li>
                     ))}
@@ -351,7 +409,9 @@ const EditLayout = () => {
                   {/* Hashtags */}
                   {campaignDetails.hashtags?.length > 0 && (
                     <div className="my-6">
-                      <h4 className="font-medium mb-2 text-gray-900">Hashtags</h4>
+                      <h4 className="font-medium mb-2 text-gray-900">
+                        Hashtags
+                      </h4>
                       <div className="flex flex-wrap gap-2">
                         {campaignDetails.hashtags.map(({ hashtag }, i) => (
                           <span
@@ -364,107 +424,128 @@ const EditLayout = () => {
                       </div>
                     </div>
                   )}
-
                 </div>
 
                 <div className="pt-6 ">
-                  <h3 className="font-semibold text-lg mb-4">References & Additional Info</h3>
+                  <h3 className="font-semibold text-lg mb-4">
+                    References & Additional Info
+                  </h3>
 
                   {/* Campaign Files */}
                   {campaignDetails.campaignfiles?.length > 0 && (
                     <div className="mb-1">
                       <div className="flex flex-wrap gap-4">
-                        {campaignDetails.campaignfiles.map(({ filepath }, i) => {
-                          const fileUrl = filepath;
-                          const extension = filepath.split(".").pop().toLowerCase();
+                        {campaignDetails.campaignfiles.map(
+                          ({ filepath }, i) => {
+                            const fileUrl = filepath;
+                            const extension = filepath
+                              .split(".")
+                              .pop()
+                              .toLowerCase();
 
-                          const isImage = /\.(png|jpe?g|gif|svg)$/i.test(filepath);
-                          const isVideo = /\.(mp4|webm|ogg)$/i.test(filepath);
-                          const isPdf = extension === "pdf";
-                          const isDoc = ["doc", "docx", "txt"].includes(extension);
+                            const isImage = /\.(png|jpe?g|gif|svg)$/i.test(
+                              filepath
+                            );
+                            const isVideo = /\.(mp4|webm|ogg)$/i.test(filepath);
+                            const isPdf = extension === "pdf";
+                            const isDoc = ["doc", "docx", "txt"].includes(
+                              extension
+                            );
 
-                          return (
-                            <div
-                              key={i}
-                              className="w-24 h-24 rounded-2xl overflow-hidden border border-gray-300 hover:shadow-lg transition flex items-center justify-center bg-gray-100"
-                              title="Open file in new tab"
-                            >
-                              {isImage ? (
-                                <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="w-full h-full block">
-                                  <img
+                            return (
+                              <div
+                                key={i}
+                                className="w-24 h-24 rounded-2xl overflow-hidden border border-gray-300 hover:shadow-lg transition flex items-center justify-center bg-gray-100"
+                                title="Open file in new tab"
+                              >
+                                {isImage ? (
+                                  <a
+                                    href={fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full h-full block"
+                                  >
+                                    <img
+                                      src={fileUrl}
+                                      alt={`Campaign file ${i + 1}`}
+                                      className="w-full h-full object-cover"
+                                      loading="lazy"
+                                    />
+                                  </a>
+                                ) : isVideo ? (
+                                  <video
                                     src={fileUrl}
-                                    alt={`Campaign file ${i + 1}`}
                                     className="w-full h-full object-cover"
-                                    loading="lazy"
+                                    muted
+                                    playsInline
+                                    controls
                                   />
-                                </a>
-                              ) : isVideo ? (
-                                <video
-                                  src={fileUrl}
-                                  className="w-full h-full object-cover"
-                                  muted
-                                  playsInline
-                                  controls
-                                />
-                              ) : isPdf ? (
-                                <a
-                                  href={fileUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex flex-col items-center justify-center text-red-600 text-xs font-semibold w-full h-full"
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="w-8 h-8 mb-1"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth={2}
+                                ) : isPdf ? (
+                                  <a
+                                    href={fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex flex-col items-center justify-center text-red-600 text-xs font-semibold w-full h-full"
                                   >
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                                  </svg>
-                                  PDF
-                                </a>
-                              ) : isDoc ? (
-                                <a
-                                  href={fileUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex flex-col items-center justify-center text-blue-600 text-xs font-semibold w-full h-full"
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="w-8 h-8 mb-1"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth={2}
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="w-8 h-8 mb-1"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                      strokeWidth={2}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M12 4v16m8-8H4"
+                                      />
+                                    </svg>
+                                    PDF
+                                  </a>
+                                ) : isDoc ? (
+                                  <a
+                                    href={fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex flex-col items-center justify-center text-blue-600 text-xs font-semibold w-full h-full"
                                   >
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h6m-6 4h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H9l-4 4v10a2 2 0 002 2z" />
-                                  </svg>
-                                  DOC
-                                </a>
-                              ) : (
-                                <a
-                                  href={fileUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center justify-center text-gray-500 text-xs w-full h-full"
-                                >
-                                  View File
-                                </a>
-                              )}
-                            </div>
-                          );
-                        })}
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="w-8 h-8 mb-1"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                      strokeWidth={2}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M7 8h10M7 12h6m-6 4h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H9l-4 4v10a2 2 0 002 2z"
+                                      />
+                                    </svg>
+                                    DOC
+                                  </a>
+                                ) : (
+                                  <a
+                                    href={fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center text-gray-500 text-xs w-full h-full"
+                                  >
+                                    View File
+                                  </a>
+                                )}
+                              </div>
+                            );
+                          }
+                        )}
                       </div>
                     </div>
                   )}
-
                 </div>
               </>
             )}
-
           </div>
 
           <div className="bg-white p-4 rounded-2xl">
@@ -479,11 +560,25 @@ const EditLayout = () => {
                     <span>Platform</span>
                   </div>
                   {appliedDetails?.providercontenttype?.length > 0 ? (
-                    appliedDetails.providercontenttype.map(({ providername, contenttypename }, i) => (
-                      <p key={`${providername}-${i}`} className="text-gray-800">
-                        {providername} - {contenttypename}
-                      </p>
-                    ))
+                    appliedDetails.providercontenttype.map(
+                      ({ providername, contenttypename, iconpath }, i) => (
+                        <div
+                          key={`${providername}-${i}`}
+                          className="flex items-center gap-2 text-gray-800 mb-1"
+                        >
+                          {iconpath && (
+                            <img
+                              src={iconpath}
+                              alt={providername}
+                              className="w-5 h-5 object-contain"
+                            />
+                          )}
+                          <p className="text-sm">
+                            {contenttypename}
+                          </p>
+                        </div>
+                      )
+                    )
                   ) : (
                     <p className="text-gray-500">N/A</p>
                   )}
@@ -495,7 +590,9 @@ const EditLayout = () => {
                     <RiMoneyRupeeCircleLine className="w-5" />
                     <span>Budget</span>
                   </div>
-                  <p className="text-gray-800">₹{appliedDetails?.budget || "N/A"}</p>
+                  <p className="text-gray-800">
+                    ₹{appliedDetails?.budget || "N/A"}
+                  </p>
                 </div>
 
                 {/* Deadline (Optional - You may remove this if backend doesn't provide) */}
@@ -526,7 +623,9 @@ const EditLayout = () => {
                     const fileUrl = filepath;
                     const extension = filepath.split(".").pop().toLowerCase();
 
-                    const isImage = /\.(png|jpe?g|gif|svg|webp)$/i.test(filepath);
+                    const isImage = /\.(png|jpe?g|gif|svg|webp)$/i.test(
+                      filepath
+                    );
                     const isVideo = /\.(mp4|webm|ogg)$/i.test(filepath);
                     const isPdf = extension === "pdf";
                     const isDoc = ["doc", "docx", "txt"].includes(extension);
@@ -574,7 +673,11 @@ const EditLayout = () => {
                               stroke="currentColor"
                               strokeWidth={2}
                             >
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M12 4v16m8-8H4"
+                              />
                             </svg>
                             PDF
                           </a>
@@ -617,8 +720,6 @@ const EditLayout = () => {
                 </div>
               </div>
             )}
-
-
           </div>
         </div>
 
@@ -632,8 +733,9 @@ const EditLayout = () => {
               <div>
                 <p className="font-medium text-gray-900">Brand Name</p>
                 <p
-                  className={` text-gray-800 whitespace-pre-line ${showFullBrandDesc ? "" : "line-clamp-2"
-                    }`}
+                  className={` text-gray-800 whitespace-pre-line ${
+                    showFullBrandDesc ? "" : "line-clamp-2"
+                  }`}
                 >
                   {campaignDetails.branddetails?.aboutbrand || "N/A"}
                 </p>
@@ -669,9 +771,6 @@ const EditLayout = () => {
               </div>
             </div>
           </div>
-
-
-
         </div>
       </div>
     </div>

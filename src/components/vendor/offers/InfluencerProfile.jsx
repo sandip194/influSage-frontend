@@ -27,6 +27,7 @@ const InfluencerProfile = () => {
     const { userId } = useParams()
     const { token } = useSelector((state) => state.auth);
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
    
 
@@ -185,11 +186,34 @@ const InfluencerProfile = () => {
         {/* Actual content goes here (your current JSX remains unchanged) */}
         {/* Top Header */}
             <div className="flex bg-white rounded-2xl p-6 flex-col md:flex-row  md:items-start gap-6  pb-6">
+                <div className="relative">
                 <img
                     src={influDetails?.photopath}
                     alt="Profile"
-                    className="w-28 h-28 rounded-full object-cover border-4 border-gray-200"
+                    onClick={() => setIsPreviewOpen(true)}
+                    className="w-28 h-28 rounded-full object-cover border-4 border-gray-200 cursor-pointer"
                 />
+
+                {isPreviewOpen && (
+                    <div
+                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                    onClick={() => setIsPreviewOpen(false)}
+                    >
+                    <button
+                        onClick={() => setIsPreviewOpen(false)}
+                        className="absolute top-5 right-6 text-white text-3xl font-bold"
+                    >
+                        &times;
+                    </button>
+                    <img
+                        src={influDetails?.photopath}
+                        alt="Profile Preview"
+                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                        onClick={(e) => e.stopPropagation()} 
+                    />
+                    </div>
+                )}
+                </div>
 
                 <div className="flex-1 w-full">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">

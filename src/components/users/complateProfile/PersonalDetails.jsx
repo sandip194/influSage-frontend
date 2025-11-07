@@ -30,6 +30,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
   const [loading, setLoading] = useState({ countries: false, states: false, cities: false });
   const [existingPhotoPath, setExistingPhotoPath] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormChanged, setIsFormChanged] = useState(false);
   
   const { token , name} = useSelector(state => state.auth);
 
@@ -199,6 +200,7 @@ useEffect(() => {
 
       if (response.status === 200) {
         if (showToast) toast.success('Profile updated successfully!');
+        setIsFormChanged(false);
 
         // Stepper: Go to next
         if (onNext) onNext();
@@ -228,6 +230,7 @@ useEffect(() => {
         form={form}
         layout="vertical"
         className="mt-6"
+        onValuesChange={() => setIsFormChanged(true)}
 
       >
         {/* Profile Image Upload */}
@@ -474,11 +477,14 @@ useEffect(() => {
         {(showControls || onNext) && (
           <div className="flex justify-start mt-6">
             <button
-              className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
               onClick={handleSubmit}
-              disabled={isSubmitting}
-            >
-            {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
+              disabled={!isFormChanged || isSubmitting}
+              className={`px-8 py-3 rounded-full text-white font-medium transition
+              ${
+                isFormChanged && !isSubmitting ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer": "bg-gray-400 cursor-not-allowed"
+              }`}
+              >
+              {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
             </button>
           </div>
         )}

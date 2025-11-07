@@ -22,6 +22,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [loadingLanguages, setLoadingLanguages] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormChanged, setIsFormChanged] = useState(false);
 
   // Custom hook for file handling
   const {
@@ -136,6 +137,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
 
       if (res.status === 200) {
         if (showToast) toast.success("Profile updated successfully!");
+        setIsFormChanged(false)
         onNext?.();
         onSave?.(formData);
       } else {
@@ -165,8 +167,10 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
             beforeUpload={() => false}
             onChange={(info) => {
               handleFileChange(info);
-              info.fileList.length = 0; // reset AntD internal list
+              setIsFormChanged(true);
+              info.fileList.length = 0;
             }}
+
             showUploadList={false}
           >
             <div className="py-10">
@@ -181,7 +185,22 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
         </Form.Item>
 
         {/* File Previews */}
-        <FilePreview files={[...existingFiles, ...fileList]} onRemove={(file) => handleRemove(file.uid)} />
+        <FilePreview
+          files={[
+            ...existingFiles,
+            ...fileList.filter(
+              (file) =>
+                !existingFiles.some(
+                  (existing) =>
+                    existing.name === file.name || existing.url === file.url
+                )
+            ),
+          ]}
+          onRemove={(file) => {
+            handleRemove(file.uid);
+            setIsFormChanged(true);
+          }}
+        />
 
         {/* Portfolio URL */}
         <Form.Item
@@ -193,7 +212,10 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
             placeholder="https://"
             size="large"
             value={portfolioUrl}
-            onChange={e => setPortfolioUrl(e.target.value)}
+            onChange={e => {
+              setPortfolioUrl(e.target.value);
+              setIsFormChanged(true);
+            }}
             className="rounded-lg"
           />
         </Form.Item>
@@ -207,7 +229,10 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
             style={{ width: "100%" }}
             placeholder={loadingLanguages ? "Loading languages..." : "Select Languages"}
             value={selectedLanguages}
-            onChange={setSelectedLanguages}
+            onChange={(values) => {
+              setSelectedLanguages(values);
+              setIsFormChanged(true);
+            }}
             loading={loadingLanguages}
           >
             {languages.map(({ id, name }) => (
@@ -232,12 +257,15 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
           )}
           {(showControls || onNext) && (
             <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`bg-[#0D132D] text-white px-8 py-3 rounded-full hover:bg-[#121A3F] transition ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
-            >
-              {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
-            </button>
+            type="submit"
+                          disabled={!isFormChanged || isSubmitting}
+                          className={`px-8 py-3 rounded-full text-white font-medium transition
+                          ${
+                            isFormChanged && !isSubmitting ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer": "bg-gray-400 cursor-not-allowed"
+                          }`}
+                          >
+                          {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
+                        </button>
           )}
         </div>
       </Form>

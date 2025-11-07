@@ -12,6 +12,7 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
     const [selectedChildren, setSelectedChildren] = useState([]);
     const [error, setError] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isFormChanged, setIsFormChanged] = useState(false);
 
     const { token, role } = useSelector(state => state.auth);
 
@@ -65,10 +66,14 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
     }, []);
 
     const toggleChildSelection = (id) => {
-        setSelectedChildren((prev) =>
-            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-        );
-        setError(false);
+    setSelectedChildren((prev) => {
+        const updated = prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : [...prev, id];
+        setIsFormChanged(true);
+        return updated;
+    });
+    setError(false);
     };
 
     const sendDataToBackend = async (data) => {
@@ -91,6 +96,7 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
 
                 if (res.status === 200) {
                     if (showToast) toast.success('Profile updated successfully!');
+                    setIsFormChanged(false);
 
                     // Stepper: Go to next
                     if (onNext) onNext();
@@ -115,6 +121,7 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
 
                 if (res.status === 200) {
                     if (showToast) toast.success('Profile updated successfully!');
+                    setIsFormChanged(false);
 
                     // Stepper: Go to next
                     if (onNext) onNext();
@@ -158,14 +165,16 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
             }
         });
 
-        sendDataToBackend(selectedData);
         // Save full data to localStorage or send to server
         localStorage.setItem('selectedFullCategoryData', JSON.stringify(selectedData));
 
        // console.log('✅ Saved category data:', selectedData);
        await sendDataToBackend(selectedData);
 
-        if (onNext) onNext();
+        if (onBack) {
+            setIsFormChanged(false);
+            onBack();
+        }
     };
 
 
@@ -247,11 +256,16 @@ export const CategorySelector = ({ onBack, onNext, data, showControls, showToast
                 {/* Next / Save Button */}
                 {(showControls || onNext) && (
                     <button
-                    className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
                         onClick={handleSubmit}
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
+                        disabled={!isFormChanged || isSubmitting}
+                        className={`px-8 py-3 rounded-full text-white font-medium transition
+                            ${
+                            isFormChanged && !isSubmitting
+                                ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                                : "bg-gray-400 cursor-not-allowed"
+                            }`}
+                        >
+                        {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
                     </button>
                 )}
 

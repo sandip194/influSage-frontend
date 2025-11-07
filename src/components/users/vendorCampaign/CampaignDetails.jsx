@@ -50,6 +50,7 @@ const CampaignDetails = () => {
   const { token } = useSelector((state) => state.auth);
   // const [isModalVisible, setIsModalVisible] = useState(false);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
 
   const getCampaignDetails = async () => {
     try {
@@ -347,11 +348,39 @@ const CampaignDetails = () => {
                 alt="Banner"
                 className="w-full h-28 object-cover"
               /> */}
+              <div className="relative">
+              {/* Campaign Logo */}
               <img
                 src={campaignDetails?.photopath}
                 alt="Logo"
-                className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover"
+                onClick={() => setIsCampaignPreviewOpen(true)}
+                className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover cursor-pointer"
               />
+
+              {/* Fullscreen Image Preview */}
+              {isCampaignPreviewOpen && (
+                <div
+                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                  onClick={() => setIsCampaignPreviewOpen(false)}
+                >
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setIsCampaignPreviewOpen(false)}
+                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                  >
+                    &times;
+                  </button>
+
+                  {/* Enlarged Image */}
+                  <img
+                    src={campaignDetails?.photopath}
+                    alt="Campaign Logo Preview"
+                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
+            </div>
             </div>
 
             <div className="p-4">

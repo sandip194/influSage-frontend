@@ -10,6 +10,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
   const [providers, setProviders] = useState([])
   const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormChanged, setIsFormChanged] = useState(false);
 
   const { token } = useSelector(state => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -76,7 +77,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
 
       if (response.status === 200) {
         if (showToast) toast.success('Profile updated successfully!');
-
+        setIsFormChanged(false);
         // Stepper: Go to next
         if (onNext) onNext();
 
@@ -107,7 +108,9 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
       form.setFieldsValue(initialValues);
     }
   }, [data, platforms, form]);
-
+  const handleFormChange = (_, allValues) => {
+    setIsFormChanged(true);
+  };
 
   return (
     <div className="bg-white p-6 rounded-3xl">
@@ -118,7 +121,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
         form={form}
         layout="vertical"
         onFinish={onFinish}
-
+        onValuesChange={handleFormChange}
       >
         <div className="space-y-4">
           {platforms.map((platform) => (
@@ -162,12 +165,14 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
 
           {/* Next / Save Button */}
           {(showControls || onNext) && (
-            <button
-              className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
-              type='submit'
-              disabled={isSubmitting}
-            >
-            {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
+          <button
+              disabled={!isFormChanged || isSubmitting}
+              className={`px-8 py-3 rounded-full text-white font-medium transition
+              ${
+                isFormChanged && !isSubmitting ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer": "bg-gray-400 cursor-not-allowed"
+              }`}
+              >
+              {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
             </button>
           )}
 
