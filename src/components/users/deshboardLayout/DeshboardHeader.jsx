@@ -49,6 +49,10 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [initialMessagesFetched, setInitialMessagesFetched] = useState(false);
 
+  // inside component
+  const [isMobile, setIsMobile] = useState(false);
+
+
   const basePath = role === 1 ? "/dashboard" : "/vendor-dashboard";
 
   // ✅ Memoized logout handler
@@ -90,6 +94,44 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   }, [token, fetchUnreadMessages]);
 
   const memoizedMessages = useMemo(() => unreadMessages, [unreadMessages]);
+
+
+
+  const formatRelativeTime = (timestamp) => {
+    if (!timestamp) return "";
+
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHr / 24);
+
+    if (diffSec < 60) return "Just now";
+    if (diffMin < 60) return `${diffMin} min ago`;
+    if (diffHr < 24) return `${diffHr} hr${diffHr > 1 ? "s" : ""} ago`;
+    if (diffDay === 1) return "Yesterday";
+    if (diffDay < 30) return `${diffDay} days ago`;
+
+    // For older dates, show month name or months ago
+    const diffMonth =
+      now.getMonth() -
+      date.getMonth() +
+      12 * (now.getFullYear() - date.getFullYear());
+
+    if (diffMonth < 12) {
+      if (diffMonth === 1) return "1 month ago";
+      return `${diffMonth} months ago`;
+    }
+
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: now.getFullYear() !== date.getFullYear() ? "numeric" : undefined,
+    });
+  };
+
 
   // 🔔 Fetch only unread notifications (polling)
   const fetchUnreadNotifications = useCallback(async () => {
@@ -215,7 +257,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
                   <>
                     <p className="text-sm mb-1">{item.message}</p>
                     <Text type="secondary" className="text-xs">
-                      {item.time}
+                      {formatRelativeTime(item.time)}
                     </Text>
                   </>
                 }
@@ -226,6 +268,15 @@ const DeshboardHeader = ({ toggleSidebar }) => {
       ),
     [allNotifications]
   );
+
+
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div className="w-full flex justify-between items-center p-4 bg-white shadow-sm border-b border-gray-200">
@@ -252,7 +303,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
             setMessageDropdownVisible(open);
             if (open && !initialMessagesFetched) setLoadingMessages(true);
           }}
-          placement="bottomRight"
+          placement={isMobile ? "bottom" : "bottomRight"} // 👈 Change here
           overlay={
             <MessageDropdown
               messages={memoizedMessages}
@@ -267,6 +318,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
           </Badge>
         </Dropdown>
 
+
         {/* 🔔 Notification Dropdown */}
         <Dropdown
           open={notificationDropdownVisible}
@@ -274,7 +326,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
             setNotificationDropdownVisible(open);
             if (open) setHasUnreadNotifications(false);
           }}
-          placement="bottomRight"
+          placement={isMobile ? "bottom" : "bottomRight"} // 👈
           trigger={["click"]}
           arrow
           overlay={
@@ -291,6 +343,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
             <Button shape="circle" icon={<BellOutlined />} />
           </Badge>
         </Dropdown>
+
 
         {/* 👤 Profile */}
         <Dropdown menu={profileMenu} trigger={["click"]} arrow>

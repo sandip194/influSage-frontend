@@ -30,6 +30,7 @@ const UserTableLayout = () => {
 
     const [statusList, setStatusList] = useState([]); // Dynamic tabs
     const [activeStatusId, setActiveStatusId] = useState(null);
+    const [blockReasonlist, setBlockReasonList] = useState(null)
     const [userList, setUserList] = useState([]);
     const [platforms, setPlatforms] = useState([]); // Dynamic platforms
     const [genders, setGenders] = useState([]); // Dynamic genders
@@ -55,6 +56,10 @@ const UserTableLayout = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [actionType, setActionType] = useState(""); // 'Approved', 'Rejected', or 'Blocked'
+
+    const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+    const [selectedReason, setSelectedReason] = useState(null);
+
 
 
     const fetchStatusList = async () => {
@@ -103,6 +108,18 @@ const UserTableLayout = () => {
             setLoading(false);
         }
     };
+
+    const fetchBlockResons = async () => {
+        try {
+            const res = await axios.get("/admin/dashboard/campaign-block-reason", {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+
+            setBlockReasonList(res?.data?.data)
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     const fetchPlatforms = async () => {
         try {
@@ -159,8 +176,15 @@ const UserTableLayout = () => {
         setCurrentUser(user);
         setCurrentUserId(user.id);
         setActionType(type);
-        setIsModalOpen(true);
+
+        if (type === 'Blocked') {
+            fetchBlockResons(); // Ensure we have the reasons
+            setIsBlockModalOpen(true);
+        } else {
+            setIsModalOpen(true);
+        }
     };
+
 
     // Run initial fetches only once on mount
     useEffect(() => {
@@ -191,6 +215,33 @@ const UserTableLayout = () => {
         if (e.key === "Enter") {
             setSearch(searchInput);
             setPage(1);
+        }
+    };
+
+
+    const handleBlockSubmit = async () => {
+        if (!selectedReason) {
+            toast.error("Please select a reason to block this user.");
+            return;
+        }
+
+        try {
+            const res = await axios.post('/admin/dashboard/profile-block', {
+                p_userid: currentUserId,
+                p_objective: selectedReason,
+            }, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (res.status === 200) {
+                toast.success(res.data?.message || "User blocked successfully");
+                fetchUserRequests();
+                setIsBlockModalOpen(false);
+                setSelectedReason(null);
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Failed to block user");
         }
     };
 
@@ -489,6 +540,49 @@ const UserTableLayout = () => {
                     ?
                 </p>
             </Modal>
+
+            {/* Block Reason Modal */}
+            <Modal
+                title={`Block ${currentUser?.firstname} ${currentUser?.lastname}`}
+                open={isBlockModalOpen}
+                onOk={handleBlockSubmit}
+                onCancel={() => {
+                    setIsBlockModalOpen(false);
+                    setSelectedReason(null);
+                }}
+                okText="Confirm Block"
+                okButtonProps={{
+                    danger: true,
+                    className: "bg-red-600 hover:bg-red-700 text-white",
+                }}
+            >
+                <p className="mb-4 text-gray-700">
+                    Please select a reason for blocking this user:
+                </p>
+
+                {blockReasonlist?.length > 0 ? (
+                    <div className="space-y-3">
+                        {blockReasonlist.map((reason) => (
+                            <label
+                                key={reason.id}
+                                className="flex items-center gap-2 cursor-pointer text-gray-800"
+                            >
+                                <input
+                                    type="radio"
+                                    name="blockReason"
+                                    value={reason.id}
+                                    checked={selectedReason === reason.id}
+                                    onChange={(e) => setSelectedReason(Number(e.target.value))}
+                                />
+                                <span>{reason.name}</span>
+                            </label>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-gray-500 text-sm">No reasons found.</p>
+                )}
+            </Modal>
+
 
 
             {/* Filter Drawer */}
