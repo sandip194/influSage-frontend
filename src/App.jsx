@@ -63,6 +63,7 @@ import DashboardGuard from './routes/DashboardGuard';
 import InfluencerDetailView from './components/admin/pages/InfluencerDetailView';
 import HomePage from './pages/LandingPage/HomePage';
 import CampaignDetailsView from './components/admin/pages/CampaignDetailsView';
+import BlockedUserPage from './pages/commonPages/BlockedUserPage';
 
 const App = () => {
 
@@ -97,7 +98,7 @@ const App = () => {
                                         <Route path='/verify-email-or-mobile' element={<VerifyEmailOrMobile />} />
                                         <Route path='/reset-password' element={<ResetPassword />} />
                                         <Route path='/unauthorized' element={<Unauthorized />} />
-
+                                        <Route path='/User' element={<BlockedUserPage />} />
 
 
 
@@ -187,7 +188,7 @@ const App = () => {
                                                         <Route path='influencers' element={<InfluencersRequests />} />
                                                         <Route path='influencers/details/:userId' element={<InfluencerDetailView />} />
                                                         <Route path='campaigns' element={<CampaignRequests />} />
-                                                        <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView/>} />
+                                                        <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView />} />
                                                 </Route>
                                         </Route>
 

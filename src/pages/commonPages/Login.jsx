@@ -112,6 +112,17 @@ export const LoginForm = () => {
 
       const res = await axios.post("/user/login", payload);
       if (res.status === 200) {
+
+        // Handle blocked or rejected status
+        if (res.data?.p_code === "BLOCKED") {
+          navigate("/User?status=blocked");
+          return;
+        } else if (res.data?.p_code === "REJECTED") {
+          navigate("/User?status=rejected");
+          return;
+        }
+
+
         if (data.rememberMe) {
           localStorage.setItem("rememberedEmail", data.email);
           localStorage.setItem("rememberedPassword", data.password);

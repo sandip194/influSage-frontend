@@ -25,6 +25,12 @@ const InfluencerDetailView = () => {
     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState("");
 
+    // For block reason modal
+    const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+    const [blockReasonList, setBlockReasonList] = useState([]);
+    const [selectedReason, setSelectedReason] = useState(null);
+
+
     const formatPhoneNumber = (phone) => {
         if (!phone) return "No phone";
 
@@ -53,6 +59,19 @@ const InfluencerDetailView = () => {
         }
     };
 
+    const fetchBlockReasons = async () => {
+        try {
+            const res = await axios.get("/admin/dashboard/campaign-block-reason", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setBlockReasonList(res?.data?.data || []);
+        } catch (error) {
+            console.error("Error fetching block reasons:", error);
+            toast.error("Failed to load block reasons");
+        }
+    };
+
+
     // ✅ Unified approval/rejection API (same as in UserTableLayout)
     const handleSubmit = async (statusName) => {
         try {
@@ -75,10 +94,45 @@ const InfluencerDetailView = () => {
         }
     };
 
+    const handleBlockSubmit = async () => {
+        if (!selectedReason) {
+            toast.error("Please select a reason to block this user.");
+            return;
+        }
+
+        try {
+            setActionLoading(true);
+            const res = await axios.post(
+                "/admin/dashboard/profile-block", // ✅ new endpoint
+                { p_userid: userId, p_objective: selectedReason },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (res.status === 200) {
+                toast.success(res.data?.message || "User blocked successfully!");
+                getInfluencerDetails(); // Refresh user details
+                setIsBlockModalOpen(false);
+                setSelectedReason(null);
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Failed to block user");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+
     const openConfirmationModal = (type) => {
         setActionType(type);
-        setIsModalOpen(true);
+        if (type === "Blocked") {
+            fetchBlockReasons(); // Fetch block reasons dynamically
+            setIsBlockModalOpen(true);
+        } else {
+            setIsModalOpen(true);
+        }
     };
+
 
     const openImageModal = (imageSrc) => {
         setSelectedImage(imageSrc);
@@ -427,6 +481,49 @@ const InfluencerDetailView = () => {
                 </p>
             </Modal>
 
+            {/* 🧱 Block Reason Modal */}
+            <Modal
+                title={`Block ${influDetails?.firstname} ${influDetails?.lastname}`}
+                open={isBlockModalOpen}
+                onOk={handleBlockSubmit}
+                onCancel={() => {
+                    setIsBlockModalOpen(false);
+                    setSelectedReason(null);
+                }}
+                okText="Confirm Block"
+                cancelText="Cancel"
+                okButtonProps={{
+                    danger: true,
+                    className: "bg-red-600 hover:bg-red-700 text-white",
+                    loading: actionLoading,
+                }}
+            >
+                <p className="mb-4 text-gray-700">
+                    Please select a reason for blocking this user:
+                </p>
+
+                {blockReasonList?.length > 0 ? (
+                    <div className="space-y-3">
+                        {blockReasonList.map((reason) => (
+                            <label
+                                key={reason.id}
+                                className="flex items-center gap-2 cursor-pointer text-gray-800"
+                            >
+                                <input
+                                    type="radio"
+                                    name="blockReason"
+                                    value={reason.id}
+                                    checked={selectedReason === reason.id}
+                                    onChange={(e) => setSelectedReason(Number(e.target.value))}
+                                />
+                                <span>{reason.name}</span>
+                            </label>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-gray-500 text-sm">No block reasons available.</p>
+                )}
+            </Modal>
 
             {/* 🖼️ Image Modal */}
             <Modal
