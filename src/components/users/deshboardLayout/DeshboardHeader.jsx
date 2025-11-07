@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   BellOutlined,
   MessageOutlined,
@@ -40,6 +40,8 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [initialFetchDone, setInitialFetchDone] = useState(false);
 
   const { token, role, name } = useSelector((state) => state.auth);
   const basePath = role === 1 ? '/dashboard' : '/vendor-dashboard';
@@ -49,62 +51,81 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     navigate("/login");
   };
 
+  // 📨 Fetch unread messages
+  const fetchUnreadMessages = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      const res = await axios.get(`/chat/unread-messages`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const newData = res.data?.data || [];
+
+      // 🧠 Only update if data has changed
+      setUnreadMessages((prev) => {
+        const prevStr = JSON.stringify(prev);
+        const newStr = JSON.stringify(newData);
+        return prevStr !== newStr ? newData : prev;
+      });
+
+      if (!initialFetchDone) setInitialFetchDone(true);
+    } catch (err) {
+      console.error("Error fetching unread messages:", err);
+    } finally {
+      setLoadingMessages(false);
+    }
+  }, [token, initialFetchDone]);
+
+  // ⏱️ Poll messages every 3s
   useEffect(() => {
     if (!token) return;
 
-    const fetchUnreadMessages = async () => {
-      try {
-        const res = await axios.get(`/chat/unread-messages`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUnreadMessages(res.data?.data || []);
-      } catch (err) {
-        console.error("Error fetching unread messages:", err);
-      }
-    };
-
+    setLoadingMessages(true);
     fetchUnreadMessages();
     const interval = setInterval(fetchUnreadMessages, 3000);
     return () => clearInterval(interval);
-  }, [token]);
+  }, [token, fetchUnreadMessages]);
 
-useEffect(() => {
-  if (!token) return;
+  // 🧩 Stable message data (prevents unnecessary re-render)
+  const memoizedMessages = useMemo(() => unreadMessages, [unreadMessages]);
 
-  const getAllNotification = async (limitedData = null) => {
+  useEffect(() => {
     if (!token) return;
-    try {
-      setLoadingNotifications(true);
-      const res = await axios.get("new/getallnotification", {
-        params: { limitedData },
-        headers: { Authorization: `Bearer ${token}` },
-      });
 
-      let data = res.data?.data || [];
+    const getAllNotification = async (limitedData = null) => {
+      if (!token) return;
+      try {
+        setLoadingNotifications(true);
+        const res = await axios.get("new/getallnotification", {
+          params: { limitedData },
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      data = data.filter((item) => item.isread === false);
+        let data = res.data?.data || [];
 
-      const formatted = data.map((item) => ({
-        id: item.notificationid,
-        title: item.title,
-        message: item.description,
-        isRead: item.isread,
-        time: new Date(item.createddate).toLocaleString(),
-      }));
+        data = data.filter((item) => item.isread === false);
 
-      setNotifications(formatted);
-      setHasUnreadNotifications(formatted.length > 0);
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    } finally {
-      setLoadingNotifications(false);
-    }
-  };
+        const formatted = data.map((item) => ({
+          id: item.notificationid,
+          title: item.title,
+          message: item.description,
+          isRead: item.isread,
+          time: new Date(item.createddate).toLocaleString(),
+        }));
 
-  getAllNotification();
-  const interval = setInterval(getAllNotification, 3000);
-  return () => clearInterval(interval);
-}, [token]);
+        setNotifications(formatted);
+        setHasUnreadNotifications(formatted.length > 0);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      } finally {
+        setLoadingNotifications(false);
+      }
+    };
+
+    getAllNotification();
+    const interval = setInterval(getAllNotification, 3000);
+    return () => clearInterval(interval);
+  }, [token]);
 
   const profileMenu = {
     items: [
@@ -174,18 +195,24 @@ useEffect(() => {
       </div>
 
       <div className="flex items-center gap-4">
+        {/* Message Dropdown */}
         <Dropdown
           open={messageDropdownVisible}
           onOpenChange={(open) => {
             setMessageDropdownVisible(open);
-            if (open) setUnreadMessages([]); // mark as read visually
+            if (open && !initialFetchDone) setLoadingMessages(true);
           }}
           placement="bottomRight"
-          overlay={<MessageDropdown messages={unreadMessages} />}
+          overlay={
+            <MessageDropdown
+              messages={memoizedMessages}
+              loading={!initialFetchDone || loadingMessages}
+            />
+          }
           trigger={["click"]}
           arrow
         >
-          <Badge dot={unreadMessages.length > 0} color="red" offset={[-3, 3]}>
+          <Badge dot={memoizedMessages.length > 0} color="red" offset={[-3, 3]}>
             <Button shape="circle" icon={<MessageOutlined />} />
           </Badge>
         </Dropdown>

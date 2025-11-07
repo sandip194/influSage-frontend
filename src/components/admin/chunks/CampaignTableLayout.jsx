@@ -277,7 +277,6 @@ const CampaignTableLayout = () => {
 
           <Button
             size="large"
-            icon={<FilterOutlined />}
             onClick={() => setShowFilters(true)}
           >
             Filters

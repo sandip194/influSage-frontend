@@ -270,13 +270,15 @@ const UserTableLayout = () => {
                                         className="border-t border-gray-200 hover:bg-gray-50 transition"
                                     >
                                         {/* User */}
-                                        <td className="px-4 py-3 flex items-center space-x-3">
-                                            <Skeleton.Avatar active size="large" shape="circle" />
-                                            <Skeleton.Input
-                                                active
-                                                size="small"
-                                                style={{ width: 100 }}
-                                            />
+                                        <td className="px-4">
+                                            <div className="flex items-center space-x-3">
+                                                <Skeleton.Avatar active size="large" shape="circle" />
+                                                <Skeleton.Input
+                                                    active
+                                                    size="small"
+                                                    style={{ width: 100 }}
+                                                />
+                                            </div>
                                         </td>
 
                                         {/* Email */}
@@ -335,15 +337,17 @@ const UserTableLayout = () => {
                                         key={user.id}
                                         className="border-t border-gray-200 hover:bg-gray-100 transition"
                                     >
-                                        <td className="px-4 py-3 flex items-center space-x-3">
-                                            <img
-                                                src={user.photopath}
-                                                alt={user.firstname}
-                                                className="w-10 h-10 rounded-full object-cover"
-                                            />
-                                            <span className="font-medium">
-                                                {user.firstname} {user.lastname}
-                                            </span>
+                                        <td className="px-4">
+                                            <div className="flex items-center space-x-3">
+                                                <img
+                                                    src={user.photopath}
+                                                    alt={user.firstname}
+                                                    className="w-10 h-10 rounded-full object-cover"
+                                                />
+                                                <span className="font-medium">
+                                                    {user.firstname} {user.lastname}
+                                                </span>
+                                            </div>
                                         </td>
                                         <td className="p-4">{user.email}</td>
 
