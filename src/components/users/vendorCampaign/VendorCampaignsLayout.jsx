@@ -384,6 +384,8 @@ const VendorCampaignsLayout = () => {
         </div>
       </div>
 
+      
+
       {/* Table */}
       <div className="bg-white rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
@@ -595,3 +597,109 @@ const VendorCampaignsLayout = () => {
 };
 
 export default VendorCampaignsLayout;
+
+
+
+
+
+
+
+
+
+
+
+
+{/* Search, Status, Sort, and Filter Header */}
+      // <div className="bg-white p-4 rounded-lg mb-4">
+      //   <div className="flex flex-wrap items-center gap-3">
+      //     {/* Search Input */}
+      //     <div className="flex-grow min-w-[200px]">
+      //       <Input
+      //         prefix={<SearchOutlined />}
+      //         size="large"
+      //         placeholder="Search campaigns, Budget, Status..."
+      //         value={searchInput}
+      //         onChange={(e) => setSearchInput(e.target.value)}
+      //         onKeyDown={handleSearch}
+      //         suffix={
+      //           searchInput && (
+      //             <Tooltip title="Clear search" placement="top">
+      //               <CloseCircleFilled
+      //                 onClick={() => {
+      //                   setSearchInput("");
+      //                   setFilters((prev) => ({ ...prev, search: "" }));
+      //                 }}
+      //                 className="text-gray-400 hover:text-gray-600 cursor-pointer"
+      //               />
+      //             </Tooltip>
+      //           )
+      //         }
+      //       />
+      //     </div>
+
+      //     {/* Status Dropdown */}
+      //     <div className="flex-shrink-0 w-full sm:w-48">
+      //       <Select
+      //         size="large"
+      //         value={filters.status || "all"}
+      //         onChange={(value) =>
+      //           setFilters((prev) => ({
+      //             ...prev,
+      //             status: value === "all" ? null : value,
+      //             pagenumber: 1,
+      //           }))
+      //         }
+      //         placeholder="Status"
+      //         className="w-full"
+      //       >
+      //         {statusList.map((statusItem) => {
+      //           const key =
+      //             typeof statusItem === "object" && statusItem.id
+      //               ? statusItem.id
+      //               : getStatusKey(statusItem);
+      //           const label =
+      //             typeof statusItem === "string"
+      //               ? statusItem
+      //               : statusLabels[getStatusKey(statusItem.name)] || statusItem.name;
+      //           return (
+      //             <Option key={key} value={key}>
+      //               {label}
+      //             </Option>
+      //           );
+      //         })}
+      //       </Select>
+      //     </div>
+
+      //     {/* Sort Dropdown */}
+      //     <div className="flex-shrink-0 w-full sm:w-48">
+      //       <Select
+      //         size="large"
+      //         value={`${filters.sortby}_${filters.sortorder}`}
+      //         onChange={handleSortChange}
+      //         placeholder="Sort By"
+      //         className="w-full"
+      //         suffixIcon={<RiArrowDownSLine size={16} />}
+      //       >
+      //         {sortOptions.map((option) => (
+      //           <Option key={option.value} value={option.value}>
+      //             {option.label}
+      //           </Option>
+      //         ))}
+      //       </Select>
+      //     </div>
+
+      //     {/* Filter Button */}
+      //     <div className="flex-shrink-0 w-full sm:w-auto">
+      //       <button
+      //         onClick={() => {
+      //           setTempFilters(filters);
+      //           setShowFilter(true);
+      //         }}
+      //         className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition w-full sm:w-auto"
+      //       >
+      //         Filter
+      //         <RiEqualizerFill size={16} />
+      //       </button>
+      //     </div>
+      //   </div>
+      // </div>

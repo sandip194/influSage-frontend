@@ -45,7 +45,7 @@ const workHistoryData = [
         rating: 3,
     },
 ];
-    const formatPhoneNumber = (phone) => {
+const formatPhoneNumber = (phone) => {
     if (!phone) return "No phone";
 
     const cleaned = phone.replace(/\D/g, "");
@@ -55,7 +55,7 @@ const workHistoryData = [
         number = number.slice(2);
     }
     return `+91 ${number.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3")}`;
-    };
+};
 const VendorMyProfile = () => {
     const [showAllHistory, setShowAllHistory] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -126,21 +126,21 @@ const VendorMyProfile = () => {
 
                             {isPreviewOpen && (
                                 <div
-                                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                                onClick={() => setIsPreviewOpen(false)} 
-                                >
-                                <button
+                                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
                                     onClick={() => setIsPreviewOpen(false)}
-                                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
                                 >
-                                    &times;
-                                </button>
-                                <img
-                                    src={profileData?.p_profile?.photopath}
-                                    alt="Profile Preview"
-                                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                                    onClick={(e) => e.stopPropagation()}
-                                />
+                                    <button
+                                        onClick={() => setIsPreviewOpen(false)}
+                                        className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                                    >
+                                        &times;
+                                    </button>
+                                    <img
+                                        src={profileData?.p_profile?.photopath}
+                                        alt="Profile Preview"
+                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
                                 </div>
                             )}
                         </div>
@@ -197,7 +197,10 @@ const VendorMyProfile = () => {
                         <div>
                             <h2 className="font-bold text-base mb-3">Categories</h2>
                             <div className="flex flex-wrap gap-2">
-                                {profileData?.p_categories?.flatMap(p =>
+                                {(Array.isArray(profileData?.p_categories)
+                                    ? profileData.p_categories
+                                    : []
+                                ).flatMap(p =>
                                     p.categories.map(cat => (
                                         <span
                                             key={cat.categoryid}
@@ -207,28 +210,27 @@ const VendorMyProfile = () => {
                                         </span>
                                     ))
                                 )}
-
                             </div>
+
                         </div>
                     </div>
 
                     {/* Objective Section */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm">
                         <h2 className="font-bold text-base mb-4">Objective</h2>
-                        {profileData?.p_objectives?.length > 0 ? (
-                            <div className="space-y-3">
-                                {profileData.p_objectives.map(obj => (
-                                    <div key={obj.objectiveid}>
-                                        <h3 className="font-semibold text-sm">{obj.name}</h3>
-                                        <p className="text-gray-600 text-sm leading-relaxed">{obj.description}</p>
-                                    </div>
-                                ))}
-                            </div>
+                        {Array.isArray(profileData?.p_objectives) && profileData.p_objectives.length > 0 ? (
+                            profileData.p_objectives.map(obj => (
+                                <div key={obj.objectiveid}>
+                                    <h3 className="font-semibold text-sm">{obj.name}</h3>
+                                    <p className="text-gray-600 text-sm leading-relaxed">{obj.description}</p>
+                                </div>
+                            ))
                         ) : (
                             <p className="text-gray-600 text-sm leading-relaxed">
                                 No objectives available.
                             </p>
                         )}
+
                     </div>
 
                     <div className="bg-white p-4 rounded-2xl shadow-sm">
@@ -333,31 +335,35 @@ const VendorMyProfile = () => {
                     <div className="bg-white rounded-2xl p-4 text-sm w-full">
                         <h3 className="font-bold mb-4 text-base">Platforms</h3>
                         <div className="flex flex-col gap-3">
-                            {profileData?.p_providers?.map((provider) => (
-                                <a
-                                    key={provider.providerid}
-                                    href={provider.handleslink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-4 border border-gray-200 p-4 rounded-lg hover:shadow-md transition"
-                                >
-                                    {provider.iconpath ? (
-                                        <img
-                                            src={provider.iconpath}
-                                            alt={provider.name}
-                                            className="w-10 h-10 object-contain rounded-full"
-                                        />
-                                    ) : (
-                                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
-                                            ?
+                            {Array.isArray(profileData?.p_providers) && profileData.p_providers.length > 0 ? (
+                                profileData.p_providers.map(provider => (
+                                    <a
+                                        key={provider.providerid}
+                                        href={provider.handleslink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-4 border border-gray-200 p-4 rounded-lg hover:shadow-md transition"
+                                    >
+                                        {provider.iconpath ? (
+                                            <img
+                                                src={provider.iconpath}
+                                                alt={provider.name}
+                                                className="w-10 h-10 object-contain rounded-full"
+                                            />
+                                        ) : (
+                                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+                                                ?
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className="font-medium text-base">{provider.name}</p>
                                         </div>
-                                    )}
+                                    </a>
+                                ))
+                            ) : (
+                                <p className="text-gray-500 text-sm">No platforms available.</p>
+                            )}
 
-                                    <div>
-                                        <p className="font-medium text-base">{provider.name}</p>
-                                    </div>
-                                </a>
-                            ))}
                         </div>
                     </div>
 

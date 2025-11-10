@@ -8,7 +8,7 @@ import {
   RiYoutubeFill,
   RiStarLine,
 } from '@remixicon/react';
-import { Modal, Input, Tabs, DatePicker, Skeleton } from 'antd';
+import { Modal, Input, Tabs, DatePicker, Skeleton, ConfigProvider } from 'antd';
 import VendorCampaignOverview from './VendorCampaignOverview';
 import VendorActivity from './VendorActivity';
 import VendorMessage from './VendorMessage';
@@ -23,6 +23,7 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter"; // ✅ Add this
 import toast from 'react-hot-toast';
 
 import dayjs from 'dayjs';
+import VendorContract from './VendorContract';
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
@@ -349,38 +350,38 @@ const CampaignDetails = () => {
                 className="w-full h-28 object-cover"
               /> */}
               <div className="relative">
-              {/* Campaign Logo */}
-              <img
-                src={campaignDetails?.photopath}
-                alt="Logo"
-                onClick={() => setIsCampaignPreviewOpen(true)}
-                className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover cursor-pointer"
-              />
+                {/* Campaign Logo */}
+                <img
+                  src={campaignDetails?.photopath}
+                  alt="Logo"
+                  onClick={() => setIsCampaignPreviewOpen(true)}
+                  className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover cursor-pointer"
+                />
 
-              {/* Fullscreen Image Preview */}
-              {isCampaignPreviewOpen && (
-                <div
-                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                  onClick={() => setIsCampaignPreviewOpen(false)}
-                >
-                  {/* Close Button */}
-                  <button
+                {/* Fullscreen Image Preview */}
+                {isCampaignPreviewOpen && (
+                  <div
+                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
                     onClick={() => setIsCampaignPreviewOpen(false)}
-                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
                   >
-                    &times;
-                  </button>
+                    {/* Close Button */}
+                    <button
+                      onClick={() => setIsCampaignPreviewOpen(false)}
+                      className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                    >
+                      &times;
+                    </button>
 
-                  {/* Enlarged Image */}
-                  <img
-                    src={campaignDetails?.photopath}
-                    alt="Campaign Logo Preview"
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              )}
-            </div>
+                    {/* Enlarged Image */}
+                    <img
+                      src={campaignDetails?.photopath}
+                      alt="Campaign Logo Preview"
+                      className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="p-4">
@@ -452,30 +453,55 @@ const CampaignDetails = () => {
 
           {/* Tabs + Content */}
           <div className="bg-white p-5 rounded-2xl">
-            <Tabs defaultActiveKey="overview">
-              <Tabs.TabPane tab="Overview" key="overview">
-                {campaignDetails && (
-                  <VendorCampaignOverview campaignData={campaignDetails} />
-                )}
 
-              </Tabs.TabPane>
+            <ConfigProvider
+              theme={{
+                components: {
+                  Tabs: {
+                    colorBgContainer: "#0f122f",        // Background for tab container
+                    itemColor: "#0f122f",            // Text color for inactive tab
+                    itemHoverColor: "#0f122f",       // Text color on hover
+                    itemSelectedColor: "#fff",       // Text color when active
+                    itemActiveColor: "#fff",         // Ensures text stays white
+                    itemActiveBg: "#0f122f",         // ✅ Active tab background
+                    itemHoverBg: "#f4f5ff",          // Hover background
+                    cardBg: "#fff",                  // Card tab background
+                    inkBarColor: "#0f122f",          // Underline indicator (for line type)
+                    colorBorderSecondary: "#e5e7eb", // Light border color
+                    colorTextDisabled: "#b0b0b0",    // Disabled tab text
+                  },
+                },
+              }}
+            >
+              <Tabs type="card" defaultActiveKey="overview">
+                <Tabs.TabPane tab="Overview" key="overview">
+                  {campaignDetails && (
+                    <VendorCampaignOverview campaignData={campaignDetails} />
+                  )}
+                </Tabs.TabPane>
 
-              <Tabs.TabPane tab="Activity" key="activity">
-                <VendorActivity />
-              </Tabs.TabPane>
+                {/* <Tabs.TabPane tab="Contract" key="contract">
+                  <VendorContract />
+                </Tabs.TabPane> */}
 
-              <Tabs.TabPane tab="Message" key="message">
-                <VendorMessage />
-              </Tabs.TabPane>
+                <Tabs.TabPane  tab="Activity" key="activity">
+                  <VendorActivity />
+                </Tabs.TabPane>
 
-              <Tabs.TabPane tab="Files & Media" key="files&media">
-                <VendorFilesMedia />
-              </Tabs.TabPane>
+                {/* <Tabs.TabPane  tab="Message" key="message">
+                  <VendorMessage />
+                </Tabs.TabPane> */}
 
-              <Tabs.TabPane tab="Payment" key="payment">
-                <VendorPayment />
-              </Tabs.TabPane>
-            </Tabs>
+                <Tabs.TabPane  tab="Files & Media" key="files&media">
+                  <VendorFilesMedia />
+                </Tabs.TabPane>
+
+                <Tabs.TabPane  tab="Payment" key="payment">
+                  <VendorPayment />
+                </Tabs.TabPane>
+              </Tabs>
+            </ConfigProvider>
+
           </div>
         </div>
 
