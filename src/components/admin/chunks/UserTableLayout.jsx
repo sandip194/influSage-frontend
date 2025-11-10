@@ -422,8 +422,9 @@ const UserTableLayout = () => {
                                         </td>
                                         <td className="p-4">{user.statename}</td>
                                         <td className="p-4">
-                                            {new Date(user.createddate).toLocaleDateString()}
+                                            {new Date(user.createddate).toLocaleDateString("en-GB")}
                                         </td>
+
                                         <td className="px-4 py-3 text-right">
                                             <div className="flex justify-end items-center gap-1">
                                                 <Tooltip title="View">
