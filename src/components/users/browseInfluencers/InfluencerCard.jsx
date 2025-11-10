@@ -23,39 +23,31 @@ const InfluencerCard = ({ influencer, onLike, onInvite, BASE_URL }) => {
       className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-xl/30 hover:shadow-lg transition-all duration-300 flex flex-col justify-between cursor-pointer relative"
     >
 
-       <div className="absolute top-3 right-3">
+       <div className="absolute top-3 right-3 z-10">
           <Tooltip title={influencer?.savedinfluencer ? "Unfavorite" : "Favorite"}>
-            <div
+            <button
+              type="button"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                onLike(influencer?.id);
               }}
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition relative overflow-visible"
             >
-              <button
-                type="button"
-                onMouseDown={(e) => e.stopPropagation()}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onLike(influencer?.id);
-                }}
-                className="flex items-center justify-center w-9 h-9 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition relative overflow-visible"
-              >
-                {influencer?.savedinfluencer ? (
-                  <RiHeartFill
-                    key={`heart-${influencer?.id}-fill`}
-                    size={22}
-                    className="text-red-500 animate-like"
-                  />
-                ) : (
-                  <RiHeartLine
-                    key={`heart-${influencer?.id}-line`}
-                    size={22}
-                    className="text-gray-600 animate-dislike"
-                  />
-                )}
-              </button>
-            </div>
+              {influencer?.savedinfluencer ? (
+                <RiHeartFill
+                  key={`heart-${influencer?.id}-fill`}
+                  size={22}
+                  className="text-red-500 animate-like"
+                />
+              ) : (
+                <RiHeartLine
+                  key={`heart-${influencer?.id}-line`}
+                  size={22}
+                  className="text-gray-600 animate-dislike"
+                />
+              )}
+            </button>
           </Tooltip>
         </div>
 

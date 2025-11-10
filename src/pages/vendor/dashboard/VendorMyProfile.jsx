@@ -167,7 +167,7 @@ const VendorMyProfile = () => {
                                 </div>
                                 <div>
                                     <p className="text-gray-500 text-sm">Total Spending</p>
-                                    <p className="font-semibold text-lg">$1,200</p>
+                                    <p className="font-semibold text-lg">0</p>
                                 </div>
                             </div>
                         </div>

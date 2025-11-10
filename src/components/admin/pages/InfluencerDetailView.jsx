@@ -418,29 +418,40 @@ const InfluencerDetailView = () => {
                         <h3 className="font-bold mb-4 text-base">Social Media</h3>
                         <div className="space-y-4">
                             {influDetails?.providers?.map((item, index) => {
-                                // Normalize link: add https:// if missing
-                                const handleLink = item.handleslink;
+                            const handleLink = item.handleslink?.startsWith("http")
+                                ? item.handleslink
+                                : `https://${item.handleslink}`;
 
-                                return (
-                                    <div
-                                        key={index}
-                                        onClick={() => window.open(handleLink, "_blank", "noopener,noreferrer")}
-                                        className="flex items-center gap-3 p-2 rounded-lg bg-gray-100 cursor-pointer hover:bg-gray-200 transition"
+                            return (
+                                <div
+                                key={index}
+                                onClick={() =>
+                                    window.open(handleLink, "_blank", "noopener,noreferrer")
+                                }
+                                className="flex items-center gap-3 p-2 rounded-lg bg-gray-100 cursor-pointer hover:bg-gray-200 transition"
+                                >
+                                <img
+                                    src={item.iconpath}
+                                    alt="Social"
+                                    className="w-8 h-8 rounded-full object-cover"
+                                />
+                                <div>
+                                    <p className="font-medium text-gray-900">{item.providername}</p>
+                                    <p
+                                    className="text-blue-600 text-xs truncate max-w-[200px] underline"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        window.open(handleLink, "_blank", "noopener,noreferrer");
+                                    }}
                                     >
-                                        <img
-                                            src={item.iconpath}
-                                            alt="Social"
-                                            className="w-8 h-8 rounded-full object-cover"
-                                        />
-                                        <div>
-                                            <p className="font-medium text-gray-900">{item.providername}</p>
-                                            <p className="text-gray-500 text-xs truncate max-w-[200px]">{item.handleslink}</p>
-                                            <p className="text-gray-500 text-xs">
-                                                Followers: {item.nooffollowers?.toLocaleString() || 0}
-                                            </p>
-                                        </div>
-                                    </div>
-                                );
+                                    {item.handleslink}
+                                    </p>
+                                    <p className="text-gray-500 text-xs">
+                                    Followers: {item.nooffollowers?.toLocaleString() || 0}
+                                    </p>
+                                </div>
+                                </div>
+                            );
                             })}
                         </div>
                     </div>
