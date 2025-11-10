@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  RiEyeLine, RiAddFill, RiEqualizerFill, RiCloseFill, RiArrowDownSLine, RiEraserLine, RiAddLine } from "@remixicon/react";
+  RiEyeLine, RiAddFill, RiEqualizerFill, RiCloseFill, RiArrowDownSLine, RiEraserLine, RiFilterLine } from "@remixicon/react";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -504,7 +504,7 @@ const VendorCampaignsLayout = () => {
                     onClick={applyFilters}
                     className="p-2 rounded-full bg-[#141843] text-white hover:bg-[#1d214f] transition"
                   >
-                    <RiAddLine size={18} />
+                    <RiFilterLine size={18} />
                   </button>
                 </Tooltip>
 

@@ -13,7 +13,7 @@ import {
 } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { RiEyeLine, RiArrowDownSLine, RiCloseFill, RiCheckLine, RiEraserLine  } from "react-icons/ri";
+import { RiEyeLine, RiArrowDownSLine, RiCloseFill, RiFilterLine, RiEraserLine  } from "react-icons/ri";
 import { RiEqualizerFill } from "@remixicon/react";
 
 const { Option } = Select;
@@ -483,7 +483,7 @@ const InfluencerCampaigns = () => {
                     onClick={applyFilters}
                     className="p-2 rounded-full bg-[#141843] text-white hover:bg-[#1d214f] transition"
                   >
-                    <RiCheckLine size={18} />
+                    <RiFilterLine size={18} />
                   </button>
                 </Tooltip>
 

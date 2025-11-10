@@ -44,16 +44,16 @@ const CreateCampaign = () => {
           {steps.map(({ id, title, description }) => (
             <div
               key={id}
-              className="border border-gray-200 rounded-2xl p-2 sm:p-4"
+              className="border border-gray-200 rounded-2xl p-3 sm:p-4"
             >
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-wrap">
                 {/* Step number */}
-                <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-100 text-gray-900 font-semibold text-base sm:text-lg shrink-0">
+                <div className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-gray-100 text-gray-900 font-semibold text-sm sm:text-lg shrink-0">
                   {id}
                 </div>
 
                 {/* Step content */}
-                <div>
+                <div className="flex-1">
                   <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1">
                     {title}
                   </h3>

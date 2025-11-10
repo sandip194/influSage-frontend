@@ -222,7 +222,7 @@ const Signup = () => {
                   className="h-4 w-4"
                 />
                 <span>
-                  I agree to{" "}
+                  I agree to the{" "}
                   <span
                     className="text-blue-600 cursor-pointer"
                     onClick={() => setShowModal(true)}

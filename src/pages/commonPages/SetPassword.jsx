@@ -161,7 +161,7 @@ export const SetPassword = () => {
                 className="mt-1 h-4 w-4"
               />
               <p>
-                I agree to{" "}
+                I agree to the{" "}
                 <span
                   className="text-indigo-600 cursor-pointer font-medium"
                   onClick={() => setShowModal(true)}

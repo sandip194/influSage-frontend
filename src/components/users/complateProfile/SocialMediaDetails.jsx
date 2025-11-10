@@ -93,8 +93,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
 
       if (response.status == 200) {
         if (showToast) toast.success('Profile updated successfully!');
-          onClick={handleSubmit}
-
+          setIsFormChanged(false);
         // Stepper: Go to next
         if (onNext) onNext();
 
@@ -171,7 +170,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
           {platforms.map((platform) => (
             <div
               key={platform.field}
-              className="flex flex-col gap-3 border border-gray-100 p-3 rounded-xl bg-gray-50"
+              className="flex flex-col gap-3 border border-gray-100 p-3 rounded-xl bg-gray-100"
             >
               <div className="grid grid-cols-12 gap-4 items-center">
                 {/* Platform (small) */}
@@ -257,15 +256,17 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
           )}
 
           {/* Next / Save Button */}
-          {(showControls || onNext) && (
+           {(showControls || onNext) && (
             <button
-              onClick={onFinish}
+              type="submit"
               disabled={!isFormChanged || isSubmitting}
               className={`px-8 py-3 rounded-full text-white font-medium transition
-              ${
-                isFormChanged && !isSubmitting ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer": "bg-gray-400 cursor-not-allowed"
-              }`}
-              >
+                ${
+                  isFormChanged && !isSubmitting
+                    ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
+            >
               {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
             </button>
           )}

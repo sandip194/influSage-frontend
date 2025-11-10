@@ -5,7 +5,7 @@ import {
   RiEqualizerFill,
   RiCloseFill,
   RiEraserLine,
-  RiAddLine,
+  RiFilterLine,
 } from "@remixicon/react";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import { Input, Pagination, Select, Tooltip } from "antd";
@@ -309,7 +309,7 @@ const Browse = () => {
                     onClick={handleApplyFilters}
                     className="p-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
                   >
-                    <RiAddLine size={18} />
+                    <RiFilterLine size={18} />
                   </button>
                 </Tooltip>
 

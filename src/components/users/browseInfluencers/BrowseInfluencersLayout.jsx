@@ -4,7 +4,7 @@ import axios from "axios";
 import {
   RiEqualizerFill,
   RiCloseFill,
-  RiEraserLine, RiAddLine,
+  RiEraserLine, RiFilterLine,
 } from "@remixicon/react";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import { Input, Pagination, Empty, Skeleton, Tooltip } from "antd";
@@ -410,7 +410,7 @@ const BrowseInfluencersLayout = () => {
                     }}
                     className="p-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
                   >
-                    <RiAddLine size={18} />
+                    <RiFilterLine size={18} />
                   </button>
                 </Tooltip>
 

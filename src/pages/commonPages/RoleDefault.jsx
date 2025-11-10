@@ -72,7 +72,7 @@ export const RoleDefault = () => {
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900">Select Your Role</h2>
             <p className="text-sm text-gray-700 mt-1">
-              Choose your role based on your requirements
+              Choose the role that best matches your needs so we can personalize your experience.
             </p>
           </div>
 
@@ -81,11 +81,10 @@ export const RoleDefault = () => {
             {roles.map((role) => (
               <div
                 key={role.id}
-                className={`flex flex-col items-center justify-center border rounded-xl cursor-pointer p-4 transition-all duration-300 ${
-                  selectedRole === role.id
-                    ? "border-indigo-600 bg-indigo-50 shadow-lg scale-105"
-                    : "border-gray-300 hover:border-indigo-400"
-                }`}
+               className={`flex flex-col items-center justify-center border rounded-xl p-4 cursor-pointer transition duration-300 hover:shadow-md ${Number(selectedRole) === role.id
+                      ? "border-indigo-600 bg-indigo-50 shadow-lg scale-105 ring-2 ring-indigo-300"
+                      : "border-gray-300 bg-white/70"
+                    }`}
                 onClick={() => {
                   setSelectedRole(role.id);
                   setShowError(false);
