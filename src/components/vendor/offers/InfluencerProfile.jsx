@@ -216,69 +216,101 @@ const InfluencerProfile = () => {
                 </div>
 
                 <div className="flex-1 w-full">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                        <div>
-                            <h2 className="text-3xl font-semibold capitalize text-gray-900">
-                                {influDetails?.firstname} {influDetails?.lastname}
-                            </h2>
-                            <p className="text-sm text-gray-900 mt-1">{influDetails?.email}</p>
-                            <p className="text-sm text-gray-900 mt-1">{influDetails?.genderid === 1 ? "Male" : "Female"}</p>
-                            <p className="text-sm text-gray-900 mt-1">
-                                {influDetails?.statename}, {influDetails?.countryname}
-                            </p>
-                        </div>
-
-                        <div className="flex gap-10 mt-4 sm:mt-0 text-center">
-                            <div>
-                                <p className="text-gray-900 font-bold text-xs uppercase tracking-wide">
-                                    Total Campaign
-                                </p>
-                                 <p className="text-lg font-semibold text-gray-900">
-                                    {typeof influDetails?.totalcampaign === "number"? influDetails?.totalcampaign: 0}
-                                </p>
-                            </div>
-                        </div>
+                {/* Header Section */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center relative">
+                    {/* Mobile Like Button */}
+                    <div className="absolute right-0 top-2 sm:hidden">
+                    <Tooltip title={influDetails?.savedinfluencer ? "Unfavorite" : "Favorite"}>
+                        <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleLike();
+                        }}
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border border-[#0e102b]"
+                        >
+                        {influDetails?.savedinfluencer ? (
+                            <RiHeartFill size={18} className="text-red-500" />
+                        ) : (
+                            <RiHeart3Line size={18} />
+                        )}
+                        </button>
+                    </Tooltip>
                     </div>
 
-                    <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-3">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
-                           {influDetails?.invitedcampaigns !== null && (
-                                <Tooltip title="Message">
-                                    <button
-                                    onClick={handleMessageClick}
-                                    className="flex items-center justify-center gap-2 bg-[#0f122f] text-white px-4 py-2 rounded-3xl hover:bg-[#23265a]"
-                                    >
-                                    <RiMessage2Line size={18} /> Send Message
-                                    </button>
-                                </Tooltip>
-                                )}
-                            <button onClick={handleInvite} className="border border-gray-300 text-gray-900 px-5 py-2 rounded-full hover:bg-gray-100 transition w-full sm:w-auto">
-                                Invite
-                            </button>
-                            <Tooltip title={influDetails?.savedinfluencer ? "Unfavorite" : "Favorite"}>
-                                <button
-                                    onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleLike();
-                                    }}
-                                    className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border border-[#0e102b]"
-                                >
-                                    {influDetails?.savedinfluencer ? (
-                                    <RiHeartFill size={18} className="text-red-500" />
-                                    ) : (
-                                    <RiHeart3Line size={18} />
-                                    )}
-                                </button>
-                                </Tooltip>
-
-                        </div>
-
-                        <span className="sm:ml-auto bg-yellow-50 border border-yellow-200 text-yellow-700 px-3 py-2 rounded-2xl text-sm font-medium text-center">
-                            Invitation Pending
-                        </span>
+                    {/* Influencer Info */}
+                    <div>
+                    <h2 className="text-3xl font-semibold capitalize text-gray-900">
+                        {influDetails?.firstname} {influDetails?.lastname}
+                    </h2>
+                    <p className="text-sm text-gray-900 mt-1">{influDetails?.email}</p>
+                    <p className="text-sm text-gray-900 mt-1">
+                        {influDetails?.genderid === 1 ? "Male" : "Female"}
+                    </p>
+                    <p className="text-sm text-gray-900 mt-1">
+                        {influDetails?.statename}, {influDetails?.countryname}
+                    </p>
                     </div>
 
+                    {/* Total Campaign (desktop alignment) */}
+                    <div className="flex gap-10 mt-4 sm:mt-0 text-center">
+                    <div>
+                        <p className="text-gray-900 font-bold text-xs uppercase tracking-wide">
+                        Total Campaign
+                        </p>
+                        <p className="text-lg font-semibold text-gray-900">
+                        {typeof influDetails?.totalcampaign === "number"
+                            ? influDetails?.totalcampaign
+                            : 0}
+                        </p>
+                    </div>
+                    </div>
                 </div>
+
+                {/* Buttons Section */}
+                <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
+                    {influDetails?.invitedcampaigns !== null && (
+                        <Tooltip title="Message">
+                        <button
+                            onClick={handleMessageClick}
+                            className="flex items-center justify-center gap-2 bg-[#0f122f] text-white px-4 py-2 rounded-3xl hover:bg-[#23265a]"
+                        >
+                            <RiMessage2Line size={18} /> Send Message
+                        </button>
+                        </Tooltip>
+                    )}
+
+                    <button
+                        onClick={handleInvite}
+                        className="border border-gray-300 text-gray-900 px-5 py-2 rounded-full hover:bg-gray-100 transition w-full sm:w-auto"
+                    >
+                        Invite
+                    </button>
+
+                    {/* Desktop Like Button (hidden on mobile) */}
+                    <Tooltip title={influDetails?.savedinfluencer ? "Unfavorite" : "Favorite"}>
+                        <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleLike();
+                        }}
+                        className="hidden sm:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border border-[#0e102b]"
+                        >
+                        {influDetails?.savedinfluencer ? (
+                            <RiHeartFill size={18} className="text-red-500" />
+                        ) : (
+                            <RiHeart3Line size={18} />
+                        )}
+                        </button>
+                    </Tooltip>
+                    </div>
+
+                    <span className="sm:ml-auto bg-yellow-50 border border-yellow-200 text-yellow-700 px-3 py-2 rounded-2xl text-sm font-medium text-center">
+                    Invitation Pending
+                    </span>
+                </div>
+                </div>
+
             </div>
 
             {/* Bio & Personal Details */}
