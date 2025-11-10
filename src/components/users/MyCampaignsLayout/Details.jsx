@@ -402,19 +402,24 @@ const Details = () => {
 
             <div className="bg-white p-6 rounded-2xl mt-6">
               <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
+
               <div className="relative">
-                <div className="absolute left-2 top-0 h-full border-l-2 border-dashed border-gray-300"></div>
                 {[
                   { name: "Campaign Created", date: campaign?.trackcampaign?.createddate },
                   { name: "Campaign Started", date: campaign?.trackcampaign?.startdate },
                   { name: "Campaign Ended", date: campaign?.trackcampaign?.enddate },
-                ].map((step, idx) => {
+                ].map((step, idx, arr) => {
                   const stepDate = dayjs(step.date, "DD-MM-YYYY HH:mm");
                   const now = dayjs();
                   const isCompleted = now.isAfter(stepDate) || now.isSame(stepDate);
+                  const isLast = idx === arr.length - 1;
 
                   return (
-                    <div key={idx} className="relative pl-10 pb-6">
+                    <div key={idx} className="relative pl-10 pb-6 last:pb-0">
+                      {!isLast && (
+                        <div className="absolute left-[8px] top-[22px] h-full border-l-2 border-dashed border-gray-300"></div>
+                      )}
+
                       <span className="absolute left-0 top-1">
                         {isCompleted ? (
                           <RiCheckboxCircleFill className="text-[#0f122f]" size={20} />
@@ -422,11 +427,21 @@ const Details = () => {
                           <RiCheckboxBlankCircleLine className="text-gray-400" size={18} />
                         )}
                       </span>
+
+                      {/* Step content */}
                       <div>
-                        <h4 className={`font-semibold ${isCompleted ? "text-gray-800" : "text-gray-400"}`}>
+                        <h4
+                          className={`font-semibold ${
+                            isCompleted ? "text-gray-800" : "text-gray-400"
+                          }`}
+                        >
                           {step.name}
                         </h4>
-                        <p className={`text-sm ${isCompleted ? "text-gray-600" : "text-gray-400"}`}>
+                        <p
+                          className={`text-sm ${
+                            isCompleted ? "text-gray-600" : "text-gray-400"
+                          }`}
+                        >
                           {step.date}
                         </p>
                       </div>
