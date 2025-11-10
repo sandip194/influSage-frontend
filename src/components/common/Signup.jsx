@@ -146,7 +146,7 @@ export const Signup = () => {
             <div style={{ marginTop: "10px", fontSize: "14px", marginBottom: "10px" }}>
               <label>
                 <input type="checkbox" {...register("terms", { required: "Please accept terms & conditions" })} />
-                &nbsp;I agree to&nbsp;
+                &nbsp;I agree to the&nbsp;
                 <span style={{ color: "#0066cc", cursor: "pointer" }} onClick={() => setShowModal(true)}>
                   Terms & Conditions
                 </span>

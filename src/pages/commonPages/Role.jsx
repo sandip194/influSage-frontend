@@ -56,7 +56,7 @@ export const Role = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Select Your Role</h2>
             <p className="text-sm text-gray-700 mt-1">
-              Select your role based on your requirements
+               Choose the role that best matches your needs so we can personalize your experience.
             </p>
           </div>
 
@@ -71,7 +71,7 @@ export const Role = () => {
                     setShowError(false);
                   }}
                   className={`flex flex-col items-center justify-center border rounded-xl p-4 cursor-pointer transition duration-300 hover:shadow-md ${Number(selectedRole) === role.id
-                      ? "border-[#0d0e2f] bg-gray-100"
+                      ? "border-indigo-600 bg-indigo-50 shadow-lg scale-105 ring-2 ring-indigo-300"
                       : "border-gray-300 bg-white/70"
                     }`}
                 >
