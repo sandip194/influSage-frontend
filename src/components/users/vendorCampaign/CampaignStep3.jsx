@@ -197,6 +197,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       applicationenddate: formData.applicationenddate?.format("DD-MM-YYYY") || null,
       branddetail: formData.aboutBrand,
       hashtags: formData.hashtags.map(tag => ({ hashtag: tag })),
+      profileImage: !profileImage && !formData.profileImageUrl,
       photopath: profileImage
         ? null
         : formData.profileImageUrl,
@@ -220,11 +221,16 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
   };
 
   const handleContinue = async () => {
-    const fieldErrors = validateFields(formData, profileImage);
+    const sanitizedFormData = {
+      ...formData,
+      title: formData.title.trim(),
+    };
+
+    const fieldErrors = validateFields(sanitizedFormData, profileImage);
     const milestoneErrors = validateMilestones(
-      formData.milestones,
-      formData.startDate,
-      formData.endDate
+      sanitizedFormData.milestones,
+      sanitizedFormData.startDate,
+      sanitizedFormData.endDate
     );
 
     const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
@@ -232,11 +238,8 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       Object.values(m).some(Boolean)
     );
 
-    // Handle field or milestone errors first
     if (hasFieldErrors || hasMilestoneErrors) {
       setErrors({ ...fieldErrors, milestones: milestoneErrors });
-
-      // Show clear toast messages
       if (fieldErrors.milestoneMismatch) {
         toast.error(fieldErrors.milestoneMismatch);
       } else {
@@ -245,27 +248,24 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       return;
     }
 
-    // Check milestone total against budget (extra guard)
-    const totalMilestoneAmount = formData.milestones.reduce(
+    const totalMilestoneAmount = sanitizedFormData.milestones.reduce(
       (sum, m) => sum + Number(m.amount || 0),
       0
     );
 
-    if (totalMilestoneAmount > Number(formData.budgetAmount)) {
+    if (totalMilestoneAmount > Number(sanitizedFormData.budgetAmount)) {
       toast.error("Total milestone amounts cannot exceed the campaign budget.");
       return;
-    } else if (totalMilestoneAmount < Number(formData.budgetAmount)) {
+    } else if (totalMilestoneAmount < Number(sanitizedFormData.budgetAmount)) {
       toast.warning(
-        `Milestone total (${totalMilestoneAmount}) is less than campaign budget (${formData.budgetAmount}).`
+        `Milestone total (${totalMilestoneAmount}) is less than campaign budget (${sanitizedFormData.budgetAmount}).`
       );
       return;
     }
 
-    const payload = buildPayload(formData, profileImage);
-
+    const payload = buildPayload(sanitizedFormData, profileImage);
     try {
       setLoading(true);
-
       const fd = buildFormData(payload, profileImage);
       if (campaignId) fd.append("campaignId", campaignId);
 
@@ -329,12 +329,10 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
         </div>
       </div>
       {errors.profileImage && (
-        <p className="text-red-500 text-sm mt-2">
-          Please upload a campaign photo
-        </p>
+        <p className="text-red-500 text-sm mt-1">Please upload a campaign image</p>
       )}
       {profileError && (
-        <p className="text-red-500 text-sm mb-3">{profileError}</p>
+        <p className="text-red-500 text-sm mt-1">{profileError}</p>
       )}
 
       {/* Campaign Title */}
@@ -526,7 +524,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       <label className="font-semibold block mb-2">
         Budget <span>(Approx Price)</span>
       </label>
-      <div className="flex gap-4 mb-1">
+      <div className="flex gap-4 mb-1"> 
         <Input
           size="large"
           type="number"

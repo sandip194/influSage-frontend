@@ -132,7 +132,7 @@ const OffersLayout = () => {
                               </div>
                 
                               {/* Mobile view: fixed at bottom */}
-                              <div className="sm:hidden fixed bottom-0 left-0 w-full z-50 bg-white p-4 shadow-md">
+                              <div className="sm:hidden fixed bottom-0 left-0 w-full z-30 bg-white p-4 shadow-md">
                                 <Select
                                   size="large"
                                   value={`${sortby}_${sortorder}`}

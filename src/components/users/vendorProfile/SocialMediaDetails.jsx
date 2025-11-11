@@ -115,7 +115,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
   return (
     <div className="bg-white p-6 rounded-3xl">
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Connect Your Social Media</h2>
-      <p className="text-gray-500 mb-6">Enter the details of your social media handles</p>
+      <p className="text-gray-500 mb-6">Let’s connect your social media profiles to help us understand your reach better.</p>
 
       <Form
         form={form}
@@ -165,13 +165,15 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
 
           {/* Next / Save Button */}
           {(showControls || onNext) && (
-          <button
-              disabled={!isFormChanged || isSubmitting}
+            <button
+              disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
               className={`px-8 py-3 rounded-full text-white font-medium transition
-              ${
-                isFormChanged && !isSubmitting ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer": "bg-gray-400 cursor-not-allowed"
-              }`}
-              >
+                ${
+                  (onNext || isFormChanged) && !isSubmitting
+                    ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
+            >
               {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
             </button>
           )}

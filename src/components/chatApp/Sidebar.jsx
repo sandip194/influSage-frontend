@@ -50,11 +50,10 @@ export default function Sidebar({ onSelectChat }) {
 
 
   // check if this campaign/vendor has an unread message
-  const hasUnreadMessage = (vendor) => {
-    if (!vendor) return false;
-    if (!vendor.readbyinfluencer) return true
-    return false
-  };
+ const hasUnreadMessage = (vendor) => {
+  if (!vendor) return false;
+  return vendor.readbyinfluencer === false || vendor.readbyinfluencer === null;
+};
 
   return (
     <div className="h-full flex rounded-2xl flex-col bg-white">

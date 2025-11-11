@@ -9,7 +9,6 @@ import { toast } from "react-toastify";
 import useFileUpload from "../../../hooks/useFileUpload";
 import FilePreview from "../../common/FilePreview";
 
-
 const { Option } = Select;
 
 const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSave }) => {
@@ -23,6 +22,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
   const [loadingLanguages, setLoadingLanguages] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFormChanged, setIsFormChanged] = useState(false);
+  const [validationError, setValidationError] = useState(""); // ✅ NEW
 
   // Custom hook for file handling
   const {
@@ -68,7 +68,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
           uid: `existing-${index}`,
           name: f.filepath.split("/").pop(),
           url: f.filepath,
-          type: f.filepath.split(".").pop() // basic type
+          type: f.filepath.split(".").pop()
         }));
       setExistingFiles(filesFromBackend);
     }
@@ -83,79 +83,97 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
   }, [data, languages, setExistingFiles]);
 
   const handleSubmit = async () => {
-    if (isSubmitting) return;
+  if (isSubmitting) return;
 
-    try {
+  try {
     setIsSubmitting(true);
-      const hasFiles = fileList.length > 0 || existingFiles.length > 0;
-      const isValidUrl = /^https?:\/\/.+/.test(portfolioUrl);
+    setValidationError("");
 
-      if (!hasFiles && !isValidUrl) {
-        message.error("Upload at least one file or add a valid URL.");
-        return;
-      }
+    const hasFiles = fileList.length > 0 || existingFiles.length > 0;
+    const url = portfolioUrl.trim();
+    const isValidUrl = /^https?:\/\/.+/.test(url);
 
-      if (selectedLanguages.length === 0) {
-        message.error("Select at least one language.");
-        return;
-      }
-
-      // Delete removed files
-      for (const filepath of deletedFilePaths) {
-        await axios.post("/user/profile/delete-portfolio-file", { userId, filepath }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      }
-
-      const formData = new FormData();
-
-      const existingFilePaths = existingFiles.map(f => ({
-        filepath: f.url.startsWith("http") ? f.url.replace(`${BASE_URL}/`, "") : f.url
-      }));
-
-      const selectedLanguagesData = selectedLanguages
-        .map(langId => {
-          const lang = languages.find(l => l.id === langId);
-          return lang ? { languageid: lang.id, languagename: lang.name } : null;
-        })
-        .filter(Boolean);
-
-      formData.append("portfoliojson", JSON.stringify({
-        portfoliourl: isValidUrl ? portfolioUrl : null,
-        filepaths: existingFilePaths.length ? existingFilePaths : [{ filepath: null }],
-        languages: selectedLanguagesData
-      }));
-
-      fileList.forEach(f => formData.append("portfolioFiles", f));
-
-      const res = await axios.post("user/complete-profile", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (res.status === 200) {
-        if (showToast) toast.success("Profile updated successfully!");
-        setIsFormChanged(false)
-        onNext?.();
-        onSave?.(formData);
-      } else {
-        message.error("Something went wrong.");
-      }
-
-    } catch (err) {
-      console.error("Submit error:", err);
-      message.error("Failed to submit portfolio.");
-    } finally {
+    // ✅ Require at least one: file OR valid URL
+    if (!hasFiles && !isValidUrl) {
+      setValidationError("Please upload at least one portfolio file or enter a valid portfolio URL.");
+      message.error("Please upload at least one portfolio file or enter a valid portfolio URL.");
       setIsSubmitting(false);
+      return;
     }
-  };
+
+    // ✅ Require language selection
+    if (selectedLanguages.length === 0) {
+      message.error("Please select at least one language.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    for (const filepath of deletedFilePaths) {
+      await axios.post(
+        "/user/profile/delete-portfolio-file",
+        { userId, filepath },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    }
+
+    const formData = new FormData();
+
+    const existingFilePaths = existingFiles.map(f => ({
+      filepath: f.url.startsWith("http")
+        ? f.url.replace(`${BASE_URL}/`, "")
+        : f.url
+    }));
+
+    const selectedLanguagesData = selectedLanguages
+      .map(langId => {
+        const lang = languages.find(l => l.id === langId);
+        return lang ? { languageid: lang.id, languagename: lang.name } : null;
+      })
+      .filter(Boolean);
+
+    formData.append(
+      "portfoliojson",
+      JSON.stringify({
+        portfoliourl: isValidUrl ? url : null,
+        filepaths: existingFilePaths.length
+          ? existingFilePaths
+          : [{ filepath: null }],
+        languages: selectedLanguagesData,
+      })
+    );
+
+    fileList.forEach(f => formData.append("portfolioFiles", f));
+
+    const res = await axios.post("user/complete-profile", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.status === 200) {
+      if (showToast) toast.success("Profile updated successfully!");
+      setIsFormChanged(false);
+      onSave?.(formData);
+      onNext?.();
+    } else {
+      message.error("Something went wrong while saving.");
+    }
+  } catch (err) {
+    console.error("Submit error:", err);
+    message.error("Failed to submit portfolio.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <div className="bg-white p-6 rounded-3xl">
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Portfolio</h2>
-      <p className="text-gray-600 mb-6 text-sm sm:text-base">Upload your portfolio or recent works</p>
+      <p className="text-gray-600 mb-6 text-sm sm:text-base">
+        Upload your portfolio or recent works
+      </p>
 
       <Form layout="vertical" form={form} onFinish={handleSubmit}>
         {/* File Uploader */}
@@ -170,7 +188,6 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
               setIsFormChanged(true);
               info.fileList.length = 0;
             }}
-
             showUploadList={false}
           >
             <div className="py-10">
@@ -181,7 +198,11 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
               </p>
             </div>
           </Dragger>
-          {fileError && <p className="text-red-500 text-sm mt-2 text-center">{fileError}</p>}
+          {(fileError || validationError) && (
+            <p className="text-red-500 text-sm mt-2 text-center">
+              {fileError || validationError}
+            </p>
+          )}
         </Form.Item>
 
         {/* File Previews */}
@@ -206,13 +227,17 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
         <Form.Item
           label={<span className="font-semibold text-sm text-gray-800">Portfolio URL</span>}
           validateStatus={portfolioUrl && !/^https?:\/\/.+/.test(portfolioUrl) ? "warning" : ""}
-          help={portfolioUrl && !/^https?:\/\/.+/.test(portfolioUrl) ? "Enter a valid URL (https://...)" : ""}
+          help={
+            portfolioUrl && !/^https?:\/\/.+/.test(portfolioUrl)
+              ? "Enter a valid URL (https://...)"
+              : ""
+          }
         >
           <Input
             placeholder="https://"
             size="large"
             value={portfolioUrl}
-            onChange={e => {
+            onChange={(e) => {
               setPortfolioUrl(e.target.value);
               setIsFormChanged(true);
             }}
@@ -222,7 +247,9 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
 
         {/* Languages */}
         <Form.Item className="mb-6">
-          <label className="block mb-2 font-semibold text-gray-700">Languages <span className="text-red-500">*</span></label>
+          <label className="block mb-2 font-semibold text-gray-700">
+            Languages <span className="text-red-500">*</span>
+          </label>
           <Select
             mode="multiple"
             size="large"
@@ -240,7 +267,9 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
             ))}
           </Select>
           {selectedLanguages.length === 0 && (
-            <div className="text-red-500 text-sm mt-2">Please select at least one language</div>
+            <p className="text-red-500 text-sm mt-2 text-center">
+              Please select at least one language.
+            </p>
           )}
         </Form.Item>
 
@@ -257,15 +286,17 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
           )}
           {(showControls || onNext) && (
             <button
-            type="submit"
-                          disabled={!isFormChanged || isSubmitting}
-                          className={`px-8 py-3 rounded-full text-white font-medium transition
-                          ${
-                            isFormChanged && !isSubmitting ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer": "bg-gray-400 cursor-not-allowed"
-                          }`}
-                          >
-                          {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
-                        </button>
+              type="submit"
+              disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
+              className={`px-8 py-3 rounded-full text-white font-medium transition
+                ${
+                  (onNext || isFormChanged) && !isSubmitting
+                    ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
+            >
+              {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
+            </button>
           )}
         </div>
       </Form>

@@ -7,6 +7,7 @@ import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
 import { useParams } from "react-router-dom";
 import influencer from '../../../assets/influencer.jpg'
+import { Spin } from "antd";
 
 import {
   RiCheckboxCircleFill,
@@ -27,6 +28,9 @@ const CampaignReviewStep = ({ onEdit }) => {
   const [lightboxVideo, setLightboxVideo] = useState({ open: false, src: "" });
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { campaignId } = useParams();
+  const [loadingAction, setLoadingAction] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
+  const [loadingSend, setLoadingSend] = useState(false);
 
 
 
@@ -134,6 +138,9 @@ const CampaignReviewStep = ({ onEdit }) => {
 
   const handleCreateCampaign = async (status) => {
     try {
+      if (status === "Draft") setLoadingDraft(true);
+      if (status === "ApprovalPending") setLoadingSend(true);
+
       const authToken = token || localStorage.getItem("token");
       if (!authToken) {
         toast.error("No token found. Please log in again.");
@@ -144,10 +151,7 @@ const CampaignReviewStep = ({ onEdit }) => {
         userid: userId,
         p_campaignid: campaignId || null,
         objective: campaignData?.p_objectivejson || {},
-        vendorinfo: {
-          ...p_vendorinfojson,
-          genders,
-        },
+        vendorinfo: { ...p_vendorinfojson, genders },
         campaign: campaignData?.p_campaignjson || {},
         references: campaignData?.p_campaignfilejson || [],
         contenttypes: campaignData?.p_contenttypejson || [],
@@ -162,12 +166,13 @@ const CampaignReviewStep = ({ onEdit }) => {
       });
 
       toast.success(res.data.message || "Campaign created successfully!");
-
-      // Redirect after success
       navigate("/vendor-dashboard/vendor-campaign");
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || "Failed to create campaign");
+    } finally {
+      setLoadingDraft(false);
+      setLoadingSend(false);
     }
   };
 
@@ -581,25 +586,42 @@ const CampaignReviewStep = ({ onEdit }) => {
       {/* Buttons */}
       <div className="flex max-w-sm gap-3 mt-3">
         <button
-          className="flex-1 bg-white border border-gray-300 text-gray-800 py-3 rounded-full"
+          className="flex-1 bg-white border border-gray-300 text-gray-800 py-3 rounded-full disabled:opacity-60"
           onClick={onEdit}
           type="button"
+          disabled={loadingDraft || loadingSend}
         >
           Edit Campaign
         </button>
+
         <button
-          className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full"
+          className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full disabled:opacity-60 flex items-center justify-center gap-2"
           onClick={() => handleCreateCampaign("Draft")}
           type="button"
+          disabled={loadingDraft || loadingSend}
         >
-          Save Draft
+          {loadingDraft ? (
+            <>
+              <Spin size="small" /> <span>Saving...</span>
+            </>
+          ) : (
+            "Save Draft"
+          )}
         </button>
+
         <button
-          className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full"
+          className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full disabled:opacity-60 flex items-center justify-center gap-2"
           onClick={() => handleCreateCampaign("ApprovalPending")}
           type="button"
+          disabled={loadingDraft || loadingSend}
         >
-          Send To Admin
+          {loadingSend ? (
+            <>
+              <Spin size="small" /> <span>Sending...</span>
+            </>
+          ) : (
+            "Send To Admin"
+          )}
         </button>
       </div>
     </div>

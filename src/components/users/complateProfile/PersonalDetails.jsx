@@ -467,27 +467,31 @@ useEffect(() => {
           <TextArea
             rows={4}
             showCount
-            maxLength={100}
+            maxLength={500}
             placeholder="Tell us about yourself..."
             className="rounded-xl"
           />
         </Form.Item>
 
         {/* Submit Button */}
-        {(showControls || onNext) && (
-          <div className="flex justify-start mt-6">
-            <button
-              onClick={handleSubmit}
-              disabled={!isFormChanged || isSubmitting}
-              className={`px-8 py-3 rounded-full text-white font-medium transition
-              ${
-                isFormChanged && !isSubmitting ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer": "bg-gray-400 cursor-not-allowed"
-              }`}
+          {(showControls || onNext) && (
+            <div className="flex justify-start mt-6">
+              <button
+                onClick={handleSubmit}
+                disabled={
+                  (onNext ? isSubmitting : !isFormChanged || isSubmitting) 
+                }
+                className={`px-8 py-3 rounded-full text-white font-medium transition
+                  ${
+                    !isSubmitting && (onNext || isFormChanged)
+                      ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                      : "bg-gray-400 cursor-not-allowed"
+                  }`}
               >
-              {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
-            </button>
-          </div>
-        )}
+                {isSubmitting ? (<Spin size="small" />) : onNext ? ( "Continue" ) : ( "Save Changes" )}
+              </button>
+            </div>
+          )}
 
       </Form>
     </div>

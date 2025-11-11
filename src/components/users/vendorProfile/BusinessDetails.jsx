@@ -403,21 +403,21 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
                 {/* Submit Button */}
                 {(showControls || onNext) && (
-                <div className="flex justify-start mt-6">
-                    <button
-                    className={`px-8 py-3 rounded-full text-white font-medium transition
-                        ${
-                        isFormChanged && !isSubmitting
-                            ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
-                            : "bg-gray-400 cursor-not-allowed"
-                        }`}
-                    onClick={handleSubmit}
-                    disabled={!isFormChanged || isSubmitting}
-                    >
-                    {isSubmitting ? <Spin size="small" /> : (onNext ? "Continue" : "Save Changes")}
-                    </button>
-                </div>
-                )}
+                    <div className="flex justify-start mt-6">
+                        <button
+                        className={`px-8 py-3 rounded-full text-white font-medium transition
+                            ${
+                            (onNext || isFormChanged) && !isSubmitting
+                                ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                                : "bg-gray-400 cursor-not-allowed"
+                            }`}
+                        onClick={handleSubmit}
+                        disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
+                        >
+                        {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
+                        </button>
+                    </div>
+                    )}
             </Form>
         </div>
     );

@@ -399,7 +399,7 @@ const CampaignDetails = () => {
                       onClick={handleEditClick}
                       className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
                     >
-                      Edit Campaign
+                      Edit
                     </button>
                   )}
                   {/* <button
@@ -413,7 +413,7 @@ const CampaignDetails = () => {
                     onClick={() => setCancelModel(true)}
                     className="w-full sm:w-auto px-6 py-2 rounded-full border border-red-400 text-red-900 font-semibold hover:bg-gray-50"
                   >
-                    Cancel Campaign
+                    Cancel
                   </button>
                 </div>
               </div>

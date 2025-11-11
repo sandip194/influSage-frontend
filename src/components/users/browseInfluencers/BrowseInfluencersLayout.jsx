@@ -311,7 +311,7 @@ const BrowseInfluencersLayout = () => {
 
         {/* Mobile view: fixed at bottom */}
         {!showFilter && (
-          <div className="sm:hidden fixed bottom-0 left-0 w-full z-50 bg-white p-3 flex justify-end shadow-md">
+          <div className="sm:hidden fixed bottom-0 left-0 w-full z-30 bg-white p-3 flex justify-end shadow-md">
             <button
               onClick={() => setShowFilter(true)}
               className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white hover:bg-gray-100 w-full max-w-xs mx-auto"
@@ -374,7 +374,7 @@ const BrowseInfluencersLayout = () => {
             className="fixed inset-0 bg-black/30 z-40"
             onClick={() => setShowFilter(false)}
           />
-          <div className="fixed top-0 right-0 w-80 h-full bg-white p-4 z-50 shadow-lg overflow-y-auto">
+          <div className="fixed top-0 right-0 w-80 h-full bg-white p-4 z-50 shadow-2xl overflow-y-auto transition-transform duration-300 transform translate-x-0" >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Filter Options</h3>
               <div className="flex items-center gap-2">

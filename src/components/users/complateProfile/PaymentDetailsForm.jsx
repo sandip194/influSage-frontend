@@ -560,7 +560,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
             ]}
           >
             <Checkbox>
-              By Adding this bank account, I agree to{" "}
+              By Adding this bank account, I agree to the{" "}
               <Link onClick={() => setTermsVisible(true)}>
                 <b>Payment Terms & Conditions</b>
               </Link>
@@ -584,13 +584,13 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
             {(showControls || onNext) && (
               <button
                 type="submit"
-                disabled={!isFormChanged || isSubmitting}
+                disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
                 className={`px-8 py-3 rounded-full text-white font-medium transition
-                ${
-                  isFormChanged && !isSubmitting
-                    ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
-                    : "bg-gray-400 cursor-not-allowed"
-                }`}
+                  ${
+                    (onNext || isFormChanged) && !isSubmitting
+                      ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                      : "bg-gray-400 cursor-not-allowed"
+                  }`}
               >
                 {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
               </button>

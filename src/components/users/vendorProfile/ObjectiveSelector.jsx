@@ -148,12 +148,13 @@ const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSa
         {(showControls || onNext) && (
           <button
             onClick={handleContinue}
-            disabled={!isFormChanged || isSubmitting}
-            className={`px-8 py-3 rounded-full text-white font-medium transition ${
-              isFormChanged && !isSubmitting
-                ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
-                : "bg-gray-400 cursor-not-allowed"
-            }`}
+            disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
+            className={`px-8 py-3 rounded-full text-white font-medium transition
+              ${
+                (onNext || isFormChanged) && !isSubmitting
+                  ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
           >
             {isSubmitting ? (
               <Spin size="small" />

@@ -353,7 +353,7 @@ const VendorCampaignsLayout = () => {
           />
 
           {!showFilter && (
-            <div className="sm:static fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-200 flex gap-2 justify-between sm:flex-row sm:w-auto sm:border-none sm:p-0 z-50">
+            <div className="sm:static fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-200 flex gap-2 justify-between sm:flex-row sm:w-auto sm:border-none sm:p-0 z-30">
               <Select
                 size="large"
                 value={`${filters.sortby}_${filters.sortorder}`}

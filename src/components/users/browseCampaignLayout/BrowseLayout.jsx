@@ -231,7 +231,7 @@ const Browse = () => {
           />
 
           {/* Sort + Filter */}
-          <div className="flex gap-2 w-full sm:w-auto justify-end">
+          <div className="hidden sm:flex gap-2 w-auto justify-end">
             <Select
               size="large"
               value={`${filters.sortby}_${filters.sortorder}`}
@@ -258,6 +258,35 @@ const Browse = () => {
               <RiEqualizerFill size={16} />
             </button>
           </div>
+          {!showFilter && (
+            <div className="sm:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-30 p-4 flex gap-3 justify-between">
+              <Select
+                size="large"
+                value={`${filters.sortby}_${filters.sortorder}`}
+                onChange={(value) => {
+                  const [sortby, sortorder] = value.split("_");
+                  setFilters((prev) => ({ ...prev, sortby, sortorder, pagenumber: 1 }));
+                }}
+                className="flex-1"
+                placeholder="Sort By"
+                suffixIcon={<RiArrowDownSLine size={16} />}
+              >
+                {sortOptions.map((option) => (
+                  <Select.Option key={option.value} value={option.value}>
+                    {option.label}
+                  </Select.Option>
+                ))}
+              </Select>
+
+              <button
+                onClick={() => setShowFilter(true)}
+                className="flex-1 flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition"
+              >
+                Filter
+                <RiEqualizerFill size={16} />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Campaign Grid */}
@@ -291,7 +320,12 @@ const Browse = () => {
             className="fixed inset-0 bg-black/30 z-40"
             onClick={() => setShowFilter(false)}
           />
-          <div className="fixed top-0 right-0 w-80 h-full bg-white p-4 z-50 shadow-lg overflow-y-auto">
+          <div
+            className="fixed bg-white p-4 z-50 shadow-lg overflow-y-auto transition-transform duration-300
+                      sm:top-0 sm:right-0 sm:w-80 sm:h-full
+                      bottom-0 left-0 w-full h-[80vh] sm:rounded-none rounded-t-2xl"
+          >
+
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Filter Options</h3>
               <div className="flex items-center gap-2">

@@ -101,6 +101,24 @@ export const VerifyEmailOrMobile = () => {
     }
   };
 
+  const handlePaste = (e) => {
+  e.preventDefault();
+  const pasted = e.clipboardData.getData("text").replace(/[^0-9]/g, "");
+  if (!pasted) return;
+
+  const newOtp = [...otp];
+  for (let i = 0; i < 4 && i < pasted.length; i++) {
+    newOtp[i] = pasted[i];
+  }
+  setOtp(newOtp);
+
+  // Move focus to the last filled input
+  const lastFilled = Math.min(pasted.length, 4) - 1;
+  if (lastFilled >= 0 && inputsRef[lastFilled]) {
+    inputsRef[lastFilled].current.focus();
+  }
+};
+
   return (
     <div className="relative flex justify-center items-center min-h-screen bg-gray-100 p-5 font-[Segoe_UI,Tahoma,Geneva,Verdana,sans-serif] overflow-hidden">
       {/* Background */}
@@ -141,6 +159,7 @@ export const VerifyEmailOrMobile = () => {
                   value={digit}
                   onChange={(e) => handleChange(e, idx)}
                   onKeyDown={(e) => handleKeyDown(e, idx)}
+                  onPaste={handlePaste}
                   autoFocus={idx === 0}
                   className="w-12 h-12 text-center text-lg font-semibold border border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white/70"
                 />

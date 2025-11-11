@@ -72,7 +72,6 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
           existingNames.has(fileNameLower) ||
           newNames.has(fileNameLower)
         ) {
-          errorMessages.add(`${file.name}: already uploaded`);
           continue;
         }
 
