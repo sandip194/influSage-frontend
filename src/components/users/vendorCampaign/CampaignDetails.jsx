@@ -24,6 +24,7 @@ import toast from 'react-hot-toast';
 
 import dayjs from 'dayjs';
 import VendorContract from './VendorContract';
+import ViewAllOffers from '../../vendor/offers/ViewAllOffers';
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
@@ -480,11 +481,17 @@ const CampaignDetails = () => {
                   )}
                 </Tabs.TabPane>
 
-                {/* <Tabs.TabPane tab="Contract" key="contract">
-                  <VendorContract />
-                </Tabs.TabPane> */}
+                <Tabs.TabPane tab="Applications" key="applications">
+                  {campaignDetails && (
+                    <ViewAllOffers campaignData={campaignDetails} />
+                  )}
+                </Tabs.TabPane>
 
-                <Tabs.TabPane  tab="Activity" key="activity">
+                <Tabs.TabPane tab="Contract" key="contract">
+                  <VendorContract />
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="Activity" key="activity">
                   <VendorActivity />
                 </Tabs.TabPane>
 
@@ -492,11 +499,11 @@ const CampaignDetails = () => {
                   <VendorMessage />
                 </Tabs.TabPane> */}
 
-                <Tabs.TabPane  tab="Files & Media" key="files&media">
+                <Tabs.TabPane tab="Files & Media" key="files&media">
                   <VendorFilesMedia />
                 </Tabs.TabPane>
 
-                <Tabs.TabPane  tab="Payment" key="payment">
+                <Tabs.TabPane tab="Payment" key="payment">
                   <VendorPayment />
                 </Tabs.TabPane>
               </Tabs>
