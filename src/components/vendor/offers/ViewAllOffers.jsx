@@ -10,9 +10,10 @@ import {
   RiArrowLeftLine,
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import InfluencerDetailsModal from "./InfluencerDetailsModal";
 
 
 const statusLabels = {
@@ -24,7 +25,7 @@ const statusLabels = {
 
 
 
-const ViewAllOffers = () => {
+const ViewAllOffers = ({ campaignData }) => {
 
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,16 +34,20 @@ const ViewAllOffers = () => {
   const [pagesize, setPageSize] = useState(10); // or any default
   const [applications, setApplications] = useState([])
   const [totalOffers, setTotalOffers] = useState(0);
+  const [showInfluencerModal, setShowInfluencerModal] = useState(false);
+  const [selectedInfluencerId, setSelectedInfluencerId] = useState(null);
+
+
 
 
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const { id } = useParams();
+  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  // const { id } = useParams();
 
 
   const handleViewOffer = async (offer) => {
-   // console.log(offer.status)
+    // console.log(offer.status)
     if (offer.status === "Applied" && offer.status !== "Viewed") {
       try {
         await axios.post(
@@ -73,8 +78,13 @@ const ViewAllOffers = () => {
     navigate(`/vendor-dashboard/applications/${offer.applicationid}`);
   };
 
+  // const handleViewProfile = (offer) => {
+  //   navigate(`/vendor-dashboard/applications/influencer-details/${offer.id}`);
+  // };
+
   const handleViewProfile = (offer) => {
-    navigate(`/vendor-dashboard/applications/influencer-details/${offer.id}`);
+    setSelectedInfluencerId(offer.id);
+    setShowInfluencerModal(true);
   };
 
   // Action handler map
@@ -114,7 +124,7 @@ const ViewAllOffers = () => {
     try {
       setLoading(true)
 
-      const res = await axios.get(`/vendor/view-all-offers/${id}`, {
+      const res = await axios.get(`/vendor/view-all-offers/${campaignData?.id}`, {
         params: {
           pagenumber,
           pagesize,
@@ -126,7 +136,7 @@ const ViewAllOffers = () => {
       })
 
       const { records, totalcount } = res.data.data;
-     // console.log(records)
+      // console.log(records)
       setApplications(records)
       setTotalOffers(totalcount)
 
@@ -143,22 +153,22 @@ const ViewAllOffers = () => {
 
   return (
     <div className="text-sm">
-      <button
+      {/* <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-gray-600 mb-2"
       >
         <RiArrowLeftLine /> Back
-      </button>
+      </button> */}
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start gap-4 sm:items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">View All Applications</h2>
-        <button
+        <h2 className="text-xl font-bold">All Applications</h2>
+        {/* <button
           onClick={() => navigate(`/vendor-dashboard/applications/campaignDetails/${id}`)}
           className="px-4 py-2 bg-[#0D132D] text-white rounded-lg"
         >
           View Campaign Details
-        </button>
+        </button> */}
 
       </div>
 
@@ -191,7 +201,7 @@ const ViewAllOffers = () => {
 
       {/* Table */}
       <div className="bg-white rounded-xl overflow-auto">
-        <table className="w-full text-left min-w-[900px]">
+        <table className="w-full text-left min-w-[700px]">
           <thead className="bg-gray-100 text-gray-900 text-sm">
             <tr>
               <th className="p-4">Influencer Name</th>
@@ -205,98 +215,98 @@ const ViewAllOffers = () => {
           <tbody className="text-sm text-gray-700">
 
             {loading ? (
-  <>
-    {[...Array(5)].map((_, index) => (
-      <tr key={index} className="border-t border-gray-200">
-        <td className="p-4">
-          <div className="flex items-center gap-3">
-            <Skeleton.Avatar active size="large" shape="circle" />
-            <div className="flex-1">
-              <Skeleton.Input style={{ width: 120 }} active size="small" />
-              <Skeleton.Input style={{ width: 100, marginTop: 4 }} active size="small" />
-            </div>
-          </div>
-        </td>
-        <td className="p-4">
-          <Skeleton.Input style={{ width: 80 }} active size="small" />
-        </td>
-        <td className="p-4">
-          <Skeleton.Input style={{ width: 60 }} active size="small" />
-        </td>
-        <td className="p-4">
-          <Skeleton.Button active size="small" shape="round" />
-        </td>
-        <td className="p-4">
-          <Skeleton.Avatar active shape="circle" size="small" />
-        </td>
-      </tr>
-    ))}
-  </>
-) 
- : applications.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="text-center py-10">
-                  <Empty description="No Applications found." />
-                </td>
-              </tr>
-            ) : (
-              applications?.map((offer) => (
-                <tr
-                  key={offer.applicationid}
-                  className="border-t border-gray-200 hover:bg-gray-100 transition"
-                >
-                  <td className="p-4 flex gap-3 items-center">
-                    <img
-                      src={offer.photopath}
-                      alt={offer.name}
-                      className="w-10 h-10 rounded-full"
-                    />
-                    <div>
-                      <p className="font-medium">{offer.firstname} {offer.lastname}</p>
-                      <p className="text-xs text-gray-500">{offer.statename}-{offer.countryname}</p>
-                      {/* <p className="text-xs text-gray-500">
-                      ⭐ {offer.rating?.toFixed(1)}
-                    </p> */}
-                    </div>
-                  </td>
-
-                  <td className="p-4">
-                    <div className="flex flex-wrap gap-1">
-                      {offer.categories?.map((cat) => (
-                        <span
-                          key={cat.categoryid}
-                          className="bg-gray-100 text-gray-700 px-2 py-0.5 text-xs rounded-full"
-                        >
-                          {cat.categoryname}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-
-                  <td className="p-4">{offer.amount}</td>
-
-                  <td className="p-4">
-                    {(() => {
-                      const { text, style } = statusLabels[offer.status];
-                      return (
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${style}`}>
-                          {text}
-                        </span>
-                      );
-                    })()}
-                  </td>
-
-
-                  <td className="p-4">
-                    <Dropdown overlay={getActionMenu(offer)} trigger={["click"]}>
-                      <button className="p-2 rounded-full hover:bg-gray-100">
-                        <RiMore2Fill className="text-gray-600" />
-                      </button>
-                    </Dropdown>
+              <>
+                {[...Array(5)].map((_, index) => (
+                  <tr key={index} className="border-t border-gray-200">
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <Skeleton.Avatar active size="large" shape="circle" />
+                        <div className="flex-1">
+                          <Skeleton.Input style={{ width: 120 }} active size="small" />
+                          <Skeleton.Input style={{ width: 100, marginTop: 4 }} active size="small" />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <Skeleton.Input style={{ width: 80 }} active size="small" />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton.Input style={{ width: 60 }} active size="small" />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton.Button active size="small" shape="round" />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton.Avatar active shape="circle" size="small" />
+                    </td>
+                  </tr>
+                ))}
+              </>
+            )
+              : applications.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="text-center py-10">
+                    <Empty description="No Applications found." />
                   </td>
                 </tr>
-              ))
-            )
+              ) : (
+                applications?.map((offer) => (
+                  <tr
+                    key={offer.applicationid}
+                    className="border-t border-gray-200 hover:bg-gray-100 transition"
+                  >
+                    <td className="p-4 flex gap-3 items-center">
+                      <img
+                        src={offer.photopath}
+                        alt={offer.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      <div>
+                        <p className="font-medium">{offer.firstname} {offer.lastname}</p>
+                        <p className="text-xs text-gray-500">{offer.statename}-{offer.countryname}</p>
+                        {/* <p className="text-xs text-gray-500">
+                      ⭐ {offer.rating?.toFixed(1)}
+                    </p> */}
+                      </div>
+                    </td>
+
+                    <td className="p-4">
+                      <div className="flex flex-wrap gap-1">
+                        {offer.categories?.map((cat) => (
+                          <span
+                            key={cat.categoryid}
+                            className="bg-gray-100 text-gray-700 px-2 py-0.5 text-xs rounded-full"
+                          >
+                            {cat.categoryname}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+
+                    <td className="p-4">{offer.amount}</td>
+
+                    <td className="p-4">
+                      {(() => {
+                        const { text, style } = statusLabels[offer.status];
+                        return (
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${style}`}>
+                            {text}
+                          </span>
+                        );
+                      })()}
+                    </td>
+
+
+                    <td className="p-4">
+                      <Dropdown overlay={getActionMenu(offer)} trigger={["click"]}>
+                        <button className="p-2 rounded-full hover:bg-gray-100">
+                          <RiMore2Fill className="text-gray-600" />
+                        </button>
+                      </Dropdown>
+                    </td>
+                  </tr>
+                ))
+              )
 
             }
 
@@ -334,6 +344,17 @@ const ViewAllOffers = () => {
         onConfirm={handleConfirmReject}
         offer={selectedOffer}
       /> */}
+
+
+      <InfluencerDetailsModal
+        visible={showInfluencerModal}
+        influencerId={selectedInfluencerId}
+        onClose={() => {
+          setShowInfluencerModal(false);
+          setSelectedInfluencerId(null);
+        }}
+      />
+
 
     </div>
   );
