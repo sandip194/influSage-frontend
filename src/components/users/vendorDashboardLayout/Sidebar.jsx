@@ -61,7 +61,7 @@ const Sidebar = forwardRef((props, ref) => {
         { icon: <RiGalleryView2 className="w-5" />, label: "Dashboard", to: "/vendor-dashboard", end: true },
         { icon: <RiSearch2Line className="w-5" />, label: "Browse Influencer", to: "/vendor-dashboard/browse-influencers" },
         { icon: <RiStackLine className="w-5" />, label: "My Campaign", to: "/vendor-dashboard/vendor-campaign" },
-        { icon: <RiPriceTag3Line className="w-5" />, label: "Applications", to: "/vendor-dashboard/applications" },
+        // { icon: <RiPriceTag3Line className="w-5" />, label: "Applications", to: "/vendor-dashboard/applications" }, -- Removed From Sidebar
         { icon: <RiMessage3Line className="w-5" />, label: "Messages", to: "/vendor-dashboard/messages" },
     ];
 

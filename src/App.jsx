@@ -166,11 +166,15 @@ const App = () => {
                                                                 <Route path='messages' element={<ChatAppPageVendor />} />
 
 
+                                                                {/*  -- Removed From Sidebar bcs We Replace this things in Campaign Details Page
+                                                                
                                                                 <Route path='applications' element={<OffersLayout />} />
                                                                 <Route path='applications/view-all-offers/:id' element={<ViewAllOffers />} />
                                                                 <Route path="applications/:id" element={<OfferDetails />} />
                                                                 <Route path='applications/influencer-details/:userId' element={<InfluencerProfile />} />
-                                                                <Route path='applications/campaignDetails/:campaignId' element={<CampaignDetails />} />
+                                                                <Route path='applications/campaignDetails/:campaignId' element={<CampaignDetails />} /> 
+                                                                
+                                                                */} 
 
 
                                                                 <Route path='edit-profile' element={<EditVendorProfile />} />

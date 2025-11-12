@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  RiEyeLine, RiAddFill, RiEqualizerFill, RiCloseFill, RiArrowDownSLine, RiEraserLine, RiFilterLine } from "@remixicon/react";
+  RiEyeLine, RiAddFill, RiEqualizerFill, RiCloseFill, RiArrowDownSLine, RiEraserLine, RiFilterLine
+} from "@remixicon/react";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import {
-  Pagination, Skeleton, Empty, Select, Input, DatePicker, Checkbox, Tooltip} from "antd";
+  Pagination, Skeleton, Empty, Select, Input, DatePicker, Checkbox, Tooltip
+} from "antd";
 import { toast } from "react-toastify"; // Optional: for error notifications; install if not present
 
 const { RangePicker } = DatePicker;
@@ -314,11 +316,10 @@ const VendorCampaignsLayout = () => {
             <button
               key={uniqueKey} // Use ID for better uniqueness
               onClick={() => handleStatusFilter(statusItem)} // Pass full statusItem
-              className={`px-4 py-2 rounded-lg border transition font-medium ${
-                statusFilter === id
+              className={`px-4 py-2 rounded-lg border transition font-medium ${statusFilter === id
                   ? "bg-[#141843] text-white border-[#141843]"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-              }`}
+                }`}
             >
               {label}
             </button>
@@ -340,16 +341,16 @@ const VendorCampaignsLayout = () => {
             suffix={
               searchInput ? (
                 <Tooltip title="Clear search" placement="top">
-                <CloseCircleFilled
-                onClick={() => {
-                setSearchInput("");
-                setSearchTerm("");
-              }}
-              className="text-gray-400 hover:text-gray-600 cursor-pointer"
-            />
-          </Tooltip>
-            ) : null
-          }
+                  <CloseCircleFilled
+                    onClick={() => {
+                      setSearchInput("");
+                      setSearchTerm("");
+                    }}
+                    className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                  />
+                </Tooltip>
+              ) : null
+            }
           />
 
           {!showFilter && (
@@ -384,7 +385,7 @@ const VendorCampaignsLayout = () => {
         </div>
       </div>
 
-      
+
 
       {/* Table */}
       <div className="bg-white rounded-xl overflow-hidden">
@@ -397,7 +398,7 @@ const VendorCampaignsLayout = () => {
                 <th className="p-4">Date Started</th>
                 <th className="p-4">Due Date</th>
                 <th className="p-4">Status</th>
-                <th className="p-4">Action</th>
+                {/* <th className="p-4">Action</th> */}
               </tr>
             </thead>
             <tbody className="text-sm text-gray-700">
@@ -413,7 +414,10 @@ const VendorCampaignsLayout = () => {
                 paginatedData.map((row) => (
                   <tr
                     key={row.id}
-                    className="border-t border-gray-200 hover:bg-gray-50 transition"
+                    className="border-t border-gray-200 hover:bg-gray-100 transition cursor-pointer"
+                    onClick={() =>
+                      navigate(`/vendor-dashboard/vendor-campaign/campaignDetails/${row.id}`)
+                    }
                   >
                     <td className="p-4 flex items-center gap-3">
                       <img
@@ -428,15 +432,14 @@ const VendorCampaignsLayout = () => {
                     <td className="p-4">{row.enddate}</td>
                     <td className="p-4">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          statusStyles[getStatusKey(row.status)] ||
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[getStatusKey(row.status)] ||
                           "bg-gray-100 text-gray-600"
-                        }`}
+                          }`}
                       >
                         {statusLabels[getStatusKey(row.status)] || row.status}
                       </span>
                     </td>
-                    <td className="p-4">
+                    {/* <td className="p-4">
                       <button
                         onClick={() =>
                           navigate(
@@ -449,7 +452,7 @@ const VendorCampaignsLayout = () => {
                           <RiEyeLine className="text-lg" />
                         </Tooltip>
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               ) : (
@@ -609,97 +612,97 @@ export default VendorCampaignsLayout;
 
 
 
-{/* Search, Status, Sort, and Filter Header */}
-      // <div className="bg-white p-4 rounded-lg mb-4">
-      //   <div className="flex flex-wrap items-center gap-3">
-      //     {/* Search Input */}
-      //     <div className="flex-grow min-w-[200px]">
-      //       <Input
-      //         prefix={<SearchOutlined />}
-      //         size="large"
-      //         placeholder="Search campaigns, Budget, Status..."
-      //         value={searchInput}
-      //         onChange={(e) => setSearchInput(e.target.value)}
-      //         onKeyDown={handleSearch}
-      //         suffix={
-      //           searchInput && (
-      //             <Tooltip title="Clear search" placement="top">
-      //               <CloseCircleFilled
-      //                 onClick={() => {
-      //                   setSearchInput("");
-      //                   setFilters((prev) => ({ ...prev, search: "" }));
-      //                 }}
-      //                 className="text-gray-400 hover:text-gray-600 cursor-pointer"
-      //               />
-      //             </Tooltip>
-      //           )
-      //         }
-      //       />
-      //     </div>
+{/* Search, Status, Sort, and Filter Header */ }
+// <div className="bg-white p-4 rounded-lg mb-4">
+//   <div className="flex flex-wrap items-center gap-3">
+//     {/* Search Input */}
+//     <div className="flex-grow min-w-[200px]">
+//       <Input
+//         prefix={<SearchOutlined />}
+//         size="large"
+//         placeholder="Search campaigns, Budget, Status..."
+//         value={searchInput}
+//         onChange={(e) => setSearchInput(e.target.value)}
+//         onKeyDown={handleSearch}
+//         suffix={
+//           searchInput && (
+//             <Tooltip title="Clear search" placement="top">
+//               <CloseCircleFilled
+//                 onClick={() => {
+//                   setSearchInput("");
+//                   setFilters((prev) => ({ ...prev, search: "" }));
+//                 }}
+//                 className="text-gray-400 hover:text-gray-600 cursor-pointer"
+//               />
+//             </Tooltip>
+//           )
+//         }
+//       />
+//     </div>
 
-      //     {/* Status Dropdown */}
-      //     <div className="flex-shrink-0 w-full sm:w-48">
-      //       <Select
-      //         size="large"
-      //         value={filters.status || "all"}
-      //         onChange={(value) =>
-      //           setFilters((prev) => ({
-      //             ...prev,
-      //             status: value === "all" ? null : value,
-      //             pagenumber: 1,
-      //           }))
-      //         }
-      //         placeholder="Status"
-      //         className="w-full"
-      //       >
-      //         {statusList.map((statusItem) => {
-      //           const key =
-      //             typeof statusItem === "object" && statusItem.id
-      //               ? statusItem.id
-      //               : getStatusKey(statusItem);
-      //           const label =
-      //             typeof statusItem === "string"
-      //               ? statusItem
-      //               : statusLabels[getStatusKey(statusItem.name)] || statusItem.name;
-      //           return (
-      //             <Option key={key} value={key}>
-      //               {label}
-      //             </Option>
-      //           );
-      //         })}
-      //       </Select>
-      //     </div>
+//     {/* Status Dropdown */}
+//     <div className="flex-shrink-0 w-full sm:w-48">
+//       <Select
+//         size="large"
+//         value={filters.status || "all"}
+//         onChange={(value) =>
+//           setFilters((prev) => ({
+//             ...prev,
+//             status: value === "all" ? null : value,
+//             pagenumber: 1,
+//           }))
+//         }
+//         placeholder="Status"
+//         className="w-full"
+//       >
+//         {statusList.map((statusItem) => {
+//           const key =
+//             typeof statusItem === "object" && statusItem.id
+//               ? statusItem.id
+//               : getStatusKey(statusItem);
+//           const label =
+//             typeof statusItem === "string"
+//               ? statusItem
+//               : statusLabels[getStatusKey(statusItem.name)] || statusItem.name;
+//           return (
+//             <Option key={key} value={key}>
+//               {label}
+//             </Option>
+//           );
+//         })}
+//       </Select>
+//     </div>
 
-      //     {/* Sort Dropdown */}
-      //     <div className="flex-shrink-0 w-full sm:w-48">
-      //       <Select
-      //         size="large"
-      //         value={`${filters.sortby}_${filters.sortorder}`}
-      //         onChange={handleSortChange}
-      //         placeholder="Sort By"
-      //         className="w-full"
-      //         suffixIcon={<RiArrowDownSLine size={16} />}
-      //       >
-      //         {sortOptions.map((option) => (
-      //           <Option key={option.value} value={option.value}>
-      //             {option.label}
-      //           </Option>
-      //         ))}
-      //       </Select>
-      //     </div>
+//     {/* Sort Dropdown */}
+//     <div className="flex-shrink-0 w-full sm:w-48">
+//       <Select
+//         size="large"
+//         value={`${filters.sortby}_${filters.sortorder}`}
+//         onChange={handleSortChange}
+//         placeholder="Sort By"
+//         className="w-full"
+//         suffixIcon={<RiArrowDownSLine size={16} />}
+//       >
+//         {sortOptions.map((option) => (
+//           <Option key={option.value} value={option.value}>
+//             {option.label}
+//           </Option>
+//         ))}
+//       </Select>
+//     </div>
 
-      //     {/* Filter Button */}
-      //     <div className="flex-shrink-0 w-full sm:w-auto">
-      //       <button
-      //         onClick={() => {
-      //           setTempFilters(filters);
-      //           setShowFilter(true);
-      //         }}
-      //         className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition w-full sm:w-auto"
-      //       >
-      //         Filter
-      //         <RiEqualizerFill size={16} />
-      //       </button>
-      //     </div>
-      //   </div>
-      // </div>
+//     {/* Filter Button */}
+//     <div className="flex-shrink-0 w-full sm:w-auto">
+//       <button
+//         onClick={() => {
+//           setTempFilters(filters);
+//           setShowFilter(true);
+//         }}
+//         className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition w-full sm:w-auto"
+//       >
+//         Filter
+//         <RiEqualizerFill size={16} />
+//       </button>
+//     </div>
+//   </div>
+// </div>

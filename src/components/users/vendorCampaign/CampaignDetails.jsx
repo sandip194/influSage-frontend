@@ -341,116 +341,94 @@ const CampaignDetails = () => {
 
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Left Section */}
-        <div className="flex-1 space-y-4">
-          {/* Banner + Profile */}
-          <div className="bg-white rounded-2xl overflow-hidden">
-            <div className="relative h-40 bg-gray-200">
-              {/* <img
-                src="https://images.pexels.com/photos/33350497/pexels-photo-33350497.jpeg"
-                alt="Banner"
-                className="w-full h-28 object-cover"
-              /> */}
-              <div className="relative">
-                {/* Campaign Logo */}
+        <div className="flex-1 space-y-4 ">
+          <div className="bg-white rounded-xl p-6 border border-gray-100 bg-white rounded-xl  border border-gray-100">
+            <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-4'>
+              {/* Left Section */}
+              <div className="flex items-start gap-4">
+                {/* Profile */}
                 <img
                   src={campaignDetails?.photopath}
-                  alt="Logo"
-                  onClick={() => setIsCampaignPreviewOpen(true)}
-                  className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover cursor-pointer"
+                  alt="Profile"
+                  className="w-16 h-16 rounded-full object-cover"
                 />
+                <div>
+                  <h2 className="font-semibold text-lg text-gray-900 ">
+                    {campaignDetails?.name || "Campaign Name"}
+                  </h2>
+                  <p className="text-gray-500 text-sm">{campaignDetails?.businessname}</p>
+                </div>
+              </div>
 
-                {/* Fullscreen Image Preview */}
-                {isCampaignPreviewOpen && (
-                  <div
-                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                    onClick={() => setIsCampaignPreviewOpen(false)}
+              {/* Right Buttons */}
+              <div className="flex gap-2 items-start">
+                {campaignDetails?.iseditable !== "Not editable" && (
+                  <button
+                    onClick={handleEditClick}
+                    className="bg-[#0f122f] text-white px-4 py-1.5 rounded-lg font-medium hover:bg-[#1a1d4f] transition"
                   >
-                    {/* Close Button */}
-                    <button
-                      onClick={() => setIsCampaignPreviewOpen(false)}
-                      className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                    >
-                      &times;
-                    </button>
-
-                    {/* Enlarged Image */}
-                    <img
-                      src={campaignDetails?.photopath}
-                      alt="Campaign Logo Preview"
-                      className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
+                    Edit
+                  </button>
                 )}
+                <button
+                  onClick={() => setCancelModel(true)}
+                  className="border border-red-400 text-red-500 px-4 py-1.5 rounded-lg font-medium hover:bg-red-50 transition"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
 
-            <div className="p-4">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
-                <div>
-                  <h2 className="font-semibold text-lg">{campaignDetails?.name}</h2>
-                  <p className="text-gray-500 text-sm">{campaignDetails?.businessname}</p>
-
+            {/* Info Section */}
+            <div className="mt-3 flex flex-wrap justify-between gap-4 pt-2">
+              {/* Budget */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-400 mb-1">
+                  <RiMoneyRupeeCircleLine className="w-5 h-5" />
+                  <span>Budget</span>
                 </div>
+                <p className="text-gray-800 font-medium">₹{campaignDetails?.estimatedbudget}</p>
+              </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                  {campaignDetails?.iseditable !== "Not editable" && (
-                    <button
-                      type="button"
-                      onClick={handleEditClick}
-                      className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
+              {/* Language */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-400 mb-1">
+                  <RiTranslate className="w-5 h-5" />
+                  <span>Language</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {campaignDetails?.campaignlanguages?.map((lang) => (
+                    <span
+                      key={lang.languageid}
+                      className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md text-sm"
                     >
-                      Edit
-                    </button>
-                  )}
-                  {/* <button
-                    onClick={() => setIsPauseModalOpen(true)}
-                    className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
-                  >
-                    Pause Campaign
-                  </button> */}
-
-                  <button
-                    onClick={() => setCancelModel(true)}
-                    className="w-full sm:w-auto px-6 py-2 rounded-full border border-red-400 text-red-900 font-semibold hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
+                      {lang.languagename}
+                    </span>
+                  ))}
                 </div>
               </div>
-              {/* Campaign Info */}
-              <div className="flex flex-wrap justify-between gap-6 border border-gray-200 rounded-2xl p-4">
-                <div>
-                  <div className="flex gap-2 items-center text-gray-400 mb-2">
-                    <RiMoneyRupeeCircleLine className="w-5" />
-                    <span>Budget</span>
-                  </div>
-                  <p>₹{campaignDetails?.estimatedbudget}</p>
 
+              {/* Gender */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-400 mb-1">
+                  <RiMenLine className="w-5 h-5" />
+                  <span>Gender</span>
                 </div>
-                <div>
-                  <div className="flex gap-2 items-center text-gray-400 mb-2">
-                    <RiTranslate className="w-5" />
-                    <span>Language</span>
-                  </div>
-                  {campaignDetails?.campaignlanguages?.map((lang) => (
-                    <p key={lang.languageid}>{lang.languagename}</p>
-                  ))}
-
-                </div>
-                <div>
-                  <div className="flex gap-2 items-center text-gray-400 mb-2">
-                    <RiMenLine className="w-5" />
-                    <span>Gender</span>
-                  </div>
+                <div className="flex gap-2 flex-wrap">
                   {campaignDetails?.campaigngenders?.map((gender) => (
-                    <p key={gender.genderid}>{gender.gendername}</p>
+                    <span
+                      key={gender.genderid}
+                      className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md text-sm"
+                    >
+                      {gender.gendername}
+                    </span>
                   ))}
-
                 </div>
               </div>
             </div>
           </div>
+
+
 
           {/* Tabs + Content */}
           <div className="bg-white p-5 rounded-2xl">

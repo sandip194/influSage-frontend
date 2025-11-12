@@ -2,18 +2,14 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Tabs, Dropdown, Menu, Pagination, Input, Select, Empty, Skeleton } from "antd";
 import {
   RiMore2Fill,
-  RiCheckboxCircleLine,
-  RiCloseCircleLine,
   RiEyeLine,
-  RiMessage3Line,
   RiUserLine,
-  RiArrowLeftLine,
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import { useNavigate, } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import InfluencerDetailsModal from "./InfluencerDetailsModal";
+import OfferDetailsModal from "./OfferDetailsModal";
 
 
 const statusLabels = {
@@ -37,36 +33,68 @@ const ViewAllOffers = ({ campaignData }) => {
   const [showInfluencerModal, setShowInfluencerModal] = useState(false);
   const [selectedInfluencerId, setSelectedInfluencerId] = useState(null);
 
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [selectedOfferId, setSelectedOfferId] = useState(null);
 
 
 
-  const navigate = useNavigate();
+
+
   const { token } = useSelector((state) => state.auth);
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   // const { id } = useParams();
 
 
+  // const handleViewOffer = async (offer) => {
+  //   // console.log(offer.status)
+  //   if (offer.status === "Applied" && offer.status !== "Viewed") {
+  //     try {
+  //       await axios.post(
+  //         `/vendor/application-status`,
+  //         {
+  //           p_applicationid: Number(offer.applicationid),
+  //           p_statusname: "Viewed"
+  //         },
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
+
+  //       setApplications((prev) =>
+  //         prev.map((o) =>
+  //           o.applicationid === offer.applicationid
+  //             ? { ...o, status: "true" }
+  //             : o
+  //         )
+  //       );
+  //     } catch (error) {
+  //       console.error("Failed to mark as viewed", error);
+  //     }
+  //   }
+
+  //   navigate(`/vendor-dashboard/applications/${offer.applicationid}`);
+  // };
+
   const handleViewOffer = async (offer) => {
-    // console.log(offer.status)
     if (offer.status === "Applied" && offer.status !== "Viewed") {
       try {
         await axios.post(
           `/vendor/application-status`,
           {
             p_applicationid: Number(offer.applicationid),
-            p_statusname: "Viewed"
+            p_statusname: "Viewed",
           },
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
         setApplications((prev) =>
           prev.map((o) =>
             o.applicationid === offer.applicationid
-              ? { ...o, status: "true" }
+              ? { ...o, status: "Viewed" }
               : o
           )
         );
@@ -75,8 +103,11 @@ const ViewAllOffers = ({ campaignData }) => {
       }
     }
 
-    navigate(`/vendor-dashboard/applications/${offer.applicationid}`);
+    // ✅ Open the Offer Details modal
+    setSelectedOfferId(offer.applicationid);
+    setShowOfferModal(true);
   };
+
 
   // const handleViewProfile = (offer) => {
   //   navigate(`/vendor-dashboard/applications/influencer-details/${offer.id}`);
@@ -152,7 +183,7 @@ const ViewAllOffers = ({ campaignData }) => {
   }, [getApplications])
 
   return (
-    <div className="text-sm">
+    <div className="text-sm ">
       {/* <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-gray-600 mb-2"
@@ -354,6 +385,16 @@ const ViewAllOffers = ({ campaignData }) => {
           setSelectedInfluencerId(null);
         }}
       />
+
+      <OfferDetailsModal
+        visible={showOfferModal}
+        id={selectedOfferId}
+        onClose={() => {
+          setShowOfferModal(false);
+          setSelectedOfferId(null);
+        }}
+      />
+
 
 
     </div>
