@@ -31,11 +31,11 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
     },
     {
       label: "Campaign Start Date:",
-      value: campaignData?.requirements?.startdate || "N/A",
+      value: campaignData?.requirements?.campaignstartdate || "N/A",
     },
     {
       label: "Campaign End Date:",
-      value: campaignData?.requirements?.enddate || "N/A",
+      value: campaignData?.requirements?.campaignenddate || "N/A",
     },
     {
       label: "Vendor Profile Link Included:",

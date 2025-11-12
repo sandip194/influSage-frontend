@@ -252,31 +252,32 @@ export const CategorySelector = ({
           )}
 
           {mobileMode === "child" && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-4 sticky top-0 bg-white z-10 pb-2 border-b border-gray-200">
                 <button
                   onClick={() => setMobileMode("parent")}
-                  className="text-gray-600 flex items-center gap-2 hover:text-gray-900 transition"
+                  className="text-gray-700 flex items-center gap-1 font-medium hover:text-[#0D132D] transition"
                 >
                   <RiArrowLeftSLine className="text-lg" /> Back
                 </button>
-                <h3 className="font-semibold text-gray-700 text-base">
+                <h3 className="font-semibold text-gray-800 text-base truncate max-w-[60%] text-center">
                   {currentParent?.name}
                 </h3>
+                <div className="w-8" />
               </div>
-
-              <div className="grid grid-cols-1 gap-3">
+              <div className="flex-1 overflow-y-auto space-y-3">
                 {currentParent?.categories.map((child) => (
                   <div
                     key={child.id}
                     onClick={() => toggleChildSelection(child.id)}
-                    className={`flex justify-between items-center px-4 py-3 text-sm rounded-xl border cursor-pointer transition-all ${
-                      selectedChildren.includes(child.id)
-                        ? "bg-[#0D132D26] border-[#0D132D26]"
-                        : "bg-white border-gray-300 hover:border-[#141843]"
-                    }`}
+                    className={`flex justify-between items-center px-4 py-3 text-sm rounded-xl border cursor-pointer transition-all
+                      ${
+                        selectedChildren.includes(child.id)
+                          ? "bg-[#0D132D26] border-[#0D132D26]"
+                          : "bg-white border-gray-300 hover:border-[#141843]"
+                      }`}
                   >
-                    <span>{child.name}</span>
+                    <span className="text-gray-800">{child.name}</span>
                     <div
                       className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all ${
                         selectedChildren.includes(child.id)
@@ -284,9 +285,7 @@ export const CategorySelector = ({
                           : "bg-transparent border-gray-400 text-transparent"
                       }`}
                     >
-                      {selectedChildren.includes(child.id) && (
-                        <RiCheckLine size={12} />
-                      )}
+                      {selectedChildren.includes(child.id) && <RiCheckLine size={12} />}
                     </div>
                   </div>
                 ))}

@@ -406,8 +406,8 @@ const Details = () => {
               <div className="relative">
                 {[
                   { name: "Campaign Created", date: campaign?.trackcampaign?.createddate },
-                  { name: "Campaign Started", date: campaign?.trackcampaign?.startdate },
-                  { name: "Campaign Ended", date: campaign?.trackcampaign?.enddate },
+                  { name: "Campaign Started", date: campaign?.trackcampaign?.campaignstartdate },
+                  { name: "Campaign Ended", date: campaign?.trackcampaign?.campaignenddate },
                 ].map((step, idx, arr) => {
                   const stepDate = dayjs(step.date, "DD-MM-YYYY HH:mm");
                   const now = dayjs();

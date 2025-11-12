@@ -123,13 +123,6 @@ const CampaignCard = React.memo(({ campaign, handleCardClick, handleSave }) => {
         </div>
 
         {campaign.campaignapplied ? (
-          <button
-            className="px-5 py-2 text-sm bg-gray-400 text-white rounded-full font-semibold cursor-not-allowed"
-            disabled
-          >
-            Applied
-          </button>
-        ) : (
           <Link
             to={`/dashboard/browse/apply-now/${campaign.id}`}
             onClick={(e) => e.stopPropagation()}
@@ -138,6 +131,13 @@ const CampaignCard = React.memo(({ campaign, handleCardClick, handleSave }) => {
               Apply now
             </button>
           </Link>
+        ) : (
+          <button
+            className="px-5 py-2 text-sm bg-gray-400 text-white rounded-full font-semibold cursor-not-allowed"
+            disabled
+          >
+            Apply now
+          </button>
         )}
       </div>
     </div>

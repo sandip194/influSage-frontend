@@ -48,6 +48,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const [unreadMessages, setUnreadMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [initialMessagesFetched, setInitialMessagesFetched] = useState(false);
+  const [profileData, setProfileData] = useState(null);
 
   // inside component
   const [isMobile, setIsMobile] = useState(false);
@@ -192,6 +193,24 @@ const DeshboardHeader = ({ toggleSidebar }) => {
       setLoadingNotifications(false);
     }
   }, [token]);
+
+  useEffect(() => {
+  const fetchProfileData = async () => {
+    if (!token) return;
+    try {
+      const res = await axios.get("/user-profile-info", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data?.userData) {
+        setProfileData(res.data.userData);
+      }
+    } catch (error) {
+      console.error("Error fetching profile info:", error);
+    }
+  };
+
+  fetchProfileData();
+}, [token]);
 
   // ⏱️ Poll unread notifications every 3s
   useEffect(() => {
@@ -346,13 +365,25 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
 
         {/* 👤 Profile */}
-        <Dropdown menu={profileMenu} trigger={["click"]} arrow>
-          <div className="flex items-center gap-2 cursor-pointer border border-gray-200 px-3 py-1 rounded-full">
-            <Avatar src="https://api.dicebear.com/5.x/bottts/svg?seed=12345" />
-            <span className="hidden sm:inline text-sm font-medium">{name}</span>
-            <DownOutlined className="text-xs" />
-          </div>
-        </Dropdown>
+          <Dropdown menu={profileMenu} trigger={["click"]} arrow>
+            <div className="flex items-center gap-2 cursor-pointer border border-gray-200 px-3 py-1 rounded-full">
+              <Avatar
+                src={
+                  profileData?.photopath
+                    ? profileData.photopath
+                    : "https://api.dicebear.com/5.x/bottts/svg?seed=default"
+                }
+                alt={profileData?.firstname || "User"}
+              />
+              <span className="hidden sm:inline text-sm font-medium">
+                {profileData
+                  ? `${profileData.firstname || ""} ${profileData.lastname || ""}`.trim()
+                  : name || "User"}
+              </span>
+              <DownOutlined className="text-xs" />
+            </div>
+          </Dropdown>
+
       </div>
 
       {/* 📜 Notifications Modal */}
