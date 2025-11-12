@@ -235,14 +235,29 @@ const handleConfirmAccept = () => {
                                 <RiEyeLine size={18} /> View Profile
                             </button>
 
-                            <Tooltip title="Message">
-                                <button
-                                    onClick={handleMessageClick}
-                                    className="flex items-center justify-center gap-2 bg-[#0f122f] text-white px-4 py-2 rounded-3xl hover:bg-[#23265a]"
+                            <Tooltip
+                                title={
+                                    offerDetails?.ismessaged
+                                    ? "Message"
+                                    : "Messaging disabled for this campaign"
+                                }
                                 >
-                                    <RiMessage2Line size={18} /> Message
+                                <button
+                                    onClick={
+                                    offerDetails?.ismessaged ? handleMessageClick : undefined
+                                    }
+                                    disabled={!offerDetails?.ismessaged}
+                                    className={`flex items-center justify-center gap-2 px-4 py-2 rounded-3xl font-medium transition
+                                    ${
+                                        offerDetails?.ismessaged
+                                        ? "bg-[#0f122f] text-white hover:bg-[#23265a] cursor-pointer"
+                                        : "bg-[#9d9d9d] text-white cursor-not-allowed opacity-80"
+                                    }`}
+                                >
+                                    <RiMessage2Line size={18} />
+                                    Message
                                 </button>
-                            </Tooltip>
+                                </Tooltip>
                         </div>
                     </div>
                 </div>

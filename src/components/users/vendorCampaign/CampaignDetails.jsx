@@ -121,11 +121,14 @@ const CampaignDetails = () => {
       );
 
       if (res.status === 200) {
-        toast.success(res.data?.message);
+        toast.success(res.data?.message || "Campaign cancelled successfully!");
         setCancelModel(false);
         setCancelReason("");
         setErrors({});
         // getCampaignDetails();
+        setTimeout(() => {
+        navigate("/vendor-dashboard/vendor-campaign");
+      }, 1000);
       } else {
         toast.error(res.data?.message);
       }
@@ -371,10 +374,16 @@ const CampaignDetails = () => {
                   </button>
                 )}
                 <button
-                  onClick={() => setCancelModel(true)}
-                  className="border border-red-400 text-red-500 px-4 py-1.5 rounded-lg font-medium hover:bg-red-50 transition"
-                >
-                  Cancel
+                    onClick={() => setCancelModel(true)}
+                    disabled={campaignDetails?.iseditable === "Not editable"}
+                    className={`w-full sm:w-auto px-6 py-2 rounded-full border font-semibold transition
+                      ${
+                        campaignDetails?.iseditable === "Not editable"
+                          ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
+                          : "border-red-400 text-red-900 hover:bg-gray-50"
+                      }`}
+                  >
+                    Cancel
                 </button>
               </div>
             </div>
@@ -534,21 +543,36 @@ const CampaignDetails = () => {
             {/* Platform Card */}
             <div className="bg-white p-4 rounded-2xl">
               <h3 className="font-semibold text-lg py-3">Platform</h3>
-              <div className="space-y-3">
+
+              <div className="space-y-4">
                 {campaignDetails?.providercontenttype?.map((platform) => (
-                  <div key={platform.providercontenttypeid} className="flex items-center justify-between pb-2">
-                    <div className="flex items-center gap-2">
-                      {/* {platform.providerid === 1 && <RiInstagramFill className="text-pink-600" />}
-                      {platform.providerid === 2 && <RiYoutubeFill className="text-red-600" />} */}
-                      {/* Add conditions for other platforms as needed */}
-                      <span className="text-gray-700 font-medium">{platform.providername}</span>
+                  <div
+                    key={platform.providercontenttypeid}
+                    className="pb-3 border-b border-gray-100 last:border-0"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {/* Optional platform icons */}
+                        {/* {platform.providerid === 1 && <RiInstagramFill className="text-pink-600 text-xl" />} */}
+                        {/* {platform.providerid === 2 && <RiYoutubeFill className="text-red-600 text-xl" />} */}
+
+                        <span className="text-gray-800 font-medium">
+                          {platform.providername}
+                        </span>
+                      </div>
+
+                      <span className="text-gray-500 text-sm">
+                        {platform.contenttypename}
+                      </span>
                     </div>
-                    <span className="text-gray-500 text-sm">
-                      {platform.contenttypename}
-                    </span>
+
+                    {platform.caption && (
+                      <p className="text-gray-600 text-sm mt-1 pl-3">
+                        {platform.caption}
+                      </p>
+                    )}
                   </div>
                 ))}
-
               </div>
             </div>
 
@@ -610,8 +634,8 @@ const CampaignDetails = () => {
               <div className="relative">
                 {[
                   { name: "Campaign Created", date: campaignDetails?.trackcampaign?.createddate },
-                  { name: "Campaign Started", date: campaignDetails?.trackcampaign?.startdate },
-                  { name: "Campaign Ended", date: campaignDetails?.trackcampaign?.enddate },
+                  { name: "Campaign Started", date: campaignDetails?.trackcampaign?.campaignstartdate },
+                  { name: "Campaign Ended", date: campaignDetails?.trackcampaign?.campaignenddate},
                 ].map((step, idx, arr) => {
                   const stepDate = dayjs(step.date, "DD-MM-YYYY HH:mm");
                   const now = dayjs();

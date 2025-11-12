@@ -554,17 +554,23 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
                   value
                     ? Promise.resolve()
                     : Promise.reject(
-                      new Error("You must agree to Payment Terms & Conditions")
-                    ),
+                        new Error("You must agree to Payment Terms & Conditions")
+                      ),
               },
             ]}
           >
-            <Checkbox>
-              By Adding this bank account, I agree to the{" "}
-              <Link onClick={() => setTermsVisible(true)}>
-                <b>Payment Terms & Conditions</b>
-              </Link>
-            </Checkbox>
+            <div className="flex items-center flex-wrap gap-1 text-sm text-gray-700">
+              <Checkbox />
+              <span>
+                By adding this bank account, I agree to the{" "}
+                <span
+                  onClick={() => setTermsVisible(true)}
+                  className="text-blue-600 cursor-pointer font-semibold hover:underline"
+                >
+                  Payment Terms & Conditions
+                </span>
+              </span>
+            </div>
           </Form.Item>
 
           {/* Buttons */}

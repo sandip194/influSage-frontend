@@ -64,6 +64,7 @@ import InfluencerDetailView from './components/admin/pages/InfluencerDetailView'
 import HomePage from './pages/LandingPage/HomePage';
 import CampaignDetailsView from './components/admin/pages/CampaignDetailsView';
 import BlockedUserPage from './pages/commonPages/BlockedUserPage';
+import MessagePage  from './components/adminChat/MessagePage';
 
 const App = () => {
 
@@ -135,6 +136,8 @@ const App = () => {
                                                                 <Route path='editProfile' element={<EditProfile />} />
 
                                                                 <Route path='setting' element={<Settings />} />
+
+                                                                <Route path='messagepage' element={<MessagePage />} />
 
                                                         </Route>
                                                 </Route>

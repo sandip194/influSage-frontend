@@ -167,22 +167,29 @@ const SavedCampaignCard = ({
                 <p className="text-xs text-gray-500">Estimated Budget</p>
               </div>
 
-              {campaign.campaignapplied ? (
+              {campaign.isapplied ? (
                 <button
                   className="px-5 py-2 text-sm bg-gray-400 text-white rounded-full font-semibold cursor-not-allowed"
                   disabled
                 >
                   Applied
                 </button>
-              ) : (
+              ) : campaign.campaignapplied ? (
                 <Link
                   to={`/dashboard/browse/apply-now/${campaign.id}`}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button className="px-5 py-2 text-sm bg-black text-white rounded-full font-semibold hover:bg-gray-900 transition">
-                    Apply now
+                    Apply Now
                   </button>
                 </Link>
+              ) : (
+                <button
+                  className="px-5 py-2 text-sm bg-gray-400 text-white rounded-full font-semibold cursor-not-allowed"
+                  disabled
+                >
+                  Not Apply
+                </button>
               )}
             </div>
           </div>

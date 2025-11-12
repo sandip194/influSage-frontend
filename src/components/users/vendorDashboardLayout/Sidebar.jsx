@@ -6,7 +6,8 @@ import {
     RiSearch2Line,
     RiShutDownLine,
     RiStackLine,
-    RiWallet3Line
+    RiWallet3Line,
+    RiAdminLine
 } from '@remixicon/react';
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { NavLink } from 'react-router-dom';
@@ -70,7 +71,9 @@ const Sidebar = forwardRef((props, ref) => {
         { icon: <RiLineChartLine className="w-5" />, label: "Analytics", to: "/vendor-dashboard/analytics" },
     ];
 
-
+    const supportItems = [
+        { icon: <RiAdminLine className="w-5" />, label: "Admin Support", to: "/vendor-dashboard/admin-support" },
+    ];
     return (
         <>
             {/* Overlay (only for mobile when open) */}
@@ -176,6 +179,33 @@ const Sidebar = forwardRef((props, ref) => {
                             {isOpen && <span className="text-sm">{item.label}</span>}
                         </NavLink>
                     ))}
+                    <hr className="my-2 border-gray-200" />
+
+                    {/* Support Section */}
+                    {isOpen && (
+                    <li className="text-xs text-gray-400 uppercase px-4 mb-4 mt-4">
+                        Support
+                    </li>
+                    )}
+
+                    {supportItems.map((item, index) => (
+                    <NavLink
+                        key={index}
+                        to={item.to}
+                        onClick={() => isMobile && toggleSidebar()}
+                        className={({ isActive }) =>
+                        `flex items-center ${isOpen ? "justify-start" : "justify-center"}
+                        mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#0D132D] 
+                        ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
+                        }
+                    >
+                        <Tooltip title={item.label} placement="right" disabled={isOpen}>
+                        <span className="text-base">{item.icon}</span>
+                        </Tooltip>
+                        {isOpen && <span className="text-sm">{item.label}</span>}
+                    </NavLink>
+                    ))}
+
                 </ul>
 
                 {/* Logout */}

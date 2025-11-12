@@ -72,12 +72,12 @@ const DescriptionLayout = () => {
         value: campaignDetails.requirements?.isincludevendorprofilelink ? "Yes" : "No",
       },
       {
-        label: "Start Date: ",
-        value: campaignDetails.requirements.startdate,
+        label: "Campaign Start Date: ",
+        value: campaignDetails.requirements.campaignstartdate,
       },
       {
-        label: "End Date: ",
-        value: campaignDetails.requirements.enddate,
+        label: "Campaign End Date: ",
+        value: campaignDetails.requirements.campaignenddate,
       },
     ];
   }, [campaignDetails]);
@@ -257,7 +257,7 @@ const DescriptionLayout = () => {
                     </div>
                     <div className='text-sm text-gray-700 '>
                       <span className="font-semibold text-gray-900">Campaign Start:</span>{" "}
-                      {campaignDetails.requirements.startdate || "N/A"}
+                      {campaignDetails.requirements.campaignstartdate || "N/A"}
                     </div>
 
                   </div>

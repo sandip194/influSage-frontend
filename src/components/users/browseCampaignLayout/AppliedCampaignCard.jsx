@@ -142,6 +142,7 @@ const AppliedCampaignCard = ({
                 <p className="text-xs text-gray-500">Estimated Budget</p>
               </div>
 
+              {campaign.iseditable ? (
               <Link
                 to={`/dashboard/browse/apply-now/${campaign.id}`}
                 onClick={(e) => e.stopPropagation()}
@@ -150,6 +151,14 @@ const AppliedCampaignCard = ({
                   Edit Application
                 </button>
               </Link>
+            ) : (
+              <button
+                className="px-5 py-2 text-sm bg-gray-400 text-white rounded-full font-semibold cursor-not-allowed"
+                disabled
+              >
+                Edit Application
+              </button>
+            )}
             </div>
           </div>
         ))

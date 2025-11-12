@@ -315,8 +315,8 @@ const CampaignTableLayout = () => {
                 <th className="p-4 min-w-[150px]">Categories</th>
                 <th className="p-4 min-w-[150px]">Platforms</th>
                 <th className="p-4 min-w-[100px]">Budget</th>
-                <th className="p-4 whitespace-nowrap min-w-[100px]">Start Date</th>
-                <th className="p-4 whitespace-nowrap min-w-[100px]">End Date</th>
+                <th className="p-4 whitespace-nowrap min-w-[100px]">Campaign Start Date</th>
+                <th className="p-4 whitespace-nowrap min-w-[100px]">Campaign End Date</th>
 
                 {/* ✅ Show Status column only for "Approved" tab */}
                 {activeStatusName === "Approved" && <th className="p-4 min-w-[150px]">Campaign Status</th>}
@@ -396,12 +396,12 @@ const CampaignTableLayout = () => {
 
                   {/* Start Date */}
                   <td className="p-4 whitespace-nowrap">
-                    {c.startdate || "—"}
+                    {c.campaignstartdate || "—"}
                   </td>
 
                   {/* End Date */}
                   <td className="p-4 whitespace-nowrap">
-                    {c.enddate || "—"}
+                    {c.campaignenddate || "—"}
                   </td>
 
                   {/* Status (only in All tab) */}
