@@ -64,7 +64,7 @@ import InfluencerDetailView from './components/admin/pages/InfluencerDetailView'
 import HomePage from './pages/LandingPage/HomePage';
 import CampaignDetailsView from './components/admin/pages/CampaignDetailsView';
 import BlockedUserPage from './pages/commonPages/BlockedUserPage';
-import MessagePage  from './components/adminChat/MessagePage';
+import MessagePage  from './components/adminChat/ConversationPage';
 
 const App = () => {
 

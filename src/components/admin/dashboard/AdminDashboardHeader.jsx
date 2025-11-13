@@ -8,7 +8,7 @@ import React, { useState, useEffect } from "react";
 const AdminDashboardHeader = ({ toggleSidebar }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { token, name } = useSelector((state) => state.auth);
+  const { token } = useSelector((state) => state.auth);
   const [profileData, setProfileData] = useState(null);
 
   const handleLogout = () => {
@@ -92,13 +92,11 @@ const AdminDashboardHeader = ({ toggleSidebar }) => {
                   ? profileData.photopath
                   : "https://api.dicebear.com/5.x/bottts/svg?seed=admin"
               }
-              alt={profileData?.firstname || "Admin"}
+              alt={profileData?.firstname }
             />
             <span className="hidden sm:inline text-sm font-medium text-gray-700">
-              {profileData
-                ? `${profileData.firstname || ""} ${profileData.lastname || ""}`.trim()
-                : name || "Admin User"}
-            </span>
+                {`${profileData?.firstname || ""} ${profileData?.lastname || ""}`.trim()}
+                </span>
           </div>
         </Dropdown>
       </div>

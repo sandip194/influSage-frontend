@@ -33,7 +33,7 @@ const { Text } = Typography;
 const DeshboardHeader = ({ toggleSidebar }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { token, role, name } = useSelector((state) => state.auth);
+  const { token, role } = useSelector((state) => state.auth);
 
   const [notificationDropdownVisible, setNotificationDropdownVisible] = useState(false);
   const [messageDropdownVisible, setMessageDropdownVisible] = useState(false);
@@ -373,13 +373,11 @@ const DeshboardHeader = ({ toggleSidebar }) => {
                     ? profileData.photopath
                     : "https://api.dicebear.com/5.x/bottts/svg?seed=default"
                 }
-                alt={profileData?.firstname || "User"}
+                alt={profileData?.firstname }
               />
-              <span className="hidden sm:inline text-sm font-medium">
-                {profileData
-                  ? `${profileData.firstname || ""} ${profileData.lastname || ""}`.trim()
-                  : name || "User"}
-              </span>
+               <span className="hidden sm:inline text-sm font-medium">
+                {`${profileData?.firstname || ""} ${profileData?.lastname || ""}`.trim()}
+                </span>
               <DownOutlined className="text-xs" />
             </div>
           </Dropdown>
