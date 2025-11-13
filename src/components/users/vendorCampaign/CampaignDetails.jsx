@@ -231,7 +231,6 @@ const CampaignDetails = () => {
   };
 
 
-  if (loading) return <div className="text-center">Loading campaign...</div>;
   if (loading) {
     return (
       <div className="w-full text-sm overflow-x-hidden space-y-6">
@@ -451,7 +450,7 @@ const CampaignDetails = () => {
                     itemHoverColor: "#0f122f",       // Text color on hover
                     itemSelectedColor: "#fff",       // Text color when active
                     itemActiveColor: "#fff",         // Ensures text stays white
-                    itemActiveBg: "#0f122f",         // ✅ Active tab background
+                    itemActiveBg: "#fff",         // ✅ Active tab background
                     itemHoverBg: "#f4f5ff",          // Hover background
                     cardBg: "#fff",                  // Card tab background
                     inkBarColor: "#0f122f",          // Underline indicator (for line type)

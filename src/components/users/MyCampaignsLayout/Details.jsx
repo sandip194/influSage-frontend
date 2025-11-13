@@ -8,7 +8,7 @@ import {
   RiYoutubeFill,
   RiStarLine,
 } from '@remixicon/react';
-import { Modal, Input, Tabs, Skeleton } from 'antd';
+import { Modal, Input, Tabs, Skeleton, ConfigProvider } from 'antd';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -16,6 +16,7 @@ import { RiArrowLeftLine, RiCheckboxCircleFill } from "react-icons/ri";
 
 import dayjs from 'dayjs';
 import VendorCampaignOverview from '../vendorCampaign/VendorCampaignOverview';
+import ContractTab from './tabs/ContractTab';
 
 const { TextArea } = Input;
 
@@ -207,122 +208,147 @@ const Details = () => {
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Left Section */}
         <div className="flex-1 space-y-4">
-          {/* Banner + Profile */}
-          <div className="bg-white rounded-2xl overflow-hidden">
-            <div className="relative h-40 bg-gray-200">
-             <div className="relative">
-              {/* Campaign Logo */}
-              <img
-                src={campaign?.photopath}
-                alt="Logo"
-                onClick={() => setIsLogoPreviewOpen(true)}
-                className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover cursor-pointer"
-              />
-
-              {/* Image Preview Modal */}
-              {isLogoPreviewOpen && (
-                <div
-                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                  onClick={() => setIsLogoPreviewOpen(false)}
-                >
-                  {/* Close Button */}
-                  <button
-                    onClick={() => setIsLogoPreviewOpen(false)}
-                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                  >
-                    &times;
-                  </button>
-
-                  {/* Enlarged Image */}
-                  <img
-                    src={campaign?.photopath}
-                    alt="Logo Preview"
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                    onClick={(e) => e.stopPropagation()} 
-                  />
-                </div>
-              )}
-            </div>
-            </div>
-
-            <div className="p-4">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+          {/* Header / Overview Card */}
+          <div className="bg-white rounded-xl p-6 border border-gray-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-4">
+              {/* Left Section */}
+              <div className="flex items-start gap-4">
+                {/* Profile */}
+                <img
+                  src={campaign?.photopath}
+                  alt="Profile"
+                  className="w-16 h-16 rounded-full object-cover"
+                />
                 <div>
-                  <h2 className="font-semibold text-lg">{campaign?.name}</h2>
+                  <h2 className="font-semibold text-lg text-gray-900">
+                    {campaign?.name || "Campaign Name"}
+                  </h2>
                   <p className="text-gray-500 text-sm">{campaign?.businessname}</p>
                 </div>
-
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                  <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="w-full sm:w-auto bg-[#0f122f] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#23265a] transition"
-                  >
-                    Complete & Payment
-                  </button>
-                  {/* <button
-                    onClick={() => setCancelModel(true)}
-                    className="w-full sm:w-auto px-6 py-2 rounded-full border border-gray-400 text-black font-semibold hover:bg-gray-50"
-                  >
-                    Cancel Campaign
-                  </button> */}
-                </div>
               </div>
-              {/* Campaign Info */}
-              <div className="flex flex-wrap justify-between gap-6 border border-gray-200 rounded-2xl p-4">
-                <div>
-                  <div className="flex gap-2 items-center text-gray-900 mb-2">
-                    <RiMoneyRupeeCircleLine className="w-5 font-semibold" />
-                    <span>Budget</span>
-                  </div>
-                  <p className='text-gray-800'>₹{campaign?.estimatedbudget}</p>
+
+              {/* Right Buttons */}
+              <div className="flex gap-2 items-start">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-[#0f122f] text-white px-4 py-1.5 rounded-lg font-medium hover:bg-[#1a1d4f] transition"
+                >
+                  Complete & Payment
+                </button>
+
+                {/* Optional Cancel button */}
+                {/* Uncomment if needed */}
+                {/* <button
+        onClick={() => setCancelModel(true)}
+        className="w-full sm:w-auto px-4 py-1.5 rounded-lg border border-red-400 text-red-900 font-medium hover:bg-gray-50 transition"
+      >
+        Cancel
+      </button> */}
+              </div>
+            </div>
+
+            {/* Info Section */}
+            <div className="mt-3 flex flex-wrap justify-between gap-4 pt-2">
+              {/* Budget */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-400 mb-1">
+                  <RiMoneyRupeeCircleLine className="w-5 h-5" />
+                  <span>Budget</span>
                 </div>
-                <div>
-                  <div className="flex gap-2 items-center text-gray-900 mb-2">
-                    <RiTranslate className="w-5 font-semibold" />
-                    <span>Language</span>
-                  </div>
+                <p className="text-gray-800 font-medium">₹{campaign?.estimatedbudget}</p>
+              </div>
+
+              {/* Language */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-400 mb-1">
+                  <RiTranslate className="w-5 h-5" />
+                  <span>Language</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
                   {campaign?.campaignlanguages?.map((lang) => (
-                    <p key={lang.languageid} className='text-gray-800'>{lang.languagename}</p>
+                    <span
+                      key={lang.languageid}
+                      className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md text-sm"
+                    >
+                      {lang.languagename}
+                    </span>
                   ))}
                 </div>
-                <div>
-                  <div className="flex gap-2 items-center text-gray-900 mb-2">
-                    <RiMenLine className="w-5 font-semibold" />
-                    <span>Gender</span>
-                  </div>
+              </div>
+
+              {/* Gender */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-400 mb-1">
+                  <RiMenLine className="w-5 h-5" />
+                  <span>Gender</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
                   {campaign?.campaigngenders?.map((gender) => (
-                    <p key={gender.genderid} className='text-gray-800'>{gender.gendername}</p>
+                    <span
+                      key={gender.genderid}
+                      className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md text-sm"
+                    >
+                      {gender.gendername}
+                    </span>
                   ))}
                 </div>
               </div>
             </div>
           </div>
 
+
           {/* Tabs + Content */}
           <div className="bg-white p-5 rounded-2xl">
-            <Tabs defaultActiveKey="overview">
-              <Tabs.TabPane tab="Overview" key="overview">
-                {campaign && (
-                  <VendorCampaignOverview campaignData={campaign} isEditable={false} />
-                )}
-              </Tabs.TabPane>
 
-              <Tabs.TabPane tab="Activity" key="activity">
-                <UserActivity />
-              </Tabs.TabPane>
+            <ConfigProvider
+              theme={{
+                components: {
+                  Tabs: {
+                    colorBgContainer: "#0f122f",        // Background for tab container
+                    itemColor: "#0f122f",            // Text color for inactive tab
+                    itemHoverColor: "#0f122f",       // Text color on hover
+                    itemSelectedColor: "#fff",       // Text color when active
+                    itemActiveColor: "#fff",         // Ensures text stays white
+                    itemActiveBg: "#fff",         // ✅ Active tab background
+                    itemHoverBg: "#f4f5ff",          // Hover background
+                    cardBg: "#fff",                  // Card tab background
+                    inkBarColor: "#0f122f",          // Underline indicator (for line type)
+                    colorBorderSecondary: "#e5e7eb", // Light border color
+                    colorTextDisabled: "#b0b0b0",    // Disabled tab text
+                  },
+                },
+              }}
+            >
+              <Tabs type="card" defaultActiveKey="overview">
+                <Tabs.TabPane tab="Overview" key="overview">
+                  {campaign && (
+                    <VendorCampaignOverview campaignData={campaign} isEditable={false} />
+                  )}
+                </Tabs.TabPane>
 
-              <Tabs.TabPane tab="Message" key="message">
-                <UserMessage />
-              </Tabs.TabPane>
+                <Tabs.TabPane tab="Contract" key="contract">
+                  <ContractTab />
+                </Tabs.TabPane>
 
-              <Tabs.TabPane tab="Files & Media" key="files&media">
-                <UserFilesMedia />
-              </Tabs.TabPane>
+                <Tabs.TabPane tab="Activity" key="activity">
+                  <UserActivity />
+                </Tabs.TabPane>
 
-              <Tabs.TabPane tab="Payment" key="payment">
-                <UserPayment />
-              </Tabs.TabPane>
-            </Tabs>
+                <Tabs.TabPane tab="Message" key="message">
+                  <UserMessage />
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="Files & Media" key="files&media">
+                  <UserFilesMedia />
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="Payment" key="payment">
+                  <UserPayment />
+                </Tabs.TabPane>
+              </Tabs>
+
+            </ConfigProvider>
+
           </div>
         </div>
 
@@ -431,16 +457,14 @@ const Details = () => {
                       {/* Step content */}
                       <div>
                         <h4
-                          className={`font-semibold ${
-                            isCompleted ? "text-gray-800" : "text-gray-400"
-                          }`}
+                          className={`font-semibold ${isCompleted ? "text-gray-800" : "text-gray-400"
+                            }`}
                         >
                           {step.name}
                         </h4>
                         <p
-                          className={`text-sm ${
-                            isCompleted ? "text-gray-600" : "text-gray-400"
-                          }`}
+                          className={`text-sm ${isCompleted ? "text-gray-600" : "text-gray-400"
+                            }`}
                         >
                           {step.date}
                         </p>
