@@ -16,6 +16,7 @@ import { RiArrowLeftLine, RiCheckboxCircleFill } from "react-icons/ri";
 
 import dayjs from 'dayjs';
 import VendorCampaignOverview from '../vendorCampaign/VendorCampaignOverview';
+import ContractTab from './tabs/ContractTab';
 
 const { TextArea } = Input;
 
@@ -305,6 +306,10 @@ const Details = () => {
                 {campaign && (
                   <VendorCampaignOverview campaignData={campaign} isEditable={false} />
                 )}
+              </Tabs.TabPane>
+
+              <Tabs.TabPane tab="Contract" key="contract">
+                <ContractTab/>
               </Tabs.TabPane>
 
               <Tabs.TabPane tab="Activity" key="activity">
