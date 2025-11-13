@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 const Profile = () => {
   const [showAll, setShowAll] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
- // const [showAllHistory, setShowAllHistory] = useState(false);
+  // const [showAllHistory, setShowAllHistory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -23,18 +23,18 @@ const Profile = () => {
 
   const { token, userId } = useSelector((state) => state.auth);
 
-      const formatPhoneNumber = (phone) => {
+  const formatPhoneNumber = (phone) => {
     if (!phone) return "No phone";
 
     const cleaned = phone.replace(/\D/g, "");
 
     let number = cleaned;
     if (number.startsWith("91")) {
-        number = number.slice(2);
+      number = number.slice(2);
     }
     return `+91 ${number.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3")}`;
-    };
-    
+  };
+
   // Fetch profile data
   const getMyProfileDetails = async () => {
     try {
@@ -134,10 +134,10 @@ const Profile = () => {
             </div>
 
             <div className="px-6 pb-6">
-               <button
-                  onClick={() => navigate("/dashboard/editProfile")}
-                  className="bg-[#0f122f] text-white px-5 py-2 rounded-full font-medium hover:bg-[#23265a] transition inline-block"
-                > Edit Profile </button>
+              <button
+                onClick={() => navigate("/dashboard/editProfile")}
+                className="bg-[#0f122f] text-white px-5 py-2 rounded-full font-medium hover:bg-[#23265a] transition inline-block"
+              > Edit Profile </button>
             </div>
           </div>
 
@@ -151,12 +151,17 @@ const Profile = () => {
             {/* Categories */}
             <h2 className="font-bold text-base mb-3">Categories</h2>
             <div className="flex flex-wrap gap-2">
-              {p_categories.flatMap((cat) =>
-                cat.categories.map((sub) => (
+              {(Array.isArray(p_categories)
+                ? p_categories
+                : []
+              ).flatMap(p =>
+                p.categories.map(cat => (
                   <span
+
+                    key={cat.categoryid}
                     className="px-4 py-1.5 text-sm bg-gray-100 rounded-full text-gray-700"
                   >
-                    {sub?.categoryname}
+                    {cat.categoryname}
                   </span>
                 ))
               )}
@@ -264,8 +269,8 @@ const Profile = () => {
                     item?.handleslink?.startsWith("http")
                       ? item.handleslink
                       : item?.handleslink
-                      ? `https://${item.handleslink}`
-                      : null;
+                        ? `https://${item.handleslink}`
+                        : null;
 
                   return (
                     <a
@@ -273,9 +278,8 @@ const Profile = () => {
                       href={handleLink || "#"}
                       target={handleLink ? "_blank" : "_self"}
                       rel="noopener noreferrer"
-                      className={`flex items-center gap-4 border border-gray-200 p-3 rounded-xl hover:shadow-md hover:border-gray-300 transition-all duration-200 ${
-                        handleLink ? "cursor-pointer" : "cursor-default"
-                      }`}
+                      className={`flex items-center gap-4 border border-gray-200 p-3 rounded-xl hover:shadow-md hover:border-gray-300 transition-all duration-200 ${handleLink ? "cursor-pointer" : "cursor-default"
+                        }`}
                     >
                       {/* Icon */}
                       {item?.iconpath ? (
@@ -295,7 +299,7 @@ const Profile = () => {
                         <p className="font-medium text-gray-800 text-sm">{item?.name}</p>
 
                         {handleLink ? (
-                          <span  className="text-blue-600 text-xs underline break-all">
+                          <span className="text-blue-600 text-xs underline break-all">
                             {item.handleslink}
                           </span>
                         ) : (

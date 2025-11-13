@@ -203,6 +203,7 @@ const VendorMyProfile = () => {
                                 ).flatMap(p =>
                                     p.categories.map(cat => (
                                         <span
+                                        
                                             key={cat.categoryid}
                                             className="px-4 py-1.5 text-sm bg-gray-100 rounded-full text-gray-700"
                                         >
