@@ -121,6 +121,18 @@ const InfluencerCard = ({ influencer, onLike, onInvite, BASE_URL }) => {
             ))}
         </div>
       )}
+      {influencer?.completedcampaigncount > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="px-3 py-1.5 border-2 border-gray-300 bg-gray-100 rounded-lg text-xs text-gray-900 flex items-center gap-2 font-semibold">
+                      <span className="inline-flex items-center justify-center w-5 h-5 bg-gray-500 text-white rounded-full text-xs">
+                      {influencer.completedcampaigncount}
+                      </span>
+                      <span className="whitespace-nowrap">
+                      {influencer.completedcampaigncount === 1 ? "completed campaign" : "completed campaigns"}
+                      </span>
+                    </span>
+                    </div>
+                  )}
 
       {/* --- Action Buttons --- */}
       <div className="mt-auto border-t border-black pt-4 flex justify-end items-center">

@@ -4,8 +4,14 @@ import {
   RiHome2Line,
   RiSettings3Line,
   RiUser3Line,
+<<<<<<< HEAD
   RiLogoutBoxRLine,
   RiArrowLeftDoubleLine,  
+=======
+  RiCloseLine,
+  RiShutDownLine,
+  RiCustomerService2Line ,
+>>>>>>> 28ab2904687f422f8ddf87fc8dec310719d29073
 } from "@remixicon/react";
 import { useDispatch } from "react-redux";
 import { Tooltip } from 'antd';
@@ -13,10 +19,18 @@ import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'rea
 import { logout } from "../../../features/auth/authSlice";
 
 const navItems = [
+<<<<<<< HEAD
   { name: "Dashboard", icon: <RiHome2Line className="w-5" />, path: "/admin-dashboard" },
   { name: "User Requests", icon: <RiUser3Line className="w-5" />, path: "/admin-dashboard/influencers" },
   { name: "Campaign Requests", icon: <RiFolderOpenLine className="w-5" />, path: "/admin-dashboard/campaigns" },
   { name: "Settings", icon: <RiSettings3Line className="w-5" />, path: "/admin-dashboard/settings" },
+=======
+  { name: "Dashboard", icon: <RiHome2Line />, path: "/admin-dashboard" },
+  { name: "User Requests", icon: <RiUser3Line />, path: "/admin-dashboard/influencers" },
+  { name: "Campaign Requests", icon: <RiFolderOpenLine />, path: "/admin-dashboard/campaigns" },
+  { name: "Settings", icon: <RiSettings3Line />, path: "/admin-dashboard/settings" },
+  { name: "Support", icon: <RiCustomerService2Line />, path: "/admin-dashboard/support" },
+>>>>>>> 28ab2904687f422f8ddf87fc8dec310719d29073
 ];
 
 const AdminSidebar = forwardRef(({ onStateChange }, ref) => {
