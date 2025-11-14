@@ -37,6 +37,7 @@ const CampaignDetails = () => {
   const [isCancelModel, setCancelModel] = useState(false);
   const [campaignDetails, setCampaignDetails] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [redirecting, setRedirecting] = useState(false); // New state for redirecting
   const [cancelReasons, setCancelReasons] = useState([]);
   // const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
@@ -51,26 +52,46 @@ const CampaignDetails = () => {
   const { campaignId } = useParams()
   const { token } = useSelector((state) => state.auth);
   // const [isModalVisible, setIsModalVisible] = useState(false);
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
+  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  // const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
 
   const getCampaignDetails = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const res = await axios.get(`/vendor/singlecampaign/${campaignId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
-      })
+      });
 
-      // console.log(res?.data?.data)
-      setCampaignDetails(res?.data?.data)
+      if (res.status === 200) {
+        setCampaignDetails(res?.data?.data);
+        setLoading(false); // Set loading false on success
+      }
     } catch (error) {
-      console.error(error)
-    } finally {
-      setLoading(false)
+      if (error.response) {
+        const { status, data } = error.response;
+        if (status === 403) {
+          // Handle Forbidden
+          toast.error(data?.message || "Unauthorized access");
+          setRedirecting(true); // Set redirecting to true
+          // Optional: redirect user to dashboard or another page
+          setTimeout(() => {
+            navigate("/vendor-dashboard/vendor-campaign");
+          }, 1000);
+        } else {
+          console.error("API Error:", data);
+          toast.error(data?.message || "Something went wrong");
+          setLoading(false); // Set loading false for other errors
+        }
+      } else {
+        console.error("Error:", error);
+        toast.error("Network error. Please try again.");
+        setLoading(false); // Set loading false for network errors
+      }
     }
-  }
+  };
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -127,8 +148,8 @@ const CampaignDetails = () => {
         setErrors({});
         // getCampaignDetails();
         setTimeout(() => {
-        navigate("/vendor-dashboard/vendor-campaign");
-      }, 1000);
+          navigate("/vendor-dashboard/vendor-campaign");
+        }, 1000);
       } else {
         toast.error(res.data?.message);
       }
@@ -231,7 +252,7 @@ const CampaignDetails = () => {
   };
 
 
-  if (loading) {
+  if (loading || redirecting) {
     return (
       <div className="w-full text-sm overflow-x-hidden space-y-6">
         {/* Header */}
@@ -373,16 +394,15 @@ const CampaignDetails = () => {
                   </button>
                 )}
                 <button
-                    onClick={() => setCancelModel(true)}
-                    disabled={campaignDetails?.iseditable === "Not editable"}
-                    className={`w-full sm:w-auto px-6 py-2 rounded-full border font-semibold transition
-                      ${
-                        campaignDetails?.iseditable === "Not editable"
-                          ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
-                          : "border-red-400 text-red-900 hover:bg-gray-50"
-                      }`}
-                  >
-                    Cancel
+                  onClick={() => setCancelModel(true)}
+                  disabled={campaignDetails?.iseditable === "Not editable"}
+                  className={`w-full sm:w-auto px-6 py-2 rounded-full border font-semibold transition
+                      ${campaignDetails?.iseditable === "Not editable"
+                      ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
+                      : "border-red-400 text-red-900 hover:bg-gray-50"
+                    }`}
+                >
+                  Cancel
                 </button>
               </div>
             </div>
@@ -634,7 +654,7 @@ const CampaignDetails = () => {
                 {[
                   { name: "Campaign Created", date: campaignDetails?.trackcampaign?.createddate },
                   { name: "Campaign Started", date: campaignDetails?.trackcampaign?.campaignstartdate },
-                  { name: "Campaign Ended", date: campaignDetails?.trackcampaign?.campaignenddate},
+                  { name: "Campaign Ended", date: campaignDetails?.trackcampaign?.campaignenddate },
                 ].map((step, idx, arr) => {
                   const stepDate = dayjs(step.date, "DD-MM-YYYY HH:mm");
                   const now = dayjs();

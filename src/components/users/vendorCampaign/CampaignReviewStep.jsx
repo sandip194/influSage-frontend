@@ -518,7 +518,7 @@ const CampaignReviewStep = ({ onEdit }) => {
           </div>
 
           {/* Milestone Info */}
-          <div className="bg-white p-4 rounded-2xl">
+          {/* <div className="bg-white p-4 rounded-2xl">
             <div className="space-y-4">
               {campaignData?.p_campaignjson?.milestones?.length > 0 ? (
                 campaignData.p_campaignjson.milestones.map((milestone, index) => (
@@ -545,7 +545,7 @@ const CampaignReviewStep = ({ onEdit }) => {
               )}
             </div>
 
-          </div>
+          </div> */}
 
           {/* Platform Info */}
           <div className="bg-white p-4 rounded-2xl">

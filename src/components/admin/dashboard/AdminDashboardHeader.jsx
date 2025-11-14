@@ -1,11 +1,12 @@
-import { Dropdown, Avatar, Badge } from "antd";
-import { RiMenu2Line, RiNotification3Line } from "@remixicon/react";
+import { Dropdown, Avatar } from "antd";
+import { RiMenu2Line } from "@remixicon/react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../../features/auth/authSlice";
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-const AdminDashboardHeader = ({ toggleSidebar }) => {
+const AdminDashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
@@ -16,7 +17,7 @@ const AdminDashboardHeader = ({ toggleSidebar }) => {
     navigate("/login");
   };
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchProfileData = async () => {
       if (!token) return;
       try {
@@ -35,7 +36,7 @@ const AdminDashboardHeader = ({ toggleSidebar }) => {
   }, [token]);
 
   const handleSettings = () => {
-    alert("Settings clicked! (dummy menu)"); // replace with real navigation if needed
+    navigate("/admin-dashboard/settings");
   };
 
   const userMenu = {
@@ -54,16 +55,14 @@ const AdminDashboardHeader = ({ toggleSidebar }) => {
     ],
   };
 
-  // const notifications = {
-  //   items: [
-  //     { key: "1", label: "New user registered" },
-  //     { key: "2", label: "Campaign request pending" },
-  //     { key: "3", label: "System update available" },
-  //   ],
-  // };
+  // Dynamic padding-left for header (to avoid overlap with sidebar)
+  const headerPaddingLeft = window.innerWidth >= 768 ? (sidebarOpen ? '16rem' : '4rem') : '1rem'; // 1rem for mobile (from px-4)
 
   return (
-    <header className="w-full h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:pl-64 fixed top-0 left-0 z-30">
+    <header 
+      className="w-full py-3 h-16 bg-white border-b border-gray-200 flex items-center justify-between fixed top-0 left-0 z-30"
+      style={{ paddingLeft: headerPaddingLeft, paddingRight: '1rem' }} // Override left padding dynamically
+    >
       {/* Mobile Hamburger */}
       <button
         className="md:hidden text-gray-600"
@@ -74,15 +73,6 @@ const AdminDashboardHeader = ({ toggleSidebar }) => {
 
       {/* Right-side Controls */}
       <div className="flex items-center gap-4 ml-auto">
-        {/* Notifications */}
-        {/* <Dropdown menu={notifications} placement="bottomRight" arrow> */}
-          {/* <div className="cursor-pointer relative">
-            <Badge count={3} size="small">
-              <RiNotification3Line size={22} className="text-gray-600" />
-            </Badge>
-          </div> */}
-        {/* </Dropdown> */}
-
         {/* User Avatar + Dropdown */}
         <Dropdown menu={userMenu} placement="bottomRight" arrow>
           <div className="flex items-center gap-2 cursor-pointer">
@@ -92,11 +82,11 @@ const AdminDashboardHeader = ({ toggleSidebar }) => {
                   ? profileData.photopath
                   : "https://api.dicebear.com/5.x/bottts/svg?seed=admin"
               }
-              alt={profileData?.firstname }
+              alt={profileData?.firstname}
             />
             <span className="hidden sm:inline text-sm font-medium text-gray-700">
-                {`${profileData?.firstname || ""} ${profileData?.lastname || ""}`.trim()}
-                </span>
+              {`${profileData?.firstname || ""} ${profileData?.lastname || ""}`.trim()}
+            </span>
           </div>
         </Dropdown>
       </div>

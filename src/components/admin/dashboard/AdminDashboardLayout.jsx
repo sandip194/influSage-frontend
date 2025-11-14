@@ -1,50 +1,46 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 import AdminDashboardHeader from "./AdminDashboardHeader";
 
 const AdminDashboardLayout = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const sidebarRef = useRef();
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024); // Sync with sidebar's initial state
 
-    const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+  const toggleSidebar = () => {
+    sidebarRef.current?.toggleSidebar();
+  };
 
-    return (
-        <div className="min-h-screen bg-gray-50 text-gray-800">
-            {/* Sidebar for desktop */}
-            <div className="hidden md:block fixed inset-y-0 left-0 w-60 bg-white shadow-sm z-30">
-                <AdminSidebar isOpen={true} />
-            </div>
+  // Dynamic padding-left for main content
+  const mainPaddingLeft = sidebarOpen ? '16rem' : '4rem'; // 256px : 64px
 
-            {/* Sidebar for mobile */}
-            <div
-                className={`fixed inset-y-0 left-0 w-60 bg-white shadow-sm z-40 transform transition-transform duration-300 md:hidden ${
-                    isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-                }`}
-            >
-                <AdminSidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            </div>
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-800">
+      {/* Sidebar */}
+      <AdminSidebar ref={sidebarRef} onStateChange={setSidebarOpen} />
 
-            {/* Backdrop for mobile sidebar */}
-            {isSidebarOpen && (
-                <div
-                    className="fixed inset-0  bg-opacity-30 z-30 md:hidden"
-                    onClick={toggleSidebar}
-                />
-            )}
+      {/* Backdrop for mobile sidebar */}
+      {sidebarOpen && window.innerWidth < 768 && (
+        <div
+          className="fixed inset-0 bg-opacity-30 z-30 md:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
 
-            {/* Header */}
-            <div className="fixed top-0 left-0 right-0 z-20">
-                <AdminDashboardHeader toggleSidebar={toggleSidebar} />
-            </div>
+      {/* Header */}
+      <AdminDashboardHeader toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
 
-            {/* Main Content */}
-            <main className="pt-16 md:pl-60 transition-all duration-300">
-                <div className="p-4">
-                    <Outlet />
-                </div>
-            </main>
+      {/* Main Content */}
+      <main 
+        className="pt-16 transition-all duration-300"
+        style={{ paddingLeft: window.innerWidth >= 768 ? mainPaddingLeft : '0' }}
+      >
+        <div className="p-4">
+          <Outlet />
         </div>
-    );
+      </main>
+    </div>
+  );
 };
 
 export default AdminDashboardLayout;

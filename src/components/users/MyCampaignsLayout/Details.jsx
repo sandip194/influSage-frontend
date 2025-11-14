@@ -406,7 +406,7 @@ const Details = () => {
             {/* Influencers List - REMOVED as per requirement */}
 
             {/* Milestones (adapted from your user component) */}
-            <div className="bg-white p-4 rounded-2xl mt-6">
+            {/* <div className="bg-white p-4 rounded-2xl mt-6">
               <h3 className="font-semibold text-lg mb-3">Milestones</h3>
               {campaign?.milestones?.length > 0 ? (
                 campaign.milestones.map((milestone, index) => (
@@ -424,7 +424,7 @@ const Details = () => {
               ) : (
                 <p className="text-gray-500">No milestones available.</p>
               )}
-            </div>
+            </div> */}
 
             <div className="bg-white p-6 rounded-2xl mt-6">
               <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>

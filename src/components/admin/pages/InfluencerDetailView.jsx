@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RiArrowLeftLine } from "@remixicon/react";
-import { Button, Modal, Tooltip, Empty, Skeleton } from "antd";
+import { Button, Modal, Tooltip, Empty, Skeleton, Input } from "antd";
 import { CheckOutlined, CloseOutlined, StopOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 
@@ -29,6 +29,11 @@ const InfluencerDetailView = () => {
     const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
     const [blockReasonList, setBlockReasonList] = useState([]);
     const [selectedReason, setSelectedReason] = useState(null);
+
+    // New states for reject modal
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [rejectReason, setRejectReason] = useState("");
+    const [rejectLoading, setRejectLoading] = useState(false);
 
 
     const formatPhoneNumber = (phone) => {
@@ -122,10 +127,41 @@ const InfluencerDetailView = () => {
         }
     };
 
+    // New function for reject with reason (same API as in UserTableLayout)
+    const handleRejectSubmit = async () => {
+        if (!rejectReason.trim()) {
+            toast.error("Please provide a reason for rejection.");
+            return;
+        }
+
+        try {
+            setRejectLoading(true);
+            const res = await axios.post('/admin/dashboard/profile-reject', {
+                p_userid: userId,
+                p_text: rejectReason
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.status === 200) {
+                getInfluencerDetails();
+                toast.success(res.data?.message || "User rejected successfully");
+                setIsRejectModalOpen(false);
+                setRejectReason("");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Failed to reject user");
+        } finally {
+            setRejectLoading(false);
+        }
+    };
+
 
     const openConfirmationModal = (type) => {
         setActionType(type);
-        if (type === "Blocked") {
+        if (type === "Rejected") {
+            setIsRejectModalOpen(true);
+        } else if (type === "Blocked") {
             fetchBlockReasons(); // Fetch block reasons dynamically
             setIsBlockModalOpen(true);
         } else {
@@ -418,40 +454,40 @@ const InfluencerDetailView = () => {
                         <h3 className="font-bold mb-4 text-base">Social Media</h3>
                         <div className="space-y-4">
                             {influDetails?.providers?.map((item, index) => {
-                            const handleLink = item.handleslink?.startsWith("http")
-                                ? item.handleslink
-                                : `https://${item.handleslink}`;
+                                const handleLink = item.handleslink?.startsWith("http")
+                                    ? item.handleslink
+                                    : `https://${item.handleslink}`;
 
-                            return (
-                                <div
-                                key={index}
-                                onClick={() =>
-                                    window.open(handleLink, "_blank", "noopener,noreferrer")
-                                }
-                                className="flex items-center gap-3 p-2 rounded-lg bg-gray-100 cursor-pointer hover:bg-gray-200 transition"
-                                >
-                                <img
-                                    src={item.iconpath}
-                                    alt="Social"
-                                    className="w-8 h-8 rounded-full object-cover"
-                                />
-                                <div>
-                                    <p className="font-medium text-gray-900">{item.providername}</p>
-                                    <p
-                                    className="text-blue-600 text-xs truncate max-w-[200px] underline"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        window.open(handleLink, "_blank", "noopener,noreferrer");
-                                    }}
+                                return (
+                                    <div
+                                        key={index}
+                                        onClick={() =>
+                                            window.open(handleLink, "_blank", "noopener,noreferrer")
+                                        }
+                                        className="flex items-center gap-3 p-2 rounded-lg bg-gray-100 cursor-pointer hover:bg-gray-200 transition"
                                     >
-                                    {item.handleslink}
-                                    </p>
-                                    <p className="text-gray-500 text-xs">
-                                    Followers: {item.nooffollowers?.toLocaleString() || 0}
-                                    </p>
-                                </div>
-                                </div>
-                            );
+                                        <img
+                                            src={item.iconpath}
+                                            alt="Social"
+                                            className="w-8 h-8 rounded-full object-cover"
+                                        />
+                                        <div>
+                                            <p className="font-medium text-gray-900">{item.providername}</p>
+                                            <p
+                                                className="text-blue-600 text-xs truncate max-w-[200px] underline"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    window.open(handleLink, "_blank", "noopener,noreferrer");
+                                                }}
+                                            >
+                                                {item.handleslink}
+                                            </p>
+                                            <p className="text-gray-500 text-xs">
+                                                Followers: {item.nooffollowers?.toLocaleString() || 0}
+                                            </p>
+                                        </div>
+                                    </div>
+                                );
                             })}
                         </div>
                     </div>
@@ -508,6 +544,9 @@ const InfluencerDetailView = () => {
                     className: "bg-red-600 hover:bg-red-700 text-white",
                     loading: actionLoading,
                 }}
+                cancelButtonProps={{
+                    disabled: actionLoading,
+                }}
             >
                 <p className="mb-4 text-gray-700">
                     Please select a reason for blocking this user:
@@ -534,6 +573,38 @@ const InfluencerDetailView = () => {
                 ) : (
                     <p className="text-gray-500 text-sm">No block reasons available.</p>
                 )}
+            </Modal>
+
+            {/* Reject Reason Modal */}
+            <Modal
+                title={`Reject ${influDetails?.firstname} ${influDetails?.lastname}`}
+                open={isRejectModalOpen}
+                onOk={handleRejectSubmit}
+                onCancel={() => {
+                    setIsRejectModalOpen(false);
+                    setRejectReason("");
+                }}
+                okText="Confirm Reject"
+                okButtonProps={{
+                    danger: true,
+                    className: "bg-red-600 hover:bg-red-700 text-white mt-4",
+                    disabled: rejectLoading,
+                }}
+                cancelButtonProps={{
+                    disabled: rejectLoading,
+                }}
+            >
+                <p className="mb-4 text-gray-700">
+                    Please provide a reason for rejecting this user:
+                </p>
+                <Input.TextArea
+                    placeholder="Enter rejection reason..."
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    rows={4}
+                    maxLength={500}
+                    showCount={{ formatter: ({ count, maxLength }) => `${count} / ${maxLength}` }}
+                />
             </Modal>
 
             {/* 🖼️ Image Modal */}

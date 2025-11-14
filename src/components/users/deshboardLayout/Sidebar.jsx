@@ -8,7 +8,8 @@ import {
     RiShutDownLine,
     RiStackLine,
     RiWallet3Line,
-    RiAdminLine
+    RiAdminLine,
+    RiLogoutBoxRLine
 } from '@remixicon/react';
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { NavLink } from 'react-router-dom';
@@ -214,7 +215,7 @@ const Sidebar = forwardRef((props, ref) => {
                                 isOpen ? "justify-between px-6" : "justify-center"
                             } w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm gap-2`}
                             >
-                            <RiShutDownLine className="text-lg" />
+                            <RiLogoutBoxRLine className="text-lg" />
                             {isOpen && <span>Logout</span>}
                             </button>
                         </Tooltip>

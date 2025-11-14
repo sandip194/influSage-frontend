@@ -64,7 +64,8 @@ import InfluencerDetailView from './components/admin/pages/InfluencerDetailView'
 import HomePage from './pages/LandingPage/HomePage';
 import CampaignDetailsView from './components/admin/pages/CampaignDetailsView';
 import BlockedUserPage from './pages/commonPages/BlockedUserPage';
-import MessagePage  from './components/adminChat/ConversationPage';
+import MessagePage from './components/adminChat/ConversationPage';
+import ComingSoon from './pages/commonPages/ComingSoon';
 
 const App = () => {
 
@@ -74,7 +75,7 @@ const App = () => {
                 <Router>
                         {/* <h1 className="text-3xl font-bold text-green-500">Tailwind is Working ✅</h1> */}
                         <ToastContainer
-                                position="top-right"
+                                position="top-right"  // Keep as is, or change to "top-center" for centering
                                 autoClose={4000}
                                 hideProgressBar={false}
                                 newestOnTop={false}
@@ -83,7 +84,9 @@ const App = () => {
                                 draggable
                                 pauseOnHover
                                 theme="light"
+                                style={{ top: '80px' }}  // ✅ Add this: Moves the toast container 60px down from the top (adjust as needed, e.g., 40px or 80px)
                         />
+
                         <SocketProvider>
 
 
@@ -139,6 +142,13 @@ const App = () => {
 
                                                                 <Route path='messagepage' element={<MessagePage />} />
 
+
+
+
+
+
+                                                                <Route path="referrals" element={<ComingSoon />} />
+
                                                         </Route>
                                                 </Route>
                                                 <Route path='/dashboard/browse' element={<BrowseCampaign />} />
@@ -177,11 +187,17 @@ const App = () => {
                                                                 <Route path='applications/influencer-details/:userId' element={<InfluencerProfile />} />
                                                                 <Route path='applications/campaignDetails/:campaignId' element={<CampaignDetails />} /> 
                                                                 
-                                                                */} 
+                                                                */}
 
 
                                                                 <Route path='edit-profile' element={<EditVendorProfile />} />
                                                                 <Route path='my-profile' element={<VendorMyProfile />} />
+
+
+                                                                <Route path="payment" element={<ComingSoon />} />
+                                                                <Route path="analytics" element={<ComingSoon />} />
+                                                                <Route path="setting" element={<ComingSoon />} />
+
                                                         </Route>
                                                 </Route>
                                                 <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
@@ -196,6 +212,13 @@ const App = () => {
                                                         <Route path='influencers/details/:userId' element={<InfluencerDetailView />} />
                                                         <Route path='campaigns' element={<CampaignRequests />} />
                                                         <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView />} />
+
+
+
+
+
+
+                                                        <Route path="settings" element={<ComingSoon />} />
                                                 </Route>
                                         </Route>
 

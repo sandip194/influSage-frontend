@@ -51,7 +51,6 @@ const UserTableLayout = () => {
         gender: [],     // Changed to array for multiple selections
     });
 
-
     const [currentUser, setCurrentUser] = useState(null); // store full user object
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
@@ -60,7 +59,10 @@ const UserTableLayout = () => {
     const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
     const [selectedReason, setSelectedReason] = useState(null);
 
-
+    // New states for reject modal
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [rejectReason, setRejectReason] = useState("");
+    const [rejectLoading, setRejectLoading] = useState(false)
 
     const fetchStatusList = async () => {
         try {
@@ -177,14 +179,15 @@ const UserTableLayout = () => {
         setCurrentUserId(user.id);
         setActionType(type);
 
-        if (type === 'Blocked') {
+        if (type === 'Rejected') {
+            setIsRejectModalOpen(true);
+        } else if (type === 'Blocked') {
             fetchBlockResons(); // Ensure we have the reasons
             setIsBlockModalOpen(true);
         } else {
             setIsModalOpen(true);
         }
     };
-
 
     // Run initial fetches only once on mount
     useEffect(() => {
@@ -245,7 +248,34 @@ const UserTableLayout = () => {
         }
     };
 
+    // New function for reject with reason
+    const handleRejectSubmit = async () => {
+        if (!rejectReason.trim()) {
+            toast.error("Please provide a reason for rejection.");
+            return;
+        }
 
+        try {
+            setRejectLoading(true)
+            const res = await axios.post('/admin/dashboard/profile-reject', {
+                p_userid: currentUserId,
+                p_text: rejectReason
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.status === 200) {
+                fetchUserRequests();
+                toast.success(res.data?.message || "User rejected successfully");
+                setIsRejectModalOpen(false);
+                setRejectReason("");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Failed to reject user");
+        } finally {
+            setRejectLoading(false)
+        }
+    };
 
     return (
         <div className="w-full">
@@ -515,7 +545,6 @@ const UserTableLayout = () => {
                 />
             </div>
 
-
             {/* confirmation Modal */}
             <Modal
                 title={`Confirm ${actionType}`}
@@ -540,6 +569,38 @@ const UserTableLayout = () => {
                     </span>
                     ?
                 </p>
+            </Modal>
+
+            // {/* Reject Reason Modal */}
+            <Modal
+                title={`Reject ${currentUser?.firstname} ${currentUser?.lastname}`}
+                open={isRejectModalOpen}
+                onOk={handleRejectSubmit}
+                onCancel={() => {
+                    setIsRejectModalOpen(false);
+                    setRejectReason("");
+                }}
+                okText="Confirm Reject"
+                okButtonProps={{
+                    danger: true,
+                    className: "bg-red-600 hover:bg-red-700 text-white mt-4",
+                    disabled: rejectLoading,
+                }}
+                cancelButtonProps={{
+                    disabled: rejectLoading,
+                }}
+            >
+                <p className="mb-4 text-gray-700">
+                    Please provide a reason for rejecting this user:
+                </p>
+                <Input.TextArea
+                    placeholder="Enter rejection reason..."
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    rows={4}
+                    maxLength={500}
+                    showCount={{ formatter: ({ count, maxLength }) => `${count} / ${maxLength}` }}
+                />
             </Modal>
 
             {/* Block Reason Modal */}
@@ -574,6 +635,7 @@ const UserTableLayout = () => {
                                     value={reason.id}
                                     checked={selectedReason === reason.id}
                                     onChange={(e) => setSelectedReason(Number(e.target.value))}
+
                                 />
                                 <span>{reason.name}</span>
                             </label>
@@ -583,8 +645,6 @@ const UserTableLayout = () => {
                     <p className="text-gray-500 text-sm">No reasons found.</p>
                 )}
             </Modal>
-
-
 
             {/* Filter Drawer */}
             <Drawer
@@ -680,5 +740,3 @@ const UserTableLayout = () => {
 };
 
 export default UserTableLayout;
-
-

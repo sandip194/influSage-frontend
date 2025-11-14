@@ -378,6 +378,8 @@ const CampaignDetailsView = () => {
                 </div>
                 {/* RIGHT SIDE */}
                 <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
+
+                    {/* Campaign Info */}
                     <div className="bg-white p-4 rounded-2xl">
                         <h3 className="font-semibold text-lg">Campaign Details</h3>
                         <hr className="my-2 border-gray-200" />

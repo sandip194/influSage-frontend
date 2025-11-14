@@ -40,21 +40,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       ? photoPath
       : null;
 
-    // ✅ Ensure milestone amounts are numbers
-    const initialMilestones = Array.isArray(data.milestones)
-      ? data.milestones.map((m) => ({
-        description: m.description || "",
-        amount: Number(m.amount) || 0,
-        enddate: m.enddate ? dayjs(m.enddate, "DD-MM-YYYY") : null,
-      }))
-      : [
-        {
-          description: "",
-          amount: 0,
-          enddate: null,
-        },
-      ];
-
     // ✅ Ensure budget is number, not string
     setFormData({
       title: data.name || "",
@@ -75,7 +60,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
         : null,
       aboutBrand: data.branddetail || "",
       profileImageUrl: imageUrl,
-      milestones: initialMilestones,
     });
 
     setPreview(imageUrl);
@@ -93,7 +77,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
     setFormData((prev) => ({ ...prev, [field]: newValue }));
     setErrors((prev) => ({ ...prev, [field]: false }));
   };
-
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -114,29 +97,8 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
     setPreview(URL.createObjectURL(file));
   };
 
-  const handleMilestoneChange = (index, field, value) => {
-    const updated = [...formData.milestones];
-    updated[index][field] = value;
-    setFormData((prev) => ({ ...prev, milestones: updated }));
-    // Clear specific milestone error immediately on change (unified with other fields)
-    setErrors((prev) => {
-      const newMilestonesErrors = [...(prev.milestones || [])];
-      newMilestonesErrors[index] = { ...newMilestonesErrors[index], [field]: false };
-      return { ...prev, milestones: newMilestonesErrors };
-    });
-  };
-
-  const validateFields = (formData, profileImage, milestones = []) => {
+  const validateFields = (formData, profileImage) => {
     const budgetAmount = Number(formData.budgetAmount) || 0;
-
-    // Use whichever milestone array actually has data
-    const effectiveMilestones =
-      milestones?.length > 0 ? milestones : formData.milestones || [];
-
-    const milestoneTotal = effectiveMilestones.reduce(
-      (sum, m) => sum + Number(m.amount || 0),
-      0
-    );
 
     const errors = {
       title: !formData.title?.trim(),
@@ -154,36 +116,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       hashtags: !Array.isArray(formData.hashtags) || formData.hashtags.length === 0,
     };
 
-    if (budgetAmount > 0 && milestoneTotal !== budgetAmount) {
-      errors.milestoneMismatch = `Total milestones amount (${milestoneTotal}) must equal campaign budget (${budgetAmount}).`;
-    }
-
     return errors;
-  };
-
-
-  const validateMilestones = (milestones = [], campaignStart, campaignEnd) => {
-    return milestones.map((m, index) => {
-      const errors = {
-        description: !m.description?.trim(),
-        amount: !m.amount || Number(m.amount) <= 0,
-        enddate: !m.enddate,
-      };
-
-      if (m.enddate && campaignStart && campaignEnd) {
-        const isBeforeStart = m.enddate.isBefore(campaignStart, "day");
-        const isAfterEnd = m.enddate.isAfter(campaignEnd, "day");
-
-        const prev = milestones[index - 1];
-        const isBeforePrev = prev?.enddate && m.enddate.isBefore(prev.enddate, "day");
-
-        if (isBeforeStart || isAfterEnd || isBeforePrev) {
-          errors.enddate = true;
-        }
-      }
-
-      return errors;
-    });
   };
 
   const buildPayload = (formData, profileImage) => {
@@ -201,11 +134,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       photopath: profileImage
         ? null
         : formData.profileImageUrl,
-      milestones: formData.milestones?.map(m => ({
-        description: m.description,
-        amount: Number(m.amount),
-        enddate: m.enddate?.format("DD-MM-YYYY") || null,
-      })),
     };
   };
 
@@ -227,39 +155,12 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
     };
 
     const fieldErrors = validateFields(sanitizedFormData, profileImage);
-    const milestoneErrors = validateMilestones(
-      sanitizedFormData.milestones,
-      sanitizedFormData.startDate,
-      sanitizedFormData.endDate
-    );
 
     const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
-    const hasMilestoneErrors = milestoneErrors.some((m) =>
-      Object.values(m).some(Boolean)
-    );
 
-    if (hasFieldErrors || hasMilestoneErrors) {
-      setErrors({ ...fieldErrors, milestones: milestoneErrors });
-      if (fieldErrors.milestoneMismatch) {
-        toast.error(fieldErrors.milestoneMismatch);
-      } else {
-        toast.error("Please fill all required fields before continuing.");
-      }
-      return;
-    }
-
-    const totalMilestoneAmount = sanitizedFormData.milestones.reduce(
-      (sum, m) => sum + Number(m.amount || 0),
-      0
-    );
-
-    if (totalMilestoneAmount > Number(sanitizedFormData.budgetAmount)) {
-      toast.error("Total milestone amounts cannot exceed the campaign budget.");
-      return;
-    } else if (totalMilestoneAmount < Number(sanitizedFormData.budgetAmount)) {
-      toast.warning(
-        `Milestone total (${totalMilestoneAmount}) is less than campaign budget (${sanitizedFormData.budgetAmount}).`
-      );
+    if (hasFieldErrors) {
+      setErrors({ ...fieldErrors });
+      toast.error("Please fill all required fields before continuing.");
       return;
     }
 
@@ -300,8 +201,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       setLoading(false);
     }
   };
-
-
 
   return (
     <div className="bg-white p-6 rounded-2xl">
@@ -457,7 +356,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
         </div>
       </div>
 
-
       <hr className="my-4 border-gray-200" />
       <label className="font-semibold block mb-2 flex items-center gap-2 mt-6">
         Campaign Duration
@@ -515,9 +413,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
         </div>
       </div>
 
-
-
-
       <hr className="my-4 border-gray-200" />
 
       {/* Budget */}
@@ -556,140 +451,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       {errors.budgetAmount && (
         <p className="text-red-500 text-sm mt-1">Budget is required and must be greater than 0</p>
       )}
-
-      {/* Proposal Breakdown */}
-      <hr className="my-4 border-gray-200" />
-      <label className="font-semibold block mb-2">Proposal Breakdown</label>
-      <p className="text-sm mb-3 text-gray-500">
-        Suggest a milestone schedule for your client
-      </p>
-
-      {formData.milestones?.map((milestone, index) => (
-        <div key={index} className="mb-6">
-          <label className="font-semibold block mb-2">Milestone {index + 1} <span className="text-red-500">*</span></label>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-            {/* Description */}
-            <div className="md:col-span-4">
-              <Input
-                size="large"
-                placeholder="Description"
-                value={milestone.description}
-                onChange={(e) => handleMilestoneChange(index, "description", e.target.value)}
-              />
-              {errors.milestones?.[index]?.description && (
-                <p className="text-red-500 text-sm mt-1">Description is required</p>
-              )}
-            </div>
-
-            {/* Amount */}
-            <div className="md:col-span-3">
-              <Input
-                size="large"
-                type="number"
-                addonBefore="₹"
-                min={0}
-                placeholder={`Enter amount for milestone ${index + 1}`}
-                value={milestone.amount}
-                onChange={(e) => {
-                  const val = e.target.value === "" ? "" : Number(e.target.value);
-                  handleMilestoneChange(index, "amount", val);
-                }}
-              />
-              {errors.milestones?.[index]?.amount && (
-                <p className="text-red-500 text-sm mt-1">Amount must be greater than 0</p>
-              )}
-            </div>
-
-            {/* Due Date */}
-            <div className="md:col-span-4">
-              <DatePicker
-                size="large"
-                format="DD-MM-YYYY"
-                style={{ width: "100%" }}
-                placeholder="Due Date"
-                value={milestone.enddate}
-                disabledDate={(current) => {
-                  const campaignStart = formData.startDate;
-                  const campaignEnd = formData.endDate;
-                  const prevMilestone = formData.milestones[index - 1];
-
-                  if (!campaignStart || !campaignEnd) return current < dayjs().startOf("day");
-
-                  const isBeforeCampaignStart = current.isBefore(campaignStart, "day");
-                  const isAfterCampaignEnd = current.isAfter(campaignEnd, "day");
-                  const isBeforePrevMilestone =
-                    prevMilestone?.enddate &&
-                    current.isBefore(prevMilestone.enddate, "day");
-
-                  return (
-                    current < dayjs().startOf("day") ||
-                    isBeforeCampaignStart ||
-                    isAfterCampaignEnd ||
-                    isBeforePrevMilestone
-                  );
-                }}
-                onChange={(date) => handleMilestoneChange(index, "enddate", date)}
-              />
-              {errors.milestones?.[index]?.enddate && (
-                <p className="text-red-500 text-sm mt-1">Due Date is required and must be valid</p>
-              )}
-            </div>
-
-            {/* Remove Button */}
-            {index !== 0 && (
-              <div className="md:col-span-1 flex md:justify-center">
-                <button
-                  type="button"
-                  className="text-red-500 p-2 bg-gray-100 rounded-full cursor-pointer hover:text-red-700"
-                  onClick={() => {
-                    const updated = [...formData.milestones];
-                    updated.splice(index, 1);
-                    setFormData((prev) => ({ ...prev, milestones: updated }));
-                    // Clear errors for removed milestone
-                    setErrors((prev) => {
-                      const newMilestonesErrors = prev.milestones?.filter((_, i) => i !== index) || [];
-                      return { ...prev, milestones: newMilestonesErrors };
-                    });
-                  }}
-                >
-                  <RiDeleteBin6Line size={18} className="text-red-500 hover:text-red-700" />
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
-
-
-      {/* Add Milestone Button */}
-      <button
-        type="button"
-        onClick={() => {
-          const last = formData.milestones[formData.milestones.length - 1];
-          const isIncomplete =
-            !last.description?.trim() || !last.amount || !last.amount > 0 || !last.enddate;
-
-          if (isIncomplete) {
-            toast.warning(
-              "Please complete the current milestone before adding a new one."
-            );
-            return;
-          }
-
-          setFormData((prev) => ({
-            ...prev,
-            milestones: [
-              ...prev.milestones,
-              { description: "", amount: 0, enddate: null },
-            ],
-          }));
-        }}
-        className="text-blue-600 text-sm hover:underline mt-2"
-      >
-        + Add Milestone
-      </button>
-
 
       <hr className="my-4 border-gray-200" />
 
