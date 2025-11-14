@@ -3,12 +3,12 @@ import Sidebar from "./Sidebar";
 import ChatWindow from "./ChatWindow";
 
 const ConversationPage = () => {
-  const [activeSubject, setActiveSubject] = useState("Support Related Subject");
+  const [activeSubject, setActiveSubject] = useState("");
 
   return (
     <div className="h-[85vh] flex overflow-hidden gap-0 p-0 m-0">
 
-      <div className="w-[450px]">
+      <div className="w-[410px]">
         <Sidebar setActiveSubject={setActiveSubject} />
       </div>
 

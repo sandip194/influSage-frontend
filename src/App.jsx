@@ -64,7 +64,9 @@ import InfluencerDetailView from './components/admin/pages/InfluencerDetailView'
 import HomePage from './pages/LandingPage/HomePage';
 import CampaignDetailsView from './components/admin/pages/CampaignDetailsView';
 import BlockedUserPage from './pages/commonPages/BlockedUserPage';
-import MessagePage  from './components/adminChat/ConversationPage';
+import InfluencerMessagePage  from './components/influencerChat/ConversationPage';
+import AdminMessagePage from './components/admin/adminChat/AdminConversationPage';
+import VendorConversationPage  from './components/vendorChat/VendorConversationPage';
 
 const App = () => {
 
@@ -137,7 +139,7 @@ const App = () => {
 
                                                                 <Route path='setting' element={<Settings />} />
 
-                                                                <Route path='messagepage' element={<MessagePage />} />
+                                                                <Route path='messagepage' element={<InfluencerMessagePage />} />
 
                                                         </Route>
                                                 </Route>
@@ -182,6 +184,7 @@ const App = () => {
 
                                                                 <Route path='edit-profile' element={<EditVendorProfile />} />
                                                                 <Route path='my-profile' element={<VendorMyProfile />} />
+                                                                <Route path='vendorMessagepage' element={<VendorConversationPage />} />
                                                         </Route>
                                                 </Route>
                                                 <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
@@ -196,6 +199,7 @@ const App = () => {
                                                         <Route path='influencers/details/:userId' element={<InfluencerDetailView />} />
                                                         <Route path='campaigns' element={<CampaignRequests />} />
                                                         <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView />} />
+                                                        <Route path='support' element={<AdminMessagePage />} />
                                                 </Route>
                                         </Route>
 

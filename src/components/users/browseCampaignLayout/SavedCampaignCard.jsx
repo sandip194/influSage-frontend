@@ -117,22 +117,30 @@ const SavedCampaignCard = ({
 
             {/* --- Tags --- */}
             <div className="flex flex-wrap gap-2 mb-4">
-              {campaign.providercontenttype?.map((item, index) => (
-                <span
-                  key={index}
-                  className="flex items-center gap-2 px-1 py-1 text-xs text-black rounded-full"
-                >
-                  {item.iconpath && (
-                    <img
-                      src={item.iconpath}
-                      alt={item.name}
-                      className="w-4 h-4 object-contain"
-                    />
-                  )}
-                  {item.contenttypename || item.name}
-                </span>
-              ))}
+          {campaign.providercontenttype?.map((provider, pIdx) => (
+            <div
+          key={pIdx}
+          className="flex items-center gap-2 px-1 py-1 text-xs text-black rounded-full"
+            >
+          {provider.iconpath && (
+            <img
+              loading="lazy"
+              src={provider.iconpath}
+              alt={provider.providername}
+              className="w-6 h-6 object-contain"
+            />
+          )}
+          <div className="flex items-center gap-1">
+             <span className="text-xs text-black">
+            {provider.contenttypes
+              ?.map((ct) => ct.contenttypename)
+              .filter(Boolean)
+              .join(", ")}
+          </span>
+          </div>
             </div>
+          ))}
+        </div>
 
             {/* --- Description --- */}
             <p
@@ -158,6 +166,18 @@ const SavedCampaignCard = ({
               ))}
             </div>
 
+        {campaign.appliedinfluencercount > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            <span className="px-3 py-1.5 border-2 border-gray-300 bg-gray-300 rounded-lg text-xs text-gray-900 flex items-center gap-2 font-semibold">
+          <span className="inline-flex items-center justify-center w-5 h-5 bg-gray-500 text-white rounded-full text-xs">
+            {campaign.appliedinfluencercount}
+          </span>
+          <span className="whitespace-nowrap">
+            {campaign.appliedinfluencercount === 1 ? "influencer applied" : "influencers applied"}
+          </span>
+            </span>
+          </div>
+        )}
             {/* --- Footer (Budget + Apply Button) --- */}
             <div className="mt-auto flex justify-between items-center border-t border-gray-300 pt-4">
               <div>

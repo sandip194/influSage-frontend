@@ -251,13 +251,21 @@ const DescriptionLayout = () => {
                 <div>
                   <h2 className="font-semibold text-lg">{campaignDetails?.name}</h2>
                   <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-900 font-medium">
-                    <div className='text-sm text-gray-700'>
-                      <span className="font-semibold text-gray-900">Apply Before:</span>{" "}
-                      {campaignDetails.requirements.applicationenddate || "N/A"}
+                    <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-900 font-medium">
+                    <div className="text-gray-700 text-sm">
+                      <span className="font-semibold text-gray-900">Apply Between:</span>{" "}
+                        {campaignDetails?.requirements.applicationstartdate || "N/A"}{" "}
+                          <span className="font-semibold text-gray-900 mx-1">to</span>{" "}
+                        {campaignDetails?.requirements.applicationenddate || "N/A"}
+                    </div>
                     </div>
                     <div className='text-sm text-gray-700 '>
                       <span className="font-semibold text-gray-900">Campaign Start:</span>{" "}
                       {campaignDetails.requirements.campaignstartdate || "N/A"}
+                    </div>
+                    <div className='text-sm text-gray-700 '>
+                      <span className="font-semibold text-gray-900">influencer applied:</span>{" "}
+                        {campaignDetails.appliedinfluencercount ?? "N/A"}
                     </div>
 
                   </div>
@@ -287,19 +295,23 @@ const DescriptionLayout = () => {
                   </div>
                   {campaignDetails?.providercontenttype?.length > 0 ? (
                     campaignDetails.providercontenttype.map(
-                      ({ providername, contenttypename, iconpath }, i) => (
+                      ({ providername, iconpath, contenttypes }, i) => (
                         <div
-                          key={`${providername}-${contenttypename}-${i}`}
-                          className="flex items-center justify-center gap-2 mb-1 text-sm text-gray-800"
+                          key={`${providername}-${i}`}
+                          className="flex items-center gap-2 mb-2 text-sm text-gray-800"
                         >
                           {iconpath && (
                             <img
                               src={iconpath}
-                              alt={providername}
+                              alt="platform"
                               className="w-5 h-5 object-contain"
                             />
                           )}
-                          <span>{contenttypename}</span>
+                          <span className="text-xs text-gray-900">
+                            {contenttypes && contenttypes.length > 0
+                              ? contenttypes.map((c) => c.contenttypename).join(", ")
+                              : "No content types"}
+                          </span>
                         </div>
                       )
                     )

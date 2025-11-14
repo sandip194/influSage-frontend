@@ -6,6 +6,7 @@ import {
   RiUser3Line,
   RiCloseLine,
   RiShutDownLine,
+  RiCustomerService2Line ,
 } from "@remixicon/react";
 import { useDispatch } from "react-redux";
 import { Tooltip } from 'antd';
@@ -16,6 +17,7 @@ const navItems = [
   { name: "User Requests", icon: <RiUser3Line />, path: "/admin-dashboard/influencers" },
   { name: "Campaign Requests", icon: <RiFolderOpenLine />, path: "/admin-dashboard/campaigns" },
   { name: "Settings", icon: <RiSettings3Line />, path: "/admin-dashboard/settings" },
+  { name: "Support", icon: <RiCustomerService2Line />, path: "/admin-dashboard/support" },
 ];
 
 const AdminSidebar = ({ isOpen, toggleSidebar }) => {

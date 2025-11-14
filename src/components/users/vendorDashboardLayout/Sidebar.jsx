@@ -72,7 +72,7 @@ const Sidebar = forwardRef((props, ref) => {
     ];
 
     const supportItems = [
-        { icon: <RiAdminLine className="w-5" />, label: "Admin Support", to: "/vendor-dashboard/admin-support" },
+        { icon: <RiAdminLine className="w-5" />, label: "Admin Support", to: "/vendor-dashboard/vendorMessagepage" },
     ];
     return (
         <>

@@ -255,6 +255,16 @@ const InfluencerProfile = () => {
                                 <div className="flex gap-10 mt-4 sm:mt-0 text-center">
                                     <div>
                                         <p className="text-gray-900 font-bold text-xs uppercase tracking-wide">
+                                            Completed Campaigns
+                                        </p>
+                                        <p className="text-lg font-semibold text-gray-900">
+                                            {typeof influDetails?.completedcampaigncount === "number"
+                                                ? influDetails?.completedcampaigncount
+                                                : 0}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-gray-900 font-bold text-xs uppercase tracking-wide">
                                             Total Campaign
                                         </p>
                                         <p className="text-lg font-semibold text-gray-900">

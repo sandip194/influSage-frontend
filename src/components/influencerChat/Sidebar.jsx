@@ -23,14 +23,14 @@ const Sidebar = ({ setActiveSubject }) => {
       { name: "Support Related", icon: <RiBook2Line className="text-xl" /> },
       { name: "Technical Support", icon: <RiBug2Line className="text-xl" /> },
     ],
-    Pending: [{ name: "Payment Support", icon: <RiMoneyDollarCircleLine className="text-xl" /> }],
+    Inprograss: [{ name: "Payment Support", icon: <RiMoneyDollarCircleLine className="text-xl" /> }],
     Close: [{ name: "Verification Support", icon: <RiShieldUserLine className="text-xl" /> }],
     Released: [],
   };
 
   const [activeTab, setActiveTab] = useState("Open");
   const [subjectsByTab, setSubjectsByTab] = useState(initialByTab);
-  const [newSub, setNewSub] = useState("");
+  const [newSub, setNewSub] = useState(null);
   const [activeSubjectName, setActiveSubjectName] = useState("");
 
   const subjectOptions = [
@@ -60,11 +60,7 @@ const Sidebar = ({ setActiveSubject }) => {
       return copy;
     });
 
-    // ⭐ UPDATE HEADER + HIGHLIGHT NEW SUBJECT
-    setActiveSubject(newSub);
-    setActiveSubjectName(newSub);
-
-    setNewSub("");
+    setNewSub(null);
   };
 
   const subjects = subjectsByTab[activeTab] || [];
@@ -75,14 +71,14 @@ const Sidebar = ({ setActiveSubject }) => {
   };
 
   return (
-    <div className="h-full w-[400px] bg-white flex flex-col p-4">
+    <div className="h-full w-[400px] bg-white flex flex-col p-4 border-r border-gray-200 shadow-md rounded-md">
       <h1 className="text-xl font-bold text-gray-900">Support</h1>
       <p className="text-gray-500 text-sm mb-3">Your conversations to related subject</p>
 
-      <hr className="my-2 border-gray-100" />
+      <hr className="my-2 border-gray-200" />
 
       <div className="flex gap-2 mb-4 my-2">
-        {["Open", "Pending", "Close", "Released"].map((tab) => (
+        {["Open", "Inprograss", "Resolve", "Close"].map((tab) => (
           <button
             key={tab}
             onClick={() => handleTabChange(tab)}
@@ -109,7 +105,7 @@ const Sidebar = ({ setActiveSubject }) => {
             className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition ${
               activeSubjectName === s.name
                 ? "bg-[#0D132D] text-white shadow-md"
-                : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+                : "bg-gray-100 hover:bg-gray-200 text-gray-700"
             }`}
           >
             <div className={`${activeSubjectName === s.name ? "text-white" : "text-gray-700"}`}>
@@ -127,29 +123,26 @@ const Sidebar = ({ setActiveSubject }) => {
         ))}
       </div>
 
-      <div className="mt-4 bg-white p-4 border border-gray-200 rounded-lg">
-        <label className="text-sm font-semibold text-gray-700 mb-2 block">Select a Subject</label>
+      {activeTab === "Open" && (
+        <div className="mt-4 bg-white p-4 border border-gray-200 rounded-lg shadow-md">
+          <Select
+            allowClear
+            placeholder="Select Subject"
+            value={newSub}
+            onChange={setNewSub}
+            className="w-full mb-3"
+            options={subjectOptions}
+          />
 
-        <Select
-          placeholder="Select Subject"
-          value={newSub}
-          onChange={(val) => {
-            setNewSub(val);
-            setActiveSubject(val);
-            setActiveSubjectName(val);
-          }}
-          className="w-full mb-3"
-          options={subjectOptions}
-        />
-
-        <button
-          onClick={handleAdd}
-          className="w-full flex items-center justify-center gap-2 bg-[#0D132D] text-white py-2 rounded-lg font-semibold hover:bg-[#1A234B] transition"
-        >
-          <RiAddLine />
-          Add
-        </button>
-      </div>
+          <button
+            onClick={handleAdd}
+            className="w-full flex items-center justify-center gap-2 bg-[#0D132D] text-white py-2 rounded-lg font-semibold hover:bg-[#1A234B] transition"
+          >
+            <RiAddLine />
+            Add
+          </button>
+        </div>
+      )}
     </div>
   );
 };
