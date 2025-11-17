@@ -195,16 +195,10 @@ const App = () => {
 
                                                                 <Route path='edit-profile' element={<EditVendorProfile />} />
                                                                 <Route path='my-profile' element={<VendorMyProfile />} />
-<<<<<<< HEAD
-
-
                                                                 <Route path="payment" element={<ComingSoon />} />
                                                                 <Route path="analytics" element={<ComingSoon />} />
                                                                 <Route path="setting" element={<ComingSoon />} />
-
-=======
                                                                 <Route path='vendorMessagepage' element={<VendorConversationPage />} />
->>>>>>> 28ab2904687f422f8ddf87fc8dec310719d29073
                                                         </Route>
                                                 </Route>
                                                 <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
@@ -219,17 +213,8 @@ const App = () => {
                                                         <Route path='influencers/details/:userId' element={<InfluencerDetailView />} />
                                                         <Route path='campaigns' element={<CampaignRequests />} />
                                                         <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView />} />
-<<<<<<< HEAD
-
-
-
-
-
-
                                                         <Route path="settings" element={<ComingSoon />} />
-=======
                                                         <Route path='support' element={<AdminMessagePage />} />
->>>>>>> 28ab2904687f422f8ddf87fc8dec310719d29073
                                                 </Route>
                                         </Route>
 
