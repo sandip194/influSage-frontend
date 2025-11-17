@@ -1,33 +1,23 @@
 import React from "react";
 import { Tooltip, Skeleton, Empty } from "antd";
 import { Link } from "react-router-dom";
-import {
-  RiDeleteBinLine,
-} from "@remixicon/react";
+import { RiDeleteBinLine } from "@remixicon/react";
 
 const AppliedCampaignCard = ({
   campaigns,
   loading,
   handleCardClick,
-  handleSave,
   setSelectedApplicationId,
+  setSelectedCampaignId,
   setWithdrawModalOpen,
+  openEditModal,
 }) => {
   return (
     <div className="grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-      {/* --- Loading Skeletons --- */}
       {loading ? (
         Array.from({ length: 6 }).map((_, idx) => (
-          <div
-            key={idx}
-            className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm"
-          >
-            <Skeleton.Avatar
-              active
-              size="large"
-              shape="circle"
-              className="mb-4"
-            />
+          <div key={idx} className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm">
+            <Skeleton.Avatar active size="large" shape="circle" className="mb-4" />
             <Skeleton active paragraph={{ rows: 3 }} title={{ width: "70%" }} />
           </div>
         ))
@@ -40,11 +30,11 @@ const AppliedCampaignCard = ({
           <div
             key={campaign.id}
             onClick={() => handleCardClick(campaign.id)}
-              className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-xl/30 hover:shadow-lg transition-all duration-300 flex flex-col justify-between cursor-pointer relative"
+            className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-xl/30 hover:shadow-lg transition-all duration-300 flex flex-col justify-between cursor-pointer relative"
           >
-            {/* --- Top Bar --- */}
+            {/* Top Bar */}
             <div className="flex justify-between items-start mb-3 pb-1">
-              <p className="text-xs text-gray-500 font-medium">
+              <p className="text-xs text-gray-500">
                 Applied on {new Date(campaign.createddate).toLocaleDateString()}
               </p>
 
@@ -56,68 +46,28 @@ const AppliedCampaignCard = ({
                       setSelectedApplicationId(campaign.campaignapplicationid);
                       setWithdrawModalOpen(true);
                     }}
-                    className={`flex items-center gap-1 px-2 py-1 border rounded-lg text-sm font-medium transition
-                    border-red-300 bg-white text-red-600 hover:bg-red-50 hover:border-red-500`}
+                    className="flex items-center gap-1 px-2 py-1 border border-red-300 bg-white text-red-600 rounded-lg text-sm hover:bg-red-50 hover:border-red-500"
                   >
                     <span>Withdraw</span>
                     <RiDeleteBinLine size={16} className="text-red-500" />
                   </button>
                 </Tooltip>
               </div>
-
             </div>
 
-
-            {/* --- Header --- */}
+            {/* Header */}
             <div className="flex items-center gap-3 mb-3">
-              <img
-                src={campaign.photopath}
-                alt={campaign.name}
-                className="w-12 h-12 rounded-full object-cover border border-gray-200"
-              />
-              <div>
-                <Link
-                  to={
-                    campaign.campaignapplied
-                      ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
-                      : `/dashboard/browse/description/${campaign.id}`
-                  }
-                  onClick={(e) => e.stopPropagation()}
-                  className="block text-base font-bold text-gray-900 hover:underline hover:text-blue-900 transition-colors duration-150"
-                >
-                  {campaign.name}
-                </Link>
-              </div>
+              <img src={campaign.photopath} className="w-12 h-12 rounded-full object-cover border" />
+              <Link
+                to={`/dashboard/browse/applied-campaign-details/${campaign.id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="text-base font-bold hover:underline text-gray-900"
+              >
+                {campaign.name}
+              </Link>
             </div>
 
-            {/* --- Provider / Type Tag --- */}
-            <div className="flex flex-wrap gap-2 mb-4">
-          {campaign.providercontenttype?.map((provider, pIdx) => (
-            <div
-          key={pIdx}
-          className="flex items-center gap-2 px-1 py-1 text-xs text-black rounded-full"
-            >
-          {provider.iconpath && (
-            <img
-              loading="lazy"
-              src={provider.iconpath}
-              alt={provider.providername}
-              className="w-6 h-6 object-contain"
-            />
-          )}
-          <div className="flex items-center gap-1">
-             <span className="text-xs text-black">
-            {provider.contenttypes
-              ?.map((ct) => ct.contenttypename)
-              .filter(Boolean)
-              .join(", ")}
-          </span>
-          </div>
-            </div>
-          ))}
-        </div>
-
-            {/* --- Description --- */}
+            {/* Description */}
             <p
               className="text-gray-700 text-sm mb-4 text-justify overflow-hidden"
               style={{
@@ -129,31 +79,7 @@ const AppliedCampaignCard = ({
               {campaign.description}
             </p>
 
-            {/* --- Categories --- */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {campaign.campaigncategories?.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="px-2 py-1 bg-blue-200 rounded-full text-xs text-black"
-                >
-                  {tag.categoryname}
-                </span>
-              ))}
-            </div>
-
-        {campaign.appliedinfluencercount > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            <span className="px-3 py-1.5 border-2 border-gray-300 bg-gray-300 rounded-lg text-xs text-gray-900 flex items-center gap-2 font-semibold">
-          <span className="inline-flex items-center justify-center w-5 h-5 bg-gray-500 text-white rounded-full text-xs">
-            {campaign.appliedinfluencercount}
-          </span>
-          <span className="whitespace-nowrap">
-            {campaign.appliedinfluencercount === 1 ? "influencer applied" : "influencers applied"}
-          </span>
-            </span>
-          </div>
-        )}
-            {/* --- Bottom Section (Budget + Apply Button) --- */}
+            {/* Bottom Section */}
             <div className="mt-auto border-t border-black pt-4 flex justify-between items-center">
               <div>
                 <p className="text-sm font-semibold text-gray-900">
@@ -163,22 +89,22 @@ const AppliedCampaignCard = ({
               </div>
 
               {campaign.iseditable ? (
-              <Link
-                to={`/dashboard/browse/apply-now/${campaign.id}`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button className="px-5 py-2 text-sm bg-black text-white rounded-full font-semibold hover:bg-gray-900 transition">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedApplicationId(campaign.campaignapplicationid);
+                    setSelectedCampaignId(campaign.id);  // Add this
+                    openEditModal();
+                  }}
+                  className="px-5 py-2 text-sm bg-black text-white rounded-full font-semibold hover:bg-gray-900"
+                >
                   Edit Application
                 </button>
-              </Link>
-            ) : (
-              <button
-                className="px-5 py-2 text-sm bg-gray-400 text-white rounded-full font-semibold cursor-not-allowed"
-                disabled
-              >
-                Edit Application
-              </button>
-            )}
+              ) : (
+                <button className="px-5 py-2 text-sm bg-gray-400 text-white rounded-full" disabled>
+                  Edit Application
+                </button>
+              )}
             </div>
           </div>
         ))

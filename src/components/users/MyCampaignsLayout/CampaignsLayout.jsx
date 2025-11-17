@@ -377,9 +377,9 @@ const InfluencerCampaigns = () => {
                 <th className="p-4">Business</th>
                 <th className="p-4">Campaign</th>
                 <th className="p-4">Budget</th>
-                <th className="p-4">Start Date</th>
+                <th className="p-4">Campaign Start Date</th>
                 <th className="p-4">Status</th>
-                <th className="p-4">Action</th>
+                {/* <th className="p-4">Action</th> */}
               </tr>
             </thead>
             <tbody className="text-sm text-gray-700">
@@ -395,7 +395,8 @@ const InfluencerCampaigns = () => {
                 campaigns.map((row) => (
                   <tr
                     key={row.id}
-                    className="border-t border-gray-200 hover:bg-gray-50 transition"
+                    className="border-t border-gray-200 cursor-pointer hover:bg-gray-100 transition"
+                    onClick={() => navigate(`/dashboard/my-campaigns/details/${row.id}`)}
                   >
                     <td className="p-4 flex items-center gap-3">
                       
@@ -408,7 +409,7 @@ const InfluencerCampaigns = () => {
                     </td>
                     <td className="p-4">{row.name}</td>
                     <td className="p-4 font-medium">₹ {row.estimatedbudget}</td>
-                    <td className="p-4">{row.startdate}</td>
+                    <td className="p-4">{row.campaignstartdate}</td>
                     <td className="p-4">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[row.status.toLowerCase()] ||
@@ -418,7 +419,7 @@ const InfluencerCampaigns = () => {
                         {statusLabels[row.status.toLowerCase()] || row.status}
                       </span>
                     </td>
-                    <td className="p-4">
+                    {/* <td className="p-4">
                       <Tooltip title="View Details">
                         <button
                           onClick={() => navigate(`/dashboard/my-campaigns/details/${row.id}`)}
@@ -427,7 +428,7 @@ const InfluencerCampaigns = () => {
                           <RiEyeLine className="text-lg" />
                         </button>
                       </Tooltip>
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               ) : (
