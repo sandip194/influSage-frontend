@@ -23,6 +23,9 @@ import {
   RiCloseLine,
   RiArrowDownSLine,
   RiProhibitedLine,
+  RiCloseFill,
+  RiFilterLine,
+  RiEraserLine
 } from "react-icons/ri";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -330,7 +333,8 @@ const CampaignTableLayout = () => {
               {campaignList.map((c) => (
                 <tr
                   key={c.id}
-                  className="border-t border-gray-200 hover:bg-gray-50 transition"
+                  onClick={() => navigate(`/admin-dashboard/campaigns/details/${c.id}`)}
+                  className="border-t border-gray-200 hover:bg-gray-100 transition cursor-pointer"
                 >
                   {/* Campaign */}
                   <td className="p-4">
@@ -422,18 +426,10 @@ const CampaignTableLayout = () => {
 
                   {/* Actions */}
                   <td className="p-4 text-right space-x-2">
-                    <div className="flex justify-start items-center gap-1">
-                      {/* Always show View button */}
-                      <Tooltip title="View">
-                        <button
-                          className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition"
-                          onClick={() =>
-                            navigate(`/admin-dashboard/campaigns/details/${c.id}`)
-                          }
-                        >
-                          <RiEyeLine size={18} />
-                        </button>
-                      </Tooltip>
+                    <div
+                      className="flex justify-end items-center gap-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
 
                       {/* Conditional buttons based on activeStatusName */}
                       {activeStatusName === "ApprovalPending" && (
@@ -542,9 +538,53 @@ const CampaignTableLayout = () => {
 
       {/* Filters Drawer */}
       <Drawer
-        title="Filter Campaigns"
+       closeIcon={false}
+        title={
+          <div className="flex justify-between items-center w-full">
+            <span className="font-semibold">Filter Campaigns</span>
+
+            <div className="flex items-center gap-2">
+              <Tooltip title="Clear Filters">
+                <button
+                  onClick={() => {
+                    const cleared = {
+                      providers: [],
+                      minBudget: null,
+                      maxBudget: null,
+                      startDate: null,
+                      endDate: null,
+                      sortBy: "createddate",
+                      sortOrder: "desc",
+                    };
+                    setFilters(cleared);
+                    setAppliedFilters(cleared);
+                  }}
+                  className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
+                >
+                  <RiEraserLine size={18} />
+                </button>
+              </Tooltip>
+              <Tooltip title="Apply Filters">
+                <button
+                  onClick={handleFilterApply}
+                  className="p-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
+                >
+                  <RiFilterLine size={18} />
+                </button>
+              </Tooltip>
+              <Tooltip title="Close">
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="p-2 rounded-full text-gray-500 hover:bg-gray-100"
+                >
+                  <RiCloseFill size={20} />
+                </button>
+              </Tooltip>
+            </div>
+          </div>
+        }
         placement="right"
-        width={320}
+        width={300}
         onClose={() => setShowFilters(false)}
         open={showFilters}
       >
@@ -609,30 +649,6 @@ const CampaignTableLayout = () => {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between items-center mt-6">
-          <Button
-            type="link"
-            onClick={() => {
-              const cleared = {
-                providers: [],
-                minBudget: null,
-                maxBudget: null,
-                startDate: null,
-                endDate: null,
-                sortBy: "createddate",
-                sortOrder: "desc",
-              };
-              setFilters(cleared);
-              setAppliedFilters(cleared);
-            }}
-          >
-            Clear Filters
-          </Button>
-
-          <Button type="primary" onClick={handleFilterApply}>
-            Apply
-          </Button>
-        </div>
       </Drawer>
     </div>
   );

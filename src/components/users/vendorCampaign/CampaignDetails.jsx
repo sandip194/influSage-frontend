@@ -548,7 +548,7 @@ const CampaignDetails = () => {
 
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Delivery Date</p>
-              <p>{campaignDetails?.requirements.enddate}</p>
+              <p>{campaignDetails?.requirements.campaignenddate}</p>
             </div>
 
             <div className="py-4">

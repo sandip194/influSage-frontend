@@ -1,30 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Select } from "antd";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
 import {
-  RiBook2Line,
-  RiBug2Line,
-  RiMoneyDollarCircleLine,
-  RiShieldUserLine,
-  RiAddLine,
-} from "@remixicon/react";
+  RiBook2Line, RiAddLine, } from "@remixicon/react";
 
-import {
-  RiCheckDoubleLine,
-  RiBarChart2Line,
-  RiHandHeartLine,
-  RiFileList3Line,
-  RiQuestionLine,
-} from "@remixicon/react";
-
-const Sidebar = ({ setActiveSubject }) => {
+const VendorSidebar = ({ setActiveSubject }) => {
   const initialByTab = {
-    Open: [
-      { name: "Support Related", icon: <RiBook2Line className="text-xl" /> },
-      { name: "Technical Support", icon: <RiBug2Line className="text-xl" /> },
-    ],
-    Inprograss: [{ name: "Payment Support", icon: <RiMoneyDollarCircleLine className="text-xl" /> }],
-    Close: [{ name: "Verification Support", icon: <RiShieldUserLine className="text-xl" /> }],
+    Open: [],
+    Inprograss: [],
+    Close: [],
     Released: [],
   };
 
@@ -32,37 +18,77 @@ const Sidebar = ({ setActiveSubject }) => {
   const [subjectsByTab, setSubjectsByTab] = useState(initialByTab);
   const [newSub, setNewSub] = useState(null);
   const [activeSubjectName, setActiveSubjectName] = useState("");
+  const [subjectOptions, setSubjectOptions] = useState([]);
+  const { token } = useSelector((state) => state.auth);
 
-  const subjectOptions = [
-    { label: "Campaign Approval", value: "Campaign Approval", icon: <RiCheckDoubleLine className="text-lg" /> },
-    { label: "Payment & Payout Issues", value: "Payment & Payout Issues", icon: <RiMoneyDollarCircleLine className="text-lg" /> },
-    { label: "Profile Verification", value: "Profile Verification", icon: <RiShieldUserLine className="text-lg" /> },
-    { label: "Campaign Performance", value: "Campaign Performance", icon: <RiBarChart2Line className="text-lg" /> },
-    { label: "Technical Issue", value: "Technical Issue", icon: <RiBug2Line className="text-lg" /> },
-    { label: "Brand Collaboration Help", value: "Brand Collaboration Help", icon: <RiHandHeartLine className="text-lg" /> },
-    { label: "Content Approval", value: "Content Approval", icon: <RiFileList3Line className="text-lg" /> },
-    { label: "General Query", value: "General Query", icon: <RiQuestionLine className="text-lg" /> },
-  ];
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      try {
+        const res = await axios.get("/chat/support/user/get-subject", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-  };
+        const list = res.data?.subjectList || [];
 
-  const handleAdd = () => {
+        setSubjectOptions(list.map(x => ({
+          label: x.name,
+          value: x.id,
+        })));
+
+        setSubjectsByTab({
+          Open: list.map(x => ({
+            name: x.name,
+            icon: <RiBook2Line className="text-xl" />,
+          })),
+          Inprograss: [],
+          Close: [],
+          Released: [],
+        });
+      } catch (error) {
+        console.error("Error fetching subjects:", error);
+      }
+    };
+
+    if (token) fetchSubjects();
+  }, [token]);
+
+  const handleTabChange = (tab) => setActiveTab(tab);
+
+  const handleAdd = async () => {
     if (!newSub) return;
+    const selected = subjectOptions.find((o) => o.value === newSub);
+    if (!selected) return;
 
-    const find = subjectOptions.find((o) => o.value === newSub);
-    const newObj = { name: newSub, icon: find?.icon || <RiBook2Line className="text-xl" /> };
+    try {
+      const res = await axios.post(
+        "/chat/support/user/create-ticket",
+        {
+          p_objectiveid: selected.value,
+          p_statusname: "Open",
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (res.data?.p_status) {
+        const newTicketObj = {
+          name: selected.label,
+          icon: <RiBook2Line className="text-xl" />,
+        };
 
-    setSubjectsByTab((prev) => {
-      const copy = { ...prev };
-      copy[activeTab] = [...copy[activeTab], newObj];
-      return copy;
-    });
+        setSubjectsByTab((prev) => ({
+          ...prev,
+          Open: [...prev.Open, newTicketObj],
+        }));
 
-    setNewSub(null);
+        setNewSub(null);
+      }
+    } catch (error) {
+      console.error("Error creating ticket:", error);
+    }
   };
-
   const subjects = subjectsByTab[activeTab] || [];
 
   const handleSubjectClick = (name) => {
@@ -94,10 +120,6 @@ const Sidebar = ({ setActiveSubject }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-        {subjects.length === 0 && (
-          <p className="text-gray-400 text-sm text-center">No subjects</p>
-        )}
-
         {subjects.map((s, i) => (
           <div
             key={i}
@@ -108,17 +130,8 @@ const Sidebar = ({ setActiveSubject }) => {
                 : "bg-gray-100 hover:bg-gray-200 text-gray-700"
             }`}
           >
-            <div className={`${activeSubjectName === s.name ? "text-white" : "text-gray-700"}`}>
-              {s.icon}
-            </div>
-
-            <span
-              className={`font-medium truncate ${
-                activeSubjectName === s.name ? "text-white" : "text-gray-700"
-              }`}
-            >
-              {s.name}
-            </span>
+            {s.icon}
+            <span className="font-medium truncate">{s.name}</span>
           </div>
         ))}
       </div>
@@ -147,4 +160,4 @@ const Sidebar = ({ setActiveSubject }) => {
   );
 };
 
-export default Sidebar;
+export default VendorSidebar;

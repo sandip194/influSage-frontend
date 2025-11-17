@@ -133,14 +133,8 @@ const ViewAllOffers = ({ campaignData }) => {
 
   const getActionMenu = (offer) => (
     <Menu
+      onClick={(e) => e.domEvent.stopPropagation()}
       items={[
-
-        {
-          key: "view",
-          icon: <RiEyeLine />,
-          label: "View Application Details",
-          onClick: () => handleAction("view", offer),
-        },
         {
           key: "profile",
           icon: <RiUserLine />,
@@ -284,7 +278,11 @@ const ViewAllOffers = ({ campaignData }) => {
                 applications?.map((offer) => (
                   <tr
                     key={offer.applicationid}
-                    className="border-t border-gray-200 hover:bg-gray-100 transition"
+                    className="border-t border-gray-200 hover:bg-gray-100 transition cursor-pointer"
+                    onClick={() => {
+                      setSelectedOfferId(offer.applicationid);
+                      setShowOfferModal(true);
+                    }}
                   >
                     <td className="p-4 flex gap-3 items-center">
                       <img
@@ -328,13 +326,16 @@ const ViewAllOffers = ({ campaignData }) => {
                     </td>
 
 
-                    <td className="p-4">
-                      <Dropdown overlay={getActionMenu(offer)} trigger={["click"]}>
-                        <button className="p-2 rounded-full hover:bg-gray-100">
-                          <RiMore2Fill className="text-gray-600" />
-                        </button>
-                      </Dropdown>
-                    </td>
+                     <td className="p-4">
+                        <Dropdown overlay={getActionMenu(offer)} trigger={["click"]}>
+                          <button
+                            className="p-2 rounded-full hover:bg-gray-100"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <RiMore2Fill className="text-gray-600" />
+                          </button>
+                        </Dropdown>
+                      </td>
                   </tr>
                 ))
               )

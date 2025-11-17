@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { RiAddLine, RiMore2Fill } from "@remixicon/react";
+import { RiAddLine, RiMore2Fill,RiCheckLine } from "@remixicon/react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { Dropdown, Menu, Modal, message, Input, DatePicker, Button } from "antd";
@@ -127,9 +127,11 @@ const TodoListCard = () => {
                     Mark as Complete
                   </Menu.Item>
                 )}
-                <Menu.Item key="edit" onClick={() => openModal(todo)}>
-                  Edit
-                </Menu.Item>
+                {!isCompleted && (
+                  <Menu.Item key="edit" onClick={() => openModal(todo)}>
+                    Edit
+                  </Menu.Item>
+                )}
                 <Menu.Item
                   key="delete"
                   danger
@@ -150,11 +152,22 @@ const TodoListCard = () => {
                 key={todo.id}
                 className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 border-b border-gray-200 pb-3"
               >
-                <input
-                  type="checkbox"
-                  checked={isCompleted}
-                  className="form-checkbox h-5 w-5 text-gray-600 flex-shrink-0"
-                />
+                {isCompleted ? (
+                  <RiCheckLine className="text-white w-5 h-5 bg-[#121A3F] flex-shrink-0" />
+
+                  ) : (
+                    <input
+                      type="checkbox"
+                      checked={isCompleted}
+                      onChange={() =>
+                        showConfirm({
+                          title: "Mark this todo as complete?",
+                          onOk: () => handleTodoAction({ id: todo.id, isCompleted: true }),
+                        })
+                      }
+                      className="form-checkbox h-5 w-5 text-gray-600 flex-shrink-0 cursor-pointer"
+                    />
+                  )}
 
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-medium mb-1 ${isCompleted ? "text-gray-600 " : ""}`}>

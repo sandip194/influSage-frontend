@@ -16,6 +16,9 @@ import {
     RiCheckLine,
     RiCloseLine,
     RiProhibitedLine,
+    RiCloseFill,
+    RiFilterLine,
+    RiEraserLine
 } from "react-icons/ri";
 import { SearchOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
@@ -416,7 +419,8 @@ const UserTableLayout = () => {
                                 {userList.map((user) => (
                                     <tr
                                         key={user.id}
-                                        className="border-t border-gray-200 hover:bg-gray-100 transition"
+                                        onClick={() => navigate(`/admin-dashboard/influencers/details/${user.id}`)}
+                                        className="border-t border-gray-200 hover:bg-gray-100 transition cursor-pointer"
                                     >
                                         <td className="px-4">
                                             <div className="flex items-center space-x-3">
@@ -456,20 +460,10 @@ const UserTableLayout = () => {
                                         </td>
 
                                         <td className="px-4 py-3 text-right">
-                                            <div className="flex justify-end items-center gap-1">
-                                                <Tooltip title="View">
-                                                    <button
-                                                        className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition"
-                                                        onClick={() =>
-                                                            navigate(
-                                                                `/admin-dashboard/influencers/details/${user.id}`
-                                                            )
-                                                        }
-                                                    >
-                                                        <RiEyeLine size={18} />
-                                                    </button>
-                                                </Tooltip>
-
+                                            <div
+                                                className="flex justify-end items-center gap-1"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
                                                 {user.status === "ApprovalPending" && (
                                                     <>
                                                         <Tooltip title="Approve">
@@ -571,7 +565,7 @@ const UserTableLayout = () => {
                 </p>
             </Modal>
 
-            // {/* Reject Reason Modal */}
+            {/* Reject Reason Modal */}
             <Modal
                 title={`Reject ${currentUser?.firstname} ${currentUser?.lastname}`}
                 open={isRejectModalOpen}
@@ -647,12 +641,51 @@ const UserTableLayout = () => {
             </Modal>
 
             {/* Filter Drawer */}
-            <Drawer
-                title="Filter Users"
-                placement="right"
-                width={300}
-                onClose={() => setShowFilters(false)}
-                open={showFilters}
+           <Drawer
+            closeIcon={false}
+            title={
+                <div className="flex justify-between items-center w-full">
+                <span className="font-semibold">Filter Users</span>
+
+                <div className="flex items-center gap-2">
+                    <Tooltip title="Clear Filters">
+                    <button
+                        onClick={() =>
+                        setFilters({
+                            location: "",
+                            platforms: [],
+                            followers: [],
+                            gender: [],
+                        })
+                        }
+                        className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
+                    >
+                        <RiEraserLine size={18} />
+                    </button>
+                    </Tooltip>
+                    <Tooltip title="Apply Filters">
+                    <button
+                        onClick={handleFilterApply}
+                        className="p-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
+                    >
+                        <RiFilterLine size={18} />
+                    </button>
+                    </Tooltip>
+                    <Tooltip title="Close">
+                    <button
+                        onClick={() => setShowFilters(false)}
+                        className="p-2 rounded-full text-gray-500 hover:bg-gray-100"
+                    >
+                        <RiCloseFill size={20} />
+                    </button>
+                    </Tooltip>
+                </div>
+                </div>
+            }
+            placement="right"
+            width={300}
+            onClose={() => setShowFilters(false)}
+            open={showFilters}
             >
                 {/* Providers/Platforms */}
                 <div className="mb-6">
@@ -716,24 +749,7 @@ const UserTableLayout = () => {
                     </Checkbox.Group>
                 </div>
 
-                <div className="flex justify-between items-center mt-6">
-                    <Button
-                        type="link"
-                        onClick={() =>
-                            setFilters({
-                                location: "",
-                                platforms: [],
-                                followers: [],
-                                gender: [],
-                            })
-                        }
-                    >
-                        Clear Filters
-                    </Button>
-                    <Button type="primary" onClick={handleFilterApply}>
-                        Apply
-                    </Button>
-                </div>
+                
             </Drawer>
         </div>
     );

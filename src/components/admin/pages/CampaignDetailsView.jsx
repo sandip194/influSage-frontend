@@ -23,15 +23,15 @@ const CampaignDetailsView = () => {
 
     const [cmapignDetails, setCampaignDetails] = useState(null)
     const [actionLoading, setActionLoading] = useState(false);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState(null);
+    const openImageModal = (img) => setPreviewImage(img);
+    const closeImageModal = () => setPreviewImage(null);
 
 
     // For approval/rejection modal
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [actionType, setActionType] = useState(""); // 'Approved' or 'Rejected'
-
-    // For image modal
-    const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-    const [selectedImage, setSelectedImage] = useState("");
 
 
 
@@ -60,10 +60,10 @@ const CampaignDetailsView = () => {
         setIsModalOpen(true);
     };
 
-    const openImageModal = (imageSrc) => {
-        setSelectedImage(imageSrc);
-        setIsImageModalOpen(true);
-    };
+    // const openImageModal = (imageSrc) => {
+    //     setSelectedImage(imageSrc);
+    //     setIsImageModalOpen(true);
+    // };
 
 
 
@@ -131,8 +131,28 @@ const CampaignDetailsView = () => {
                             <img
                                 src={cmapignDetails?.photopath}
                                 alt="Logo"
-                                className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover"
+                                onClick={() => setIsPreviewOpen(true)}
+                                className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover cursor-pointer"
                             />
+                            {isPreviewOpen && (
+                                <div
+                                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                                onClick={() => setIsPreviewOpen(false)}
+                                >
+                                <button
+                                    onClick={() => setIsPreviewOpen(false)}
+                                    className="absolute top-6 right-8 text-white text-3xl font-bold hover:text-gray-300"
+                                >
+                                    ×
+                                </button>
+                                <img
+                                    src={cmapignDetails?.photopath}
+                                    alt="Logo Preview"
+                                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                                </div>
+                            )}
                         </div>
 
                         <div className="p-4">
@@ -283,10 +303,38 @@ const CampaignDetailsView = () => {
                             </p>
                         </div>
 
+                        {/* Hashtags */}
+                        <div className="py-4 border-b border-gray-200">
+                            <h3 className="font-semibold text-lg mb-2">Hashtags</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {cmapignDetails?.hashtags?.length > 0 ? (
+                                    cmapignDetails.hashtags.map((item, index) => (
+                                        <span
+                                            key={index}
+                                            className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
+                                        >
+                                            {item.hashtag}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="text-gray-500 text-sm">No hashtags</span>
+                                )}
+                            </div>
+                        </div>
+
                         {/* Requirements */}
                         <div className="requirements py-4 border-b border-gray-200">
                             <h3 className="font-semibold text-lg mb-4">Requirements</h3>
                             <ul className="space-y-2 font-semibold">
+                                <li className="flex items-center gap-2">
+                                    <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
+                                    <span>
+                                        Objective:{" "}
+                                        <span className="text-gray-500">
+                                            {cmapignDetails?.requirements?.objectivename || "-"}
+                                        </span>
+                                    </span>
+                                </li>
                                 <li className="flex items-center gap-2">
                                     <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
                                     <span>
@@ -316,63 +364,119 @@ const CampaignDetailsView = () => {
                                         </span>
                                     </span>
                                 </li>
+                                <li className="flex items-center gap-2">
+                                    <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
+                                    <span>
+                                        Application Start Date:{" "}
+                                        <span className="text-gray-500">
+                                            {cmapignDetails?.requirements?.applicationstartdate || "-"}
+                                        </span>
+                                    </span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
+                                    <span>
+                                        Application End Date:{" "}
+                                        <span className="text-gray-500">
+                                            {cmapignDetails?.requirements?.applicationenddate || "-"}
+                                        </span>
+                                    </span>
+                                </li>
                             </ul>
                         </div>
 
+                        {/* Influencer Tiers */}
                         <div className="py-4 border-b border-gray-200">
-                            <h3 className="font-semibold text-lg mb-4">References</h3>
-                            {Array.isArray(cmapignDetails?.campaignfiles) &&
-                                cmapignDetails.campaignfiles.some((f) => f.filepath) ? (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                    {cmapignDetails.campaignfiles.map((item, index) => {
-                                        const file = item?.filepath;
-                                        if (!file) return null;
+                            <h3 className="font-semibold text-lg mb-2">Influencer Tiers</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {cmapignDetails?.campaigninfluencertiers?.length > 0 ? (
+                                    cmapignDetails.campaigninfluencertiers.map((tier) => (
+                                        <span
+                                            key={tier.influencertierid}
+                                            className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
+                                        >
+                                            {tier.influencertiername}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="text-gray-500 text-sm">No influencer tiers available</span>
+                                )}
+                            </div>
+                        </div>
 
-                                        const fileExtension = file.split(".").pop()?.toLowerCase();
-                                        const isImage = ["jpg", "jpeg", "png", "gif"].includes(fileExtension);
-                                        const isVideo = ["mp4", "mov", "webm"].includes(fileExtension);
-                                        const isDoc = ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(fileExtension);
+                        <div className="py-4 border-b border-gray-200">
+                        <h3 className="font-semibold text-lg mb-4">References</h3>
 
-                                        return (
-                                            <div
-                                                key={index}
-                                                className="relative group rounded-lg overflow-hidden border border-gray-200"
-                                            >
-                                                {isImage && (
-                                                    <img
-                                                        src={file}
-                                                        alt="portfolio"
-                                                        className="w-full h-40 object-cover cursor-pointer"
-                                                        onClick={() => openImageModal(file)}
-                                                    />
-                                                )}
-                                                {isVideo && (
-                                                    <video className="w-full h-40 object-cover" controls>
-                                                        <source src={file} type="video/mp4" />
-                                                    </video>
-                                                )}
-                                                {isDoc && (
-                                                    <a
-                                                        href={file}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="flex flex-col items-center justify-center w-full h-40 bg-gray-100 text-gray-700 p-2"
-                                                    >
-                                                        <span className="text-xs text-center truncate">{file.split("/").pop()}</span>
-                                                    </a>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            ) : (
-                                <div className="flex justify-center py-6">
-                                    <Empty
-                                        image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                        description={<span className="text-gray-500 text-sm">No portfolio files</span>}
+                        {Array.isArray(cmapignDetails?.campaignfiles) &&
+                        cmapignDetails.campaignfiles.some((f) => f.filepath) ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            {cmapignDetails.campaignfiles.map((item, index) => {
+                                const file = item?.filepath;
+                                if (!file) return null;
+
+                                const fileExtension = file.split(".").pop()?.toLowerCase();
+                                const isImage = ["jpg", "jpeg", "png", "gif"].includes(fileExtension);
+                                const isVideo = ["mp4", "mov", "webm"].includes(fileExtension);
+                                const isDoc = ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(fileExtension);
+
+                                return (
+                                <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200">
+                                    
+                                    {isImage && (
+                                    <img
+                                        src={file}
+                                        alt="portfolio"
+                                        className="w-full h-40 object-cover cursor-pointer"
+                                        onClick={() => openImageModal(file)}
                                     />
+                                    )}
+                                    {previewImage && (
+                                    <div
+                                        className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                                        onClick={closeImageModal}
+                                    >
+                                        <button
+                                        onClick={closeImageModal}
+                                        className="absolute top-6 right-8 text-white text-3xl font-bold hover:text-gray-300"
+                                        >
+                                        ×
+                                        </button>
+                                        <img
+                                        src={previewImage}
+                                        alt="Preview"
+                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                        onClick={(e) => e.stopPropagation()}
+                                        />
+                                    </div>
+                                    )}
+                                    {isVideo && (
+                                    <video className="w-full h-40 object-cover" controls>
+                                        <source src={file} type="video/mp4" />
+                                    </video>
+                                    )}
+
+                                    {isDoc && (
+                                    <a
+                                        href={file}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex flex-col items-center justify-center w-full h-40 bg-gray-100 text-gray-700 p-2"
+                                    >
+                                        <span className="text-xs text-center truncate">{file.split("/").pop()}</span>
+                                    </a>
+                                    )}
                                 </div>
-                            )}
+                                );
+                            })}
+                            </div>
+                        ) : (
+                            <div className="flex justify-center py-6">
+                            <Empty
+                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                description={<span className="text-gray-500 text-sm">No portfolio files</span>}
+                            />
+                            </div>
+                        )}
                         </div>
                     </div>
                 </div>
@@ -445,6 +549,32 @@ const CampaignDetailsView = () => {
                             </div>
                         </div>
                     </div>
+
+                    <div className="bg-white p-4 rounded-2xl">
+                        <h3 className="font-semibold text-lg mb-4">Platform Content Types</h3>
+                            <div className="space-y-4">
+                                {cmapignDetails?.providercontenttype?.length > 0 ? (
+                                    cmapignDetails.providercontenttype.map((platform) => (
+                                        <div
+                                            key={platform.providercontenttypeid}
+                                            className="border-b border-gray-100 pb-3 last:border-none"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-900 font-medium">{platform.providername}</span>
+                                                <span className="text-gray-600 text-sm">{platform.contenttypename}</span>
+                                            </div>
+                                            {platform.caption && (
+                                                <p className="text-gray-600 italic text-sm mt-2 border-l-2 border-gray-200 pl-3">
+                                                    {platform.caption}
+                                                </p>
+                                        )}
+                                    </div>
+                                    ))
+                                ) : (
+                                <p className="text-gray-500 text-sm">No platform content types available.</p>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -482,26 +612,6 @@ const CampaignDetailsView = () => {
                 </p>
             </Modal>
 
-
-
-
-            {/* 🖼️ Image Modal */}
-            <Modal
-                open={isImageModalOpen}
-                onCancel={() => setIsImageModalOpen(false)}
-                footer={null}
-                width={800}
-                centered
-            >
-                <div className="p-6">
-                    <img
-                        src={selectedImage}
-                        alt="Full view"
-                        className="w-full max-h-[70vh] object-contain"
-                    />
-                </div>
-
-            </Modal>
         </div >
     );
 }

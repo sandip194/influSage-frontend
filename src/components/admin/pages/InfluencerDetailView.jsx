@@ -34,6 +34,7 @@ const InfluencerDetailView = () => {
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
     const [rejectReason, setRejectReason] = useState("");
     const [rejectLoading, setRejectLoading] = useState(false);
+    const [previewImage, setPreviewImage] = useState(null);
 
 
     const formatPhoneNumber = (phone) => {
@@ -219,9 +220,37 @@ const InfluencerDetailView = () => {
                             <img
                                 src={influDetails?.photopath}
                                 alt="Profile"
+                                onClick={() => setPreviewImage(influDetails?.photopath)}
                                 className="absolute left-6 -bottom-10 w-20 h-20 object-cover rounded-full border-4 bg-gray-200 border-white shadow cursor-pointer"
-                                onClick={() => openImageModal(influDetails?.photopath)}
                             />
+                            <div className="relative">
+                                <img
+                                    src={influDetails?.photopath}
+                                    alt="Profile"
+                                    onClick={() => setPreviewImage(influDetails?.photopath)}
+                                    className="absolute left-6 -bottom-10 w-20 h-20 object-cover rounded-full border-4 bg-gray-200 border-white shadow cursor-pointer"
+                                />
+                                {previewImage && (
+                                    <div
+                                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                                    onClick={() => setPreviewImage(null)}
+                                    >
+                                    <button
+                                        onClick={() => setPreviewImage(null)}
+                                        className="absolute top-6 right-8 text-white text-3xl font-bold hover:text-gray-300"
+                                    >
+                                        ×
+                                    </button>
+
+                                    <img
+                                        src={previewImage}
+                                        alt="Profile Preview"
+                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                        onClick={(e) => e.stopPropagation()} 
+                                    />
+                                    </div>
+                                )}
+                                </div>
                         </div>
 
                         <div className="p-6 pt-14 flex flex-col md:flex-row justify-between items-start">
@@ -383,33 +412,57 @@ const InfluencerDetailView = () => {
 
                                     return (
                                         <div
-                                            key={index}
-                                            className="relative group rounded-lg overflow-hidden border border-gray-200"
+                                    key={index}
+                                    className="relative group rounded-lg overflow-hidden border border-gray-200"
+                                    >
+                                    {isImage && (
+                                        <img
+                                        src={file}
+                                        alt="portfolio"
+                                        className="w-full h-40 object-cover cursor-pointer"
+                                        onClick={() => setPreviewImage(file)}
+                                        />
+                                    )}
+
+                                    {previewImage && (
+                                    <div
+                                        className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                                        onClick={() => setPreviewImage(null)}
+                                    >
+                                        <button
+                                        onClick={() => setPreviewImage(null)}
+                                        className="absolute top-6 right-8 text-white text-3xl font-bold hover:text-gray-300"
                                         >
-                                            {isImage && (
-                                                <img
-                                                    src={file}
-                                                    alt="portfolio"
-                                                    className="w-full h-40 object-cover cursor-pointer"
-                                                    onClick={() => openImageModal(file)}
-                                                />
-                                            )}
-                                            {isVideo && (
-                                                <video className="w-full h-40 object-cover" controls>
-                                                    <source src={file} type="video/mp4" />
-                                                </video>
-                                            )}
-                                            {isDoc && (
-                                                <a
-                                                    href={file}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex flex-col items-center justify-center w-full h-40 bg-gray-100 text-gray-700 p-2"
-                                                >
-                                                    <span className="text-xs text-center truncate">{file.split("/").pop()}</span>
-                                                </a>
-                                            )}
-                                        </div>
+                                        ×
+                                        </button>
+
+                                        <img
+                                        src={previewImage}
+                                        alt="Preview"
+                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                        onClick={(e) => e.stopPropagation()}
+                                        />
+                                    </div>
+                                    )}
+
+
+                                    {isVideo && (
+                                        <video className="w-full h-40 object-cover" controls>
+                                        <source src={file} type="video/mp4" />
+                                        </video>
+                                    )}
+
+                                    {isDoc && (
+                                        <a
+                                        href={file}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex flex-col items-center justify-center w-full h-40 bg-gray-100 text-gray-700 p-2"
+                                        >
+                                        <span className="text-xs text-center truncate">{file.split("/").pop()}</span>
+                                        </a>
+                                    )}
+                                    </div>
                                     );
                                 })}
                             </div>
@@ -605,24 +658,6 @@ const InfluencerDetailView = () => {
                     maxLength={500}
                     showCount={{ formatter: ({ count, maxLength }) => `${count} / ${maxLength}` }}
                 />
-            </Modal>
-
-            {/* 🖼️ Image Modal */}
-            <Modal
-                open={isImageModalOpen}
-                onCancel={() => setIsImageModalOpen(false)}
-                footer={null}
-                width={800}
-                centered
-            >
-                <div className="p-6">
-                    <img
-                        src={selectedImage}
-                        alt="Full view"
-                        className="w-full max-h-[70vh] object-contain"
-                    />
-                </div>
-
             </Modal>
         </div>
     );
