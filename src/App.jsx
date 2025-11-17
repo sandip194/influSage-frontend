@@ -64,15 +64,11 @@ import InfluencerDetailView from './components/admin/pages/InfluencerDetailView'
 import HomePage from './pages/LandingPage/HomePage';
 import CampaignDetailsView from './components/admin/pages/CampaignDetailsView';
 import BlockedUserPage from './pages/commonPages/BlockedUserPage';
-<<<<<<< HEAD
 import MessagePage from './components/adminChat/ConversationPage';
 import ComingSoon from './pages/commonPages/ComingSoon';
-=======
 import InfluencerMessagePage  from './components/influencerChat/ConversationPage';
 import AdminMessagePage from './components/admin/adminChat/AdminConversationPage';
 import VendorConversationPage  from './components/vendorChat/VendorConversationPage';
->>>>>>> 28ab2904687f422f8ddf87fc8dec310719d29073
-
 const App = () => {
 
         const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -198,16 +194,15 @@ const App = () => {
 
                                                                 <Route path='edit-profile' element={<EditVendorProfile />} />
                                                                 <Route path='my-profile' element={<VendorMyProfile />} />
-<<<<<<< HEAD
+
 
 
                                                                 <Route path="payment" element={<ComingSoon />} />
                                                                 <Route path="analytics" element={<ComingSoon />} />
                                                                 <Route path="setting" element={<ComingSoon />} />
 
-=======
+
                                                                 <Route path='vendorMessagepage' element={<VendorConversationPage />} />
->>>>>>> 28ab2904687f422f8ddf87fc8dec310719d29073
                                                         </Route>
                                                 </Route>
                                                 <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
@@ -222,17 +217,9 @@ const App = () => {
                                                         <Route path='influencers/details/:userId' element={<InfluencerDetailView />} />
                                                         <Route path='campaigns' element={<CampaignRequests />} />
                                                         <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView />} />
-<<<<<<< HEAD
-
-
-
-
-
 
                                                         <Route path="settings" element={<ComingSoon />} />
-=======
                                                         <Route path='support' element={<AdminMessagePage />} />
->>>>>>> 28ab2904687f422f8ddf87fc8dec310719d29073
                                                 </Route>
                                         </Route>
 
