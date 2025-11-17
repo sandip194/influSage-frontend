@@ -32,7 +32,7 @@ const FilePreview = ({ files = [], onRemove }) => {
 
   return (
     <PhotoProvider>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-4 mt-3 justify-center">
         {files.map((file) => {
           const type = getFileType(file);
           const displayUrl = file.url || file.previewUrl || file.filepath;

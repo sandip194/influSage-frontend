@@ -70,6 +70,7 @@ import InfluencerMessagePage  from './components/influencerChat/ConversationPage
 import AdminMessagePage from './components/admin/adminChat/AdminConversationPage';
 import VendorConversationPage  from './components/vendorChat/VendorConversationPage';
 
+
 const App = () => {
 
         const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -195,9 +196,14 @@ const App = () => {
 
                                                                 <Route path='edit-profile' element={<EditVendorProfile />} />
                                                                 <Route path='my-profile' element={<VendorMyProfile />} />
+
+
+
                                                                 <Route path="payment" element={<ComingSoon />} />
                                                                 <Route path="analytics" element={<ComingSoon />} />
                                                                 <Route path="setting" element={<ComingSoon />} />
+
+
                                                                 <Route path='vendorMessagepage' element={<VendorConversationPage />} />
                                                         </Route>
                                                 </Route>

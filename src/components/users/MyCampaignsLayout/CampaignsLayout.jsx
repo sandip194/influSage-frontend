@@ -377,7 +377,7 @@ const InfluencerCampaigns = () => {
                 <th className="p-4">Business</th>
                 <th className="p-4">Campaign</th>
                 <th className="p-4">Budget</th>
-                <th className="p-4">Start Date</th>
+                <th className="p-4">Campaign Start Date</th>
                 <th className="p-4">Status</th>
               </tr>
             </thead>

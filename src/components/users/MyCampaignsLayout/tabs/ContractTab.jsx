@@ -33,7 +33,7 @@ const NoContractOffered = () => (
 
 const ContractTab = ({ campaign }) => {
   const [contractStatus, setContractStatus] = useState(
-    campaign?.contract?.status || "no_contract"
+    campaign?.contract?.status || "offered"
   );
 
   /**

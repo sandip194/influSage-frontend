@@ -17,6 +17,7 @@ import { RiArrowLeftLine, RiCheckboxCircleFill } from "react-icons/ri";
 import dayjs from 'dayjs';
 import VendorCampaignOverview from '../vendorCampaign/VendorCampaignOverview';
 import ContractTab from './tabs/ContractTab';
+import ApplicationTab from './tabs/ApplicationTab';
 
 const { TextArea } = Input;
 
@@ -39,7 +40,7 @@ const Details = () => {
   const { campaignId } = useParams()
   const { token } = useSelector((state) => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const [isLogoPreviewOpen, setIsLogoPreviewOpen] = useState(false);
+  // const [isLogoPreviewOpen, setIsLogoPreviewOpen] = useState(false);
 
   // Complete action (adapted from vendor)
   const handleComplete = () => {
@@ -325,7 +326,9 @@ const Details = () => {
                     <VendorCampaignOverview campaignData={campaign} isEditable={false} />
                   )}
                 </Tabs.TabPane>
-
+                <Tabs.TabPane tab="Application" key="application">
+                  <ApplicationTab campaignId={campaignId} token={token} />
+                </Tabs.TabPane>
                 <Tabs.TabPane tab="Contract" key="contract">
                   <ContractTab />
                 </Tabs.TabPane>

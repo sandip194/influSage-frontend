@@ -1,52 +1,48 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
-  RiVideoAddLine,
-  RiExchangeDollarLine,
   RiArrowDownSLine,
-  RiDeleteBinLine,
-  RiEyeLine,
 } from "@remixicon/react";
 import { Modal } from "antd";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
-import { Empty, Input, Pagination, Select, Skeleton, Tooltip } from "antd";
+import { Empty, Input, Pagination, Select, Tooltip } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+
+// IMPORT Apply Now Modal
+import ApplyNowModal from "./ApplyNowModal";
 import AppliedCampaignCard from "./AppliedCampaignCard";
 
 const AppliedLayout = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [pagenumber, setPageNumber] = useState(1);
-  const [pagesize, setPageSize] = useState(10); // or any default
+  const [pagesize, setPageSize] = useState(10);
   const [totalCampaigns, setTotalCampaigns] = useState(0);
+
   const [sortby, setSortBy] = useState("createddate");
   const [sortorder, setSortOrder] = useState("desc");
+
   const [searchTerm, setSearchTerm] = useState("");
   const [searchInput, setSearchInput] = useState("");
+
+  // Withdraw modal
   const [isWithdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState(null);
+  const [selectedCampaignId,setSelectedCampaignId] = useState(null)
 
+  // EDIT modal (Apply Now)
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
-
   const { token } = useSelector((state) => state.auth);
- // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleClick = (path) => {
-    navigate(path);
-  };
-
   const buttons = [
     { id: "browse", label: "Browse Campaign", path: "/dashboard/browse" },
-    {
-      id: "applied",
-      label: "Applied Campaign",
-      path: "/dashboard/browse/applied",
-    },
+    { id: "applied", label: "Applied Campaign", path: "/dashboard/browse/applied" },
     { id: "saved", label: "Saved Campaign", path: "/dashboard/browse/saved" },
   ];
 
@@ -80,15 +76,18 @@ const AppliedLayout = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+
       const { records, totalcount } = res.data.data;
       setCampaigns(records);
       setTotalCampaigns(totalcount);
-    } catch (error) {
-      console.error("Failed to fetch campaigns", error);
     } finally {
       setLoading(false);
     }
   }, [sortby, sortorder, pagenumber, pagesize, token, searchTerm]);
+
+  useEffect(() => {
+    getAllAppliedCampaigns();
+  }, [getAllAppliedCampaigns]);
 
   const handleWithdraw = async (campaignapplicationid) => {
     try {
@@ -98,43 +97,31 @@ const AppliedLayout = () => {
           p_applicationid: campaignapplicationid,
           p_statusname: "Withdrawn",
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // console.log(res.data);
-      // console.log("Withdraw request:", campaignapplicationid);
       toast.success(res.data?.message);
-
+      getAllAppliedCampaigns();
     } catch (error) {
-      console.error(error)
-      toast.error(error);
+      toast.error(error || "Error withdrawing application");
     }
   };
-  useEffect(() => {
-    getAllAppliedCampaigns();
-  }, [getAllAppliedCampaigns]);
 
   return (
-    
-    <div className="appliedlayout w-full text-sm pb-24 sm:pb-0 ">
+    <div className="appliedlayout w-full text-sm pb-24 sm:pb-0">
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
-      <p className="mb-6 text-gray-700 text-sm">
-        Track your campaigns & Browse
-      </p>
+      <p className="mb-6 text-gray-700 text-sm">Track your campaigns & Browse</p>
 
+      {/* Top Navigation Buttons */}
       <div className="bg-white p-4 rounded-lg mb-6 flex flex-row gap-2 flex-wrap sm:flex-nowrap">
         {buttons.map(({ id, label, path }) => (
           <button
             key={id}
-            onClick={() => handleClick(path)}
-            className={`flex-1 sm:flex-none px-3 py-2 rounded-md border border-gray-300 transition text-sm
-              ${selectedButton === id
+            onClick={() => navigate(path)}
+            className={`flex-1 sm:flex-none px-3 py-2 rounded-md border 
+            ${selectedButton === id
                 ? "bg-[#0f122f] text-white"
-                : "bg-white text-[#141843] hover:bg-gray-100"
+                : "bg-white text-[#141843] border-gray-300 hover:bg-gray-100"
               }`}
           >
             {label}
@@ -142,36 +129,30 @@ const AppliedLayout = () => {
         ))}
       </div>
 
+      {/* Search + Sort */}
       <div className="bg-white p-4 rounded-lg">
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <Input
             size="large"
             prefix={<SearchOutlined />}
             placeholder="Search for anything here..."
-            className="w-full sm:w-auto flex-1"
+            className="w-full flex-1"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => {
-              const trimmedInput = searchInput.trim();
-
-              if ((e.key === "Enter" || e.key === " ") && trimmedInput !== "") {
-                setPageNumber(1);
-                setSearchTerm(trimmedInput);
-              }
-
-              if (e.key === "Enter" && trimmedInput === "") {
-                // Reset search
-                setSearchTerm("");
+              if (e.key === "Enter") {
+                setSearchTerm(searchInput.trim());
                 setPageNumber(1);
               }
             }}
             suffix={
               searchInput ? (
-                <Tooltip title="Clear search" placement="top">
+                <Tooltip title="Clear search">
                   <CloseCircleFilled
                     onClick={() => {
                       setSearchInput("");
                       setSearchTerm("");
+                      setPageNumber(1);
                     }}
                     className="text-gray-400 hover:text-gray-600 cursor-pointer"
                   />
@@ -180,64 +161,37 @@ const AppliedLayout = () => {
             }
           />
 
-          <div className="flex gap-2 w-full sm:w-auto justify-end">
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-end">
-              {/* Desktop view */}
-                <div className="hidden sm:block w-full sm:w-auto">
-                  <Select
-                    size="large"
-                    value={`${sortby}_${sortorder}`}
-                    onChange={(value) => {
-                      const [newSortBy, newSortOrder] = value.split("_");
-                      setSortBy(newSortBy);
-                      setSortOrder(newSortOrder);
-                      setPageNumber(1);
-                    }}
-                    className="w-48"
-                    placeholder="Sort By"
-                    suffixIcon={<RiArrowDownSLine size={16} />}
-                  >
-                    {sortOptions.map((option) => (
-                      <Select.Option key={option.value} value={option.value}>
-                        {option.label}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </div>
-
-                {/* Mobile view: fixed at bottom */}
-                <div className="sm:hidden fixed bottom-0 left-0 w-full z-30 bg-white p-4 shadow-md">
-                  <Select
-                    size="large"
-                    value={`${sortby}_${sortorder}`}
-                    onChange={(value) => {
-                      const [newSortBy, newSortOrder] = value.split("_");
-                      setSortBy(newSortBy);
-                      setSortOrder(newSortOrder);
-                      setPageNumber(1);
-                    }}
-                    className="w-full"
-                    placeholder="Sort By"
-                    suffixIcon={<RiArrowDownSLine size={16} />}
-                  >
-                    {sortOptions.map((option) => (
-                      <Select.Option key={option.value} value={option.value}>
-                        {option.label}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </div>
-            </div>
-          </div>
+          {/* Sort Dropdown */}
+          <Select
+            size="large"
+            value={`${sortby}_${sortorder}`}
+            onChange={(value) => {
+              const [newSortBy, newSortOrder] = value.split("_");
+              setSortBy(newSortBy);
+              setSortOrder(newSortOrder);
+              setPageNumber(1);
+            }}
+            className="w-48"
+            suffixIcon={<RiArrowDownSLine size={16} />}
+          >
+            {sortOptions.map((option) => (
+              <Select.Option key={option.value} value={option.value}>
+                {option.label}
+              </Select.Option>
+            ))}
+          </Select>
         </div>
 
+        {/* Cards */}
         <div className="flex flex-col lg:flex-row gap-6 mt-6">
           <AppliedCampaignCard
             campaigns={campaigns}
             loading={loading}
             handleCardClick={handleCardClick}
             setSelectedApplicationId={setSelectedApplicationId}
+            setSelectedCampaignId={setSelectedCampaignId}
             setWithdrawModalOpen={setWithdrawModalOpen}
+            openEditModal={() => setEditModalOpen(true)}
           />
         </div>
       </div>
@@ -253,10 +207,10 @@ const AppliedLayout = () => {
             setPageSize(pageSize);
           }}
           showSizeChanger
-          pageSizeOptions={["10", "15", "25", "50"]}
         />
       </div>
 
+      {/* Withdraw Modal */}
       <Modal
         open={isWithdrawModalOpen}
         onCancel={() => setWithdrawModalOpen(false)}
@@ -265,7 +219,7 @@ const AppliedLayout = () => {
       >
         <h2 className="text-xl font-semibold mb-2">Withdraw Application</h2>
         <p className="text-gray-600">
-          Are you sure you want to withdraw this application? You can’t undo this action.
+          Are you sure you want to withdraw this application?
         </p>
 
         <div className="flex justify-end gap-3 mt-4">
@@ -275,18 +229,26 @@ const AppliedLayout = () => {
           >
             Cancel
           </button>
+
           <button
             onClick={() => {
               handleWithdraw(selectedApplicationId);
               setWithdrawModalOpen(false);
             }}
-            className="px-6 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a]"
+            className="px-6 py-2 rounded-full bg-[#0f122f] text-white"
           >
             Withdraw
           </button>
         </div>
       </Modal>
 
+      {/* Edit Application Modal */}
+      <ApplyNowModal
+        open={isEditModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        applicationId={selectedApplicationId}
+        campaignId={selectedCampaignId}
+      />
     </div>
   );
 };
