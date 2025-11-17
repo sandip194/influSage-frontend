@@ -64,7 +64,7 @@ import InfluencerDetailView from './components/admin/pages/InfluencerDetailView'
 import HomePage from './pages/LandingPage/HomePage';
 import CampaignDetailsView from './components/admin/pages/CampaignDetailsView';
 import BlockedUserPage from './pages/commonPages/BlockedUserPage';
-import MessagePage from './components/adminChat/ConversationPage';
+// import MessagePage from './components/adminChat/ConversationPage';
 import ComingSoon from './pages/commonPages/ComingSoon';
 import InfluencerMessagePage  from './components/influencerChat/ConversationPage';
 import AdminMessagePage from './components/admin/adminChat/AdminConversationPage';
