@@ -100,16 +100,11 @@ const BrowseInfluencersLayout = () => {
   };
 
   const handleLike = async (influencerId) => {
-    if (!userId) {
-      toast.error("User not logged in");
-      return;
-    }
-
+    
     try {
       const response = await axios.post(
         "/vendor/addfavourite/influencer",
         {
-          p_userId: userId,
           p_influencerId: influencerId,
         },
         {
@@ -211,8 +206,7 @@ const BrowseInfluencersLayout = () => {
 
   // for invite
   const handleInvite = (influencerId) => {
-    if (!userId) return toast.error("User not logged in");
-
+    
     setSelectedInfluencer(influencerId);
     setIsInviteModalVisible(true);
   };
