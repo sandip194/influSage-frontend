@@ -79,6 +79,11 @@ const CampaignTableLayout = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCampaignId, setCurrentCampaignId] = useState(null);
 
+  // New states for reject modal
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectLoading, setRejectLoading] = useState(false)
+
   // 📍 Fetch Status Tabs
   const fetchStatusList = async () => {
     try {
@@ -212,12 +217,47 @@ const CampaignTableLayout = () => {
     setCurrentCampaign(campaign);
     setCurrentCampaignId(campaign.id);
     setActionType(type);
-    setIsModalOpen(true);
+
+    if (type === 'Rejected') {
+      setIsRejectModalOpen(true);
+    } else {
+      setIsModalOpen(true);
+    }
   };
 
 
 
   const activeStatusName = statusList.find(s => String(s.id) === String(activeStatusId))?.name;
+
+
+  // New function for reject with reason
+  const handleRejectSubmit = async () => {
+    if (!rejectReason.trim()) {
+      toast.error("Please provide a reason for rejection.");
+      return;
+    }
+
+    try {
+      setRejectLoading(true)
+      const res = await axios.post('/admin/dashboard/reject/profile-or-campaign', {
+        p_campaignid: currentCampaignId,
+        p_text: rejectReason
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.status === 200) {
+        fetchCampaigns();
+        toast.success(res.data?.message || "Campaign rejected successfully");
+        setIsRejectModalOpen(false);
+        setRejectReason("");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to reject Campaign");
+    } finally {
+      setRejectLoading(false)
+    }
+  };
 
 
   // 🧱 UI
@@ -450,7 +490,7 @@ const CampaignTableLayout = () => {
                               <RiCloseLine size={18} />
                             </button>
                           </Tooltip>
-                          
+
                         </>
                       )}
 
@@ -476,7 +516,7 @@ const CampaignTableLayout = () => {
                         </Tooltip>
                       )}
 
-                      
+
                     </div>
                   </td>
 
@@ -536,9 +576,41 @@ const CampaignTableLayout = () => {
         </p>
       </Modal>
 
+      {/* Reject Reason Modal */}
+      <Modal
+        title={`Reject :- ${currentCampaign?.name}`}
+        open={isRejectModalOpen}
+        onOk={handleRejectSubmit}
+        onCancel={() => {
+          setIsRejectModalOpen(false);
+          setRejectReason("");
+        }}
+        okText="Confirm Reject"
+        okButtonProps={{
+          danger: true,
+          className: "bg-red-600 hover:bg-red-700 text-white mt-4",
+          disabled: rejectLoading,
+        }}
+        cancelButtonProps={{
+          disabled: rejectLoading,
+        }}
+      >
+        <p className="mb-4 text-gray-700">
+          Please provide a reason for rejecting this Campaign:
+        </p>
+        <Input.TextArea
+          placeholder="Enter rejection reason..."
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+          rows={4}
+          maxLength={500}
+          showCount={{ formatter: ({ count, maxLength }) => `${count} / ${maxLength}` }}
+        />
+      </Modal>
+
       {/* Filters Drawer */}
       <Drawer
-       closeIcon={false}
+        closeIcon={false}
         title={
           <div className="flex justify-between items-center w-full">
             <span className="font-semibold">Filter Campaigns</span>

@@ -9,7 +9,7 @@ import {
     RiArrowLeftLine,
 } from "react-icons/ri";
 import { CheckOutlined, CloseOutlined, StopOutlined } from "@ant-design/icons";
-import { Button, Modal, Tooltip, Empty, Skeleton } from "antd";
+import { Button, Modal, Tooltip, Empty, Skeleton, Input } from "antd";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -29,10 +29,15 @@ const CampaignDetailsView = () => {
     const closeImageModal = () => setPreviewImage(null);
 
 
-    // For approval/rejection modal
+    // For approval
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [actionType, setActionType] = useState(""); // 'Approved' or 'Rejected'
 
+
+    // New states for reject modal
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [rejectReason, setRejectReason] = useState("");
+    const [rejectLoading, setRejectLoading] = useState(false);
 
 
     const [loading, setLoading] = useState(false)
@@ -55,9 +60,14 @@ const CampaignDetailsView = () => {
         }
     }
 
+
     const openConfirmationModal = (type) => {
         setActionType(type);
-        setIsModalOpen(true);
+        if (type === "Rejected") {
+            setIsRejectModalOpen(true);
+        } else {
+            setIsModalOpen(true);
+        }
     };
 
     // const openImageModal = (imageSrc) => {
@@ -85,6 +95,36 @@ const CampaignDetailsView = () => {
             toast.error(error.response?.data?.message || "Action failed");
         } finally {
             setActionLoading(false);
+        }
+    };
+
+
+    // New function for reject with reason (same API as in UserTableLayout)
+    const handleRejectSubmit = async () => {
+        if (!rejectReason.trim()) {
+            toast.error("Please provide a reason for rejection.");
+            return;
+        }
+
+        try {
+            setRejectLoading(true);
+            const res = await axios.post('/admin/dashboard/reject/profile-or-campaign', {
+                p_campaignid: campaignId,
+                p_text: rejectReason
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.status === 200) {
+                getCamapignDetails();
+                toast.success(res.data?.message || "Campaign rejected successfully");
+                setIsRejectModalOpen(false);
+                setRejectReason("");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Failed to reject Campaign");
+        } finally {
+            setRejectLoading(false);
         }
     };
 
@@ -136,21 +176,21 @@ const CampaignDetailsView = () => {
                             />
                             {isPreviewOpen && (
                                 <div
-                                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                                onClick={() => setIsPreviewOpen(false)}
-                                >
-                                <button
+                                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
                                     onClick={() => setIsPreviewOpen(false)}
-                                    className="absolute top-6 right-8 text-white text-3xl font-bold hover:text-gray-300"
                                 >
-                                    ×
-                                </button>
-                                <img
-                                    src={cmapignDetails?.photopath}
-                                    alt="Logo Preview"
-                                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                                    onClick={(e) => e.stopPropagation()}
-                                />
+                                    <button
+                                        onClick={() => setIsPreviewOpen(false)}
+                                        className="absolute top-6 right-8 text-white text-3xl font-bold hover:text-gray-300"
+                                    >
+                                        ×
+                                    </button>
+                                    <img
+                                        src={cmapignDetails?.photopath}
+                                        alt="Logo Preview"
+                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
                                 </div>
                             )}
                         </div>
@@ -405,78 +445,78 @@ const CampaignDetailsView = () => {
                         </div>
 
                         <div className="py-4 border-b border-gray-200">
-                        <h3 className="font-semibold text-lg mb-4">References</h3>
+                            <h3 className="font-semibold text-lg mb-4">References</h3>
 
-                        {Array.isArray(cmapignDetails?.campaignfiles) &&
-                        cmapignDetails.campaignfiles.some((f) => f.filepath) ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                            {cmapignDetails.campaignfiles.map((item, index) => {
-                                const file = item?.filepath;
-                                if (!file) return null;
+                            {Array.isArray(cmapignDetails?.campaignfiles) &&
+                                cmapignDetails.campaignfiles.some((f) => f.filepath) ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                    {cmapignDetails.campaignfiles.map((item, index) => {
+                                        const file = item?.filepath;
+                                        if (!file) return null;
 
-                                const fileExtension = file.split(".").pop()?.toLowerCase();
-                                const isImage = ["jpg", "jpeg", "png", "gif"].includes(fileExtension);
-                                const isVideo = ["mp4", "mov", "webm"].includes(fileExtension);
-                                const isDoc = ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(fileExtension);
+                                        const fileExtension = file.split(".").pop()?.toLowerCase();
+                                        const isImage = ["jpg", "jpeg", "png", "gif"].includes(fileExtension);
+                                        const isVideo = ["mp4", "mov", "webm"].includes(fileExtension);
+                                        const isDoc = ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(fileExtension);
 
-                                return (
-                                <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200">
-                                    
-                                    {isImage && (
-                                    <img
-                                        src={file}
-                                        alt="portfolio"
-                                        className="w-full h-40 object-cover cursor-pointer"
-                                        onClick={() => openImageModal(file)}
-                                    />
-                                    )}
-                                    {previewImage && (
-                                    <div
-                                        className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                                        onClick={closeImageModal}
-                                    >
-                                        <button
-                                        onClick={closeImageModal}
-                                        className="absolute top-6 right-8 text-white text-3xl font-bold hover:text-gray-300"
-                                        >
-                                        ×
-                                        </button>
-                                        <img
-                                        src={previewImage}
-                                        alt="Preview"
-                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                                        onClick={(e) => e.stopPropagation()}
-                                        />
-                                    </div>
-                                    )}
-                                    {isVideo && (
-                                    <video className="w-full h-40 object-cover" controls>
-                                        <source src={file} type="video/mp4" />
-                                    </video>
-                                    )}
+                                        return (
+                                            <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200">
 
-                                    {isDoc && (
-                                    <a
-                                        href={file}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex flex-col items-center justify-center w-full h-40 bg-gray-100 text-gray-700 p-2"
-                                    >
-                                        <span className="text-xs text-center truncate">{file.split("/").pop()}</span>
-                                    </a>
-                                    )}
+                                                {isImage && (
+                                                    <img
+                                                        src={file}
+                                                        alt="portfolio"
+                                                        className="w-full h-40 object-cover cursor-pointer"
+                                                        onClick={() => openImageModal(file)}
+                                                    />
+                                                )}
+                                                {previewImage && (
+                                                    <div
+                                                        className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                                                        onClick={closeImageModal}
+                                                    >
+                                                        <button
+                                                            onClick={closeImageModal}
+                                                            className="absolute top-6 right-8 text-white text-3xl font-bold hover:text-gray-300"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                        <img
+                                                            src={previewImage}
+                                                            alt="Preview"
+                                                            className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        />
+                                                    </div>
+                                                )}
+                                                {isVideo && (
+                                                    <video className="w-full h-40 object-cover" controls>
+                                                        <source src={file} type="video/mp4" />
+                                                    </video>
+                                                )}
+
+                                                {isDoc && (
+                                                    <a
+                                                        href={file}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex flex-col items-center justify-center w-full h-40 bg-gray-100 text-gray-700 p-2"
+                                                    >
+                                                        <span className="text-xs text-center truncate">{file.split("/").pop()}</span>
+                                                    </a>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                                );
-                            })}
-                            </div>
-                        ) : (
-                            <div className="flex justify-center py-6">
-                            <Empty
-                                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                description={<span className="text-gray-500 text-sm">No portfolio files</span>}
-                            />
-                            </div>
-                        )}
+                            ) : (
+                                <div className="flex justify-center py-6">
+                                    <Empty
+                                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                        description={<span className="text-gray-500 text-sm">No portfolio files</span>}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -552,25 +592,25 @@ const CampaignDetailsView = () => {
 
                     <div className="bg-white p-4 rounded-2xl">
                         <h3 className="font-semibold text-lg mb-4">Platform Content Types</h3>
-                            <div className="space-y-4">
-                                {cmapignDetails?.providercontenttype?.length > 0 ? (
-                                    cmapignDetails.providercontenttype.map((platform) => (
-                                        <div
-                                            key={platform.providercontenttypeid}
-                                            className="border-b border-gray-100 pb-3 last:border-none"
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-gray-900 font-medium">{platform.providername}</span>
-                                                <span className="text-gray-600 text-sm">{platform.contenttypename}</span>
-                                            </div>
-                                            {platform.caption && (
-                                                <p className="text-gray-600 italic text-sm mt-2 border-l-2 border-gray-200 pl-3">
-                                                    {platform.caption}
-                                                </p>
+                        <div className="space-y-4">
+                            {cmapignDetails?.providercontenttype?.length > 0 ? (
+                                cmapignDetails.providercontenttype.map((platform) => (
+                                    <div
+                                        key={platform.providercontenttypeid}
+                                        className="border-b border-gray-100 pb-3 last:border-none"
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-900 font-medium">{platform.providername}</span>
+                                            <span className="text-gray-600 text-sm">{platform.contenttypename}</span>
+                                        </div>
+                                        {platform.caption && (
+                                            <p className="text-gray-600 italic text-sm mt-2 border-l-2 border-gray-200 pl-3">
+                                                {platform.caption}
+                                            </p>
                                         )}
                                     </div>
-                                    ))
-                                ) : (
+                                ))
+                            ) : (
                                 <p className="text-gray-500 text-sm">No platform content types available.</p>
                             )}
                         </div>
@@ -610,6 +650,38 @@ const CampaignDetailsView = () => {
                     </span>
                     ?
                 </p>
+            </Modal>
+
+            {/* Reject Reason Modal */}
+            <Modal
+                title={`Reject :-  ${cmapignDetails?.name} `}
+                open={isRejectModalOpen}
+                onOk={handleRejectSubmit}
+                onCancel={() => {
+                    setIsRejectModalOpen(false);
+                    setRejectReason("");
+                }}
+                okText="Confirm Reject"
+                okButtonProps={{
+                    danger: true,
+                    className: "bg-red-600 hover:bg-red-700 text-white mt-4",
+                    disabled: rejectLoading,
+                }}
+                cancelButtonProps={{
+                    disabled: rejectLoading,
+                }}
+            >
+                <p className="mb-4 text-gray-700">
+                    Please provide a reason for rejecting this Campaign:
+                </p>
+                <Input.TextArea
+                    placeholder="Enter rejection reason..."
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    rows={4}
+                    maxLength={500}
+                    showCount={{ formatter: ({ count, maxLength }) => `${count} / ${maxLength}` }}
+                />
             </Modal>
 
         </div >

@@ -137,7 +137,7 @@ const InfluencerDetailView = () => {
 
         try {
             setRejectLoading(true);
-            const res = await axios.post('/admin/dashboard/profile-reject', {
+            const res = await axios.post('/admin/dashboard/reject/profile-or-campaign', {
                 p_userid: userId,
                 p_text: rejectReason
             }, {

@@ -260,7 +260,7 @@ const UserTableLayout = () => {
 
         try {
             setRejectLoading(true)
-            const res = await axios.post('/admin/dashboard/profile-reject', {
+            const res = await axios.post('/admin/dashboard/reject/profile-or-campaign', {
                 p_userid: currentUserId,
                 p_text: rejectReason
             }, {
