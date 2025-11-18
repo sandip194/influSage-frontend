@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 const InviteModal = ({
   visible,
   influencerId,
-  userId,
   token,
   onClose,
 }) => {
@@ -25,7 +24,7 @@ const InviteModal = ({
       setLoading(true);
       try {
         const res = await axios.get("/vendor/inviteinfluencer/Campaigns", {
-          params: { p_userid: userId, p_influencerid: influencerId },
+          params: { p_influencerid: influencerId },
           headers: { Authorization: `Bearer ${token}` },
         });
         setCampaigns(res.data?.data || []);
@@ -38,7 +37,7 @@ const InviteModal = ({
     };
 
     fetchCampaigns();
-  }, [visible, influencerId, userId, token]);
+  }, [visible, influencerId,  token]);
 
   const handleSubmit = async () => {
     if (selected.length === 0) {
