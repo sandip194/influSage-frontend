@@ -454,7 +454,7 @@ const InfluencerCampaigns = () => {
             className="fixed inset-0 bg-black/30 z-40"
             onClick={() => setShowFilter(false)}
           />
-          <div className="fixed top-0 right-0 w-80 h-full bg-white p-4 z-30 shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
+          <div className="fixed top-0 right-0 w-80 h-full bg-white p-4 z-50 shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Filter Options</h3>
 

@@ -301,6 +301,7 @@ const BrowseInfluencersLayout = () => {
          {/* Desktop view */}
         <div className="hidden sm:flex gap-2 w-full sm:w-auto justify-end">
           <button
+            type="button"
             onClick={() => setShowFilter(true)}
             className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white hover:bg-gray-100"
           >
@@ -512,18 +513,6 @@ const BrowseInfluencersLayout = () => {
                 </label>
               ))}
             </div>
-            {campaign?.completedcampaigncount > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="px-3 py-1.5 border-2 border-gray-300 bg-gray-300 rounded-lg text-xs text-gray-900 flex items-center gap-2 font-semibold">
-                      <span className="inline-flex items-center justify-center w-5 h-5 bg-gray-500 text-white rounded-full text-xs">
-                      {campaign.completedcampaigncount}
-                      </span>
-                      <span className="whitespace-nowrap">
-                      {campaign.completedcampaigncount === 1 ? "completed campaign" : "completed campaigns"}
-                      </span>
-                    </span>
-                    </div>
-                  )}
             <hr className="my-4 border-gray-200" />
           </div>
         </>

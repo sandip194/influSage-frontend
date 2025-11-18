@@ -9,6 +9,7 @@ import {
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { Skeleton } from 'antd';
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -43,6 +44,7 @@ import { Skeleton } from 'antd';
 const DashboardHomePage = () => {
     const [allCounts, setAllCounts] = useState(null);
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     const { token } = useSelector(state => state.auth);
 
@@ -71,12 +73,14 @@ const DashboardHomePage = () => {
     }, []);
 
     // Create dynamic stat cards from API data
-    const stats = allCounts ? [
-        { title: "Pending Users", value: allCounts.pendinguser, icon: RiUserAddLine, iconColor: "text-blue-500" },
-        { title: "Approved Users", value: allCounts.approveduser, icon: RiUserAddLine, iconColor: "text-green-500" },
-        { title: "Pending Campaigns", value: allCounts.pendingcampaign, icon: RiTimeLine, iconColor: "text-yellow-500" },
-        { title: "Active Campaigns", value: allCounts.activecampaign, icon: RiBarChartLine, iconColor: "text-purple-500" },
-    ] : [];
+    const stats = allCounts
+    ? [
+        { title: "Pending Users", value: allCounts.pendinguser, icon: RiUserAddLine, iconColor: "text-blue-500", redirect: "/admin-dashboard/influencers?status=pending" },
+        { title: "Approved Users", value: allCounts.approveduser, icon: RiUserAddLine, iconColor: "text-green-500", redirect: "/admin-dashboard/influencers?status=approved" },
+        { title: "Pending Campaigns", value: allCounts.pendingcampaign, icon: RiTimeLine, iconColor: "text-yellow-500", redirect: "/admin-dashboard/campaigns?status=pending" },
+        { title: "Active Campaigns", value: allCounts.activecampaign, icon: RiBarChartLine, iconColor: "text-purple-500", redirect: "/admin-dashboard/campaigns?status=approve" },
+        ]
+    : [];
     return (
         <>
 
@@ -94,7 +98,11 @@ const DashboardHomePage = () => {
                                 </div>
                             </div>
                         ))
-                        : stats.map((stat, idx) => <StatCard key={idx} {...stat} />)
+                        : stats.map((stat, idx) => (
+                        <div key={idx} onClick={() => navigate(stat.redirect)} className="cursor-pointer">
+                            <StatCard {...stat} />
+                        </div>
+                        ))
                     }
                 </div>
 

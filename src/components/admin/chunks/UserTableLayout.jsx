@@ -18,13 +18,15 @@ import {
     RiProhibitedLine,
     RiCloseFill,
     RiFilterLine,
-    RiEraserLine
+    RiEraserLine,
+    RiEqualizerFill
 } from "react-icons/ri";
 import { SearchOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const UserTableLayout = () => {
     const { token } = useSelector((state) => state.auth);
@@ -66,6 +68,7 @@ const UserTableLayout = () => {
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
     const [rejectReason, setRejectReason] = useState("");
     const [rejectLoading, setRejectLoading] = useState(false)
+    const location = useLocation();
 
     const fetchStatusList = async () => {
         try {
@@ -280,6 +283,20 @@ const UserTableLayout = () => {
         }
     };
 
+    useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const status = queryParams.get("status");
+
+    if (status && statusList.length > 0) {
+        const matched = statusList.find(
+            (s) => s.name.toLowerCase().includes(status.toLowerCase())
+        );
+        if (matched) {
+            setActiveStatusId(matched.id);
+        }
+    }
+}, [location.search, statusList]);
+
     return (
         <div className="w-full">
             <div className="mb-6">
@@ -292,24 +309,30 @@ const UserTableLayout = () => {
             </div>
 
             {/* Dynamic Tabs */}
-            <Tabs
-                activeKey={String(activeStatusId)}
-                onChange={(key) => {
-                    setActiveStatusId(Number(key));
-                    setPage(1);
-                    setFilters({
+            <div className="flex flex-wrap gap-2 mb-4 bg-white p-3 rounded-lg">
+                {statusList.map((status) => (
+                    <button
+                    key={status.id}
+                    onClick={() => {
+                        setActiveStatusId(status.id);
+                        setPage(1);
+                        setFilters({
                         location: "",
                         platforms: [],
                         followers: [],
                         gender: [],
-                    })
-                }}
-                items={statusList.map((status) => ({
-                    key: String(status.id),
-                    label: status.name,
-                }))}
-                className="mb-4"
-            />
+                        });
+                    }}
+                    className={`px-4 py-2 rounded-md border border-gray-300 transition
+                        ${Number(activeStatusId) === Number(status.id)
+                        ? "bg-[#0f122f] text-white"
+                        : "bg-white text-[#141843] hover:bg-gray-100"
+                        }`}
+                    >
+                    {status.name}
+                    </button>
+                ))}
+            </div>
 
             {/* Search + Filter */}
             <div className="flex bg-white shadow-sm p-3 rounded-t-2xl flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
@@ -326,6 +349,7 @@ const UserTableLayout = () => {
 
                     <Button type="default" size="large" onClick={() => setShowFilters(true)}>
                         Filters
+                         <RiEqualizerFill size={16} />
                     </Button>
                 </div>
             </div>

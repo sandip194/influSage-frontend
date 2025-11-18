@@ -39,13 +39,14 @@ const OfferDetailsModal = ({ visible, onClose, id }) => {
     const handleMessageClick = () => {
         navigate("/vendor-dashboard/messages", {
             state: {
-                influencerId: offerDetails.influencerid,
-                influencerName: `${offerDetails.firstname} ${offerDetails.lastname}`,
-                influencerPhoto: offerDetails.photopath,
-                conversationId: offerDetails.conversationid || null,
+            selectChatFromOutside: {
+                influencerid: offerDetails.influencerid,
+                conversationid: offerDetails.conversationid || null,
+                campaignid: offerDetails.campaignid,
+            },
             },
         });
-    };
+        };
 
     const handleConfirmAccept = async () => {
         if (!offerDetails?.applicationid) return toast.error("Missing Application ID");

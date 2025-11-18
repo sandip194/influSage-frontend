@@ -114,14 +114,11 @@ export default function SidebarVendor({ onSelectChat }) {
     );
   }, [influencers, selectedCampaign]);
 
-  // ✅ handle outside chat selection
   useEffect(() => {
     if (selectChatFromOutside && campaigns.length > 0) {
-      const { influencerid } = selectChatFromOutside;
+      const { influencerid, campaignid, conversationid } = selectChatFromOutside;
 
-      const campaign = campaigns.find((c) =>
-        c.influencers.some((i) => i.influencerid === influencerid)
-      );
+      const campaign = campaigns.find((c) => c.campaignid === campaignid);
 
       if (campaign) {
         setSelectedCampaign(campaign);
@@ -129,20 +126,24 @@ export default function SidebarVendor({ onSelectChat }) {
         const influencer = campaign.influencers.find(
           (i) => i.influencerid === influencerid
         );
+
         if (influencer) {
           setSelectedInfluencer(influencerid);
 
           onSelectChat({
-            conversationid: influencer.conversationid,
-            id: influencer.conversationid,
+            conversationid: conversationid || influencer.conversationid,
+            id: conversationid || influencer.conversationid,
             name: `${influencer.firstname} ${influencer.lastname}`,
-            img: influencer.userphoto ? influencer.userphoto : null,
+            img: influencer.userphoto || null,
             influencerid: influencer.influencerid,
+            campaign,
           });
         }
       }
+
+      navigate(location.pathname, { replace: true });
     }
-  }, [selectChatFromOutside, campaigns, onSelectChat]);
+  }, [selectChatFromOutside, campaigns]);
 
   return (
     <div className="h-full flex flex-col md:flex-row gap-4">
@@ -289,7 +290,7 @@ export default function SidebarVendor({ onSelectChat }) {
 
               return (
                 <div
-                  key={inf.influencerid}
+                  key={`${inf.campaignId}-${inf.influencerid}`}
                   onClick={() => {
                     setSelectedInfluencer(inf.influencerid);
                     onSelectChat({

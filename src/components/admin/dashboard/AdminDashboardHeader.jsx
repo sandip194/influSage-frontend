@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../../features/auth/authSlice";
 import React, { useState, useEffect } from "react";
+import {DownOutlined } from "@ant-design/icons";
 import axios from "axios";
 
 const AdminDashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
@@ -70,13 +71,10 @@ const AdminDashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
       >
         <RiMenu2Line size={24} />
       </button>
-
-      {/* Right-side Controls */}
       <div className="flex items-center gap-4 ml-auto">
-        {/* User Avatar + Dropdown */}
-        <Dropdown menu={userMenu} placement="bottomRight" arrow>
-          <div className="flex items-center gap-2 cursor-pointer">
-            <Avatar
+        <Dropdown menu={userMenu} trigger={["click"]} arrow>
+            <div className="flex items-center gap-2 cursor-pointer border border-gray-200 px-3 py-1 rounded-full">
+              <Avatar
               src={
                 profileData?.photopath
                   ? profileData.photopath
@@ -84,12 +82,13 @@ const AdminDashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
               }
               alt={profileData?.firstname}
             />
-            <span className="hidden sm:inline text-sm font-medium text-gray-700">
-              {`${profileData?.firstname || ""} ${profileData?.lastname || ""}`.trim()}
-            </span>
-          </div>
-        </Dropdown>
-      </div>
+               <span className="hidden sm:inline text-sm font-medium">
+                {`${profileData?.firstname || ""} ${profileData?.lastname || ""}`.trim()}
+                </span>
+              <DownOutlined className="text-xs" />
+            </div>
+          </Dropdown>
+        </div>
     </header>
   );
 };

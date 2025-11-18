@@ -321,9 +321,7 @@ const Browse = () => {
             onClick={() => setShowFilter(false)}
           />
           <div
-            className="fixed bg-white p-4 z-50 shadow-lg overflow-y-auto transition-transform duration-300
-                      sm:top-0 sm:right-0 sm:w-80 sm:h-full
-                      bottom-0 left-0 w-full h-[80vh] sm:rounded-none rounded-t-2xl"
+            className="fixed top-0 right-0 w-80 h-full bg-white p-4 z-50 shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
           >
 
             <div className="flex justify-between items-center mb-4">

@@ -94,7 +94,7 @@ const AdminSidebar = forwardRef(({ onStateChange }, ref) => {
         <div className={`flex items-center ${isOpen ? "justify-between" : "justify-center"} py-3 h-16 border-b border-gray-100`}>
           {isOpen && (
             <div className="px-3">
-              <h1 className="text-xl font-bold text-blue-600">Admin Panel</h1>
+              <h1 className="text-xl font-bold text-[#0D132D]">Admin Panel</h1>
             </div>
           )}
           {!isMobile && (

@@ -8,7 +8,7 @@ import {
     RiShutDownLine,
     RiStackLine,
     RiWallet3Line,
-    RiAdminLine,
+    RiCustomerService2Line,
     RiLogoutBoxRLine
 } from '@remixicon/react';
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
@@ -70,7 +70,7 @@ const Sidebar = forwardRef((props, ref) => {
         { icon: <RiGiftLine className="w-5" />, label: "Refer & Earn", to: "/dashboard/referrals" },
     ];
     const supportItems = [
-        { icon: <RiAdminLine className="w-5" />, label: "Admin Support", to: "/dashboard/messagepage" },
+        { icon: <RiCustomerService2Line className="w-5" />, label: "Admin Support", to: "/dashboard/messagepage" },
     ];
 
     return (

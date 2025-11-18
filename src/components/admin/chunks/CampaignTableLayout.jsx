@@ -170,10 +170,25 @@ const CampaignTableLayout = () => {
   }, []);
 
   useEffect(() => {
-    if (statusList.length > 0 && !activeStatusId) {
-      setActiveStatusId(String(statusList[0].id)); // ✅ Select first tab automatically
+    const queryParams = new URLSearchParams(location.search);
+    const status = queryParams.get("status");
+
+    // if status exists in URL → open its tab
+    if (status && statusList.length > 0) {
+      const matched = statusList.find(s =>
+        s.name.toLowerCase().includes(status.toLowerCase())
+      );
+      if (matched) {
+        setActiveStatusId(String(matched.id));
+        return;
+      }
     }
-  }, [statusList]);
+
+    // else → open first tab
+    if (statusList.length > 0 && !activeStatusId) {
+      setActiveStatusId(String(statusList[0].id));
+    }
+  }, [location.search, statusList]);
 
 
   useEffect(() => {
@@ -234,20 +249,26 @@ const CampaignTableLayout = () => {
       </div>
 
       {/* Tabs */}
-      <Tabs
-        activeKey={String(activeStatusId)}
-        onChange={(key) => {
-          setActiveStatusId(key);
-          setPage(1);
-        }}
-        items={[
-          ...statusList.map((status) => ({
-            key: String(status.id),
-            label: status.name,
-          })),
-        ]}
-        className="mb-4"
-      />
+      <div className="flex flex-wrap gap-2 mb-4 bg-white p-3 rounded-lg">
+        {statusList.map((status) => (
+          <button
+            key={status.id}
+            onClick={() => {
+              setActiveStatusId(String(status.id));
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-md border border-gray-300 transition
+              ${
+                String(activeStatusId) === String(status.id)
+                  ? "bg-[#0f122f] text-white"
+                  : "bg-white text-[#141843] hover:bg-gray-100"
+              }
+            `}
+          >
+            {status.name}
+          </button>
+        ))}
+      </div>
 
       {/* Search + Filters + Sort */}
       <div className="flex flex-col mb-2 sm:flex-row sm:items-center sm:justify-between gap-4 bg-white shadow-sm p-3 rounded-t-2xl">
