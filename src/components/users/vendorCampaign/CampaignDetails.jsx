@@ -388,9 +388,9 @@ const CampaignDetails = () => {
                 {campaignDetails?.iseditable !== "Not editable" && (
                   <button
                     onClick={handleEditClick}
-                    className="bg-[#0f122f] text-white px-4 py-1.5 rounded-lg font-medium hover:bg-[#1a1d4f] transition"
+                    className="bg-[#0f122f] text-white px-6 py-2 rounded-full border border-[#0f122f] font-semibold hover:bg-[#1a1d4f] transition"
                   >
-                    Edit
+                    Edit Campaign
                   </button>
                 )}
                 <button
@@ -402,7 +402,7 @@ const CampaignDetails = () => {
                       : "border-red-400 text-red-900 hover:bg-gray-50"
                     }`}
                 >
-                  Cancel
+                  Cancel Campaign
                 </button>
               </div>
             </div>
@@ -494,7 +494,10 @@ const CampaignDetails = () => {
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Contract" key="contract">
-                  <VendorContract />
+                  <VendorContract
+                    campaignStart={campaignDetails?.requirements.campaignstartdate}
+                    campaignEnd={campaignDetails?.requirements.campaignenddate}
+                  />
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Activity" key="activity">
@@ -535,7 +538,7 @@ const CampaignDetails = () => {
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
               <p>
-                {campaignDetails?.requirements.startdate} — {campaignDetails?.requirements.enddate}
+                {campaignDetails?.requirements.campaignstartdate} — {campaignDetails?.requirements.campaignenddate}
               </p>
             </div>
 
