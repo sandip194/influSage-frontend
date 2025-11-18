@@ -25,7 +25,8 @@ import {
   RiProhibitedLine,
   RiCloseFill,
   RiFilterLine,
-  RiEraserLine
+  RiEraserLine,
+  RiEqualizerFill
 } from "react-icons/ri";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -310,7 +311,7 @@ const CampaignTableLayout = () => {
         ))}
       </div>
 
-      {/* Search + Filters + Sort */}
+     {/* Search + Filters + Sort */}
       <div className="flex flex-col mb-2 sm:flex-row sm:items-center sm:justify-between gap-4 bg-white shadow-sm p-3 rounded-t-2xl">
         <Input
           prefix={<SearchOutlined />}
@@ -322,13 +323,21 @@ const CampaignTableLayout = () => {
           onKeyDown={handleSearch}
         />
 
-        <div className="flex gap-2">
-
+        {/* SORT + FILTER — footer only on mobile */}
+        <div
+          className="
+            flex gap-2
+            w-full
+            sm:w-auto sm:static sm:gap-2
+            fixed bottom-0 left-0 bg-white p-3 shadow-md justify-center z-30
+            sm:shadow-none sm:bg-transparent sm:p-0
+          "
+        >
           <Select
             size="large"
             value={`${filters.sortBy}_${filters.sortOrder}`}
             onChange={handleSortChange}
-            className="flex-1 sm:w-48"
+            className="w-full sm:w-48"
             placeholder="Sort By"
             suffixIcon={<RiArrowDownSLine size={16} />}
           >
@@ -342,8 +351,9 @@ const CampaignTableLayout = () => {
           <Button
             size="large"
             onClick={() => setShowFilters(true)}
+            className="w-full sm:w-auto font-semibold"
           >
-            Filters
+            Filters <RiEqualizerFill size={16} />
           </Button>
         </div>
       </div>

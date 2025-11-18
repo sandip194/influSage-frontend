@@ -337,20 +337,29 @@ const UserTableLayout = () => {
             {/* Search + Filter */}
             <div className="flex bg-white shadow-sm p-3 rounded-t-2xl flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
                 <Input
-                    prefix={<SearchOutlined />}
-                    size="large"
-                    placeholder="Search users..."
-                    className="w-full sm:w-72"
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    onKeyDown={handleSearch}
+                prefix={<SearchOutlined />}
+                size="large"
+                placeholder="Search users..."
+                className="w-full sm:w-72"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={handleSearch}
                 />
-                <div className="flex gap-2 w-full sm:w-auto">
-
-                    <Button type="default" size="large" onClick={() => setShowFilters(true)}>
-                        Filters
-                         <RiEqualizerFill size={16} />
-                    </Button>
+                <div
+                className="
+                    flex gap-2
+                    fixed bottom-0 left-0 w-full bg-white shadow-md p-3 justify-center z-30
+                    sm:static sm:bg-transparent sm:shadow-none sm:p-0 sm:w-auto sm:justify-end
+                "
+                >
+                <Button
+                    type="default"
+                    size="large"
+                    onClick={() => setShowFilters(true)}
+                    className="w-full sm:w-auto font-semibold"
+                >
+                    Filters <RiEqualizerFill size={16} />
+                </Button>
                 </div>
             </div>
 
@@ -358,7 +367,7 @@ const UserTableLayout = () => {
             <div className="bg-white shadow-sm rounded-b-2xl mt-0 border border-gray-100">
                 <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                     {loading ? (
-                        <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full">
+                        <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full [&_th]:px-2 [&_th]:py-2 [&_td]:px-2 [&_td]:py-2">
                             <thead className="bg-gray-100 text-gray-700 text-xs sm:text-sm uppercase tracking-wide">
                                 <tr>
                                     <th className="px-4 py-3 sm:px-4">User</th>
@@ -426,7 +435,7 @@ const UserTableLayout = () => {
                             </tbody>
                         </table>
                     ) : userList.length > 0 ? (
-                        <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full">
+                        <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full [&_th]:px-2 [&_th]:py-2 [&_td]:px-2 [&_td]:py-2">
                             <thead className="bg-gray-100 text-gray-700 text-xs sm:text-sm uppercase tracking-wide">
                                 <tr>
                                     <th className="px-4 py-3 sm:px-4 min-w-[200px]">User</th>
