@@ -240,7 +240,7 @@ const Campaign = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-semibold text-lg">Browse Influencers</h2>
           <button
-            onClick={() => navigate("/vendor-dashboard/vendor-browse-influencers")}
+            onClick={() => navigate("/vendor-dashboard/browse-influencers")}
             className="text-[#0D132D] text-sm sm:text-base font-medium hover:underline"
           >
             View All
