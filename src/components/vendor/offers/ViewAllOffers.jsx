@@ -19,8 +19,6 @@ const statusLabels = {
   "Withdrawn": { text: "Withdrawn", style: "bg-yellow-50 border border-yellow-200 text-yellow-700" },
 };
 
-
-
 const ViewAllOffers = ({ campaignData }) => {
 
   const [loading, setLoading] = useState(false)
@@ -37,45 +35,8 @@ const ViewAllOffers = ({ campaignData }) => {
   const [selectedOfferId, setSelectedOfferId] = useState(null);
 
 
-
-
-
   const { token } = useSelector((state) => state.auth);
-  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  // const { id } = useParams();
 
-
-  // const handleViewOffer = async (offer) => {
-  //   // console.log(offer.status)
-  //   if (offer.status === "Applied" && offer.status !== "Viewed") {
-  //     try {
-  //       await axios.post(
-  //         `/vendor/application-status`,
-  //         {
-  //           p_applicationid: Number(offer.applicationid),
-  //           p_statusname: "Viewed"
-  //         },
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       setApplications((prev) =>
-  //         prev.map((o) =>
-  //           o.applicationid === offer.applicationid
-  //             ? { ...o, status: "true" }
-  //             : o
-  //         )
-  //       );
-  //     } catch (error) {
-  //       console.error("Failed to mark as viewed", error);
-  //     }
-  //   }
-
-  //   navigate(`/vendor-dashboard/applications/${offer.applicationid}`);
-  // };
 
   const handleViewOffer = async (offer) => {
     if (offer.status === "Applied" && offer.status !== "Viewed") {
@@ -107,11 +68,6 @@ const ViewAllOffers = ({ campaignData }) => {
     setSelectedOfferId(offer.applicationid);
     setShowOfferModal(true);
   };
-
-
-  // const handleViewProfile = (offer) => {
-  //   navigate(`/vendor-dashboard/applications/influencer-details/${offer.id}`);
-  // };
 
   const handleViewProfile = (offer) => {
     setSelectedInfluencerId(offer.id);
@@ -178,22 +134,10 @@ const ViewAllOffers = ({ campaignData }) => {
 
   return (
     <div className="text-sm ">
-      {/* <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-gray-600 mb-2"
-      >
-        <RiArrowLeftLine /> Back
-      </button> */}
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start gap-4 sm:items-center justify-between mb-4">
         <h2 className="text-xl font-bold">All Applications</h2>
-        {/* <button
-          onClick={() => navigate(`/vendor-dashboard/applications/campaignDetails/${id}`)}
-          className="px-4 py-2 bg-[#0D132D] text-white rounded-lg"
-        >
-          View Campaign Details
-        </button> */}
 
       </div>
 
@@ -279,11 +223,9 @@ const ViewAllOffers = ({ campaignData }) => {
                   <tr
                     key={offer.applicationid}
                     className="border-t border-gray-200 hover:bg-gray-100 transition cursor-pointer"
-                    onClick={() => {
-                      setSelectedOfferId(offer.applicationid);
-                      setShowOfferModal(true);
-                    }}
+                    onClick={() => handleViewOffer(offer)}
                   >
+
                     <td className="p-4 flex gap-3 items-center">
                       <img
                         src={offer.photopath}
@@ -326,16 +268,16 @@ const ViewAllOffers = ({ campaignData }) => {
                     </td>
 
 
-                     <td className="p-4">
-                        <Dropdown overlay={getActionMenu(offer)} trigger={["click"]}>
-                          <button
-                            className="p-2 rounded-full hover:bg-gray-100"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <RiMore2Fill className="text-gray-600" />
-                          </button>
-                        </Dropdown>
-                      </td>
+                    <td className="p-4">
+                      <Dropdown overlay={getActionMenu(offer)} trigger={["click"]}>
+                        <button
+                          className="p-2 rounded-full hover:bg-gray-100"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <RiMore2Fill className="text-gray-600" />
+                        </button>
+                      </Dropdown>
+                    </td>
                   </tr>
                 ))
               )
@@ -361,22 +303,6 @@ const ViewAllOffers = ({ campaignData }) => {
         />
       </div>
 
-      {/* Accept Offer Modal */}
-      {/* <AcceptOfferModal
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        onConfirm={handleConfirmAccept}
-        offer={selectedOffer}
-      /> */}
-
-      {/* Reject Offer Modal */}
-      {/* <RejectOfferModal
-        open={isRejectModalOpen}
-        onCancel={() => setIsRejectModalOpen(false)}
-        onConfirm={handleConfirmReject}
-        offer={selectedOffer}
-      /> */}
-
 
       <InfluencerDetailsModal
         visible={showInfluencerModal}
@@ -395,8 +321,6 @@ const ViewAllOffers = ({ campaignData }) => {
           setSelectedOfferId(null);
         }}
       />
-
-
 
     </div>
   );

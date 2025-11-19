@@ -10,7 +10,7 @@ import axios from 'axios';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
-import {Skeleton } from 'antd';
+import { Skeleton } from 'antd';
 
 const DescriptionLayout = () => {
   const [campaignDetails, setCampaignDetails] = useState(null);
@@ -54,7 +54,7 @@ const DescriptionLayout = () => {
 
   const requirements = useMemo(() => {
     if (!campaignDetails) return [];
-    return [  
+    return [
       {
         label: "Objective: ",
         value: campaignDetails.requirements?.objectivename,
@@ -82,102 +82,102 @@ const DescriptionLayout = () => {
     ];
   }, [campaignDetails]);
 
- if (loading) {
-  return (
-    <div className="w-full text-sm overflow-x-hidden space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <Skeleton.Button active size="small" shape="circle" />
-        <Skeleton.Input active size="small" style={{ width: 100 }} />
-      </div>
-
-      <Skeleton.Input active size="default" style={{ width: 200 }} />
-
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left Side */}
-        <div className="flex-1 space-y-6">
-          {/* Banner Card */}
-          <div className="bg-white w-full rounded-2xl overflow-hidden">
-            <div className="p-6 space-y-4">
-              <Skeleton.Avatar active size={64} shape="circle" />
-              <Skeleton.Input active style={{ width: 200 }} size="small" />
-              <Skeleton.Input active style={{ width: 150 }} size="small" />
-              <div className="flex gap-4">
-                <Skeleton.Button active />
-                <Skeleton.Button active />
-              </div>
-              <div className="flex gap-6 flex-wrap mt-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="min-w-[120px] text-center">
-                    <Skeleton.Input active size="small" style={{ width: 100 }} />
-                    <Skeleton.Input active size="small" style={{ width: 80 }} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Description & Requirements */}
-          <div className="bg-white p-6 rounded-2xl space-y-6">
-            <Skeleton.Input active size="default" style={{ width: 200 }} />
-            <Skeleton paragraph={{ rows: 3 }} active />
-
-            <Skeleton.Input active size="default" style={{ width: 180 }} />
-            <ul className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <Skeleton.Avatar size="small" shape="circle" active />
-                  <Skeleton.Input active size="small" style={{ width: 200 }} />
-                </li>
-              ))}
-            </ul>
-
-            <div>
-              <Skeleton.Input active size="default" style={{ width: 150 }} />
-              <div className="flex gap-2 flex-wrap mt-2">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton.Button key={i} active shape="round" size="small" />
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <Skeleton.Input active size="default" style={{ width: 220 }} />
-              <div className="flex gap-4 mt-4 flex-wrap">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton.Image key={i} active style={{ width: 96, height: 96 }} />
-                ))}
-              </div>
-            </div>
-          </div>
+  if (loading) {
+    return (
+      <div className="w-full text-sm overflow-x-hidden space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-2">
+          <Skeleton.Button active size="small" shape="circle" />
+          <Skeleton.Input active size="small" style={{ width: 100 }} />
         </div>
 
-        {/* Right Side */}
-        <aside className="w-full md:w-[300px] space-y-6 flex-shrink-0">
-          <div className="bg-white rounded-2xl p-6 space-y-4">
-            <Skeleton.Input active size="default" style={{ width: 160 }} />
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i}>
-                <Skeleton.Input active size="small" style={{ width: 100 }} />
-                <Skeleton.Input active size="small" style={{ width: 200 }} />
+        <Skeleton.Input active size="default" style={{ width: 200 }} />
+
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left Side */}
+          <div className="flex-1 space-y-6">
+            {/* Banner Card */}
+            <div className="bg-white w-full rounded-2xl overflow-hidden">
+              <div className="p-6 space-y-4">
+                <Skeleton.Avatar active size={64} shape="circle" />
+                <Skeleton.Input active style={{ width: 200 }} size="small" />
+                <Skeleton.Input active style={{ width: 150 }} size="small" />
+                <div className="flex gap-4">
+                  <Skeleton.Button active />
+                  <Skeleton.Button active />
+                </div>
+                <div className="flex gap-6 flex-wrap mt-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="min-w-[120px] text-center">
+                      <Skeleton.Input active size="small" style={{ width: 100 }} />
+                      <Skeleton.Input active size="small" style={{ width: 80 }} />
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            </div>
+
+            {/* Description & Requirements */}
+            <div className="bg-white p-6 rounded-2xl space-y-6">
+              <Skeleton.Input active size="default" style={{ width: 200 }} />
+              <Skeleton paragraph={{ rows: 3 }} active />
+
+              <Skeleton.Input active size="default" style={{ width: 180 }} />
+              <ul className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <Skeleton.Avatar size="small" shape="circle" active />
+                    <Skeleton.Input active size="small" style={{ width: 200 }} />
+                  </li>
+                ))}
+              </ul>
+
+              <div>
+                <Skeleton.Input active size="default" style={{ width: 150 }} />
+                <div className="flex gap-2 flex-wrap mt-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Skeleton.Button key={i} active shape="round" size="small" />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Skeleton.Input active size="default" style={{ width: 220 }} />
+                <div className="flex gap-4 mt-4 flex-wrap">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton.Image key={i} active style={{ width: 96, height: 96 }} />
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 space-y-4">
-            <Skeleton.Input active size="default" style={{ width: 200 }} />
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i}>
-                <Skeleton.Input active size="small" style={{ width: 180 }} />
-                <Skeleton.Input active size="small" style={{ width: 140 }} />
-              </div>
-            ))}
-          </div>
-        </aside>
+          {/* Right Side */}
+          <aside className="w-full md:w-[300px] space-y-6 flex-shrink-0">
+            <div className="bg-white rounded-2xl p-6 space-y-4">
+              <Skeleton.Input active size="default" style={{ width: 160 }} />
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i}>
+                  <Skeleton.Input active size="small" style={{ width: 100 }} />
+                  <Skeleton.Input active size="small" style={{ width: 200 }} />
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 space-y-4">
+              <Skeleton.Input active size="default" style={{ width: 200 }} />
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i}>
+                  <Skeleton.Input active size="small" style={{ width: 180 }} />
+                  <Skeleton.Input active size="small" style={{ width: 140 }} />
+                </div>
+              ))}
+            </div>
+          </aside>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   if (error)
     return (
@@ -208,167 +208,158 @@ const DescriptionLayout = () => {
         {/* Left Side */}
         <div className="flex-1 space-y-6">
           {/* Banner */}
-          <div className="bg-white rounded-2xl overflow-hidden ">
-            <div className="relative h-40 bg-gray-300">
-              <div className="relative">
-              {/* Campaign Image */}
-              <img
-                src={campaignDetails?.photopath}
-                alt="Campaign"
-                onClick={() => setIsCampaignPreviewOpen(true)}
-                className="absolute top-10 left-6 w-24 h-24 rounded-full object-cover border-4 border-white shadow cursor-pointer"
-                loading="lazy"
-              />
+          <div className="bg-white rounded-xl p-6 border border-gray-100">
+            {/* Top Section */}
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-b border-gray-200 pb-4">
 
-              {/* Image Preview Modal */}
-              {isCampaignPreviewOpen && (
-                <div
-                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                  onClick={() => setIsCampaignPreviewOpen(false)}
-                >
-                  {/* Close Button */}
-                  <button
-                    onClick={() => setIsCampaignPreviewOpen(false)}
-                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                  >
-                    &times;
-                  </button>
+              {/* Left Section - Profile + Basic Info */}
+              <div className="flex items-start gap-4">
+                <img
+                  src={campaignDetails?.photopath}
+                  alt="Campaign"
+                  className="w-16 h-16 rounded-full object-cover cursor-pointer shadow"
+                  onClick={() => setIsCampaignPreviewOpen(true)}
+                />
 
-                  {/* Enlarged Image */}
-                  <img
-                    src={campaignDetails?.photopath}
-                    alt="Campaign Preview"
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              )}
-            </div>
-            </div>
-
-            <div className="p-6">
-              <div className="flex flex-col gap-4 sm:flex-row justify-between items-start mb-5">
                 <div>
-                  <h2 className="font-semibold text-lg">{campaignDetails?.name}</h2>
-                  <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-900 font-medium">
-                    <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-900 font-medium">
-                    <div className="text-gray-700 text-sm">
-                      <span className="font-semibold text-gray-900">Apply Between:</span>{" "}
-                        {campaignDetails?.requirements.applicationstartdate || "N/A"}{" "}
-                          <span className="font-semibold text-gray-900 mx-1">to</span>{" "}
-                        {campaignDetails?.requirements.applicationenddate || "N/A"}
-                    </div>
-                    </div>
-                    <div className='text-sm text-gray-700 '>
-                      <span className="font-semibold text-gray-900">Campaign Start:</span>{" "}
-                      {campaignDetails.requirements.campaignstartdate || "N/A"}
-                    </div>
-                    <div className='text-sm text-gray-700 '>
-                      <span className="font-semibold text-gray-900">influencer applied:</span>{" "}
-                        {campaignDetails.appliedinfluencercount ?? "N/A"}
-                    </div>
+                  <h2 className="font-semibold text-lg text-gray-900">
+                    {campaignDetails?.name || "Campaign Name"}
+                  </h2>
+                  <p className="text-gray-500 text-sm">
+                    {campaignDetails?.businessname || "Business Name"}
+                  </p>
 
-                  </div>
+                  {/* Apply Period */}
+                  <p className="text-xs mt-1">
+                    <span className="font-semibold text-indigo-600">Apply:</span>{" "}
+                    <span className="text-gray-800">{campaignDetails?.requirements?.applicationstartdate || "N/A"}</span> -{" "}
+                    <span className="text-gray-800">{campaignDetails?.requirements?.applicationenddate || "N/A"}</span>
+                  </p>
+
+                  {/* Campaign Start */}
+                  <p className="text-xs">
+                    <span className="font-semibold text-indigo-600">Start:</span>{" "}
+                    <span className="text-gray-800">{campaignDetails?.requirements?.campaignstartdate || "N/A"}</span>
+                  </p>
+
+                  {/* Applied Influencers */}
+                  <p className="text-xs">
+                    <span className="font-semibold text-indigo-600">Applied Influencers:</span>{" "}
+                    <span className="text-gray-800">{campaignDetails?.appliedinfluencercount ?? "N/A"}</span>
+                  </p>
                 </div>
-
-                <div className="flex items-center gap-3">
-                  
-                  {/* {campaignDetails?.campaignapplied ? (
-                    <Link to={`/dashboard/browse/apply-now/${campaignId}`} className="flex-1 min-w-0">
-                      <button className="w-full px-6 py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition truncate">
-                        Apply Now
-                      </button>
-                    </Link>
-                  ) : (
-                    <button className="flex-1 px-6 py-2 rounded-3xl bg-[#9d9d9d] cursor-not-allowed text-white font-semibold transition min-w-0 truncate">
-                      Apply Now
-                    </button>
-                  )} */}
-
-                  {campaignDetails.isapplied ? (
-                    <button
-                      className="px-5 py-2 text-sm bg-gray-400 text-white rounded-full font-semibold cursor-not-allowed"
-                      disabled >
-                      Applied
-                   </button>
-                  ) : campaignDetails.campaignapplied ? (
-                  <Link to={`/dashboard/browse/apply-now/${campaignDetails.id}`}
-                    onClick={(e) => e.stopPropagation()} >
-                    <button className="px-5 py-2 text-sm bg-black text-white rounded-full font-semibold hover:bg-gray-900 transition">
-                      Apply Now
-                    </button>
-                  </Link> ) : (
-                  <button
-                    className="px-5 py-2 text-sm bg-gray-400 text-white rounded-full font-semibold cursor-not-allowed"
-                    disabled >
-                    Not Apply</button>)}
-                </div> 
               </div>
 
-              <div className="flex flex-wrap md:justify-around gap-6 border border-gray-200 rounded-2xl p-5">
-                <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900 font-semibold">
-                    <RiStackLine size={20} />
-                    <span>Platform</span>
-                  </div>
-                  {campaignDetails?.providercontenttype?.length > 0 ? (
-                    campaignDetails.providercontenttype.map(
-                      ({ providername, iconpath, contenttypes }, i) => (
-                        <div
-                          key={`${providername}-${i}`}
-                          className="flex items-center gap-2 mb-2 text-sm text-gray-800"
-                        >
-                          {iconpath && (
-                            <img
-                              src={iconpath}
-                              alt="platform"
-                              className="w-5 h-5 object-contain"
-                            />
-                          )}
-                          <span className="text-xs text-gray-900">
-                            {contenttypes && contenttypes.length > 0
-                              ? contenttypes.map((c) => c.contenttypename).join(", ")
-                              : "No content types"}
-                          </span>
-                        </div>
-                      )
-                    )
-                  ) : (
-                    <p className="text-sm text-gray-500">No platform data</p>
-                  )}
-                </div>
-                <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900 font-semibold">
-                    <RiMoneyRupeeCircleLine size={20} />
-                    <span>Budget</span>
-                  </div>
-                  <p className="text-sm ">₹{campaignDetails.estimatedbudget}</p>
-                </div>
-                <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900 font-semibold">
-                    <RiTranslate size={20} />
-                    <span>Language</span>
-                  </div>
-                  {campaignDetails.campaignlanguages?.map(({ languagename }, i) => (
-                    <p key={`${languagename}-${i}`} className="text-sm">
-                      {languagename}
-                    </p>
-                  ))}
-                </div>
-                <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900 font-semibold">
-                    <RiMenLine size={20} />
-                    <span>Gender</span>
-                  </div>
-                  {campaignDetails.campaigngenders?.map(({ gendername }, i) => (
-                    <p key={`${gendername || "any"}-${i}`} className="text-sm">
-                      {gendername || "Any"}
-                    </p>
-                  ))}
-                </div>
+              {/* Right Side Buttons */}
+              <div className="flex gap-2 items-start">
+                {campaignDetails?.isapplied ? (
+                  <button className="px-4 py-1.5 bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed">
+                    Applied
+                  </button>
+                ) : campaignDetails?.campaignapplied ? (
+                  <Link to={`/dashboard/browse/apply-now/${campaignDetails?.id}`}>
+                    <button className="px-6 py-2 bg-[#0D132D] text-white rounded-full cursor-pointer font-medium hover:bg-gray-800 transition">
+                      Apply Now
+                    </button>
+                  </Link>
+                ) : (
+                  <button className="px-4 py-1.5 bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed">
+                    Not Eligible
+                  </button>
+                )}
               </div>
             </div>
+
+            {/* Bottom Grid Section */}
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-2">
+
+              {/* Budget */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-400 mb-1">
+                  <RiMoneyRupeeCircleLine className="w-5 h-5" />
+                  <span>Budget</span>
+                </div>
+                <p className="text-gray-800 font-semibold text-indigo-600">
+                  ₹{campaignDetails?.estimatedbudget}
+                </p>
+              </div>
+
+              {/* Language */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-400 mb-1">
+                  <RiTranslate className="w-5 h-5" />
+                  <span>Language</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {campaignDetails?.campaignlanguages?.map((lang) => (
+                    <span
+                      key={lang.languageid}
+                      className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md text-sm font-medium"
+                    >
+                      {lang.languagename}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Gender */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-400 mb-1">
+                  <RiMenLine className="w-5 h-5" />
+                  <span>Gender</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {campaignDetails?.campaigngenders?.map((gender) => (
+                    <span
+                      key={gender.genderid}
+                      className="bg-pink-100 text-pink-800 px-2 py-0.5 rounded-md text-sm font-medium"
+                    >
+                      {gender.gendername}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Platforms */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-400 mb-1">
+                  <RiStackLine className="w-5 h-5" />
+                  <span>Platform</span>
+                </div>
+
+                {campaignDetails?.providercontenttype?.length > 0 ? (
+                  campaignDetails.providercontenttype.map((p, i) => (
+                    <div key={i} className="flex items-center gap-2 mb-1">
+                      {p.iconpath && (
+                        <img src={p.iconpath} className="w-5 h-5 object-contain" />
+                      )}
+                      <p className="text-md text-gray-800 font-medium">
+                        {p.contenttypes?.map((c) => c.contenttypename).join(", ")}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500">No Platform Data</p>
+                )}
+              </div>
+            </div>
+
+            {/* Image Modal */}
+            {isCampaignPreviewOpen && (
+              <div
+                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                onClick={() => setIsCampaignPreviewOpen(false)}
+              >
+                <img
+                  src={campaignDetails?.photopath}
+                  className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            )}
           </div>
+
+
 
           {/* Description & Requirements */}
           <div className="bg-white p-6 rounded-2xl ">
@@ -379,17 +370,17 @@ const DescriptionLayout = () => {
               </p>
 
               <h3 className="text-lg font-semibold mb-3">Categories</h3>
-                <div className="flex flex-wrap gap-2">
-                   {campaignDetails.campaigncategories?.map(({ categoryname, categoryid }) => (
-                    <span
-                      key={categoryid || categoryname}
-                      className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
-                    >
-                       {categoryname}
-                    </span>
-                  ))}
-                </div>
-      
+              <div className="flex flex-wrap gap-2">
+                {campaignDetails.campaigncategories?.map(({ categoryname, categoryid }) => (
+                  <span
+                    key={categoryid || categoryname}
+                    className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
+                  >
+                    {categoryname}
+                  </span>
+                ))}
+              </div>
+
             </div>
 
             <div className="pt-6 border-b border-gray-200">
@@ -399,7 +390,7 @@ const DescriptionLayout = () => {
                   <li key={index} className="flex items-start gap-3">
                     <RiCheckLine size={16} className="text-gray-900 flex-shrink-0 border rounded" />
                     <span>
-                     <strong>{label}</strong>  {value}
+                      <strong>{label}</strong>  {value}
                     </span>
                   </li>
                 ))}
