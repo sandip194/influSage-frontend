@@ -15,9 +15,10 @@ const VenderDashboardPage = () => {
             <div className="mian-box">
                 <ProfileComplationVendor />
                 <CampaignCards />
+                <Campaign />
                 <EarningsSummarySectionVendor />
                 <ActiveCampaign />
-                <Campaign />
+
             </div>
         </div>
     )

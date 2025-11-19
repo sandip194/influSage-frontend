@@ -20,9 +20,10 @@ import { RiArrowLeftSLine, RiArrowRightSLine } from "@remixicon/react";
 
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import InfluencerCard from "../../../components/users/browseInfluencers/InfluencerCard";
+// import InfluencerCard from "../../../components/users/browseInfluencers/InfluencerCard";
 import { toast } from "react-toastify";
 import InviteModal from "../../../components/users/browseInfluencers/InviteModal";
+import InfluencerCardNew from "./InfluencerCardNew";
 
 
 const Campaign = () => {
@@ -55,7 +56,7 @@ const Campaign = () => {
       const allCampaigns = res?.data?.data?.records || [];
 
       // Show only 6 items on dashboard
-      setCampaigns(allCampaigns.slice(0, 6));
+      setCampaigns(allCampaigns);
 
     } catch (error) {
       console.error("Error fetching campaigns:", error);
@@ -86,7 +87,7 @@ const Campaign = () => {
       const allInfluencers = res?.data?.data?.records || [];
 
       // Only show first 6 influencers on dashboard
-      setInfluencers(allInfluencers.slice(0, 6));
+      setInfluencers(allInfluencers);
 
     } catch (error) {
       console.error("Error fetching influencers:", error);
@@ -169,64 +170,73 @@ const Campaign = () => {
           className="mySwiper pb-5"
         >
           {campaigns.map((item) => (
-            <SwiperSlide key={item.id} className="!w-auto">
-              <div className="min-w-[260px] max-w-[260px] p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
-
-                {/* ======= Status + Menu ======= */}
-                <div className="flex justify-between items-center mb-3">
+            <SwiperSlide key={item.id} className="!w-auto pb-4">
+              <div
+                className="min-w-[260px] max-w-[260px] bg-[#e6eff9]
+    border border-gray-200 rounded-2xl shadow-xl/30 hover:shadow-lg transition-all duration-300 p-3 flex flex-col justify-between"
+              >
+                {/* ======= Top Section (Status + Menu) ======= */}
+                <div className="flex justify-end items-center">
                   <span
-                    className={`text-xs font-medium px-3 py-1 rounded-full ${item.status === "Completed"
-                      ? "bg-green-100 text-green-700"
-                      : item.status === "Pending"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : item.status === "Rejected"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-gray-100 text-gray-700"
+                    className={`text-[11px] font-semibold px-3 py-1 rounded-full shadow-sm
+        ${item.status === "Completed"
+                        ? "bg-green-200 text-green-800"
+                        : item.status === "Pending"
+                          ? "bg-yellow-200 text-yellow-800"
+                          : item.status === "Rejected"
+                            ? "bg-red-200 text-red-800"
+                            : "bg-gray-200 text-gray-700"
                       }`}
                   >
                     {item.status}
                   </span>
-                  <RiMoreFill className="text-gray-500 cursor-pointer" />
+
                 </div>
 
-                {/* ======= Image + Title Row ======= */}
-                <div className="flex items-center gap-3">
+                {/* ======= Middle Section (Image + Details) ======= */}
+                <div className="mt-2 flex items-center gap-3">
                   <img
                     src={item.photopath}
                     alt={item.name}
-                    className="w-12 h-12 rounded-full object-cover"
+                    className="w-14 h-14 rounded-full object-cover border border-gray-300 shadow-sm"
                   />
 
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-800 text-sm leading-tight truncate">
+                    <h3 className="text-[16px] font-bold text-gray-900 leading-tight truncate">
                       {item.name}
                     </h3>
 
-                    <p className="text-gray-500 text-xs mt-0.5">
+                    <p className="text-[11px] text-gray-500">
                       Created: {new Date(item.createddate).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
 
-                {/* ======= Budget ======= */}
-                <div className="mt-3">
-                  <p className="text-gray-600 text-xs">
-                    <span className="font-medium">Budget:</span> ₹{item.estimatedbudget?.toLocaleString()}
-                  </p>
+                {/* ======= Budget Highlight ======= */}
+                <div className="mt-4">
+                  <span
+                    className="inline-block bg-blue-50 text-[#0f1330] font-semibold 
+        px-3 py-1 rounded-full text-xs shadow-sm"
+                  >
+                    Budget: ₹{item.estimatedbudget?.toLocaleString()}
+                  </span>
                 </div>
 
-                {/* ======= Campaign Start ======= */}
-                <p className="text-gray-500 text-xs mt-1">
-                  Campaign start : {item.campaignstartdate}
-                </p>
-
-                {/* ======= Campaign Start ======= */}
-                <p className="text-gray-500 text-xs mt-1">
-                  Campaign End : {item.campaignenddate}
-                </p>
-
+                {/* ======= Dates Section ======= */}
+                <div className="mt-4 p-3 bg-white/40 rounded-xl border border-gray-300 text-xs text-gray-700">
+                  <p>
+                    <span className="font-semibold text-gray-800">Campaign Start:</span>{" "}
+                    {item.campaignstartdate}
+                  </p>
+                  <p className="mt-2">
+                    <span className="font-semibold text-gray-800">Campaign End:</span>{" "}
+                    {item.campaignenddate}
+                  </p>
+                </div>
               </div>
             </SwiperSlide>
+
+
 
           ))}
         </Swiper>
@@ -271,7 +281,7 @@ const Campaign = () => {
           ) : (
             influencers.map((inf) => (
               <SwiperSlide key={inf.id} className="pb-4">
-                <InfluencerCard
+                <InfluencerCardNew
                   influencer={inf}
                   onLike={handleLike}
                   onInvite={handleInvite}

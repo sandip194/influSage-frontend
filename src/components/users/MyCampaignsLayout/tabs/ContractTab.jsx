@@ -6,16 +6,7 @@ import {
   RiEdit2Line,
 } from "react-icons/ri";
 
-// 🔹 Static contract data (can later come from API)
-const staticContract = {
-  amount: "₹25,000",
-  deadline: "28 Feb 2026",
-  deliverables: "2 Reels + 3 Stories",
-  platform: "Instagram",
-  notes:
-    "All content must feature the product prominently. The first reel should be posted by Feb 15th, and the second reel by Feb 25th. Stories should be spread out between Feb 20th and Feb 28th. Please submit all content for approval at least 72 hours before the planned posting date. Use hashtags #AwesomeBrand and #Campaign2026 in all posts.",
-};
-
+// Shown when no contract exists
 const NoContractOffered = () => (
   <div className="flex flex-col items-center justify-center text-center py-16 px-6">
     <div className="bg-gray-100 p-6 rounded-full mb-4">
@@ -31,110 +22,182 @@ const NoContractOffered = () => (
   </div>
 );
 
-const ContractTab = ({ campaign }) => {
-  const [contractStatus, setContractStatus] = useState(
-    campaign?.contract?.status || "offered"
-  );
+const ContractTab = () => {
 
-  /**
-   * Possible statuses:
-   * - "no_contract"
-   * - "offered"
-   * - "accepted"
-   * - "rejected"
-   * - "updated"
-   */
+  const [contract, setContract] = useState(
+      {
+        id: "CONT-001",
+        influencerId: 2,
+        influencer: "Aditi Sharma",
+        contractStart: "01 Feb 2025",
+        contractEnd: "28 Feb 2025",
+        campaignStart: "05 Feb 2025",
+        campaignEnd: "25 Feb 2025",
+        deliverables: "Reel (Instagram), Story (Instagram)",
+        payment: "₹25,000",
+        notes: "Use #Brand hashtags",
+        status: "offered",
+      },
+    );
+
+
+  const [contractStatus, setContractStatus] = useState(
+    contract?.status || "offered"
+  );
 
   const handleAccept = () => setContractStatus("accepted");
   const handleReject = () => setContractStatus("rejected");
 
   if (contractStatus === "no_contract") return <NoContractOffered />;
 
-  // 🔹 Shared contract layout for offered, accepted, and rejected
+  // MODERN CONTRACT CARD UI
   const renderContractCard = () => (
-    <div className="flex flex-col items-center ">
-      <div className="bg-white w-full">
-        <h2 className="text-xl font-semibold text-gray-900 mb-1">
-          Contract Details
-        </h2>
-        <p className="text-gray-500 mb-6">
-          Review the terms of your agreement below.
-        </p>
+    <div className="flex flex-col items-center">
+      <div
+        className="w-full bg-white/70 backdrop-blur-xl 
+        border border-gray-200 rounded-2xl shadow-lg p-8 
+        transition-all duration-300"
+      >
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <RiFileList3Line className="text-[#0f122f]" />
+            Contract #{contract?.id}
+          </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 mb-6">
-          <div>
-            <p className="text-gray-500 text-sm mb-1">Amount</p>
-            <p className="text-gray-900 font-semibold text-lg">
-              {staticContract.amount}
-            </p>
+          {contractStatus !== "offered" && (
+            <span
+              className={`px-4 py-1.5 rounded-full text-sm font-semibold
+                ${
+                  contractStatus === "accepted"
+                    ? "bg-green-100 text-green-700"
+                    : contractStatus === "rejected"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-blue-100 text-blue-700"
+                }`}
+            >
+              {contractStatus.charAt(0).toUpperCase() + contractStatus.slice(1)}
+            </span>
+          )}
+        </div>
+
+        {/* MAIN GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          {/* COLUMN 1 */}
+          <div className="space-y-4">
+            {contract?.vendorName && (
+              <div>
+                <p className="text-gray-500 text-sm">Vendor / Business</p>
+                <p className="text-gray-900 font-semibold">
+                  {contract.vendorName}
+                </p>
+              </div>
+            )}
+
+            {contract?.campaignName && (
+              <div>
+                <p className="text-gray-500 text-sm">Campaign</p>
+                <p className="text-gray-900 font-semibold">
+                  {contract.campaignName}
+                </p>
+              </div>
+            )}
+
+            <div>
+              <p className="text-gray-500 text-sm">Contract Duration</p>
+              <p className="text-gray-900 font-semibold">
+                {contract.contractStart} → {contract.contractEnd}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-gray-500 text-sm">Campaign Window</p>
+              <p className="text-gray-900 font-semibold">
+                {contract.campaignStart} → {contract.campaignEnd}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-gray-500 text-sm mb-1">Deadlines</p>
-            <p className="text-gray-900 font-semibold text-lg">
-              {staticContract.deadline}
-            </p>
-          </div>
-          <div>
-            <p className="text-gray-500 text-sm mb-1">Deliverables</p>
-            <p className="text-gray-900 font-semibold text-lg">
-              {staticContract.deliverables}
-            </p>
-          </div>
-          <div>
-            <p className="text-gray-500 text-sm mb-1">Platform</p>
-            <p className="text-gray-900 font-semibold text-lg">
-              {staticContract.platform}
-            </p>
+
+          {/* COLUMN 2 */}
+          <div className="space-y-4">
+            {/* PAYMENT */}
+            <div>
+              <p className="text-gray-500 text-sm">Payment</p>
+              <p className="text-gray-900 font-bold text-xl">
+                {contract.payment}
+              </p>
+            </div>
+
+            {/* DELIVERABLES */}
+            <div>
+              <p className="text-gray-500 text-sm">Deliverables</p>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {contract.deliverables
+                  ?.split("+")
+                  .map((item, i) => (
+                    <span
+                      key={i}
+                      className="px-3 py-1 bg-blue-50 border border-blue-200 
+                      rounded-lg text-blue-700 text-xs font-medium"
+                    >
+                      {item.trim()}
+                    </span>
+                  ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mb-8">
-          <p className="text-gray-500 text-sm mb-1">Notes</p>
-          <p className="text-gray-800 leading-relaxed text-sm">
-            {staticContract.notes}
-          </p>
-        </div>
-
-        {/* 🔹 Footer area: buttons or status chip */}
-        {contractStatus === "offered" && (
-          <div className="flex justify-end gap-4 border-t border-gray-100 pt-6">
-            <button
-              onClick={handleReject}
-              className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
-            >
-              Reject
-            </button>
-            <button
-              onClick={handleAccept}
-              className="px-6 py-2 rounded-lg bg-[#0f122f] text-white hover:bg-[#23265a] transition"
-            >
-              Accept Contract
-            </button>
-          </div>
-        )}
-
-        {contractStatus === "accepted" && (
-          <div className="flex justify-end border-t pt-6">
-            <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-lg font-medium">
-              <RiCheckLine className="text-lg" />
-              Contract Accepted
+        {/* NOTES */}
+        {contract.notes && (
+          <div className="mb-8">
+            <p className="text-gray-500 text-sm">Notes</p>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-1 text-sm text-gray-700 leading-relaxed">
+              {contract.notes}
             </div>
           </div>
         )}
 
-        {contractStatus === "rejected" && (
-          <div className="flex justify-end border-t pt-6">
-            <div className="flex items-center gap-2 bg-red-50 text-red-700 px-4 py-2 rounded-lg font-medium">
-              <RiCloseLine className="text-lg" />
-              Contract Rejected
+        {/* ACTION FOOTER */}
+        <div className="border-t border-gray-200 pt-6 flex justify-end gap-4">
+          {contractStatus === "offered" && (
+            <>
+              <button
+                onClick={handleReject}
+                className="px-6 py-2 rounded-lg border border-gray-300 
+                text-gray-700 hover:bg-gray-100 transition font-medium"
+              >
+                Reject
+              </button>
+              <button
+                onClick={handleAccept}
+                className="px-6 py-2 rounded-lg bg-[#0f122f] text-white 
+                hover:bg-[#23265a] transition font-medium"
+              >
+                Accept Contract
+              </button>
+            </>
+          )}
+
+          {contractStatus === "accepted" && (
+            <div className="flex items-center gap-2 bg-green-100 text-green-700 px-5 py-2 rounded-md">
+              <RiCheckLine className="text-xl" />
+              Accepted
             </div>
-          </div>
-        )}
+          )}
+
+          {contractStatus === "rejected" && (
+            <div className="flex items-center gap-2 bg-red-100 text-red-700 px-5 py-2 rounded-md">
+              <RiCloseLine className="text-xl" />
+              Rejected
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 
-  // Render for updated state
+  // UPDATED STATE UI
   if (contractStatus === "updated") {
     return (
       <div className="text-center py-16 px-6">
@@ -153,7 +216,7 @@ const ContractTab = ({ campaign }) => {
     );
   }
 
-  // Otherwise render normal contract card (offered / accepted / rejected)
+  // Default view (offered / accepted / rejected)
   return renderContractCard();
 };
 

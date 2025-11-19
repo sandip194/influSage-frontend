@@ -8,6 +8,51 @@ const { Title, Text } = Typography;
 const VendorContract = ({ campaignStart, campaignEnd }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [editingContract, setEditingContract] = useState(null);
+
+  const [contracts, setContracts] = useState([
+    {
+      id: "CONT-001",
+      influencerId: 2,
+      influencer: "Aditi Sharma",
+      contractStart: "01 Feb 2025",
+      contractEnd: "28 Feb 2025",
+      campaignStart: "05 Feb 2025",
+      campaignEnd: "25 Feb 2025",
+      deliverables: "Reel (Instagram), Story (Instagram)",
+      payment: "₹25,000",
+      notes: "Use #Brand hashtags",
+      status: "Approved",
+    },
+    {
+      id: "CONT-002",
+      influencerId: 1,
+      influencer: "John Carter",
+      contractStart: "10 Mar 2025",
+      contractEnd: "20 Mar 2025",
+      campaignStart: "12 Mar 2025",
+      campaignEnd: "18 Mar 2025",
+      deliverables: "Post (Instagram) + Short (YouTube)",
+      payment: "₹18,000",
+      notes: "Shoot outdoors only",
+      status: "Pending",
+    },
+    {
+      id: "CONT-003",
+      influencerId: 5,
+      influencer: "Maya Patel",
+      contractStart: "01 Apr 2025",
+      contractEnd: "15 Apr 2025",
+      campaignStart: "03 Apr 2025",
+      campaignEnd: "12 Apr 2025",
+      deliverables: "Reel (Instagram)",
+      payment: "₹12,000",
+      notes: "",
+      status: "Rejected",
+    },
+  ]);
+
+
   // Static influencer data
   const influencerList = [
     { id: 1, name: "John Carter", platform: "Instagram", followers: "45k" },
@@ -17,23 +62,25 @@ const VendorContract = ({ campaignStart, campaignEnd }) => {
     { id: 5, name: "Maya Patel", platform: "Instagram", followers: "75k" },
   ];
 
+  // Convert deliverables array to readable string
+  const formatDeliverables = (deliverables) => {
+    return deliverables
+      .map((p) =>
+        p.contentTypes
+          .map((ct) => `${ct.contenttypename} (${p.providername})`)
+          .join(", ")
+      )
+      .join(" + ");
+  };
 
+  // OPEN MODAL TO EDIT
+  const handleEdit = (contract) => {
+    setEditingContract(contract);
+    setIsModalOpen(true);
+  };
 
-  const existingContracts = [
-    {
-      id: "CONT-001",
-      influencer: "Aditi Sharma",
-      status: "Approved",
-      startDate: "01 Dec 2025",
-      endDate: "15 Dec 2025",
-      deliverables: "2 Reels + 1 Story",
-      payment: "₹15,000",
-      notes: "Include #BrandName hashtag",
-    },
-  ];
-
+  // CREATE OR UPDATE CONTRACT
   const handleSubmit = (values) => {
-    // Custom date validation
     if (values.campaignEnd.isBefore(values.campaignStart)) {
       Modal.error({
         title: "Invalid Dates",
@@ -42,94 +89,163 @@ const VendorContract = ({ campaignStart, campaignEnd }) => {
       return;
     }
 
-    const selectedInfluencers = influencerList.filter((inf) =>
-      values.influencers.includes(inf.id)
+    const influencer = influencerList.find(
+      (inf) => inf.id === values.influencer
     );
 
-    console.log({
-      influencers: selectedInfluencers.map((i) => i.name),
-      deliverables: values.deliverables,
-      campaignStart: values.campaignStart?.format("DD MMM YYYY"),
-      campaignEnd: values.campaignEnd?.format("DD MMM YYYY"),
-      payment: values.payment,
-      productLink: values.productLink,
+    const formattedContract = {
+      id: editingContract ? editingContract.id : `CONT-${contracts.length + 1}`,
+      influencerId: values.influencer,
+      influencer: influencer?.name,
+      contractStart: values.contractStart.format("DD MMM YYYY"),
+      contractEnd: values.contractEnd.format("DD MMM YYYY"),
+      campaignStart: values.campaignStart.format("DD MMM YYYY"),
+      campaignEnd: values.campaignEnd.format("DD MMM YYYY"),
+      deliverables: formatDeliverables(values.deliverables),
+      payment: `₹${values.payment.toLocaleString()}`,
       notes: values.notes,
-    });
+      status: editingContract ? editingContract.status : "Pending",
+    };
 
-    Modal.success({
-      title: "Contract Created",
-      content: "Your contract has been created successfully.",
-    });
+    if (editingContract) {
+      // Update
+      setContracts((prev) =>
+        prev.map((c) => (c.id === editingContract.id ? formattedContract : c))
+      );
 
+      Modal.success({
+        title: "Contract Updated",
+        content: "The contract has been successfully updated.",
+      });
+    } else {
+      // Create
+      setContracts((prev) => [...prev, formattedContract]);
+
+      Modal.success({
+        title: "Contract Created",
+        content: "Your contract has been created successfully.",
+      });
+    }
+
+    setEditingContract(null);
     setIsModalOpen(false);
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6">
+    <div className="bg-white rounded-2xl p-0">
       <div className="flex justify-between items-center mb-4">
         <Title level={4}>Contracts</Title>
         <Button
           icon={<RiAddLine size={20} />}
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setEditingContract(null);
+            setIsModalOpen(true);
+          }}
           style={{ display: "flex", alignItems: "center", gap: 8 }}
         >
           Create Contract
         </Button>
       </div>
 
-      {/* Existing Contracts */}
-      <div className="space-y-3 mb-6">
-        {existingContracts.map((contract) => (
+      {/* MODERN CONTRACT LIST */}
+      <div className="space-y-4 mb-4">
+        {contracts.map((contract) => (
           <div
             key={contract.id}
-            className="border border-gray-200 rounded-lg p-4 flex justify-between items-center hover:shadow-sm transition"
+            className="relative bg-white/70 backdrop-blur-xl border border-gray-200 
+      rounded-xl p-5 shadow-md hover:shadow-xl 
+      transition-all duration-300 cursor-pointer group"
           >
-            <div>
-              <Text strong>{contract.influencer}</Text>
-              <div>
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                  Start: {contract.startDate}
-                </Text>
+            {/* STATUS RIBBON */}
+            <span
+              className={`absolute top-0 right-0 px-3 py-1 text-xs font-semibold rounded-bl-xl 
+        ${contract.status === "Approved"
+                  ? "bg-green-500 text-white"
+                  : contract.status === "Rejected"
+                    ? "bg-red-500 text-white"
+                    : "bg-yellow-500 text-white"
+                }`}
+            >
+              {contract.status}
+            </span>
+
+            <div className="flex justify-between items-start gap-6">
+
+              {/* LEFT SIDE → Details */}
+              <div className="flex flex-col gap-2 w-full">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <span className="text-blue-600">●</span>
+                  {contract.influencer}
+                </h3>
+
+                <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
+
+                  <div>
+                    <p className="font-medium text-gray-800">Contract Duration</p>
+                    <p>{contract.contractStart} → {contract.contractEnd}</p>
+                  </div>
+
+                  <div>
+                    <p className="font-medium text-gray-800">Campaign Dates</p>
+                    <p>{contract.campaignStart} → {contract.campaignEnd}</p>
+                  </div>
+
+                  <div className="col-span-2">
+                    <p className="font-medium text-gray-800">Deliverables</p>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {contract.deliverables.split(",").map((item, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs 
+                    border border-blue-100"
+                        >
+                          {item.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {contract.notes && (
+                    <div className="col-span-2 mt-1">
+                      <p className="italic text-gray-500 text-xs">"{contract.notes}"</p>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                  End: {contract.endDate}
-                </Text>
-              </div>
-              <div>
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                  Deliverables: {contract.deliverables}
-                </Text>
-              </div>
-              {contract.notes && (
-                <Text type="secondary" italic style={{ fontSize: 12 }}>
-                  Notes: {contract.notes}
-                </Text>
-              )}
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <Text style={{ fontSize: 14 }}>{contract.payment}</Text>
-              <div>
-                <Text
-                  strong
-                  type={contract.status === "Approved" ? "success" : "warning"}
-                  style={{ fontSize: 12 }}
+
+              {/* RIGHT SIDE → Payment + Buttons */}
+              <div className="flex flex-col items-end gap-3 min-w-[120px]">
+                <p className="text-lg font-semibold text-gray-900 mt-3">
+                  {contract.payment}
+                </p>
+
+                <button
+                  onClick={() => handleEdit(contract)}
+                  className="px-4 py-1.5 text-xs font-medium bg-blue-600 text-white 
+            rounded-lg opacity-0 group-hover:opacity-100 transition-all
+            hover:bg-blue-700 shadow-sm"
                 >
-                  {contract.status}
-                </Text>
+                  Edit Contract
+                </button>
               </div>
+
             </div>
           </div>
         ))}
       </div>
 
-      {/* Contract Modal */}
+
+      {/* CONTRACT MODAL */}
       <ContractModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setEditingContract(null);
+          setIsModalOpen(false);
+        }}
         influencerList={influencerList}
         existingCampaignStart={campaignStart}
-        existingCampaignEnd ={campaignEnd}
+        existingCampaignEnd={campaignEnd}
+        editData={editingContract}
         onSubmit={handleSubmit}
       />
     </div>

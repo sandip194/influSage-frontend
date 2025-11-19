@@ -12,12 +12,14 @@ import {
     Col,
     Spin,
     Alert,
+    Collapse,
 } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
 const { TextArea } = Input;
+const { Panel } = Collapse;
 
 export default function ContractModal({
     isOpen,
@@ -158,6 +160,7 @@ export default function ContractModal({
 
     // Updated: Handle form submission with API integration
     const handleFinish = async (values) => {
+        isFormValid()
         setSubmitLoading(true);
         setSubmitError(null);
         values.deliverables = selectedPlatforms;
@@ -173,149 +176,227 @@ export default function ContractModal({
 
     return (
         <Modal
-            title="Create New Contract"
+            title={null}  // Remove default title to match custom header
             open={isOpen}
             onCancel={handleModalClose}
             footer={null}
             destroyOnClose
-            width={850}
-            bodyStyle={{ padding: "24px" }}
+            width={900}
+            bodyStyle={{ padding: 0 }}  // Remove padding for custom layout
             maskClosable={false}
+            className="bg-surface-light dark:bg-surface-dark rounded-lg shadow-2xl"  // Apply Tailwind classes
         >
-            {submitError && <Alert message={submitError} type="error" showIcon style={{ marginBottom: 16 }} />}
-            <Form
-                form={form}
-                layout="vertical"
-                onFinish={handleFinish}
-                validateTrigger="onSubmit"  // Errors only on submit
-            >
-                <Row gutter={16}>
-                    {/* Influencers (now API-fetched) */}
-                    <Col xs={24} md={12}>
-                        <Form.Item
-                            label="Select Influencers"
-                            name="influencers"
-                            rules={[{ required: true, message: "Please select influencers" }]}
-                        >
-                            <Select
-                                placeholder={loadingInfluencers ? "Loading..." : "Select influencers"}
-                                size="large"
-                                showSearch
-                                allowClear
-                                optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    option.children.toLowerCase().includes(input.toLowerCase())
-                                }
-                                disabled={loadingInfluencers}
-                                notFoundContent={influencerError ? <Alert message={influencerError} type="error" /> : null}
+            {/* Custom Header */}
+            <header className="flex items-center justify-between ">
+                <h1 className="text-xl font-bold text-text-light dark:text-text-dark">Create New Contract</h1>
+
+            </header>
+
+            {/* Main Content */}
+            <main className="p-2 space-y-0 bg-background-light dark:bg-background-dark">
+                {submitError && <Alert message={submitError} type="error" showIcon style={{ marginBottom: 16 }} />}
+                <Form
+                    form={form}
+                    layout="vertical"
+                    onFinish={handleFinish}
+                    validateTrigger="onSubmit"  // Errors only on submit
+                    requiredMark={false}  // Disable Ant Design's default * to avoid duplication
+                >
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {/* Influencers */}
+                        <div className="md:col-span-1">
+                            <Form.Item
+                                label={<span className="block text-sm font-medium text-text-light mb-1">Select Influencers <span className="text-red-500">*</span></span>}
+                                name="influencers"
+                                rules={[{ required: true, message: "Please select influencers" }]}
+                                style={{ marginBottom: 2 }}
                             >
-                                {influencers.map((inf) => (
-                                    <Select.Option key={inf.id} value={inf.id}>
-                                        {inf.name} ({inf.platform})
-                                    </Select.Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                    </Col>
+                                <Select
+                                    placeholder={loadingInfluencers ? "Loading..." : "Select influencers"}
+                                    size="large"
+                                    showSearch
+                                    allowClear
+                                    optionFilterProp="children"
+                                    filterOption={(input, option) =>
+                                        option.children.toLowerCase().includes(input.toLowerCase())
+                                    }
+                                    disabled={loadingInfluencers}
+                                    notFoundContent={influencerError ? <Alert message={influencerError} type="error" /> : null}
+                                    className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark placeholder:text-subtext-light dark:placeholder:text-subtext-dark focus:ring-primary focus:border-primary"
+                                >
+                                    {influencers.map((inf) => (
+                                        <Select.Option key={inf.id} value={inf.id}>
+                                            {inf.name} ({inf.platform})
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </div>
 
-                    {/* Campaign Start */}
-                    <Col xs={24} md={6}>
-                        <Form.Item
-                            label="Campaign Start Date"
-                            name="campaignStart"
-                            rules={[{ required: true, message: "Select campaign start date" }]}
-                        >
-                            <DatePicker
-                                placeholder="Start Date"
-                                format="DD-MM-YYYY"
-                                size="large"
-                                style={{ width: "100%" }}
-                                disabledDate={(current) => current && current < dayjs().startOf("day")}
-                            />
-                        </Form.Item>
-                    </Col>
+                        {/* Contract Start */}
+                        <div className="md:col-span-1">
+                            <Form.Item
+                                label={<span className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Contract Start Date <span className="text-red-500">*</span></span>}
+                                name="contractStart"
+                                rules={[{ required: true, message: "Select contract start date" }]}
+                                style={{ marginBottom: 2 }}
+                            >
+                                <DatePicker
+                                    placeholder="Start Date"
+                                    format="DD-MM-YYYY"
+                                    size="large"
+                                    style={{ width: "100%" }}
+                                    disabledDate={(current) => current && current < dayjs().startOf("day")}
+                                    className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark placeholder:text-subtext-light dark:placeholder:text-subtext-dark focus:ring-primary focus:border-primary"
+                                />
+                            </Form.Item>
+                        </div>
 
-                    {/* Campaign End */}
-                    <Col xs={24} md={6}>
-                        <Form.Item
-                            label="Campaign End Date"
-                            name="campaignEnd"
-                            dependencies={["campaignStart"]}
-                            rules={[
-                                { required: true, message: "Select campaign end date" },
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                        const start = getFieldValue("campaignStart");
-                                        if (
-                                            !value ||
-                                            !start ||
-                                            value.isAfter(start) ||
-                                            value.isSame(start, "day")
-                                        ) {
-                                            return Promise.resolve();
-                                        }
-                                        return Promise.reject(
-                                            new Error("End date must be same or after start date")
-                                        );
-                                    },
-                                }),
-                            ]}
-                        >
-                            <DatePicker
-                                placeholder="End Date"
-                                format="DD-MM-YYYY"
-                                size="large"
-                                style={{ width: "100%" }}
-                                disabledDate={(current) => {
-                                    const start = form.getFieldValue("campaignStart");
-                                    return !start
-                                        ? current && current < dayjs().startOf("day")
-                                        : current && current < start;
-                                }}
-                            />
-                        </Form.Item>
-                    </Col>
-                </Row>
+                        {/* Contract End */}
+                        <div className="md:col-span-1">
+                            <Form.Item
+                                label={<span className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Contract End Date <span className="text-red-500">*</span></span>}
+                                name="contractEnd"
+                                dependencies={["contractStart"]}
+                                style={{ marginBottom: 2 }}
+                                rules={[
+                                    { required: true, message: "Select contract end date" },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            const start = getFieldValue("contractStart");
+                                            if (!value || !start) return Promise.resolve();
+                                            if (value.isSame(start, "day") || value.isAfter(start)) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(
+                                                new Error("End date must be same or after start date")
+                                            );
+                                        },
+                                    }),
+                                ]}
+                            >
+                                <DatePicker
+                                    placeholder="End Date"
+                                    format="DD-MM-YYYY"
+                                    size="large"
+                                    style={{ width: "100%" }}
+                                    disabledDate={(current) => {
+                                        const start = form.getFieldValue("contractStart");
+                                        return start ? current && current < start : false;
+                                    }}
+                                    className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark placeholder:text-subtext-light dark:placeholder:text-subtext-dark focus:ring-primary focus:border-primary"
+                                />
+                            </Form.Item>
+                        </div>
 
-                <Row gutter={16}>
-                    {/* Platforms & Deliverables */}
-                    <Col xs={24} md={24}>
-                        <Form.Item label="Platforms & Deliverables" required>
+                        {/* Campaign Start */}
+                        <div className="md:col-span-1">
+                            <Form.Item
+                                label={<span className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Campaign Start Date <span className="text-red-500">*</span></span>}
+                                name="campaignStart"
+                                rules={[{ required: true, message: "Select campaign start date" }]}
+                                style={{ marginBottom: 2 }}
+                            >
+                                <DatePicker
+                                    placeholder="Start Date"
+                                    format="DD-MM-YYYY"
+                                    size="large"
+                                    style={{ width: "100%" }}
+                                    disabledDate={(current) => current && current < dayjs().startOf("day")}
+                                    className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark placeholder:text-subtext-light dark:placeholder:text-subtext-dark focus:ring-primary focus:border-primary"
+                                />
+                            </Form.Item>
+                        </div>
+
+                        {/* Campaign End */}
+                        <div className="md:col-span-1">
+                            <Form.Item
+                                label={<span className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Campaign End Date <span className="text-red-500">*</span></span>}
+                                name="campaignEnd"
+                                dependencies={["campaignStart"]}
+                                style={{ marginBottom: 2 }}
+                                rules={[
+                                    { required: true, message: "Select campaign end date" },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            const start = getFieldValue("campaignStart");
+                                            if (
+                                                !value ||
+                                                !start ||
+                                                value.isAfter(start) ||
+                                                value.isSame(start, "day")
+                                            ) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(
+                                                new Error("End date must be same or after start date")
+                                            );
+                                        },
+                                    }),
+                                ]}
+                            >
+                                <DatePicker
+                                    placeholder="End Date"
+                                    format="DD-MM-YYYY"
+                                    size="large"
+                                    style={{ width: "100%" }}
+                                    disabledDate={(current) => {
+                                        const start = form.getFieldValue("campaignStart");
+                                        return !start
+                                            ? current && current < dayjs().startOf("day")
+                                            : current && current < start;
+                                    }}
+                                    className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark placeholder:text-subtext-light dark:placeholder:text-subtext-dark focus:ring-primary focus:border-primary"
+                                />
+                            </Form.Item>
+                        </div>
+
+
+
+                        {/* Payment */}
+                        <div className="md:col-span-1">
+                            <Form.Item
+                                label={<span className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Payment Amount (₹) <span className="text-red-500">*</span></span>}
+                                name="payment"
+                                rules={[{ required: true, message: "Enter payment amount" }]}
+                                style={{ marginBottom: 2 }}
+                            >
+                                <InputNumber
+                                    size="large"
+                                    style={{ width: "100%" }}
+                                    formatter={(value) =>
+                                        value ? `₹ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+                                    }
+                                    parser={(value) => value.replace(/\₹\s?|(,*)/g, "")}
+                                    min={0}
+                                    maxLength={13}
+                                    placeholder="0"
+                                    className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark placeholder:text-subtext-light dark:placeholder:text-subtext-dark focus:ring-primary focus:border-primary"
+                                />
+                            </Form.Item>
+                        </div>
+
+                        {/* Platforms & Deliverables */}
+                        <div className="md:col-span-3">
+                            <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                                Platforms &amp; Deliverables <span className="text-red-500">*</span>
+                            </label>
                             {loadingPlatforms ? (
-                                <div style={{ textAlign: "center", padding: "20px" }}>
+                                <div className="text-center p-4">
                                     <Spin tip="Loading platforms..." />
                                 </div>
                             ) : (
-                                <>
+                                <div className="border border border-gray-300  rounded-md p-4 space-y-2">
                                     {selectedPlatforms.length === 0 && (
-                                        <p style={{ color: "#999", marginBottom: 12 }}>
-                                            No platforms selected. Use dropdown below to add.
-                                        </p>
+                                        <p className="text-subtext-light dark:text-subtext-dark">No platforms selected. Use dropdown below to add.</p>
                                     )}
-
                                     {selectedPlatforms.map((platform, idx) => (
-                                        <div
-                                            key={platform.providerid}
-                                            style={{
-                                                marginBottom: 10,
-                                                border: "1px solid #ddd",
-                                                padding: 10,
-                                                borderRadius: 6,
-                                            }}
-                                        >
-                                            <div
-                                                style={{
-                                                    display: "flex",
-                                                    justifyContent: "space-between",
-                                                    alignItems: "center",
-                                                    marginBottom: 12,
-                                                }}
-                                            >
-                                                <strong style={{ fontSize: 16 }}>{platform.providername}</strong>
-                                                <Button
-                                                    type="link"
-                                                    danger
-                                                    aria-label={`Remove ${platform.providername} platform`}
+                                        <div key={platform.providerid} className="space-y-6">
+                                            <div className="flex items-start justify-between mb-2">
+                                                <h3 className="font-semibold text-text-light dark:text-text-dark">{platform.providername}</h3>
+                                                <button
+                                                    type="button"
+                                                    className="text-sm text-red-500 hover:text-red-700 font-medium"
                                                     onClick={() =>
                                                         setSelectedPlatforms(
                                                             selectedPlatforms.filter((_, i) => i !== idx)
@@ -323,10 +404,9 @@ export default function ContractModal({
                                                     }
                                                 >
                                                     Remove
-                                                </Button>
+                                                </button>
                                             </div>
-
-                                            <Row gutter={[12, 12]}>
+                                            <div className="flex items-center space-x-6 flex-wrap ps-4">
                                                 {(contentTypesByPlatform[String(platform.providerid)] || []).map(
                                                     (ct) => {
                                                         const isChecked = platform.contentTypes.some(
@@ -334,64 +414,35 @@ export default function ContractModal({
                                                         );
 
                                                         return (
-                                                            <Col
-                                                                xs={24}
-                                                                sm={12}
-                                                                md={8}
-                                                                lg={6}
-                                                                key={ct.id}
-                                                                style={{ display: "flex", alignItems: "center" }}
-                                                            >
+                                                            <label key={ct.id} className="flex items-center space-x-2 text-sm text-subtext-light dark:text-subtext-dark">
                                                                 <Checkbox
                                                                     checked={isChecked}
                                                                     onChange={(e) => {
                                                                         const updatedPlatforms = selectedPlatforms.map(
                                                                             (p, i) => {
                                                                                 if (i !== idx) return p;
+
                                                                                 const contentTypes = e.target.checked
-                                                                                    ? [...p.contentTypes, { ...ct, count: 1 }]
-                                                                                    : p.contentTypes.filter((d) => d.id !== ct.id);
+                                                                                    ? [...p.contentTypes, { ...ct }]
+                                                                                    : p.contentTypes.filter(
+                                                                                        (d) => d.id !== ct.id
+                                                                                    );
+
                                                                                 return { ...p, contentTypes };
                                                                             }
                                                                         );
                                                                         setSelectedPlatforms(updatedPlatforms);
                                                                     }}
-                                                                    style={{ flex: 1 }}
-                                                                >
-                                                                    {ct.contenttypename}
-                                                                </Checkbox>
-
-                                                                {isChecked && (
-                                                                    <InputNumber
-                                                                        min={1}
-                                                                        size="small"
-                                                                        style={{ width: 70, marginLeft: 8 }}
-                                                                        value={
-                                                                            platform.contentTypes.find((d) => d.id === ct.id)
-                                                                                ?.count
-                                                                        }
-                                                                        onChange={(value) => {
-                                                                            const updatedPlatforms = selectedPlatforms.map(
-                                                                                (p, i) => {
-                                                                                    if (i !== idx) return p;
-                                                                                    const contentTypes = p.contentTypes.map((d) =>
-                                                                                        d.id === ct.id ? { ...d, count: value } : d
-                                                                                    );
-                                                                                    return { ...p, contentTypes };
-                                                                                }
-                                                                            );
-                                                                            setSelectedPlatforms(updatedPlatforms);
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                            </Col>
+                                                                    className="rounded text-primary focus:ring-primary/50"
+                                                                />
+                                                                <span className="ps-2">{ct.contenttypename}</span>
+                                                            </label>
                                                         );
                                                     }
                                                 )}
-                                            </Row>
+                                            </div>
                                         </div>
                                     ))}
-
                                     <Select
                                         placeholder="Add Platform"
                                         value={null}
@@ -405,6 +456,7 @@ export default function ContractModal({
                                         size="large"
                                         style={{ width: "100%" }}
                                         disabled={loadingPlatforms}
+                                        className="form-select w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark placeholder:text-subtext-light dark:placeholder:text-subtext-dark focus:ring-primary focus:border-primary"
                                     >
                                         {platforms.map((p) => (
                                             <Select.Option key={p.providerid} value={p.providerid}>
@@ -412,115 +464,121 @@ export default function ContractModal({
                                             </Select.Option>
                                         ))}
                                     </Select>
-                                </>
+                                </div>
                             )}
 
-                            {/* Updated: Hidden input with stricter validation */}
+                            {/* Hidden validation */}
                             <Form.Item
                                 name="deliverables"
                                 rules={[
                                     {
                                         validator: () =>
-                                            selectedPlatforms.some(p => p.contentTypes && p.contentTypes.length > 0)
+                                            selectedPlatforms.some(p => p.contentTypes.length > 0)
                                                 ? Promise.resolve()
-                                                : Promise.reject("Select at least one platform with content"),
+                                                : Promise.reject("Select at least one platform with content type"),
                                     },
                                 ]}
                                 hidden
                             >
                                 <Input value={JSON.stringify(selectedPlatforms)} />
                             </Form.Item>
-                        </Form.Item>
-                    </Col>
-                </Row>
+                        </div>
 
-                <Row gutter={16}>
-                    {/* Product Link */}
-                    <Col xs={24} md={12}>
-                        <Form.Item
-                            label="Product Link"
-                            name="productLink"
-                            rules={[
-                                { type: "url", message: "Enter a valid URL" },
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                        if (value || getFieldValue("vendorAddress")) return Promise.resolve();
-                                        return Promise.reject(
-                                            new Error("Fill Product Link or Vendor Address")
-                                        );
-                                    },
-                                }),
-                            ]}
+                        {/* Product Link and Vendor Address in a 2-column sub-grid */}
+                        <div className="md:col-span-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Product Link */}
+                                <div>
+                                    <Form.Item
+                                        label={<span className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Product Link</span>}
+                                        name="productLink"
+                                        style={{ marginBottom: 2 }}
+                                        rules={[
+                                            { type: "url", message: "Enter a valid URL" },
+                                            ({ getFieldValue }) => ({
+                                                validator(_, value) {
+                                                    if (value || getFieldValue("vendorAddress")) return Promise.resolve();
+                                                    return Promise.reject(
+                                                        new Error("Fill Product Link or Vendor Address")
+                                                    );
+                                                },
+                                            }),
+                                        ]}
+                                    >
+                                        <Input
+                                            size="large"
+                                            placeholder="Enter product link"
+                                            className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark placeholder:text-subtext-light dark:placeholder:text-subtext-dark focus:ring-primary focus:border-primary"
+                                        />
+                                    </Form.Item>
+                                </div>
+
+                                {/* Vendor Address */}
+                                <div>
+                                    <Form.Item
+                                        label={<span className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Vendor Address</span>}
+                                        name="vendorAddress"
+                                        style={{ marginBottom: 2 }}
+                                        rules={[
+                                            ({ getFieldValue }) => ({
+                                                validator(_, value) {
+                                                    if (value || getFieldValue("productLink")) return Promise.resolve();
+                                                    return Promise.reject(
+                                                        new Error("Fill Vendor Address or Product Link")
+                                                    );
+                                                },
+                                            }),
+                                        ]}
+                                    >
+                                        <Input
+                                            size="large"
+                                            placeholder="Enter vendor address"
+                                            className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark placeholder:text-subtext-light dark:placeholder:text-subtext-dark focus:ring-primary focus:border-primary"
+                                        />
+                                    </Form.Item>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Notes */}
+                        <div className="md:col-span-3">
+                            <Form.Item
+                                label={<span className="block text-sm font-medium text-text-light  mb-1">Notes</span>}
+                                name="notes"
+                            >
+                                <TextArea
+                                    rows={4}
+                                    maxLength={250}
+                                    showCount
+                                    placeholder="e.g. #BrandName hashtag"
+                                    className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark placeholder:text-subtext-light dark:placeholder:text-subtext-dark focus:ring-primary focus:border-primary"
+                                />
+                            </Form.Item>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="pt-4 text-right">
+                        <button
+                            type="submit"
+                            disabled={submitLoading}
+                            className={`
+      bg-[#0f122f] text-white px-6 py-2 cursor-pointer rounded-full border border-[#0f122f]
+      font-semibold hover:bg-[#1a1d4f] transition
+      inline-flex items-center justify-center gap-2
+      ${submitLoading ? "opacity-70 cursor-not-allowed" : ""}
+    `}
                         >
-                            <Input size="large" placeholder="Enter product link" />
-                        </Form.Item>
-                    </Col>
+                            {submitLoading && (
+                                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                            )}
+                            {submitLoading ? "Processing..." : "Create Contract"}
+                        </button>
+                    </footer>
 
-                    {/* Vendor Address */}
-                    <Col xs={24} md={12}>
-                        <Form.Item
-                            label="Vendor Address"
-                            name="vendorAddress"
-                            rules={[
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                        if (value || getFieldValue("productLink")) return Promise.resolve();
-                                        return Promise.reject(
-                                            new Error("Fill Vendor Address or Product Link")
-                                        );
-                                    },
-                                }),
-                            ]}
-                        >
-                            <Input size="large" placeholder="Enter vendor address" />
-                        </Form.Item>
-                    </Col>
-                </Row>
-
-                <Row gutter={16}>
-                    {/* Payment */}
-                    <Col xs={24} md={12}>
-                        <Form.Item
-                            label="Payment Amount (₹)"
-                            name="payment"
-                            rules={[{ required: true, message: "Enter payment amount" }]}
-                        >
-                            <InputNumber
-                                size="large"
-                                style={{ width: "100%" }}
-                                formatter={(value) =>
-                                    value ? `₹ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
-                                }
-                                parser={(value) => value.replace(/\₹\s?|(,*)/g, "")}
-                                min={0}
-                                placeholder="0"
-                            />
-                        </Form.Item>
-                    </Col>
-                </Row>
-
-                {/* Notes */}
-                <Form.Item label="Notes" name="notes">
-                    <TextArea
-                        rows={4}
-                        maxLength={200}
-                        showCount
-                        placeholder="e.g. #BrandName hashtag"
-                    />
-                </Form.Item>
-
-                {/* Updated: Button enabled based on silent validation */}
-                <Button
-                    type="primary"
-                    size="large"
-                    htmlType="submit"
-                    block
-                    disabled={submitLoading}
-                    loading={submitLoading}
-                >
-                    Create Contract
-                </Button>
-            </Form>
+                </Form>
+            </main>
         </Modal>
     );
+
 }
