@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   RiEmojiStickerLine,
   RiAttachment2,
@@ -8,11 +8,16 @@ import {
 } from "@remixicon/react";
 import EmojiPicker from "emoji-picker-react";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const ChatWindow = ({ activeSubject }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const { token } = useSelector((state) => state.auth);
+  const [isClosed, setIsClosed] = useState(false);
 
   const imageInputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -47,6 +52,34 @@ const ChatWindow = ({ activeSubject }) => {
       { type: "file", content: file.name, sender: "user" },
     ]);
   };
+
+const handleClose = async () => {
+    if (!activeSubject) return;
+    if (isClosed) return;
+
+    try {
+      setIsClosed(true);
+
+      await axios.post(
+        "/chat/support/ticket/create-or-update-status",
+        {
+          p_usersupportticketid: activeSubject.id,
+          p_objectiveid: null,
+          p_statusname: "Closed"
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("Ticket closed successfully");
+
+    } catch (err) {
+      console.error("Error resolving ticket:", err);
+      setIsClosed(false);
+    }
+  };
+ useEffect(() => {
+  setIsClosed(activeSubject?.statusname === "Closed");
+}, [activeSubject]);  
 
   return (
     <div className="flex flex-col h-full relative overflow-hidden rounded-md">
@@ -165,9 +198,16 @@ const ChatWindow = ({ activeSubject }) => {
           <div className="p-4 flex justify-between items-center border-b border-gray-500 ">
             <h1 className="text-2xl font-bold text-[#0D132D]">{activeSubject}</h1>
             <button
-              className="flex items-center gap-2 border border-gray-300 bg-gray-200 px-3 py-1.5 rounded-full text-sm"
+              onClick={handleClose}
+              disabled={isClosed}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition
+                ${isClosed
+                  ? "bg-red-600 text-white border-red-600 cursor-not-allowed"
+                  : "bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-300"
+                }
+              `}
             >
-              Close
+              {isClosed ? "Closeed" : "Close"}
             </button>
           </div>
 

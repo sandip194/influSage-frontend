@@ -371,7 +371,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
                 src={
                   profileData?.photopath
                     ? profileData.photopath
-                    : "https://api.dicebear.com/5.x/bottts/svg?seed=default"
+                    : "/default.jpg"
                 }
                 alt={profileData?.firstname }
               />

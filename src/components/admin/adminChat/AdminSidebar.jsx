@@ -1,135 +1,209 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal } from "antd";
-
-import {
-  RiBook2Line,
-  RiBug2Line,
-  RiMoneyDollarCircleLine,
-  RiShieldUserLine,
-  RiTicket2Line,
-} from "@remixicon/react";
+import axios from "axios";
+import { RiBook2Line, RiTicket2Line } from "@remixicon/react";
+import { useSelector } from "react-redux";
 
 const AdminSidebar = ({ setActiveSubject }) => {
-  const initialByTab = {
-    Open: [
-      { name: "Support Related", icon: <RiBook2Line className="text-xl" /> },
-      { name: "Technical Support", icon: <RiBug2Line className="text-xl" /> },
-    ],
-    Inprograss: [
-      {
-        name: "Payment Support",
-        icon: <RiMoneyDollarCircleLine className="text-xl" />,
-      },
-    ],
-    Close: [
-      {
-        name: "Verification Support",
-        icon: <RiShieldUserLine className="text-xl" />,
-      },
-    ],
-    Released: [],
-  };
+  const { token } = useSelector((state) => state.auth);
 
-  const [activeTab, setActiveTab] = useState("Open");
-  const [subjectsByTab] = useState(initialByTab);
-  const [activeSubjectName, setActiveSubjectName] = useState("");
+  const [activeTab, setActiveTab] = useState("");
+  const [statusList, setStatusList] = useState([]);
+  const [subjectsByTab, setSubjectsByTab] = useState({});
+  const [activeSubjectId, setActiveSubjectId] = useState(null);
   const [ticketModalData, setTicketModalData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubjectClick = (name) => {
-    setActiveSubject(name);
-    setActiveSubjectName(name);
-  };
+  useEffect(() => {
+    const fetchTicketStatus = async () => {
+      try {
+        const res = await axios.get("/chat/support/ticket-status");
+        const list = res.data?.status || [];
 
-  const openTicketModal = (ticket) => setTicketModalData(ticket);
+        setStatusList(list.map((x) => ({ id: x.id, name: x.name })));
+
+        if (list.length > 0) {
+          setActiveTab(list[0].name);
+        }
+      } catch (error) {
+        console.error("Error fetching ticket status:", error);
+      }
+    };
+
+    fetchTicketStatus();
+  }, []);
+
+  useEffect(() => {
+    if (!activeTab || statusList.length === 0) return;
+
+    const selected = statusList.find((t) => t.name === activeTab);
+    if (!selected) return;
+
+    fetchTickets(selected);
+  }, [activeTab, statusList]);
+
+  const fetchTickets = async (tab) => {
+  setLoading(true);
+  setSubjectsByTab((prev) => ({ ...prev, [tab.name]: [] }));
+
+  try {
+    const res = await axios.get("/chat/support/user-admin/all-tickets", {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { p_statuslabelid: tab.id },
+    });
+
+    const tickets = res.data?.viewTicket || [];
+
+    const mapped = tickets.map((t) => ({
+      id: t.usersupportticketid,
+      name: t.subjectname,
+      status: t.statusname,
+      createddate: t.createddate,
+      userfullname: t.userfullname,
+      userphoto: t.userphoto,
+      userrole: t.userrole,
+      adminfullname: t.adminfullname,
+      adminphoto: t.adminphoto,
+      icon: <RiBook2Line className="text-xl" />,
+      ...t,
+    }));
+
+    setSubjectsByTab((prev) => ({ ...prev, [tab.name]: mapped }));
+
+  } catch (error) {
+    console.error("Error fetching tickets:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  const handleSubjectClick = async (ticket) => {
+  try {
+    setActiveSubject(ticket);
+    setActiveSubjectId(ticket.id);
+
+    await axios.post(
+      "/chat/support/ticket/create-or-update-status",
+      {
+        p_usersupportticketid: ticket.id,
+        p_objectiveid: null,
+        p_statusname: "Inprogress"
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    setActiveTab("Inprogress");
+
+    setTimeout(() => {
+      const list = subjectsByTab["Inprogress"];
+      if (list) {
+        const updated = list.find(x => x.id === ticket.id);
+        if (updated) {
+          setActiveSubject(updated);
+          setActiveSubjectId(updated.id);
+        }
+      }
+    }, 300);
+
+  } catch (err) {
+    console.error("Error updating ticket status:", err);
+  }
+};
+
 
   const subjects = subjectsByTab[activeTab] || [];
+  
 
   return (
     <div className="h-full w-[400px] bg-white flex flex-col p-4 border-r border-gray-200 shadow-md rounded-md">
       <h1 className="text-xl font-bold text-gray-900">Support</h1>
       <p className="text-gray-500 text-sm mb-3">
-        Your conversations to related subject
+        Your conversations related to subjects
       </p>
 
       <hr className="my-2 border-gray-200" />
 
       {/* Tabs */}
       <div className="flex gap-2 mb-4 my-2">
-        {["Open", "Inprograss", "Resolve", "Close"].map((tab) => (
+        {statusList.map((tab) => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
+            key={tab.id}
+            onClick={() => {
+              setActiveTab(tab.name); 
+              setTicketModalData(null);
+            }}
             className={`px-4 py-1.5 rounded-full text-sm border transition ${
-              activeTab === tab
+              activeTab === tab.name
                 ? "bg-[#0D132D] text-white border-[#0D132D]"
                 : "bg-white text-gray-600 border-gray-300"
             }`}
           >
-            {tab}
+            {tab.name}
           </button>
         ))}
       </div>
 
-      {/* Subject list */}
+      {/* Ticket List */}
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-        {subjects.length === 0 && (
-          <p className="text-gray-400 text-sm text-center">No subjects</p>
+        {loading && (
+          <p className="text-gray-400 text-sm text-center">Loading...</p>
         )}
 
-        {subjects.map((s, i) => (
-          <div
-            key={i}
-            className={`p-3 rounded-lg transition ${
-              activeSubjectName === s.name
-                ? "bg-[#0D132D] text-white shadow-md"
-                : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-            }`}
-          >
-            <div className="flex items-center justify-between gap-3 w-full">
-              {/* Subject name + icon */}
-              <div
-                onClick={() => openTicketModal(s)}
-                className="flex items-center gap-2 cursor-pointer flex-1"
-              >
-                <div
-                  className={`${
-                    activeSubjectName === s.name
-                      ? "text-white"
-                      : "text-gray-700"
-                  }`}
-                >
+        {!loading && subjects.length === 0 && (
+          <p className="text-gray-400 text-sm text-center">No tickets found</p>
+        )}
+
+        {!loading &&
+          subjects.map((s) => (
+            <div
+              key={s.id}
+              onClick={() => setTicketModalData(s)}
+              className={`rounded-xl border cursor-pointer transition p-3 ${
+                activeSubjectId === s.id
+                  ? "bg-[#0D132D] border-[#0D132D] text-white shadow-md"
+                  : "bg-white border-gray-200 hover:bg-gray-100 text-[#0D132D]"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <div className="flex items-center gap-2">
                   {s.icon}
+                  <span className="font-semibold text-[15px] truncate">
+                    {s.name}
+                  </span>
                 </div>
-                <span
-                  className={`font-medium truncate ${
-                    activeSubjectName === s.name
-                      ? "text-white"
-                      : "text-gray-700"
-                  }`}
-                >
-                  {s.name}
-                </span>
               </div>
 
-              {/* Action buttons */}
-              <div className="flex gap-2 shrink-0">
-                <button
-                  onClick={() => handleSubjectClick(s.name)}
-                  className="text-[11px] px-2 py-1 rounded bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
-                >
-                  Claim
-                </button>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[12px] opacity-75">
+                  {new Date(s.createddate).toLocaleDateString("en-GB")}
+                </span>
 
-                <button
-                  onClick={() => openTicketModal(s)}
-                  className="text-[11px] px-2 py-1 rounded bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition"
-                >
-                  Details
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSubjectClick(s);
+                    }}
+                    className={`text-[11px] px-2 py-1 rounded font-medium transition bg-blue-600 text-white hover:bg-blue-700"
+                    }`}
+                  >
+                    Claim
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTicketModalData(s);
+                    }}
+                    className="text-[11px] px-2 py-1 rounded bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition"
+                  >
+                    Details
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
 
       {/* Ticket Modal */}
@@ -156,7 +230,7 @@ const AdminSidebar = ({ setActiveSubject }) => {
             {/* Status */}
             <div className="flex items-center gap-2">
               <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded">
-                {ticketModalData.status || "In Progress"}
+                {ticketModalData.statusname}
               </span>
             </div>
 
@@ -165,33 +239,27 @@ const AdminSidebar = ({ setActiveSubject }) => {
               <div className="space-y-3 text-sm">
                 <div>
                   <p className="text-gray-500">Ticket ID</p>
-                  <p className="font-medium">
-                    {ticketModalData.ticketid || "TKT-2025-01-001"}
-                  </p>
+                  <p className="font-medium">{ticketModalData.usersupportticketid}</p>
                 </div>
 
                 <div>
                   <p className="text-gray-500">Subject</p>
-                  <p className="font-medium">
-                    {ticketModalData.Subject || "Technical Support"}
-                  </p>
+                  <p className="font-medium">{ticketModalData.subjectname}</p>
                 </div>
 
                 <div>
                   <p className="text-gray-500">Created On</p>
                   <p className="font-medium">
-                    {ticketModalData.createdat
-                      ? new Date(ticketModalData.createdat).toLocaleString()
-                      : "Jan 15, 2025, 10:30 AM"}
+                    {new Date(ticketModalData.createddate).toLocaleString()}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-gray-500">Resolve on</p>
+                  <p className="text-gray-500">Resolved On</p>
                   <p className="font-medium">
-                    {ticketModalData.updatedat
-                      ? new Date(ticketModalData.updatedat).toLocaleString()
-                      : "Jan 15, 2025, 10:45 AM"}
+                    {ticketModalData.updateddate
+                      ? new Date(ticketModalData.updateddate).toLocaleString()
+                      : "-"}
                   </p>
                 </div>
               </div>
@@ -205,20 +273,14 @@ const AdminSidebar = ({ setActiveSubject }) => {
                   </p>
                   <div className="flex items-center gap-2">
                     <img
-                      src={
-                        ticketModalData.submittedimage ||
-                        "https://randomuser.me/api/portraits/women/44.jpg"
-                      }
+                      src={ticketModalData.userphoto}
                       alt="user"
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
-                      <p className="font-medium">
-                        {ticketModalData.submittedby || "Sarah Jenkins"}
-                      </p>
+                      <p className="font-medium">{ticketModalData.userfullname}</p>
                       <p className="text-xs text-gray-500">
-                        {ticketModalData.submittedemail ||
-                          "s.jenkins@example.com"}
+                        {ticketModalData.userrole}
                       </p>
                     </div>
                   </div>
@@ -232,18 +294,18 @@ const AdminSidebar = ({ setActiveSubject }) => {
                   <div className="flex items-center gap-2">
                     <img
                       src={
-                        ticketModalData.assignedimage ||
-                        "https://randomuser.me/api/portraits/men/32.jpg"
+                        ticketModalData.adminphoto ||
+                        "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                       }
                       alt="admin"
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
                       <p className="font-medium">
-                        {ticketModalData.assignedto || "Alex Hartman"}
+                        {ticketModalData.adminfullname || "Not assigned"}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {ticketModalData.assignedrole || "Admin"}
+                        Admin
                       </p>
                     </div>
                   </div>
@@ -251,9 +313,12 @@ const AdminSidebar = ({ setActiveSubject }) => {
               </div>
             </div>
 
-            {/* Footer buttons */}
+            {/* Modal footer */}
             <div className="flex justify-end gap-3 border-t border-gray-300 pt-4">
-              <button className="px-4 py-2 border rounded font-medium text-red-600 hover:bg-red-50">
+              <button
+                onClick={() => setTicketModalData(null)}
+                className="px-4 py-2 border rounded font-medium text-red-600 hover:bg-red-50"
+              >
                 Close
               </button>
             </div>
