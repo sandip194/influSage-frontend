@@ -203,7 +203,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
 
     return (
-        <div className="personal-details-container bg-white p-6 rounded-3xl text-inter">
+        <div className="personal-details-container bg-white p-2 rounded-3xl text-inter">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Business Details</h2>
             <p className="text-gray-600">Please provide your Business details to complete your profile.</p>
 

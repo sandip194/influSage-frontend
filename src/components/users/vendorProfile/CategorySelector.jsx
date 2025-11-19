@@ -54,14 +54,42 @@ export const CategorySelector = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // 👉 NEW CODE — Get selected count per parent
+  const getSelectedCount = (parent) => {
+    return parent.categories.filter((c) =>
+      selectedChildren.includes(c.id)
+    ).length;
+  };
+
+  // 👉 NEW CODE — Build selected chip objects
+  const selectedChipData = categoryTree.flatMap((parent) =>
+    parent.categories
+      .filter((child) => selectedChildren.includes(child.id))
+      .map((child) => ({
+        id: child.id,
+        name: child.name,
+        parent: parent.name,
+      }))
+  );
+
+  // 👉 NEW CODE — Max 10 selection limit
   const toggleChildSelection = (id) => {
     setSelectedChildren((prev) => {
-      const updated = prev.includes(id)
+      const alreadySelected = prev.includes(id);
+
+      if (!alreadySelected && prev.length >= 10) {
+        toast.error("You can select a maximum of 10 categories.");
+        return prev;
+      }
+
+      const updated = alreadySelected
         ? prev.filter((x) => x !== id)
         : [...prev, id];
+
       setIsFormChanged(true);
       return updated;
     });
+
     setError(false);
   };
 
@@ -131,8 +159,9 @@ export const CategorySelector = ({
   );
 
   return (
-    <div className="bg-white p-6 rounded-3xl text-inter min-h-[80vh]">
-      {/* --- Header with title and Save button --- */}
+    <div className="bg-white p-2 rounded-3xl text-inter min-h-[80vh]">
+
+      {/* ---------- HEADER ---------- */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
@@ -167,10 +196,36 @@ export const CategorySelector = ({
         )}
       </div>
 
-      {/* --- DESKTOP VIEW --- */}
+      {/* ---------- GLOBAL COUNTER (NEW) ---------- */}
+      <div className="mb-4 text-sm font-medium text-gray-800">
+        Selected: {selectedChildren.length}/10
+      </div>
+
+      {/* ---------- SELECTED CHIPS (NEW) ---------- */}
+      {selectedChipData.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {selectedChipData.map((chip) => (
+            <div
+              key={chip.id}
+              className="bg-[#121A3F] text-white text-xs px-3 py-1 rounded-full flex items-center gap-2"
+            >
+              <span>{chip.name}</span>
+              <button
+                onClick={() => toggleChildSelection(chip.id)}
+                className="text-white hover:text-red-300"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ---------- DESKTOP VIEW ---------- */}
       {!isMobileView && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {/* Left: Parent Categories */}
+          
+          {/* PARENT CATEGORY LIST */}
           <div className="col-span-1 md:col-span-2 lg:col-span-1 border-r pr-4">
             <h3 className="font-semibold mb-2 text-gray-700">
               Main Categories
@@ -180,20 +235,30 @@ export const CategorySelector = ({
                 <li
                   key={cat.parentcategoryid}
                   onClick={() => setSelectedParentId(cat.parentcategoryid)}
-                  className={`cursor-pointer px-3 py-2 text-sm rounded-md 
+                  className={`
+                    cursor-pointer px-3 py-2 text-sm rounded-md flex justify-between items-center
                     ${
                       selectedParentId === cat.parentcategoryid
                         ? "bg-[#121A3F] text-white font-semibold"
+                        : getSelectedCount(cat) > 0
+                        ? "bg-[#E8ECF7] text-[#121A3F] font-medium border border-[#CED3E0]"
                         : "text-gray-800 hover:text-black hover:bg-gray-100"
-                    }`}
+                    }
+                  `}
                 >
-                  {cat.name}
+                  <span>{cat.name}</span>
+
+                  {getSelectedCount(cat) > 0 && (
+                    <span className="text-xs bg-[#121A3F] text-white px-2 py-1 rounded-full ml-2">
+                      {getSelectedCount(cat)}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Right: Child Categories */}
+          {/* CHILD CATEGORY LIST */}
           <div className="col-span-1 md:col-span-2 lg:col-span-3">
             <h3 className="font-semibold mb-3 text-gray-700">Subcategories</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -226,7 +291,7 @@ export const CategorySelector = ({
         </div>
       )}
 
-      {/* --- MOBILE VIEW --- */}
+      {/* ---------- MOBILE VIEW ---------- */}
       {isMobileView && (
         <div>
           {mobileMode === "parent" && (
@@ -242,9 +307,22 @@ export const CategorySelector = ({
                       setSelectedParentId(cat.parentcategoryid);
                       setMobileMode("child");
                     }}
-                    className="cursor-pointer px-4 py-3 text-base rounded-xl border border-gray-200 hover:bg-gray-100 font-medium"
+                    className={`
+                      cursor-pointer px-4 py-3 text-base rounded-xl border flex justify-between items-center
+                      ${
+                        getSelectedCount(cat) > 0
+                          ? "bg-[#E8ECF7] border-[#CED3E0] text-[#121A3F] font-medium"
+                          : "border-gray-200 hover:bg-gray-100"
+                      }
+                    `}
                   >
-                    {cat.name}
+                    <span>{cat.name}</span>
+
+                    {getSelectedCount(cat) > 0 && (
+                      <span className="text-xs bg-[#121A3F] text-white px-2 py-1 rounded-full">
+                        {getSelectedCount(cat)}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -278,6 +356,7 @@ export const CategorySelector = ({
                       }`}
                   >
                     <span className="text-gray-800">{child.name}</span>
+
                     <div
                       className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all ${
                         selectedChildren.includes(child.id)
@@ -285,7 +364,9 @@ export const CategorySelector = ({
                           : "bg-transparent border-gray-400 text-transparent"
                       }`}
                     >
-                      {selectedChildren.includes(child.id) && <RiCheckLine size={12} />}
+                      {selectedChildren.includes(child.id) && (
+                        <RiCheckLine size={12} />
+                      )}
                     </div>
                   </div>
                 ))}
@@ -295,14 +376,13 @@ export const CategorySelector = ({
         </div>
       )}
 
-      {/* --- Error Message --- */}
+      {/* ERROR */}
       {error && (
         <div className="text-red-500 text-sm font-medium mt-4">
           Please select at least one subcategory.
         </div>
       )}
 
-      {/* --- Bottom Back Button --- */}
       <div className="flex flex-row items-center gap-4 mt-6">
         {onBack && (
           <button

@@ -27,6 +27,7 @@ export default function ContractModal({
     onSubmit,  // Now expects this to handle the API call (e.g., POST contract data)
     existingCampaignStart = null,
     existingCampaignEnd = null,
+    campaignId
 }) {
     const [form] = Form.useForm();
     const { token } = useSelector((state) => state.auth);
@@ -46,11 +47,24 @@ export default function ContractModal({
         const fetchInfluencers = async () => {
             setLoadingInfluencers(true);
             setInfluencerError(null);
+
             try {
-                const res = await axios.get("/api/influencers", {  // Replace with your API endpoint
+                const res = await axios.get("/vendor/selected/influencer", {
+                    params: { campaign_id: campaignId },
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                setInfluencers(res.data || []);  // Assume API returns an array of { id, name, platform }
+
+                const raw = res.data?.data || [];
+
+                // 🔥 Map API data to UI-friendly format
+                const converted = raw.map((inf) => ({
+                    id: inf.userid,
+                    name: `${inf.firstname} ${inf.lastname}`,
+                    platform: null,  // remove if not needed
+                }));
+
+                setInfluencers(converted);
+
             } catch (err) {
                 console.error("Error fetching influencers:", err);
                 setInfluencerError("Failed to load influencers. Please try again.");
@@ -58,6 +72,7 @@ export default function ContractModal({
                 setLoadingInfluencers(false);
             }
         };
+
 
         if (isOpen) {
             fetchInfluencers();
@@ -226,7 +241,7 @@ export default function ContractModal({
                                 >
                                     {influencers.map((inf) => (
                                         <Select.Option key={inf.id} value={inf.id}>
-                                            {inf.name} ({inf.platform})
+                                            {inf.name}
                                         </Select.Option>
                                     ))}
                                 </Select>
@@ -580,5 +595,4 @@ export default function ContractModal({
             </main>
         </Modal>
     );
-
 }

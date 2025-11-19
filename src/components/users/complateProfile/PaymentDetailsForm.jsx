@@ -256,7 +256,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
 
   return (
     <>
-      <div className=" p-6 bg-white rounded-3xl ">
+      <div className=" p-2 bg-white rounded-3xl ">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Payment Details</h2>
         <p className="mb-6 text-gray-700">
           Enter Your Payment Details to withdraw Money

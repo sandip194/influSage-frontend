@@ -497,6 +497,7 @@ const CampaignDetails = () => {
                   <VendorContract
                     campaignStart={campaignDetails?.requirements.campaignstartdate}
                     campaignEnd={campaignDetails?.requirements.campaignenddate}
+                    campaignId={campaignId}
                   />
                 </Tabs.TabPane>
 

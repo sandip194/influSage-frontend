@@ -5,7 +5,7 @@ import ContractModal from "./ContractModal";
 
 const { Title, Text } = Typography;
 
-const VendorContract = ({ campaignStart, campaignEnd }) => {
+const VendorContract = ({ campaignId,  campaignStart, campaignEnd }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [editingContract, setEditingContract] = useState(null);
@@ -53,15 +53,6 @@ const VendorContract = ({ campaignStart, campaignEnd }) => {
   ]);
 
 
-  // Static influencer data
-  const influencerList = [
-    { id: 1, name: "John Carter", platform: "Instagram", followers: "45k" },
-    { id: 2, name: "Aditi Sharma", platform: "YouTube", followers: "120k" },
-    { id: 3, name: "Rahul Mehta", platform: "Instagram", followers: "60k" },
-    { id: 4, name: "Sana Khan", platform: "TikTok", followers: "30k" },
-    { id: 5, name: "Maya Patel", platform: "Instagram", followers: "75k" },
-  ];
-
   // Convert deliverables array to readable string
   const formatDeliverables = (deliverables) => {
     return deliverables
@@ -81,22 +72,10 @@ const VendorContract = ({ campaignStart, campaignEnd }) => {
 
   // CREATE OR UPDATE CONTRACT
   const handleSubmit = (values) => {
-    if (values.campaignEnd.isBefore(values.campaignStart)) {
-      Modal.error({
-        title: "Invalid Dates",
-        content: "End date cannot be earlier than start date!",
-      });
-      return;
-    }
-
-    const influencer = influencerList.find(
-      (inf) => inf.id === values.influencer
-    );
-
+    console.log(values)
     const formattedContract = {
       id: editingContract ? editingContract.id : `CONT-${contracts.length + 1}`,
       influencerId: values.influencer,
-      influencer: influencer?.name,
       contractStart: values.contractStart.format("DD MMM YYYY"),
       contractEnd: values.contractEnd.format("DD MMM YYYY"),
       campaignStart: values.campaignStart.format("DD MMM YYYY"),
@@ -242,7 +221,7 @@ const VendorContract = ({ campaignStart, campaignEnd }) => {
           setEditingContract(null);
           setIsModalOpen(false);
         }}
-        influencerList={influencerList}
+        campaignId = {campaignId}
         existingCampaignStart={campaignStart}
         existingCampaignEnd={campaignEnd}
         editData={editingContract}
