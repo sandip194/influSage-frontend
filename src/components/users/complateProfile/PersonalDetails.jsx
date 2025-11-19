@@ -314,6 +314,10 @@ useEffect(() => {
           name="phone"
           rules={[
             {
+              required: true,
+              message: 'Please enter your phone number'
+            },
+            {
               validator: (_, value) => {
                 if (!value || value.trim() === "") {
                   return Promise.resolve();
@@ -332,6 +336,7 @@ useEffect(() => {
               width: "100%",
               height: "40px",
               borderRadius: "8px",
+              
             }}
             containerStyle={{ width: "100%" }}
             specialLabel=""
@@ -441,7 +446,7 @@ useEffect(() => {
 
           error="ZIP Or PIN Code Is Required"
           name="zipCode"
-          rules={[{ message: 'Please enter your ZIP or PIN Code' },
+          rules={[{ required: true, message: 'Please enter your ZIP or PIN Code' },
           ({ getFieldValue }) => ({
             validator(_, value) {
               const iso = countries.find(c => c.name === getFieldValue('country'))?.iso2;
@@ -463,7 +468,7 @@ useEffect(() => {
         <Form.Item
           name="bio"
           label={<b>Bio</b>}
-        >
+          rules={[{required: true,message: 'Please enter your bio'},]}>
           <TextArea
             rows={4}
             showCount

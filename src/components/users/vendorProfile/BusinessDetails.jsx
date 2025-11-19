@@ -144,16 +144,15 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
         setIsFormChanged(true);
     };
 
-    const handleSubmit = async () => {
+        const handleSubmit = async () => {
+        if (!profileImage && !existingPhotoPath) {
+            setProfileError("Profile image is required");
+            return;
+        } else {
+            setProfileError("");
+        }
         try {
             setIsSubmitting(true);
-            const values = await form.validateFields();
-
-            if (!profileImage && !preview) {
-                setProfileError("Please Select Profile Image! Profile Image is required");
-                return;
-            }
-
             const profilejson = {
                 photopath: profileImage ? null : existingPhotoPath,
                 businessname: values.businessname,
@@ -246,6 +245,10 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                         label={<b>Phone Number</b>}
                         name="phone"
                         rules={[
+                            {
+                                required: true,
+                                message: 'Please enter your phone number'
+                            },
                             {
                                 validator: (_, value) => {
                                     if (!value || value.trim() === "") {
@@ -379,26 +382,40 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                     label={<b>ZIP / PIN Code</b>}
                     name="zipCode"
                     rules={[
-                        { message: 'Please enter your ZIP or PIN Code' },
-                        ({ getFieldValue }) => ({
-                            validator(_, value) {
-                                const iso = countries.find(c => c.name === getFieldValue('countryname'))?.iso2;
-                                const regex = getRegexForCountry(iso);
-                                if (!value) return Promise.resolve();
-                                if (regex && !regex.test(value.trim())) {
-                                    return Promise.reject(new Error('Invalid ZIP/PIN code'));
-                                }
-                                return Promise.resolve();
-                            }
-                        })
-                    ]}
-                >
+                    { required: true, message: 'Please enter your ZIP or PIN Code' },
+                    ({ getFieldValue }) => ({
+                    validator(_, value) {
+                    const iso = countries.find(c => c.name === getFieldValue('countryname'))?.iso2;
+                    const regex = getRegexForCountry(iso);
+                    if (!value) return Promise.resolve();
+                    if (regex && !regex.test(value.trim())) {
+                            return Promise.reject(new Error('Invalid ZIP/PIN code'));
+                    }
+                    return Promise.resolve();
+                    }
+                    })
+                    ]}>
                     <Input size="large" placeholder="Enter ZIP or PIN" className="rounded-xl" />
-                </Form.Item>
+                    </Form.Item>
 
                 {/* Bio */}
-                <Form.Item name="bio" label={<b>Bio</b>}>
-                    <TextArea rows={4} showCount maxLength={100} placeholder="Tell us about your Business..." className="rounded-xl" />
+                <Form.Item 
+                    name="bio" 
+                    label={<b>Bio</b>}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please enter your bio'
+                        },
+                    ]}
+                >
+                    <TextArea 
+                        rows={4} 
+                        showCount 
+                        maxLength={100} 
+                        placeholder="Tell us about your Business..." 
+                        className="rounded-xl" 
+                    />
                 </Form.Item>
 
                 {/* Submit Button */}

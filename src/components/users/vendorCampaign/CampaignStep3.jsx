@@ -79,23 +79,24 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const file = e.target.files[0];
+  if (!file) return;
 
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
-      setProfileError(
-        "Only JPG, JPEG, or WEBP files are allowed. PNG is not allowed."
-      );
-      setProfileImage(null);
-      setPreview(formData.profileImageUrl || null);
-      return;
-    }
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/webp"];
+  if (!allowedTypes.includes(file.type)) {
+    setProfileError("Only JPG, JPEG, or WEBP files are allowed. PNG is not allowed.");
+    setProfileImage(null);
+    setPreview(formData.profileImageUrl || null);
+    return;
+  }
 
-    setProfileError("");
-    setProfileImage(file);
-    setPreview(URL.createObjectURL(file));
-  };
+  setProfileError("");
+  setErrors(prev => ({ ...prev, profileImage: false }));
+
+  setProfileImage(file);
+  setPreview(URL.createObjectURL(file));
+};
+
 
   const validateFields = (formData, profileImage) => {
     const budgetAmount = Number(formData.budgetAmount) || 0;
@@ -160,7 +161,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
 
     if (hasFieldErrors) {
       setErrors({ ...fieldErrors });
-      toast.error("Please fill all required fields before continuing.");
+      // toast.error("Please fill all required fields before continuing."); 
       return;
     }
 

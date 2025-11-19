@@ -5,12 +5,15 @@ import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Modal } from "antd";
+import googleIcon from "../../assets/icons/google-logo.png";
+import facebookIcon from "../../assets/icons/facebook-logo.png";
 
 const SideImageSlider = React.lazy(() =>
   import("../../components/common/SideImageSlider")
 );
 
 const Signup = () => {
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const {
     register,
     handleSubmit,
@@ -66,7 +69,18 @@ const Signup = () => {
     setValue(field, onlyLetters, { shouldValidate: true });
   };
 
+const handleGoogleLogin = useCallback(() => {
+    const storedRole = localStorage.getItem("selected_role");
+    const backendUrl = BASE_URL.replace(/\/$/, "");
+    window.location.href = `${backendUrl}/auth/google/?roleid=${storedRole}`;
+  }, [BASE_URL]);
 
+  const handleFacebookLogin = useCallback(() => {
+    const storedRole = localStorage.getItem("selected_role");
+    const backendUrl = BASE_URL.replace(/\/$/, "");
+    window.location.href = `${backendUrl}/auth/facebook?roleid=${storedRole}`;
+  }, [BASE_URL]);
+  
   return (
     <div className="relative flex justify-center items-center min-h-screen bg-gray-100 p-5 font-[Segoe_UI,Tahoma,Geneva,Verdana,sans-serif] overflow-hidden">
       {/* 🔹 Background Side Image */}
@@ -235,7 +249,7 @@ const Signup = () => {
                 <p className="text-xs text-red-500">{errors.terms.message}</p>
               )}
             </div>
-
+               
             {/* Submit */}
             <button
               type="submit"
@@ -245,6 +259,22 @@ const Signup = () => {
               {loading ? "Signing Up..." : "Sign Up"}
             </button>
 
+            <div className="flex justify-center gap-4">
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="w-11 h-11 rounded-full border border-gray-300 bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+              >
+                <img src={googleIcon} alt="Google" className="w-6 h-6" />
+              </button>
+              <button
+                type="button"
+                onClick={handleFacebookLogin}
+                className="w-11 h-11 rounded-full border border-gray-300 bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+              >
+                <img src={facebookIcon} alt="Facebook" className="w-6 h-6" />
+              </button>
+            </div>
             {/* Login link */}
             <div className="text-center text-sm text-gray-700 mt-4">
               Already have an account?{" "}
