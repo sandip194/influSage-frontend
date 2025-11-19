@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   RiEmojiStickerLine,
   RiAttachment2,
@@ -8,11 +8,16 @@ import {
 } from "@remixicon/react";
 import EmojiPicker from "emoji-picker-react";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const AdminChatWindow = ({ activeSubject }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const { token } = useSelector((state) => state.auth);
+  const [isResolved, setIsResolved] = useState(false);
 
   const imageInputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -47,6 +52,33 @@ const AdminChatWindow = ({ activeSubject }) => {
       { type: "file", content: file.name, sender: "user" },
     ]);
   };
+  const handleResolve = async () => {
+    if (!activeSubject) return;
+    if (isResolved) return;
+
+    try {
+      setIsResolved(true);
+
+      await axios.post(
+        "/chat/support/ticket/create-or-update-status",
+        {
+          p_usersupportticketid: activeSubject.id,
+          p_objectiveid: null,
+          p_statusname: "Resolved"
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("Ticket resolved successfully");
+
+    } catch (err) {
+      console.error("Error resolving ticket:", err);
+      setIsResolved(false);
+    }
+  };
+  useEffect(() => {
+    setIsResolved(activeSubject?.statusname === "Resolved");
+}, [activeSubject]);
 
   return (
     <div className="flex flex-col h-full relative overflow-hidden rounded-md">
@@ -163,12 +195,20 @@ const AdminChatWindow = ({ activeSubject }) => {
           className="flex flex-col h-full"
         >
           <div className="p-4 flex justify-between items-center border-b border-gray-500 ">
-            <h1 className="text-2xl font-bold text-[#0D132D]">{activeSubject}</h1>
+            <h1 className="text-2xl font-bold text-[#0D132D]">{activeSubject?.name}</h1>
             <button
-              className="flex items-center gap-2 border border-gray-300 bg-gray-200 px-3 py-1.5 rounded-full text-sm"
+              onClick={handleResolve}
+              disabled={isResolved}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition
+                ${isResolved
+                  ? "bg-green-600 text-white border-green-600 cursor-not-allowed"
+                  : "bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-300"
+                }
+              `}
             >
-              Resolve
+              {isResolved ? "Resolved" : "Resolve"}
             </button>
+
           </div>
 
           <div className="flex-1 overflow-y-auto space-y-4 p-4">

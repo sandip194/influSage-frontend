@@ -62,7 +62,7 @@ const AdminDashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
   return (
     <header 
       className="w-full py-3 h-16 bg-white border-b border-gray-200 flex items-center justify-between fixed top-0 left-0 z-30"
-      style={{ paddingLeft: headerPaddingLeft, paddingRight: '1rem' }} // Override left padding dynamically
+      style={{ paddingLeft: headerPaddingLeft, paddingRight: '1rem' }}
     >
       {/* Mobile Hamburger */}
       <button
@@ -78,7 +78,7 @@ const AdminDashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
               src={
                 profileData?.photopath
                   ? profileData.photopath
-                  : "https://api.dicebear.com/5.x/bottts/svg?seed=admin"
+                  : "/default.jpg"
               }
               alt={profileData?.firstname}
             />

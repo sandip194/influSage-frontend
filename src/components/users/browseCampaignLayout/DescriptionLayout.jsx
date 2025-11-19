@@ -273,18 +273,36 @@ const DescriptionLayout = () => {
 
                 <div className="flex items-center gap-3">
                   
-                  {campaignDetails?.campaignapplied ? (
-                    <button className="flex-1 px-6 py-2 rounded-3xl bg-[#9d9d9d] cursor-not-allowed text-white font-semibold transition min-w-0 truncate">
-                      Applied
-                    </button>
-                  ) : (
+                  {/* {campaignDetails?.campaignapplied ? (
                     <Link to={`/dashboard/browse/apply-now/${campaignId}`} className="flex-1 min-w-0">
                       <button className="w-full px-6 py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition truncate">
                         Apply Now
                       </button>
                     </Link>
-                  )}
-                </div>
+                  ) : (
+                    <button className="flex-1 px-6 py-2 rounded-3xl bg-[#9d9d9d] cursor-not-allowed text-white font-semibold transition min-w-0 truncate">
+                      Apply Now
+                    </button>
+                  )} */}
+
+                  {campaignDetails.isapplied ? (
+                    <button
+                      className="px-5 py-2 text-sm bg-gray-400 text-white rounded-full font-semibold cursor-not-allowed"
+                      disabled >
+                      Applied
+                   </button>
+                  ) : campaignDetails.campaignapplied ? (
+                  <Link to={`/dashboard/browse/apply-now/${campaignDetails.id}`}
+                    onClick={(e) => e.stopPropagation()} >
+                    <button className="px-5 py-2 text-sm bg-black text-white rounded-full font-semibold hover:bg-gray-900 transition">
+                      Apply Now
+                    </button>
+                  </Link> ) : (
+                  <button
+                    className="px-5 py-2 text-sm bg-gray-400 text-white rounded-full font-semibold cursor-not-allowed"
+                    disabled >
+                    Not Apply</button>)}
+                </div> 
               </div>
 
               <div className="flex flex-wrap md:justify-around gap-6 border border-gray-200 rounded-2xl p-5">

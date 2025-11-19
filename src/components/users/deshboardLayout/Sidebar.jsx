@@ -212,11 +212,11 @@ const Sidebar = forwardRef((props, ref) => {
                             <button
                             onClick={handleLogout}
                             className={`flex items-center cursor-pointer ${
-                                isOpen ? "justify-between px-6" : "justify-center"
-                            } w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm gap-2`}
+                                isOpen ? "px-3 gap-3" : "justify-center"
+                                } w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm`}
                             >
                             <RiLogoutBoxRLine className="text-lg" />
-                            {isOpen && <span>Logout</span>}
+                            {isOpen && <span className="ml-1">Logout</span>}
                             </button>
                         </Tooltip>
                     </div>

@@ -99,11 +99,7 @@ const SavedCampaignCard = ({
               />
               <div>
                 <Link
-                  to={
-                    campaign.campaignapplied
-                      ? `/dashboard/browse/applied-campaign-details/${campaign.id}`
-                      : `/dashboard/browse/description/${campaign.id}`
-                  }
+                  to={`/dashboard/browse/description/${campaign.id}`}
                   onClick={(e) => e.stopPropagation()}
                   className="block text-lg font-bold text-gray-900 hover:underline hover:text-blue-900 transition-colors duration-150"
                 >

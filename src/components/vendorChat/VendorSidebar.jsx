@@ -16,51 +16,89 @@ const VendorSidebar = ({ setActiveSubject }) => {
 
   const [activeTab, setActiveTab] = useState("Open");
   const [subjectsByTab, setSubjectsByTab] = useState(initialByTab);
-  const [activeSubjectName, setActiveSubjectName] = useState("");
+  const [activeSubjectId, setActiveSubjectId] = useState(null);
   const [subjectOptions, setSubjectOptions] = useState([]);
   const { token } = useSelector((state) => state.auth);
   const [openModal, setOpenModal] = useState(false);
   const [newSubject, setNewSubject] = useState(null);
   const [loadingAdd, setLoadingAdd] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [statusList, setStatusList] = useState([]);
 
   useEffect(() => {
+    const fetchTicketStatus = async () => {
+      try {
+        const res = await axios.get("/chat/support/ticket-status");
+        const list = res.data?.status || [];
+        setStatusList(list);
+        setSubjectsByTab(
+          list.reduce((acc, x) => ({ ...acc, [x.name]: [] }), {})
+        );
+        if (list.length > 0) {
+          setActiveTab(list[0].name);
+          handleTabChange(list[0]);
+        }
+
+      } catch (error) {
+        console.error("Error fetching ticket status:", error);
+      }
+    };
+
     const fetchSubjects = async () => {
       try {
         const res = await axios.get("/chat/support/user/get-subject", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         const list = res.data?.subjectList || [];
 
-        setSubjectOptions(
-          list.map((x) => ({
-            label: x.name,
-            value: x.id,
-          }))
-        );
+        setSubjectOptions(list.map((x) => ({ label: x.name, value: x.id })));
 
-        setSubjectsByTab({
+        setSubjectsByTab((prev) => ({
+          ...prev,
           Open: list.map((x) => ({
+            id: x.id,
             name: x.name,
+            created: new Date(),
             icon: <RiBook2Line className="text-xl" />,
           })),
-          Inprograss: [],
-          Close: [],
-          Released: [],
-        });
+        }));
       } catch (error) {
         console.error("Error fetching subjects:", error);
       }
     };
 
-    if (token) fetchSubjects();
+    if (token) {
+      fetchTicketStatus();
+      fetchSubjects();
+    }
   }, [token]);
 
-  const handleTabChange = (tab) => setActiveTab(tab);
+ const handleTabChange = async (tab) => {
+    setActiveTab(tab.name);
 
+    try {
+      const res = await axios.get("/chat/support/user-admin/all-tickets", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { p_statuslabelid: tab.id },
+      });
+
+      const tickets = res.data?.viewTicket || [];
+
+      setSubjectsByTab((prev) => ({
+        ...prev,
+        [tab.name]: tickets.map((t) => ({
+          id: t.usersupportticketid,
+          name: t.subjectname,
+          status: t.statusname,
+          created: t.createddate,
+          icon: <RiBook2Line className="text-xl" />,
+        })),
+      }));
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+    }
+  };
   const handleSubmitTicket = async () => {
     if (!newSubject) {
       setShowError(true);
@@ -71,7 +109,7 @@ const VendorSidebar = ({ setActiveSubject }) => {
     setLoadingAdd(true);
     try {
       const res = await axios.post(
-        "/chat/support/user/create-ticket",
+        "/chat/support/ticket/create-or-update-status",
         {
           p_objectiveid: newSubject,
           p_statusname: "Open",
@@ -82,19 +120,7 @@ const VendorSidebar = ({ setActiveSubject }) => {
       );
 
       if (res.data?.p_status) {
-        const selected = subjectOptions.find((o) => o.value === newSubject);
-        const newTicketObj = {
-          name: selected.label,
-          icon: <RiBook2Line className="text-xl" />,
-        };
-
-        setSubjectsByTab((prev) => ({
-          ...prev,
-          Open: [...prev.Open, newTicketObj],
-        }));
-
-        setActiveSubject(selected.label);
-        setActiveSubjectName(selected.label);
+      await handleTabChange(statusList.find((x) => x.name === "Open"));
         setOpenModal(false);
         setNewSubject(null);
       }
@@ -107,9 +133,9 @@ const VendorSidebar = ({ setActiveSubject }) => {
 
   const subjects = subjectsByTab[activeTab] || [];
 
-  const handleSubjectClick = (name) => {
+  const handleSubjectClick = (id, name) => {
     setActiveSubject(name);
-    setActiveSubjectName(name);
+    setActiveSubjectId(id);
   };
 
   return (
@@ -135,34 +161,43 @@ const VendorSidebar = ({ setActiveSubject }) => {
       <hr className="my-2 border-gray-200" />
 
       <div className="flex gap-2 mb-4 my-2">
-        {["Open", "Inprograss", "Resolve", "Close"].map((tab) => (
+        {statusList.map((tab) => (
           <button
-            key={tab}
+            key={tab.id}
             onClick={() => handleTabChange(tab)}
             className={`px-4 py-1.5 rounded-full text-sm border transition ${
-              activeTab === tab
+              activeTab === tab.name
                 ? "bg-[#0D132D] text-white border-[#0D132D]"
                 : "bg-white text-gray-600 border-gray-300"
             }`}
           >
-            {tab}
+            {tab.name}
           </button>
         ))}
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-        {subjects.map((s, i) => (
+        {subjects.length === 0 && (
+          <p className="text-gray-400 text-sm text-center">No tickets found</p>
+        )}
+
+        {subjects.map((s) => (
           <div
-            key={i}
-            onClick={() => handleSubjectClick(s.name)}
+            key={s.id}
+            onClick={() => handleSubjectClick(s.id, s.name)}
             className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition ${
-              activeSubjectName === s.name
+              activeSubjectId === s.id
                 ? "bg-[#0D132D] text-white shadow-md"
                 : "bg-gray-100 hover:bg-gray-200 text-gray-700"
             }`}
           >
             {s.icon}
-            <span className="font-medium truncate">{s.name}</span>
+            <div className="flex flex-col">
+              <span className="font-medium truncate">{s.name}</span>
+              <span className="text-xs opacity-70">
+                {new Date(s.created).toLocaleDateString("en-GB")}
+              </span>
+            </div>
           </div>
         ))}
       </div>
