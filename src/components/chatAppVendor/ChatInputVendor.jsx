@@ -23,9 +23,16 @@ export default function ChatInputVendor({
   const fileInputRef = useRef(null);
 
   // Block input actions when chat not allowed
+  const toastBlockedRef = useRef(false);
+
   const handleBlockedAction = () => {
-    toast.warning("You cannot send messages for this campaign yet.");
+    if (!toastBlockedRef.current) {
+      toast.warning("You cannot send messages for this campaign yet.");
+      toastBlockedRef.current = true;
+      setTimeout(() => (toastBlockedRef.current = false), 2000); // 2 sec throttle
+    }
   };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -58,11 +65,12 @@ export default function ChatInputVendor({
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
       e.preventDefault();
       handleSubmit(e);
     }
   };
+
 
   const handleEmojiClick = (emojiData) => {
     if (!canstartchat) {
@@ -73,12 +81,13 @@ export default function ChatInputVendor({
   };
 
   const handleFileChange = (e) => {
-    if (!canstartchat) {
-      handleBlockedAction();
-      return;
-    }
+    if (!canstartchat) { handleBlockedAction(); return; }
 
     const selectedFile = e.target.files[0];
+
+    // Revoke old URL if exists
+    if (previewUrl?.url) URL.revokeObjectURL(previewUrl.url);
+
     setFile(selectedFile);
 
     if (!selectedFile) {
@@ -96,13 +105,18 @@ export default function ChatInputVendor({
     } else {
       setPreviewUrl({ type: "file", name: selectedFile.name });
     }
+
+    // Reset input to allow re-upload of same file
+    fileInputRef.current.value = "";
   };
 
+
   const removeFile = () => {
-    if (previewUrl?.url) URL.revokeObjectURL(previewUrl.url);
+    if (previewUrl?.url?.startsWith("blob:")) URL.revokeObjectURL(previewUrl.url);
     setFile(null);
     setPreviewUrl(null);
   };
+
 
   useEffect(() => {
     if (editingMessage?.file) {
@@ -118,9 +132,8 @@ export default function ChatInputVendor({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative ${
-        !canstartchat ? "opacity-70 cursor-not-allowed" : ""
-      }`}
+      className={`p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative ${!canstartchat ? "opacity-70 cursor-not-allowed" : ""
+        }`}
     >
       {/* Emoji Picker */}
       {showEmojiPicker && canstartchat && (
@@ -246,11 +259,10 @@ export default function ChatInputVendor({
         <button
           type="submit"
           disabled={!canstartchat}
-          className={`${
-            canstartchat
-              ? "bg-[#0D132D] hover:bg-indigo-700"
-              : "bg-gray-400 cursor-not-allowed"
-          } text-white p-3 rounded-full shadow-md transition flex-shrink-0`}
+          className={`${canstartchat
+            ? "bg-[#0D132D] hover:bg-indigo-700"
+            : "bg-gray-400 cursor-not-allowed"
+            } text-white p-3 rounded-full shadow-md transition flex-shrink-0`}
         >
           <RiSendPlane2Fill />
         </button>

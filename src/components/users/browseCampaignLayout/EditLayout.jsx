@@ -4,37 +4,16 @@ import {
   RiStackLine,
   RiTranslate,
   RiArrowLeftSLine,
-  RiCalendarLine,
   RiCheckLine,
 } from "@remixicon/react";
 import axios from "axios";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Skeleton } from "antd";
+import ApplyNowModal from "./ApplyNowModal";
 
-const SimilarCampaigns = [
-  {
-    name: "Instagram Campaign",
-    brand: "Tiktokstar",
-    image: "https://cdn-icons-png.flaticon.com/512/1384/1384063.png",
-  },
-  {
-    name: "Tiktok Campaign",
-    brand: "Tiktokstar",
-    image: "https://cdn-icons-png.flaticon.com/512/3046/3046121.png",
-  },
-  {
-    name: "Youtube Campaign",
-    brand: "Tiktokstar",
-    image: "https://cdn-icons-png.flaticon.com/512/1384/1384060.png",
-  },
-  {
-    name: "Facebook Campaign",
-    brand: "Tiktokstar",
-    image: "https://cdn-icons-png.flaticon.com/512/1384/1384053.png",
-  },
-];
+
 
 const EditLayout = () => {
   const [campaignDetails, setCampaignDetails] = useState(null);
@@ -43,6 +22,11 @@ const EditLayout = () => {
   const [error, setError] = useState(null);
   const [showFullDetails, setShowFullDetails] = useState(false);
   const [showFullBrandDesc, setShowFullBrandDesc] = useState(false);
+
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState(null);
+  const [selectedCampaignId, setSelectedCampaignId] = useState(null);
+
 
   const { token } = useSelector((state) => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -206,160 +190,161 @@ const EditLayout = () => {
         {/* Left Side */}
         <div className="flex-1 space-y-4">
           {/* Banner */}
-          <div className="bg-white rounded-2xl overflow-hidden ">
-            <div className="relative h-40 bg-gray-300">
-             <div className="relative">
-              {/* Campaign Image */}
-              <img
-                src={campaignDetails?.photopath}
-                alt="Campaign"
-                onClick={() => setIsCampaignPreviewOpen(true)}
-                className="absolute top-10 left-6 w-24 h-24 rounded-full object-cover border-4 border-white shadow cursor-pointer"
-                loading="lazy"
-              />
+          <div className="bg-white rounded-xl p-6 border border-gray-100">
+            {/* Top Section */}
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-b border-gray-200 pb-4">
 
-              {/* Image Preview Modal */}
-              {isCampaignPreviewOpen && (
-                <div
-                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                  onClick={() => setIsCampaignPreviewOpen(false)}
-                >
-                  {/* Close Button */}
-                  <button
-                    onClick={() => setIsCampaignPreviewOpen(false)}
-                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                  >
-                    &times;
-                  </button>
+              {/* Left Section - Profile + Basic Info */}
+              <div className="flex items-start gap-4">
+                <img
+                  src={campaignDetails?.photopath}
+                  alt="Campaign"
+                  className="w-20 h-20 rounded-full object-cover cursor-pointer shadow-md"
+                  onClick={() => setIsCampaignPreviewOpen(true)}
+                />
 
-                  {/* Enlarged Image */}
-                  <img
-                    src={campaignDetails?.photopath}
-                    alt="Campaign Preview"
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              )}
-            </div>
-            </div>
-
-            <div className="p-6">
-              <div className="flex flex-col gap-4 sm:flex-row justify-between items-start mb-5">
                 <div>
-                  <h2 className="font-semibold text-lg">
+                  <h2 className="font-semibold text-lg text-gray-900">
                     {campaignDetails?.name}
                   </h2>
-                  <p className="text-gray-900 text-sm">
+                  <p className="text-gray-500 text-sm">
                     {campaignDetails?.businessname}
                   </p>
-                  <div className="mt-2 flex-call flex-wrap gap-4 text-xs text-gray-900 font-medium">
-                    <div className="text-gray-700 text-sm">
-                      <span className="font-semibold text-gray-900">Apply Between:</span>{" "}
-                        {campaignDetails?.requirements.applicationstartdate || "N/A"}{" "}
-                          <span className="font-semibold text-gray-900 mx-1">to</span>{" "}
-                        {campaignDetails?.requirements.applicationenddate || "N/A"}
-                    </div>
 
-                    <div className="text-gray-700 text-sm">
-                      <span className="font-semibold text-gray-900">
-                        Campaign Start:
-                      </span>{" "}
-                      {campaignDetails?.requirements.campaignstartdate || "N/A"}
-                    </div>
-                    <div className='text-sm text-gray-700 '>
-                      <span className="font-semibold text-gray-900">influencer applied:</span>{" "}
-                        {campaignDetails.appliedinfluencercount ?? "N/A"}
-                    </div>
-                  </div>
-                </div>
+                  {/* Apply Period */}
+                  <p className="text-xs mt-2">
+                    <span className="font-semibold text-indigo-600">Apply:</span>{" "}
+                    <span className="text-gray-800">
+                      {campaignDetails?.requirements?.applicationstartdate || "N/A"}
+                    </span>{" "}
+                    -{" "}
+                    <span className="text-gray-800">
+                      {campaignDetails?.requirements?.applicationenddate || "N/A"}
+                    </span>
+                  </p>
 
-                <div className="flex items-center gap-3">
-                  <Link
-                    to={`/dashboard/browse/apply-now/${campaignId}`}
-                    className="flex-1"
-                  >
-                    <button className="w-full px-6 py-2 rounded-3xl bg-[#0f122f] cursor-pointer text-white font-semibold hover:bg-[#23265a] transition">
-                      Edit Application
-                    </button>
-                  </Link>
+                  {/* Campaign Start */}
+                  <p className="text-xs">
+                    <span className="font-semibold text-indigo-600">Campaign Start:</span>{" "}
+                    <span className="text-gray-800">{campaignDetails?.requirements?.campaignstartdate || "N/A"}</span>
+                  </p>
+
+                  {/* Applied Influencers */}
+                  <p className="text-xs">
+                    <span className="font-semibold text-indigo-600">Applied Influencers:</span>{" "}
+                    <span className="text-gray-800">{campaignDetails?.appliedinfluencercount ?? "N/A"}</span>
+                  </p>
                 </div>
               </div>
 
-              <div className="flex flex-wrap md:justify-around gap-6 border border-gray-200 rounded-2xl p-5">
-                <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900 font-semibold">
-                    <RiStackLine size={20} />
-                    <span>Platform</span>
-                  </div>
-                  {campaignDetails?.providercontenttype?.length > 0 ? (
-                    campaignDetails.providercontenttype.map(
-                      ({ providername, iconpath, contenttypes }, i) => (
-                        <div
-                          key={`${providername}-${i}`}
-                          className="flex items-center gap-2 mb-2 text-sm text-gray-800"
-                        >
-                          {iconpath && (
-                            <img
-                              src={iconpath}
-                              alt="platform"
-                              className="w-5 h-5 object-contain"
-                            />
-                          )}
-                          <span className="text-xs text-gray-900">
-                            {contenttypes && contenttypes.length > 0
-                              ? contenttypes.map((c) => c.contenttypename).join(", ")
-                              : "No content types"}
-                          </span>
-                        </div>
-                      )
-                    )
-                  ) : (
-                    <p className="text-sm text-gray-500">No platform data</p>
-                  )}
+              {/* Right Buttons */}
+              <div className="flex gap-2 items-start">
+                <button
+                  onClick={() => {
+                    setSelectedApplicationId(campaignDetails?.applicationid);
+                    setSelectedCampaignId(campaignId);     // you already have this in props
+                    setEditModalOpen(true);
+                  }}
+                  className="px-6 py-2 bg-[#0F122F] text-white rounded-full font-medium hover:bg-gray-800 transition"
+                >
+                  Edit Application
+                </button>
+
+              </div>
+            </div>
+
+            {/* Bottom Grid Section */}
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+              {/* Budget */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-500 mb-1">
+                  <RiMoneyRupeeCircleLine className="w-5 h-5" />
+                  <span>Budget</span>
                 </div>
-                <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
-                    <RiMoneyRupeeCircleLine size={20} />
-                    <span>Budget</span>
-                  </div>
-                  <p className="text-sm text-gray-800 font-medium">
-                    ₹{campaignDetails.estimatedbudget}
-                  </p>
+                <p className="text-[#0D132D] font-semibold text-lg">
+                  ₹{campaignDetails?.estimatedbudget}
+                </p>
+              </div>
+
+              {/* Language */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-500 mb-1">
+                  <RiTranslate className="w-5 h-5" />
+                  <span>Language</span>
                 </div>
-                <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
-                    <RiTranslate size={20} />
-                    <span>Language</span>
-                  </div>
-                  {campaignDetails.campaignlanguages?.map(
-                    ({ languagename }, i) => (
-                      <p
-                        key={`${languagename}-${i}`}
-                        className="text-sm text-gray-800"
-                      >
-                        {languagename}
-                      </p>
-                    )
-                  )}
-                </div>
-                <div className="min-w-[120px] text-center">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
-                    <RiMenLine size={20} />
-                    <span>Gender</span>
-                  </div>
-                  {campaignDetails.campaigngenders?.map(({ gendername }, i) => (
-                    <p
-                      key={`${gendername || "any"}-${i}`}
-                      className="text-sm text-gray-800"
+
+                <div className="flex gap-2 flex-wrap">
+                  {campaignDetails?.campaignlanguages?.map((lang, i) => (
+                    <span
+                      key={i}
+                      className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md text-sm font-medium"
                     >
-                      {gendername || "Any"}
-                    </p>
+                      {lang.languagename}
+                    </span>
                   ))}
                 </div>
               </div>
+
+              {/* Gender */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-500 mb-1">
+                  <RiMenLine className="w-5 h-5" />
+                  <span>Gender</span>
+                </div>
+
+                <div className="flex gap-2 flex-wrap">
+                  {campaignDetails?.campaigngenders?.map((gender, i) => (
+                    <span
+                      key={i}
+                      className="bg-pink-100 text-pink-800 px-2 py-0.5 rounded-md text-sm font-medium"
+                    >
+                      {gender.gendername || "Any"}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Platform */}
+              <div>
+                <div className="flex items-center gap-2 text-gray-500 mb-1">
+                  <RiStackLine className="w-5 h-5" />
+                  <span>Platform</span>
+                </div>
+
+                {campaignDetails?.providercontenttype?.length > 0 ? (
+                  campaignDetails.providercontenttype.map((p, i) => (
+                    <div key={i} className="flex items-center gap-2 mb-1">
+                      {p.iconpath && (
+                        <img src={p.iconpath} className="w-5 h-5 object-contain" alt="platform" />
+                      )}
+                      <span className="text-sm text-gray-800 font-medium">
+                        {p.contenttypes?.map((c) => c.contenttypename).join(", ")}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-400">No Platform Data</p>
+                )}
+              </div>
             </div>
+
+            {/* Image Modal */}
+            {isCampaignPreviewOpen && (
+              <div
+                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                onClick={() => setIsCampaignPreviewOpen(false)}
+              >
+                <img
+                  src={campaignDetails?.photopath}
+                  alt="Campaign Preview"
+                  className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            )}
           </div>
+
 
           {/* Description & Requirements */}
           <div className="bg-white p-6 rounded-2xl">
@@ -368,9 +353,8 @@ const EditLayout = () => {
                 Campaign Description
               </h3>
               <p
-                className={`text-gray-700 text-justify leading-relaxed mb-4 ${
-                  showFullDetails ? "" : "line-clamp-3"
-                }`}
+                className={`text-gray-700 text-justify leading-relaxed mb-4 ${showFullDetails ? "" : "line-clamp-3"
+                  }`}
               >
                 {campaignDetails.description || "No description available."}
               </p>
@@ -556,179 +540,142 @@ const EditLayout = () => {
             )}
           </div>
 
-          <div className="bg-white p-4 rounded-2xl">
-            {/* Proposed Terms */}
-            <div>
-              <h4 className="font-bold text-base mb-2">Your proposed terms</h4>
-              <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4">
-                {/* Platforms */}
-                <div className="flex-row items-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
-                    <RiStackLine className="w-5" />
-                    <span>Platform</span>
+          <div className="bg-white p-6 rounded-2xl">
+            <h2 className="text-2xl font-bold mb-6 text-[#0D132D]">
+              Your Proposed Terms
+            </h2>
+
+            <div className="flex flex-col md:flex-row gap-6">
+              {/* Left Column — Description, Budget, Platforms */}
+              <div className="flex-1 flex flex-col gap-4">
+
+                {/* Description */}
+                {appliedDetails?.description && (
+                  <div className="p-4 bg-gray-50 rounded-2xl">
+                    <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
+                    <p className="text-gray-700">
+                      {appliedDetails.description}
+                    </p>
                   </div>
+                )}
+
+                {/* Budget */}
+                <div className="p-4 bg-gray-50 rounded-2xl">
+                  <h3 className="font-semibold text-gray-900 mb-2">Budget</h3>
+                  <p className="text-[#0D132D] font-bold text-xl">
+                    ₹{appliedDetails?.budget || "N/A"}
+                  </p>
+                </div>
+
+                {/* Platforms */}
+                {/* <div className="p-4 bg-gray-50 rounded-2xl">
+                  <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <RiStackLine className="w-5 h-5" />
+                    Platforms
+                  </h3>
+
                   {appliedDetails?.providercontenttype?.length > 0 ? (
                     appliedDetails.providercontenttype.map(
                       ({ providername, contenttypename, iconpath }, i) => (
                         <div
-                          key={`${providername}-${i}`}
-                          className="flex items-center gap-2 text-gray-800 mb-1"
+                          key={i}
+                          className="flex items-center gap-3 mb-3"
                         >
                           {iconpath && (
                             <img
                               src={iconpath}
                               alt={providername}
-                              className="w-5 h-5 object-contain"
+                              className="w-6 h-6 object-contain"
                             />
                           )}
-                          <p className="text-sm">
+                          <span className="text-gray-800 text-sm font-medium">
                             {contenttypename}
-                          </p>
+                          </span>
                         </div>
                       )
                     )
                   ) : (
-                    <p className="text-gray-500">N/A</p>
+                    <p className="text-gray-500">No platform data</p>
                   )}
-                </div>
-
-                {/* Budget */}
-                <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-900">
-                    <RiMoneyRupeeCircleLine className="w-5" />
-                    <span>Budget</span>
-                  </div>
-                  <p className="text-gray-800">
-                    ₹{appliedDetails?.budget || "N/A"}
-                  </p>
-                </div>
-
-                {/* Deadline (Optional - You may remove this if backend doesn't provide) */}
-                {/* <div className="flex-row items-center justify-center gap-2">
-                  <div className="flex gap-2 items-center justify-center mb-2 text-gray-400">
-                    <RiCalendarLine className="w-5" />
-                    <span>Deadline</span>
-                  </div>
-                  <p className="text-gray-500">Not specified</p>
                 </div> */}
+
+              </div>
+
+              {/* Right Column — File Previews */}
+              <div className="flex-1 p-4 bg-gray-50 rounded-2xl">
+                <h3 className="font-semibold text-gray-900 mb-4">Files</h3>
+
+                {appliedDetails?.filepaths?.length > 0 ? (
+                  <div className="flex gap-3 flex-wrap">
+                    {appliedDetails.filepaths.map(({ filepath }, index) => {
+                      const fileUrl = filepath;
+                      const extension = filepath.split(".").pop().toLowerCase();
+
+                      const isImage = /\.(png|jpe?g|gif|svg|webp)$/i.test(filepath);
+                      const isVideo = /\.(mp4|webm|ogg)$/i.test(filepath);
+                      const isPdf = extension === "pdf";
+                      const isDoc = ["doc", "docx", "txt"].includes(extension);
+
+                      return (
+                        <div
+                          key={index}
+                          className="w-28 h-28 rounded-xl overflow-hidden border border-gray-300 
+                          hover:shadow-md transition flex items-center justify-center bg-white"
+                        >
+                          {isImage ? (
+                            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                              <img
+                                src={fileUrl}
+                                className="w-full h-full object-cover"
+                                alt="file"
+                              />
+                            </a>
+                          ) : isVideo ? (
+                            <video
+                              src={fileUrl}
+                              className="w-full h-full object-cover"
+                              muted
+                              controls
+                            />
+                          ) : isPdf ? (
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex flex-col items-center justify-center text-red-600 text-xs font-semibold w-full h-full"
+                            >
+                              PDF
+                            </a>
+                          ) : isDoc ? (
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex flex-col items-center justify-center text-blue-600 text-xs font-semibold w-full h-full"
+                            >
+                              DOC
+                            </a>
+                          ) : (
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-gray-500 text-xs text-center px-2"
+                            >
+                              View File
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-gray-700">No files uploaded.</p>
+                )}
               </div>
             </div>
-
-            {/* Description */}
-            {appliedDetails?.description && (
-              <div className="mt-4">
-                <h3 className="font-semibold text-base mb-2">Description</h3>
-                <p className="text-gray-800">{appliedDetails.description}</p>
-              </div>
-            )}
-
-            {/* Files */}
-            {appliedDetails?.filepaths?.length > 0 && (
-              <div className="mt-4">
-                <h3 className="font-semibold text-base mb-2">Attached Files</h3>
-                <div className="flex gap-3 flex-wrap">
-                  {appliedDetails.filepaths.map(({ filepath }, index) => {
-                    const fileUrl = filepath;
-                    const extension = filepath.split(".").pop().toLowerCase();
-
-                    const isImage = /\.(png|jpe?g|gif|svg|webp)$/i.test(
-                      filepath
-                    );
-                    const isVideo = /\.(mp4|webm|ogg)$/i.test(filepath);
-                    const isPdf = extension === "pdf";
-                    const isDoc = ["doc", "docx", "txt"].includes(extension);
-
-                    return (
-                      <div
-                        key={index}
-                        className="w-24 h-24 rounded-2xl overflow-hidden border border-gray-300 hover:shadow-lg transition flex items-center justify-center bg-gray-100"
-                        title="Open file in new tab"
-                      >
-                        {isImage ? (
-                          <a
-                            href={fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full h-full block"
-                          >
-                            <img
-                              src={fileUrl}
-                              alt={`File ${index + 1}`}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
-                          </a>
-                        ) : isVideo ? (
-                          <video
-                            src={fileUrl}
-                            className="w-full h-full object-cover"
-                            muted
-                            playsInline
-                            controls
-                          />
-                        ) : isPdf ? (
-                          <a
-                            href={fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex flex-col items-center justify-center text-red-600 text-xs font-semibold w-full h-full"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="w-8 h-8 mb-1"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M12 4v16m8-8H4"
-                              />
-                            </svg>
-                            PDF
-                          </a>
-                        ) : isDoc ? (
-                          <a
-                            href={fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex flex-col items-center justify-center text-blue-600 text-xs font-semibold w-full h-full"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="w-8 h-8 mb-1"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M7 8h10M7 12h6m-6 4h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H9l-4 4v10a2 2 0 002 2z"
-                              />
-                            </svg>
-                            DOC
-                          </a>
-                        ) : (
-                          <a
-                            href={fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center text-gray-500 text-xs w-full h-full px-2 text-center"
-                          >
-                            View File
-                          </a>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
+
         </div>
 
         {/* Right Side */}
@@ -741,9 +688,8 @@ const EditLayout = () => {
               <div>
                 <p className="font-medium text-gray-900">Brand Name</p>
                 <p
-                  className={` text-gray-800 whitespace-pre-line ${
-                    showFullBrandDesc ? "" : "line-clamp-2"
-                  }`}
+                  className={` text-gray-800 whitespace-pre-line ${showFullBrandDesc ? "" : "line-clamp-2"
+                    }`}
                 >
                   {campaignDetails.branddetails?.aboutbrand || "N/A"}
                 </p>
@@ -781,6 +727,15 @@ const EditLayout = () => {
           </div>
         </div>
       </div>
+
+
+      <ApplyNowModal
+        open={isEditModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        applicationId={selectedApplicationId}
+        campaignId={selectedCampaignId}
+      />
+
     </div>
   );
 };

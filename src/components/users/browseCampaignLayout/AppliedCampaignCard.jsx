@@ -57,7 +57,7 @@ const AppliedCampaignCard = ({
 
             {/* Header */}
             <div className="flex items-center gap-3 mb-3">
-              <img src={campaign.photopath} className="w-12 h-12 rounded-full object-cover border" />
+              <img src={campaign.photopath} className="w-12 h-12 rounded-full object-cover border border-gray-300" />
               <Link
                 to={`/dashboard/browse/applied-campaign-details/${campaign.id}`}
                 onClick={(e) => e.stopPropagation()}

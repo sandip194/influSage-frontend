@@ -281,7 +281,7 @@ export const ProfileStepper = () => {
         </div>
 
         {/* Step Content */}
-        <div className="w-full sm:w-2/3 lg:w-3/4 p-0">
+        <div className="w-full sm:w-2/3 lg:w-3/4 p-4 bg-white rounded-3xl">
           <ErrorBoundary>
             {currentStep === 'thankyou' ? (
               <ThankYouScreen />
