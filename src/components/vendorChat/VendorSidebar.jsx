@@ -75,30 +75,33 @@ const VendorSidebar = ({ setActiveSubject }) => {
   }, [token]);
 
  const handleTabChange = async (tab) => {
-    setActiveTab(tab.name);
+  setActiveTab(tab.name);
 
-    try {
-      const res = await axios.get("/chat/support/user-admin/all-tickets", {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { p_statuslabelid: tab.id },
-      });
+  try {
+    const res = await axios.get("/chat/support/user-admin/all-tickets", {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { p_statuslabelid: tab.id },
+    });
 
-      const tickets = res.data?.viewTicket || [];
+    const tickets = Array.isArray(res.data?.viewTicket?.records)
+      ? res.data.viewTicket.records
+      : [];
 
-      setSubjectsByTab((prev) => ({
-        ...prev,
-        [tab.name]: tickets.map((t) => ({
-          id: t.usersupportticketid,
-          name: t.subjectname,
-          status: t.statusname,
-          created: t.createddate,
-          icon: <RiBook2Line className="text-xl" />,
-        })),
-      }));
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-    }
-  };
+    setSubjectsByTab((prev) => ({
+      ...prev,
+      [tab.name]: tickets.map((t) => ({
+        id: t.usersupportticketid,
+        name: t.subjectname,
+        status: t.statusname,
+        created: t.createddate,
+        icon: <RiBook2Line className="text-xl" />,
+      })),
+    }));
+  } catch (error) {
+    console.error("Error fetching tickets:", error);
+  }
+};
+
   const handleSubmitTicket = async () => {
     if (!newSubject) {
       setShowError(true);
@@ -133,9 +136,9 @@ const VendorSidebar = ({ setActiveSubject }) => {
 
   const subjects = subjectsByTab[activeTab] || [];
 
-  const handleSubjectClick = (id, name) => {
-    setActiveSubject(name);
-    setActiveSubjectId(id);
+  const handleSubjectClick = (ticket) => {
+    setActiveSubject(ticket);
+    setActiveSubjectId(ticket.id);
   };
 
   return (
@@ -184,7 +187,7 @@ const VendorSidebar = ({ setActiveSubject }) => {
         {subjects.map((s) => (
           <div
             key={s.id}
-            onClick={() => handleSubjectClick(s.id, s.name)}
+            onClick={() => handleSubjectClick(s)}
             className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition ${
               activeSubjectId === s.id
                 ? "bg-[#0D132D] text-white shadow-md"

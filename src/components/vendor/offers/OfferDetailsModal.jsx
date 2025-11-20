@@ -157,12 +157,14 @@ const OfferDetailsModal = ({ visible, onClose, id }) => {
 
                             {/* Buttons */}
                             <div className="flex justify-start gap-3 ">
-                                <button
-                                    onClick={() => setIsAcceptModalOpen(true)}
-                                    className="bg-[#0D132D] text-white font-medium py-2 px-6 min-w-48 rounded-lg hover:bg-[#0D132Ded] transition"
-                                >
+                                {!offerDetails?.ismessaged && (
+                                    <button
+                                        onClick={() => setIsAcceptModalOpen(true)}
+                                        className="bg-[#0D132D] text-white font-medium py-2 px-6 min-w-48 rounded-lg hover:bg-[#0D132Ded] transition"
+                                    >
                                     Accept Application
-                                </button>
+                                    </button>
+                                )}
                             </div>
                         </div>
 

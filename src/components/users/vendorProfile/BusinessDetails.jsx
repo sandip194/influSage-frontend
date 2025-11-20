@@ -153,6 +153,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
         }
         try {
             setIsSubmitting(true);
+            const values = form.getFieldsValue();
             const profilejson = {
                 photopath: profileImage ? null : existingPhotoPath,
                 businessname: values.businessname,

@@ -620,7 +620,7 @@ const CampaignReviewStep = ({ onEdit }) => {
               <Spin size="small" /> <span>Sending...</span>
             </>
           ) : (
-            "Send To Admin"
+            "Send For Approcval"
           )}
         </button>
       </div>

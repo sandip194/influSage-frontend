@@ -145,22 +145,24 @@ useEffect(() => {
 
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const file = e.target.files[0];
+  if (!file) return;
 
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/webp']; // Add more if needed
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    setProfileError('Only JPG, JPEG, or WEBP files are allowed.');
+    setProfileImage(null);
+    setPreview(null);
+    return;
+  }
 
-    if (!allowedTypes.includes(file.type)) {
-      setProfileError('Only JPG, JPEG, or WEBP files are allowed. PNG is not allowed.');
-      setProfileImage(null);
-      setPreview(null);
-      return;
-    }
+  setProfileError('');
+  setProfileImage(file);
+  setPreview(URL.createObjectURL(file));
 
-    setProfileError('');
-    setProfileImage(file);
-    setPreview(URL.createObjectURL(file));
-  };
+  setIsFormChanged(true);
+};
+
 
   const handleSubmit = async () => {
     try {

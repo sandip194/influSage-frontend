@@ -279,7 +279,7 @@ const InfluencerProfile = () => {
                             {/* Buttons Section */}
                             <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-3">
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
-                                    {influDetails?.invitedcampaigns !== null && (
+                                    {influDetails?.ismessaged === true && (
                                         <Tooltip title="Message">
                                             <button
                                                 onClick={handleMessageClick}

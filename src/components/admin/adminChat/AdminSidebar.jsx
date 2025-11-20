@@ -52,7 +52,9 @@ const AdminSidebar = ({ setActiveSubject }) => {
       params: { p_statuslabelid: tab.id },
     });
 
-    const tickets = res.data?.viewTicket || [];
+    const tickets = Array.isArray(res.data?.viewTicket?.records)
+      ? res.data.viewTicket.records
+      : [];
 
     const mapped = tickets.map((t) => ({
       id: t.usersupportticketid,
@@ -180,16 +182,17 @@ const AdminSidebar = ({ setActiveSubject }) => {
                 </span>
 
                 <div className="flex gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSubjectClick(s);
-                    }}
-                    className={`text-[11px] px-2 py-1 rounded font-medium transition bg-blue-600 text-white hover:bg-blue-700"
-                    }`}
-                  >
-                    Claim
-                  </button>
+                  {s.isclaimed === true && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSubjectClick(s);
+                      }}
+                      className="text-[11px] px-2 py-1 rounded font-medium transition bg-blue-600 text-white hover:bg-blue-700"
+                    >
+                      Claim
+                    </button>
+                  )}
 
                   <button
                     onClick={(e) => {
