@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import Sidebar from "./SidebarVendor";
@@ -30,15 +30,24 @@ export default function ChatAppPageVendor() {
   const showChatUI = activeChat && socket;
   const [selectedReplyMessage, setSelectedReplyMessage] = useState(null);
 
-  // 📦 Join/leave socket room
+  const joinedRoomRef = useRef(null);
+
   useEffect(() => {
     if (!socket || !activeChat?.conversationid) return;
 
-    socket.emit("joinRoom", activeChat.conversationid);
+    if (joinedRoomRef.current !== activeChat.conversationid) {
+      socket.emit("joinRoom", activeChat.conversationid);
+      joinedRoomRef.current = activeChat.conversationid;
+    }
+
     return () => {
-      socket.emit("leaveRoom", activeChat.conversationid);
+      if (joinedRoomRef.current) {
+        socket.emit("leaveRoom", joinedRoomRef.current);
+        joinedRoomRef.current = null;
+      }
     };
   }, [activeChat?.conversationid, socket]);
+
 
   // 📥 Receive messages
   useEffect(() => {
@@ -46,7 +55,7 @@ export default function ChatAppPageVendor() {
 
     const handleReceiveMessage = (msg) => {
       dispatch(addMessage(msg));
-      setRefreshKey((prev) => prev + 1);
+      // setRefreshKey((prev) => prev + 1);
     };
 
     socket.on("receiveMessage", handleReceiveMessage);
@@ -113,10 +122,10 @@ export default function ChatAppPageVendor() {
   };
 
   const handleEditMessage = async ({ id, content, file, replyId }) => {
-     if (!activeChat?.conversationid || !id) {
-        console.error("Missing conversation id or message id", { activeChat, id });
-        return;
-      }
+    if (!activeChat?.conversationid || !id) {
+      console.error("Missing conversation id or message id", { activeChat, id });
+      return;
+    }
 
     try {
       const formData = new FormData();
@@ -137,7 +146,7 @@ export default function ChatAppPageVendor() {
           senderId: userId,
           content,
           file: file || res.data.filepath || null,
-          conversationId: activeChat.id,
+          conversationId: activeChat.conversationId,
           replyId: replyId || null,
         };
 
@@ -151,26 +160,42 @@ export default function ChatAppPageVendor() {
     }
   };
 
-  useEffect(() => {
-  if (location.state?.influencerId) {
-    const { influencerId, influencerName, influencerPhoto, conversationId } = location.state;
-
-    const chatData = {
-      id: conversationId || influencerId,
-      conversationid: conversationId,
-      name: influencerName,
-      img: influencerPhoto,
-      vendorId: userId,
-      influencerId,
-    };
-
-    dispatch(setActiveChat(chatData));
-
-    if (conversationId) {
-      fetchMessages(); 
+  const fetchMessages = async () => {
+    if (!activeChat?.conversationid) return;
+    try {
+      const res = await axios.get(`/chat/messages/${activeChat.conversationid}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data?.messages) {
+        res.data.messages.forEach((msg) => dispatch(addMessage(msg)));
+        setRefreshKey((prev) => prev + 1);
+      }
+    } catch (err) {
+      console.error("Failed to fetch messages", err);
     }
-  }
-}, [location.state, dispatch, userId]);
+  };
+
+
+  useEffect(() => {
+    if (location.state?.influencerId) {
+      const { influencerId, influencerName, influencerPhoto, conversationId } = location.state;
+
+      const chatData = {
+        id: conversationId || influencerId,
+        conversationid: conversationId,
+        name: influencerName,
+        img: influencerPhoto,
+        vendorId: userId,
+        influencerId,
+      };
+
+      dispatch(setActiveChat(chatData));
+
+      if (conversationId) {
+        fetchMessages();
+      }
+    }
+  }, [location.state, dispatch, userId]);
 
   return (
     <div className="h-[85vh] flex overflow-hidden">
@@ -184,7 +209,7 @@ export default function ChatAppPageVendor() {
             dispatch(
               setActiveChat(chat)
             )}
-            selectChatFromOutside={chatToSelect}
+          selectChatFromOutside={chatToSelect}
         />
       </div>
 

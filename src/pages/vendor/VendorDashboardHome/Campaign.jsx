@@ -130,7 +130,7 @@ const Campaign = () => {
 
         // Show toast for success
         toast.success(response?.data?.message);
-
+        fetchInfluencers()
       } else {
         toast.error(response.data.message || "Failed to update favourite");
       }

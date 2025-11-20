@@ -117,9 +117,6 @@ export const LoginForm = () => {
         if (res.data?.p_code === "BLOCKED") {
           navigate("/User?status=blocked");
           return;
-        } else if (res.data?.p_code === "REJECTED") {
-          navigate("/User?status=rejected");
-          return;
         }
 
 

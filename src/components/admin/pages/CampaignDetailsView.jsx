@@ -679,7 +679,7 @@ const CampaignDetailsView = () => {
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
                     rows={4}
-                    maxLength={500}
+                    maxLength={250}
                     showCount={{ formatter: ({ count, maxLength }) => `${count} / ${maxLength}` }}
                 />
             </Modal>
