@@ -14,7 +14,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Tooltip } from "antd";
 
-const VendorChatWindow = ({ activeSubject }) => {
+const VendorChatWindow = ({ activeSubject, onCloseSuccess }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -22,52 +22,86 @@ const VendorChatWindow = ({ activeSubject }) => {
   const [isClosed, setIsClosed] = useState(false);
   const [replyToMessage, setReplyToMessage] = useState(null);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
+  const [attachedFile, setAttachedFile] = useState(null);
+  const [attachedPreview, setAttachedPreview] = useState(null);
 
   const [previewImage, setPreviewImage] = useState(null);
   const [previewVideo, setPreviewVideo] = useState(null);
   const imageInputRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const handleSend = () => {
-    if (!activeSubject) return;
-    if (!message.trim()) return;
+const handleSend = async () => {
+  if (!activeSubject) return;
+  if (!message.trim() && !attachedFile) return;
 
-    const newMsg = {
-      id: Date.now(),
-      message,
-      sender: "user",
-      replyId: replyToMessage?.id || null,
-    };
+  try {
+    const formData = new FormData();
+    formData.append("p_usersupportticketid", activeSubject.id);
+    formData.append("p_messages", message || "");
+    formData.append("p_replyid", replyToMessage?.id || "");
 
-    setMessages((prev) => [...prev, newMsg]);
+    if (attachedFile) {
+      formData.append("file", attachedFile);
+    }
+
+    const res = await axios.post(
+      "/chat/support/user-admin/send-message",
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        message,
+        filepath: res.data.filePaths || null,
+        filetype: attachedFile
+          ? attachedFile.type.startsWith("image")
+            ? "image"
+            : attachedFile.type.startsWith("video")
+            ? "video"
+            : "file"
+          : null,
+        sender: "user",
+        roleid: 2,
+        replyId: replyToMessage?.id || null,
+      },
+    ]);
+
     setMessage("");
     setReplyToMessage(null);
-  };
+    setAttachedFile(null);
+    setAttachedPreview(null);
+  } catch (err) {
+    console.error("Send message error", err);
+    toast.error("Message not sent");
+  }
+};
+
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") handleSend();
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const handleImageUpload = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  setAttachedFile(file);
+  setAttachedPreview(URL.createObjectURL(file));
+};
 
-    const imgURL = URL.createObjectURL(file);
-    setMessages((prev) => [
-      ...prev,
-      { type: "image", content: imgURL, sender: "user" },
-    ]);
-  };
-
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setMessages((prev) => [
-      ...prev,
-      { type: "file", content: file.name, sender: "user" },
-    ]);
-  };
+const handleFileUpload = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  setAttachedFile(file);
+  setAttachedPreview(URL.createObjectURL(file));
+};
 
   const handleClose = async () => {
     if (!activeSubject || isClosed) return;
@@ -107,8 +141,8 @@ const VendorChatWindow = ({ activeSubject }) => {
           {
             headers: { Authorization: `Bearer ${token}` },
             params: {
-              p_limit: 200,
-              p_offset: 0,
+              p_limit: 20,
+              p_offset: 1,
             },
           }
         );
@@ -134,8 +168,7 @@ const VendorChatWindow = ({ activeSubject }) => {
               message: m.message,
               filepath: m.filepath || null,
               filetype,
-              // sender:
-              //   m.senderrole?.toLowerCase() === "admin" ? "admin" : "user",
+              sender: m.roleid === 4 ? "admin" : "user",
               time: m.createddate,
             };
           })
@@ -198,19 +231,21 @@ const VendorChatWindow = ({ activeSubject }) => {
             <h1 className="text-2xl font-bold text-[#0D132D]">
               {activeSubject.name}
             </h1>
-            <button
-              onClick={handleClose}
-              disabled={isClosed}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition
-                ${
-                  isClosed
-                    ? "bg-red-600 text-white border-red-600 cursor-not-allowed"
-                    : "bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-300"
-                }
-              `}
-            >
-              {isClosed ? "Closed" : "Close"}
-            </button>
+              {isClosed && (
+                <span className="px-3 py-1.5 rounded-full text-sm bg-red-600 text-white border border-red-600">
+                  Closed
+                </span>
+              )}
+
+              {!isClosed && (
+                <button
+                  onClick={handleClose}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-gray-200 text-gray-800 border border-gray-300 hover:bg-gray-300"
+                >
+                  Close
+                </button>
+              )}
+
           </div>
 
           <div className="flex-1 overflow-y-auto space-y-4 p-4 pb-28">
@@ -222,15 +257,11 @@ const VendorChatWindow = ({ activeSubject }) => {
                 onMouseLeave={() => setHoveredMsgId(null)}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className={`relative flex ${
-                  msg.sender === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`relative flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`px-4 py-2 rounded-2xl max-w-[65%] shadow-md text-sm break-words whitespace-pre-wrap ${
-                    msg.sender === "user"
-                      ? "bg-[#0D132D] text-white"
-                      : "bg-gray-100 text-gray-900"
+                    msg.sender === "user" ? "bg-[#0D132D] text-white" : "bg-gray-100 text-gray-900"
                   }`}
                 >
                   {msg.replyId && (
@@ -345,6 +376,31 @@ const VendorChatWindow = ({ activeSubject }) => {
             </button>
           </div>
         )}
+        {attachedPreview && (
+  <div className="mb-3 flex items-center gap-3 bg-gray-200 p-2 rounded-md">
+    {attachedFile.type.startsWith("image") ? (
+      <img
+        src={attachedPreview}
+        className="w-20 h-20 rounded-md object-cover cursor-pointer"
+        onClick={() => setPreviewImage(attachedPreview)}
+      />
+    ) : (
+      <div className="flex-1 text-sm font-medium truncate">
+        📎 {attachedFile.name}
+      </div>
+    )}
+
+    <button
+      onClick={() => {
+        setAttachedPreview(null);
+        setAttachedFile(null);
+      }}
+      className="text-gray-600 hover:text-red-600 text-lg font-bold"
+    >
+      ✕
+    </button>
+  </div>
+)}
         <motion.div
           initial={{ scale: 0.92, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}

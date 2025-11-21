@@ -26,37 +26,78 @@ const AdminChatWindow = ({ activeSubject }) => {
   const fileInputRef = useRef(null);
   const [replyToMessage, setReplyToMessage] = useState(null);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
+  const [attachedFile, setAttachedFile] = useState(null);
+  const [attachedPreview, setAttachedPreview] = useState(null);
 
-const handleSend = () => {
-  if (!activeSubject || !message.trim()) return;
+const handleSend = async () => {
+  if (!activeSubject) return;
+  if (!message.trim() && !attachedFile) return;
 
-  const newMsg = {
-    id: Date.now(),
-    message,
-    sender: "user",
-    replyId: replyToMessage?.id || null,
-  };
+  try {
+    const formData = new FormData();
+    formData.append("p_usersupportticketid", activeSubject.id);
+    formData.append("p_messages", message || "");
+    formData.append("p_replyid", replyToMessage?.id || "");
 
-  setMessages((prev) => [...prev, newMsg]);
-  setMessage("");
-  setReplyToMessage(null);
+    if (attachedFile) {
+      formData.append("file", attachedFile);
+    }
+
+    const res = await axios.post(
+      "/chat/support/user-admin/send-message",
+      formData,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    setMessages(
+      sorted.map((m) => {
+        let filetype = null;
+        if (m.filepath) {
+          const ext = m.filepath.split(".").pop().toLowerCase();
+          if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
+          else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
+          else filetype = "file";
+        }
+
+        return {
+          id: m.usersupportticketmessageid,
+          replyId: m.replyid || null,
+          message: m.message,
+          filepath: m.filepath || null,
+          filetype,
+          sender: m.roleid === 4 ? "admin" : "user",
+          time: m.createddate,
+        };
+      })
+    );
+
+    setMessage("");
+    setAttachedFile(null);
+    setAttachedPreview(null);
+    setReplyToMessage(null);
+  } catch (err) {
+    console.error("Send message error", err);
+    toast.error("Message not sent");
+  }
 };
 
 
   const handleKeyPress = (e) => e.key === "Enter" && handleSend();
 
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const imgURL = URL.createObjectURL(file);
-    setMessages((prev) => [...prev, { type: "image", content: imgURL, sender: "user" }]);
-  };
+  const file = e.target.files[0];
+  if (!file) return;
+  setAttachedFile(file);
+  setAttachedPreview(URL.createObjectURL(file));
+};
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setMessages((prev) => [...prev, { type: "file", content: file.name, sender: "user" }]);
-  };
+const handleFileUpload = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  setAttachedFile(file);
+  setAttachedPreview(URL.createObjectURL(file));
+};
+
 
   const handleResolve = async () => {
     if (!activeSubject || isResolved) return;
@@ -113,7 +154,7 @@ const handleSend = () => {
             message: m.message,
             filepath: m.filepath || null,
             filetype,
-            // sender: m.senderrole?.toLowerCase() === "admin" ? "admin" : "user",
+            sender: m.roleid === 4 ? "admin" : "user",
             time: m.createddate,
           };
         })
@@ -174,11 +215,11 @@ const handleSend = () => {
                 onMouseLeave={() => setHoveredMsgId(null)}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className={`relative flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+                className={`relative flex ${msg.sender === "admin" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`px-4 py-2 rounded-2xl max-w-[65%] shadow-md text-sm break-words whitespace-pre-wrap ${
-                    msg.sender === "user" ? "bg-[#0D132D] text-white" : "bg-gray-100 text-gray-900"
+                    msg.sender === "admin" ? "bg-[#0D132D] text-white" : "bg-gray-100 text-gray-900"
                   }`}
                 >
                   {/* reply preview inside bubble */}
@@ -189,7 +230,7 @@ const handleSend = () => {
                       if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
                     }}
                     className={`mb-2 px-2 py-1 rounded-md border-l-4 text-xs cursor-pointer
-                      ${msg.sender === "user"
+                      ${msg.sender === "admin"
                         ? "bg-white/20 border-blue-400 text-blue-100"
                         : "bg-gray-200 border-blue-500 text-gray-700"
                       }`}
@@ -211,7 +252,7 @@ const handleSend = () => {
                       <button
                         onClick={() => setReplyToMessage(msg)}
                         className={`absolute -top-6 p-1 bg-white shadow  hover:bg-gray-100 transition
-                          ${msg.sender === "user" ? "right-0" : "left-0"}`}
+                          ${msg.sender === "admin" ? "right-0" : "left-0"}`}
                       >
                         <Tooltip title="Reply">
                           <RiReplyLine size={18} className="text-gray-700" />
@@ -267,6 +308,32 @@ const handleSend = () => {
             <button onClick={() => setReplyToMessage(null)} className="text-gray-500 hover:text-gray-700">✕</button>
           </div>
         )}
+        {attachedPreview && (
+  <div className="mb-3 flex items-center gap-3 bg-gray-200 p-2 rounded-md">
+    {attachedFile.type.startsWith("image") ? (
+      <img
+        src={attachedPreview}
+        className="w-20 h-20 rounded-md object-cover cursor-pointer"
+        onClick={() => setPreviewImage(attachedPreview)}
+      />
+    ) : (
+      <div className="flex-1 text-sm font-medium truncate">
+        📎 {attachedFile.name}
+      </div>
+    )}
+
+    <button
+      onClick={() => {
+        setAttachedPreview(null);
+        setAttachedFile(null);
+      }}
+      className="text-gray-600 hover:text-red-600 text-lg font-bold"
+    >
+      ✕
+    </button>
+  </div>
+)}
+
         <motion.div
           initial={{ scale: 0.92, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
