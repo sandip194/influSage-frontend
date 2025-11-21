@@ -25,6 +25,7 @@ import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 import VendorContract from './VendorContract';
 import ViewAllOffers from '../../vendor/offers/ViewAllOffers';
+import VendorContentLinksTab from './VendorContentLinksTab';
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
@@ -365,39 +366,46 @@ const CampaignDetails = () => {
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Left Section */}
         <div className="flex-1 space-y-4 ">
-          <div className="bg-white rounded-xl p-6 border border-gray-100 bg-white rounded-xl  border border-gray-100">
-            <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-4'>
+          <div className="bg-white rounded-xl p-6 border border-gray-100">
+
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 border-b border-gray-200 pb-4">
+
               {/* Left Section */}
               <div className="flex items-start gap-4">
-                {/* Profile */}
                 <img
                   src={campaignDetails?.photopath}
                   alt="Profile"
                   className="w-16 h-16 rounded-full object-cover"
                 />
+
                 <div>
-                  <h2 className="font-semibold text-lg text-gray-900 ">
+                  <h2 className="font-semibold text-lg text-gray-900">
                     {campaignDetails?.name || "Campaign Name"}
                   </h2>
-                  <p className="text-gray-500 text-sm">{campaignDetails?.businessname}</p>
+                  <p className="text-gray-500 text-sm">
+                    {campaignDetails?.businessname}
+                  </p>
                 </div>
               </div>
 
               {/* Right Buttons */}
-              <div className="flex gap-2 items-start">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+
                 {campaignDetails?.iseditable !== "Not editable" && (
                   <button
                     onClick={handleEditClick}
-                    className="bg-[#0f122f] text-white px-6 py-2 rounded-full border border-[#0f122f] font-semibold hover:bg-[#1a1d4f] transition"
+                    className="bg-[#0f122f] text-white px-6 py-2 rounded-full border border-[#0f122f] font-semibold hover:bg-[#1a1d4f] transition w-full sm:w-auto"
                   >
                     Edit Campaign
                   </button>
                 )}
+
                 <button
                   onClick={() => setCancelModel(true)}
                   disabled={campaignDetails?.iseditable === "Not editable"}
-                  className={`w-full sm:w-auto px-6 py-2 rounded-full border font-semibold transition
-                      ${campaignDetails?.iseditable === "Not editable"
+                  className={`px-6 py-2 rounded-full border font-semibold transition w-full sm:w-auto
+          ${campaignDetails?.iseditable === "Not editable"
                       ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
                       : "border-red-400 text-red-900 hover:bg-gray-50"
                     }`}
@@ -408,14 +416,17 @@ const CampaignDetails = () => {
             </div>
 
             {/* Info Section */}
-            <div className="mt-3 flex flex-wrap justify-between gap-4 pt-2">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+
               {/* Budget */}
               <div>
                 <div className="flex items-center gap-2 text-gray-400 mb-1">
                   <RiMoneyRupeeCircleLine className="w-5 h-5" />
                   <span>Budget</span>
                 </div>
-                <p className="text-gray-800 font-medium">₹{campaignDetails?.estimatedbudget}</p>
+                <p className="text-gray-800 font-medium">
+                  ₹{campaignDetails?.estimatedbudget}
+                </p>
               </div>
 
               {/* Language */}
@@ -424,6 +435,7 @@ const CampaignDetails = () => {
                   <RiTranslate className="w-5 h-5" />
                   <span>Language</span>
                 </div>
+
                 <div className="flex gap-2 flex-wrap">
                   {campaignDetails?.campaignlanguages?.map((lang) => (
                     <span
@@ -442,6 +454,7 @@ const CampaignDetails = () => {
                   <RiMenLine className="w-5 h-5" />
                   <span>Gender</span>
                 </div>
+
                 <div className="flex gap-2 flex-wrap">
                   {campaignDetails?.campaigngenders?.map((gender) => (
                     <span
@@ -453,8 +466,10 @@ const CampaignDetails = () => {
                   ))}
                 </div>
               </div>
+
             </div>
           </div>
+
 
 
 
@@ -500,6 +515,11 @@ const CampaignDetails = () => {
                     campaignId={campaignId}
                   />
                 </Tabs.TabPane>
+
+                <Tabs.TabPane tab="Content Links" key="contentLinks">
+                  <VendorContentLinksTab />
+                </Tabs.TabPane>
+
 
                 <Tabs.TabPane tab="Activity" key="activity">
                   <VendorActivity />
