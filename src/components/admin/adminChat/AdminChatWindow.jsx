@@ -4,13 +4,15 @@ import {
   RiAttachment2,
   RiImageLine,
   RiSendPlaneFill,
-  RiMessage3Line
+  RiMessage3Line,
+  RiReplyLine 
 } from "@remixicon/react";
 import EmojiPicker from "emoji-picker-react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { Tooltip } from "antd";
 
 const AdminChatWindow = ({ activeSubject }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -22,13 +24,24 @@ const AdminChatWindow = ({ activeSubject }) => {
   const [previewVideo, setPreviewVideo] = useState(null);
   const imageInputRef = useRef(null);
   const fileInputRef = useRef(null);
+  const [replyToMessage, setReplyToMessage] = useState(null);
+  const [hoveredMsgId, setHoveredMsgId] = useState(null);
 
-  const handleSend = () => {
-    if (!activeSubject || !message.trim()) return;
-    const newMsg = { type: "text", content: message, sender: "user" };
-    setMessage("");
-    setMessages((prev) => [...prev, newMsg]);
+const handleSend = () => {
+  if (!activeSubject || !message.trim()) return;
+
+  const newMsg = {
+    id: Date.now(),
+    message,
+    sender: "user",
+    replyId: replyToMessage?.id || null,
   };
+
+  setMessages((prev) => [...prev, newMsg]);
+  setMessage("");
+  setReplyToMessage(null);
+};
+
 
   const handleKeyPress = (e) => e.key === "Enter" && handleSend();
 
@@ -100,7 +113,7 @@ const AdminChatWindow = ({ activeSubject }) => {
             message: m.message,
             filepath: m.filepath || null,
             filetype,
-            sender: m.senderrole?.toLowerCase() === "admin" ? "admin" : "user",
+            // sender: m.senderrole?.toLowerCase() === "admin" ? "admin" : "user",
             time: m.createddate,
           };
         })
@@ -129,18 +142,135 @@ const AdminChatWindow = ({ activeSubject }) => {
             <br />You can send messages, images, emojis, and files.
           </p>
         </motion.div>
-      )}
+      )}     
 
+      <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+      <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileUpload} />
+
+      {/* messages */}
+      {activeSubject && (
+        <motion.div className="flex flex-col h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <div className="p-4 flex justify-between items-center border-b border-gray-500">
+            <h1 className="text-2xl font-bold text-[#0D132D]">{activeSubject?.name}</h1>
+          {activeSubject?.isclaimedbyadmin && (
+            <button
+              onClick={handleResolve}
+              disabled={isResolved}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
+            isResolved ? "bg-green-600 text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+              }`}
+            >
+              {isResolved ? "Resolved" : "Resolve"}
+            </button>
+          )}
+          </div>
+
+          <div className="flex-1 overflow-y-auto space-y-4 p-4 pb-28">
+            {messages.map((msg, idx) => (
+              <motion.div
+                key={idx}
+                id={msg.id} 
+                onMouseEnter={() => setHoveredMsgId(idx)}
+                onMouseLeave={() => setHoveredMsgId(null)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className={`relative flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`px-4 py-2 rounded-2xl max-w-[65%] shadow-md text-sm break-words whitespace-pre-wrap ${
+                    msg.sender === "user" ? "bg-[#0D132D] text-white" : "bg-gray-100 text-gray-900"
+                  }`}
+                >
+                  {/* reply preview inside bubble */}
+                {msg.replyId && (
+                  <div
+                    onClick={() => {
+                      const el = document.getElementById(msg.replyId);
+                      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }}
+                    className={`mb-2 px-2 py-1 rounded-md border-l-4 text-xs cursor-pointer
+                      ${msg.sender === "user"
+                        ? "bg-white/20 border-blue-400 text-blue-100"
+                        : "bg-gray-200 border-blue-500 text-gray-700"
+                      }`}
+                  >
+                    <span className="font-semibold block">
+                      {messages.find((m) => m.id === msg.replyId)?.sender === "user"
+                        ? "You"
+                        : activeSubject?.name}
+                    </span>
+
+                    <span className="block truncate">
+                      {messages.find((m) => m.id === msg.replyId)?.message || "Attachment"}
+                    </span>
+                  </div>
+                )}
+                  {/* text */}
+                  {!msg.filepath && msg.message && <span>{msg.message}</span>}
+                    {hoveredMsgId === idx && (
+                      <button
+                        onClick={() => setReplyToMessage(msg)}
+                        className={`absolute -top-6 p-1 bg-white shadow  hover:bg-gray-100 transition
+                          ${msg.sender === "user" ? "right-0" : "left-0"}`}
+                      >
+                        <Tooltip title="Reply">
+                          <RiReplyLine size={18} className="text-gray-700" />
+                        </Tooltip>
+                      </button>
+                    )}
+                  {/* image */}
+                  {msg.filetype === "image" && (
+                    <img
+                      src={msg.filepath}
+                      className="w-full max-w-[220px] rounded-lg mt-2 cursor-pointer hover:opacity-90 transition"
+                      onClick={() => setPreviewImage(msg.filepath)}
+                    />
+                  )}
+
+                  {/* video */}
+                  {msg.filetype === "video" && (
+                    <video
+                      controls
+                      className="w-full max-w-[240px] rounded-lg mt-2 cursor-pointer"
+                      onClick={() => setPreviewVideo(msg.filepath)}
+                    >
+                      <source src={msg.filepath} type="video/mp4" />
+                    </video>
+                  )}
+
+                  {/* file */}
+                  {msg.filetype === "file" && (
+                    <div
+                      className="flex items-center gap-2 text-white px-3 mt-2 cursor-pointer"
+                      onClick={() => window.open(msg.filepath, "_blank")}
+                    >
+                      <span className="underline font-medium truncate">{msg.filepath.split("/").pop()}</span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
       <motion.div
         initial={false}
         animate={{ marginTop: activeSubject ? "0px" : "50vh" }}
         transition={{ type: "spring", stiffness: 45, damping: 12 }}
-        className={`px-6 ${activeSubject ? "absolute bottom-0 w-full" : "w-full"}`}
+       className="px-6 sticky bottom-0 w-full bg-white border-t border-gray-300"
       >
+        {replyToMessage && (
+          <div className="bg-gray-200 border-l-4 border-blue-600 px-3 py-2 rounded-md mb-2 flex justify-between items-center">
+            <div className="text-xs text-gray-700">
+              Replying to: <span className="font-semibold">{replyToMessage?.message?.slice(0, 40)}</span>
+            </div>
+            <button onClick={() => setReplyToMessage(null)} className="text-gray-500 hover:text-gray-700">✕</button>
+          </div>
+        )}
         <motion.div
           initial={{ scale: 0.92, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className={`flex items-center bg-gray-300 rounded-full px-4 my-4 py-2 shadow-lg ${!activeSubject && "opacity-60"}`}
+          className={`flex items-center bg-gray-300 rounded-full px-4 2 py-2 shadow-lg ${!activeSubject && "opacity-60"}`}
         >
           <input
             type="text"
@@ -179,72 +309,6 @@ const AdminChatWindow = ({ activeSubject }) => {
           </motion.button>
         </motion.div>
       </motion.div>
-
-      <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-      <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileUpload} />
-
-      {/* messages */}
-      {activeSubject && (
-        <motion.div className="flex flex-col h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <div className="p-4 flex justify-between items-center border-b border-gray-500">
-            <h1 className="text-2xl font-bold text-[#0D132D]">{activeSubject?.name}</h1>
-            <button
-              onClick={handleResolve}
-              disabled={isResolved}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
-                isResolved ? "bg-green-600 text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-              }`}
-            >
-              {isResolved ? "Resolved" : "Resolve"}
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto space-y-4 p-4 pb-28">
-            {messages.map((msg, idx) => (
-              <motion.div key={idx} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`px-4 py-2 rounded-2xl max-w-[65%] shadow-md text-sm break-words whitespace-pre-wrap ${
-                    msg.sender === "user" ? "bg-[#0D132D] text-white" : "bg-gray-100 text-gray-900"
-                  }`}
-                >
-                  {/* text */}
-                  {!msg.filepath && msg.message && <span>{msg.message}</span>}
-
-                  {/* image */}
-                  {msg.filetype === "image" && (
-                    <img
-                      src={msg.filepath}
-                      className="w-full max-w-[220px] rounded-lg mt-2 cursor-pointer hover:opacity-90 transition"
-                      onClick={() => setPreviewImage(msg.filepath)}
-                    />
-                  )}
-
-                  {/* video */}
-                  {msg.filetype === "video" && (
-                    <video
-                      controls
-                      className="w-full max-w-[240px] rounded-lg mt-2 cursor-pointer"
-                      onClick={() => setPreviewVideo(msg.filepath)}
-                    >
-                      <source src={msg.filepath} type="video/mp4" />
-                    </video>
-                  )}
-
-                  {/* file */}
-                  {msg.filetype === "file" && (
-                    <div
-                      className="flex items-center gap-2 text-white px-3 mt-2 cursor-pointer"
-                      onClick={() => window.open(msg.filepath, "_blank")}
-                    >
-                      <span className="underline font-medium truncate">{msg.filepath.split("/").pop()}</span>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      )}
 
       {/* emoji picker */}
       {showEmojiPicker && (

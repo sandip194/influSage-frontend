@@ -93,6 +93,7 @@ const VendorSidebar = ({ setActiveSubject }) => {
         id: t.usersupportticketid,
         name: t.subjectname,
         status: t.statusname,
+        isclosed: t.isclosed,
         created: t.createddate,
         icon: <RiBook2Line className="text-xl" />,
       })),

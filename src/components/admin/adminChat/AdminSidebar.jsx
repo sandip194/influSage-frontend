@@ -43,79 +43,79 @@ const AdminSidebar = ({ setActiveSubject }) => {
   }, [activeTab, statusList]);
 
   const fetchTickets = async (tab) => {
-  setLoading(true);
-  setSubjectsByTab((prev) => ({ ...prev, [tab.name]: [] }));
+    setLoading(true);
+    setSubjectsByTab((prev) => ({ ...prev, [tab.name]: [] }));
 
-  try {
-    const res = await axios.get("/chat/support/user-admin/all-tickets", {
-      headers: { Authorization: `Bearer ${token}` },
-      params: { p_statuslabelid: tab.id },
-    });
+    try {
+      const res = await axios.get("/chat/support/user-admin/all-tickets", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { p_statuslabelid: tab.id },
+      });
 
-    const tickets = Array.isArray(res.data?.viewTicket?.records)
-      ? res.data.viewTicket.records
-      : [];
+      const tickets = Array.isArray(res.data?.viewTicket?.records)
+        ? res.data.viewTicket.records
+        : [];
 
-    const mapped = tickets.map((t) => ({
-      id: t.usersupportticketid,
-      name: t.subjectname,
-      status: t.statusname,
-      createddate: t.createddate,
-      userfullname: t.userfullname,
-      userphoto: t.userphoto,
-      userrole: t.userrole,
-      adminfullname: t.adminfullname,
-      adminphoto: t.adminphoto,
-      icon: <RiBook2Line className="text-xl" />,
-      ...t,
-    }));
+      const mapped = tickets.map((t) => ({
+        id: t.usersupportticketid,
+        name: t.subjectname,
+        status: t.statusname,
+        createddate: t.createddate,
+        userfullname: t.userfullname,
+        userphoto: t.userphoto,
+        userrole: t.userrole,
+        adminfullname: t.adminfullname,
+        adminphoto: t.adminphoto,
+        icon: <RiBook2Line className="text-xl" />,
+        ...t,
+      }));
 
-    setSubjectsByTab((prev) => ({ ...prev, [tab.name]: mapped }));
-
-  } catch (error) {
-    console.error("Error fetching tickets:", error);
-  } finally {
-    setLoading(false);
-  }
-};
-
+      setSubjectsByTab((prev) => ({ ...prev, [tab.name]: mapped }));
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubjectClick = async (ticket) => {
-  try {
-    setActiveSubject(ticket);
-    setActiveSubjectId(ticket.id);
+    try {
+      setActiveSubject(ticket);
+      setActiveSubjectId(ticket.id);
 
-    await axios.post(
-      "/chat/support/ticket/create-or-update-status",
-      {
-        p_usersupportticketid: ticket.id,
-        p_objectiveid: null,
-        p_statusname: "Inprogress"
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+      await axios.post(
+        "/chat/support/ticket/create-or-update-status",
+        {
+          p_usersupportticketid: ticket.id,
+          p_objectiveid: null,
+          p_statusname: "Inprogress",
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    setActiveTab("Inprogress");
+      setSubjectsByTab((prev) => {
+        let updated = { ...prev };
+        Object.keys(updated).forEach((tab) => {
+          updated[tab] = updated[tab].map((t) =>
+            t.id === ticket.id ? { ...t, isclaimedbyadmin: true } : t
+          );
+        });
+        return updated;
+      });
 
-    setTimeout(() => {
-      const list = subjectsByTab["Inprogress"];
-      if (list) {
-        const updated = list.find(x => x.id === ticket.id);
-        if (updated) {
-          setActiveSubject(updated);
-          setActiveSubjectId(updated.id);
-        }
-      }
-    }, 300);
-
-  } catch (err) {
-    console.error("Error updating ticket status:", err);
-  }
-};
-
+      setActiveTab("Inprogress");
+    } catch (err) {
+      console.error("Error updating ticket status:", err);
+    }
+  };
 
   const subjects = subjectsByTab[activeTab] || [];
-  
+
+  const openChat = (ticket) => {
+    setActiveSubject(ticket);
+    setActiveSubjectId(ticket.id);
+    setTicketModalData(null);
+  };
 
   return (
     <div className="h-full w-[400px] bg-white flex flex-col p-4 border-r border-gray-200 shadow-md rounded-md">
@@ -132,7 +132,7 @@ const AdminSidebar = ({ setActiveSubject }) => {
           <button
             key={tab.id}
             onClick={() => {
-              setActiveTab(tab.name); 
+              setActiveTab(tab.name);
               setTicketModalData(null);
             }}
             className={`px-4 py-1.5 rounded-full text-sm border transition ${
@@ -182,27 +182,52 @@ const AdminSidebar = ({ setActiveSubject }) => {
                 </span>
 
                 <div className="flex gap-2">
-                  {s.isclaimed === true && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSubjectClick(s);
-                      }}
-                      className="text-[11px] px-2 py-1 rounded font-medium transition bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                      Claim
-                    </button>
-                  )}
+                  <div className="flex gap-2">
+                    {s.statusname === "Resolved" ? (
+                      s.isclaimed ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSubjectClick(s);
+                          }}
+                          className="text-[11px] px-2 py-1 rounded font-medium transition bg-blue-600 text-white hover:bg-blue-700"
+                        >
+                          Claim
+                        </button>
+                      ) : null
+                    ) : s.isclaimed ? (
+                      !s.isclaimedbyadmin ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSubjectClick(s);
+                          }}
+                          className="text-[11px] px-2 py-1 rounded font-medium transition bg-blue-600 text-white hover:bg-blue-700"
+                        >
+                          Claim
+                        </button>
+                      ) : (
+                        <button
+                          disabled
+                          className="text-[11px] px-2 py-1 rounded font-medium transition bg-gray-400 text-white cursor-not-allowed"
+                        >
+                          Claimed
+                        </button>
+                      )
+                    ) : null}
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setTicketModalData(s);
-                    }}
-                    className="text-[11px] px-2 py-1 rounded bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition"
-                  >
-                    Details
-                  </button>
+                     {s.statusname !== "Open" && s.isclaimedbyadmin === true && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openChat(s);
+                        }}
+                        className="text-[11px] px-2 py-1 rounded bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition"
+                      >
+                        Chat
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -233,7 +258,7 @@ const AdminSidebar = ({ setActiveSubject }) => {
             {/* Status */}
             <div className="flex items-center gap-2">
               <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded">
-                {ticketModalData.statusname}
+                {ticketModalData?.statusname}
               </span>
             </div>
 
@@ -242,27 +267,25 @@ const AdminSidebar = ({ setActiveSubject }) => {
               <div className="space-y-3 text-sm">
                 <div>
                   <p className="text-gray-500">Ticket ID</p>
-                  <p className="font-medium">{ticketModalData.usersupportticketid}</p>
+                  <p className="font-medium">{ticketModalData?.ticketnumber}</p>
                 </div>
 
                 <div>
                   <p className="text-gray-500">Subject</p>
-                  <p className="font-medium">{ticketModalData.subjectname}</p>
+                  <p className="font-medium">{ticketModalData?.subjectname}</p>
                 </div>
 
                 <div>
                   <p className="text-gray-500">Created On</p>
                   <p className="font-medium">
-                    {new Date(ticketModalData.createddate).toLocaleString()}
+                    {new Date(ticketModalData?.createddate).toLocaleString()}
                   </p>
                 </div>
 
                 <div>
                   <p className="text-gray-500">Resolved On</p>
                   <p className="font-medium">
-                    {ticketModalData.updateddate
-                      ? new Date(ticketModalData.updateddate).toLocaleString()
-                      : "-"}
+                    {new Date(ticketModalData?.resolveddate).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -281,7 +304,9 @@ const AdminSidebar = ({ setActiveSubject }) => {
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
-                      <p className="font-medium">{ticketModalData.userfullname}</p>
+                      <p className="font-medium">
+                        {ticketModalData.userfullname}
+                      </p>
                       <p className="text-xs text-gray-500">
                         {ticketModalData.userrole}
                       </p>
@@ -307,9 +332,7 @@ const AdminSidebar = ({ setActiveSubject }) => {
                       <p className="font-medium">
                         {ticketModalData.adminfullname || "Not assigned"}
                       </p>
-                      <p className="text-xs text-gray-500">
-                        Admin
-                      </p>
+                      <p className="text-xs text-gray-500">Admin</p>
                     </div>
                   </div>
                 </div>
