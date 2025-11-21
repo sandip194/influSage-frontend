@@ -95,7 +95,7 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
 
     // ============= LOAD EDIT DATA =============
     const loadData = async () => {
-        console.log(campaignId)
+        
         try {
             setLoading(true);
             const res = await axios.get(`user/signle-applied/${campaignId}`, {

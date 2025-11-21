@@ -5,14 +5,15 @@ import {
   RiTranslate,
   RiArrowLeftSLine,
   RiCheckLine,
+  RiDeleteBinLine,
 } from "@remixicon/react";
 import axios from "axios";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { Skeleton } from "antd";
+import { Skeleton, Modal } from "antd";
 import ApplyNowModal from "./ApplyNowModal";
-
+import { toast } from "react-toastify";
 
 
 const EditLayout = () => {
@@ -23,6 +24,7 @@ const EditLayout = () => {
   const [showFullDetails, setShowFullDetails] = useState(false);
   const [showFullBrandDesc, setShowFullBrandDesc] = useState(false);
 
+  const [isWithdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState(null);
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
@@ -99,6 +101,25 @@ const EditLayout = () => {
   const handleBack = useCallback(() => {
     window.history.back();
   }, []);
+
+  const handleWithdraw = async () => {
+    try {
+
+      const res = await axios.post(
+        `/user/withdraw-application`,
+        {
+          p_applicationid: Number(selectedApplicationId),
+          p_statusname: "Withdrawn",
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success(res.data?.message);
+      fetchCampaignDetails();
+    } catch (error) {
+      toast.error(error || "Error withdrawing application");
+    }
+  };
 
   if (loading)
     return (
@@ -239,18 +260,37 @@ const EditLayout = () => {
 
               {/* Right Buttons */}
               <div className="flex gap-2 items-start">
-                <button
-                  onClick={() => {
-                    setSelectedApplicationId(campaignDetails?.applicationid);
-                    setSelectedCampaignId(campaignId);     // you already have this in props
-                    setEditModalOpen(true);
-                  }}
-                  className="px-6 py-2 bg-[#0F122F] text-white rounded-full font-medium hover:bg-gray-800 transition"
-                >
-                  Edit Application
-                </button>
+
+                {/* Edit Button (Conditional) */}
+                {campaignDetails?.iseditable && (
+                  <button
+                    onClick={() => {
+                      setSelectedApplicationId(campaignDetails?.applicationid);
+                      setSelectedCampaignId(campaignId);
+                      setEditModalOpen(true);
+                    }}
+                    className="px-6 py-2 bg-[#0F122F] text-white rounded-full font-medium hover:bg-gray-800 transition"
+                  >
+                    Edit Application
+                  </button>
+                )}
+
+                {/* Withdraw Button (Conditional) */}
+                {campaignDetails?.canwithdraw && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedApplicationId(appliedDetails?.campaignapplicationid);
+                      setWithdrawModalOpen(true)
+                    }}
+                    className="px-4 py-2 flex items-center gap-1  border border-red-300 bg-white text-red-600 rounded-full text-sm hover:bg-red-50 hover:border-red-500"
+                  ><RiDeleteBinLine size={16} className="text-red-500" />
+                    Withdraw
+                  </button>
+                )}
 
               </div>
+
             </div>
 
             {/* Bottom Grid Section */}
@@ -727,6 +767,39 @@ const EditLayout = () => {
           </div>
         </div>
       </div>
+
+
+      {/* Withdraw Modal */}
+      <Modal
+        open={isWithdrawModalOpen}
+        onCancel={() => setWithdrawModalOpen(false)}
+        centered
+        footer={null}
+      >
+        <h2 className="text-xl font-semibold mb-2">Withdraw Application</h2>
+        <p className="text-gray-600">
+          Are you sure you want to withdraw this application?
+        </p>
+
+        <div className="flex justify-end gap-3 mt-4">
+          <button
+            onClick={() => setWithdrawModalOpen(false)}
+            className="px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={() => {
+              handleWithdraw(selectedApplicationId);
+              setWithdrawModalOpen(false);
+            }}
+            className="px-6 py-2 rounded-full bg-[#0f122f] text-white"
+          >
+            Withdraw
+          </button>
+        </div>
+      </Modal>
 
 
       <ApplyNowModal

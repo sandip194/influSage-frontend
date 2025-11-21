@@ -18,6 +18,7 @@ import dayjs from 'dayjs';
 import VendorCampaignOverview from '../vendorCampaign/VendorCampaignOverview';
 import ContractTab from './tabs/ContractTab';
 import ApplicationTab from './tabs/ApplicationTab';
+import ContentLinksTab from './tabs/ContentLinksTab';
 
 const { TextArea } = Input;
 
@@ -331,6 +332,10 @@ const Details = () => {
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="Contract" key="contract">
                   <ContractTab />
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="Content Links" key="contentLinks">
+                  <ContentLinksTab />
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Activity" key="activity">
