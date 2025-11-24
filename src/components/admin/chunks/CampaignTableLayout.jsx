@@ -33,6 +33,8 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
+import { safeText, safeArray, safeNumber } from "../../../App/safeAccess";
+
 const { RangePicker } = DatePicker;
 
 
@@ -299,10 +301,9 @@ const CampaignTableLayout = () => {
               setPage(1);
             }}
             className={`px-4 py-2 rounded-md border border-gray-300 transition
-              ${
-                String(activeStatusId) === String(status.id)
-                  ? "bg-[#0f122f] text-white"
-                  : "bg-white text-[#141843] hover:bg-gray-100"
+              ${String(activeStatusId) === String(status.id)
+                ? "bg-[#0f122f] text-white"
+                : "bg-white text-[#141843] hover:bg-gray-100"
               }
             `}
           >
@@ -311,7 +312,7 @@ const CampaignTableLayout = () => {
         ))}
       </div>
 
-     {/* Search + Filters + Sort */}
+      {/* Search + Filters + Sort */}
       <div className="flex flex-col mb-2 sm:flex-row sm:items-center sm:justify-between gap-4 bg-white shadow-sm p-3 rounded-t-2xl">
         <Input
           prefix={<SearchOutlined />}
@@ -379,7 +380,7 @@ const CampaignTableLayout = () => {
               </div>
             ))}
           </div>
-        ) : campaignList.length > 0 ? (
+        ) : campaignList?.length > 0 ? (
           <table className="min-w-[1100px] w-full text-left text-sm">
             {/* Table Header */}
             <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
@@ -401,7 +402,7 @@ const CampaignTableLayout = () => {
 
 
             <tbody>
-              {campaignList.map((c) => (
+              {campaignList?.map((c) => (
                 <tr
                   key={c.id}
                   onClick={() => navigate(`/admin-dashboard/campaigns/details/${c.id}`)}
@@ -413,31 +414,31 @@ const CampaignTableLayout = () => {
                       {c.photopath ? (
                         <img
                           src={c.photopath}
-                          alt={c.name}
+                          alt={safeText(c.name)}
                           className="w-12 h-12 object-cover rounded-full border border-gray-200"
                         />
                       ) : (
                         <div className="w-12 h-12 bg-gray-200 rounded-full" />
                       )}
                       <div>
-                        <div className="font-medium text-gray-900">{c.name}</div>
+                        <div className="font-medium text-gray-900">{safeText(c.name)}</div>
                       </div>
                     </div>
                   </td>
 
                   {/* Vendor */}
-                  <td className="p-4">{c.firstname || "—"}</td>
+                  <td className="p-4">{safeText(c.firstname)}</td>
 
                   {/* Categories */}
                   <td className="p-4">
-                    {c.campaigncategories?.length > 0 ? (
+                    {safeArray(c.campaigncategories).length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {c.campaigncategories.map((cat) => (
                           <span
                             key={cat.id}
                             className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full border border-blue-100"
                           >
-                            {cat.categoryname}
+                            {safeText(cat.categoryname)}
                           </span>
                         ))}
                       </div>
@@ -448,14 +449,14 @@ const CampaignTableLayout = () => {
 
                   {/* Platforms */}
                   <td className="p-4">
-                    {c.providercontenttype?.length > 0 ? (
+                    {safeArray(c.providercontenttype).length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {c.providercontenttype.map((p, i) => (
                           <span
                             key={i}
                             className="bg-purple-50 text-purple-700 text-xs px-2 py-0.5 rounded-full border border-purple-100"
                           >
-                            {p.providername} ({p.contenttypename})
+                            {`${safeText(p.providername)} (${safeText(p.contenttypename)})`}
                           </span>
                         ))}
                       </div>
@@ -466,34 +467,35 @@ const CampaignTableLayout = () => {
 
                   {/* Budget */}
                   <td className="p-4">
-                    ₹ {c.estimatedbudget?.toLocaleString() || "—"}
+                    ₹ {safeNumber(c.estimatedbudget).toLocaleString()}
                   </td>
 
                   {/* Start Date */}
                   <td className="p-4 whitespace-nowrap">
-                    {c.campaignstartdate || "—"}
+                    {safeText(c.campaignstartdate)}
                   </td>
 
                   {/* End Date */}
                   <td className="p-4 whitespace-nowrap">
-                    {c.campaignenddate || "—"}
+                    {safeText(c.campaignenddate)}
                   </td>
 
-                  {/* Status (only in All tab) */}
+                  {/* Status */}
                   {activeStatusName === "Approved" && (
                     <td className="p-4">
                       <span
                         className={`text-xs font-medium px-2 py-0.5 rounded-full ${c.status === "Approved"
-                          ? "bg-green-50 text-green-700 border border-green-100"
-                          : c.status === "Rejected"
-                            ? "bg-red-50 text-red-700 border border-red-100"
-                            : "bg-yellow-50 text-yellow-700 border border-yellow-100"
+                            ? "bg-green-50 text-green-700 border border-green-100"
+                            : c.status === "Rejected"
+                              ? "bg-red-50 text-red-700 border border-red-100"
+                              : "bg-yellow-50 text-yellow-700 border border-yellow-100"
                           }`}
                       >
-                        {c.status}
+                        {safeText(c.status)}
                       </span>
                     </td>
                   )}
+
 
                   {/* Actions */}
                   <td className="p-4 text-right space-x-2">

@@ -27,6 +27,7 @@
     "axios": "^1.10.0",
     "chart.js": "^4.5.0",
     "classnames": "^2.5.1",
+    "country-state-city": "^3.2.1",
     "dayjs": "^1.11.18",
     "dompurify": "^3.3.0",
     "emoji-picker-react": "^4.13.3",

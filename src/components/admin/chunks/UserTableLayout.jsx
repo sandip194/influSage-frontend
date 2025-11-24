@@ -25,8 +25,9 @@ import { SearchOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
+import { safeText, safeArray, safeNumber, safeDate } from "../../../App/safeAccess";
 
 const UserTableLayout = () => {
     const { token } = useSelector((state) => state.auth);
@@ -284,18 +285,18 @@ const UserTableLayout = () => {
     };
 
     useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const status = queryParams.get("status");
+        const queryParams = new URLSearchParams(location.search);
+        const status = queryParams.get("status");
 
-    if (status && statusList.length > 0) {
-        const matched = statusList.find(
-            (s) => s.name.toLowerCase().includes(status.toLowerCase())
-        );
-        if (matched) {
-            setActiveStatusId(matched.id);
+        if (status && statusList.length > 0) {
+            const matched = statusList.find(
+                (s) => s.name.toLowerCase().includes(status.toLowerCase())
+            );
+            if (matched) {
+                setActiveStatusId(matched.id);
+            }
         }
-    }
-}, [location.search, statusList]);
+    }, [location.search, statusList]);
 
     return (
         <div className="w-full">
@@ -312,24 +313,24 @@ const UserTableLayout = () => {
             <div className="flex flex-wrap gap-2 mb-4 bg-white p-3 rounded-lg">
                 {statusList.map((status) => (
                     <button
-                    key={status.id}
-                    onClick={() => {
-                        setActiveStatusId(status.id);
-                        setPage(1);
-                        setFilters({
-                        location: "",
-                        platforms: [],
-                        followers: [],
-                        gender: [],
-                        });
-                    }}
-                    className={`px-4 py-2 rounded-md border border-gray-300 transition
+                        key={status.id}
+                        onClick={() => {
+                            setActiveStatusId(status.id);
+                            setPage(1);
+                            setFilters({
+                                location: "",
+                                platforms: [],
+                                followers: [],
+                                gender: [],
+                            });
+                        }}
+                        className={`px-4 py-2 rounded-md border border-gray-300 transition
                         ${Number(activeStatusId) === Number(status.id)
-                        ? "bg-[#0f122f] text-white"
-                        : "bg-white text-[#141843] hover:bg-gray-100"
-                        }`}
+                                ? "bg-[#0f122f] text-white"
+                                : "bg-white text-[#141843] hover:bg-gray-100"
+                            }`}
                     >
-                    {status.name}
+                        {status.name}
                     </button>
                 ))}
             </div>
@@ -337,93 +338,67 @@ const UserTableLayout = () => {
             {/* Search + Filter */}
             <div className="flex bg-white shadow-sm p-3 rounded-t-2xl flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
                 <Input
-                prefix={<SearchOutlined />}
-                size="large"
-                placeholder="Search users..."
-                className="w-full sm:w-72"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={handleSearch}
+                    prefix={<SearchOutlined />}
+                    size="large"
+                    placeholder="Search users..."
+                    className="w-full sm:w-72"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyDown={handleSearch}
                 />
                 <div
-                className="
+                    className="
                     flex gap-2
                     fixed bottom-0 left-0 w-full bg-white shadow-md p-3 justify-center z-30
                     sm:static sm:bg-transparent sm:shadow-none sm:p-0 sm:w-auto sm:justify-end
                 "
                 >
-                <Button
-                    type="default"
-                    size="large"
-                    onClick={() => setShowFilters(true)}
-                    className="w-full sm:w-auto font-semibold"
-                >
-                    Filters <RiEqualizerFill size={16} />
-                </Button>
+                    <Button
+                        type="default"
+                        size="large"
+                        onClick={() => setShowFilters(true)}
+                        className="w-full sm:w-auto font-semibold"
+                    >
+                        Filters <RiEqualizerFill size={16} />
+                    </Button>
                 </div>
             </div>
 
             {/* Table */}
             <div className="bg-white shadow-sm rounded-b-2xl mt-0 border border-gray-100">
                 <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+
                     {loading ? (
-                        <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full [&_th]:px-2 [&_th]:py-2 [&_td]:px-2 [&_td]:py-2">
+                        /* Skeleton Loader */
+                        <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full">
                             <thead className="bg-gray-100 text-gray-700 text-xs sm:text-sm uppercase tracking-wide">
                                 <tr>
-                                    <th className="px-4 py-3 sm:px-4">User</th>
-                                    <th className="px-4 py-3 sm:px-4">Email</th>
-                                    <th className="px-4 py-3 sm:px-4">Followers</th>
-                                    <th className="px-4 py-3 sm:px-4">Category</th>
-                                    <th className="px-4 py-3 sm:px-4">Location</th>
-                                    <th className="px-4 py-3 sm:px-4">Applied On</th>
-                                    <th className="px-4 py-3 sm:px-4 text-right">Actions</th>
+                                    <th>User</th>
+                                    <th>Email</th>
+                                    <th>Followers</th>
+                                    <th>Category</th>
+                                    <th>Location</th>
+                                    <th>Applied On</th>
+                                    <th className="text-right">Actions</th>
                                 </tr>
                             </thead>
 
                             <tbody className="text-sm bg-white text-gray-700">
                                 {[...Array(6)].map((_, i) => (
-                                    <tr
-                                        key={i}
-                                        className="border-t border-gray-200 hover:bg-gray-50 transition"
-                                    >
-                                        {/* User */}
+                                    <tr key={i} className="border-t border-gray-200 hover:bg-gray-50 transition">
                                         <td className="px-4">
                                             <div className="flex items-center space-x-3">
                                                 <Skeleton.Avatar active size="large" shape="circle" />
-                                                <Skeleton.Input
-                                                    active
-                                                    size="small"
-                                                    style={{ width: 100 }}
-                                                />
+                                                <Skeleton.Input active size="small" style={{ width: 100 }} />
                                             </div>
                                         </td>
 
-                                        {/* Email */}
-                                        <td className="p-4">
-                                            <Skeleton.Input active size="small" style={{ width: 160 }} />
-                                        </td>
+                                        <td className="p-4"><Skeleton.Input active size="small" style={{ width: 160 }} /></td>
+                                        <td className="p-4"><Skeleton.Input active size="small" style={{ width: 100 }} /></td>
+                                        <td className="p-4"><Skeleton.Input active size="small" style={{ width: 120 }} /></td>
+                                        <td className="p-4"><Skeleton.Input active size="small" style={{ width: 90 }} /></td>
+                                        <td className="p-4"><Skeleton.Input active size="small" style={{ width: 80 }} /></td>
 
-                                        {/* Followers */}
-                                        <td className="p-4">
-                                            <Skeleton.Input active size="small" style={{ width: 100 }} />
-                                        </td>
-
-                                        {/* Category */}
-                                        <td className="p-4">
-                                            <Skeleton.Input active size="small" style={{ width: 120 }} />
-                                        </td>
-
-                                        {/* Location */}
-                                        <td className="p-4">
-                                            <Skeleton.Input active size="small" style={{ width: 90 }} />
-                                        </td>
-
-                                        {/* Applied On */}
-                                        <td className="p-4">
-                                            <Skeleton.Input active size="small" style={{ width: 80 }} />
-                                        </td>
-
-                                        {/* Actions */}
                                         <td className="px-4 py-3 text-right">
                                             <div className="flex justify-end gap-2">
                                                 <Skeleton.Avatar active size="small" shape="circle" />
@@ -434,75 +409,88 @@ const UserTableLayout = () => {
                                 ))}
                             </tbody>
                         </table>
-                    ) : userList.length > 0 ? (
-                        <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full [&_th]:px-2 [&_th]:py-2 [&_td]:px-2 [&_td]:py-2">
+
+                    ) : safeArray(userList).length > 0 ? (
+
+                        /* Main Table */
+                        <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full">
                             <thead className="bg-gray-100 text-gray-700 text-xs sm:text-sm uppercase tracking-wide">
                                 <tr>
-                                    <th className="px-4 py-3 sm:px-4 min-w-[200px]">User</th>
-                                    <th className="px-4 py-3 sm:px-4 min-w-[150px]">Email</th>
-                                    <th className="px-4 py-3 sm:px-4 min-w-[150px]">Followers</th>
-                                    <th className="px-4 py-3 sm:px-4 min-w-[150px]">Category</th>
-                                    <th className="px-4 py-3 sm:px-4 min-w-[100px]">Location</th>
-                                    <th className="px-4 py-3 sm:px-4 min-w-[100px]">Applied On</th>
-                                    <th className="px-4 py-3 sm:px-4 text-right">Actions</th>
+                                    <th className="min-w-[200px]">User</th>
+                                    <th className="min-w-[150px]">Email</th>
+                                    <th className="min-w-[150px]">Followers</th>
+                                    <th className="min-w-[150px]">Category</th>
+                                    <th className="min-w-[100px]">Location</th>
+                                    <th className="min-w-[100px]">Applied On</th>
+                                    <th className="text-right">Actions</th>
                                 </tr>
                             </thead>
 
                             <tbody className="text-sm bg-white text-gray-700">
-                                {userList.map((user) => (
+                                {safeArray(userList).map((user) => (
                                     <tr
-                                        key={user.id}
-                                        onClick={() => navigate(`/admin-dashboard/influencers/details/${user.id}`)}
+                                        key={user?.id ?? crypto.randomUUID()}
+                                        onClick={() => navigate(`/admin-dashboard/influencers/details/${safeText(user?.id, "")}`)}
                                         className="border-t border-gray-200 hover:bg-gray-100 transition cursor-pointer"
                                     >
+                                        {/* USER */}
                                         <td className="px-4">
                                             <div className="flex items-center space-x-3">
                                                 <img
-                                                    src={user.photopath}
-                                                    alt={user.firstname}
+                                                    src={user?.photopath }
+                                                    alt={safeText(user?.firstname, "User")}
                                                     className="w-10 h-10 rounded-full object-cover"
                                                 />
+
                                                 <span className="font-medium">
-                                                    {user.firstname} {user.lastname}
+                                                    {safeText(user?.firstname)} {safeText(user?.lastname, "")}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="p-4">{user.email}</td>
 
+                                        {/* EMAIL */}
+                                        <td className="p-4">{safeText(user?.email)}</td>
+
+                                        {/* FOLLOWERS */}
                                         <td className="p-4">
-                                            {user.providers?.map((p) => (
-                                                <div key={p.providerid}>
-                                                    <span className="font-medium">{p.providername}:</span>{" "}
-                                                    {p.nooffollowers?.toLocaleString()}
+                                            {safeArray(user?.providers).map((p) => (
+                                                <div key={p?.providerid ?? crypto.randomUUID()}>
+                                                    <span className="font-medium">{safeText(p?.providername, "Unknown")}:</span>{" "}
+                                                    {safeNumber(p?.nooffollowers).toLocaleString()}
                                                 </div>
                                             ))}
                                         </td>
+
+                                        {/* CATEGORY */}
                                         <td className="p-4">
-                                            {user.categories.map((c) => (
+                                            {safeArray(user?.categories).map((c) => (
                                                 <span
-                                                    key={c.categoryid}
-                                                    className={`inline-block mr-1 mb-1 px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 }`}
+                                                    key={c?.categoryid ?? crypto.randomUUID()}
+                                                    className="inline-block mr-1 mb-1 px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700"
                                                 >
-                                                    {c.categoryname}
+                                                    {safeText(c?.categoryname)}
                                                 </span>
                                             ))}
                                         </td>
-                                        <td className="p-4">{user.statename}</td>
-                                        <td className="p-4">
-                                            {new Date(user.createddate).toLocaleDateString("en-GB")}
-                                        </td>
 
+                                        {/* LOCATION */}
+                                        <td className="p-4">{safeText(user?.statename)}</td>
+
+                                        {/* DATE */}
+                                        <td className="p-4">{safeDate(user?.createddate)}</td>
+
+                                        {/* ACTION BUTTONS */}
                                         <td className="px-4 py-3 text-right">
                                             <div
                                                 className="flex justify-end items-center gap-1"
                                                 onClick={(e) => e.stopPropagation()}
                                             >
-                                                {user.status === "ApprovalPending" && (
+                                                {user?.status === "ApprovalPending" && (
                                                     <>
                                                         <Tooltip title="Approve">
                                                             <button
-                                                                onClick={() => openConfirmationModal(user, 'Approved')}
-                                                                className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
+                                                                onClick={() => openConfirmationModal(user, "Approved")}
+                                                                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
                                                             >
                                                                 <RiCheckLine size={18} />
                                                             </button>
@@ -510,8 +498,8 @@ const UserTableLayout = () => {
 
                                                         <Tooltip title="Reject">
                                                             <button
-                                                                onClick={() => openConfirmationModal(user, 'Rejected')}
-                                                                className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
+                                                                onClick={() => openConfirmationModal(user, "Rejected")}
+                                                                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
                                                             >
                                                                 <RiCloseLine size={18} />
                                                             </button>
@@ -519,22 +507,22 @@ const UserTableLayout = () => {
                                                     </>
                                                 )}
 
-                                                {user.status === "Approved" && (
+                                                {user?.status === "Approved" && (
                                                     <Tooltip title="Block">
                                                         <button
-                                                            onClick={() => openConfirmationModal(user, 'Blocked')}
-                                                            className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
+                                                            onClick={() => openConfirmationModal(user, "Blocked")}
+                                                            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
                                                         >
                                                             <RiProhibitedLine size={18} />
                                                         </button>
                                                     </Tooltip>
                                                 )}
 
-                                                {user.status === "Rejected" && (
+                                                {user?.status === "Rejected" && (
                                                     <Tooltip title="Approve">
                                                         <button
-                                                            onClick={() => openConfirmationModal(user, 'Approved')}
-                                                            className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
+                                                            onClick={() => openConfirmationModal(user, "Approved")}
+                                                            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
                                                         >
                                                             <RiCheckLine size={18} />
                                                         </button>
@@ -542,12 +530,14 @@ const UserTableLayout = () => {
                                                 )}
                                             </div>
                                         </td>
-
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
+
                     ) : (
+
+                        /* EMPTY STATE */
                         <div className="py-16 flex justify-center">
                             <Empty
                                 image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -557,6 +547,7 @@ const UserTableLayout = () => {
                     )}
                 </div>
             </div>
+
 
             {/* Pagination */}
             <div className="flex justify-end py-4">
@@ -674,51 +665,51 @@ const UserTableLayout = () => {
             </Modal>
 
             {/* Filter Drawer */}
-           <Drawer
-            closeIcon={false}
-            title={
-                <div className="flex justify-between items-center w-full">
-                <span className="font-semibold">Filter Users</span>
+            <Drawer
+                closeIcon={false}
+                title={
+                    <div className="flex justify-between items-center w-full">
+                        <span className="font-semibold">Filter Users</span>
 
-                <div className="flex items-center gap-2">
-                    <Tooltip title="Clear Filters">
-                    <button
-                        onClick={() =>
-                        setFilters({
-                            location: "",
-                            platforms: [],
-                            followers: [],
-                            gender: [],
-                        })
-                        }
-                        className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
-                    >
-                        <RiEraserLine size={18} />
-                    </button>
-                    </Tooltip>
-                    <Tooltip title="Apply Filters">
-                    <button
-                        onClick={handleFilterApply}
-                        className="p-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
-                    >
-                        <RiFilterLine size={18} />
-                    </button>
-                    </Tooltip>
-                    <Tooltip title="Close">
-                    <button
-                        onClick={() => setShowFilters(false)}
-                        className="p-2 rounded-full text-gray-500 hover:bg-gray-100"
-                    >
-                        <RiCloseFill size={20} />
-                    </button>
-                    </Tooltip>
-                </div>
-                </div>
-            }
-            placement="right"
-            width={300}
-            onClose={() => setShowFilters(false)}
-            open={showFilters}
+                        <div className="flex items-center gap-2">
+                            <Tooltip title="Clear Filters">
+                                <button
+                                    onClick={() =>
+                                        setFilters({
+                                            location: "",
+                                            platforms: [],
+                                            followers: [],
+                                            gender: [],
+                                        })
+                                    }
+                                    className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
+                                >
+                                    <RiEraserLine size={18} />
+                                </button>
+                            </Tooltip>
+                            <Tooltip title="Apply Filters">
+                                <button
+                                    onClick={handleFilterApply}
+                                    className="p-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
+                                >
+                                    <RiFilterLine size={18} />
+                                </button>
+                            </Tooltip>
+                            <Tooltip title="Close">
+                                <button
+                                    onClick={() => setShowFilters(false)}
+                                    className="p-2 rounded-full text-gray-500 hover:bg-gray-100"
+                                >
+                                    <RiCloseFill size={20} />
+                                </button>
+                            </Tooltip>
+                        </div>
+                    </div>
+                }
+                placement="right"
+                width={300}
+                onClose={() => setShowFilters(false)}
+                open={showFilters}
             >
                 {/* Providers/Platforms */}
                 <div className="mb-6">
@@ -782,7 +773,7 @@ const UserTableLayout = () => {
                     </Checkbox.Group>
                 </div>
 
-                
+
             </Drawer>
         </div>
     );

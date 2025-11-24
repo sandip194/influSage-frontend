@@ -13,6 +13,7 @@ import { Button, Modal, Tooltip, Empty, Skeleton, Input } from "antd";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { safeText, safeArray, safeNumber } from "../../../App/safeAccess";
 
 
 const CampaignDetailsView = () => {
@@ -199,8 +200,9 @@ const CampaignDetailsView = () => {
                             {/* Title + Buttons Row */}
                             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
                                 <div>
-                                    <h2 className="font-semibold text-lg">{cmapignDetails?.name || "Sample Campaign"}</h2>
-                                    <p className="text-gray-500 text-sm">{cmapignDetails?.businessName || "ABC Marketing Pvt. Ltd."}</p>
+                                    {/* Campaign Name and Business */}
+                                    <h2 className="font-semibold text-lg">{safeText(cmapignDetails?.name, "no CampaignName")}</h2>
+                                    <p className="text-gray-500 text-sm">{safeText(cmapignDetails?.businessname, "no businessName")}</p>
                                 </div>
 
                                 {/* Action Buttons */}
@@ -286,7 +288,7 @@ const CampaignDetailsView = () => {
                                         <RiMoneyRupeeCircleLine className="w-5" />
                                         <span>Budget</span>
                                     </div>
-                                    <p>₹{cmapignDetails?.estimatedbudget || "50,000"}</p>
+                                    <p>₹{safeNumber(cmapignDetails?.estimatedbudget, "-").toLocaleString()}</p>
                                 </div>
 
                                 <div>
@@ -294,9 +296,14 @@ const CampaignDetailsView = () => {
                                         <RiTranslate className="w-5" />
                                         <span>Languages</span>
                                     </div>
-                                    {cmapignDetails?.campaignlanguages?.map((lang) => (
-                                        <p key={lang.languageid}>{lang.languagename}</p>
-                                    )) || <p> - </p>}
+                                    {/* Languages */}
+                                    {safeArray(cmapignDetails?.campaignlanguages).length > 0 ? (
+                                        cmapignDetails.campaignlanguages.map((lang) => (
+                                            <p key={lang.languageid}>{safeText(lang.languagename)}</p>
+                                        ))
+                                    ) : (
+                                        <p> - </p>
+                                    )}
                                 </div>
 
                                 <div>
@@ -304,9 +311,14 @@ const CampaignDetailsView = () => {
                                         <RiMenLine className="w-5" />
                                         <span>Gender</span>
                                     </div>
-                                    {cmapignDetails?.campaigngenders?.map((gender) => (
-                                        <p key={gender.genderid}>{gender.gendername}</p>
-                                    )) || <p> - </p>}
+                                    {/* Genders */}
+                                    {safeArray(cmapignDetails?.campaigngenders).length > 0 ? (
+                                        cmapignDetails.campaigngenders.map((gender) => (
+                                            <p key={gender.genderid}>{safeText(gender.gendername)}</p>
+                                        ))
+                                    ) : (
+                                        <p> - </p>
+                                    )}
                                 </div>
 
 
@@ -368,59 +380,39 @@ const CampaignDetailsView = () => {
                             <ul className="space-y-2 font-semibold">
                                 <li className="flex items-center gap-2">
                                     <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
-                                    <span>
-                                        Objective:{" "}
-                                        <span className="text-gray-500">
-                                            {cmapignDetails?.requirements?.objectivename || "-"}
-                                        </span>
-                                    </span>
+                                    <p>
+                                        Objective: <span className="text-gray-500">{safeText(cmapignDetails?.requirements?.objectivename, "-")}</span>
+                                    </p>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
-                                    <span>
-                                        Post Duration:{" "}
-                                        <span className="text-gray-500">
-                                            {cmapignDetails?.requirements?.postdurationdays
-                                                ? `${cmapignDetails.requirements.postdurationdays} days`
-                                                : "-"}
-                                        </span>
-                                    </span>
+                                    <p>
+                                        Post Duration: <span className="text-gray-500">{safeText(cmapignDetails?.requirements?.postdurationdays ? `${cmapignDetails.requirements.postdurationdays} days` : "-", "-")}</span>
+                                    </p>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
-                                    <span>
-                                        Include Vendor Profile Link:{" "}
-                                        <span className="text-gray-500">
-                                            {cmapignDetails?.requirements?.isincludevendorprofilelink ? "Yes" : "No"}
-                                        </span>
-                                    </span>
+                                    <p>
+                                        Include Vendor Profile Link: <span className="text-gray-500">{cmapignDetails?.requirements?.isincludevendorprofilelink ? "Yes" : "No"}</span>
+                                    </p>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
-                                    <span>
-                                        Product Shipping:{" "}
-                                        <span className="text-gray-500">
-                                            {cmapignDetails?.requirements?.isproductshipping ? "Yes" : "No"}
-                                        </span>
-                                    </span>
+                                    <p>
+                                        Product Shipping: <span className="text-gray-500">{cmapignDetails?.requirements?.isproductshipping ? "Yes" : "No"}</span>
+                                    </p>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
-                                    <span>
-                                        Application Start Date:{" "}
-                                        <span className="text-gray-500">
-                                            {cmapignDetails?.requirements?.applicationstartdate || "-"}
-                                        </span>
-                                    </span>
+                                    <p>
+                                        Application Start Date: <span className="text-gray-500">{safeText(cmapignDetails?.requirements?.applicationstartdate)}</span>
+                                    </p>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
-                                    <span>
-                                        Application End Date:{" "}
-                                        <span className="text-gray-500">
-                                            {cmapignDetails?.requirements?.applicationenddate || "-"}
-                                        </span>
-                                    </span>
+                                    <p>
+                                        Application End Date: <span className="text-gray-500">{safeText(cmapignDetails?.requirements?.applicationenddate)}</span>
+                                    </p>
                                 </li>
                             </ul>
                         </div>
@@ -565,8 +557,8 @@ const CampaignDetailsView = () => {
                                 className="w-12 h-12 rounded-full object-cover border border-gray-100"
                             />
                             <div>
-                                <p className="text-base font-semibold">{cmapignDetails?.businessname || "N/A"}</p>
-                                <p className="text-sm text-gray-500">{cmapignDetails?.fullname || "N/A"}</p>
+                                <p className="text-base font-semibold">{safeText(cmapignDetails?.businessname)}</p>
+                                <p className="text-sm text-gray-500">{safeText(cmapignDetails?.fullname)}</p>
                             </div>
                         </div>
 
@@ -575,17 +567,17 @@ const CampaignDetailsView = () => {
 
                             <div>
                                 <p className="text-sm font-semibold">Email</p>
-                                <p className="text-gray-500 break-words">{cmapignDetails?.email || "N/A"}</p>
+                                <p className="text-gray-500 break-words">{safeText(cmapignDetails?.email)}</p>
                             </div>
 
                             <div>
                                 <p className="text-sm font-semibold">Phone</p>
-                                <p className="text-gray-500">+{cmapignDetails?.phonenumber || "N/A"}</p>
+                                <p className="text-gray-500">+{safeText(cmapignDetails?.phonenumber)}</p>
                             </div>
 
                             <div className="pt-2 border-t border-gray-200">
                                 <p className="text-sm font-semibold">Total Campaigns</p>
-                                <p className="text-gray-500">{cmapignDetails?.totalcampaign || 0}</p>
+                                <p className="text-gray-500">{safeNumber(cmapignDetails?.totalcampaign)}</p>
                             </div>
                         </div>
                     </div>

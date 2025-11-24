@@ -15,8 +15,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import ErrorBoundary from '../../../components/common/ErrorBoundary';
 
-
-// Validation Function ==> bcs we dont need to re create it for every render 
+// Validation Functions
 const isProfileComplete = (profile) => {
   if (!profile || Object.keys(profile).length === 0) return false;
   const fieldsToCheck = ['photopath', 'genderid', 'dob', 'address1', 'countryname', 'statename', 'bio'];
@@ -43,16 +42,14 @@ const isPaymentComplete = (payment) => {
   return hasValidField || hasValidPaymentMethod;
 };
 
-
-//main function
-
+// Main Component
 export const ProfileStepper = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [lastCompletedStep, setLastCompletedStep] = useState(null);
 
-  const { token, userId } = useSelector(state => state.auth);
+  const { token, userId, p_code } = useSelector(state => state.auth);
 
   const [profileData, setProfileData] = useState({
     profile: {},
@@ -69,17 +66,6 @@ export const ProfileStepper = () => {
     }));
   }, []);
 
-
-  useEffect(() => {
-    const stored = localStorage.getItem('completedSteps');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setCompletedSteps(parsed);
-      const lastIndex = parsed.lastIndexOf(true);
-      if (lastIndex !== -1) setLastCompletedStep(lastIndex);
-    }
-  }, []);
-
   const markStepComplete = useCallback((index) => {
     setCompletedSteps(prev => {
       const updated = [...prev];
@@ -90,9 +76,11 @@ export const ProfileStepper = () => {
       }
       return updated;
     });
-
     setCurrentStep(index + 1 < steps?.length ? index + 1 : 'thankyou');
   }, []);
+
+  // Editable for PENDINGPROFILE or REJECTED
+  const isEditable = ['PENDINGPROFILE', 'REJECTED'].includes(p_code);
 
   const steps = useMemo(() => [
     {
@@ -100,8 +88,7 @@ export const ProfileStepper = () => {
       component: (
         <PersonalDetails
           data={profileData.profile}
-          showControls={true}
-         
+          showControls={isEditable}
           onChange={(updated) => updateProfileSection('profile', updated)}
           onNext={() => markStepComplete(0)}
         />
@@ -112,6 +99,7 @@ export const ProfileStepper = () => {
       component: (
         <SocialMediaDetails
           data={profileData.social}
+          showControls={isEditable}
           onChange={(updated) => updateProfileSection('social', updated)}
           onNext={() => markStepComplete(1)}
           onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
@@ -123,6 +111,7 @@ export const ProfileStepper = () => {
       component: (
         <CategorySelector
           data={profileData.categories}
+          showControls={isEditable}
           onChange={(updated) => updateProfileSection('categories', updated)}
           onNext={() => markStepComplete(2)}
           onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
@@ -134,6 +123,7 @@ export const ProfileStepper = () => {
       component: (
         <PortfolioUploader
           data={profileData.portfolio}
+          showControls={isEditable}
           onNext={(updated) => {
             updateProfileSection('portfolio', updated);
             markStepComplete(3);
@@ -147,22 +137,19 @@ export const ProfileStepper = () => {
       component: (
         <PaymentDetailsForm
           data={profileData.payment}
+          showControls={isEditable}
           onChange={(updated) => updateProfileSection('payment', updated)}
           onNext={() => markStepComplete(4)}
           onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
         />
       )
     }
-  ], [profileData, updateProfileSection, markStepComplete]);
-
+  ], [profileData, updateProfileSection, markStepComplete, isEditable]);
 
   const getUserProfileCompationData = async () => {
     try {
       const res = await axios.get(`user/profile/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
 
       if (res.status === 200) {
@@ -192,39 +179,65 @@ export const ProfileStepper = () => {
           return;
         }
 
-        const stepsCompletion = [
-          isProfileComplete(parts.profile),
-          isSocialComplete(parts.social),
-          isCategoriesComplete(parts.categories),
-          isPortfolioComplete(parts.portfolio),
-          isPaymentComplete(parts.payment),
-        ];
+        // APPROVALPENDING: mark all steps complete, show thank you
+        if (p_code === 'APPROVALPENDING') {
+          setCompletedSteps([true, true, true, true, true]);
+          setCurrentStep('thankyou');
+          return;
+        }
 
-        setCompletedSteps(stepsCompletion);
+        // REJECTED profiles always start at step 0
+        if (p_code === 'REJECTED') {
+          setCompletedSteps([false, false, false, false, false]);
+          setCurrentStep(0);
+          return;
+        }
 
-        const firstIncomplete = stepsCompletion.findIndex(done => !done);
-        setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : 'thankyou');
+        // Only for PENDINGPROFILE calculate completed steps
+        if (p_code === 'PENDINGPROFILE') {
+          const stepsCompletion = [
+            isProfileComplete(parts.profile),
+            isSocialComplete(parts.social),
+            isCategoriesComplete(parts.categories),
+            isPortfolioComplete(parts.portfolio),
+            isPaymentComplete(parts.payment),
+          ];
+
+          setCompletedSteps(stepsCompletion);
+
+          const firstIncomplete = stepsCompletion.findIndex(done => !done);
+          setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : 'thankyou');
+        }
       }
     } catch (error) {
       console.error("❌ Error fetching profile data:", error);
     }
   };
 
-
-
-
   useEffect(() => {
     getUserProfileCompationData();
   }, [lastCompletedStep]);
 
+  const handleStepChange = (step) => {
+    // Non-editable users cannot change steps
+    if (!isEditable) return; 
+
+    if (p_code === 'PENDINGPROFILE') {
+      if (step <= currentStep + 1) setCurrentStep(step);
+    } else if (p_code === 'REJECTED') {
+      if (step === 0) setCurrentStep(step);
+    }
+  };
+
+  // Determine which step to display
+  const displayStep = ['APPROVALPENDING'].includes(p_code) ? 'thankyou' : currentStep;
+
   return (
     <>
-      {/* Header */}
       <div className="profile-header sticky top-0 z-20 bg-white">
         <ProfileHeader />
       </div>
 
-      {/* Mobile Toggle Button */}
       <div className="sm:hidden p-4 flex justify-start">
         <RiMenu2Line
           className="w-6 h-6 cursor-pointer"
@@ -232,7 +245,6 @@ export const ProfileStepper = () => {
         />
       </div>
 
-      {/* Mobile Sidebar */}
       <div className={`sm:hidden fixed top-[55px] left-0 h-full w-90 bg-white z-30 transition-transform duration-300 ease-in-out shadow-lg ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-5">
           <div className="flex justify-between items-center mb-4">
@@ -241,26 +253,19 @@ export const ProfileStepper = () => {
           </div>
           <Steps
             direction="vertical"
-            current={typeof currentStep === 'number' ? currentStep : steps.length}
+            current={typeof displayStep === 'number' ? displayStep : steps.length}
             items={steps.map((s) => ({ title: s.title }))}
-            onChange={(step) => {
-              if (completedSteps[step] || step <= currentStep) {
-                setCurrentStep(step);
-                setIsMobileSidebarOpen(false);
-              }
-            }}
+            onChange={handleStepChange}
           />
         </div>
       </div>
 
-      {/* Main Layout */}
       <div className="flex flex-col sm:flex-row bg-[#f5f5f5] min-h-screen p-4 gap-2">
-        {/* Desktop Sidebar */}
         <div className="hidden sm:block w-full md:w-1/3 lg:w-1/4 p-0">
           <div className="bg-white p-6 rounded-3xl sticky top-[60px]">
             <h2 className="text-xl font-semibold mb-4">Profile Completion Steps</h2>
             <Steps
-              current={typeof currentStep === 'number' ? currentStep : steps.length}
+              current={typeof displayStep === 'number' ? displayStep : steps.length}
               direction="vertical"
               items={steps.map((s, index) => ({
                 title: s.title,
@@ -271,22 +276,17 @@ export const ProfileStepper = () => {
                       ? 'process'
                       : 'wait',
               }))}
-              onChange={(step) => {
-                if (completedSteps[step] || step <= currentStep) {
-                  setCurrentStep(step);
-                }
-              }}
+              onChange={handleStepChange}
             />
           </div>
         </div>
 
-        {/* Step Content */}
         <div className="w-full sm:w-2/3 lg:w-3/4 p-4 bg-white rounded-3xl">
           <ErrorBoundary>
-            {currentStep === 'thankyou' ? (
+            {displayStep === 'thankyou' ? (
               <ThankYouScreen />
             ) : (
-              steps[currentStep]?.component || (
+              steps[displayStep]?.component || (
                 <div className="p-6 bg-yellow-50 border border-yellow-300 rounded">
                   <p>⚠️ Invalid step index. Please try reloading the page.</p>
                 </div>
@@ -298,3 +298,4 @@ export const ProfileStepper = () => {
     </>
   );
 };
+
