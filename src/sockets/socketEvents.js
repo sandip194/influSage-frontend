@@ -1,6 +1,6 @@
 // src/sockets/socketEvents.js
-import { addMessage, deleteMessage, undoDeleteMessage } from "../features/socket/chatSlice";
-import { addNotification } from "../features/socket/notificationSlice";
+import { addMessage, deleteMessage, setMessageRead, undoDeleteMessage, updateMessage } from "../features/socket/chatSlice";
+import { addNotification, setUnreadCount, setLastThreeUnread, setNotifications, incrementUnread } from "../features/socket/notificationSlice";
 import { setConnected, setOnlineUsers } from "../features/socket/socketSlice";
 
 export const registerSocketEvents = (socket, dispatch, userId) => {
@@ -17,9 +17,23 @@ export const registerSocketEvents = (socket, dispatch, userId) => {
     dispatch(addMessage(msg));
   });
 
-  socket.on("notification", (data) => {
-    dispatch(addNotification(data));
+  socket.on("unreadCount", (count) => {
+    dispatch(setUnreadCount(count));
   });
+
+  socket.on("lastThreeUnread", (list) => {
+    dispatch(setLastThreeUnread(list));
+  });
+
+  socket.on("allNotifications", (list) => {
+    dispatch(setNotifications(list));
+  });
+
+  socket.on("receiveNotification", (notif) => {
+    dispatch(addNotification(notif));
+    dispatch(incrementUnread());
+  });
+
 
   socket.on("online-users", ({ userIds }) => {
     dispatch(setOnlineUsers(userIds));
@@ -35,13 +49,13 @@ export const registerSocketEvents = (socket, dispatch, userId) => {
     dispatch(undoDeleteMessage(messageId)); // Undo delete locally in Redux
   });
 
- socket.on("updateMessageStatus", ({ messageId, readbyvendor, readbyinfluencer }) => {
-  console.log("Received read update:", { messageId, readbyvendor, readbyinfluencer });
-  dispatch(setMessageRead({ messageId, readbyvendor, readbyinfluencer }));
-});
+  socket.on("updateMessageStatus", ({ messageId, readbyvendor, readbyinfluencer }) => {
+    console.log("Received read update:", { messageId, readbyvendor, readbyinfluencer });
+    dispatch(setMessageRead({ messageId, readbyvendor, readbyinfluencer }));
+  });
 
-socket.on("editMessage", ({ updatedMsg }) => {
-  dispatch(updateMessage(updatedMsg));;
-});
+  socket.on("editMessage", ({ updatedMsg }) => {
+    dispatch(updateMessage(updatedMsg));;
+  });
 
 };  

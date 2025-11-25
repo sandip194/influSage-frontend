@@ -25,6 +25,8 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../features/auth/authSlice";
 
+
+
 import NotificationDropdown from "./NotificationDropdown";
 import MessageDropdown from "./MessageDropdown";
 
@@ -50,27 +52,97 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const [initialMessagesFetched, setInitialMessagesFetched] = useState(false);
   const [profileData, setProfileData] = useState(null);
 
-  // inside component
   const [isMobile, setIsMobile] = useState(false);
-
 
   const basePath = role === 1 ? "/dashboard" : "/vendor-dashboard";
 
-  // ✅ Memoized logout handler
+  // ======================================================
+  // 🛠️ CLEAN UNIFIED NOTIFICATION API HANDLER
+  // ======================================================
+  const fetchNotifications = useCallback(
+    async ({ mode = "unread" } = {}) => {
+      if (!token) return;
+
+      /**
+       * mode = "unread"       → polling unread notifications
+       * mode = "all"          → full list
+       * mode = "last-three"   → modal open → last 3 unread + mark read
+       */
+
+      const params =
+        mode === "all"
+          ? { limitedData: false }
+          : mode === "last-three"
+            ? { limitedData: true }
+            : { limitedData: null }; // unread polling
+
+      try {
+        if (mode !== "unread") setLoadingNotifications(true);
+
+        const res = await axios.get("/new/getallnotification", {
+          params,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const rawData = res.data?.data || [];
+
+        const formatted = rawData.map((item) => ({
+          id: item.notificationid,
+          title: item.title,
+          message: item.description,
+          isRead: item.isread,
+          time: new Date(item.createddate).toLocaleString(),
+        }));
+
+        if (mode === "unread") {
+          setUnreadNotifications((prev) => {
+            const prevStr = JSON.stringify(prev);
+            const newStr = JSON.stringify(formatted);
+            return prevStr !== newStr ? formatted : prev;
+          });
+          setHasUnreadNotifications(formatted.length > 0);
+          if (!initialNotificationsFetched) setInitialNotificationsFetched(true);
+        }
+
+        if (mode === "all") {
+          setAllNotifications(formatted);
+        }
+
+        if (mode === "last-three") {
+          setAllNotifications(formatted);
+
+          // Clear unread notifications (backend marks read)
+          setUnreadNotifications([]);
+          setHasUnreadNotifications(false);
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      } finally {
+        if (mode !== "unread") setLoadingNotifications(false);
+      }
+    },
+    [token, initialNotificationsFetched]
+  );
+
+  // ======================================================
+  // 🧭 LOGOUT
+  // ======================================================
   const handleLogout = useCallback(() => {
     dispatch(logout());
     navigate("/login");
   }, [dispatch, navigate]);
 
-  // 📨 Fetch unread messages
+  // ======================================================
+  // 📨 MESSAGE LOGIC (unchanged)
+  // ======================================================
   const fetchUnreadMessages = useCallback(async () => {
     if (!token) return;
     try {
       const res = await axios.get(`/chat/unread-messages`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const newData = res.data?.data || [];
 
+      const newData = res.data?.data || [];
       setUnreadMessages((prev) => {
         const prevStr = JSON.stringify(prev);
         const newStr = JSON.stringify(newData);
@@ -85,7 +157,6 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     }
   }, [token, initialMessagesFetched]);
 
-  // ⏱️ Poll messages every 3s
   useEffect(() => {
     if (!token) return;
     setLoadingMessages(true);
@@ -96,11 +167,69 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
   const memoizedMessages = useMemo(() => unreadMessages, [unreadMessages]);
 
+  // ======================================================
+  // 🕒 POLLING UNREAD NOTIFICATIONS
+  // ======================================================
+  useEffect(() => {
+    if (!token) return;
 
+    fetchNotifications({ mode: "unread" });
+    const interval = setInterval(() => {
+      fetchNotifications({ mode: "unread" });
+    }, 3000);
 
+    return () => clearInterval(interval);
+  }, [token, fetchNotifications]);
+
+  // ======================================================
+  // GET ALL NOTIFICATIONS
+  // ======================================================
+  useEffect(() => {
+    if (modalOpen) {
+      fetchNotifications({ mode: "all" });
+    }
+  }, [modalOpen, fetchNotifications]);
+
+  // ======================================================
+  // 📜 WHEN MODAL OPENS → FETCH LAST 3 UNREAD (mark read)
+  // ======================================================
+  useEffect(() => {
+    if (notificationDropdownVisible) {
+      fetchNotifications({ mode: "last-three" });
+    }
+  }, [notificationDropdownVisible, fetchNotifications]);
+
+  const memoizedNotifications = useMemo(
+    () => unreadNotifications,
+    [unreadNotifications]
+  );
+
+  // ======================================================
+  // PROFILE DATA
+  // ======================================================
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!token) return;
+      try {
+        const res = await axios.get("/user-profile-info", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.data?.userData) {
+          setProfileData(res.data.userData);
+        }
+      } catch (error) {
+        console.error("Error fetching profile info:", error);
+      }
+    };
+
+    fetchProfileData();
+  }, [token]);
+
+  // ======================================================
+  // MODAL CONTENT
+  // ======================================================
   const formatRelativeTime = (timestamp) => {
     if (!timestamp) return "";
-
     const date = new Date(timestamp);
     const now = new Date();
     const diffMs = now - date;
@@ -114,148 +243,9 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     if (diffHr < 24) return `${diffHr} hr${diffHr > 1 ? "s" : ""} ago`;
     if (diffDay === 1) return "Yesterday";
     if (diffDay < 30) return `${diffDay} days ago`;
-
-    // For older dates, show month name or months ago
-    const diffMonth =
-      now.getMonth() -
-      date.getMonth() +
-      12 * (now.getFullYear() - date.getFullYear());
-
-    if (diffMonth < 12) {
-      if (diffMonth === 1) return "1 month ago";
-      return `${diffMonth} months ago`;
-    }
-
-    return date.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: now.getFullYear() !== date.getFullYear() ? "numeric" : undefined,
-    });
+    return date.toLocaleDateString();
   };
 
-
-  // 🔔 Fetch only unread notifications (polling)
-  const fetchUnreadNotifications = useCallback(async () => {
-    if (!token) return;
-    try {
-      const res = await axios.get("/new/getallnotification", {
-        params: { limitedData: null },
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      let data = res.data?.data || [];
-      data = data.filter((item) => item.isread === false);
-
-      const formatted = data.map((item) => ({
-        id: item.notificationid,
-        title: item.title,
-        message: item.description,
-        isRead: item.isread,
-        time: new Date(item.createddate).toLocaleString(),
-      }));
-
-      setUnreadNotifications((prev) => {
-        const prevStr = JSON.stringify(prev);
-        const newStr = JSON.stringify(formatted);
-        return prevStr !== newStr ? formatted : prev;
-      });
-
-      setHasUnreadNotifications(formatted.length > 0);
-      if (!initialNotificationsFetched) setInitialNotificationsFetched(true);
-    } catch (error) {
-      console.error("Error fetching unread notifications:", error);
-    }
-  }, [token, initialNotificationsFetched]);
-
-  // 📜 Fetch all notifications (modal)
-  const fetchAllNotifications = useCallback(async () => {
-    if (!token) return;
-    setLoadingNotifications(true);
-    try {
-      const res = await axios.get("/new/getallnotification", {
-        params: { limitedData: false },
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = res.data?.data || [];
-      const formatted = data.map((item) => ({
-        id: item.notificationid,
-        title: item.title,
-        message: item.description,
-        isRead: item.isread,
-        time: new Date(item.createddate).toLocaleString(),
-      }));
-
-      setAllNotifications(formatted);
-    } catch (error) {
-      console.error("Error fetching all notifications:", error);
-    } finally {
-      setLoadingNotifications(false);
-    }
-  }, [token]);
-
-  useEffect(() => {
-  const fetchProfileData = async () => {
-    if (!token) return;
-    try {
-      const res = await axios.get("/user-profile-info", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.data?.userData) {
-        setProfileData(res.data.userData);
-      }
-    } catch (error) {
-      console.error("Error fetching profile info:", error);
-    }
-  };
-
-  fetchProfileData();
-}, [token]);
-
-  // ⏱️ Poll unread notifications every 3s
-  useEffect(() => {
-    if (!token) return;
-    fetchUnreadNotifications();
-    const interval = setInterval(fetchUnreadNotifications, 3000);
-    return () => clearInterval(interval);
-  }, [token, fetchUnreadNotifications]);
-
-  // 🧭 Fetch all notifications when modal opens
-  useEffect(() => {
-    if (modalOpen) fetchAllNotifications();
-  }, [modalOpen, fetchAllNotifications]);
-
-  const memoizedNotifications = useMemo(() => unreadNotifications, [unreadNotifications]);
-
-  // ⚙️ Profile menu
-  const profileMenu = useMemo(
-    () => ({
-      items: [
-        {
-          key: "1",
-          icon: <UserOutlined />,
-          label: "My Profile",
-          onClick: () => navigate(`${basePath}/my-profile`),
-        },
-        {
-          key: "2",
-          icon: <SettingOutlined />,
-          label: "Settings",
-          onClick: () => navigate(`setting`),
-        },
-        {
-          key: "3",
-          icon: <LogoutOutlined />,
-          label: "Logout",
-          danger: true,
-          onClick: handleLogout,
-        },
-      ],
-    }),
-    [basePath, handleLogout, navigate]
-  );
-
-  // 🧾 Modal content
   const modalContent = useMemo(
     () =>
       allNotifications.length === 0 ? (
@@ -288,18 +278,23 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     [allNotifications]
   );
 
-
-
+  // ======================================================
+  // RESPONSIVE
+  // ======================================================
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+
+  // ======================================================
+  // UI RETURN (unchanged)
+  // ======================================================
   return (
     <div className="w-full flex justify-between items-center p-4 bg-white shadow-sm border-b border-gray-200">
-      {/* Sidebar toggle + search */}
+      {/* Sidebar + Search */}
       <div className="flex items-center gap-4 w-full max-w-sm">
         <button
           className="md:hidden p-2 rounded-sm bg-gray-100 hover:bg-gray-100"
@@ -313,16 +308,16 @@ const DeshboardHeader = ({ toggleSidebar }) => {
         </div>
       </div>
 
-      {/* Right section */}
+      {/* Right Section */}
       <div className="flex items-center gap-4">
-        {/* 📨 Message Dropdown */}
+        {/* Messages */}
         <Dropdown
           open={messageDropdownVisible}
           onOpenChange={(open) => {
             setMessageDropdownVisible(open);
             if (open && !initialMessagesFetched) setLoadingMessages(true);
           }}
-          placement={isMobile ? "bottom" : "bottomRight"} // 👈 Change here
+          placement={isMobile ? "bottom" : "bottomRight"}
           overlay={
             <MessageDropdown
               messages={memoizedMessages}
@@ -337,15 +332,14 @@ const DeshboardHeader = ({ toggleSidebar }) => {
           </Badge>
         </Dropdown>
 
-
-        {/* 🔔 Notification Dropdown */}
+        {/* Notifications */}
         <Dropdown
           open={notificationDropdownVisible}
           onOpenChange={(open) => {
             setNotificationDropdownVisible(open);
             if (open) setHasUnreadNotifications(false);
           }}
-          placement={isMobile ? "bottom" : "bottomRight"} // 👈
+          placement={isMobile ? "bottom" : "bottomRight"}
           trigger={["click"]}
           arrow
           overlay={
@@ -363,28 +357,48 @@ const DeshboardHeader = ({ toggleSidebar }) => {
           </Badge>
         </Dropdown>
 
-
-        {/* 👤 Profile */}
-          <Dropdown menu={profileMenu} trigger={["click"]} arrow>
-            <div className="flex items-center gap-2 cursor-pointer border border-gray-200 px-3 py-1 rounded-full">
-              <Avatar
-                src={
-                  profileData?.photopath
-                    ? profileData.photopath
-                    : "/default.jpg"
-                }
-                alt={profileData?.firstname }
-              />
-               <span className="hidden sm:inline text-sm font-medium">
-                {`${profileData?.firstname || ""} ${profileData?.lastname || ""}`.trim()}
-                </span>
-              <DownOutlined className="text-xs" />
-            </div>
-          </Dropdown>
-
+        {/* Profile */}
+        <Dropdown
+          menu={{
+            items: [
+              {
+                key: "1",
+                icon: <UserOutlined />,
+                label: "My Profile",
+                onClick: () => navigate(`${basePath}/my-profile`),
+              },
+              {
+                key: "2",
+                icon: <SettingOutlined />,
+                label: "Settings",
+                onClick: () => navigate(`setting`),
+              },
+              {
+                key: "3",
+                icon: <LogoutOutlined />,
+                label: "Logout",
+                danger: true,
+                onClick: handleLogout,
+              },
+            ],
+          }}
+          trigger={["click"]}
+          arrow
+        >
+          <div className="flex items-center gap-2 cursor-pointer border border-gray-200 px-3 py-1 rounded-full">
+            <Avatar
+              src={profileData?.photopath || "/default.jpg"}
+              alt={profileData?.firstname}
+            />
+            <span className="hidden sm:inline text-sm font-medium">
+              {`${profileData?.firstname || ""} ${profileData?.lastname || ""}`}
+            </span>
+            <DownOutlined className="text-xs" />
+          </div>
+        </Dropdown>
       </div>
 
-      {/* 📜 Notifications Modal */}
+      {/* Modal */}
       <Modal
         title="All Notifications"
         open={modalOpen}
@@ -394,7 +408,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
         bodyStyle={{ maxHeight: "90vh", overflowY: "auto" }}
         centered
       >
-        {loadingNotifications && allNotifications.length === 0 ? (
+        {loadingNotifications ? (
           <div className="flex justify-center py-5">
             <p className="text-gray-500 text-sm">Loading...</p>
           </div>

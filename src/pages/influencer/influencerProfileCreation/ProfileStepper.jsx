@@ -12,8 +12,9 @@ import ThankYouScreen from '../../../components/users/complateProfile/ThankYouSc
 
 import '../../../components/users/complateProfile/profile.css';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import ErrorBoundary from '../../../components/common/ErrorBoundary';
+import { setCredentials } from '../../../features/auth/authSlice';
 
 // Validation Functions
 const isProfileComplete = (profile) => {
@@ -42,14 +43,21 @@ const isPaymentComplete = (payment) => {
   return hasValidField || hasValidPaymentMethod;
 };
 
+
+
 // Main Component
 export const ProfileStepper = () => {
+
+  const dispatch = useDispatch();
+
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [lastCompletedStep, setLastCompletedStep] = useState(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const { token, userId, p_code } = useSelector(state => state.auth);
+
+  const { token, userId, p_code, role, name } = useSelector(state => state.auth);
 
   const [profileData, setProfileData] = useState({
     profile: {},
@@ -152,67 +160,109 @@ export const ProfileStepper = () => {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
 
-      if (res.status === 200) {
-        const data = res?.data;
-        if (!data) return;
+      if (res.status !== 200) return;
 
-        const parts = {
-          profile: data.profileParts.p_profile || {},
-          social: data.profileParts.p_socials || [],
-          categories: data.profileParts.p_categories || [],
-          portfolio: data.profileParts.p_portfolios || {},
-          payment: data.profileParts.p_paymentaccounts || {}
-        };
+      const data = res.data;
+      if (!data) return;
 
-        setProfileData(parts);
+      // -------------------------
+      // Extract profile parts
+      // -------------------------
+      const parts = {
+        profile: data.profileParts.p_profile || {},
+        social: data.profileParts.p_socials || [],
+        categories: data.profileParts.p_categories || [],
+        portfolio: data.profileParts.p_portfolios || {},
+        payment: data.profileParts.p_paymentaccounts || {}
+      };
 
-        const isNewUser = !isProfileComplete(parts.profile) &&
-          !isSocialComplete(parts.social) &&
-          !isCategoriesComplete(parts.categories) &&
-          !isPortfolioComplete(parts.portfolio) &&
-          !isPaymentComplete(parts.payment);
+      // Always update UI data with latest server values
+      setProfileData(parts);
 
-        if (isNewUser) {
-          localStorage.removeItem('completedSteps');
-          setCompletedSteps([false, false, false, false, false]);
-          setCurrentStep(0);
-          return;
-        }
-
-        // APPROVALPENDING: mark all steps complete, show thank you
-        if (p_code === 'APPROVALPENDING') {
-          setCompletedSteps([true, true, true, true, true]);
-          setCurrentStep('thankyou');
-          return;
-        }
-
-        // REJECTED profiles always start at step 0
-        if (p_code === 'REJECTED') {
-          setCompletedSteps([false, false, false, false, false]);
-          setCurrentStep(0);
-          return;
-        }
-
-        // Only for PENDINGPROFILE calculate completed steps
-        if (p_code === 'PENDINGPROFILE') {
-          const stepsCompletion = [
-            isProfileComplete(parts.profile),
-            isSocialComplete(parts.social),
-            isCategoriesComplete(parts.categories),
-            isPortfolioComplete(parts.portfolio),
-            isPaymentComplete(parts.payment),
-          ];
-
-          setCompletedSteps(stepsCompletion);
-
-          const firstIncomplete = stepsCompletion.findIndex(done => !done);
-          setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : 'thankyou');
-        }
+      // -------------------------
+      // Determine mappedStatus from API
+      // -------------------------
+      const apiStatus = data?.profileParts?.p_profile?.userstatusname;
+      console.log(apiStatus)
+      const mappedStatus = apiStatus ? apiStatus.toUpperCase() : null;
+      console.log(mappedStatus)
+      // -------------------------
+      // Update Redux only if APPROVALPENDING
+      // -------------------------
+      if (mappedStatus === "APPROVALPENDING") {
+        console.log("dispatch")
+        dispatch(
+          setCredentials({
+            token: token,
+            id: userId,
+            name: name,
+            role: role,
+            p_code: mappedStatus,
+          })
+        );
       }
+
+      // -------------------------
+      // Compute step completion for later use
+      // -------------------------
+      const stepsCompletion = [
+        isProfileComplete(parts.profile),
+        isSocialComplete(parts.social),
+        isCategoriesComplete(parts.categories),
+        isPortfolioComplete(parts.portfolio),
+        isPaymentComplete(parts.payment),
+      ];
+
+      // -------------------------
+      // Handle each status
+      // -------------------------
+
+      if (mappedStatus === "APPROVALPENDING") {
+        const allCompleted = [true, true, true, true, true];
+        setCompletedSteps(allCompleted);
+        setCurrentStep(steps.length); // Set to steps.length to indicate completion
+        return;
+      }
+
+
+      // 🔵 REJECTED → user must start from step 0, but keep latest API data
+      if (mappedStatus === "REJECTED") {
+        if (isInitialLoad) {
+          setCompletedSteps([false, false, false, false, false]);
+          setCurrentStep(0);
+          setIsInitialLoad(false);
+        }
+        return;
+      }
+
+      // 🟢 PENDINGPROFILE → resume from last incomplete step
+      if (mappedStatus === "PENDINGPROFILE") {
+        setCompletedSteps(stepsCompletion);
+        const firstIncomplete = stepsCompletion.findIndex(s => !s);
+        setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "thankyou");
+        return;
+      }
+
+      // ⚪ NEW USER → everything empty
+      const isNewUser =
+        !isProfileComplete(parts.profile) &&
+        !isSocialComplete(parts.social) &&
+        !isCategoriesComplete(parts.categories) &&
+        !isPortfolioComplete(parts.portfolio) &&
+        !isPaymentComplete(parts.payment);
+
+      if (isNewUser) {
+        setCompletedSteps([false, false, false, false, false]);
+        setCurrentStep(0);
+        return;
+      }
+
     } catch (error) {
       console.error("❌ Error fetching profile data:", error);
     }
   };
+
+
 
   useEffect(() => {
     getUserProfileCompationData();
@@ -220,17 +270,21 @@ export const ProfileStepper = () => {
 
   const handleStepChange = (step) => {
     // Non-editable users cannot change steps
-    if (!isEditable) return; 
+    if (!isEditable) return;
 
     if (p_code === 'PENDINGPROFILE') {
       if (step <= currentStep + 1) setCurrentStep(step);
     } else if (p_code === 'REJECTED') {
-      if (step === 0) setCurrentStep(step);
+      // Same rules as PENDINGPROFILE
+      if (step <= currentStep + 1) {
+        setCurrentStep(step);
+      }
+      return;
     }
+
   };
 
-  // Determine which step to display
-  const displayStep = ['APPROVALPENDING'].includes(p_code) ? 'thankyou' : currentStep;
+
 
   return (
     <>
@@ -253,7 +307,7 @@ export const ProfileStepper = () => {
           </div>
           <Steps
             direction="vertical"
-            current={typeof displayStep === 'number' ? displayStep : steps.length}
+            current={currentStep}
             items={steps.map((s) => ({ title: s.title }))}
             onChange={handleStepChange}
           />
@@ -265,7 +319,7 @@ export const ProfileStepper = () => {
           <div className="bg-white p-6 rounded-3xl sticky top-[60px]">
             <h2 className="text-xl font-semibold mb-4">Profile Completion Steps</h2>
             <Steps
-              current={typeof displayStep === 'number' ? displayStep : steps.length}
+              current={currentStep}
               direction="vertical"
               items={steps.map((s, index) => ({
                 title: s.title,
@@ -283,10 +337,10 @@ export const ProfileStepper = () => {
 
         <div className="w-full sm:w-2/3 lg:w-3/4 p-4 bg-white rounded-3xl">
           <ErrorBoundary>
-            {displayStep === 'thankyou' ? (
+            {currentStep >= steps.length ? (
               <ThankYouScreen />
             ) : (
-              steps[displayStep]?.component || (
+              steps[currentStep]?.component || (
                 <div className="p-6 bg-yellow-50 border border-yellow-300 rounded">
                   <p>⚠️ Invalid step index. Please try reloading the page.</p>
                 </div>
@@ -298,4 +352,3 @@ export const ProfileStepper = () => {
     </>
   );
 };
-

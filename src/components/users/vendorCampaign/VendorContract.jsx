@@ -1,113 +1,148 @@
-import React, { useState } from "react";
-import { Button, Typography, Modal } from "antd";
+import React, { useEffect, useState } from "react";
+import { Button, Typography, Modal, Spin } from "antd";
 import { RiAddLine } from "@remixicon/react";
 import ContractModal from "./ContractModal";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { safeNumber, safeText, safeArray } from "../../../App/safeAccess";
 
-const { Title, Text } = Typography;
 
-const VendorContract = ({ campaignId,  campaignStart, campaignEnd }) => {
+const { Title } = Typography;
+
+const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const [editingContract, setEditingContract] = useState(null);
+  const { token } = useSelector((state) => state.auth);
+  const [contracts, setContracts] = useState([]);
 
-  const [contracts, setContracts] = useState([
-    {
-      id: "CONT-001",
-      influencerId: 2,
-      influencer: "Aditi Sharma",
-      contractStart: "01 Feb 2025",
-      contractEnd: "28 Feb 2025",
-      campaignStart: "05 Feb 2025",
-      campaignEnd: "25 Feb 2025",
-      deliverables: "Reel (Instagram), Story (Instagram)",
-      payment: "₹25,000",
-      notes: "Use #Brand hashtags",
-      status: "Approved",
-    },
-    {
-      id: "CONT-002",
-      influencerId: 1,
-      influencer: "John Carter",
-      contractStart: "10 Mar 2025",
-      contractEnd: "20 Mar 2025",
-      campaignStart: "12 Mar 2025",
-      campaignEnd: "18 Mar 2025",
-      deliverables: "Post (Instagram) + Short (YouTube)",
-      payment: "₹18,000",
-      notes: "Shoot outdoors only",
-      status: "Pending",
-    },
-    {
-      id: "CONT-003",
-      influencerId: 5,
-      influencer: "Maya Patel",
-      contractStart: "01 Apr 2025",
-      contractEnd: "15 Apr 2025",
-      campaignStart: "03 Apr 2025",
-      campaignEnd: "12 Apr 2025",
-      deliverables: "Reel (Instagram)",
-      payment: "₹12,000",
-      notes: "",
-      status: "Rejected",
-    },
-  ]);
+  // Fetch contracts from API
+  const fetchAllContracts = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`/vendor/contract/list/${campaignId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
+      const apiContracts = safeArray(res?.data?.data);
 
-  // Convert deliverables array to readable string
-  const formatDeliverables = (deliverables) => {
-    return deliverables
-      .map((p) =>
-        p.contentTypes
-          .map((ct) => `${ct.contenttypename} (${p.providername})`)
-          .join(", ")
-      )
-      .join(" + ");
+      const formattedContracts = apiContracts.map((c) => ({
+        id: safeNumber(c.contractid),
+        influencerId: safeNumber(c.influencerid),
+        influencer: c.influencerphoto ? (
+          <div className="flex items-center gap-2">
+            <img
+              src={safeText(c.influencerphoto)}
+              alt="Influencer"
+              className="w-6 h-6 rounded-full"
+            />
+            <span>{`Influencer ${safeNumber(c.influencerid)}`}</span>
+          </div>
+        ) : `Influencer ${safeNumber(c.influencerid)}`,
+        contractStart: c.contractstartdate,
+        contractEnd: c.contractenddate,
+        campaignStart: safeText(campaignStart),
+        campaignEnd: safeText(campaignEnd),
+        deliverables: safeArray(c.providercontenttype).map((p) => ({
+          icon: safeText(p.iconpath),
+          provider: safeText(p.providername),
+          type: safeText(p.contenttypename),
+        })),
+        payment: `₹${safeNumber(c.paymentamount).toLocaleString()}`,
+        notes: safeText(c.note),
+        status: safeText(c.statusname, "Pending"),
+      }));
+
+      setContracts(formattedContracts);
+    } catch (error) {
+      console.error("Error fetching contracts:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // OPEN MODAL TO EDIT
+  useEffect(() => {
+    fetchAllContracts();
+  }, []);
+
+  // Open modal to edit
   const handleEdit = (contract) => {
     setEditingContract(contract);
     setIsModalOpen(true);
   };
 
-  // CREATE OR UPDATE CONTRACT
-  const handleSubmit = (values) => {
-    console.log(values)
-    const formattedContract = {
-      id: editingContract ? editingContract.id : `CONT-${contracts.length + 1}`,
-      influencerId: values.influencer,
-      contractStart: values.contractStart.format("DD MMM YYYY"),
-      contractEnd: values.contractEnd.format("DD MMM YYYY"),
-      campaignStart: values.campaignStart.format("DD MMM YYYY"),
-      campaignEnd: values.campaignEnd.format("DD MMM YYYY"),
-      deliverables: formatDeliverables(values.deliverables),
-      payment: `₹${values.payment.toLocaleString()}`,
-      notes: values.notes,
-      status: editingContract ? editingContract.status : "Pending",
-    };
+  // Submit contract (create/update)
+  const handleSubmit = async (values) => {
+    try {
+      const contractPayload = {
+        contractstartdate: values.contractStart.format("DD-MM-YYYY"),
+        contractenddate: values.contractEnd.format("DD-MM-YYYY"),
+        paymentamount: values.payment,
+        productlink: values.productLink,
+        vendoraddress: values.vendorAddress,
+        note: values.notes,
+      };
 
-    if (editingContract) {
-      // Update
-      setContracts((prev) =>
-        prev.map((c) => (c.id === editingContract.id ? formattedContract : c))
-      );
+      const payload = {
+        p_campaignapplicationid: Number(values?.influencers),
+        p_contractid: editingContract ? editingContract.id : null,
+        p_contractjson: contractPayload,
+        p_contenttypejson: values.deliverables,
+      };
 
-      Modal.success({
-        title: "Contract Updated",
-        content: "The contract has been successfully updated.",
+      const response = await axios.post("/vendor/create-or-edit/contract", payload, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-    } else {
-      // Create
-      setContracts((prev) => [...prev, formattedContract]);
 
-      Modal.success({
-        title: "Contract Created",
-        content: "Your contract has been created successfully.",
+      if (response.data.p_status) {
+        const newContract = {
+          id: editingContract ? editingContract.id : `CONT-${contracts.length + 1}`,
+          influencerId: values.influencer,
+          contractStart: values.contractStart.format("DD MMM YYYY"),
+          contractEnd: values.contractEnd.format("DD MMM YYYY"),
+          campaignStart: values.campaignStart.format("DD MMM YYYY"),
+          campaignEnd: values.campaignEnd.format("DD MMM YYYY"),
+          deliverables: safeArray(values.deliverables).map((p) => ({
+            icon: safeText(p.iconpath),
+            provider: safeText(p.providername),
+            type: safeText(p.contenttypename),
+          })),
+          payment: `₹${safeNumber(values.payment).toLocaleString()}`,
+          notes: safeText(values.notes),
+          status: editingContract ? editingContract.status : "Pending",
+        };
+
+        if (editingContract) {
+          setContracts((prev) =>
+            prev.map((c) => (c.id === editingContract.id ? newContract : c))
+          );
+          Modal.success({
+            title: "Contract Updated",
+            content: response.data.p_message || "Contract updated successfully.",
+          });
+        } else {
+          setContracts((prev) => [...prev, newContract]);
+          Modal.success({
+            title: "Contract Created",
+            content: response.data.p_message || "Contract created successfully.",
+          });
+        }
+
+        setEditingContract(null);
+        setIsModalOpen(false);
+      } else {
+        Modal.error({
+          title: "Error",
+          content: response.data.p_message || "Failed to create/update contract.",
+        });
+      }
+    } catch (error) {
+      console.error("API error:", error);
+      Modal.error({
+        title: "Error",
+        content: "Something went wrong while saving the contract.",
       });
     }
-
-    setEditingContract(null);
-    setIsModalOpen(false);
   };
 
   return (
@@ -126,93 +161,96 @@ const VendorContract = ({ campaignId,  campaignStart, campaignEnd }) => {
         </Button>
       </div>
 
-      {/* MODERN CONTRACT LIST */}
-      <div className="space-y-4 mb-4">
-        {contracts.map((contract) => (
-          <div
-            key={contract.id}
-            className="relative bg-white/70 backdrop-blur-xl border border-gray-200 
-      rounded-xl p-5 shadow-md hover:shadow-xl 
-      transition-all duration-300 cursor-pointer group"
-          >
-            {/* STATUS RIBBON */}
-            <span
-              className={`absolute top-0 right-0 px-3 py-1 text-xs font-semibold rounded-bl-xl 
-        ${contract.status === "Approved"
-                  ? "bg-green-500 text-white"
-                  : contract.status === "Rejected"
-                    ? "bg-red-500 text-white"
-                    : "bg-yellow-500 text-white"
-                }`}
+      {loading ? (
+        <div className="flex justify-center py-10">
+          <Spin size="large" />
+        </div>
+      ) : (
+        <div className="space-y-4 mb-4">
+          {contracts.map((contract) => (
+            <div
+              key={contract.id}
+              className="relative bg-white/70 backdrop-blur-xl border border-gray-200 
+              rounded-xl p-5 shadow-md hover:shadow-xl 
+              transition-all duration-300 cursor-pointer group"
             >
-              {contract.status}
-            </span>
+              {/* STATUS RIBBON */}
+              <span
+                className={`absolute top-0 right-0 px-3 py-1 text-xs font-semibold rounded-bl-xl 
+                ${contract.status === "Accepted"
+                    ? "bg-green-500 text-white"
+                    : contract.status === "Rejected"
+                      ? "bg-red-500 text-white"
+                      : "bg-yellow-500 text-white"
+                  }`}
+              >
+                {contract.status}
+              </span>
 
-            <div className="flex justify-between items-start gap-6">
+              <div className="flex justify-between items-start gap-6">
+                {/* LEFT SIDE → Details */}
+                <div className="flex flex-col gap-2 w-full">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <span className="text-blue-600">●</span>
+                    {contract.influencer}
+                  </h3>
 
-              {/* LEFT SIDE → Details */}
-              <div className="flex flex-col gap-2 w-full">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <span className="text-blue-600">●</span>
-                  {contract.influencer}
-                </h3>
-
-                <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
-
-                  <div>
-                    <p className="font-medium text-gray-800">Contract Duration</p>
-                    <p>{contract.contractStart} → {contract.contractEnd}</p>
-                  </div>
-
-                  <div>
-                    <p className="font-medium text-gray-800">Campaign Dates</p>
-                    <p>{contract.campaignStart} → {contract.campaignEnd}</p>
-                  </div>
-
-                  <div className="col-span-2">
-                    <p className="font-medium text-gray-800">Deliverables</p>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {contract.deliverables.split(",").map((item, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs 
-                    border border-blue-100"
-                        >
-                          {item.trim()}
-                        </span>
-                      ))}
+                  <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
+                    <div>
+                      <p className="font-medium text-gray-800">Contract Duration</p>
+                      <p>{contract.contractStart} → {contract.contractEnd}</p>
                     </div>
-                  </div>
 
-                  {contract.notes && (
-                    <div className="col-span-2 mt-1">
-                      <p className="italic text-gray-500 text-xs">"{contract.notes}"</p>
+                    <div>
+                      <p className="font-medium text-gray-800">Campaign Dates</p>
+                      <p>{contract.campaignStart} → {contract.campaignEnd}</p>
                     </div>
+
+                    <div className="col-span-2">
+                      <p className="font-medium text-gray-800">Deliverables</p>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {safeArray(contract.deliverables).map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs border border-blue-100"
+                          >
+                            <img src={item.icon} alt={item.provider} className="w-4 h-4" />
+                            <span>{item.type}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {contract.notes && (
+                      <div className="col-span-2 mt-1">
+                        <p className="italic text-gray-500 text-xs">"{contract.notes}"</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* RIGHT SIDE → Payment + Buttons */}
+                <div className="flex flex-col items-end gap-3 min-w-[120px]">
+                  <p className="text-lg font-semibold text-gray-900 mt-3">
+                    {contract.payment}
+                  </p>
+
+                  {/* Show edit button only if status is Rejected */}
+                  {contract.status === "Rejected" && (
+                    <button
+                      onClick={() => handleEdit(contract)}
+                      className="px-4 py-1.5 text-xs font-medium bg-blue-600 text-white 
+                        rounded-lg transition-all hover:bg-blue-700 shadow-sm"
+                    >
+                      Edit Contract
+                    </button>
                   )}
                 </div>
               </div>
-
-              {/* RIGHT SIDE → Payment + Buttons */}
-              <div className="flex flex-col items-end gap-3 min-w-[120px]">
-                <p className="text-lg font-semibold text-gray-900 mt-3">
-                  {contract.payment}
-                </p>
-
-                <button
-                  onClick={() => handleEdit(contract)}
-                  className="px-4 py-1.5 text-xs font-medium bg-blue-600 text-white 
-            rounded-lg opacity-0 group-hover:opacity-100 transition-all
-            hover:bg-blue-700 shadow-sm"
-                >
-                  Edit Contract
-                </button>
-              </div>
-
             </div>
-          </div>
-        ))}
-      </div>
-
+          ))}
+        </div>
+      )}
 
       {/* CONTRACT MODAL */}
       <ContractModal
@@ -221,7 +259,7 @@ const VendorContract = ({ campaignId,  campaignStart, campaignEnd }) => {
           setEditingContract(null);
           setIsModalOpen(false);
         }}
-        campaignId = {campaignId}
+        campaignId={campaignId}
         existingCampaignStart={campaignStart}
         existingCampaignEnd={campaignEnd}
         editData={editingContract}

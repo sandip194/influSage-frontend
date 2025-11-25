@@ -4,24 +4,38 @@ const notificationSlice = createSlice({
   name: "notifications",
   initialState: {
     items: [],
+    lastThreeUnread: [],
+    unreadCount: 0,
   },
   reducers: {
     setNotifications: (state, action) => {
       state.items = action.payload;
     },
     addNotification: (state, action) => {
-      state.items.unshift(action.payload); // add latest on top
+      state.items.unshift(action.payload);
     },
-    markAsRead: (state, action) => {
-      const index = state.items.findIndex((n) => n.notification_id === action.payload);
-      if (index !== -1) state.items[index].is_read = true;
+    setUnreadCount: (state, action) => {
+      state.unreadCount = action.payload;
     },
-    clearNotifications: (state) => {
-      state.items = [];
+    incrementUnread: (state) => {
+      state.unreadCount += 1;
     },
+    setLastThreeUnread: (state, action) => {
+      state.lastThreeUnread = action.payload;
+    },
+    markAllRead: (state) => {
+      state.unreadCount = 0;
+    }
   },
 });
 
-export const { setNotifications, addNotification, markAsRead, clearNotifications } =
-  notificationSlice.actions;
+export const {
+  setNotifications,
+  addNotification,
+  setUnreadCount,
+  incrementUnread,
+  setLastThreeUnread,
+  markAllRead
+} = notificationSlice.actions;
+
 export default notificationSlice.reducer;

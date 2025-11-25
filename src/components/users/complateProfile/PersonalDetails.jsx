@@ -75,53 +75,49 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
 
   const fileInputRef = useRef();
 
-  // Load form values from data
+  // Load form values from data after countries are loaded
   useEffect(() => {
-    if (!data || Object.keys(data).length === 0) return;
+    if (!data || Object.keys(data).length === 0 || countries.length === 0) return;
 
-    const hasValidData = Object.values(data).some((value) => value !== undefined && value !== null);
+    const safe = (val) => (val !== null && val !== undefined ? val : undefined);
 
-    if (hasValidData) {
-      const safe = (val) => (val !== null && val !== undefined ? val : undefined);
+    form.setFieldsValue({
+      gender: safe(data.genderid),
+      birthDate: data.dob ? dayjs(data.dob, 'DD-MM-YYYY') : undefined,
+      phone: safe(data.phonenumber),
+      address: safe(data.address1),
+      country: safe(data.countryname),
+      state: safe(data.statename),
+      city: safe(data.city),
+      zipCode: safe(data.zip),
+      bio: safe(data.bio),
+    });
 
-      form.setFieldsValue({
-        gender: safe(data.genderid),
-        birthDate: data.dob ? dayjs(data.dob, 'DD-MM-YYYY') : undefined,
-        phone: safe(data.phonenumber),
-        address: safe(data.address1),
-        country: safe(data.countryname),
-        state: safe(data.statename),
-        city: safe(data.city),
-        zipCode: safe(data.zip),
-        bio: safe(data.bio),
-      });
+    // Country → State → City cascade fix
+    if (data.countryname) {
+      const countryObj = countries.find((c) => c.name === data.countryname);
+      if (countryObj) {
+        setSelectedCountry(countryObj.isoCode);
+        const stateList = State.getStatesOfCountry(countryObj.isoCode);
+        setStates(stateList);
 
-      if (data.countryname) {
-        const countryObj = countries.find((c) => c.name === data.countryname);
-        if (countryObj) {
-          setSelectedCountry(countryObj.isoCode);
-          fetchStates(countryObj.isoCode);
+        if (data.statename) {
+          const stateObj = stateList.find((s) => s.name === data.statename);
+          if (stateObj) {
+            setSelectedState(stateObj.isoCode);
+            const cityList = City.getCitiesOfState(countryObj.isoCode, stateObj.isoCode);
+            setCities(cityList);
+          }
         }
       }
+    }
 
-      if (data.countryname && data.statename) {
-        const countryObj = countries.find((c) => c.name === data.countryname);
-        const stateObj = State.getStatesOfCountry(countryObj?.isoCode).find(
-          (s) => s.name === data.statename
-        );
-        if (countryObj && stateObj) {
-          setSelectedState(stateObj.isoCode);
-          fetchCities(countryObj.isoCode, stateObj.isoCode);
-        }
-      }
-
-      if (data.photopath) {
-        const fullUrl = data.photopath.startsWith('http')
-          ? data.photopath
-          : `http://localhost:3001/${data.photopath.replace(/^\/+/, '')}`;
-        setPreview(fullUrl);
-        setExistingPhotoPath(data.photopath);
-      }
+    if (data.photopath) {
+      const fullUrl = data.photopath.startsWith('http')
+        ? data.photopath
+        : `http://localhost:3001/${data.photopath.replace(/^\/+/, '')}`;
+      setPreview(fullUrl);
+      setExistingPhotoPath(data.photopath);
     }
   }, [data, form, countries]);
 
@@ -354,7 +350,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
                 form.setFieldsValue({ city: undefined });
                 fetchCities(selectedCountry, val);
               }}
-              disabled={!selectedCountry}
+              disabled={states.length === 0}
               loading={loading.states}
               optionFilterProp="children"
               filterOption={(input, option) => option?.children?.toLowerCase().includes(input.toLowerCase())}
@@ -373,7 +369,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
               showSearch
               size="large"
               placeholder="Select City"
-              disabled={!selectedState}
+              disabled={cities.length === 0}
               loading={loading.cities}
               optionFilterProp="children"
               filterOption={(input, option) => option?.children?.toLowerCase().includes(input.toLowerCase())}
@@ -395,9 +391,8 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
             { required: true, message: 'Please enter your ZIP or PIN Code' },
             ({ getFieldValue }) => ({
               validator(_, value) {
-                const iso = selectedCountry;
-                const regex = getRegexForCountry(iso);
-                if (!value) return Promise.resolve();
+                if (!selectedCountry || !value) return Promise.resolve();
+                const regex = getRegexForCountry(selectedCountry);
                 if (regex && !regex.test(value.trim())) return Promise.reject(new Error('Invalid ZIP/PIN code'));
                 return Promise.resolve();
               },
