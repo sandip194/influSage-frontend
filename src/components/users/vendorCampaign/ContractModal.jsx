@@ -56,13 +56,13 @@ export default function ContractModal({
                 // 🔥 Case 1: API returns a message like:
                 // [ { "message": "No influencer selected" } ]
                 if (Array.isArray(data) && data.length === 1 && data[0].message) {
-                    setInfluencers([]);         // no influencers
-                    return;                     // stop processing map
+                    setInfluencers([]);         
+                    return;                     
                 }
 
                 // 🔥 Case 2: Normal case — array of influencers
                 const converted = (data || []).map((inf) => ({
-                    id: inf.userid,
+                    id: inf.campaignapplicationid,
                     name: `${inf.firstname} ${inf.lastname}`,
                     platform: null,
                 }));
@@ -79,7 +79,6 @@ export default function ContractModal({
 
         fetchInfluencers();
     }, [campaignId, token]);
-
 
     // Fetch platforms & content types (unchanged, but kept for completeness)
     useEffect(() => {
