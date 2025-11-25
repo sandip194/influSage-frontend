@@ -3,6 +3,7 @@ import { Modal } from "antd";
 import axios from "axios";
 import { RiBook2Line, RiTicket2Line } from "@remixicon/react";
 import { useSelector } from "react-redux";
+import { getSocket } from "../../../sockets/socket";
 
 const AdminSidebar = ({ setActiveSubject }) => {
   const { token } = useSelector((state) => state.auth);
@@ -13,6 +14,24 @@ const AdminSidebar = ({ setActiveSubject }) => {
   const [activeSubjectId, setActiveSubjectId] = useState(null);
   const [ticketModalData, setTicketModalData] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+  const socket = getSocket();
+
+  socket.on("markTicketUnread", ({ ticketId }) => {
+    setSubjectsByTab((prev) => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach((tab) => {
+        updated[tab] = updated[tab].map((t) =>
+          t.id === ticketId ? { ...t, unread: true } : t
+        );
+      });
+      return updated;
+    });
+  });
+
+  return () => socket.off("markTicketUnread");
+}, []);
 
   useEffect(() => {
     const fetchTicketStatus = async () => {
@@ -94,14 +113,14 @@ const AdminSidebar = ({ setActiveSubject }) => {
       );
 
       setSubjectsByTab((prev) => {
-        let updated = { ...prev };
+        const updated = { ...prev };
         Object.keys(updated).forEach((tab) => {
           updated[tab] = updated[tab].map((t) =>
-            t.id === ticket.id ? { ...t, isclaimedbyadmin: true } : t
+            t.id === ticket.id ? { ...t, unread: false } : t
           );
         });
         return updated;
-      });
+      }); 
 
       setActiveTab("Inprogress");
     } catch (err) {
@@ -161,12 +180,13 @@ const AdminSidebar = ({ setActiveSubject }) => {
             <div
               key={s.id}
               onClick={() => setTicketModalData(s)}
-              className={`rounded-xl border cursor-pointer transition p-3 ${
-                activeSubjectId === s.id
-                  ? "bg-[#0D132D] border-[#0D132D] text-white shadow-md"
-                  : "bg-white border-gray-200 hover:bg-gray-100 text-[#0D132D]"
-              }`}
-            >
+              className={`rounded-xl border cursor-pointer transition p-3
+  ${s.unread ? "bg-yellow-100 border-yellow-500" : ""}
+  ${activeSubjectId === s.id
+    ? "bg-[#0D132D] border-[#0D132D] text-white shadow-md"
+    : "bg-white border-gray-200 hover:bg-gray-100 text-[#0D132D]"}
+`}
+>
               <div className="flex items-center justify-between gap-2 mb-1">
                 <div className="flex items-center gap-2">
                   {s.icon}
@@ -266,7 +286,7 @@ const AdminSidebar = ({ setActiveSubject }) => {
             <div className="grid grid-cols-2 gap-6 pt-4">
               <div className="space-y-3 text-sm">
                 <div>
-                  <p className="text-gray-500">Ticket ID</p>
+                  <p className="text-gray-500">Ticket Number</p>
                   <p className="font-medium">{ticketModalData?.ticketnumber}</p>
                 </div>
 
@@ -285,7 +305,9 @@ const AdminSidebar = ({ setActiveSubject }) => {
                 <div>
                   <p className="text-gray-500">Resolved On</p>
                   <p className="font-medium">
-                    {new Date(ticketModalData?.resolveddate).toLocaleString()}
+                    {ticketModalData?.resolveddate
+                      ? new Date(ticketModalData.resolveddate).toLocaleString()
+                      : "—"}
                   </p>
                 </div>
               </div>
@@ -316,25 +338,20 @@ const AdminSidebar = ({ setActiveSubject }) => {
 
                 {/* Assigned to */}
                 <div>
-                  <p className="text-gray-500 text-sm mb-1 font-medium">
-                    Assigned To
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={
-                        ticketModalData.adminphoto ||
-                        "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                      }
-                      alt="admin"
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div>
-                      <p className="font-medium">
-                        {ticketModalData.adminfullname || "Not assigned"}
-                      </p>
-                      <p className="text-xs text-gray-500">Admin</p>
+                  <p className="text-gray-500 text-sm mb-1 font-medium">Assigned To</p>
+
+                  {ticketModalData?.adminfullname ? (
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={ticketModalData.adminphoto || "/default.jpg"}
+                        alt="admin"
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      <p className="font-medium">{ticketModalData.adminfullname}</p>
                     </div>
-                  </div>
+                  ) : (
+                    <p className="text-gray-600 font-medium">—</p>
+                  )}
                 </div>
               </div>
             </div>

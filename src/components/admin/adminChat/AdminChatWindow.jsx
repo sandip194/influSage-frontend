@@ -33,7 +33,28 @@ const AdminChatWindow = ({ activeSubject }) => {
   const [attachedFile, setAttachedFile] = useState(null);
   const [attachedPreview, setAttachedPreview] = useState(null);
   const [highlightMsgId, setHighlightMsgId] = useState(null);
+  const chatRef = useRef(null);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
+const formatTime = (timestamp) => {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffMins < 1440) {
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }
+  return date.toLocaleDateString();
+};
   useEffect(() => {
     if (!socket || !activeSubject?.id) return;
 
@@ -192,59 +213,78 @@ const AdminChatWindow = ({ activeSubject }) => {
   useEffect(() => {
     setIsResolved(activeSubject?.statusname === "Resolved");
   }, [activeSubject]);
+const handleScroll = () => {
+  if (!chatRef.current) return;
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (!activeSubject?.id) return;
+  if (chatRef.current.scrollTop === 0 && hasMore && !loadingMore) {
+    const prevHeight = chatRef.current.scrollHeight;
+    loadMessages().then(() => {
+      setTimeout(() => {
+        chatRef.current.scrollTop = chatRef.current.scrollHeight - prevHeight;
+      }, 50);
+    });
+  }
+};
 
-      try {
-        const res = await axios.get(
-          `/chat/support/user-admin/open-chat/${activeSubject.id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: {
-              p_limit: 200,
-              p_offset: 0,
-            },
-          }
-        );
+  const loadMessages = async () => {
+  if (!activeSubject?.id || loadingMore || !hasMore) return;
+  setLoadingMore(true);
 
-        const data = res.data?.data || {};
-
-        const sorted = (data.records || []).sort(
-          (a, b) => new Date(a.createddate) - new Date(b.createddate)
-        );
-
-        setMessages(
-          sorted.map((m) => {
-            let filetype = null;
-            if (m.filepath) {
-              const ext = m.filepath.split(".").pop().toLowerCase();
-              if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext))
-                filetype = "image";
-              else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext))
-                filetype = "video";
-              else filetype = "file";
-            }
-
-            return {
-              id: m.usersupportticketmessagesid,
-              replyId: m.replyid || null,
-              message: m.message,
-              filepath: m.filepath || null,
-              filetype,
-              sender: m.roleid === 4 ? "admin" : "user",
-              time: m.createddate,
-            };
-          })
-        );
-      } catch (err) {
-        console.error("Error fetching chat messages:", err);
+  try {
+    const res = await axios.get(
+      `/chat/support/user-admin/open-chat/${activeSubject.id}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          p_limit: 10,
+          p_offset: offset + 1,
+        },
       }
-    };
+    );
 
-    fetchMessages();
-  }, [activeSubject]);
+    const newRecords = res.data?.data?.records || [];
+
+    if (newRecords.length < 10) {
+      setHasMore(false);
+    }
+
+    const sorted = newRecords.sort(
+      (a, b) => new Date(a.createddate) - new Date(b.createddate)
+    );
+
+    const formatted = sorted.map((m) => ({
+      id: m.usersupportticketmessagesid,
+      replyId: m.replyid,
+      message: m.message,
+      filepath: m.filepath,
+      filetype: m.filetype,
+      sender: m.roleid === 4 ? "admin" : "user",
+      time: m.createddate,
+    }));
+
+   if (offset === 0) {
+  setMessages(formatted);
+
+  setTimeout(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, 50);
+}
+
+    setOffset((prev) => prev + 1);
+  } finally {
+    setLoadingMore(false);
+  }
+};
+useEffect(() => {
+  if (!activeSubject?.id) return;
+  setMessages([]);
+  setOffset(0);
+  setHasMore(true);
+  loadMessages();
+}, [activeSubject]);
+
 
   return (
     <div className="flex flex-col h-full relative overflow-hidden rounded-md">
@@ -307,124 +347,147 @@ const AdminChatWindow = ({ activeSubject }) => {
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-4 p-4 pb-28">
-            {messages.map((msg, idx) => (
-              <motion.div
-                key={idx}
-                id={msg.id}
-                onMouseEnter={() => setHoveredMsgId(idx)}
-                onMouseLeave={() => setHoveredMsgId(null)}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                 className={`relative flex transition-all duration-300 ${
-                    msg.sender === "admin" ? "justify-end" : "justify-start"
-                  } ${highlightMsgId === msg.id ? "bg-blue-200/60 rounded-xl p-1" : ""}`}
-                >
-                <div
-                  className={`px-4 py-2 rounded-2xl max-w-[65%] shadow-md text-sm break-words whitespace-pre-wrap ${
-                    msg.sender === "admin"
-                      ? "bg-[#0D132D] text-white"
-                      : "bg-gray-100 text-gray-900"
-                  }`}
-                >
-                  {/* reply preview inside bubble */}
-                  {msg.replyId && (
-                    <div
-                      onClick={() => {
-                        const el = document.getElementById(msg.replyId);
-                        if (el) {
-                          el.scrollIntoView({ behavior: "smooth", block: "center" });
-                          setHighlightMsgId(msg.replyId);
-
-                          setTimeout(() => setHighlightMsgId(null), 1200);
-                        }
-                      }}
-                      className={`mb-2 px-2 py-1 rounded-md border-l-4 text-xs cursor-pointer
-                          ${
-                            msg.sender === "admin"
-                              ? "bg-white/20 border-blue-400 text-blue-100"
-                              : "bg-gray-200 border-blue-500 text-gray-700"
-                          }`}
-                    >
-                      {(() => {
-                        const repliedMsg = messages.find(
-                          (m) => m.id === msg.replyId
-                        );
-                        let previewText = repliedMsg?.message;
-                        if (!previewText) {
-                          if (repliedMsg?.filetype === "image")
-                            previewText = "📷 Image";
-                          else if (repliedMsg?.filetype === "video")
-                            previewText = "🎬 Video";
-                          else if (repliedMsg?.filetype === "file")
-                            previewText =
-                              "📎 " + repliedMsg?.filepath?.split("/").pop();
-                        }
-
-                        return (
-                          <>
-                            <span className="font-semibold block">
-                              {repliedMsg?.sender === "admin" && (
-                                <span className="font-semibold block">You</span>
-                              )}
-                            </span>
-
-                            <span className="block truncate">
-                              {previewText}
-                            </span>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  )}
-                  {/* text */}
-                  {!msg.filepath && msg.message && <span>{msg.message}</span>}
-                  {hoveredMsgId === idx && (
-                    <button
-                      onClick={() => setReplyToMessage(msg)}
-                      className={`absolute -top-6 p-1 bg-white shadow  hover:bg-gray-100 transition
-                          ${msg.sender === "admin" ? "right-0" : "left-0"}`}
-                    >
-                      <Tooltip title="Reply">
-                        <RiReplyLine size={18} className="text-gray-700" />
-                      </Tooltip>
-                    </button>
-                  )}
-                  {/* image */}
-                  {msg.filetype === "image" && (
-                    <img
-                      src={msg.filepath}
-                      className="w-full max-w-[220px] rounded-lg mt-2 cursor-pointer hover:opacity-90 transition"
-                      onClick={() => setPreviewImage(msg.filepath)}
-                    />
-                  )}
-
-                  {/* video */}
-                  {msg.filetype === "video" && (
-                    <video
-                      controls
-                      className="w-full max-w-[240px] rounded-lg mt-2 cursor-pointer"
-                      onClick={() => setPreviewVideo(msg.filepath)}
-                    >
-                      <source src={msg.filepath} type="video/mp4" />
-                    </video>
-                  )}
-
-                  {/* file */}
-                  {msg.filetype === "file" && (
-                    <div
-                      className="flex items-center gap-2 text-white px-3 mt-2 cursor-pointer"
-                      onClick={() => window.open(msg.filepath, "_blank")}
-                    >
-                      <span className="underline font-medium truncate">
-                        {msg.filepath.split("/").pop()}
-                      </span>
-                    </div>
-                  )}
+           <div
+              className="flex-1 overflow-y-auto space-y-4 p-4 pb-28"
+              ref={chatRef}
+              onScroll={handleScroll}
+            >
+              {loadingMore && (
+                <div className="flex justify-center py-2">
+                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              )}
+
+                      {messages.map((msg) => {
+                        if (!msg.message && !msg.filepath) return null;
+          
+                        return (
+                          <motion.div
+                            key={msg.id}
+                            id={msg.id}
+                            onMouseEnter={() => setHoveredMsgId(msg.id)}
+                            onMouseLeave={() => setHoveredMsgId(null)}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                             className={`relative flex transition-all duration-300 ${
+                              msg.sender === "admin" ? "justify-end" : "justify-start"
+                            } ${highlightMsgId === msg.id ? "bg-blue-200/60 rounded-xl p-1" : ""}`}
+                          >
+                            <div className="flex flex-col max-w-[65%]">
+                              <div
+                                className={`px-4 py-2 rounded-2xl shadow-md text-sm break-words whitespace-pre-wrap ${
+                                  msg.sender === "admin" ? "bg-[#0D132D] text-white" : "bg-gray-100 text-gray-900"
+                                }`}
+                              >
+                                {/* reply preview */}
+                                {msg.replyId && (
+                                  <div
+                                    onClick={() => {
+                                      const el = document.getElementById(msg.replyId);
+                                      if (el) {
+                                        el.scrollIntoView({ behavior: "smooth", block: "center" });
+                                        setHighlightMsgId(msg.replyId);
+                                        setTimeout(() => setHighlightMsgId(null), 1200);
+                                      }
+                                    }}
+                                    className={`mb-2 px-2 py-1 rounded-md border-l-4 text-xs cursor-pointer ${
+                                      msg.sender === "admin"
+                                        ? "bg-white/20 border-blue-400 text-blue-100"
+                                        : "bg-gray-200 border-blue-500 text-gray-700"
+                                    }`}
+                                  >
+                                    {(() => {
+                                      const repliedMsg = messages.find((m) => m.id === msg.replyId);
+                                      let previewText = repliedMsg?.message;
+                                      if (!previewText) {
+                                        if (repliedMsg?.filetype === "image") previewText = "📷 Image";
+                                        else if (repliedMsg?.filetype === "video") previewText = "🎬 Video";
+                                        else if (repliedMsg?.filetype === "file")
+                                          previewText = "📎 " + repliedMsg?.filepath?.split("/").pop();
+                                      }
+                                      return (
+                                        <>
+                                          {repliedMsg?.sender === "admin" && (
+                                            <span className="font-semibold block">You</span>
+                                          )}
+                                          <span className="block truncate">{previewText}</span>
+                                        </>
+                                      );
+                                    })()}
+                                  </div>
+                                )}
+          
+                                {/* message text */}
+                                {!msg.filepath && msg.message && <span>{msg.message}</span>}
+          
+                                {/* reply button */}
+                                {hoveredMsgId === msg.id && (
+                                  <button
+                                    onClick={() =>
+                                      setReplyToMessage({
+                                        id: msg.id,
+                                        message: msg.message,
+                                        filepath: msg.filepath,
+                                        filetype: msg.filetype,
+                                        sender: msg.sender,
+                                      })
+                                    }
+                                    className={`absolute -top-6 p-1 bg-white shadow hover:bg-gray-100 transition ${
+                                      msg.sender === "admin" ? "right-0" : "left-0"
+                                    }`}
+                                  >
+                                    <Tooltip title="Reply">
+                                      <RiReplyLine size={18} className="text-gray-700" />
+                                    </Tooltip>
+                                  </button>
+                                )}
+          
+                                {/* image */}
+                                {msg.filetype === "image" && (
+                                  <img
+                                    src={msg.filepath}
+                                    className="w-full max-w-[220px] rounded-lg mt-2 cursor-pointer hover:opacity-90 transition"
+                                    onClick={() => setPreviewImage(msg.filepath)}
+                                  />
+                                )}
+          
+                                {/* video */}
+                                {msg.filetype === "video" && (
+                                  <video
+                                    controls
+                                    className="w-full max-w-[240px] rounded-lg mt-2 cursor-pointer"
+                                    onClick={() => setPreviewVideo(msg.filepath)}
+                                  >
+                                    <source src={msg.filepath} type="video/mp4" />
+                                  </video>
+                                )}
+          
+                                {/* file */}
+                                {msg.filetype === "file" && (
+                                  <div
+                                    className="flex items-center gap-2 text-white px-3 mt-2 cursor-pointer"
+                                    onClick={() => window.open(msg.filepath, "_blank")}
+                                  >
+                                    <span className="underline font-medium truncate">
+                                      {msg.filepath.split("/").pop()}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+          
+                              {/* Message time */}
+                              <p
+                                className={`text-[10px] mt-1 ${
+                                  msg.sender === "admin" ? "text-gray-500 self-end" : "text-gray-500 self-start"
+                                }`}
+                              >
+                                {formatTime(msg.time)}
+                              </p>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
         </motion.div>
       )}
       <motion.div
