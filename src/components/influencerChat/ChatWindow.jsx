@@ -58,21 +58,19 @@ const ChatWindow = ({ activeSubject }) => {
   return date.toLocaleDateString();
 };
 
+
 useEffect(() => {
-  if (!socket || !activeSubject?.id) return;
+  if (!activeSubject?.id || !socket) return;
 
   socket.emit("joinTicketRoom", activeSubject.id);
-  return () => {
-    socket.emit("leaveTicketRoom", activeSubject.id);
-  };
-}, [socket, activeSubject?.id]);
+  return () => socket.emit("leaveTicketRoom", activeSubject.id);
+}, [activeSubject?.id]);
 
 useEffect(() => {
   if (!socket) return;
 
   const handleReceiveMessage = (msg) => {
     const file = msg.filePath || msg.filepath || msg.file || null;
-
     let filetype = null;
     if (file) {
       const ext = file.split(".").pop().toLowerCase();
@@ -91,13 +89,13 @@ useEffect(() => {
       time: msg.createddate || new Date().toISOString(),
     };
 
-    setMessages((prev) => [...prev, formattedMsg]);
+    setMessages(prev => [...prev, formattedMsg]);
     dispatch(addMessage(formattedMsg));
   };
 
+  socket.off("receiveSupportMessage");
   socket.on("receiveSupportMessage", handleReceiveMessage);
-  return () => socket.off("receiveSupportMessage", handleReceiveMessage);
-}, [socket]);
+}, []);
 
 
 const handleSend = async () => {
@@ -199,7 +197,7 @@ const handleFileUpload = (e) => {
   }
 };
 
-const loadMessages = async () => {
+const loadMessages = async (offsetParam = offset) => {
   if (!activeSubject?.id || loadingMore || !hasMore) return;
   setLoadingMore(true);
 
@@ -210,7 +208,7 @@ const loadMessages = async () => {
         headers: { Authorization: `Bearer ${token}` },
         params: {
           p_limit: 100,
-          p_offset: offset + 1,
+          p_offset: offsetParam + 1,
         },
       }
     );
@@ -273,8 +271,7 @@ useEffect(() => {
   setMessages([]);
   setOffset(0);
   setHasMore(true);
-
-  loadMessages();
+  loadMessages(0);
 }, [activeSubject]);
 
   return (

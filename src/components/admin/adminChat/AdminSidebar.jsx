@@ -6,8 +6,8 @@ import { useSelector } from "react-redux";
 import { getSocket } from "../../../sockets/socket";
 
 const AdminSidebar = ({ setActiveSubject }) => {
-  const { token } = useSelector((state) => state.auth);
-
+  const { token , userId } = useSelector((state) => state.auth);
+  const socket = getSocket();
   const [activeTab, setActiveTab] = useState("");
   const [statusList, setStatusList] = useState([]);
   const [subjectsByTab, setSubjectsByTab] = useState({});
@@ -15,23 +15,37 @@ const AdminSidebar = ({ setActiveSubject }) => {
   const [ticketModalData, setTicketModalData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-  const socket = getSocket();
+useEffect(() => {
+  if (!socket || !userId) return;
+  socket.emit("registerUser", { userId });
 
-  socket.on("markTicketUnread", ({ ticketId }) => {
-    setSubjectsByTab((prev) => {
-      const updated = { ...prev };
-      Object.keys(updated).forEach((tab) => {
-        updated[tab] = updated[tab].map((t) =>
-          t.id === ticketId ? { ...t, unread: true } : t
-        );
-      });
-      return updated;
-    });
+  socket.on("connect", () => {
+    socket.emit("registerUser", { userId });
   });
 
-  return () => socket.off("markTicketUnread");
-}, []);
+  return () => socket.off("connect");
+}, [socket, userId]);
+
+useEffect(() => {
+  if (!socket) return;
+
+  const handler = ({ ticketId }) => {
+    setSubjectsByTab(prev =>
+      Object.fromEntries(
+        Object.entries(prev).map(([tab, tickets]) => [
+          tab,
+          tickets.map(t =>
+            String(t.id) === String(ticketId) ? { ...t, unread: true } : t
+          ),
+        ])
+      )
+    );
+  };
+
+  socket.on("sidebarTicketUpdate", handler);
+  return () => socket.off("sidebarTicketUpdate", handler);
+}, [socket]);
+
 
   useEffect(() => {
     const fetchTicketStatus = async () => {
@@ -75,7 +89,9 @@ const AdminSidebar = ({ setActiveSubject }) => {
         ? res.data.viewTicket.records
         : [];
 
-      const mapped = tickets.map((t) => ({
+      const mapped = tickets.map((t) => {
+      const previous = subjectsByTab[tab.name]?.find(o => o.id === t.usersupportticketid);
+      return {
         id: t.usersupportticketid,
         name: t.subjectname,
         status: t.statusname,
@@ -85,9 +101,11 @@ const AdminSidebar = ({ setActiveSubject }) => {
         userrole: t.userrole,
         adminfullname: t.adminfullname,
         adminphoto: t.adminphoto,
+        unread: previous?.unread || !t.readbyadmin,
         icon: <RiBook2Line className="text-xl" />,
         ...t,
-      }));
+      };
+    });
 
       setSubjectsByTab((prev) => ({ ...prev, [tab.name]: mapped }));
     } catch (error) {
@@ -180,20 +198,24 @@ const AdminSidebar = ({ setActiveSubject }) => {
             <div
               key={s.id}
               onClick={() => setTicketModalData(s)}
-              className={`rounded-xl border cursor-pointer transition p-3
-  ${s.unread ? "bg-yellow-100 border-yellow-500" : ""}
-  ${activeSubjectId === s.id
-    ? "bg-[#0D132D] border-[#0D132D] text-white shadow-md"
-    : "bg-white border-gray-200 hover:bg-gray-100 text-[#0D132D]"}
-`}
->
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <div className="flex items-center gap-2">
-                  {s.icon}
-                  <span className="font-semibold text-[15px] truncate">
-                    {s.name}
-                  </span>
-                </div>
+              className={`p-3 rounded-lg cursor-pointer transition flex flex-col gap-1
+                ${
+                  activeSubjectId === s.id
+                    ? "bg-[#0D132D] text-white shadow-md"
+                    : s.unread
+                    ? "bg-blue-100 text-black shadow"
+                    : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                }
+              `}
+            >
+              <div className="flex items-center gap-2">
+                {s.icon}
+                <span className="font-semibold text-[15px] truncate flex-1">
+                  {s.name}
+                </span>
+                {s.unread && (
+                  <div className="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0"></div>
+                )}
               </div>
 
               <div className="flex items-center justify-between mt-2">
