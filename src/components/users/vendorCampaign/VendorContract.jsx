@@ -130,6 +130,8 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
 
         setEditingContract(null);
         setIsModalOpen(false);
+
+        fetchAllContracts();
       } else {
         Modal.error({
           title: "Error",

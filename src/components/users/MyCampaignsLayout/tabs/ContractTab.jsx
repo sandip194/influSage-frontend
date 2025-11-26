@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import {
   RiFileList3Line,
   RiCheckLine,
   RiCloseLine,
   RiEdit2Line,
 } from "react-icons/ri";
+import { safeNumber, safeText } from "../../../../App/safeAccess";
+import { Modal } from "antd";
+import { toast } from "react-toastify";
 
 // Shown when no contract exists
 const NoContractOffered = () => (
@@ -22,33 +26,124 @@ const NoContractOffered = () => (
   </div>
 );
 
-const ContractTab = () => {
+const ContractTab = ({ campaignId, token, setCamContractId }) => {
 
-  const [contract, setContract] = useState(
-      {
-        id: "CONT-001",
-        influencerId: 2,
-        influencer: "Aditi Sharma",
-        contractStart: "01 Feb 2025",
-        contractEnd: "28 Feb 2025",
-        campaignStart: "05 Feb 2025",
-        campaignEnd: "25 Feb 2025",
-        deliverables: "Reel (Instagram), Story (Instagram)",
-        payment: "₹25,000",
-        notes: "Use #Brand hashtags",
-        status: "offered",
-      },
-    );
+  const [contract, setContract] = useState(null);
+  const [contractStatus, setContractStatus] = useState(null);
+
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null); // "accept" | "reject"
+  const [actionLoading, setActionLoading] = useState(false);
 
 
-  const [contractStatus, setContractStatus] = useState(
-    contract?.status || "offered"
-  );
+  const fetchContractDetails = async () => {
+    try {
+      const res = await axios.get(`/user/contract-detail/${campaignId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-  const handleAccept = () => setContractStatus("accepted");
-  const handleReject = () => setContractStatus("rejected");
+      const api = res?.data?.data;
 
-  if (contractStatus === "no_contract") return <NoContractOffered />;
+      // If API returns nothing → Show No Contract Component
+      if (!api) {
+        setContract(null);
+        setContractStatus(true);
+
+        return;
+      }
+
+      setCamContractId(api?.contractid)
+      // Map + Safe handling
+      const mapped = {
+        id: safeText(api.contractid),
+        contractStart: safeText(api.contractstartdate),     // already in dd-mm-yyyy
+        contractEnd: safeText(api.contractenddate),
+        campaignStart: safeText(api.contractstartdate),
+        campaignEnd: safeText(api.contractenddate),
+        payment: `₹${safeNumber(api.paymentamount, 0)}`,
+        deliverables: safeText(api.providercontenttype, "N/A"),
+        notes: safeText(api.note),
+        productLink: safeText(api.productlink),
+        vendorAddress: safeText(api.vendoraddress),
+        status: safeText(api.statusname)?.toLowerCase(),   // "Pending" → "pending"
+      };
+
+      setContract(mapped);
+      setContractStatus(mapped.status);
+
+    } catch (error) {
+      console.error(error);
+      setContract(null);         // <— Clear previous data
+      setContractStatus(null);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchContractDetails();
+  }, [])
+
+  const openConfirm = (action) => {
+    setPendingAction(action);        // "accept" or "reject"
+    setConfirmVisible(true);
+  };
+
+  const confirmAccept = () => openConfirm("accept");
+  const confirmReject = () => openConfirm("reject");
+
+
+  const executeAction = async () => {
+    if (!pendingAction || !contract?.id) {
+      toast.error("Invalid action or contract not found.");
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+
+      const mappedStatus =
+        pendingAction === "accept" ? "Accepted" : "Rejected";
+
+      const payload = {
+        p_influencerid: null,
+        p_contractid: contract.id,
+        p_statusname: mappedStatus
+      };
+
+      const res = await axios.post(
+        "/user/contract/approve-reject",
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Extract backend response
+      const message = res?.data?.message || "Status updated.";
+
+      toast.success(message);
+
+      // Update UI status
+      setContractStatus(
+        pendingAction === "accept" ? "accepted" : "rejected"
+      );
+
+      setConfirmVisible(false);
+
+    } catch (error) {
+      console.error("Contract action error:", error);
+
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong. Please try again.";
+
+      toast.error(msg);
+
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  if (!contractStatus) return <NoContractOffered />;
 
   // MODERN CONTRACT CARD UI
   const renderContractCard = () => (
@@ -68,10 +163,9 @@ const ContractTab = () => {
           {contractStatus !== "offered" && (
             <span
               className={`px-4 py-1.5 rounded-full text-sm font-semibold
-                ${
-                  contractStatus === "accepted"
-                    ? "bg-green-100 text-green-700"
-                    : contractStatus === "rejected"
+                ${contractStatus === "accepted"
+                  ? "bg-green-100 text-green-700"
+                  : contractStatus === "rejected"
                     ? "bg-red-100 text-red-700"
                     : "bg-blue-100 text-blue-700"
                 }`}
@@ -85,23 +179,7 @@ const ContractTab = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           {/* COLUMN 1 */}
           <div className="space-y-4">
-            {contract?.vendorName && (
-              <div>
-                <p className="text-gray-500 text-sm">Vendor / Business</p>
-                <p className="text-gray-900 font-semibold">
-                  {contract.vendorName}
-                </p>
-              </div>
-            )}
 
-            {contract?.campaignName && (
-              <div>
-                <p className="text-gray-500 text-sm">Campaign</p>
-                <p className="text-gray-900 font-semibold">
-                  {contract.campaignName}
-                </p>
-              </div>
-            )}
 
             <div>
               <p className="text-gray-500 text-sm">Contract Duration</p>
@@ -145,8 +223,27 @@ const ContractTab = () => {
                   ))}
               </div>
             </div>
+
+            <div>
+              <p className="text-gray-500 text-sm">Vendor Address</p>
+              <p className="text-gray-900 font-medium">{contract.vendorAddress}</p>
+            </div>
+
+            <div>
+              <p className="text-gray-500 text-sm">Product Link</p>
+              <a
+                href={contract.productLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline font-medium break-all"
+              >
+                {contract.productLink}
+              </a>
+            </div>
           </div>
         </div>
+
+
 
         {/* NOTES */}
         {contract.notes && (
@@ -160,17 +257,17 @@ const ContractTab = () => {
 
         {/* ACTION FOOTER */}
         <div className="border-t border-gray-200 pt-6 flex justify-end gap-4">
-          {contractStatus === "offered" && (
+          {contractStatus === "pending" && (
             <>
               <button
-                onClick={handleReject}
+                onClick={confirmReject}
                 className="px-6 py-2 rounded-lg border border-gray-300 
                 text-gray-700 hover:bg-gray-100 transition font-medium"
               >
                 Reject
               </button>
               <button
-                onClick={handleAccept}
+                onClick={confirmAccept}
                 className="px-6 py-2 rounded-lg bg-[#0f122f] text-white 
                 hover:bg-[#23265a] transition font-medium"
               >
@@ -194,7 +291,30 @@ const ContractTab = () => {
           )}
         </div>
       </div>
+
+      <Modal
+        title={pendingAction === "accept" ? "Accept Contract" : "Reject Contract"}
+        open={confirmVisible}
+        onOk={executeAction}
+        onCancel={() => setConfirmVisible(false)}
+        okText="Confirm"
+        cancelText="Cancel"
+        okButtonProps={{
+          loading: actionLoading,
+          danger: pendingAction === "reject",
+          type: pendingAction === "reject" ? "primary" : "default"
+        }}
+      >
+        <p className="text-gray-700">
+          {pendingAction === "accept"
+            ? "Are you sure you want to accept this contract?"
+            : "Are you sure you want to reject this contract?"}
+        </p>
+      </Modal>
     </div>
+
+
+
   );
 
   // UPDATED STATE UI

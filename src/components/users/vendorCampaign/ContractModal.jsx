@@ -22,8 +22,8 @@ export default function ContractModal({
     isOpen,
     onClose,
     onSubmit,  // Now expects this to handle the API call (e.g., POST contract data)
-    existingCampaignStart = null,
-    existingCampaignEnd = null,
+    existingCampaignStart,
+    existingCampaignEnd,
     campaignId
 }) {
     const [form] = Form.useForm();
@@ -56,8 +56,8 @@ export default function ContractModal({
                 // 🔥 Case 1: API returns a message like:
                 // [ { "message": "No influencer selected" } ]
                 if (Array.isArray(data) && data.length === 1 && data[0].message) {
-                    setInfluencers([]);         
-                    return;                     
+                    setInfluencers([]);
+                    return;
                 }
 
                 // 🔥 Case 2: Normal case — array of influencers
@@ -161,18 +161,9 @@ export default function ContractModal({
         return d.isValid() ? d : null;
     };
 
-    // Set initial dates
-    useEffect(() => {
-        if (isOpen) {
-            form.resetFields();
-            const fields = {};
-            const start = safeDayjs(existingCampaignStart);
-            const end = safeDayjs(existingCampaignEnd);
-            if (start) fields.campaignStart = start;
-            if (end) fields.campaignEnd = end;
-            form.setFieldsValue(fields);
-        }
-    }, [isOpen, existingCampaignStart, existingCampaignEnd, form]);
+    const campaignStartLimit = safeDayjs(existingCampaignStart);
+    const campaignEndLimit = safeDayjs(existingCampaignEnd);
+
 
     // Updated: Handle form submission with API integration
     const handleFinish = async (values) => {
@@ -285,17 +276,31 @@ export default function ContractModal({
                                 <InputNumber
                                     size="large"
                                     style={{ width: "100%" }}
-                                    formatter={(value) =>
-                                        value
-                                            ? `₹ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                                            : ""
-                                    }
-                                    parser={(value) => value.replace(/\₹\s?|(,*)/g, "")}
                                     min={0}
                                     maxLength={13}
-                                    placeholder="0"
+                                    placeholder="₹ 0"
+                                    controls={false} // hides the up/down arrows
+                                    formatter={(value) => {
+                                        if (!value) return "₹ 0";
+                                        const num = Number(String(value).replace(/[^\d]/g, ""));
+                                        return "₹ " + num.toLocaleString("en-IN");
+                                    }}
+                                    parser={(value) => {
+                                        // Remove anything that is not a digit
+                                        return value.replace(/[^\d]/g, "");
+                                    }}
                                     className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark"
+                                    onKeyDown={(e) => {
+                                        // block non-numeric keys
+                                        if (
+                                            ["e", "E", "+", "-", ".", ","].includes(e.key) ||
+                                            (!/^\d$/.test(e.key) && e.key.length === 1)
+                                        ) {
+                                            e.preventDefault();
+                                        }
+                                    }}
                                 />
+
                             </Form.Item>
                         </div>
 
@@ -311,16 +316,43 @@ export default function ContractModal({
                                     </span>
                                 }
                                 name="contractStart"
-                                rules={[{ required: true, message: "Select contract start date" }]}
+                                rules={[
+                                    { required: true, message: "Select contract start date" },
+                                    () => ({
+                                        validator(_, value) {
+                                            if (!value) return Promise.resolve();
+
+                                            if (campaignStartLimit && value.isBefore(campaignStartLimit, "day")) {
+                                                return Promise.reject(
+                                                    `Start date cannot be before campaign start (${campaignStartLimit.format("DD-MM-YYYY")})`
+                                                );
+                                            }
+
+                                            if (campaignEndLimit && value.isAfter(campaignEndLimit, "day")) {
+                                                return Promise.reject(
+                                                    `Start date cannot be after campaign end (${campaignEndLimit.format("DD-MM-YYYY")})`
+                                                );
+                                            }
+
+                                            return Promise.resolve();
+                                        }
+                                    })
+                                ]}
+
                                 style={{ marginBottom: 2 }}
                             >
                                 <DatePicker
                                     placeholder="Start Date"
                                     format="DD-MM-YYYY"
                                     size="large"
-                                    disabledDate={(current) =>
-                                        current && current < dayjs().startOf("day")
-                                    }
+                                    disabledDate={(current) => {
+                                        if (!current) return false;
+                                        return (
+                                            (campaignStartLimit && current < campaignStartLimit.startOf("day")) ||
+                                            (campaignEndLimit && current > campaignEndLimit.endOf("day"))
+                                        );
+                                    }}
+
                                     style={{ width: "100%" }}
                                     className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark"
                                 />
@@ -340,19 +372,35 @@ export default function ContractModal({
                                 style={{ marginBottom: 2 }}
                                 rules={[
                                     { required: true, message: "Select contract end date" },
+
                                     ({ getFieldValue }) => ({
                                         validator(_, value) {
                                             const start = getFieldValue("contractStart");
-                                            if (!value || !start) return Promise.resolve();
-                                            if (value.isSame(start, "day") || value.isAfter(start)) {
-                                                return Promise.resolve();
+                                            if (!value) return Promise.resolve();
+
+                                            // Must be >= contractStart
+                                            if (start && value.isBefore(start, "day")) {
+                                                return Promise.reject("End date must be same or after start date");
                                             }
-                                            return Promise.reject(
-                                                new Error("End date must be same or after start date")
-                                            );
-                                        },
+
+                                            // Must be within campaign bounds
+                                            if (campaignStartLimit && value.isBefore(campaignStartLimit, "day")) {
+                                                return Promise.reject(
+                                                    `End date cannot be before campaign start (${campaignStartLimit.format("DD-MM-YYYY")})`
+                                                );
+                                            }
+
+                                            if (campaignEndLimit && value.isAfter(campaignEndLimit, "day")) {
+                                                return Promise.reject(
+                                                    `End date cannot be after campaign end (${campaignEndLimit.format("DD-MM-YYYY")})`
+                                                );
+                                            }
+
+                                            return Promise.resolve();
+                                        }
                                     }),
                                 ]}
+
                             >
                                 <DatePicker
                                     placeholder="End Date"
@@ -360,9 +408,16 @@ export default function ContractModal({
                                     size="large"
                                     style={{ width: "100%" }}
                                     disabledDate={(current) => {
+                                        if (!current) return false;
                                         const start = form.getFieldValue("contractStart");
-                                        return start ? current && current < start : false;
+
+                                        return (
+                                            (start && current < start.startOf("day")) ||
+                                            (campaignStartLimit && current < campaignStartLimit.startOf("day")) ||
+                                            (campaignEndLimit && current > campaignEndLimit.endOf("day"))
+                                        );
                                     }}
+
                                     className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark"
                                 />
                             </Form.Item>

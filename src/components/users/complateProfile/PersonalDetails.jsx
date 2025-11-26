@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import axios from 'axios';
 import postalRegexList from './postalRegex.json';
 import { useSelector } from 'react-redux';
-// import { Country, State, City } from 'country-state-city';
+import { Country, State, City } from 'country-state-city';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { toast } from 'react-toastify';
 dayjs.extend(customParseFormat);
