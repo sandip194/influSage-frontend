@@ -55,14 +55,12 @@ const formatTime = (timestamp) => {
   }
   return date.toLocaleDateString();
 };
-  useEffect(() => {
-    if (!socket || !activeSubject?.id) return;
+useEffect(() => {
+  if (!activeSubject?.id || !socket) return;
 
-    socket.emit("joinTicketRoom", activeSubject.id);
-    return () => {
-      socket.emit("leaveTicketRoom", activeSubject.id);
-    };
-  }, [socket, activeSubject?.id]);
+  socket.emit("joinTicketRoom", activeSubject.id);
+  return () => socket.emit("leaveTicketRoom", activeSubject.id);
+}, [activeSubject?.id]);
 
   useEffect(() => {
     if (!socket) return;
@@ -90,13 +88,12 @@ const formatTime = (timestamp) => {
         time: msg.time,
       };
 
-      setMessages((prev) => [...prev, formattedMsg]);
-      dispatch(addMessage(formattedMsg));
-    };
-
-    socket.on("receiveSupportMessage", handleReceiveMessage);
-    return () => socket.off("receiveSupportMessage", handleReceiveMessage);
-  }, [socket]);
+      setMessages(prev => [...prev, formattedMsg]);
+          dispatch(addMessage(formattedMsg));
+        };     
+        socket.off("receiveSupportMessage");
+        socket.on("receiveSupportMessage", handleReceiveMessage);
+      }, []);
 
   const handleSend = async () => {
     if (!activeSubject) return;
@@ -226,7 +223,7 @@ const handleScroll = () => {
   }
 };
 
-  const loadMessages = async () => {
+  const loadMessages = async (offsetParam = offset) => {
   if (!activeSubject?.id || loadingMore || !hasMore) return;
   setLoadingMore(true);
 
@@ -236,43 +233,47 @@ const handleScroll = () => {
       {
         headers: { Authorization: `Bearer ${token}` },
         params: {
-          p_limit: 10,
-          p_offset: offset + 1,
+          p_limit: 100,
+          p_offset: offsetParam + 1,
         },
       }
     );
 
     const newRecords = res.data?.data?.records || [];
 
-    if (newRecords.length < 10) {
-      setHasMore(false);
+    if (newRecords.length < 100) setHasMore(false);
+
+    const formatted = newRecords
+      .sort((a, b) => new Date(a.createddate) - new Date(b.createddate))
+      .map((m) => {
+        let filetype = null;
+        if (m.filepath) {
+          const ext = m.filepath.split(".").pop().toLowerCase();
+          if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
+          else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
+          else filetype = "file";
+        }
+        return {
+          id: m.usersupportticketmessagesid,
+          replyId: m.replyid,
+          message: m.message,
+          filepath: m.filepath,
+          filetype,
+          sender: m.roleid === 4 ? "admin" : "user",
+          time: m.createddate,
+        };
+      });
+
+    if (offsetParam === 0) {
+      setMessages(formatted);
+      setTimeout(() => chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight }), 80);
+    } else {
+      setMessages((prev) => [...formatted, ...prev]);
     }
 
-    const sorted = newRecords.sort(
-      (a, b) => new Date(a.createddate) - new Date(b.createddate)
-    );
-
-    const formatted = sorted.map((m) => ({
-      id: m.usersupportticketmessagesid,
-      replyId: m.replyid,
-      message: m.message,
-      filepath: m.filepath,
-      filetype: m.filetype,
-      sender: m.roleid === 4 ? "admin" : "user",
-      time: m.createddate,
-    }));
-
-   if (offset === 0) {
-  setMessages(formatted);
-
-  setTimeout(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }
-  }, 50);
-}
-
-    setOffset((prev) => prev + 1);
+    setOffset(offsetParam + 1);
+  } catch (err) {
+    console.log("Load messages failed", err);
   } finally {
     setLoadingMore(false);
   }
@@ -282,7 +283,7 @@ useEffect(() => {
   setMessages([]);
   setOffset(0);
   setHasMore(true);
-  loadMessages();
+  loadMessages(0);
 }, [activeSubject]);
 
 

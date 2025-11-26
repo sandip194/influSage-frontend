@@ -3,6 +3,7 @@ import { Select } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { Modal, Button } from "antd";
+import { getSocket } from "../../sockets/socket";
 
 import { RiBook2Line, RiAddLine } from "@remixicon/react";
 
@@ -13,17 +14,47 @@ const VendorSidebar = ({ setActiveSubject }) => {
     Close: [],
     Released: [],
   };
-
+  const socket = getSocket();
   const [activeTab, setActiveTab] = useState("Open");
   const [subjectsByTab, setSubjectsByTab] = useState(initialByTab);
   const [activeSubjectId, setActiveSubjectId] = useState(null);
   const [subjectOptions, setSubjectOptions] = useState([]);
-  const { token } = useSelector((state) => state.auth);
+  const { token, userId } = useSelector((state) => state.auth);
   const [openModal, setOpenModal] = useState(false);
   const [newSubject, setNewSubject] = useState(null);
   const [loadingAdd, setLoadingAdd] = useState(false);
   const [showError, setShowError] = useState(false);
   const [statusList, setStatusList] = useState([]);
+
+  useEffect(() => {
+  if (!socket || !userId) return;
+  socket.emit("registerUser", { userId });
+
+  socket.on("connect", () => {
+    socket.emit("registerUser", { userId });
+  });
+
+  return () => socket.off("connect");
+}, [socket, userId]);
+
+  useEffect(() => {
+  if (!socket) return;
+
+  const handler = ({ ticketId }) => {
+    setSubjectsByTab(prev =>
+      Object.fromEntries(
+        Object.entries(prev).map(([tab, tickets]) => [
+          tab,
+          tickets.map(t =>
+            String(t.id) === String(ticketId) ? { ...t, unread: true } : t
+          ),
+        ])
+      )
+    );
+  };
+  socket.on("sidebarTicketUpdate", handler);
+  return () => socket.off("sidebarTicketUpdate", handler);
+}, [socket]);
 
   useEffect(() => {
     const fetchTicketStatus = async () => {
@@ -87,22 +118,24 @@ const VendorSidebar = ({ setActiveSubject }) => {
       ? res.data.viewTicket.records
       : [];
 
-    setSubjectsByTab((prev) => ({
-      ...prev,
-      [tab.name]: tickets.map((t) => ({
+    setSubjectsByTab(prev => ({
+    ...prev,
+    [tab.name]: tickets.map(t => {
+      const previous = prev[tab.name]?.find(o => o.id === t.usersupportticketid);
+      return {
         id: t.usersupportticketid,
         name: t.subjectname,
         status: t.statusname,
-        isclosed: t.isclosed,
         created: t.createddate,
+        unread: previous?.unread || !t.readbyuser,
         icon: <RiBook2Line className="text-xl" />,
-      })),
-    }));
+      };
+    }),
+  }));
   } catch (error) {
     console.error("Error fetching tickets:", error);
   }
 };
-
   const handleSubmitTicket = async () => {
     if (!newSubject) {
       setShowError(true);
@@ -138,8 +171,21 @@ const VendorSidebar = ({ setActiveSubject }) => {
   const subjects = subjectsByTab[activeTab] || [];
 
   const handleSubjectClick = (ticket) => {
+    if (activeSubjectId) {
+      socket.emit("leaveTicketRoom", activeSubjectId);
+    }
+    socket.emit("joinTicketRoom", ticket.id);
     setActiveSubject(ticket);
     setActiveSubjectId(ticket.id);
+    setSubjectsByTab((prev) => {
+    const updated = { ...prev };
+    Object.keys(updated).forEach((tab) => {
+      updated[tab] = updated[tab].map((t) =>
+        t.id === ticket.id ? { ...t, unread: false } : t
+      );
+    });
+    return updated;
+  });
   };
 
   return (
@@ -192,9 +238,11 @@ const VendorSidebar = ({ setActiveSubject }) => {
             className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition ${
               activeSubjectId === s.id
                 ? "bg-[#0D132D] text-white shadow-md"
+                : s.unread
+                ? "bg-blue-100 text-black shadow"
                 : "bg-gray-100 hover:bg-gray-200 text-gray-700"
             }`}
-          >
+            >
             {s.icon}
             <div className="flex flex-col">
               <span className="font-medium truncate">{s.name}</span>
@@ -202,6 +250,7 @@ const VendorSidebar = ({ setActiveSubject }) => {
                 {new Date(s.created).toLocaleDateString("en-GB")}
               </span>
             </div>
+            {s.unread && <div className="w-2.5 h-2.5 rounded-full bg-blue-600 ml-auto"></div>}
           </div>
         ))}
       </div>
