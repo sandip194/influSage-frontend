@@ -132,6 +132,11 @@ const ViewAllOffers = ({ campaignData }) => {
     getApplications()
   }, [getApplications])
 
+  const refreshApplications = () => {
+  getApplications(); // already defined in your component
+};
+
+
   return (
     <div className="text-sm ">
 
@@ -320,6 +325,7 @@ const ViewAllOffers = ({ campaignData }) => {
           setShowOfferModal(false);
           setSelectedOfferId(null);
         }}
+        onStatusChange={refreshApplications}
       />
 
     </div>

@@ -160,7 +160,7 @@ const ContractTab = ({ campaignId, token, setCamContractId }) => {
             Contract #{contract?.id}
           </h2>
 
-          {contractStatus !== "offered" && (
+          {contractStatus !== "pending" && (
             <span
               className={`px-4 py-1.5 rounded-full text-sm font-semibold
                 ${contractStatus === "accepted"
@@ -170,7 +170,7 @@ const ContractTab = ({ campaignId, token, setCamContractId }) => {
                     : "bg-blue-100 text-blue-700"
                 }`}
             >
-              {contractStatus.charAt(0).toUpperCase() + contractStatus.slice(1)}
+              {contractStatus?.charAt(0).toUpperCase() + contractStatus.slice(1)}
             </span>
           )}
         </div>
@@ -209,20 +209,27 @@ const ContractTab = ({ campaignId, token, setCamContractId }) => {
             {/* DELIVERABLES */}
             <div>
               <p className="text-gray-500 text-sm">Deliverables</p>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {contract.deliverables
-                  ?.split("+")
-                  .map((item, i) => (
+
+              <div className="flex flex-col gap-2 mt-1">
+                {contract.deliverables?.map((provider) => {
+                  const types = provider.contenttypes
+                    .map((ct) => ct.contenttypename)
+                    .join(", "); // "Reel, Story"
+
+                  return (
                     <span
-                      key={i}
+                      key={provider.providerid}
                       className="px-3 py-1 bg-blue-50 border border-blue-200 
-                      rounded-lg text-blue-700 text-xs font-medium"
+                     rounded-lg text-blue-700 text-xs font-medium w-fit"
                     >
-                      {item.trim()}
+                      {provider.providername} – {types}
                     </span>
-                  ))}
+                  );
+                })}
               </div>
             </div>
+
+
 
             <div>
               <p className="text-gray-500 text-sm">Vendor Address</p>

@@ -29,24 +29,30 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
       const formattedContracts = apiContracts.map((c) => ({
         id: safeNumber(c.contractid),
         influencerId: safeNumber(c.influencerid),
+        influencerSelectId: safeNumber(c.campaignapplicationid),
         influencer: c.influencerphoto ? (
           <div className="flex items-center gap-2">
             <img
               src={safeText(c.influencerphoto)}
               alt="Influencer"
-              className="w-6 h-6 rounded-full"
+              className="w-12 h-12 object-cover rounded-full"
             />
-            <span>{`Influencer ${safeNumber(c.influencerid)}`}</span>
+            <span>{safeText(c.fullname)}</span> {/* show fullname */}
           </div>
-        ) : `Influencer ${safeNumber(c.influencerid)}`,
+        ) : safeText(c.fullname, `Influencer ${safeNumber(c.influencerid)}`),
         contractStart: c.contractstartdate,
         contractEnd: c.contractenddate,
         campaignStart: safeText(campaignStart),
         campaignEnd: safeText(campaignEnd),
+        productLink: safeText(c.productlink, "N/A"),
+        vendorAddress: safeText(c.vendoraddress, "N/A"),
         deliverables: safeArray(c.providercontenttype).map((p) => ({
           icon: safeText(p.iconpath),
           provider: safeText(p.providername),
-          type: safeText(p.contenttypename),
+          contenttypes: safeArray(p.contenttypes).map((ct) => ({
+            providercontenttypeid: ct.providercontenttypeid,
+            contenttypename: ct.contenttypename,
+          })),
         })),
         payment: `₹${safeNumber(c.paymentamount).toLocaleString()}`,
         notes: safeText(c.note),
@@ -94,7 +100,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (response.data.p_status) {
+      if (response?.status == 200) {
         const newContract = {
           id: editingContract ? editingContract.id : `CONT-${contracts.length + 1}`,
           influencerId: values.influencer,
@@ -131,7 +137,9 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         setEditingContract(null);
         setIsModalOpen(false);
 
-        fetchAllContracts();
+        setTimeout(() => {
+          fetchAllContracts();
+        }, 300);
       } else {
         Modal.error({
           title: "Error",
@@ -193,7 +201,6 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                 {/* LEFT SIDE → Details */}
                 <div className="flex flex-col gap-2 w-full">
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <span className="text-blue-600">●</span>
                     {contract.influencer}
                   </h3>
 
@@ -208,20 +215,49 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                       <p>{contract.campaignStart} → {contract.campaignEnd}</p>
                     </div>
 
+                    <div className="col-span-2 mt-1 text-sm text-gray-700">
+                      {contract.productLink && (
+                        <p>
+                          <span className="font-medium">Product Link: </span>
+                          <a href={contract.productLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                            {contract.productLink}
+                          </a>
+                        </p>
+                      )}
+                      {contract.vendorAddress && (
+                        <p>
+                          <span className="font-medium">Vendor Address: </span>
+                          {contract.vendorAddress}
+                        </p>
+                      )}
+                    </div>
+
+
                     <div className="col-span-2">
                       <p className="font-medium text-gray-800">Deliverables</p>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {safeArray(contract.deliverables).map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs border border-blue-100"
-                          >
-                            <img src={item.icon} alt={item.provider} className="w-4 h-4" />
-                            <span>{item.type}</span>
+                      <div className="flex flex-col gap-2 mt-1">
+                        {safeArray(contract.deliverables).map((platform, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <img
+                              src={platform.icon}
+                              alt={platform.provider}
+                              className="w-5 h-5 rounded-full"
+                            />
+                            <div className="flex flex-wrap gap-1 text-xs text-gray-700">
+                              {safeArray(platform.contenttypes).map((ct, ctIdx) => (
+                                <span
+                                  key={ctIdx}
+                                  className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md border border-blue-100"
+                                >
+                                  {ct.contenttypename}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         ))}
                       </div>
                     </div>
+
 
                     {contract.notes && (
                       <div className="col-span-2 mt-1">

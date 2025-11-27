@@ -1,77 +1,65 @@
-import React, { useState } from "react";
-import {
-    RiYoutubeFill,
-    RiInstagramFill,
-    RiTiktokFill,
-    RiFileCopyLine,
-} from "@remixicon/react";
+import React, { useEffect, useState } from "react";
+import { RiCheckLine, RiFileCopyLine } from "@remixicon/react";
 import { message } from "antd";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { safeArray, safeText } from "../../../App/safeAccess";
 
-const PLATFORM_META = {
-    instagram: { label: "Instagram", icon: <RiInstagramFill />, color: "#E1306C" },
-    tiktok: { label: "TikTok", icon: <RiTiktokFill />, color: "#000000" },
-    youtube: { label: "YouTube", icon: <RiYoutubeFill />, color: "#FF0000" },
-};
 
-// Example influencer data
-const influencers = [
-    {
-        influencerName: "John Doe",
-        platforms: {
-            instagram: [
-                { title: "Summer Campaign Story", status: "live", link: "https://instagram.com/link1" },
-                { title: "August Lookbook Reel", status: "scheduled", link: "https://instagram.com/link2" }
-            ],
-            youtube: [],
-            tiktok: []
-        }
-    },
-    {
-        influencerName: "Sarah Kim",
-        platforms: {
-            instagram: [
-                { title: "Summer Campaign Story", status: "live", link: "https://instagram.com/link1" },
-                { title: "August Lookbook Reel", status: "scheduled", link: "https://instagram.com/link2" }
-            ],
-            youtube: [],
-            tiktok: [
-                { title: "Unboxing Fall Collection", status: "live", link: "https://tiktok.com/abc" },
-                { title: "New Product Teaser", status: "needs-review", link: "https://tiktok.com/def" },
-                { title: "Day in the life vlog", status: "live", link: "https://tiktok.com/ghi" },
-            ]
-        }
-    },
-    {
-        influencerName: "Sarah Kim",
-        platforms: {
-            instagram: [
-                { title: "Summer Campaign Story", status: "live", link: "https://instagram.com/link1" },
-                { title: "August Lookbook Reel", status: "scheduled", link: "https://instagram.com/link2" }
-            ],
-            youtube: [],
-            tiktok: [
-                { title: "Unboxing Fall Collection", status: "live", link: "https://tiktok.com/abc" },
-                { title: "New Product Teaser", status: "needs-review", link: "https://tiktok.com/def" },
-                { title: "Day in the life vlog", status: "live", link: "https://tiktok.com/ghi" },
-            ]
-        }
-    }
-];
-
-// Status badge colors
-const STATUS_META = {
-    live: { text: "Live", color: "text-green-600", dot: "bg-green-500" },
-    scheduled: { text: "Scheduled", color: "text-yellow-600", dot: "bg-yellow-500" },
-    "needs-review": { text: "Needs Review", color: "text-red-600", dot: "bg-red-500" }
-};
-
-export default function VendorContentLinksTab() {
+export default function VendorContentLinksTab({ campaignId }) {
+    const [influencers, setInfluencers] = useState([]);
     const [activePlatform, setActivePlatform] = useState({});
+    const [loading, setLoading] = useState(false);
+    const { token } = useSelector((state) => state.auth);
 
-    const copyToClipboard = (link) => {
-        navigator.clipboard.writeText(link);
+    const [copiedId, setCopiedId] = useState(null);
+
+    const copyToClipboard = (id, link) => {
+        const safeLink = safeText(link, "");
+        navigator.clipboard.writeText(safeLink);
+        setCopiedId(id);
         message.success("Link copied!");
+
+        setTimeout(() => setCopiedId(null), 1000); // remove highlight after 1s
     };
+
+
+    const fetchAllLinks = async () => {
+        try {
+            setLoading(true);
+
+            const res = await axios.get(`/vendor/content-links/${campaignId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.status === 200) {
+                const data = safeArray(res.data.data);
+                setInfluencers(data);
+
+                // Set default platform per influencer safely
+                const initialPlatforms = {};
+
+                data.forEach((inf) => {
+                    const platforms = safeArray(inf?.contentlink);
+                    if (platforms.length > 0) {
+                        initialPlatforms[inf.influencerid] = safeText(platforms[0].providername);
+                    }
+                });
+
+                setActivePlatform(initialPlatforms);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAllLinks();
+    }, []);
+
+    if (loading) return <p>Loading...</p>;
 
     return (
         <div className="space-y-6">
@@ -79,75 +67,91 @@ export default function VendorContentLinksTab() {
                 Influencer Content Links
             </h2>
 
-            {/* Grid container for influencer cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2  gap-6">
-                {influencers.map((inf, idx) => {
-                    const platformKeys = Object.keys(inf.platforms).filter(
-                        (p) => inf.platforms[p].length > 0
-                    );
-                    if (platformKeys.length === 0) return null;
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {safeArray(influencers).map((inf) => {
+                    const platforms = safeArray(inf?.contentlink);
+                    if (platforms.length === 0) return null;
 
-                    // Set default active platform per influencer
-                    if (!activePlatform[inf.influencerName]) {
-                        setActivePlatform((prev) => ({
-                            ...prev,
-                            [inf.influencerName]: platformKeys[0],
-                        }));
-                    }
+                    const active = activePlatform[inf.influencerid];
 
                     return (
                         <div
-                            key={idx}
-                            className="bg-gray-100 shadow-sm rounded-2xl p-4 space-y-4 border border-gray-100 "
+                            key={safeText(inf?.contractid)}
+                            className="bg-gray-100 shadow-sm rounded-2xl p-4 space-y-4 border border-gray-100"
                         >
                             {/* Influencer Header */}
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-full bg-gray-200" />
-                                <div>
-                                    <p className="text-xl font-semibold">{inf.influencerName}</p>
-                                </div>
+                                <img
+                                    src={inf?.influencerphoto}
+                                    alt="profile"
+
+                                    className="w-12 h-12 rounded-full object-cover bg-gray-200"
+                                />
+
+                                <p className="text-xl font-semibold">
+                                    {safeText(inf?.influencername, "Unknown Influencer")}
+                                </p>
                             </div>
 
                             {/* Platform Tabs */}
                             <div className="flex gap-4 pb-0 flex-wrap">
-                                {platformKeys.map((platform) => (
+                                {platforms.map((platform) => (
                                     <button
-                                        key={platform}
+                                        key={platform.providerid}
                                         onClick={() =>
                                             setActivePlatform((prev) => ({
                                                 ...prev,
-                                                [inf.influencerName]: platform,
+                                                [inf.influencerid]: safeText(platform.providername),
                                             }))
                                         }
-                                        className={`pb-1 font-medium text-sm ${
-                                            activePlatform[inf.influencerName] === platform
-                                                ? "border-b-2 border-black"
-                                                : "text-gray-500"
-                                        }`}
+                                        className={`pb-1 font-medium text-sm ${active === safeText(platform.providername)
+                                            ? "border-b-2 border-black"
+                                            : "text-gray-500"
+                                            }`}
                                     >
-                                        {PLATFORM_META[platform].label} ({inf.platforms[platform].length})
+                                        <span className="flex items-center gap-1">
+                                            <img
+                                                src={safeText(platform.iconpath)}
+                                                className="w-4 h-4 object-contain"
+                                                alt=""
+                                                onError={(e) => (e.target.src = "/placeholder-icon.png")}
+                                            />
+                                            {safeText(platform.providername)} (
+                                            {safeArray(platform.links).length})
+                                        </span>
                                     </button>
                                 ))}
                             </div>
 
-                            {/* Content Cards */}
-                            <div className="flex flex-wrap gap-1 mt-0">
-                                {(inf.platforms[activePlatform[inf.influencerName]] || []).map(
-                                    (item, i) => (
-                                        <div
-                                            key={i}
-                                            onClick={() => copyToClipboard(item.link)}
-                                            className="w-52 px-3 py-2 rounded-xl border border-gray-200 bg-white 
-                                                       hover:bg-gray-50 cursor-pointer transition flex items-center 
-                                                       justify-between shadow-sm"
-                                        >
-                                            <span className="text-gray-700 text-sm truncate">
-                                                {item.link}
-                                            </span>
-                                            <RiFileCopyLine className="text-gray-500" size={18} />
-                                        </div>
-                                    )
-                                )}
+                            {/* Content Link Cards */}
+                            <div className="flex flex-wrap gap-2 mt-0">
+                                {safeArray(
+                                    platforms.find(
+                                        (p) => safeText(p.providername) === active
+                                    )?.links
+                                ).map((item) => (
+                                    <div
+                                        key={item.contractcontentlinkid}
+                                        onClick={() => copyToClipboard(item.contractcontentlinkid, item.link)}
+                                        className={`w-52 px-3 py-0 rounded-xl border cursor-pointer transition flex items-center justify-between shadow-sm
+        ${copiedId === item.contractcontentlinkid
+                                                ? "bg-green-100 border-green-400"
+                                                : "bg-white border-gray-200 hover:bg-gray-50"
+                                            }
+    `}
+                                    >
+                                        <span className="text-gray-700 text-sm truncate">
+                                            {safeText(item.link, "No Link")}
+                                        </span>
+
+                                        {copiedId === item.contractcontentlinkid ? (
+                                            <RiCheckLine className="text-green-600" size={30} />
+                                        ) : (
+                                            <RiFileCopyLine className="text-gray-500" size={30} />
+                                        )}
+                                    </div>
+
+                                ))}
                             </div>
                         </div>
                     );
