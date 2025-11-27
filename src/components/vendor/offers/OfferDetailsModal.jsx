@@ -8,28 +8,29 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import AcceptOfferModal from "./models/AcceptOfferModal";
 
-const OfferDetailsModal = ({ visible, onClose, id }) => {
+const OfferDetailsModal = ({ visible, onClose, id, onStatusChange }) => {
     const { token } = useSelector((state) => state.auth);
     const navigate = useNavigate();
     const [offerDetails, setOfferDetails] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
 
+
+    const fetchOffer = async () => {
+        try {
+            setLoading(true);
+            const res = await axios.get(`vendor/offer-detail/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setOfferDetails(res.data.data);
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to load offer details.");
+        } finally {
+            setLoading(false);
+        }
+    };
     useEffect(() => {
-        const fetchOffer = async () => {
-            try {
-                setLoading(true);
-                const res = await axios.get(`vendor/offer-detail/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                setOfferDetails(res.data.data);
-            } catch (err) {
-                console.error(err);
-                toast.error("Failed to load offer details.");
-            } finally {
-                setLoading(false);
-            }
-        };
         if (visible) fetchOffer();
     }, [visible, id, token]);
 
@@ -39,14 +40,14 @@ const OfferDetailsModal = ({ visible, onClose, id }) => {
     const handleMessageClick = () => {
         navigate("/vendor-dashboard/messages", {
             state: {
-            selectChatFromOutside: {
-                influencerid: offerDetails.influencerid,
-                conversationid: offerDetails.conversationid || null,
-                campaignid: offerDetails.campaignid,
-            },
+                selectChatFromOutside: {
+                    influencerid: offerDetails.influencerid,
+                    conversationid: offerDetails.conversationid || null,
+                    campaignid: offerDetails.campaignid,
+                },
             },
         });
-        };
+    };
 
     const handleConfirmAccept = async () => {
         if (!offerDetails?.applicationid) return toast.error("Missing Application ID");
@@ -60,6 +61,8 @@ const OfferDetailsModal = ({ visible, onClose, id }) => {
             );
             if (res.data.p_status) {
                 toast.success(res.data.message || "Conversation started");
+                if (onStatusChange) onStatusChange();
+                fetchOffer();
             } else {
                 toast.error(res.data.message || "Failed to start conversation");
             }
@@ -162,7 +165,7 @@ const OfferDetailsModal = ({ visible, onClose, id }) => {
                                         onClick={() => setIsAcceptModalOpen(true)}
                                         className="bg-[#0D132D] text-white font-medium py-2 px-6 min-w-48 rounded-lg hover:bg-[#0D132Ded] transition"
                                     >
-                                    Accept Application
+                                        Accept Application
                                     </button>
                                 )}
                             </div>

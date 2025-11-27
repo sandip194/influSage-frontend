@@ -24,7 +24,8 @@ export default function ContractModal({
     onSubmit,  // Now expects this to handle the API call (e.g., POST contract data)
     existingCampaignStart,
     existingCampaignEnd,
-    campaignId
+    campaignId,
+    editData
 }) {
     const [form] = Form.useForm();
     const { token } = useSelector((state) => state.auth);
@@ -38,6 +39,8 @@ export default function ContractModal({
     const [loadingInfluencers, setLoadingInfluencers] = useState(false);  // New: Loading for influencers
     const [influencerError, setInfluencerError] = useState(null);  // New: Error for influencers
     const [submitError, setSubmitError] = useState(null);  // New: Error for submit
+
+
 
     // New: Fetch influencers via API (replace with your real endpoint)
     useEffect(() => {
@@ -131,6 +134,33 @@ export default function ContractModal({
         }
     }, [isOpen, token]);
 
+    useEffect(() => {
+        if (editData && platforms.length > 0) {
+            console.log(editData)
+            const paymentNumber = Number(editData.payment.replace(/[^\d]/g, ""));
+            form.setFieldsValue({
+                influencers: editData.influencerSelectId,
+                payment: paymentNumber,
+                contractStart: dayjs(editData.contractStart, "DD-MM-YYYY"),
+                contractEnd: dayjs(editData.contractEnd, "DD-MM-YYYY"),
+                notes: editData.notes || "",
+                productLink: editData.productLink || "",
+                vendorAddress: editData.vendorAddress || "",
+            });
+
+            const mappedPlatforms = (editData.deliverables || []).map((p) => ({
+                providerid: platforms.find(pl => pl.providername === p.provider)?.providerid || null,
+                providername: p.provider,
+                contenttypes: p.contenttypes.map((ct) => ({
+                    providercontenttypeid: ct.providercontenttypeid,
+                    contenttypename: ct.contenttypename
+                }))
+            }));
+            setSelectedPlatforms(mappedPlatforms);
+            form.setFieldsValue({ deliverables: mappedPlatforms });
+        }
+    }, [editData, platforms, form]);
+
     // New: Permanent validation check (silent, doesn't show errors until submit)
     const isFormValid = useCallback(async () => {
         try {
@@ -167,11 +197,13 @@ export default function ContractModal({
 
     // Updated: Handle form submission with API integration
     const handleFinish = async (values) => {
+        console.log(values)
         isFormValid()
         setSubmitLoading(true);
         setSubmitError(null);
         values.deliverables = selectedPlatforms;
         try {
+            console.log(values)
             await onSubmit(values);  // Call the prop, which should handle the API (e.g., axios.post)
             handleModalClose();
         } catch (err) {
@@ -465,8 +497,8 @@ export default function ContractModal({
                                             <div className="flex items-center space-x-6 flex-wrap ps-4">
                                                 {(contentTypesByPlatform[String(platform.providerid)] ||
                                                     []).map((ct) => {
-                                                        const isChecked = platform.contentTypes.some(
-                                                            (d) => d.id === ct.id
+                                                        const isChecked = platform.contenttypes?.some(
+                                                            (d) => d.providercontenttypeid === ct.id
                                                         );
 
                                                         return (
@@ -477,23 +509,26 @@ export default function ContractModal({
                                                                 <Checkbox
                                                                     checked={isChecked}
                                                                     onChange={(e) => {
-                                                                        const updatedPlatforms =
-                                                                            selectedPlatforms.map((p, i) => {
-                                                                                if (i !== idx) return p;
+                                                                        const updatedPlatforms = selectedPlatforms.map((p, i) => {
+                                                                            if (i !== idx) return p;
 
-                                                                                const contentTypes =
-                                                                                    e.target.checked
-                                                                                        ? [
-                                                                                            ...p.contentTypes,
-                                                                                            { ...ct },
-                                                                                        ]
-                                                                                        : p.contentTypes.filter(
-                                                                                            (d) => d.id !== ct.id
-                                                                                        );
+                                                                            const contenttypes = e.target.checked
+                                                                                ? [
+                                                                                    ...(p.contenttypes || []),
+                                                                                    {
+                                                                                        providercontenttypeid: ct.id,
+                                                                                        contenttypename: ct.contenttypename
+                                                                                    }
+                                                                                ]
+                                                                                : (p.contenttypes || []).filter(
+                                                                                    (d) => d.providercontenttypeid !== ct.id
+                                                                                );
 
-                                                                                return { ...p, contentTypes };
-                                                                            });
+                                                                            return { ...p, contenttypes }; // make sure key is "contenttypes"
+                                                                        });
+
                                                                         setSelectedPlatforms(updatedPlatforms);
+
                                                                     }}
                                                                 />
                                                                 <span className="ps-2">
@@ -522,7 +557,7 @@ export default function ContractModal({
                                                 if (p)
                                                     setSelectedPlatforms([
                                                         ...selectedPlatforms,
-                                                        { ...p, contentTypes: [] },
+                                                        { ...p, contenttypes: [] },
                                                     ]);
                                             }
                                         }}
@@ -548,7 +583,7 @@ export default function ContractModal({
                                     {
                                         validator: () =>
                                             selectedPlatforms.some(
-                                                (p) => p.contentTypes.length > 0
+                                                (p) => p.contenttypes.length > 0
                                             )
                                                 ? Promise.resolve()
                                                 : Promise.reject(

@@ -517,11 +517,11 @@ const CampaignDetails = () => {
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Content Links" key="contentLinks">
-                  <VendorContentLinksTab />
+                  <VendorContentLinksTab campaignId={campaignId} />
                 </Tabs.TabPane>
 
 
-                <Tabs.TabPane tab="Activity" key="activity">
+                <Tabs.TabPane tab="Activity" key="activity" disabled>
                   <VendorActivity />
                 </Tabs.TabPane>
 
@@ -529,11 +529,11 @@ const CampaignDetails = () => {
                   <VendorMessage />
                 </Tabs.TabPane> */}
 
-                <Tabs.TabPane tab="Files & Media" key="files&media">
+                <Tabs.TabPane tab="Files & Media" key="files&media" disabled>
                   <VendorFilesMedia />
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="Payment" key="payment">
+                <Tabs.TabPane tab="Payment" key="payment" disabled>
                   <VendorPayment />
                 </Tabs.TabPane>
               </Tabs>

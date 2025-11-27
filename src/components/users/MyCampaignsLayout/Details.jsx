@@ -337,23 +337,23 @@ const Details = () => {
                   <ContractTab campaignId={campaignId} token={token} setCamContractId={setCamContractId}/>
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="Content Links" key="contentLinks">
+                <Tabs.TabPane tab="Content Links" key="contentLinks" disabled={!campaign.iscontentlinktab}>
                   <ContentLinksTab campaignId={campaignId} contractId={camContractId} token={token}/>
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="Activity" key="activity">
+                <Tabs.TabPane tab="Activity" key="activity" disabled>
                   <UserActivity />
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="Message" key="message">
+                <Tabs.TabPane tab="Message" key="message" disabled>
                   <UserMessage />
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="Files & Media" key="files&media">
+                <Tabs.TabPane tab="Files & Media" key="files&media" disabled>
                   <UserFilesMedia />
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="Payment" key="payment">
+                <Tabs.TabPane tab="Payment" key="payment" disabled>
                   <UserPayment />
                 </Tabs.TabPane>
               </Tabs>

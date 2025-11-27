@@ -116,7 +116,14 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
 
         setSaving(true);
         try {
-            const payload = platforms.map((p) => ({ platform: p.name, links: p.links }));
+            const payload = platforms.map((p) => ({
+                providerid: p.id,
+                providername: p.name,
+                contentlinks: p.links.map((link) => ({
+                    links: link
+                }))
+            }));
+
             await axios.post(
                 "/user/upload/content-link",
                 { p_contractid: contractId, p_contentlinkjson: payload },
@@ -215,7 +222,33 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
 
             {/* Platform Cards */}
             <div className="space-y-4">
-                {platforms.map((p, pIndex) => (
+
+                {/* EMPTY STATE WHEN NO CONTENT LINKS */}
+                {platforms?.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-xl border border-gray-200 shadow-sm">
+                        <img
+                            src="https://cdn-icons-png.flaticon.com/512/4076/4076508.png"
+                            alt="No content"
+                            className="w-28 h-28 opacity-70 mb-4"
+                        />
+                        <h3 className="text-xl font-semibold mb-2">No Content Links Added Yet</h3>
+                        <p className="text-gray-600 max-w-md mb-6">
+                            You haven’t uploaded any content links yet.
+                            Please add the platforms where you’ve posted your campaign content.
+                        </p>
+                        <Button
+                            type="primary"
+                            size="large"
+                            icon={<RiAddLine />}
+                            onClick={() => setIsModalOpen(true)}
+                            className="!bg-[#0F122F] !border-[#0F122F] hover:!bg-[#1A1D45] hover:!border-[#1A1D45] !text-white"
+                        >
+                            Add Your First Platform
+                        </Button>
+                    </div>
+                )}
+
+                {platforms?.map((p, pIndex) => (
                     <div key={pIndex} className="border border-gray-200 rounded-xl p-4 sm:p-6 bg-white shadow-sm">
                         {/* Header */}
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
