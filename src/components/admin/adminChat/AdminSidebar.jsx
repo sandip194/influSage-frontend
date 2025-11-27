@@ -1,11 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Modal } from "antd";
 import axios from "axios";
 import { RiBook2Line, RiTicket2Line } from "@remixicon/react";
 import { useSelector } from "react-redux";
 import { getSocket } from "../../../sockets/socket";
 
-const AdminSidebar = ({ setActiveSubject }) => {
+const AdminSidebar = forwardRef (({ setActiveSubject }, ref) => {
+const refresh = async () => {
+  const active = statusList.find(x => x.name === activeTab);
+  if (active) {
+    await fetchTickets(active);
+  }
+};
+
+useImperativeHandle(ref, () => ({
+  refresh,
+}));
   const { token , userId } = useSelector((state) => state.auth);
   const socket = getSocket();
   const [activeTab, setActiveTab] = useState("");
@@ -35,7 +45,9 @@ useEffect(() => {
         Object.entries(prev).map(([tab, tickets]) => [
           tab,
           tickets.map(t =>
-            String(t.id) === String(ticketId) ? { ...t, unread: true } : t
+            String(t.id) === String(ticketId)
+              ? { ...t, unread: activeSubjectId !== ticketId }
+              : t
           ),
         ])
       )
@@ -90,7 +102,6 @@ useEffect(() => {
         : [];
 
       const mapped = tickets.map((t) => {
-      const previous = subjectsByTab[tab.name]?.find(o => o.id === t.usersupportticketid);
       return {
         id: t.usersupportticketid,
         name: t.subjectname,
@@ -101,7 +112,10 @@ useEffect(() => {
         userrole: t.userrole,
         adminfullname: t.adminfullname,
         adminphoto: t.adminphoto,
-        unread: previous?.unread || !t.readbyadmin,
+        unread:
+          t.statusname !== "Open" && 
+          t.statusname !== "Closed" && 
+          !t.readbyadmin,
         icon: <RiBook2Line className="text-xl" />,
         ...t,
       };
@@ -155,7 +169,14 @@ useEffect(() => {
   };
 
   return (
-    <div className="h-full w-[400px] bg-white flex flex-col p-4 border-r border-gray-200 shadow-md rounded-md">
+     <div className="
+          h-screen md:h-full w-full
+          bg-white flex flex-col
+          p-3 sm:p-4
+          border-r border-gray-200
+          shadow-md
+          rounded-md
+        " >
       <h1 className="text-xl font-bold text-gray-900">Support</h1>
       <p className="text-gray-500 text-sm mb-3">
         Your conversations related to subjects
@@ -164,24 +185,24 @@ useEffect(() => {
       <hr className="my-2 border-gray-200" />
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-4 my-2">
-        {statusList.map((tab) => (
-          <button
-            key={tab.id}
+      <div className="flex gap-2 mb-5 my-2 overflow-x-auto whitespace-nowrap">
+      {statusList.map((tab) => (
+        <button
+           key={tab.id}
             onClick={() => {
               setActiveTab(tab.name);
               setTicketModalData(null);
             }}
-            className={`px-4 py-1.5 rounded-full text-sm border transition ${
-              activeTab === tab.name
-                ? "bg-[#0D132D] text-white border-[#0D132D]"
-                : "bg-white text-gray-600 border-gray-300"
-            }`}
-          >
-            {tab.name}
-          </button>
-        ))}
-      </div>
+          className={`px-4 py-2 rounded-full text-sm border transition ${
+            activeTab === tab.name
+              ? "bg-[#0D132D] text-white border-[#0D132D]"
+              : "bg-white text-gray-600 border-gray-300"
+          }`}
+        >
+          {tab.name}
+        </button>
+      ))}
+    </div>
 
       {/* Ticket List */}
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
@@ -258,7 +279,10 @@ useEffect(() => {
                       )
                     ) : null}
 
-                     {s.statusname !== "Open" && s.isclaimedbyadmin === true && (
+                    {(
+                      (s.statusname !== "Open" && s.isclaimedbyadmin === true) ||
+                      s.statusname === "Resolved"
+                    ) && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -392,6 +416,6 @@ useEffect(() => {
       )}
     </div>
   );
-};
+});
 
 export default AdminSidebar;

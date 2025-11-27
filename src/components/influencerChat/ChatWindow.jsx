@@ -6,6 +6,7 @@ import {
   RiSendPlaneFill,
   RiMessage3Line,
   RiReplyLine,
+  RiArrowLeftLine
 } from "@remixicon/react";
 import { getSocket } from "../../sockets/socket";
 import { addMessage } from "../../features/socket/chatSlice";
@@ -16,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Tooltip } from "antd";
 
-const ChatWindow = ({ activeSubject }) => {
+const ChatWindow = ({ activeSubject, onCloseSuccess, onBack  }) => {
   const dispatch = useDispatch();
   const socket = getSocket();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -158,28 +159,29 @@ const handleFileUpload = (e) => {
 };
 
   const handleClose = async () => {
-    if (!activeSubject || isClosed) return;
-    try {
-      setIsClosed(true);
+  if (!activeSubject) return;
+  try {
+    await axios.post(
+      "/chat/support/ticket/create-or-update-status",
+      {
+        p_usersupportticketid: activeSubject.id,
+        p_objectiveid: null,
+        p_statusname: "Closed",
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      await axios.post(
-        "/chat/support/ticket/create-or-update-status",
-        {
-          p_usersupportticketid: activeSubject.id,
-          p_objectiveid: null,
-          p_statusname: "Closed",
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    toast.success("Ticket closed successfully");
+    setIsClosed(true);
 
-      toast.success("Ticket closed successfully");
+    if (onCloseSuccess) onCloseSuccess();
+    setMessages([]);
+    setMessage("");
 
-      if (onCloseSuccess) onCloseSuccess();
-    } catch (err) {
-      console.error("Error resolving ticket:", err);
-      setIsClosed(false);
-    }
-  };
+  } catch (err) {
+    console.error("Error resolving ticket:", err);
+  }
+};
   useEffect(() => {
     const status = activeSubject?.status;
     setIsClosed(status?.toLowerCase() === "closed");
@@ -198,7 +200,8 @@ const handleFileUpload = (e) => {
 };
 
 const loadMessages = async (offsetParam = offset) => {
-  if (!activeSubject?.id || loadingMore || !hasMore) return;
+  if (!activeSubject?.id) return;
+if (offsetParam !== 0 && (loadingMore || !hasMore)) return;
   setLoadingMore(true);
 
   try {
@@ -320,29 +323,37 @@ useEffect(() => {
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="flex flex-col h-full"
         >
-          <div className="p-4 flex justify-between items-center border-b border-gray-500 ">
-            <h1 className="text-2xl font-bold text-[#0D132D]">
-              {activeSubject.name}
-            </h1>
-              {isClosed && (
-                <span className="px-3 py-1.5 rounded-full text-sm bg-red-600 text-white border border-red-600">
-                  Closed
-                </span>
-              )}
-
-              {!isClosed && (
+          <div className="p-4 flex justify-between items-center border-b border-gray-500">
+            <div className="flex items-center gap-3">
+              {onBack && (
                 <button
-                  onClick={handleClose}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-gray-200 text-gray-800 border border-gray-300 hover:bg-gray-300"
+                  onClick={onBack}
+                  className="md:hidden p-2 -ml-2 rounded-full hover:bg-gray-100"
                 >
-                  Close
+                  <RiArrowLeftLine className="w-5 h-5 text-gray-700" />
                 </button>
               )}
 
+              <h1 className="text-lg sm:text-2xl font-bold text-[#0D132D]">
+                {activeSubject.name}
+              </h1>
+            </div>
+
+            {isClosed ? (
+              <span className="px-3 py-1.5 rounded-full text-sm bg-red-600 text-white border border-red-600">
+                Closed
+              </span>
+            ) : (
+              <button
+                onClick={handleClose}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-gray-200 text-gray-800 border border-gray-300 hover:bg-gray-300"
+              >
+                Close
+              </button>
+            )}
           </div>
 
-          <div
-            className="flex-1 overflow-y-auto space-y-4 p-4 pb-28"
+          <div className="flex-1 overflow-y-auto space-y-4 p-4 pb-28"
             ref={chatRef}
             onScroll={handleScroll}
           >
@@ -366,7 +377,7 @@ useEffect(() => {
                     msg.sender === "user" ? "justify-end" : "justify-start"
                   } ${highlightMsgId === msg.id ? "bg-blue-200/60 rounded-xl p-1" : ""}`}
                 >
-                  <div className="flex flex-col max-w-[65%]">
+                  <div className="flex flex-col max-w-[78%] sm:max-w-[65%]">
                     <div
                       className={`px-4 py-2 rounded-2xl shadow-md text-sm break-words whitespace-pre-wrap ${
                         msg.sender === "user" ? "bg-[#0D132D] text-white" : "bg-gray-100 text-gray-900"
@@ -548,14 +559,15 @@ useEffect(() => {
         <motion.div
           initial={{ scale: 0.92, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{
-            duration: 0.6,
-            ease: "easeOut",
-          }}
-          className={`flex items-center bg-gray-300 rounded-full px-4 my-4 py-2 shadow-lg relative
-          ${!activeSubject ? "opacity-60" : "opacity-100"}`}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className={`flex items-center gap-2 sm:gap-3
+            bg-gray-300 rounded-full
+            px-2 sm:px-4 py-2
+            my-2 sm:my-3
+            shadow-lg relative
+            ${!activeSubject ? "opacity-60" : "opacity-100"}
+          `}
         >
-          {/* Input */}
           <input
             type="text"
             disabled={!activeSubject || isClosed}
@@ -569,48 +581,54 @@ useEffect(() => {
             value={message}
             onKeyDown={(e) => !isClosed && handleKeyPress(e)}
             onChange={(e) => !isClosed && setMessage(e.target.value)}
-            className={`flex-1 bg-transparent outline-none text-sm
-            ${isClosed ? "text-gray-500 cursor-not-allowed" : "text-gray-700"}`}
+            className={`flex-1 min-w-[40px] bg-transparent outline-none
+              text-sm sm:text-base
+              ${isClosed ? "text-gray-500 cursor-not-allowed" : "text-gray-700"}
+            `}
           />
 
           {/* Icons */}
-          <div className="flex items-center gap-3 text-gray-600">
-           <RiEmojiStickerLine
-              className={`text-xl ${
+          <div className="flex items-center gap-2 sm:gap-3 text-gray-600 shrink-0">
+            <RiEmojiStickerLine
+              className={`text-lg sm:text-xl ${
                 !activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
-              onClick={() =>
-                activeSubject && !isClosed && setShowEmojiPicker(!showEmojiPicker)
-              }
+              onClick={() => activeSubject && !isClosed && setShowEmojiPicker(!showEmojiPicker)}
             />
 
             <RiImageLine
-              className={`text-xl ${!activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+              className={`text-lg sm:text-xl ${
+                !activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+              }`}
               onClick={() => activeSubject && !isClosed && imageInputRef.current.click()}
             />
 
             <RiAttachment2
-              className={`text-xl ${!activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+              className={`text-lg sm:text-xl ${
+                !activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+              }`}
               onClick={() => activeSubject && !isClosed && fileInputRef.current.click()}
             />
           </div>
 
-          {/* Send Button */}
+          {/* Send button */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             disabled={!activeSubject || isClosed}
             onClick={handleSend}
-            className={`ml-3 bg-[#0D132D] text-white p-2 rounded-full shadow-md transition 
-              ${isClosed ? "opacity-40 cursor-not-allowed" : "hover:bg-[#1B2448] cursor-pointer"}`}
+            className={`bg-[#0D132D] text-white p-2 sm:p-2.5
+              rounded-full shadow-md transition
+              ${isClosed ? "opacity-40 cursor-not-allowed" : "hover:bg-[#1B2448] cursor-pointer"}
+            `}
           >
-            <RiSendPlaneFill className="text-lg" />
+            <RiSendPlaneFill className="text-lg sm:text-xl" />
           </motion.button>
         </motion.div>
       </motion.div>
       {/* emoji picker */}
       {showEmojiPicker && (
         <motion.div
-          className="absolute bottom-24 right-10 z-40"
+          className="absolute bottom-28 right-2 sm:right-10"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
         >

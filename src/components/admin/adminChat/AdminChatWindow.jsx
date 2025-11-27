@@ -6,6 +6,7 @@ import {
   RiSendPlaneFill,
   RiMessage3Line,
   RiReplyLine,
+  RiArrowLeftLine
 } from "@remixicon/react";
 import { getSocket } from "../../../sockets/socket";
 import { addMessage } from "../../../features/socket/chatSlice";
@@ -16,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Tooltip } from "antd";
 
-const AdminChatWindow = ({ activeSubject }) => {
+const AdminChatWindow = ({ activeSubject, onBack }) => {
   const dispatch = useDispatch();
   const socket = getSocket();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -63,37 +64,39 @@ useEffect(() => {
 }, [activeSubject?.id]);
 
   useEffect(() => {
-    if (!socket) return;
+  if (!socket || !activeSubject?.id) return;
 
-    const handleReceiveMessage = (msg) => {
-      const file = msg.filePath || msg.filepath || msg.file || null;
+  const handleReceiveMessage = (msg) => {
+    const file = msg.filePath || msg.filepath || msg.file || null;
+    let filetype = null;
+    if (file) {
+      const ext = file.split(".").pop().toLowerCase();
+      if (["jpg","jpeg","png","gif","webp"].includes(ext)) filetype = "image";
+      else if (["mp4","mov","avi","mkv","webm"].includes(ext)) filetype = "video";
+      else filetype = "file";
+    }
 
-      let filetype = null;
-      if (file) {
-        const ext = file.split(".").pop().toLowerCase();
-        if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext))
-          filetype = "image";
-        else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext))
-          filetype = "video";
-        else filetype = "file";
-      }
+    const formattedMsg = {
+      id: msg.usersupportticketmessagesid,
+      message: msg.message,
+      filepath: file,
+      filetype,
+      replyId: msg.replyid || null,
+      sender: msg.roleid === 4 ? "admin" : "user",
+      time: msg.createddate || msg.time || new Date().toISOString(),
+    };
 
-      const formattedMsg = {
-        id: msg.usersupportticketmessagesid,
-        message: msg.message,
-        filepath: file,
-        filetype,
-        replyId: msg.replyid || null,
-        sender: msg.roleid === 4 ? "admin" : "user",
-        time: msg.time,
-      };
+    setMessages((prev) => [...prev, formattedMsg]);
+    dispatch(addMessage(formattedMsg));
+  };
 
-      setMessages(prev => [...prev, formattedMsg]);
-          dispatch(addMessage(formattedMsg));
-        };     
-        socket.off("receiveSupportMessage");
-        socket.on("receiveSupportMessage", handleReceiveMessage);
-      }, []);
+  socket.off("receiveSupportMessage");
+  socket.on("receiveSupportMessage", handleReceiveMessage);
+
+  return () => {
+    socket.off("receiveSupportMessage", handleReceiveMessage);
+  };
+}, [socket, activeSubject?.id]);
 
   const handleSend = async () => {
     if (!activeSubject) return;
@@ -224,8 +227,8 @@ const handleScroll = () => {
 };
 
   const loadMessages = async (offsetParam = offset) => {
-  if (!activeSubject?.id || loadingMore || !hasMore) return;
-  setLoadingMore(true);
+  if (!activeSubject?.id) return;
+if (offsetParam !== 0 && (loadingMore || !hasMore)) return;
 
   try {
     const res = await axios.get(
@@ -284,7 +287,7 @@ useEffect(() => {
   setOffset(0);
   setHasMore(true);
   loadMessages(0);
-}, [activeSubject]);
+}, [activeSubject?.id]);
 
 
   return (
@@ -330,6 +333,14 @@ useEffect(() => {
           animate={{ opacity: 1 }}
         >
           <div className="p-4 flex justify-between items-center border-b border-gray-500">
+            {onBack && (
+                            <button
+                              onClick={onBack}
+                              className="md:hidden p-2 -ml-2 rounded-full hover:bg-gray-100"
+                            >
+                              <RiArrowLeftLine className="w-5 h-5 text-gray-700" />
+                            </button>
+                          )}
             <h1 className="text-2xl font-bold text-[#0D132D]">
               {activeSubject?.name}
             </h1>
@@ -562,56 +573,71 @@ useEffect(() => {
         <motion.div
           initial={{ scale: 0.92, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className={`flex items-center bg-gray-300 rounded-full px-4 2 py-2 shadow-lg ${
-            !activeSubject && "opacity-60"
-          }`}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className={`flex items-center gap-2 sm:gap-3
+            bg-gray-300 rounded-full
+            px-2 sm:px-4 py-2
+            my-2 sm:my-3
+            shadow-lg relative
+          ${!activeSubject ? "opacity-60" : "opacity-100"}
+        `}
         >
           <input
             type="text"
             placeholder={
-              activeSubject
-                ? "Type your message..."
-                : "Select a subject to start chat..."
+              !activeSubject
+                ? "Select a subject to start chat..."
+                : isResolved
+                ? "Ticket is resolved"
+                : "Type your message..."
             }
-            disabled={!activeSubject}
+            disabled={!activeSubject || isResolved}
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyPress}
-            className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
+            onChange={(e) => !isResolved && setMessage(e.target.value)}
+            onKeyDown={(e) => !isResolved && handleKeyPress(e)}
+            className={`flex-1 min-w-[40px] bg-transparent outline-none text-sm sm:text-base
+              ${isResolved ? "text-gray-500 cursor-not-allowed" : "text-gray-700"}`}
           />
 
-          <div className="flex items-center gap-3 text-gray-600">
+          <div className="flex items-center gap-2 sm:gap-3 text-gray-600 shrink-0">
             <RiEmojiStickerLine
-              className={`text-xl ${
-                activeSubject ? "cursor-pointer" : "opacity-40"
+              className={`text-lg sm:text-xl ${
+                !activeSubject || isResolved ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
               onClick={() =>
-                activeSubject && setShowEmojiPicker(!showEmojiPicker)
+                activeSubject && !isResolved && setShowEmojiPicker(!showEmojiPicker)
               }
             />
+
             <RiImageLine
-              className={`text-xl ${
-                activeSubject ? "cursor-pointer" : "opacity-40"
+              className={`text-lg sm:text-xl ${
+                !activeSubject || isResolved ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
-              onClick={() => activeSubject && imageInputRef.current.click()}
+              onClick={() =>
+                activeSubject && !isResolved && imageInputRef.current.click()
+              }
             />
+
             <RiAttachment2
-              className={`text-xl ${
-                activeSubject ? "cursor-pointer" : "opacity-40"
+              className={`text-lg sm:text-xl ${
+                !activeSubject || isResolved ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
-              onClick={() => activeSubject && fileInputRef.current.click()}
-            />
+              onClick={() =>
+                activeSubject && !isResolved && fileInputRef.current.click()
+              }
+          />
           </div>
 
           <motion.button
             whileTap={{ scale: 0.9 }}
-            disabled={!activeSubject}
+            disabled={!activeSubject || isResolved}
             onClick={handleSend}
-            className={`ml-3 bg-[#0D132D] text-white p-2 rounded-full shadow-md ${
-              !activeSubject
-                ? "opacity-40 cursor-not-allowed"
-                : "hover:bg-[#1B2448]"
-            }`}
+            className={`bg-[#0D132D] text-white p-2 sm:p-2.5 rounded-full shadow-md transition
+              ${
+                !activeSubject || isResolved
+                  ? "opacity-40 cursor-not-allowed"
+                  : "hover:bg-[#1B2448] cursor-pointer"
+              }`}
           >
             <RiSendPlaneFill className="text-lg" />
           </motion.button>
@@ -621,7 +647,7 @@ useEffect(() => {
       {/* emoji picker */}
       {showEmojiPicker && (
         <motion.div
-          className="absolute bottom-24 right-10 z-40"
+          className="absolute bottom-28 right-2 sm:right-10"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
         >
