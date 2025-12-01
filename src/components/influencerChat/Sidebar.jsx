@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Select } from "antd";
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { Modal, Button } from "antd";
+import { Modal, Button, Select } from "antd";
 import { getSocket } from "../../sockets/socket";
 
 import { RiBook2Line, RiAddLine } from "@remixicon/react";
 
-const Sidebar = ({ setActiveSubject }) => {
+const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
   const initialByTab = {
     Open: [],
     Inprograss: [],
@@ -40,13 +39,18 @@ const Sidebar = ({ setActiveSubject }) => {
   useEffect(() => {
   if (!socket) return;
 
-  const handler = ({ ticketId }) => {
+  const handler = ({ ticketId, readbyuser }) => {
     setSubjectsByTab(prev =>
       Object.fromEntries(
         Object.entries(prev).map(([tab, tickets]) => [
           tab,
           tickets.map(t =>
-            String(t.id) === String(ticketId) ? { ...t, unread: true } : t
+            String(t.id) === String(ticketId)
+              ? {
+                  ...t,
+                  unread: !readbyuser && String(activeSubjectId) !== String(ticketId)
+                }
+              : t
           ),
         ])
       )
@@ -54,7 +58,7 @@ const Sidebar = ({ setActiveSubject }) => {
   };
   socket.on("sidebarTicketUpdate", handler);
   return () => socket.off("sidebarTicketUpdate", handler);
-}, [socket]);
+}, [socket, activeSubjectId]);
 
   useEffect(() => {
     const fetchTicketStatus = async () => {
@@ -136,6 +140,10 @@ const Sidebar = ({ setActiveSubject }) => {
     console.error("Error fetching tickets:", error);
   }
 };
+  useImperativeHandle(ref, () => ({
+    refresh: () => handleTabChange(statusList.find(x => x.name === activeTab)),
+  }));
+
   const handleSubmitTicket = async () => {
     if (!newSubject) {
       setShowError(true);
@@ -326,6 +334,6 @@ const Sidebar = ({ setActiveSubject }) => {
       </Modal>
     </div>
   );
-};
+});
 
 export default Sidebar;

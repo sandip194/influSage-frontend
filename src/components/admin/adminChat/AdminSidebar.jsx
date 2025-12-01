@@ -39,14 +39,17 @@ useEffect(() => {
 useEffect(() => {
   if (!socket) return;
 
-  const handler = ({ ticketId }) => {
+  const handler = ({ ticketId, readbyadmin }) => {
     setSubjectsByTab(prev =>
       Object.fromEntries(
         Object.entries(prev).map(([tab, tickets]) => [
           tab,
           tickets.map(t =>
             String(t.id) === String(ticketId)
-              ? { ...t, unread: activeSubjectId !== ticketId }
+              ? {
+                  ...t,
+                  unread: !readbyadmin && String(ticketId) !== String(activeSubjectId)
+                }
               : t
           ),
         ])
@@ -56,8 +59,7 @@ useEffect(() => {
 
   socket.on("sidebarTicketUpdate", handler);
   return () => socket.off("sidebarTicketUpdate", handler);
-}, [socket]);
-
+}, [socket, activeSubjectId]);
 
   useEffect(() => {
     const fetchTicketStatus = async () => {

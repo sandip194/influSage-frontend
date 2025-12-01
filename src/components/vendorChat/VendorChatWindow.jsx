@@ -30,6 +30,7 @@ const VendorChatWindow = ({ activeSubject, onCloseSuccess, onBack  }) => {
   const [attachedFile, setAttachedFile] = useState(null);
   const [attachedPreview, setAttachedPreview] = useState(null);
   const [highlightMsgId , setHighlightMsgId ] = useState(null);
+  const [showCloseButton, setShowCloseButton] = useState(true);
 
   const [previewImage, setPreviewImage] = useState(null);
   const [previewVideo, setPreviewVideo] = useState(null);
@@ -91,6 +92,7 @@ useEffect(() => {
     };
 
     setMessages(prev => [...prev, formattedMsg]);
+    scrollToBottom();
     dispatch(addMessage(formattedMsg));
   };
 
@@ -182,10 +184,12 @@ const handleFileUpload = (e) => {
     console.error("Error resolving ticket:", err);
   }
 };
-  useEffect(() => {
-    const status = activeSubject?.status;
-    setIsClosed(status?.toLowerCase() === "closed");
-  }, [activeSubject]);
+useEffect(() => {
+  const status = activeSubject?.status?.toLowerCase();
+  setIsClosed(status === "open" || status === "closed");
+  setShowCloseButton(status !== "closed");
+}, [activeSubject]);
+
 
   const handleScroll = () => {
   if (!chatRef.current) return;
@@ -267,6 +271,16 @@ if (offsetParam !== 0 && (loadingMore || !hasMore)) return;
     setLoadingMore(false);
   }
 };
+const scrollToBottom = () => {
+  setTimeout(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, 80);
+};
+useEffect(() => {
+  if (messages.length > 0) scrollToBottom();
+}, [messages]);
 
 useEffect(() => {
   if (!activeSubject?.id) return;
@@ -339,17 +353,17 @@ useEffect(() => {
               </h1>
             </div>
 
-            {isClosed ? (
-              <span className="px-3 py-1.5 rounded-full text-sm bg-red-600 text-white border border-red-600">
-                Closed
-              </span>
-            ) : (
+            {showCloseButton ? (
               <button
                 onClick={handleClose}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-gray-200 text-gray-800 border border-gray-300 hover:bg-gray-300"
               >
                 Close
               </button>
+            ) : (
+              <span className="px-3 py-1.5 rounded-full text-sm bg-red-600 text-white border border-red-600">
+                Closed
+              </span>
             )}
           </div>
 
@@ -375,7 +389,7 @@ useEffect(() => {
                   animate={{ opacity: 1 }}
                    className={`relative flex transition-all duration-300 ${
                     msg.sender === "user" ? "justify-end" : "justify-start"
-                  } ${highlightMsgId === msg.id ? "bg-blue-200/60 rounded-xl p-1" : ""}`}
+                  } ${highlightMsgId === msg.id ? "flash-highlight" : ""}`}
                 >
                   <div className="flex flex-col max-w-[78%] sm:max-w-[65%]">
                     <div
@@ -390,8 +404,8 @@ useEffect(() => {
                             const el = document.getElementById(msg.replyId);
                             if (el) {
                               el.scrollIntoView({ behavior: "smooth", block: "center" });
-                              setHighlightMsgId(msg.replyId);
-                              setTimeout(() => setHighlightMsgId(null), 1200);
+                              // setHighlightMsgId(msg.replyId);
+                              // setTimeout(() => setHighlightMsgId(null), 1200);
                             }
                           }}
                           className={`mb-2 px-2 py-1 rounded-md border-l-4 text-xs cursor-pointer ${
@@ -532,30 +546,30 @@ useEffect(() => {
           </div>
         )}
         {attachedPreview && (
-  <div className="mb-3 flex items-center gap-3 bg-gray-200 p-2 rounded-md">
-    {attachedFile.type.startsWith("image") ? (
-      <img
-        src={attachedPreview}
-        className="w-20 h-20 rounded-md object-cover cursor-pointer"
-        onClick={() => setPreviewImage(attachedPreview)}
-      />
-    ) : (
-      <div className="flex-1 text-sm font-medium truncate">
-        📎 {attachedFile.name}
-      </div>
-    )}
+          <div className="mb-3 flex items-center gap-3 bg-gray-200 p-2 rounded-md">
+            {attachedFile.type.startsWith("image") ? (
+              <img
+                src={attachedPreview}
+                className="w-20 h-20 rounded-md object-cover cursor-pointer"
+                onClick={() => setPreviewImage(attachedPreview)}
+              />
+            ) : (
+              <div className="flex-1 text-sm font-medium truncate">
+                📎 {attachedFile.name}
+              </div>
+            )}
 
-    <button
-      onClick={() => {
-        setAttachedPreview(null);
-        setAttachedFile(null);
-      }}
-      className="text-gray-600 hover:text-red-600 text-lg font-bold"
-    >
-      ✕
-    </button>
-  </div>
-)}
+            <button
+              onClick={() => {
+                setAttachedPreview(null);
+                setAttachedFile(null);
+              }}
+              className="text-gray-600 hover:text-red-600 text-lg font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        )}
         <motion.div
           initial={{ scale: 0.92, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -570,20 +584,31 @@ useEffect(() => {
         >
           <input
             type="text"
-            disabled={!activeSubject || isClosed}
+            disabled={
+              !activeSubject ||
+              activeSubject.status?.toLowerCase() === "open" ||
+              activeSubject.status?.toLowerCase() === "closed"
+            }
             placeholder={
               !activeSubject
                 ? "Select a subject to start chat..."
-                : isClosed
-                ? "Ticket is closed"
-                : "Type your message..."
+                : activeSubject.status?.toLowerCase() === "open"
+                  ? "Ticket is not claimed by admin"
+                  : activeSubject.status?.toLowerCase() === "closed"
+                    ? "Ticket is closed"
+                    : "Type your message..."
             }
             value={message}
-            onKeyDown={(e) => !isClosed && handleKeyPress(e)}
-            onChange={(e) => !isClosed && setMessage(e.target.value)}
+            onKeyDown={(e) => handleKeyPress(e)}
+            onChange={(e) => setMessage(e.target.value)}
             className={`flex-1 min-w-[40px] bg-transparent outline-none
               text-sm sm:text-base
-              ${isClosed ? "text-gray-500 cursor-not-allowed" : "text-gray-700"}
+              ${
+                activeSubject?.status?.toLowerCase() === "open" ||
+                activeSubject?.status?.toLowerCase() === "closed"
+                  ? "text-gray-500 cursor-not-allowed"
+                  : "text-gray-700"
+              }
             `}
           />
 
@@ -593,31 +618,38 @@ useEffect(() => {
               className={`text-lg sm:text-xl ${
                 !activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
-              onClick={() => activeSubject && !isClosed && setShowEmojiPicker(!showEmojiPicker)}
+              onClick={() => {
+                if (!activeSubject || isClosed) return;
+                setShowEmojiPicker(!showEmojiPicker);
+              }}
             />
 
             <RiImageLine
               className={`text-lg sm:text-xl ${
                 !activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
-              onClick={() => activeSubject && !isClosed && imageInputRef.current.click()}
+              onClick={() => {
+                if (!activeSubject || isClosed) return;
+                imageInputRef.current.click();
+              }}
             />
 
             <RiAttachment2
               className={`text-lg sm:text-xl ${
                 !activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
-              onClick={() => activeSubject && !isClosed && fileInputRef.current.click()}
+              onClick={() => {
+                if (!activeSubject || isClosed) return;
+                fileInputRef.current.click();
+              }}
             />
           </div>
 
           {/* Send button */}
           <motion.button
-            whileTap={{ scale: 0.9 }}
             disabled={!activeSubject || isClosed}
             onClick={handleSend}
-            className={`bg-[#0D132D] text-white p-2 sm:p-2.5
-              rounded-full shadow-md transition
+            className={`bg-[#0D132D] text-white p-2 sm:p-2.5 rounded-full shadow-md transition
               ${isClosed ? "opacity-40 cursor-not-allowed" : "hover:bg-[#1B2448] cursor-pointer"}
             `}
           >

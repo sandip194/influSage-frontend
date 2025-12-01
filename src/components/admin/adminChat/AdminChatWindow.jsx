@@ -23,7 +23,7 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const { token } = useSelector((state) => state.auth);
+  const { token, userId } = useSelector((state) => state.auth);
   const [isResolved, setIsResolved] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
   const [previewVideo, setPreviewVideo] = useState(null);
@@ -82,7 +82,7 @@ useEffect(() => {
       filepath: file,
       filetype,
       replyId: msg.replyid || null,
-      sender: msg.roleid === 4 ? "admin" : "user",
+      sender: msg.userid === userId ? "admin" : "user",
       time: msg.createddate || msg.time || new Date().toISOString(),
     };
 
@@ -133,12 +133,13 @@ useEffect(() => {
         let filetype = null;
         if (m.filepath) {
           const ext = m.filepath.split(".").pop().toLowerCase();
-          if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext))
-            filetype = "image";
-          else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext))
-            filetype = "video";
+          if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
+          else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
           else filetype = "file";
         }
+        let isSystemMsg = m.message?.includes(
+          "Your support request has been submitted successfully"
+        );
 
         return {
           id: m.usersupportticketmessagesid,
@@ -146,10 +147,11 @@ useEffect(() => {
           message: m.message,
           filepath: m.filepath || null,
           filetype,
-          sender: m.roleid === 4 ? "admin" : "user",
+          sender: isSystemMsg ? "admin" : (m.userid === userId ? "admin" : "user"),
           time: m.createddate,
         };
       });
+
 
       setMessages(formatted);
 
@@ -256,13 +258,17 @@ if (offsetParam !== 0 && (loadingMore || !hasMore)) return;
           else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
           else filetype = "file";
         }
+        let isSystemMsg = m.message?.includes("Your support request has been submitted successfully");
         return {
           id: m.usersupportticketmessagesid,
           replyId: m.replyid,
           message: m.message,
           filepath: m.filepath,
           filetype,
-          sender: m.roleid === 4 ? "admin" : "user",
+          // sender: isSystemMsg ? "admin" : (m.roleid === 4 ? "admin" : "user"),
+          sender: isSystemMsg
+      ? "admin"
+      : (m.userid === userId ? "admin" : "user"),
           time: m.createddate,
         };
       });
