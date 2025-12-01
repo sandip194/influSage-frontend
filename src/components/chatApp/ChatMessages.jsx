@@ -284,7 +284,7 @@ export default function ChatMessages({
     };
 
     loadMessagesOnce();
-  }, [chat?.id, token, role]);
+ }, [chat?.id, chat?.date, token, role]);
 
   useEffect(() => {
     if (!socket || !messages.length) return;
@@ -652,7 +652,7 @@ export default function ChatMessages({
                     className={`text-sm break-words ${msg.ishtml ? "bg-white text-gray-900 p-2 rounded-md" : ""}`}
                     dangerouslySetInnerHTML={{
                       __html: DOMPurify.sanitize(
-                        msg.ishtml ? msg.content : msg.content.replace(/\n/g, "<br>")
+                        msg.ishtml ? msg.content : (msg.content || "").replace(/\n/g, "<br>")
                       ),
                     }}
                   />
