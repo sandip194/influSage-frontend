@@ -95,7 +95,7 @@ export default function SidebarVendor({ onSelectChat }) {
   }, [token]);
 
   useEffect(() => {
-  if (!socket) return;
+     if (!socket) return; 
   fetchCampaigns();
   fetchUnreadMessages();
 
@@ -104,11 +104,14 @@ export default function SidebarVendor({ onSelectChat }) {
     fetchCampaigns();
   };
 
-  socket.off("receiveChatMessage");
-  socket.on("receiveChatMessage", handleIncoming);
+  socket.off("receiveMessage", handleIncoming);
+  socket.on("receiveMessage", handleIncoming);
 
-  return () => socket.off("receiveChatMessage", handleIncoming);
-}, [socket]);
+  return () => {
+    socket.off("receiveMessage", handleIncoming);
+  };
+}, [socket, fetchCampaigns, fetchUnreadMessages]);
+
 
 
   // ✅ useMemo for derived data
@@ -298,18 +301,23 @@ export default function SidebarVendor({ onSelectChat }) {
                   key={`${inf.campaignId}-${inf.influencerid}`}
                   onClick={() => {
                     setSelectedInfluencer(inf.influencerid);
+
+                    const cid = inf.conversationid;
+                    if (socket) {
+                      socket.emit("joinRoom", String(cid));
+                    } 
                     onSelectChat({
                       ...inf,
                       campaign: selectedCampaign,
                       canstartchat: inf.canstartchat,
+                      date: Date.now(),
                     });
 
                     setUnreadMessages((prev) =>
-                      prev.filter(
-                        (msg) => String(msg.userid) !== String(inf.influencerid)
-                      )
+                      prev.filter((msg) => String(msg.userid) !== String(inf.influencerid))
                     );
                   }}
+
                   className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-300
                     ${
                       isSelected

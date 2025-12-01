@@ -5,8 +5,10 @@ import { RiAddLine } from "react-icons/ri";
 import { CloseCircleFilled } from "@ant-design/icons";
 import { Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
+import { getSocket } from "../../sockets/socket";
 
 export default function Sidebar({ onSelectChat }) {
+  const socket = getSocket();
   const { token } = useSelector((state) => state.auth);
   const [campaigns, setCampaigns] = useState([]);
   const [search, setSearch] = useState("");
@@ -39,14 +41,24 @@ export default function Sidebar({ onSelectChat }) {
   };
 
 
-  useEffect(() => {
-    fetchCampaigns();
-    const campaignsInterval = setInterval(fetchCampaigns, 3000);
+ useEffect(() => {
+  fetchCampaigns();
 
-    return () => {
-      clearInterval(campaignsInterval);
-    };
-  }, [token, search]);
+  const handleIncoming = () => {
+    fetchCampaigns();
+  };
+
+  if (socket) {
+    socket.off("receiveMessage", handleIncoming);
+    socket.on("receiveMessage", handleIncoming);
+  }
+
+  return () => {
+    if (socket) {
+      socket.off("receiveMessage", handleIncoming);
+    }
+  };
+}, [socket, token, search]);
 
 
   // check if this campaign/vendor has an unread message
@@ -117,6 +129,9 @@ export default function Sidebar({ onSelectChat }) {
                 key={conversationId}
                 onClick={() => {
                   setSelectedCampaignId(conversationId);
+                  if (socket) {
+                    socket.emit("joinRoom", String(conversationId));
+                  }
                   onSelectChat({
                     id: conversationId,
                     name: campaign.campaignname,
@@ -126,11 +141,24 @@ export default function Sidebar({ onSelectChat }) {
                     campaignname: campaign.campaignname,
                     vendorName: `${vendor.firstname }`,
                     canstartchat: vendor.canstartchat, 
+                    date: Date.now(),
                   });
 
                   // remove from unread once clicked
-                  setUnreadMessages((prev) =>
-                    prev.filter((msg) => String(msg.ownerid) !== String(vendor.vendorid || vendor.id))
+                  setCampaigns(prev =>
+                    prev.map(c =>
+                      c.vendors?.[0]?.conversationid === conversationId
+                        ? {
+                            ...c,
+                            vendors: [
+                              {
+                                ...c.vendors[0],
+                                readbyinfluencer: true,
+                              },
+                            ],
+                          }
+                        : c
+                    )
                   );
                 }}
                 className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-300
