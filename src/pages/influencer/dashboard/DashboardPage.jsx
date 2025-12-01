@@ -5,6 +5,7 @@ import EarningsSummarySection from '../../../components/users/InfluencerDashboar
 import PerformanceCard from '../../../components/users/InfluencerDashboardHome/PerformanceCard'
 import TodoListCard from '../../../components/users/InfluencerDashboardHome/TodoListCard'
 import FeedbackCard from '../../../components/users/InfluencerDashboardHome/FeedbackCard'
+import CampaignCarousel from '../../../components/users/InfluencerDashboardHome/CampaignCarousel'
 
 const DashboardPage = () => {
     return (
@@ -16,6 +17,7 @@ const DashboardPage = () => {
             <div className="mian-box">
                 <ProfileComplation />
                 <CampaignStats />
+                <CampaignCarousel />    
                 <EarningsSummarySection />
                 <div className="flex flex-col md:flex-row gap-4 my-3">
                     <PerformanceCard />

@@ -79,23 +79,23 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
   };
 
   const handleImageChange = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+    const file = e.target.files[0];
+    if (!file) return;
 
-  const allowedTypes = ["image/jpeg", "image/jpg", "image/webp"];
-  if (!allowedTypes.includes(file.type)) {
-    setProfileError("Only JPG, JPEG, or WEBP files are allowed. PNG is not allowed.");
-    setProfileImage(null);
-    setPreview(formData.profileImageUrl || null);
-    return;
-  }
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setProfileError("Only JPG, JPEG, or WEBP files are allowed. PNG is not allowed.");
+      setProfileImage(null);
+      setPreview(formData.profileImageUrl || null);
+      return;
+    }
 
-  setProfileError("");
-  setErrors(prev => ({ ...prev, profileImage: false }));
+    setProfileError("");
+    setErrors(prev => ({ ...prev, profileImage: false }));
 
-  setProfileImage(file);
-  setPreview(URL.createObjectURL(file));
-};
+    setProfileImage(file);
+    setPreview(URL.createObjectURL(file));
+  };
 
 
   const validateFields = (formData, profileImage) => {
@@ -112,13 +112,22 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
           dayjs(formData.applicationenddate).isBefore(dayjs(formData.applicationstartdate))) ||
         (formData.startDate &&
           dayjs(formData.applicationenddate).isAfter(dayjs(formData.startDate))),
+
       aboutBrand: !formData.aboutBrand?.trim(),
       profileImage: !profileImage && !formData.profileImageUrl,
       hashtags: !Array.isArray(formData.hashtags) || formData.hashtags.length === 0,
+
+      // ⭐ NEW VALIDATION
+      startDate: !formData.startDate,
+      endDate:
+        !formData.endDate ||
+        (formData.startDate &&
+          dayjs(formData.endDate).isBefore(dayjs(formData.startDate))),
     };
 
     return errors;
   };
+
 
   const buildPayload = (formData, profileImage) => {
     return {
@@ -359,7 +368,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
 
       <hr className="my-4 border-gray-200" />
       <label className="font-semibold block mb-2 flex items-center gap-2 mt-6">
-        Campaign Duration
+        Campaign Duration <span className="text-red-500">*</span>
         <div className="relative group">
           <RiInformationLine className="text-blue-600 cursor-pointer" size={18} />
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block w-64 bg-gray-900 text-white text-xs rounded px-2 py-1 z-10">
@@ -387,9 +396,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
             }}
             onChange={(date) => handleChange("startDate", date)}
           />
-          {/* {errors.startDate && (
+          {errors.startDate && (
             <p className="text-red-500 text-sm mt-1">Please select a valid campaign start date</p>
-          )} */}
+          )}
         </div>
 
         {/* Campaign End Date */}
@@ -408,9 +417,9 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
             }
             onChange={(date) => handleChange("endDate", date)}
           />
-          {/* {errors.endDate && (
+          {errors.endDate && (
             <p className="text-red-500 text-sm mt-1">Please select a valid campaign end date</p>
-          )} */}
+          )}
         </div>
       </div>
 
@@ -420,7 +429,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       <label className="font-semibold block mb-2">
         Budget <span>(Approx Price)</span>
       </label>
-      <div className="flex gap-4 mb-1"> 
+      <div className="flex gap-4 mb-1">
         <Input
           size="large"
           type="number"

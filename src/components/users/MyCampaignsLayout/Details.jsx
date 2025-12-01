@@ -37,7 +37,6 @@ const Details = () => {
   const [campaign, setCampaign] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  const [camContractId, setCamContractId] = useState(null)
 
   const navigate = useNavigate();
   const { campaignId } = useParams()
@@ -334,11 +333,11 @@ const Details = () => {
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Contract" key="contract">
-                  <ContractTab campaignId={campaignId} token={token} setCamContractId={setCamContractId}/>
+                  <ContractTab campaignId={campaignId} token={token}/>
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Content Links" key="contentLinks" disabled={!campaign.iscontentlinktab}>
-                  <ContentLinksTab campaignId={campaignId} contractId={camContractId} token={token}/>
+                  <ContentLinksTab campaignId={campaignId} contractId={campaign?.contractid ? campaign?.contractid : null} token={token}/>
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Activity" key="activity" disabled>

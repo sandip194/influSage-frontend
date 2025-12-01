@@ -10,6 +10,8 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
     const [errors, setErrors] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [confirmRemove, setConfirmRemove] = useState({ open: false, pIndex: null });
+
 
     // ---------------- URL Validation ----------------
     const validateLink = (value, existingLinks = [], currentIndex = null) => {
@@ -88,15 +90,7 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
         });
     };
 
-    // ---------------- Remove Platform ----------------
-    const removePlatform = (pIndex) => {
-        setPlatforms((prev) => prev.filter((_, i) => i !== pIndex));
-        setErrors((prev) => {
-            const copy = { ...prev };
-            delete copy[pIndex];
-            return copy;
-        });
-    };
+
 
     // ---------------- Save All ----------------
     const saveAll = async () => {
@@ -260,7 +254,10 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
                                 <Button onClick={() => saveAll()} loading={saving}>
                                     Update Links
                                 </Button>
-                                <Button danger onClick={() => removePlatform(pIndex)}>
+                                <Button
+                                    danger
+                                    onClick={() => setConfirmRemove({ open: true, pIndex })}
+                                >
                                     Remove Platform
                                 </Button>
                             </div>
@@ -329,6 +326,64 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
                     onChange={handleAddPlatform}
                 />
             </Modal>
+
+
+            <Modal
+                title="Confirm Removal"
+                open={confirmRemove.open}
+                onCancel={() => setConfirmRemove({ open: false, pIndex: null })}
+                onOk={async () => {
+                    const pIndex = confirmRemove.pIndex;
+                    const removedPlatform = platforms[pIndex];
+
+                    // Remove from state
+                    const updatedPlatforms = platforms.filter((_, i) => i !== pIndex);
+                    setPlatforms(updatedPlatforms);
+
+                    // Also remove errors
+                    setErrors((prev) => {
+                        const newErrors = { ...prev };
+                        delete newErrors[pIndex];
+                        return newErrors;
+                    });
+
+                    setConfirmRemove({ open: false, pIndex: null });
+
+                    // Call Save API immediately to persist deletion
+                    if (contractId) {
+                        try {
+                            setSaving(true);
+                            const payload = updatedPlatforms.map((p) => ({
+                                providerid: p.id,
+                                providername: p.name,
+                                contentlinks: p.links.map((link) => ({ links: link }))
+                            }));
+
+                            await axios.post(
+                                "/user/upload/content-link",
+                                { p_contractid: contractId, p_contentlinkjson: payload },
+                                { headers: { Authorization: `Bearer ${token}` } }
+                            );
+
+                            
+                            toast.success(`${removedPlatform.name} removed successfully!`);
+                        } catch (error) {
+                            console.error(error);
+                            toast.error(error?.response?.data?.message || "Failed to remove platform.");
+                            // Optional: revert platform in case of API failure
+                            setPlatforms((prev) => [...prev, removedPlatform]);
+                        } finally {
+                            setSaving(false);
+                        }
+                    }
+                }}
+                okText="Yes, Remove"
+                cancelText="Cancel"
+                centered
+            >
+                <p>Are you sure you want to remove this platform? This action cannot be undone.</p>
+            </Modal>
+
         </div>
     );
 }
