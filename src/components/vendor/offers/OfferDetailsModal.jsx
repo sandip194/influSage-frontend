@@ -8,7 +8,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import AcceptOfferModal from "./models/AcceptOfferModal";
 
-const OfferDetailsModal = ({ visible, onClose, id, onStatusChange }) => {
+const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedApplication }) => {
     const { token } = useSelector((state) => state.auth);
     const navigate = useNavigate();
     const [offerDetails, setOfferDetails] = useState(null);
@@ -231,6 +231,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange }) => {
                     name: `${offerDetails?.firstname} ${offerDetails?.lastname}`,
                     applicationid: offerDetails?.applicationid,
                 }}
+                hasSelectedApplication={hasSelectedApplication}
             />
         </Modal >
     );

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Button, Typography, Modal, Spin } from "antd";
+import { Button, Typography, Modal, Spin, Empty, Skeleton } from "antd";
 import { RiAddLine } from "@remixicon/react";
 import ContractModal from "./ContractModal";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { safeNumber, safeText, safeArray } from "../../../App/safeAccess";
+import { toast } from "react-toastify";
 
 
 const { Title } = Typography;
@@ -96,64 +97,31 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         p_contenttypejson: values.deliverables,
       };
 
-      const response = await axios.post("/vendor/create-or-edit/contract", payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.post(
+        "/vendor/create-or-edit/contract",
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      if (response?.status == 200) {
-        const newContract = {
-          id: editingContract ? editingContract.id : `CONT-${contracts.length + 1}`,
-          influencerId: values.influencer,
-          contractStart: values.contractStart.format("DD MMM YYYY"),
-          contractEnd: values.contractEnd.format("DD MMM YYYY"),
-          campaignStart: values.campaignStart.format("DD MMM YYYY"),
-          campaignEnd: values.campaignEnd.format("DD MMM YYYY"),
-          deliverables: safeArray(values.deliverables).map((p) => ({
-            icon: safeText(p.iconpath),
-            provider: safeText(p.providername),
-            type: safeText(p.contenttypename),
-          })),
-          payment: `₹${safeNumber(values.payment).toLocaleString()}`,
-          notes: safeText(values.notes),
-          status: editingContract ? editingContract.status : "Pending",
-        };
+      if (response?.data?.p_status === true) {
+        toast.success(response.data.message || "Contract saved successfully.");
 
-        if (editingContract) {
-          setContracts((prev) =>
-            prev.map((c) => (c.id === editingContract.id ? newContract : c))
-          );
-          Modal.success({
-            title: "Contract Updated",
-            content: response.data.p_message || "Contract updated successfully.",
-          });
-        } else {
-          setContracts((prev) => [...prev, newContract]);
-          Modal.success({
-            title: "Contract Created",
-            content: response.data.p_message || "Contract created successfully.",
-          });
-        }
-
+        // CLOSE MODAL
         setEditingContract(null);
         setIsModalOpen(false);
 
-        setTimeout(() => {
-          fetchAllContracts();
-        }, 300);
+        // REFRESH FROM API ONLY
+        fetchAllContracts();
+
       } else {
-        Modal.error({
-          title: "Error",
-          content: response.data.p_message || "Failed to create/update contract.",
-        });
+        toast.error(response.data.message || "Failed to create/update contract.");
       }
     } catch (error) {
       console.error("API error:", error);
-      Modal.error({
-        title: "Error",
-        content: "Something went wrong while saving the contract.",
-      });
+      toast.error("Something went wrong while saving the contract.");
     }
   };
+
 
   return (
     <div className="bg-white rounded-2xl p-0">
@@ -172,8 +140,35 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-10">
-          <Spin size="large" />
+        // 🔵 ANT DESIGN LOADING SKELETON
+        <div className="p-6">
+          <Skeleton active paragraph={{ rows: 4 }} avatar />
+          <Skeleton active paragraph={{ rows: 4 }} avatar />
+        </div>
+      ) : contracts.length === 0 ? (
+        // 🟡 ANT DESIGN EMPTY STATE
+        <div className="flex flex-col items-center justify-center py-8">
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={
+              <span className="text-gray-500">
+                You haven't created any contracts for this campaign yet. Start by adding one below.
+              </span>
+            }
+
+          />
+          <Button
+            type="primary"
+            size="middle"
+            className="mt-1"
+            icon={<RiAddLine size={20} />}
+            onClick={() => {
+              setEditingContract(null);
+              setIsModalOpen(true);
+            }}
+          >
+            Create Contract
+          </Button>
         </div>
       ) : (
         <div className="space-y-4 mb-4">
