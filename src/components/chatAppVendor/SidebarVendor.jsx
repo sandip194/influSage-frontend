@@ -5,8 +5,10 @@ import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CloseCircleFilled } from "@ant-design/icons";
 import { Tooltip } from "antd";
+import { getSocket } from "../../sockets/socket";
 
 export default function SidebarVendor({ onSelectChat }) {
+  const socket = getSocket();
   const { token } = useSelector((state) => state.auth);
   const location = useLocation();
   const navigate = useNavigate();
@@ -92,19 +94,22 @@ export default function SidebarVendor({ onSelectChat }) {
     }
   }, [token]);
 
-  // ✅ keep your existing polling logic
   useEffect(() => {
-    fetchCampaigns();
+  if (!socket) return;
+  fetchCampaigns();
+  fetchUnreadMessages();
+
+  const handleIncoming = (msg) => {
     fetchUnreadMessages();
+    fetchCampaigns();
+  };
 
-    const unreadInterval = setInterval(fetchUnreadMessages, 3000);
-    const campaignsInterval = setInterval(fetchCampaigns, 3000);
+  socket.off("receiveChatMessage");
+  socket.on("receiveChatMessage", handleIncoming);
 
-    return () => {
-      clearInterval(unreadInterval);
-      clearInterval(campaignsInterval);
-    };
-  }, [fetchCampaigns, fetchUnreadMessages]);
+  return () => socket.off("receiveChatMessage", handleIncoming);
+}, [socket]);
+
 
   // ✅ useMemo for derived data
   const filteredInfluencers = useMemo(() => {
