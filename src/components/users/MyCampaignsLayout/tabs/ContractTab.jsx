@@ -26,7 +26,7 @@ const NoContractOffered = () => (
   </div>
 );
 
-const ContractTab = ({ campaignId, token, setCamContractId }) => {
+const ContractTab = ({ campaignId, token }) => {
 
   const [contract, setContract] = useState(null);
   const [contractStatus, setContractStatus] = useState(null);
@@ -52,7 +52,7 @@ const ContractTab = ({ campaignId, token, setCamContractId }) => {
         return;
       }
 
-      setCamContractId(api?.contractid)
+  
       // Map + Safe handling
       const mapped = {
         id: safeText(api.contractid),

@@ -295,7 +295,7 @@ const Browse = () => {
             campaigns={campaigns}
             loading={loading}
             handleCardClick={(id) => navigate(`/dashboard/browse/description/${id}`)}
-            handleSave={handleSave}
+            hand  leSave={handleSave}
           />
 
           <div className="mt-6 flex justify-center">
