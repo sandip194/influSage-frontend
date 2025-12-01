@@ -10,32 +10,37 @@ import 'swiper/css/navigation';
 import { useSelector } from "react-redux";
 
 const SkeletonCard = () => (
-  <div className="w-[240px] h-[300px] bg-gray-200 rounded-lg animate-pulse"></div>
+    <div className="w-[240px] h-[25px] bg-gray-200 rounded-lg animate-pulse"></div>
 );
 
 
 // ---------- Campaign Card ----------
 const CampaignCard = ({ campaign }) => {
     return (
-        <div className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-lg p-4 flex flex-col justify-between h-full">
+        <div className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-xl/30 hover:shadow-lg transition-transform  p-4 pb-3 flex flex-col justify-between mb-8 h-[250px]">
             <div className="flex items-center gap-3 mb-2">
                 <img
                     loading="lazy"
                     src={campaign.photopath}
                     alt={campaign.name}
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-12 h-12 rounded-full object-cover"
                 />
                 <Link
-                    to={`/campaign/${campaign.id}`}
+                    to={`/dashboard/browse/description/${campaign.id}`}
                     className="text-lg font-semibold text-gray-900 hover:text-blue-600"
                 >
                     {campaign.name}
                 </Link>
             </div>
 
-            <p className="text-sm text-gray-700 mb-4 line-clamp-2 flex-grow">
-                {campaign.description}
+            {/* Description */}
+            <p className="text-sm text-gray-700 mb-4 flex-grow">
+                {campaign.description.length > 50
+                    ? `${campaign.description.slice(0, 50)}...`
+                    : campaign.description
+                }
             </p>
+
 
             <div className="flex flex-wrap gap-1 mb-2 min-h-[20px]">
                 {campaign.campaigncategories?.map((tag, i) => (
@@ -53,7 +58,7 @@ const CampaignCard = ({ campaign }) => {
                     <p className="font-semibold text-gray-800">₹{campaign.estimatedbudget}</p>
                     <p className="text-xs text-gray-500">Budget</p>
                 </div>
-                <Link to={`/campaign/${campaign.id}`}>
+                <Link to={`/dashboard/browse/description/${campaign.id}`}>
                     <button className="px-3 py-1 bg-black text-white rounded-full text-sm hover:bg-gray-900">
                         View
                     </button>
@@ -90,13 +95,16 @@ const CampaignCarousel = () => {
     }, [getLimitedCampaigns]);
 
     return (
-        <div className="p-4">
+        <div className=" my-3 bg-white p-3 rounded-2xl">
+            <div className="p-2 mb-2">
+                <h2 className="text-lg sm:text-xl font-semibold">Browse Campaign</h2>
+            </div>
             <Swiper
                 spaceBetween={15}
                 slidesPerView="auto"
                 freeMode={true}
                 grabCursor={true}
-                modules={[FreeMode,  Autoplay]}
+                modules={[FreeMode, Autoplay]}
                 autoplay={{ delay: 3000, disableOnInteraction: true }}
                 className="pb-6"
                 breakpoints={{
@@ -113,7 +121,7 @@ const CampaignCarousel = () => {
                         </SwiperSlide>
                     ))
                     : campaigns.map((c) => (
-                        <SwiperSlide key={c.id}>
+                        <SwiperSlide key={c.id} style={{ height: "auto" }}>
                             <CampaignCard campaign={c} />
                         </SwiperSlide>
                     ))}

@@ -50,8 +50,8 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       budgetType: data.budgetType || "Fixed Price",
       budgetAmount: Number(data.estimatedbudget) || "", // ✅ Fix here
       currency: data.currency || "₹",
-      startDate: data.startdate ? dayjs(data.startdate, "DD-MM-YYYY") : null,
-      endDate: data.enddate ? dayjs(data.enddate, "DD-MM-YYYY") : null,
+      startDate: data.campaignstartdate ? dayjs(data.campaignstartdate, "DD-MM-YYYY") : null,
+      endDate: data.campaignenddate ? dayjs(data.campaignenddate, "DD-MM-YYYY") : null,
       applicationstartdate: data.applicationstartdate
         ? dayjs(data.applicationstartdate, "DD-MM-YYYY")
         : null,
