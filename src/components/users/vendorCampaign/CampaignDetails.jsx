@@ -193,11 +193,11 @@ const CampaignDetails = () => {
       navigate(`/vendor-dashboard/vendor-campaign/edit-campaign/${campaignDetails?.id}`);
     } else {
       setFormData({
-        startDate: campaignDetails?.requirements?.startdate
-          ? dayjs(campaignDetails.requirements.startdate, "DD-MM-YYYY")
+        startDate: campaignDetails?.requirements?.campaignstartdate
+          ? dayjs(campaignDetails.requirements.campaignstartdate, "DD-MM-YYYY")
           : null,
-        endDate: campaignDetails?.requirements?.enddate
-          ? dayjs(campaignDetails.requirements.enddate, "DD-MM-YYYY")
+        endDate: campaignDetails?.requirements?.campaignenddate
+          ? dayjs(campaignDetails.requirements.campaignenddate, "DD-MM-YYYY")
           : null,
       });
 
@@ -508,7 +508,7 @@ const CampaignDetails = () => {
                   )}
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="Contract" key="contract">
+                <Tabs.TabPane tab="Contract" key="contract" disabled={!campaignDetails?.iscontracttab}>
                   <VendorContract
                     campaignStart={campaignDetails?.requirements.campaignstartdate}
                     campaignEnd={campaignDetails?.requirements.campaignenddate}
@@ -516,7 +516,7 @@ const CampaignDetails = () => {
                   />
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="Content Links" key="contentLinks">
+                <Tabs.TabPane tab="Content Links" key="contentLinks" disabled={!campaignDetails?.iscontracttab}>
                   <VendorContentLinksTab campaignId={campaignId} />
                 </Tabs.TabPane>
 
@@ -818,7 +818,23 @@ const CampaignDetails = () => {
               format="DD-MM-YYYY"
               placeholder="Start Date"
               value={formData.startDate}
-              disabledDate={(current) => current && current.isBefore(dayjs().startOf("day"))}
+              disabledDate={(current) => {
+                if (!current) return false;
+
+                // Convert current to dayjs to be safe
+                const currentDate = dayjs(current);
+
+                const today = dayjs().startOf("day");
+                const appEndDate = campaignDetails?.applicationenddate
+                  ? dayjs(campaignDetails.applicationenddate, "DD-MM-YYYY")
+                  : today;
+
+                const minDate = today.isAfter(appEndDate) ? today : appEndDate;
+
+                // Disable all dates on or before minDate
+                return currentDate.isSame(minDate, "day") || currentDate.isBefore(minDate, "day");
+              }}
+
               onChange={(date) => handleChange("startDate", date)}
             />
             {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>}
@@ -832,12 +848,21 @@ const CampaignDetails = () => {
               format="DD-MM-YYYY"
               placeholder="End Date"
               value={formData.endDate}
-              disabledDate={(current) => current && formData.startDate && current.isBefore(formData.startDate)}
+              disabledDate={(current) => {
+                if (!current) return false;
+
+                const currentDate = dayjs(current);
+                // Disable dates before campaign start date
+                return formData.startDate && currentDate.isBefore(formData.startDate, "day");
+              }}
               onChange={(date) => handleChange("endDate", date)}
             />
             {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>}
           </div>
+
         </div>
+
+
 
         <div className="flex justify-end gap-3 mt-4">
           <button

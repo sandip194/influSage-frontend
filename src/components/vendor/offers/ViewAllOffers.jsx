@@ -30,6 +30,8 @@ const ViewAllOffers = ({ campaignData }) => {
   const [totalOffers, setTotalOffers] = useState(0);
   const [showInfluencerModal, setShowInfluencerModal] = useState(false);
   const [selectedInfluencerId, setSelectedInfluencerId] = useState(null);
+  const [hasSelectedApplication, setHasSelectedApplication] = useState(false);
+
 
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [selectedOfferId, setSelectedOfferId] = useState(null);
@@ -121,20 +123,24 @@ const ViewAllOffers = ({ campaignData }) => {
       setApplications(records)
       setTotalOffers(totalcount)
 
+      // ✅ Check if any application is "Selected"
+      const hasSelected = records.some(app => app.status === "Selected");
+      setHasSelectedApplication(hasSelected);
+
     } catch (error) {
       console.error(error)
     } finally {
       setLoading(false)
     }
-  }, [pagenumber, pagesize, searchTerm, token])
+  }, [pagenumber, pagesize, searchTerm, token, campaignData?.id])
 
   useEffect(() => {
     getApplications()
   }, [getApplications])
 
   const refreshApplications = () => {
-  getApplications(); // already defined in your component
-};
+    getApplications(); // already defined in your component
+  };
 
 
   return (
@@ -326,6 +332,7 @@ const ViewAllOffers = ({ campaignData }) => {
           setSelectedOfferId(null);
         }}
         onStatusChange={refreshApplications}
+         hasSelectedApplication={hasSelectedApplication} 
       />
 
     </div>
