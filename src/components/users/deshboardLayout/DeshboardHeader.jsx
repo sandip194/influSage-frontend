@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../features/auth/authSlice";
+import { getSocket } from "../../../sockets/socket";
 
 
 
@@ -33,9 +34,10 @@ import MessageDropdown from "./MessageDropdown";
 const { Text } = Typography;
 
 const DeshboardHeader = ({ toggleSidebar }) => {
+  const socket = getSocket();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { token, role } = useSelector((state) => state.auth);
+  const { token, role, userId } = useSelector((state) => state.auth);
 
   const [notificationDropdownVisible, setNotificationDropdownVisible] = useState(false);
   const [messageDropdownVisible, setMessageDropdownVisible] = useState(false);
@@ -124,6 +126,39 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     [token, initialNotificationsFetched]
   );
 
+  useEffect(() => {
+  if (!socket || !token) return;
+
+  const handler = (ntf) => {
+    console.log("📩 REAL-TIME NOTIFICATION RECEIVED:", ntf);
+
+    const list = Array.isArray(ntf) ? ntf : ntf ? [ntf] : [];
+    if (list.length === 0) return;
+
+    const formatted = list.map((n) => ({
+      id: n.notificationid,
+      title: n.title,
+      message: n.description,
+      isRead: false,
+      time: new Date(n.createddate).toLocaleString(),
+    }));
+
+    setUnreadNotifications((prev) => [...formatted, ...prev]);
+    setHasUnreadNotifications(true);
+  };
+
+  socket.on("receiveNotification", handler);
+  return () => socket.off("receiveNotification", handler);
+}, [socket, token]);
+
+useEffect(() => {
+  if (!socket || !token || !userId) return;
+
+  socket.emit("register", userId);
+  console.log("🟢 Socket registered with user:", userId);
+}, [socket, token, userId]);
+
+
   // ======================================================
   // 🧭 LOGOUT
   // ======================================================
@@ -159,7 +194,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
   useEffect(() => {
     if (!token) return;
-    setLoadingMessages(true);
+    setLoadingMessages(true);          
     fetchUnreadMessages();
     const interval = setInterval(fetchUnreadMessages, 3000);
     return () => clearInterval(interval);
@@ -172,13 +207,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   // ======================================================
   useEffect(() => {
     if (!token) return;
-
     fetchNotifications({ mode: "unread" });
-    const interval = setInterval(() => {
-      fetchNotifications({ mode: "unread" });
-    }, 3000);
-
-    return () => clearInterval(interval);
   }, [token, fetchNotifications]);
 
   // ======================================================
@@ -337,7 +366,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
           open={notificationDropdownVisible}
           onOpenChange={(open) => {
             setNotificationDropdownVisible(open);
-            if (open) setHasUnreadNotifications(false);
+            // if (open) setHasUnreadNotifications(false);
           }}
           placement={isMobile ? "bottom" : "bottomRight"}
           trigger={["click"]}
