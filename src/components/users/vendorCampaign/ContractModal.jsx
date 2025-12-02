@@ -99,8 +99,8 @@ export default function ContractModal({
                     const key = String(item.providerid);
                     if (!acc[key]) acc[key] = [];
                     acc[key].push({
-                        id: item.contenttypeid
-                            ? Number(item.contenttypeid)
+                        id: item.providercontenttypeid
+                            ? Number(item.providercontenttypeid)
                             : Number(`${item.providerid}${index}`),
                         contenttypename: item.contenttypename || "Unknown",
                         providerid: item.providerid,

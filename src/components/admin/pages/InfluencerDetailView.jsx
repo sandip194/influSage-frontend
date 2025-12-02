@@ -54,11 +54,12 @@ const InfluencerDetailView = () => {
 
     const fetchBlockReasons = async () => {
         try {
-            const res = await axios.get("/admin/dashboard/campaign-block-reason", {
+            const res = await axios.get("/admin/dashboard/user-block-reason", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setBlockReasonList(safeArray(res?.data?.data));
         } catch (error) {
+            console.error(error)
             toast.error("Failed to load block reasons");
         }
     };

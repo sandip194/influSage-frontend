@@ -17,7 +17,7 @@ const SkeletonCard = () => (
 // ---------- Campaign Card ----------
 const CampaignCard = ({ campaign }) => {
     return (
-        <div className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-xl/30 hover:shadow-lg transition-transform  p-4 pb-3 flex flex-col justify-between mb-8 h-[250px]">
+        <div className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-xl/30 hover:shadow-lg transition-transform  p-4 pb-3 flex flex-col justify-between mb-8 h-64">
             <div className="flex items-center gap-3 mb-2">
                 <img
                     loading="lazy"

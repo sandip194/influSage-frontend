@@ -29,8 +29,8 @@ const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
             acc[item.providername] = [];
           }
           acc[item.providername].push({
-            id: item.contenttypeid
-              ? Number(item.contenttypeid)
+            id: item.providercontenttypeid
+              ? Number(item.providercontenttypeid)
               : Number(`${item.providerid}${index}`),
             label: item.contenttypename || "Unknown",
             providerid: item.providerid,

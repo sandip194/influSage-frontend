@@ -120,7 +120,7 @@ const UserTableLayout = () => {
 
     const fetchBlockResons = async () => {
         try {
-            const res = await axios.get("/admin/dashboard/campaign-block-reason", {
+            const res = await axios.get("/admin/dashboard/user-block-reason", {
                 headers: { Authorization: `Bearer ${token}` },
             })
 

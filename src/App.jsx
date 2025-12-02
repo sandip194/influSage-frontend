@@ -69,6 +69,7 @@ import ComingSoon from './pages/commonPages/ComingSoon';
 import InfluencerMessagePage  from './components/influencerChat/ConversationPage';
 import AdminMessagePage from './components/admin/adminChat/AdminConversationPage';
 import VendorConversationPage  from './components/vendorChat/VendorConversationPage';
+import BrandAnalyticsDashboard from './components/vendor/analytics/BrandAnalyticsDashboard';
 
 
 const App = () => {
@@ -182,6 +183,8 @@ const App = () => {
 
                                                                 <Route path='messages' element={<ChatAppPageVendor />} />
 
+                                                                <Route path='analytics' element={<BrandAnalyticsDashboard />} />
+
 
                                                                 {/*  -- Removed From Sidebar bcs We Replace this things in Campaign Details Page
                                                                 
@@ -200,7 +203,6 @@ const App = () => {
 
 
                                                                 <Route path="payment" element={<ComingSoon />} />
-                                                                <Route path="analytics" element={<ComingSoon />} />
                                                                 <Route path="setting" element={<ComingSoon />} />
 
 

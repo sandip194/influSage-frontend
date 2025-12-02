@@ -330,7 +330,7 @@ const CampaignTableLayout = () => {
             flex gap-2
             w-full
             sm:w-auto sm:static sm:gap-2
-            fixed bottom-0 left-0 bg-white p-3 shadow-md justify-center z-30
+            fixed bottom-0 left-0 bg-white p-3 shadow-md justify-center z-10
             sm:shadow-none sm:bg-transparent sm:p-0
           "
         >

@@ -4,102 +4,128 @@ import {
   RiStackLine,
   RiArrowUpLine,
   RiArrowDownLine,
-} from '@remixicon/react';
-import EarnChart from './EarnChart';
-import ImpressionChart from './ImpressionChart';
-import Audience from './Audience';
-import TopContent from './TopContent';
-import Table from './Table';
+} from "@remixicon/react";
 
-const AnalyticsLayout = ({ balance = 22765, thisMonth = 2765 }) => {
-  const contentData = [
-    { type: "Story", followers: 30, nonFollowers: 21.1 },
-    { type: "Reel", followers: 25, nonFollowers: 26.1 },
-    { type: "Video", followers: 40, nonFollowers: 11.1 },
-    { type: "Short", followers: 10, nonFollowers: 41.1 },
-  ];
+import PerformanceChart from "./PerformanceChart";
+import ImpressionInsights from "./ImpressionInsights";
+import EngagementGauge from "./EngagementGauge";
+import TopContentChart from "./TopContentChart";
+import CampaignAnalytics from "./CampaignAnalytics";
+import Audience from "./Audience";
+import Table from "./Table";
+import { PlatformBreakdown } from "./PlatformBreakdown";
+import { CampaignContribution } from "./CampaignContribution";
 
-  const stats = [
+const AnalyticsLayout = () => {
+  /** -------------------------
+   * STATIC KPI + CHART DATA
+   --------------------------*/
+  const globalStats = [
     {
-      label: "Total Earnings",
-      value: "$2,765",
-      change: "78.3%",
+      label: "Total Views",
+      value: "152,930",
+      change: "12%",
       isPositive: true,
       icon: <RiStackLine size={20} />,
     },
     {
-      label: "Campaigns Completed",
-      value: "14",
-      change: "25.6%",
-      isPositive: false,
+      label: "Total Likes",
+      value: "12,483",
+      change: "5%",
+      isPositive: true,
       icon: <RiExchange2Line size={20} />,
     },
     {
-      label: "Proposals Sent",
-      value: "125",
-      change: "78.3%",
+      label: "Total Comments",
+      value: "1,394",
+      change: "2%",
+      isPositive: false,
+      icon: <RiCheckLine size={20} />,
+    },
+    {
+      label: "Total Shares",
+      value: "832",
+      change: "4%",
+      isPositive: true,
+      icon: <RiStackLine size={20} />,
+    },
+    {
+      label: "Content Pieces",
+      value: "14",
+      change: "25%",
       isPositive: true,
       icon: <RiCheckLine size={20} />,
     },
+    {
+      label: "Avg Engagement Rate",
+      value: "4.3%",
+      change: "1.8%",
+      isPositive: true,
+      icon: <RiExchange2Line size={20} />,
+    },
   ];
 
-  const followers = [
+
+
+  const campaignList = [
+    "GlowSkincare Launch",
+    "FitPro Campaign",
+    "Clothify Drops",
+  ];
+
+  const contentList = [
     {
       platform: "Instagram",
-      username: "@instagramusername",
-      count: "72.2k",
-      icon: "https://cdn-icons-png.flaticon.com/512/2111/2111463.png",
+      type: "Reel",
+      date: "12 Feb 2025",
+      caption: "Trying the new Glow Serum…",
+      views: 12593,
+      likes: 1204,
+      comments: 82,
+      thumbnail:
+        "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
     },
     {
-      platform: "YouTube",
-      username: "@youtubeusername",
-      count: "21.2k",
-      icon: "https://cdn-icons-png.flaticon.com/512/1384/1384060.png",
-    },
-    {
-      platform: "Facebook",
-      username: "@facebookusername",
-      count: "25.2k",
-      icon: "https://cdn-icons-png.flaticon.com/512/1384/1384053.png",
-    },
-    {
-      platform: "Tiktok",
-      username: "@tiktokusername",
-      count: "1.2k",
-      icon: "https://cdn-icons-png.flaticon.com/512/3046/3046121.png",
+      platform: "TikTok",
+      type: "Video",
+      date: "8 Feb 2025",
+      caption: "Unboxing the new FitPro pack!",
+      views: 30021,
+      likes: 3100,
+      comments: 210,
+      thumbnail:
+        "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
     },
   ];
 
   return (
     <div className="w-full text-sm overflow-x-hidden">
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Analytics</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-1">
+        Analytics Dashboard
+      </h2>
       <p className="mb-6 text-gray-600 text-sm">
-        You can view your analytics here
+        View your overall performance and content insights.
       </p>
 
-      {/* Stats cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {stats.map(({ label, value, change, isPositive, icon }, idx) => (
+      {/* 🌟 GLOBAL KPIs ROW */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        {globalStats.map(({ label, value, change, isPositive, icon }, idx) => (
           <div
             key={idx}
-            className="bg-white p-5 rounded-2xl flex items-center space-x-4"
+            className="bg-white p-5 rounded-2xl shadow-sm  flex items-center space-x-4"
           >
-            {/* Circle Icon */}
-            <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#0D132D] text-white flex-shrink-0">
+            <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#0D132D] text-white">
               {icon}
             </div>
 
-            {/* Text Section */}
             <div className="flex flex-col">
-              <p className="text-xs sm:text-sm text-gray-500">{label}</p>
+              <p className="text-xs text-gray-500">{label}</p>
+
               <div className="flex items-center space-x-2">
-                <p className="text-lg sm:text-xl font-bold text-[#0D132D]">
-                  {value}
-                </p>
+                <p className="text-lg font-bold text-[#0D132D]">{value}</p>
                 <span
-                  className={`flex items-center text-xs font-medium ${
-                    isPositive ? "text-green-500" : "text-red-500"
-                  }`}
+                  className={`flex items-center text-xs font-medium ${isPositive ? "text-green-500" : "text-red-500"
+                    }`}
                 >
                   {isPositive ? (
                     <RiArrowUpLine size={14} />
@@ -114,117 +140,107 @@ const AnalyticsLayout = ({ balance = 22765, thisMonth = 2765 }) => {
         ))}
       </div>
 
-      {/* Chart */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-3">
-        <div className="col-span-1 md:col-span-2">
-          <EarnChart />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        <PlatformBreakdown />
+        <CampaignContribution />
+      </div>
+
+
+      {/* 📊 CHARTS (Line + Bar + Gauge) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-5">
+        {/* Performance Line Chart */}
+        <div className="col-span-1 md:col-span-2 bg-white rounded-2xl p-5 shadow-sm ">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">
+            Performance Over Time
+          </h2>
+          <PerformanceChart />
         </div>
 
-        {/* Followers Section */}
-        <div className="bg-white rounded-2xl p-5 w-full">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Followers</h2>
-          <div className="space-y-4">
-            {followers.map(({ platform, username, count, icon }, idx) => (
-              <div key={idx} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <img
-                    src={icon}
-                    alt={platform}
-                    className="w-10 h-10 rounded-full"
-                  />
-                  <div className="flex flex-col">
-                    <p className="text-sm font-semibold text-gray-800">
-                      {platform}
-                    </p>
-                    <p className="text-xs text-gray-500">{username}</p>
-                  </div>
-                </div>
-                <p className="text-sm font-bold text-[#0D132D]">{count}</p>
-              </div>
-            ))}
-          </div>
+        {/* Gauge Card */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm flex items-center justify-center">
+          <EngagementGauge
+            views={152930}
+            likes={12483}
+            comments={1394}
+            shares={832}
+          />
         </div>
 
-        <div className="col-span-1 md:col-span-2">
-          <ImpressionChart />
-        </div>
-
-        <div className="bg-white rounded-2xl p-5 w-full">
-          {/* Header */}
-          <div className="ustify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">
-              By content type
-            </h2>
-            <div className="flex space-x-4 text-xs text-gray-600">
-              <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                <span>Followers</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 bg-blue-900 rounded-full"></span>
-                <span>Non Followers</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {contentData.map(({ type, followers, nonFollowers }, idx) => {
-              const total = followers + nonFollowers;
-              return (
-                <div key={idx} className="flex items-center justify-between">
-                  <div className="flex-1 mr-3">
-                    <p className="text-sm text-gray-700 mb-1">{type}</p>
-                    <div className="w-full bg-gray-200 rounded-full h-2 flex">
-                      <div
-                        className="h-2 rounded-l-full bg-blue-500"
-                        style={{ width: `${(followers / total) * 100}%` }}
-                      ></div>
-                      <div
-                        className="h-2 rounded-r-full bg-blue-900"
-                        style={{ width: `${(nonFollowers / total) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  <p className="text-sm font-semibold text-gray-800">
-                    {total.toFixed(1)}%
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+        {/* Impression Chart */}
+        <div className="col-span-1 md:col-span-3 bg-white rounded-2xl p-5 mt-4 shadow-sm ">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">
+            Impression Insights
+          </h2>
+          <ImpressionInsights />
         </div>
       </div>
 
-      <div className="col-span-1 md:col-span-2 my-4">
+      {/* 🎯 CAMPAIGN INSIGHTS */}
+      <div className="bg-white rounded-2xl p-5 w-full shadow-sm mt-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-bold text-gray-900">Campaign Insights</h2>
+
+          <select className=" rounded-full px-3 py-1.5 text-sm text-gray-600 focus:outline-none">
+            {campaignList.map((item, i) => (
+              <option key={i}>{item}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mt-5">
+          <CampaignAnalytics />
+        </div>
+      </div>
+
+      
+
+      {/* 🔥 Top Content (Replaced with Chart) */}
+      <div className="bg-white p-5 rounded-2xl shadow-sm mt-6">
+        <TopContentChart />
+      </div>
+
+      {/* 🖼 Content Cards */}
+      <div className="bg-white rounded-2xl p-5 w-full shadow-sm mt-6">
+        <h2 className="text-lg font-bold text-gray-900 mb-4">Recent Content</h2>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          {contentList.map((post, idx) => (
+            <div key={idx} className="bg-gray-50 rounded-xl p-4 shadow-sm">
+              <img
+                src={post.thumbnail}
+                alt="Thumbnail"
+                className="w-full h-40 object-cover rounded-lg mb-3"
+              />
+
+              <p className="text-xs text-gray-500">
+                {post.platform} • {post.type}
+              </p>
+
+              <p className="text-sm font-semibold text-gray-800">
+                Posted on {post.date}
+              </p>
+
+              <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                {post.caption}
+              </p>
+
+              <div className="flex justify-between mt-3 text-sm font-medium text-gray-800">
+                <p>👁 {post.views.toLocaleString()}</p>
+                <p>❤️ {post.likes.toLocaleString()}</p>
+                <p>💬 {post.comments.toLocaleString()}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 👥 Audience */}
+      <div className="my-4">
         <Audience />
       </div>
 
-      <div className="col-span-1 md:col-span-2 my-4">
-        <TopContent />
-      </div>
-
-      <div className="bg-white rounded-2xl p-4 w-full">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
-          <h2 className="text-lg font-bold text-gray-900">
-            Content Insight
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            <select className="border rounded-full px-3 py-1.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
-              <option>Instagram</option>
-              <option>Facebook</option>
-              <option>TikTok</option>
-            </select>
-            <select className="border rounded-full px-3 py-1.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
-              <option>Monthly</option>
-              <option>Weekly</option>
-              <option>Yearly</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div className="col-span-1 md:col-span-2 my-4">
+      {/* Table */}
+      <div className="my-6">
         <Table />
       </div>
     </div>
