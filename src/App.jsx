@@ -70,6 +70,7 @@ import InfluencerMessagePage  from './components/influencerChat/ConversationPage
 import AdminMessagePage from './components/admin/adminChat/AdminConversationPage';
 import VendorConversationPage  from './components/vendorChat/VendorConversationPage';
 import BrandAnalyticsDashboard from './components/vendor/analytics/BrandAnalyticsDashboard';
+import AdminContentLinks from './components/admin/pages/AdminContentLinks';
 
 
 const App = () => {
@@ -221,6 +222,7 @@ const App = () => {
                                                         <Route path='influencers/details/:userId' element={<InfluencerDetailView />} />
                                                         <Route path='campaigns' element={<CampaignRequests />} />
                                                         <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView />} />
+                                                        <Route path='analytics' element={<AdminContentLinks />} />
                                                         <Route path="settings" element={<ComingSoon />} />
                                                         <Route path='support' element={<AdminMessagePage />} />
                                                 </Route>
