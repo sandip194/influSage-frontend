@@ -62,27 +62,13 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   // 🛠️ CLEAN UNIFIED NOTIFICATION API HANDLER
   // ======================================================
   const fetchNotifications = useCallback(
-    async ({ mode = "unread" } = {}) => {
+    async () => {
       if (!token) return;
-
-      /**
-       * mode = "unread"       → polling unread notifications
-       * mode = "all"          → full list
-       * mode = "last-three"   → modal open → last 3 unread + mark read
-       */
-
-      const params =
-        mode === "all"
-          ? { limitedData: false }
-          : mode === "last-three"
-            ? { limitedData: true }
-            : { limitedData: null }; // unread polling
-
       try {
-        if (mode !== "unread") setLoadingNotifications(true);
+       
 
         const res = await axios.get("/new/getallnotification", {
-          params,
+          params : {limitedData : false},
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -96,46 +82,39 @@ const DeshboardHeader = ({ toggleSidebar }) => {
           time: new Date(item.createddate).toLocaleString(),
         }));
 
-        if (mode === "unread") {
-          setUnreadNotifications((prev) => {
-            const prevStr = JSON.stringify(prev);
-            const newStr = JSON.stringify(formatted);
-            return prevStr !== newStr ? formatted : prev;
-          });
-          setHasUnreadNotifications(formatted.length > 0);
-          if (!initialNotificationsFetched) setInitialNotificationsFetched(true);
-        }
-
-        if (mode === "all") {
-          setAllNotifications(formatted);
-        }
-
-        if (mode === "last-three") {
-          setAllNotifications(formatted);
-
-          // Clear unread notifications (backend marks read)
-          setUnreadNotifications([]);
-          setHasUnreadNotifications(false);
-        }
+       
       } catch (error) {
         console.error("Error fetching notifications:", error);
-      } finally {
-        if (mode !== "unread") setLoadingNotifications(false);
       }
     },
     [token, initialNotificationsFetched]
   );
 
-  useEffect(() => {
-  if (!socket || !token) return;
+  
+useEffect(() => {
+  if (!socket || !token || !userId) return;
+
+  socket.on("connect", () => {
+    console.log("⚡ SOCKET CONNECTED:", socket.id);
+
+    socket.emit("joinUserRoom", userId);
+    console.log("🔗 Joined Notification Room:", `user_${userId}`);
+  });
+
+  return () => socket.off("connect");
+}, [socket, token, userId]);
+
+ useEffect(() => {
+  if (!socket) return;
 
   const handler = (ntf) => {
+    console.log("hellosocket")
     console.log("📩 REAL-TIME NOTIFICATION RECEIVED:", ntf);
 
     const list = Array.isArray(ntf) ? ntf : ntf ? [ntf] : [];
-    if (list.length === 0) return;
+    if (!list.length) return;
 
-    const formatted = list.map((n) => ({
+    const formatted = list.map(n => ({
       id: n.notificationid,
       title: n.title,
       message: n.description,
@@ -143,20 +122,15 @@ const DeshboardHeader = ({ toggleSidebar }) => {
       time: new Date(n.createddate).toLocaleString(),
     }));
 
-    setUnreadNotifications((prev) => [...formatted, ...prev]);
+    setUnreadNotifications(prev => [...formatted, ...prev]);
     setHasUnreadNotifications(true);
   };
 
   socket.on("receiveNotification", handler);
+
   return () => socket.off("receiveNotification", handler);
-}, [socket, token]);
+}, [socket]);
 
-useEffect(() => {
-  if (!socket || !token || !userId) return;
-
-  socket.emit("register", userId);
-  console.log("🟢 Socket registered with user:", userId);
-}, [socket, token, userId]);
 
 
   // ======================================================
@@ -205,28 +179,28 @@ useEffect(() => {
   // ======================================================
   // 🕒 POLLING UNREAD NOTIFICATIONS
   // ======================================================
-  useEffect(() => {
-    if (!token) return;
-    fetchNotifications({ mode: "unread" });
-  }, [token, fetchNotifications]);
+  // useEffect(() => {
+  //   if (!token) return;
+  //   fetchNotifications({ mode: "unread" });
+  // }, [token, fetchNotifications]);
 
   // ======================================================
   // GET ALL NOTIFICATIONS
   // ======================================================
-  useEffect(() => {
-    if (modalOpen) {
-      fetchNotifications({ mode: "all" });
-    }
-  }, [modalOpen, fetchNotifications]);
+  // useEffect(() => {
+  //   if (modalOpen) {
+  //     fetchNotifications({ mode: "all" });
+  //   }
+  // }, [modalOpen, fetchNotifications]);
 
   // ======================================================
   // 📜 WHEN MODAL OPENS → FETCH LAST 3 UNREAD (mark read)
   // ======================================================
-  useEffect(() => {
-    if (notificationDropdownVisible) {
-      fetchNotifications({ mode: "last-three" });
-    }
-  }, [notificationDropdownVisible, fetchNotifications]);
+  // useEffect(() => {
+  //   if (notificationDropdownVisible) {
+  //     fetchNotifications({ mode: "last-three" });
+  //   }
+  // }, [notificationDropdownVisible, fetchNotifications]);
 
   const memoizedNotifications = useMemo(
     () => unreadNotifications,
@@ -376,7 +350,7 @@ useEffect(() => {
               closeDropdown={() => setNotificationDropdownVisible(false)}
               onViewAll={() => setModalOpen(true)}
               onUnreadChange={setHasUnreadNotifications}
-              notifications={memoizedNotifications}
+              notifications={fetchNotifications}
               loading={!initialNotificationsFetched || loadingNotifications}
             />
           }

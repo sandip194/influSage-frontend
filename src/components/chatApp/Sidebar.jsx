@@ -60,11 +60,12 @@ export default function Sidebar({ onSelectChat }) {
   };
 }, [socket, token, search]);
 
-
-  // check if this campaign/vendor has an unread message
- const hasUnreadMessage = (vendor) => {
+const hasUnreadMessage = (vendor) => {
   if (!vendor) return false;
-  return vendor.readbyinfluencer === false || vendor.readbyinfluencer === null;
+  if (!vendor.lastmessage || vendor.lastmessage === null) {
+    return false;
+  }
+  return vendor.readbyinfluencer === false;
 };
 
   return (

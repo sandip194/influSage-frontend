@@ -27,21 +27,28 @@ import "primeicons/primeicons.css";
 
 // ⏱️ Consistent formatTime function
 const formatTime = (timestamp) => {
-  const date = new Date(timestamp);
+  if (!timestamp) return "Just now";
+
+  const parsed = new Date(timestamp);
+
+  if (isNaN(parsed.getTime())) {
+    return "Just now";
+  }
+
   const now = new Date();
-  const diffMs = now - date;
+  const diffMs = now - parsed;
   const diffMins = Math.floor(diffMs / 60000);
 
   if (diffMins < 1) return "Just now";
   if (diffMins < 60) return `${diffMins} min ago`;
   if (diffMins < 1440) {
-    return date.toLocaleTimeString([], {
+    return parsed.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
   }
-  return date.toLocaleDateString();
+  return parsed.toLocaleDateString();
 };
 
 /* 🧹 Unescape escaped HTML */
@@ -720,5 +727,3 @@ export default function ChatMessages({
     </div>
   );
 }
-
-

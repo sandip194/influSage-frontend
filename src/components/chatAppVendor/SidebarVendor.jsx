@@ -205,12 +205,15 @@ export default function SidebarVendor({ onSelectChat }) {
           {campaigns?.map((campaign) => {
             const isSelected =
               selectedCampaign?.campaignid === campaign.campaignid;
-            const hasUnread = unreadMessages.some(
-              (msg) =>
-                campaign.influencers?.some(
-                  (inf) => String(inf.influencerid) === String(msg.userid)
-                ) && msg.readbyvendor === false
-            );
+            const hasUnread = campaign.influencers?.some((inf) => {
+              const msg = unreadMessages.find(
+                (m) => String(m.userid) === String(inf.influencerid)
+              );
+              if (!inf.lastmessage || inf.lastmessage === null) {
+                return false;
+              }
+              return msg && msg.readbyvendor === false;
+            });
 
             return (
               <div
@@ -290,11 +293,15 @@ export default function SidebarVendor({ onSelectChat }) {
           {filteredInfluencers?.length > 0 ? (
             filteredInfluencers.map((inf) => {
               const isSelected = selectedInfluencer === inf.influencerid;
-              const unread = unreadMessages.some(
-                (msg) =>
-                  String(msg.userid) === String(inf.influencerid) &&
-                  msg.readbyvendor === false
+              const unread = (() => {
+              const msg = unreadMessages.find(
+                (m) => String(m.userid) === String(inf.influencerid)
               );
+              if (!inf.lastmessage || inf.lastmessage === null) {
+                return false;
+              }
+              return msg && msg.readbyvendor === false;
+            })();
 
               return (
                 <div

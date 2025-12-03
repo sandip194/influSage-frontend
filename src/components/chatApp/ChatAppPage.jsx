@@ -46,10 +46,25 @@ export default function ChatAppPage() {
   useEffect(() => {
     if (!socket) return;
 
-    const handleReceiveMessage = (msg) => {
-      dispatch(addMessage(msg));
-      setRefreshKey((prev) => prev + 1);
-    };
+   const handleReceiveMessage = (msg) => {
+  // console.log("RAW SOCKET MSG:", msg);
+
+  const isMyMessage =
+    String(msg.roleid) === String(role) ||
+    String(msg.userid) === String(userId);
+
+  const normalized = {
+    id: msg.messageid || msg.id,
+    content: msg.message,
+    senderId: msg.userid,
+    roleId: msg.roleid,
+    file: msg.filepaths?.[0] || "",
+    replyId: msg.replyid || null,
+    time: msg.time || new Date().toISOString(),
+  };
+  dispatch(addMessage(normalized));
+  setRefreshKey(prev => prev + 1);
+};
 
     socket.on("receiveMessage", handleReceiveMessage);
     return () => {

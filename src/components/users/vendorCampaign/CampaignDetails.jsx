@@ -26,6 +26,7 @@ import dayjs from 'dayjs';
 import VendorContract from './VendorContract';
 import ViewAllOffers from '../../vendor/offers/ViewAllOffers';
 import VendorContentLinksTab from './VendorContentLinksTab';
+import VendorFeedbackModal from "./FeedbackForm";
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
@@ -55,6 +56,8 @@ const CampaignDetails = () => {
   // const [isModalVisible, setIsModalVisible] = useState(false);
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   // const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
+  const [feedbackModal, setFeedbackModal] = useState(false);
+  const [selectedInfluencer, setSelectedInfluencer] = useState(null);
 
   const getCampaignDetails = async () => {
     try {
@@ -411,6 +414,16 @@ const CampaignDetails = () => {
                     }`}
                 >
                   Cancel Campaign
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // setSelectedInfluencer(influencer);
+                    setFeedbackModal(true);
+                  }}
+                  className="mt-3 px-4 py-2 bg-[#0f122f] text-white rounded-full text-sm"
+                >
+                  Send Feedback
                 </button>
               </div>
             </div>
@@ -880,6 +893,12 @@ const CampaignDetails = () => {
         </div>
       </Modal>
 
+      {feedbackModal && (
+            <FeedbackForm
+              influencer={selectedInfluencer}
+              onClose={() => setFeedbackModal(false)}
+            />
+          )}
     </div>
   );
 };
