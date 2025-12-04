@@ -26,7 +26,7 @@ import dayjs from 'dayjs';
 import VendorContract from './VendorContract';
 import ViewAllOffers from '../../vendor/offers/ViewAllOffers';
 import VendorContentLinksTab from './VendorContentLinksTab';
-import VendorFeedbackModal from "./FeedbackForm";
+import FeedbackForm from "./FeedbackForm";
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
@@ -415,16 +415,18 @@ const CampaignDetails = () => {
                 >
                   Cancel Campaign
                 </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // setSelectedInfluencer(influencer);
-                    setFeedbackModal(true);
-                  }}
-                  className="mt-3 px-4 py-2 bg-[#0f122f] text-white rounded-full text-sm"
-                >
-                  Send Feedback
-                </button>
+                {campaignDetails?.isfeedback === true && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedInfluencer(null);
+                      setFeedbackModal(true);
+                    }}
+                    className="bg-[#0f122f] text-white px-6 py-2 rounded-full border border-[#0f122f] font-semibold hover:bg-[#1a1d4f] transition w-full sm:w-auto"
+                  >
+                    Send Feedback
+                  </button>
+                )}
               </div>
             </div>
 
@@ -895,6 +897,8 @@ const CampaignDetails = () => {
 
       {feedbackModal && (
             <FeedbackForm
+              campaignId={campaignId}
+              vendorId={campaignDetails?.vendorid}
               influencer={selectedInfluencer}
               onClose={() => setFeedbackModal(false)}
             />

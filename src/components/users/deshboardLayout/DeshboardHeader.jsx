@@ -58,37 +58,34 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
   const basePath = role === 1 ? "/dashboard" : "/vendor-dashboard";
 
-  // ======================================================
-  // 🛠️ CLEAN UNIFIED NOTIFICATION API HANDLER
-  // ======================================================
-  const fetchNotifications = useCallback(
-    async () => {
-      if (!token) return;
-      try {
-       
+  const fetchNotifications = useCallback(async () => {
+  if (!token) return;
+  try {
+    setLoadingNotifications(true);
 
-        const res = await axios.get("/new/getallnotification", {
-          params : {limitedData : false},
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    const res = await axios.get("/new/getallnotification", {
+      params: { limitedData: false },
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-        const rawData = res.data?.data || [];
+    const rawData = res.data?.data || [];
 
-        const formatted = rawData.map((item) => ({
-          id: item.notificationid,
-          title: item.title,
-          message: item.description,
-          isRead: item.isread,
-          time: new Date(item.createddate).toLocaleString(),
-        }));
+    const formatted = rawData.map((item) => ({
+      id: item.notificationid,
+      title: item.title,
+      message: item.description,
+      isRead: item.isread,
+      time: item.createddate,
+    }));
 
-       
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
-    },
-    [token, initialNotificationsFetched]
-  );
+    setAllNotifications(formatted);
+
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+  } finally {
+    setLoadingNotifications(false);
+  }
+}, [token]);
 
   
 useEffect(() => {
@@ -96,7 +93,6 @@ useEffect(() => {
 
   socket.on("connect", () => {
     console.log("⚡ SOCKET CONNECTED:", socket.id);
-
     socket.emit("joinUserRoom", userId);
     console.log("🔗 Joined Notification Room:", `user_${userId}`);
   });
@@ -337,21 +333,24 @@ useEffect(() => {
 
         {/* Notifications */}
         <Dropdown
-          open={notificationDropdownVisible}
-          onOpenChange={(open) => {
-            setNotificationDropdownVisible(open);
-            // if (open) setHasUnreadNotifications(false);
-          }}
+            open={notificationDropdownVisible}
+            onOpenChange={(open) => {
+              setNotificationDropdownVisible(open);
+              if (open) fetchNotifications();
+            }}
           placement={isMobile ? "bottom" : "bottomRight"}
           trigger={["click"]}
           arrow
-          overlay={
+           overlay={
             <NotificationDropdown
               closeDropdown={() => setNotificationDropdownVisible(false)}
-              onViewAll={() => setModalOpen(true)}
+              onViewAll={() => {
+                fetchNotifications();
+                setModalOpen(true);
+              }}
               onUnreadChange={setHasUnreadNotifications}
-              notifications={fetchNotifications}
-              loading={!initialNotificationsFetched || loadingNotifications}
+              notifications={allNotifications}
+              loading={loadingNotifications}
             />
           }
         >
