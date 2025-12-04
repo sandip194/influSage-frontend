@@ -7,7 +7,6 @@ import dayjs from 'dayjs';
 import axios from 'axios';
 import postalRegexList from './postalRegex.json';
 import { useSelector } from 'react-redux';
-import { Country, State, City } from 'country-state-city';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { toast } from 'react-toastify';
 dayjs.extend(customParseFormat);
@@ -51,27 +50,63 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
     getGender();
   }, []);
 
-  // Load countries from country-state-city
+  const loadCountries = async () => {
+    try {
+      setLoading((p) => ({ ...p, countries: true }));
+
+      const res = await axios.get("/countries");
+
+      setCountries(Array.isArray(res?.data?.countries) ? res.data.countries : []);
+    } catch (err) {
+      console.error(err);
+      setCountries([]);
+    } finally {
+      setLoading((p) => ({ ...p, countries: false }));
+    }
+  };
+
+  const loadStates = async (countryName) => {
+    try {
+      setLoading((p) => ({ ...p, states: true }));
+
+      const countryObj = countries.find((c) => c.name === countryName);
+      if (!countryObj) return setStates([]);
+
+      const res = await axios.get(`/states/${countryObj.id}`);
+
+      setStates(Array.isArray(res?.data?.states) ? res.data.states : []);
+    } catch (err) {
+      console.error(err);
+      setStates([]);
+    } finally {
+      setLoading((p) => ({ ...p, states: false }));
+    }
+  };
+
+  const loadCities = async (stateName) => {
+    try {
+      setLoading((p) => ({ ...p, cities: true }));
+
+      const stateObj = states.find((s) => s.name === stateName);
+      if (!stateObj) return setCities([]);
+
+      const res = await axios.get(`/cities/${stateObj.id}`);
+
+      setCities(Array.isArray(res?.data?.cities) ? res.data.cities : []);
+    } catch (err) {
+      console.error(err);
+      setCities([]);
+    } finally {
+      setLoading((p) => ({ ...p, cities: false }));
+    }
+  };
+
+
   useEffect(() => {
-    setLoading((prev) => ({ ...prev, countries: true }));
-    const countryList = Country.getAllCountries();
-    setCountries(countryList);
-    setLoading((prev) => ({ ...prev, countries: false }));
+    loadCountries();
   }, []);
 
-  const fetchStates = (countryCode) => {
-    setLoading((prev) => ({ ...prev, states: true }));
-    const stateList = State.getStatesOfCountry(countryCode);
-    setStates(stateList);
-    setLoading((prev) => ({ ...prev, states: false }));
-  };
 
-  const fetchCities = (countryCode, stateCode) => {
-    setLoading((prev) => ({ ...prev, cities: true }));
-    const cityList = City.getCitiesOfState(countryCode, stateCode);
-    setCities(cityList);
-    setLoading((prev) => ({ ...prev, cities: false }));
-  };
 
   const fileInputRef = useRef();
 
@@ -95,22 +130,21 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
 
     // Country → State → City cascade fix
     if (data.countryname) {
-      const countryObj = countries.find((c) => c.name === data.countryname);
+      const countryObj = countries.find(c => c.id === data.countryid);
       if (countryObj) {
-        setSelectedCountry(countryObj.isoCode);
-        const stateList = State.getStatesOfCountry(countryObj.isoCode);
-        setStates(stateList);
+        setSelectedCountry(countryObj.id);
+        loadStates(countryObj.id);
 
         if (data.statename) {
-          const stateObj = stateList.find((s) => s.name === data.statename);
+          const stateObj = states.find(s => s.id === data.stateid);
           if (stateObj) {
-            setSelectedState(stateObj.isoCode);
-            const cityList = City.getCitiesOfState(countryObj.isoCode, stateObj.isoCode);
-            setCities(cityList);
+            setSelectedState(stateObj.id);
+            loadCities(stateObj.id);
           }
         }
       }
     }
+
 
     if (data.photopath) {
       const fullUrl = data.photopath.startsWith('http')
@@ -289,7 +323,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
             {
               validator: (_, value) => {
                 if (!value || value.trim() === '') return Promise.resolve();
-                return value.length >= 10
+                return value.length >= 12
                   ? Promise.resolve()
                   : Promise.reject(new Error('Enter a valid phone number (at least 10 digits)'));
               },
@@ -317,51 +351,65 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
         {/* Country / State / City */}
         <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6">
           {/* Country */}
-          <Form.Item label={<b>Country</b>} name="country" rules={[{ required: true, message: 'Please select a country' }]}>
+          <Form.Item
+            label={<b>Country</b>}
+            name="country"
+            rules={[{ required: true, message: "Please select a country" }]}
+          >
             <Select
               showSearch
               size="large"
               placeholder="Select Country"
-              onChange={(val) => {
-                setSelectedCountry(val);
-                form.setFieldsValue({ state: undefined, city: undefined });
-                fetchStates(val);
-              }}
               loading={loading.countries}
               optionFilterProp="children"
-              filterOption={(input, option) => option?.children?.toLowerCase().includes(input.toLowerCase())}
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+              onChange={(name) => {
+                form.setFieldsValue({ state: undefined, city: undefined });
+                setSelectedCountry(name);
+                loadStates(name);
+              }}
             >
               {countries.map((country) => (
-                <Option key={country.isoCode} value={country.isoCode}>
+                <Option key={country.id} value={country.name}>
                   {country.name}
                 </Option>
               ))}
             </Select>
           </Form.Item>
 
+
           {/* State */}
-          <Form.Item label={<b>State</b>} name="state" rules={[{ required: true, message: 'Please select a state' }]}>
+          <Form.Item
+            label={<b>State</b>}
+            name="state"
+            rules={[{ required: true, message: "Please select a state" }]}
+          >
             <Select
               showSearch
               size="large"
               placeholder="Select State"
-              onChange={(val) => {
-                setSelectedState(val);
-                form.setFieldsValue({ city: undefined });
-                fetchCities(selectedCountry, val);
-              }}
-              disabled={states.length === 0}
+              disabled={!states.length}
               loading={loading.states}
               optionFilterProp="children"
-              filterOption={(input, option) => option?.children?.toLowerCase().includes(input.toLowerCase())}
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+              onChange={(name) => {
+                form.setFieldsValue({ city: undefined });
+                setSelectedState(name);
+                loadCities(name);
+              }}
             >
               {states.map((state) => (
-                <Option key={state.isoCode} value={state.isoCode}>
+                <Option key={state.id} value={state.name}>
                   {state.name}
                 </Option>
               ))}
             </Select>
           </Form.Item>
+
 
           {/* City */}
           <Form.Item label={<b>City</b>} name="city">
@@ -369,18 +417,21 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
               showSearch
               size="large"
               placeholder="Select City"
-              disabled={cities.length === 0}
+              disabled={!cities.length}
               loading={loading.cities}
               optionFilterProp="children"
-              filterOption={(input, option) => option?.children?.toLowerCase().includes(input.toLowerCase())}
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
             >
-              {cities.map((city, i) => (
-                <Option key={i} value={city.name}>
+              {cities.map((city) => (
+                <Option key={city.id} value={city.name}>
                   {city.name}
                 </Option>
               ))}
             </Select>
           </Form.Item>
+
         </div>
 
         {/* ZIP */}
@@ -391,12 +442,15 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
             { required: true, message: 'Please enter your ZIP or PIN Code' },
             ({ getFieldValue }) => ({
               validator(_, value) {
-                if (!selectedCountry || !value) return Promise.resolve();
-                const regex = getRegexForCountry(selectedCountry);
-                if (regex && !regex.test(value.trim())) return Promise.reject(new Error('Invalid ZIP/PIN code'));
+                const iso = countries.find(c => c.name === getFieldValue('countryname'))?.iso2;
+                const regex = getRegexForCountry(iso);
+                if (!value) return Promise.resolve();
+                if (regex && !regex.test(value.trim())) {
+                  return Promise.reject(new Error('Invalid ZIP/PIN code'));
+                }
                 return Promise.resolve();
-              },
-            }),
+              }
+            })
           ]}
           className="md:col-span-3"
         >
@@ -414,11 +468,10 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
             <button
               onClick={handleSubmit}
               disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
-              className={`px-8 py-3 rounded-full text-white font-medium transition ${
-                !isSubmitting && (onNext || isFormChanged)
-                  ? 'bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer'
-                  : 'bg-gray-400 cursor-not-allowed'
-              }`}
+              className={`px-8 py-3 rounded-full text-white font-medium transition ${!isSubmitting && (onNext || isFormChanged)
+                ? 'bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer'
+                : 'bg-gray-400 cursor-not-allowed'
+                }`}
             >
               {isSubmitting ? <Spin size="small" /> : onNext ? 'Continue' : 'Save Changes'}
             </button>

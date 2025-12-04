@@ -406,7 +406,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
                         return Promise.resolve();
                       }
 
-                      if (value.length >= 10) {
+                      if (value.length >= 12) {
                         return Promise.resolve();
                       }
 
