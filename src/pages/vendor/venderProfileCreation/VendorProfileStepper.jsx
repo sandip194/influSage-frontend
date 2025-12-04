@@ -282,7 +282,7 @@ export const VendorProfileStepper = () => {
             {/* Layout */}
             <div className="flex flex-col sm:flex-row bg-[#f5f5f5] min-h-screen p-4 gap-4">
                 {/* Desktop Sidebar */}
-                <div className="hidden md:block w-full md:w-1/3 lg:w-1/4 p-3">
+                <div className="hidden md:block w-full md:w-1/3 lg:w-1/4 pt-3">
                     <div className="bg-white p-6 rounded-3xl sticky top-[30px]">
                         <h2 className="text-xl font-semibold mb-4">Profile Completion Steps</h2>
                         <Steps
@@ -306,7 +306,7 @@ export const VendorProfileStepper = () => {
                 </div>
 
                 {/* Step Content */}
-                <div className="w-full md:w-2/3 lg:w-3/4 p-3">
+                <div className="w-full md:w-2/3 lg:w-3/4 pt-3">
                     {isCompleted && currentStep === steps.length ? (
                         <ThankYouScreen />
                     ) : (

@@ -30,9 +30,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
     const { token } = useSelector(state => state.auth);
 
-    const countryAPI = "https://countriesnow.space/api/v0.1/countries/positions";
-    const stateAPI = "https://countriesnow.space/api/v0.1/countries/states";
-    const cityAPI = "https://countriesnow.space/api/v0.1/countries/state/cities";
+
 
     const fileInputRef = useRef();
 
@@ -52,36 +50,54 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
         }
     };
 
-    const fetchCountries = () => {
-        setLoading(prev => ({ ...prev, countries: true }));
-        axios.get(countryAPI)
-            .then(res => {
-                if (res.data?.data) {
-                    setCountries(res.data.data); // ✅ 'data' is an array
-                }
-            })
-            .catch((err) => {
-                console.error("❌ Failed to fetch countries:", err);
-            })
-            .finally(() => {
-                setLoading(prev => ({ ...prev, countries: false }));
-            });
+    const loadCountries = async () => {
+        try {
+            setLoading(p => ({ ...p, countries: true }));
+            const res = await axios.get("/countries");
+            setCountries(Array.isArray(res?.data?.countries) ? res.data.countries : []);
+        } catch (err) {
+            console.error(err);
+            setCountries([]);
+        } finally {
+            setLoading(p => ({ ...p, countries: false }));
+        }
+    };
+
+    const loadStates = async (countryName) => {
+        try {
+            setLoading(p => ({ ...p, states: true }));
+
+            const countryObj = countries.find(c => c.name === countryName);
+            if (!countryObj) return setStates([]);
+
+            const res = await axios.get(`/states/${countryObj.id}`);
+            setStates(Array.isArray(res?.data?.states) ? res.data.states : []);
+        } catch (err) {
+            console.error(err);
+            setStates([]);
+        } finally {
+            setLoading(p => ({ ...p, states: false }));
+        }
+    };
+
+    const loadCities = async (stateName) => {
+        try {
+            setLoading(p => ({ ...p, cities: true }));
+
+            const stateObj = states.find(s => s.name === stateName);
+            if (!stateObj) return setCities([]);
+
+            const res = await axios.get(`/cities/${stateObj.id}`);
+            setCities(Array.isArray(res?.data?.cities) ? res.data.cities : []);
+        } catch (err) {
+            console.error(err);
+            setCities([]);
+        } finally {
+            setLoading(p => ({ ...p, cities: false }));
+        }
     };
 
 
-    const fetchStates = (country) => {
-        setLoading(prev => ({ ...prev, states: true }));
-        axios.post(stateAPI, { country })
-            .then(res => setStates(res.data.data.states || []))
-            .finally(() => setLoading(prev => ({ ...prev, states: false })));
-    };
-
-    const fetchCities = (country, state) => {
-        setLoading(prev => ({ ...prev, cities: true }));
-        axios.post(cityAPI, { country, state })
-            .then(res => setCities(res.data.data || []))
-            .finally(() => setLoading(prev => ({ ...prev, cities: false })));
-    };
 
     const formatNumberCompact = (num) => {
         if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace('.0', '') + 'M';
@@ -92,7 +108,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
     // Initialize form and load countries
     useEffect(() => {
         fetchCompanySizes();
-        fetchCountries(countryAPI);
+        loadCountries();
 
         if (data) {
             form.setFieldsValue({
@@ -108,13 +124,21 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
             });
 
             if (data.countryname) {
-                setSelectedCountry(data.countryname);
-                fetchStates(data.countryname);
+                const c = countries.find(x => x.name === data.countryname);
+                if (c) {
+                    setSelectedCountry(c.name);
+                    loadStates(c.name);
+
+                    if (data.statename) {
+                        const s = states.find(x => x.name === data.statename);
+                        if (s) {
+                            setSelectedState(s.name);
+                            loadCities(s.name);
+                        }
+                    }
+                }
             }
-            if (data.countryname && data.statename) {
-                setSelectedState(data.statename);
-                fetchCities(data.countryname, data.statename);
-            }
+
 
             if (data.photopath) {
                 const fullUrl = data.photopath.startsWith('http')
@@ -144,7 +168,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
         setIsFormChanged(true);
     };
 
-        const handleSubmit = async () => {
+    const handleSubmit = async () => {
         if (!profileImage && !existingPhotoPath) {
             setProfileError("Profile image is required");
             return;
@@ -203,7 +227,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
 
     return (
-        <div className="personal-details-container bg-white p-2 rounded-3xl text-inter">
+        <div className="personal-details-container bg-white p-6 bg-white rounded-3xl text-inter">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Business Details</h2>
             <p className="text-gray-600">Please provide your Business details to complete your profile.</p>
 
@@ -241,30 +265,26 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                     </Form.Item>
 
 
-                    {/* Phone Number */}
                     <Form.Item
                         label={<b>Phone Number</b>}
                         name="phone"
                         rules={[
-                            {
-                                required: true,
-                                message: 'Please enter your phone number'
-                            },
+                            { required: true, message: "Please enter your phone number" },
                             {
                                 validator: (_, value) => {
-                                    if (!value || value.trim() === "") {
-                                        return Promise.resolve();
-                                    }
-                                    return value.length >= 10
+                                    if (!value) return Promise.resolve();
+                                    return value.replace(/\D/g, "").length >= 12
                                         ? Promise.resolve()
-                                        : Promise.reject(new Error("Enter a valid phone number (at least 10 digits)"));
+                                        : Promise.reject("Enter a valid phone number");
                                 },
                             },
                         ]}
                     >
                         <PhoneInput
-                            country={"in"}
+                            country="in"
                             enableSearch
+                            value={form.getFieldValue("phone")}      // <-- bind value
+                            onChange={(val) => form.setFieldsValue({ phone: val })} // <-- update form
                             inputStyle={{
                                 width: "100%",
                                 height: "40px",
@@ -274,6 +294,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                             specialLabel=""
                         />
                     </Form.Item>
+
                 </div>
 
 
@@ -320,8 +341,9 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                             onChange={(val) => {
                                 setSelectedCountry(val);
                                 form.setFieldsValue({ statename: undefined, city: undefined });
-                                fetchStates(val);
+                                loadStates(val);
                             }}
+
                             loading={loading.countries}
                             optionFilterProp="children"
                             filterOption={(input, option) =>
@@ -348,7 +370,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                             onChange={(val) => {
                                 setSelectedState(val);
                                 form.setFieldsValue({ city: undefined });
-                                fetchCities(selectedCountry, val);
+                                loadCities(val);
                             }}
                             disabled={!selectedCountry}
                             loading={loading.states}
@@ -369,11 +391,12 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                             disabled={!selectedState}
                             loading={loading.cities}
                         >
-                            {cities.map((city, i) => (
-                                <Option key={i} value={city}>
-                                    {city}
+                            {cities.map((city) => (
+                                <Option key={city.id} value={city.name}>
+                                    {city.name}
                                 </Option>
                             ))}
+
                         </Select>
                     </Form.Item>
                 </div>
@@ -383,25 +406,25 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                     label={<b>ZIP / PIN Code</b>}
                     name="zipCode"
                     rules={[
-                    { required: true, message: 'Please enter your ZIP or PIN Code' },
-                    ({ getFieldValue }) => ({
-                    validator(_, value) {
-                    const iso = countries.find(c => c.name === getFieldValue('countryname'))?.iso2;
-                    const regex = getRegexForCountry(iso);
-                    if (!value) return Promise.resolve();
-                    if (regex && !regex.test(value.trim())) {
-                            return Promise.reject(new Error('Invalid ZIP/PIN code'));
-                    }
-                    return Promise.resolve();
-                    }
-                    })
+                        { required: true, message: 'Please enter your ZIP or PIN Code' },
+                        ({ getFieldValue }) => ({
+                            validator(_, value) {
+                                const iso = countries.find(c => c.name === getFieldValue('countryname'))?.iso2;
+                                const regex = getRegexForCountry(iso);
+                                if (!value) return Promise.resolve();
+                                if (regex && !regex.test(value.trim())) {
+                                    return Promise.reject(new Error('Invalid ZIP/PIN code'));
+                                }
+                                return Promise.resolve();
+                            }
+                        })
                     ]}>
                     <Input size="large" placeholder="Enter ZIP or PIN" className="rounded-xl" />
-                    </Form.Item>
+                </Form.Item>
 
                 {/* Bio */}
-                <Form.Item 
-                    name="bio" 
+                <Form.Item
+                    name="bio"
                     label={<b>Bio</b>}
                     rules={[
                         {
@@ -410,12 +433,12 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                         },
                     ]}
                 >
-                    <TextArea 
-                        rows={4} 
-                        showCount 
-                        maxLength={100} 
-                        placeholder="Tell us about your Business..." 
-                        className="rounded-xl" 
+                    <TextArea
+                        rows={4}
+                        showCount
+                        maxLength={500}
+                        placeholder="Tell us about your Business..."
+                        className="rounded-xl"
                     />
                 </Form.Item>
 
@@ -423,19 +446,18 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                 {(showControls || onNext) && (
                     <div className="flex justify-start mt-6">
                         <button
-                        className={`px-8 py-3 rounded-full text-white font-medium transition
-                            ${
-                            (onNext || isFormChanged) && !isSubmitting
-                                ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
-                                : "bg-gray-400 cursor-not-allowed"
-                            }`}
-                        onClick={handleSubmit}
-                        disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
+                            className={`px-8 py-3 rounded-full text-white font-medium transition
+                            ${(onNext || isFormChanged) && !isSubmitting
+                                    ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                                    : "bg-gray-400 cursor-not-allowed"
+                                }`}
+                            onClick={handleSubmit}
+                            disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
                         >
-                        {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
+                            {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}
                         </button>
                     </div>
-                    )}
+                )}
             </Form>
         </div>
     );
