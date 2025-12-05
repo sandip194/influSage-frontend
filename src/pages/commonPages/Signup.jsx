@@ -14,12 +14,16 @@ const SideImageSlider = React.lazy(() =>
 
 const Signup = () => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  // ⭐ IMPORTANT FIX — enable validation mode
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    mode: "onChange",
+    reValidateMode: "onChange",
+  });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -59,17 +63,26 @@ const Signup = () => {
 
   // 🔹 Helper: handle lowercase email
   const handleEmailChange = (e) => {
-    const lowerEmail = e.target.value.toLowerCase();
-    setValue("email", lowerEmail, { shouldValidate: true });
+    const val = e.target.value.trim().toLowerCase();
+    setValue("email", val, { shouldValidate: true });
   };
+
+  const formatName = (value) => {
+    const cleaned = value.replace(/[^A-Za-z\s]/g, ""); // only letters + spaces
+    const trimmed = cleaned.replace(/\s+/g, " ").trim(); // remove extra spaces
+    return trimmed.replace(/\b\w/g, (char) => char.toUpperCase()); // capitalize
+  };
+
+
 
   // 🔹 Helper: prevent special chars in names
   const handleNameChange = (e, field) => {
-    const onlyLetters = e.target.value.replace(/[^a-zA-Z\s]/g, "");
-    setValue(field, onlyLetters, { shouldValidate: true });
+    const formatted = formatName(e.target.value);
+    setValue(field, formatted, { shouldValidate: true });
   };
 
-const handleGoogleLogin = useCallback(() => {
+
+  const handleGoogleLogin = useCallback(() => {
     const storedRole = localStorage.getItem("selected_role");
     const backendUrl = BASE_URL.replace(/\/$/, "");
     window.location.href = `${backendUrl}/auth/google/?roleid=${storedRole}`;
@@ -80,7 +93,7 @@ const handleGoogleLogin = useCallback(() => {
     const backendUrl = BASE_URL.replace(/\/$/, "");
     window.location.href = `${backendUrl}/auth/facebook?roleid=${storedRole}`;
   }, [BASE_URL]);
-  
+
   return (
     <div className="relative flex justify-center items-center min-h-screen bg-gray-100 p-5 font-[Segoe_UI,Tahoma,Geneva,Verdana,sans-serif] overflow-hidden">
       {/* 🔹 Background Side Image */}
@@ -123,10 +136,9 @@ const handleGoogleLogin = useCallback(() => {
                   placeholder="Enter first name"
                   {...register("firstName", {
                     required: "First name is required",
-                    pattern: {
-                      value: /^[A-Za-z\s]+$/,
-                      message: "Only alphabets are allowed",
-                    },
+                    minLength: { value: 2, message: "Min 2 characters" },
+                    maxLength: { value: 50, message: "Max 50 characters" },
+                    pattern: { value: /^[A-Za-z\s]+$/, message: "Only alphabets allowed" },
                   })}
                   onChange={(e) => handleNameChange(e, "firstName")}
                   className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -147,10 +159,9 @@ const handleGoogleLogin = useCallback(() => {
                   placeholder="Enter last name"
                   {...register("lastName", {
                     required: "Last name is required",
-                    pattern: {
-                      value: /^[A-Za-z\s]+$/,
-                      message: "Only alphabets are allowed",
-                    },
+                    minLength: { value: 2, message: "Min 2 characters" },
+                    maxLength: { value: 50, message: "Max 50 characters" },
+                    pattern: { value: /^[A-Za-z\s]+$/, message: "Only alphabets allowed" },
                   })}
                   onChange={(e) => handleNameChange(e, "lastName")}
                   className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -173,9 +184,11 @@ const handleGoogleLogin = useCallback(() => {
                 placeholder="Enter your email"
                 {...register("email", {
                   required: "Email is required",
+                  validate: (value) =>
+                    value.length <= 60 || "Email cannot exceed 60 characters",
                   pattern: {
-                    value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
-                    message: "Invalid email format (use lowercase letters only)",
+                    value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i,
+                    message: "Invalid email format",
                   },
                 })}
                 onChange={handleEmailChange}
@@ -197,11 +210,14 @@ const handleGoogleLogin = useCallback(() => {
                   placeholder="Create a password"
                   {...register("password", {
                     required: "Password is required",
-                    pattern: {
-                      value:
-                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
-                      message:
-                        "Password must have 8+ chars, 1 uppercase, 1 lowercase, 1 number, 1 special char",
+                    validate: (value) => {
+                      if (!value) return "Password is required";
+                      if (value.length < 8) return "Password must be at least 8 characters";
+                      if (value.length > 20) return "Password cannot exceed 20 characters";
+                      if (!/[A-Z]/.test(value)) return "Must include at least one uppercase letter";
+                      if (!/[a-z]/.test(value)) return "Must include at least one lowercase letter";
+                      if (!/[0-9]/.test(value)) return "Must include at least one number";
+                      return true;
                     },
                   })}
                   className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm pr-10 focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -249,7 +265,7 @@ const handleGoogleLogin = useCallback(() => {
                 <p className="text-xs text-red-500">{errors.terms.message}</p>
               )}
             </div>
-               
+
             {/* Submit */}
             <button
               type="submit"
