@@ -103,7 +103,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (response?.data?.p_status === true) {
+      if (response?.status === 200) {
         toast.success(response.data.message || "Contract saved successfully.");
 
         // CLOSE MODAL
@@ -157,18 +157,17 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
             }
 
           />
-          <Button
-            type="primary"
-            size="middle"
-            className="mt-1"
-            icon={<RiAddLine size={20} />}
+          <button
             onClick={() => {
               setEditingContract(null);
               setIsModalOpen(true);
             }}
+            className="bg-[#0D132D] text-white text-md py-2 px-4 rounded flex items-center gap-2"
           >
+            <RiAddLine size={20} />
             Create Contract
-          </Button>
+          </button>
+
         </div>
       ) : (
         <div className="space-y-4 mb-4">

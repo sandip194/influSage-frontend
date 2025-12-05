@@ -164,7 +164,7 @@ export default function ContractModal({
     // New: Permanent validation check (silent, doesn't show errors until submit)
     const isFormValid = useCallback(async () => {
         try {
-            await form.validateFields({ validateOnly: true });  // Silent validation
+            await form.validateFields({ validateOnly: true });
             return true;
         } catch {
             return false;
@@ -184,32 +184,34 @@ export default function ContractModal({
         onClose();
     };
 
-    // Fixed: Safe dayjs helper
     const safeDayjs = (date) => {
         if (!date) return null;
         const d = dayjs(date, "DD-MM-YYYY");
         return d.isValid() ? d : null;
     };
 
+
     const campaignStartLimit = safeDayjs(existingCampaignStart);
     const campaignEndLimit = safeDayjs(existingCampaignEnd);
 
 
-    // Updated: Handle form submission with API integration
     const handleFinish = async (values) => {
-        console.log(values)
-        isFormValid()
+        // Validate all form fields (including deliverables via Form.Item)
+        const isValid = await isFormValid();
+        if (!isValid) {
+            return;  // Errors will show inline on invalid fields
+        }
+
         setSubmitLoading(true);
         setSubmitError(null);
         values.deliverables = selectedPlatforms;
         try {
-            console.log(values)
-            await onSubmit(values);  // Call the prop, which should handle the API (e.g., axios.post)
+            await onSubmit(values);
             handleModalClose();
         } catch (err) {
             console.error("Submit error:", err);
             setSubmitError("Failed to create contract. Please check your inputs and try again.");
-            setSubmitLoading(false);  // Re-enable button on error
+            setSubmitLoading(false);
         }
     };
 
@@ -455,48 +457,58 @@ export default function ContractModal({
                             </Form.Item>
                         </div>
 
-                        {/* ===========================
-                             Full Width - Platforms & Deliverables
-                            ============================== */}
+                        {/* Platforms & Deliverables Section */}
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                                Platforms & Deliverables <span className="text-red-500">*</span>
-                            </label>
+                            <Form.Item
+                                label={
+                                    <span className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                                        Platforms & Deliverables <span className="text-red-500">*</span>
+                                    </span>
+                                }
+                                name="deliverables"
+                                rules={[
+                                    {
+                                        validator: () =>
+                                            selectedPlatforms.some((p) => p.contenttypes.length > 0)
+                                                ? Promise.resolve()
+                                                : Promise.reject(new Error("Select at least one platform with content type")),
+                                    },
+                                ]}
+                            >
+                                {/* Custom UI for Platforms & Deliverables */}
+                                {loadingPlatforms ? (
+                                    <div className="text-center p-4">
+                                        <Spin tip="Loading platforms..." />
+                                    </div>
+                                ) : (
+                                    <div className="border border-gray-300 rounded-md p-4 space-y-2">
+                                        {selectedPlatforms.length === 0 && (
+                                            <p className="text-subtext-light dark:text-subtext-dark">
+                                                No platforms selected. Use dropdown below to add.
+                                            </p>
+                                        )}
 
-                            {loadingPlatforms ? (
-                                <div className="text-center p-4">
-                                    <Spin tip="Loading platforms..." />
-                                </div>
-                            ) : (
-                                <div className="border border-gray-300 rounded-md p-4 space-y-2">
-                                    {selectedPlatforms.length === 0 && (
-                                        <p className="text-subtext-light dark:text-subtext-dark">
-                                            No platforms selected. Use dropdown below to add.
-                                        </p>
-                                    )}
+                                        {selectedPlatforms.map((platform, idx) => (
+                                            <div key={platform.providerid} className="space-y-6">
+                                                <div className="flex items-start justify-between mb-2">
+                                                    <h3 className="font-semibold text-text-light dark:text-text-dark">
+                                                        {platform.providername}
+                                                    </h3>
+                                                    <button
+                                                        type="button"
+                                                        className="text-sm text-red-500 hover:text-red-700 font-medium"
+                                                        onClick={() =>
+                                                            setSelectedPlatforms(
+                                                                selectedPlatforms.filter((_, i) => i !== idx)
+                                                            )
+                                                        }
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
 
-                                    {selectedPlatforms.map((platform, idx) => (
-                                        <div key={platform.providerid} className="space-y-6">
-                                            <div className="flex items-start justify-between mb-2">
-                                                <h3 className="font-semibold text-text-light dark:text-text-dark">
-                                                    {platform.providername}
-                                                </h3>
-                                                <button
-                                                    type="button"
-                                                    className="text-sm text-red-500 hover:text-red-700 font-medium"
-                                                    onClick={() =>
-                                                        setSelectedPlatforms(
-                                                            selectedPlatforms.filter((_, i) => i !== idx)
-                                                        )
-                                                    }
-                                                >
-                                                    Remove
-                                                </button>
-                                            </div>
-
-                                            <div className="flex items-center space-x-6 flex-wrap ps-4">
-                                                {(contentTypesByPlatform[String(platform.providerid)] ||
-                                                    []).map((ct) => {
+                                                <div className="flex items-center space-x-6 flex-wrap ps-4">
+                                                    {(contentTypesByPlatform[String(platform.providerid)] || []).map((ct) => {
                                                         const isChecked = platform.contenttypes?.some(
                                                             (d) => d.providercontenttypeid === ct.id
                                                         );
@@ -524,76 +536,42 @@ export default function ContractModal({
                                                                                     (d) => d.providercontenttypeid !== ct.id
                                                                                 );
 
-                                                                            return { ...p, contenttypes }; // make sure key is "contenttypes"
+                                                                            return { ...p, contenttypes };
                                                                         });
 
                                                                         setSelectedPlatforms(updatedPlatforms);
-
                                                                     }}
                                                                 />
-                                                                <span className="ps-2">
-                                                                    {ct.contenttypename}
-                                                                </span>
+                                                                <span className="ps-2">{ct.contenttypename}</span>
                                                             </label>
                                                         );
                                                     })}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
-
-                                    <Select
-                                        placeholder="Add Platform"
-                                        size="large"
-                                        value={null}
-                                        onChange={(val) => {
-                                            if (
-                                                !selectedPlatforms.some(
-                                                    (p) => p.providerid === val
-                                                )
-                                            ) {
-                                                const p = platforms.find(
-                                                    (p) => p.providerid === val
-                                                );
-                                                if (p)
-                                                    setSelectedPlatforms([
-                                                        ...selectedPlatforms,
-                                                        { ...p, contenttypes: [] },
-                                                    ]);
-                                            }
-                                        }}
-                                        style={{ width: "100%" }}
-                                        disabled={loadingPlatforms}
-                                    >
-                                        {platforms.map((p) => (
-                                            <Select.Option
-                                                key={p.providerid}
-                                                value={p.providerid}
-                                            >
-                                                {p.providername}
-                                            </Select.Option>
                                         ))}
-                                    </Select>
-                                </div>
-                            )}
 
-                            {/* Hidden Validation Field */}
-                            <Form.Item
-                                name="deliverables"
-                                rules={[
-                                    {
-                                        validator: () =>
-                                            selectedPlatforms.some(
-                                                (p) => p.contenttypes.length > 0
-                                            )
-                                                ? Promise.resolve()
-                                                : Promise.reject(
-                                                    "Select at least one platform with content type"
-                                                ),
-                                    },
-                                ]}
-                                hidden
-                            >
-                                <Input value={JSON.stringify(selectedPlatforms)} />
+                                        <Select
+                                            placeholder="Add Platform"
+                                            size="large"
+                                            value={null}
+                                            onChange={(val) => {
+                                                if (!selectedPlatforms.some((p) => p.providerid === val)) {
+                                                    const p = platforms.find((p) => p.providerid === val);
+                                                    if (p)
+                                                        setSelectedPlatforms([...selectedPlatforms, { ...p, contenttypes: [] }]);
+                                                }
+                                            }}
+                                            style={{ width: "100%" }}
+                                            disabled={loadingPlatforms}
+                                        >
+                                            {platforms.map((p) => (
+                                                <Select.Option key={p.providerid} value={p.providerid}>
+                                                    {p.providername}
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
+                                    </div>
+                                )}
                             </Form.Item>
                         </div>
 
@@ -703,11 +681,11 @@ export default function ContractModal({
                             type="submit"
                             disabled={submitLoading}
                             className={`
-                    bg-[#0f122f] text-white px-6 py-2 cursor-pointer rounded-full border border-[#0f122f]
-                    font-semibold hover:bg-[#1a1d4f] transition
-                    inline-flex items-center justify-center gap-2
-                    ${submitLoading ? "opacity-70 cursor-not-allowed" : ""}
-                `}
+                                   bg-[#0f122f] text-white px-6 py-2 cursor-pointer rounded-full border border-[#0f122f]
+                                   font-semibold hover:bg-[#1a1d4f] transition
+                                   inline-flex items-center justify-center gap-2
+                                   ${submitLoading ? "opacity-70 cursor-not-allowed" : ""}
+                               `}
                         >
                             {submitLoading && (
                                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -721,3 +699,13 @@ export default function ContractModal({
         </Modal>
     );
 }
+
+
+
+
+
+
+
+
+
+

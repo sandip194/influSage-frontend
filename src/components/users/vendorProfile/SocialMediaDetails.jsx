@@ -6,6 +6,15 @@ import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { toast } from 'react-toastify';
 
+const PLATFORM_URL_RULES = {
+  instagram: /^(https?:\/\/)?(www\.)?instagram\.com\/[A-Za-z0-9._%-]+\/?$/,
+  facebook: /^(https?:\/\/)?(www\.)?facebook\.com\/[A-Za-z0-9._%-]+\/?$/,
+  youtube: /^(https?:\/\/)?(www\.)?youtube\.com\/.+$/,
+  twitter: /^(https?:\/\/)?(www\.)?(twitter\.com|x\.com)\/[A-Za-z0-9._%-]+\/?$/,
+  linkedin: /^(https?:\/\/)?(www\.)?linkedin\.com\/in\/.+$/,
+};
+
+
 export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToast, onSave }) => {
   const [providers, setProviders] = useState([])
   const [form] = Form.useForm();
@@ -134,17 +143,40 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
               <Form.Item
                 style={{ margin: 0, width: "100%" }}
                 name={platform.field}
-                rules={[{ type: 'url', message: 'Please enter a valid URL' }]}
+                rules={[
+                  {
+                    validator(_, value) {
+                      if (!value) return Promise.resolve(); // allow empty links
+
+                      // Check if it's a valid URL
+                      try {
+                        new URL(value);
+                      } catch {
+                        return Promise.reject(new Error("Please enter a valid URL"));
+                      }
+
+                      // Check if the URL contains the platform name
+                      const lowerValue = value.toLowerCase();
+                      const platformKey = platform.name.toLowerCase().replace(/\s+/g, '');
+                      if (!lowerValue.includes(platformKey)) {
+                        return Promise.reject(
+                          new Error(`This link must be for ${platform.name}`)
+                        );
+                      }
+
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
               >
                 <Input
                   size="large"
                   placeholder={platform.placeholder}
                   className="flex-1 border-none shadow-none bg-transparent focus:ring-0 focus:outline-none"
-                  onChange={() => {
-                    form.validateFields(['atLeastOne']);
-                  }}
                 />
               </Form.Item>
+
+
             </div>
 
           ))}
@@ -168,10 +200,9 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
             <button
               disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
               className={`px-8 py-3 rounded-full text-white font-medium transition
-                ${
-                  (onNext || isFormChanged) && !isSubmitting
-                    ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
-                    : "bg-gray-400 cursor-not-allowed"
+                ${(onNext || isFormChanged) && !isSubmitting
+                  ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                  : "bg-gray-400 cursor-not-allowed"
                 }`}
             >
               {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}

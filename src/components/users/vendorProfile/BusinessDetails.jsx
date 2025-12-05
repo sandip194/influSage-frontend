@@ -157,14 +157,29 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
         const file = e.target.files[0];
         if (!file) return;
 
-        if (!file.type.startsWith('image/')) {
-            setProfileError('Only image files are allowed.');
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/webp'];
+
+        //  File type check
+        if (!allowedTypes.includes(file.type)) {
+            setProfileError('Only JPG, JPEG, or WEBP files are allowed.');
+            setProfileImage(null);
+            setPreview(null);
             return;
         }
 
-        setPreview(URL.createObjectURL(file));
-        setProfileImage(file);
+        //  File SIZE check — MAX 5 MB
+        const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
+        if (file.size > maxSize) {
+            setProfileError('File size must be less than 5 MB.');
+            setProfileImage(null);
+            setPreview(null);
+            return;
+        }
+
+        // ✔ Passed all validation
         setProfileError('');
+        setProfileImage(file);
+        setPreview(URL.createObjectURL(file));
         setIsFormChanged(true);
     };
 
@@ -244,7 +259,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                         )}
                         <input
                             type="file"
-                            accept="image/*"
+                            accept=".jpg,.jpeg,.webp"
                             ref={fileInputRef}
                             onChange={handleImageChange}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -259,9 +274,29 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                     <Form.Item
                         name="businessname"
                         label={<b>Business Name</b>}
-                        rules={[{ required: true, message: 'Please enter your Business Name' }]}
+                        rules={[
+                            { required: true, message: 'Please enter your Business Name' },
+                            {
+                                validator: (_, value) => {
+                                    if (!value) return Promise.resolve();
+                                    const trimmed = value.trim();
+                                    if (trimmed.length < 5 || trimmed.length > 50) {
+                                        return Promise.reject(new Error('Business Name must be between 5 and 50 characters'));
+                                    }
+                                    return Promise.resolve();
+                                },
+                            },
+                        ]}
                     >
-                        <Input size="large" placeholder="Enter your Business Name" className="rounded-xl" />
+                        <Input
+                            size="large"
+                            placeholder="Enter your Business Name"
+                            className="rounded-xl"
+                            onBlur={(e) => {
+                                const trimmed = e.target.value.trim();
+                                form.setFieldsValue({ businessname: trimmed });
+                            }}
+                        />
                     </Form.Item>
 
 
@@ -322,10 +357,35 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                 <Form.Item
                     name="address1"
                     label={<b>Business Address</b>}
-                    rules={[{ required: true, message: 'Please enter your address' }]}
+                    rules={[
+                        { required: true, message: 'Please enter your address' },
+                        {
+                            validator: (_, value) => {
+                                if (!value) return Promise.resolve();
+                                const trimmed = value.trim();
+                                if (trimmed.length < 5 || trimmed.length > 100) {
+                                    return Promise.reject(new Error('Address must be between 5 and 100 characters'));
+                                }
+                                const pattern = /^[a-zA-Z0-9\s,.\-]+$/;
+                                if (!pattern.test(trimmed)) {
+                                    return Promise.reject(new Error('Address contains invalid characters'));
+                                }
+                                return Promise.resolve();
+                            },
+                        },
+                    ]}
                 >
-                    <Input size="large" placeholder="Enter your address" className="rounded-xl" />
+                    <Input
+                        size="large"
+                        placeholder="Enter your address"
+                        className="rounded-xl"
+                        onBlur={(e) => {
+                            const trimmed = e.target.value.trim();
+                            form.setFieldsValue({ address1: trimmed });
+                        }}
+                    />
                 </Form.Item>
+
 
                 {/* Country / State / City */}
                 <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6">

@@ -179,6 +179,8 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
     if (!file) return;
 
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/webp'];
+
+    //  File type check
     if (!allowedTypes.includes(file.type)) {
       setProfileError('Only JPG, JPEG, or WEBP files are allowed.');
       setProfileImage(null);
@@ -186,11 +188,22 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
       return;
     }
 
+    //  File SIZE check — MAX 5 MB
+    const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
+    if (file.size > maxSize) {
+      setProfileError('File size must be less than 5 MB.');
+      setProfileImage(null);
+      setPreview(null);
+      return;
+    }
+
+    // ✔ Passed all validation
     setProfileError('');
     setProfileImage(file);
     setPreview(URL.createObjectURL(file));
     setIsFormChanged(true);
   };
+
 
   const handleSubmit = async () => {
     try {
@@ -343,10 +356,46 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
         <Form.Item
           name="address"
           label={<b>Address</b>}
-          rules={[{ required: true, message: 'Please enter your address' }]}
+          rules={[
+            { required: true, message: 'Please enter your address' },
+            {
+              validator: (_, value) => {
+                if (!value) return Promise.resolve();
+
+                const trimmedValue = value.trim(); // Trim leading/trailing spaces
+
+                // Check length
+                if (trimmedValue.length < 5 || trimmedValue.length > 100) {
+                  return Promise.reject(
+                    new Error('Address must be between 5 and 100 characters')
+                  );
+                }
+
+                // Allow letters, numbers, spaces, comma, period, hyphen
+                const pattern = /^[a-zA-Z0-9\s,.\-]+$/;
+                if (!pattern.test(trimmedValue)) {
+                  return Promise.reject(
+                    new Error('Address contains invalid characters')
+                  );
+                }
+
+                return Promise.resolve();
+              },
+            },
+          ]}
         >
-          <Input size="large" placeholder="Enter your address" className="rounded-xl" />
+          <Input
+            size="large"
+            placeholder="Enter your address"
+            className="rounded-xl"
+            onBlur={e => {
+              const trimmed = e.target.value.trim();
+              form.setFieldsValue({ address: trimmed });
+            }}
+          />
         </Form.Item>
+
+
 
         {/* Country / State / City */}
         <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6">

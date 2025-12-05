@@ -370,7 +370,7 @@ const Details = () => {
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
               <p>
-                {campaign?.requirements?.startdate} — {campaign?.requirements?.enddate}
+                {campaign?.requirements?.campaignstartdate} — {campaign?.requirements?.campaignenddate}
               </p>
             </div>
 

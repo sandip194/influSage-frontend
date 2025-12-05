@@ -93,7 +93,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
 
       if (response.status == 200) {
         if (showToast) toast.success('Profile updated successfully!');
-          setIsFormChanged(false);
+        setIsFormChanged(false);
         // Stepper: Go to next
         if (onNext) onNext();
 
@@ -153,7 +153,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
           }
         }}
         onValuesChange={() => {
-          setIsFormChanged(true); 
+          setIsFormChanged(true);
           const values = form.getFieldsValue();
           const socialData = platforms
             .filter(p => values[p.urlField])
@@ -186,7 +186,31 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
                   <Form.Item
                     style={{ margin: 0 }}
                     name={platform.urlField}
-                    rules={[{ type: "url", message: "Please enter a valid URL" }]}
+                    rules={[
+                      {
+                        validator: (_, value) => {
+                          if (!value) return Promise.resolve(); // allow empty
+
+                          // Check valid URL
+                          try {
+                            new URL(value);
+                          } catch {
+                            return Promise.reject(new Error("Please enter a valid URL"));
+                          }
+
+                          // Check if URL contains platform name
+                          const lowerValue = value.toLowerCase();
+                          const platformKey = platform.name.toLowerCase().replace(/\s+/g, '');
+                          if (!lowerValue.includes(platformKey)) {
+                            return Promise.reject(
+                              new Error(`This link must be for ${platform.name}`)
+                            );
+                          }
+
+                          return Promise.resolve();
+                        },
+                      },
+                    ]}
                   >
                     <Input
                       size="large"
@@ -194,6 +218,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
                       className="w-full rounded-lg border border-gray-300 px-3 py-2"
                     />
                   </Form.Item>
+
                 </div>
 
                 {/* Followers input (medium) */}
@@ -255,7 +280,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
             </button>
           )}
 
-         {/* Next / Save Button */}
+          {/* Next / Save Button */}
           {(showControls || onNext) && (
             <button
               type="submit"
@@ -263,10 +288,9 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
                 onNext ? isSubmitting : !isFormChanged || isSubmitting
               }
               className={`px-8 py-3 rounded-full text-white font-medium transition
-                ${
-                  !isSubmitting && (onNext || isFormChanged)
-                    ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
-                    : "bg-gray-400 cursor-not-allowed"
+                ${!isSubmitting && (onNext || isFormChanged)
+                  ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                  : "bg-gray-400 cursor-not-allowed"
                 }`}
             >
               {isSubmitting ? (

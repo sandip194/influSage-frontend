@@ -16,15 +16,32 @@ const SideImageSlider = React.lazy(() =>
 const validationSchema = {
   emailValidator: {
     required: { value: true, message: "Email is required" },
+    validate: (value) =>
+      value.length <= 60 || "Email cannot exceed 60 characters",
     pattern: {
       value: /^\w+[\+\.\w-]*@([\w-]+\.)*\w+[\w-]*\.([a-z]{2,4}|\d+)$/i,
       message: "Please enter a valid email address",
     },
   },
+
   passwordValidator: {
     required: { value: true, message: "Password is required" },
+    validate: {
+      minLength: (value) =>
+        value.length >= 8 || "Password must be at least 8 characters",
+      maxLength: (value) =>
+        value.length <= 20 || "Password cannot exceed 20 characters",
+      hasUppercase: (value) =>
+        /[A-Z]/.test(value) || "Password must contain at least one uppercase letter",
+      hasLowercase: (value) =>
+        /[a-z]/.test(value) || "Password must contain at least one lowercase letter",
+      hasNumber: (value) =>
+        /[0-9]/.test(value) || "Password must contain at least one number",
+    },
   },
+
 };
+
 
 export const LoginForm = () => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -174,6 +191,8 @@ export const LoginForm = () => {
                 {...register("email", validationSchema.emailValidator)}
                 className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
               />
+
+
               {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
             </div>
 
@@ -189,6 +208,7 @@ export const LoginForm = () => {
                   {...register("password", validationSchema.passwordValidator)}
                   className="w-full mt-1 border border-gray-700 rounded-lg px-3 py-2 text-sm pr-10 focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
