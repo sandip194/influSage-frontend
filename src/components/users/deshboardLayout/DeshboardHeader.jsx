@@ -89,43 +89,47 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
   
 useEffect(() => {
-  if (!socket || !token || !userId) return;
+  if (!socket) {
+    console.log("❌ No socket instance found!");
+    return;
+  }
 
-  socket.on("connect", () => {
-    console.log("⚡ SOCKET CONNECTED:", socket.id);
-    socket.emit("joinUserRoom", userId);
-    console.log("🔗 Joined Notification Room:", `user_${userId}`);
-  });
+  console.log("🔌 Socket connected:", socket.connected);
+  console.log("🆔 Current userId:", userId);
 
-  return () => socket.off("connect");
-}, [socket, token, userId]);
+  const room = `user_${userId}`;
+  console.log("➡️ Joining room:", room);
 
- useEffect(() => {
-  if (!socket) return;
+  socket.emit("joinUserRoom", userId);
 
   const handler = (ntf) => {
-    console.log("hellosocket")
     console.log("📩 REAL-TIME NOTIFICATION RECEIVED:", ntf);
 
-    const list = Array.isArray(ntf) ? ntf : ntf ? [ntf] : [];
-    if (!list.length) return;
+    if (!ntf) return;
 
-    const formatted = list.map(n => ({
-      id: n.notificationid,
-      title: n.title,
-      message: n.description,
+    const formatted = {
+      id: ntf.notificationid,
+      title: ntf.title,
+      description: ntf.description,
       isRead: false,
-      time: new Date(n.createddate).toLocaleString(),
-    }));
+      time: ntf.createddate,
+    };
+    
 
-    setUnreadNotifications(prev => [...formatted, ...prev]);
+    setUnreadNotifications(prev => [formatted, ...prev]);
+    setAllNotifications(prev => [formatted, ...prev]);
     setHasUnreadNotifications(true);
   };
 
   socket.on("receiveNotification", handler);
+  console.log("👂 Listener attached: receiveNotification");
 
-  return () => socket.off("receiveNotification", handler);
-}, [socket]);
+  return () => {
+    socket.off("receiveNotification", handler);
+    console.log("🧹 Listener removed: receiveNotification");
+  };
+}, [socket, userId]);
+
 
 
 
@@ -336,9 +340,16 @@ useEffect(() => {
             open={notificationDropdownVisible}
             onOpenChange={(open) => {
               setNotificationDropdownVisible(open);
-              if (open) fetchNotifications();
+
+              if (open) {
+                setHasUnreadNotifications(false);
+                setUnreadNotifications([]);
+                setAllNotifications(prev =>
+                  prev.map(n => ({ ...n, isRead: true }))
+                );
+              }
             }}
-          placement={isMobile ? "bottom" : "bottomRight"}
+        placement={isMobile ? "bottom" : "bottomRight"}
           trigger={["click"]}
           arrow
            overlay={

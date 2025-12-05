@@ -160,24 +160,27 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
                 rows={4}
                 placeholder="Describe your proposal..."
                 value={proposal}
-                onChange={(e) => setProposal(e.target.value)}
+                onChange={(e) => {
+                    setProposal(e.target.value);
+                    setErrors(prev => ({ ...prev, proposal: "" }));
+                }}
                 status={errors.proposal ? "error" : ""}
                 className="mt-2"
             />
             {errors.proposal && <p className="text-red-500">{errors.proposal}</p>}
 
             {/* Files */}
-            <h3 className="mt-5 font-semibold mb-2">Portfolio *</h3>
+            <h3 className="mt-5 font-semibold mb-2">Portfolio <span className="text-red-500">*</span></h3>
 
             <Upload.Dragger
                 beforeUpload={() => false}
                 fileList={[]}
                 multiple
                 showUploadList={false}
-                accept=".png,.jpg,.jpeg,.pdf,.mp4,.mov,.doc,.docx"
                 onChange={(info) => {
                     handleFileChange(info);
                     info.fileList.length = 0;
+                    setErrors(prev => ({ ...prev, portfolioFile: "" }));
                 }}
             >
                 <div className="flex flex-col items-center">
@@ -203,7 +206,10 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
                 addonBefore="₹"
                 placeholder="0.00"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => {
+                    setAmount(e.target.value);
+                    setErrors(prev => ({ ...prev, amount: "" }));
+                }}
                 status={errors.amount ? "error" : ""}
             />
             {errors.amount && <p className="text-red-500">{errors.amount}</p>}

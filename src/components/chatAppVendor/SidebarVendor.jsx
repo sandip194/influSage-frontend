@@ -95,11 +95,14 @@ export default function SidebarVendor({ onSelectChat }) {
   }, [token]);
 
   useEffect(() => {
-     if (!socket) return; 
   fetchCampaigns();
   fetchUnreadMessages();
 
-  const handleIncoming = (msg) => {
+  if (!socket) {
+    return;
+  }
+
+  const handleIncoming = () => {
     fetchUnreadMessages();
     fetchCampaigns();
   };
@@ -110,6 +113,7 @@ export default function SidebarVendor({ onSelectChat }) {
   return () => {
     socket.off("receiveMessage", handleIncoming);
   };
+
 }, [socket, fetchCampaigns, fetchUnreadMessages]);
 
 
