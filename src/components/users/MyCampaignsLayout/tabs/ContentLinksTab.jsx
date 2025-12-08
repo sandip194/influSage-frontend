@@ -396,111 +396,164 @@
 
 
 
-
 import React, { useEffect, useState } from "react";
 import { Button, Input, message, Form, Alert } from "antd";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-export default function ContentLinksTab({ token, contractId }) {
+export default function ContentLinksTab({ token, contractId, campaignId }) {
     const [providers, setProviders] = useState([]);
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
 
+    const getDomainFromProvider = (providerName) => {
+        if (!providerName) return null;
+        const clean = providerName.trim().toLowerCase();
+        return `${clean}.com`;
+    };
+
     // ---------------- Link Validation ----------------
-    const validateLink = (value, existingLinks = [], index = null) => {
+    const validateLink = (value, existingLinks = [], index = null, providerName = "") => {
         const trimmed = value.trim();
         if (!trimmed) return "Link cannot be empty.";
-        if (!/^https?:\/\/.+/.test(trimmed)) return "Invalid URL. Must start with http or https.";
+
+        if (!/^https?:\/\/.+/.test(trimmed))
+            return "Invalid URL. Must start with http or https.";
+
         const duplicate = existingLinks.some((l, i) => i !== index && l.trim() === trimmed);
         if (duplicate) return "Duplicate link.";
+
+        const expectedDomain = getDomainFromProvider(providerName);
+        if (expectedDomain && !trimmed.includes(expectedDomain)) {
+            return `This link must be a valid ${providerName} URL (${expectedDomain}).`;
+        }
+
         return "";
     };
 
     const validateContentType = (pIndex, ctIndex) => {
+        const providerName = providers[pIndex].providername;
         const ct = providers[pIndex].contenttypes[ctIndex];
+
         const ctErrors = {};
         let valid = true;
 
+        const hasNonEmpty = ct.links.some((l) => l.trim() !== "");
+        if (!hasNonEmpty) {
+            ctErrors[0] = "At least one link is required.";
+            valid = false;
+        }
+
         ct.links.forEach((link, li) => {
-            const err = validateLink(link, ct.links, li);
+            const err = validateLink(link, ct.links, li, providerName);
             if (err) valid = false;
             ctErrors[li] = err;
         });
 
         setErrors((prev) => ({
             ...prev,
-            [`${pIndex}-${ctIndex}`]: ctErrors
+            [`${pIndex}-${ctIndex}`]: ctErrors,
         }));
 
         return valid;
     };
 
-    // ---------------- Fetch Provider + Content Types ----------------
+    // ---------------- Fetch Provider + Content Types + Old Links ----------------
     useEffect(() => {
         const load = async () => {
             try {
-                const res = await axios.get(`/user/contracts/${contractId}/content-types`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                // 1. Load providers + content types
+                const res = await axios.get(
+                    `/user/contracts/${contractId}/content-types`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                const providerList = res.data?.providercontenttype || [];
+
+                // 2. Load previously uploaded links
+                const linkRes = await axios.get(
+                    `/user/content-links/${campaignId}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                // Normalize response shape (supports both {data:[...]} and [...])
+                const oldProviders = Array.isArray(linkRes.data)
+                    ? linkRes.data
+                    : linkRes.data?.data || [];
+
+                // Build a lookup map by contractcontenttypeid
+                const oldMap = {};
+                oldProviders.forEach(provider => {
+                    provider.contentlink?.forEach(ct => {
+                        oldMap[ct.contractcontenttypeid] = ct.links.map(l => l.link);
+                    });
                 });
 
-                const list = res.data?.providercontenttype?.map((p) => ({
-                    providerid: p.providerid,
-                    providername: p.providername,
-                    iconpath: p.iconpath,
-                    contenttypes: p.contenttypes.map((ct) => ({
+                // Merge NEW providers with OLD saved links
+                const merged = providerList.map(provider => ({
+                    providerid: provider.providerid,
+                    providername: provider.providername,
+                    iconpath: provider.iconpath,
+
+                    contenttypes: provider.contenttypes.map(ct => ({
                         contractcontenttypeid: ct.contractcontenttypeid,
                         contenttypename: ct.contenttypename,
-                        links: [""]
-                    }))
-                })) || [];
+                        links: oldMap[ct.contractcontenttypeid] || [""],
+                    })),
+                }));
 
-                setProviders(list);
+                setProviders(merged);
+                setErrors({});
+
+
 
             } catch (err) {
                 console.error(err);
-                message.error("Failed to load content types");
+                message.error("Failed to load content types or previous links");
             }
         };
 
         load();
-    }, [contractId, token]);
+    }, [contractId, campaignId, token]);
 
     // ---------------- Update Link ----------------
     const updateLink = (pIndex, ctIndex, li, value) => {
-        setProviders((prev) =>
-            prev.map((p, i) =>
+        const providerName = providers[pIndex].providername;
+
+        setProviders((prev) => {
+            const updated = prev.map((p, i) =>
                 i === pIndex
                     ? {
-                          ...p,
-                          contenttypes: p.contenttypes.map((ct, j) =>
-                              j === ctIndex
-                                  ? {
-                                        ...ct,
-                                        links: ct.links.map((l, idx) =>
-                                            idx === li ? value : l
-                                        )
-                                    }
-                                  : ct
-                          )
-                      }
+                        ...p,
+                        contenttypes: p.contenttypes.map((ct, j) =>
+                            j === ctIndex
+                                ? {
+                                    ...ct,
+                                    links: ct.links.map((l, idx) =>
+                                        idx === li ? value : l
+                                    ),
+                                }
+                                : ct
+                        ),
+                    }
                     : p
-            )
-        );
+            );
 
-        const err = validateLink(
-            value,
-            providers[pIndex].contenttypes[ctIndex].links,
-            li
-        );
+            const updatedLinks =
+                updated[pIndex].contenttypes[ctIndex].links;
 
-        setErrors((prev) => ({
-            ...prev,
-            [`${pIndex}-${ctIndex}`]: {
-                ...prev[`${pIndex}-${ctIndex}`],
-                [li]: err
-            }
-        }));
+            const err = validateLink(value, updatedLinks, li, providerName);
+
+            setErrors((prevErr) => ({
+                ...prevErr,
+                [`${pIndex}-${ctIndex}`]: {
+                    ...(prevErr[`${pIndex}-${ctIndex}`] || {}),
+                    [li]: err,
+                },
+            }));
+
+            return updated;
+        });
     };
 
     // ---------------- Add Link Field ----------------
@@ -509,13 +562,13 @@ export default function ContentLinksTab({ token, contractId }) {
             prev.map((p, i) =>
                 i === pIndex
                     ? {
-                          ...p,
-                          contenttypes: p.contenttypes.map((ct, j) =>
-                              j === ctIndex
-                                  ? { ...ct, links: [...ct.links, ""] }
-                                  : ct
-                          )
-                      }
+                        ...p,
+                        contenttypes: p.contenttypes.map((ct, j) =>
+                            j === ctIndex
+                                ? { ...ct, links: [...ct.links, ""] }
+                                : ct
+                        ),
+                    }
                     : p
             )
         );
@@ -527,16 +580,16 @@ export default function ContentLinksTab({ token, contractId }) {
             prev.map((p, i) =>
                 i === pIndex
                     ? {
-                          ...p,
-                          contenttypes: p.contenttypes.map((ct, j) =>
-                              j === ctIndex
-                                  ? {
-                                        ...ct,
-                                        links: ct.links.filter((_, idx) => idx !== li)
-                                    }
-                                  : ct
-                          )
-                      }
+                        ...p,
+                        contenttypes: p.contenttypes.map((ct, j) =>
+                            j === ctIndex
+                                ? {
+                                    ...ct,
+                                    links: ct.links.filter((_, idx) => idx !== li),
+                                }
+                                : ct
+                        ),
+                    }
                     : p
             )
         );
@@ -564,7 +617,7 @@ export default function ContentLinksTab({ token, contractId }) {
         const payload = providers.flatMap((p) =>
             p.contenttypes.map((ct) => ({
                 contractcontenttypeid: ct.contractcontenttypeid,
-                contentlinks: ct.links.map((l) => ({ links: l }))
+                contentlinks: ct.links.map((l) => ({ links: l })),
             }))
         );
 
@@ -575,7 +628,7 @@ export default function ContentLinksTab({ token, contractId }) {
                 "/user/upload/content-link",
                 {
                     p_contractid: contractId,
-                    p_contentlinkjson: payload
+                    p_contentlinkjson: payload,
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -591,9 +644,7 @@ export default function ContentLinksTab({ token, contractId }) {
 
     return (
         <div>
-            <h2 className="text-xl font-semibold mb-6">
-                Upload Content Links
-            </h2>
+            <h2 className="text-xl font-semibold mb-6">Upload Content Links</h2>
 
             {hasGlobalErrors && (
                 <Alert
@@ -605,16 +656,18 @@ export default function ContentLinksTab({ token, contractId }) {
                 />
             )}
 
-            {/* Provider Cards */}
             {providers.map((provider, pIndex) => (
-                <div key={provider.providerid} className="border border-gray-200 rounded-xl p-3 bg-white mb-6">
-                    {/* Provider Header */}
+                <div
+                    key={provider.providerid}
+                    className="border border-gray-200 rounded-xl p-3 bg-white mb-6"
+                >
                     <div className="flex items-center gap-3 mb-4">
                         <img src={provider.iconpath} className="w-6 h-6" />
-                        <h3 className="text-lg font-semibold">{provider.providername}</h3>
+                        <h3 className="text-lg font-semibold">
+                            {provider.providername}
+                        </h3>
                     </div>
 
-                    {/* Content Types */}
                     {provider.contenttypes.map((ct, ctIndex) => (
                         <div
                             key={ct.contractcontenttypeid}
@@ -628,7 +681,9 @@ export default function ContentLinksTab({ token, contractId }) {
                                 <Form.Item
                                     key={li}
                                     validateStatus={
-                                        errors[`${pIndex}-${ctIndex}`]?.[li] ? "error" : ""
+                                        errors[`${pIndex}-${ctIndex}`]?.[li]
+                                            ? "error"
+                                            : ""
                                     }
                                     help={errors[`${pIndex}-${ctIndex}`]?.[li]}
                                     className="!mb-2"
@@ -670,7 +725,6 @@ export default function ContentLinksTab({ token, contractId }) {
                 </div>
             ))}
 
-            {/* SAVE BUTTON */}
             {providers.length > 0 && (
                 <div className="text-right">
                     <Button

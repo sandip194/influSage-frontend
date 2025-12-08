@@ -40,6 +40,11 @@ const ApplyNow = () => {
     if (!amount || Number(amount) <= 0) {
       newErrors.amount = "Please enter a valid amount greater than 0.";
     }
+
+    if (amount && amount.length > 7) {
+      newErrors.amount = "Amount cannot exceed 7 digits.";
+    }
+
     if (!proposal.trim()) {
       newErrors.proposal = "Please describe your proposal.";
     }
@@ -265,7 +270,21 @@ const ApplyNow = () => {
                   placeholder="0.00"
                   value={amount}
                   min={1}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    // Allow only digits
+                    if (!/^\d*$/.test(value)) return;
+
+                    // Prevent entering more than 7 digits
+                    if (value.length > 7) {
+                      setErrors(prev => ({ ...prev, amount: "Amount cannot exceed 7 digits." }));
+                      return;
+                    }
+
+                    setAmount(value);
+                    setErrors(prev => ({ ...prev, amount: "" }));
+                  }}
                   status={errors.amount ? "error" : ""}
                 />
                 {errors.amount && (
