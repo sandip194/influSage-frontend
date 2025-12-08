@@ -45,7 +45,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
   const [unreadNotifications, setUnreadNotifications] = useState([]);
   const [allNotifications, setAllNotifications] = useState([]);
-  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+  // const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [initialNotificationsFetched, setInitialNotificationsFetched] = useState(false);
 
@@ -59,7 +59,8 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const basePath = role === 1 ? "/dashboard" : "/vendor-dashboard";
 
   const fetchNotifications = useCallback(async () => {
-  if (!token) return;
+  if (!token || initialNotificationsFetched) return;
+
   try {
     setLoadingNotifications(true);
 
@@ -70,7 +71,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
     const rawData = res.data?.data || [];
 
-    const formatted = rawData.map((item) => ({
+    const formatted = rawData.map(item => ({
       id: item.notificationid,
       title: item.title,
       message: item.description,
@@ -79,13 +80,15 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     }));
 
     setAllNotifications(formatted);
+    setUnreadNotifications(formatted.filter(n => !n.isRead));
+    setInitialNotificationsFetched(true);
 
-  } catch (error) {
-    console.error("Error fetching notifications:", error);
+  } catch (err) {
+    console.error("Error fetching notifications:", err);
   } finally {
     setLoadingNotifications(false);
   }
-}, [token]);
+}, [token, initialNotificationsFetched]);
 
   
 useEffect(() => {
@@ -102,24 +105,35 @@ useEffect(() => {
 
   socket.emit("joinUserRoom", userId);
 
-  const handler = (ntf) => {
-    console.log("📩 REAL-TIME NOTIFICATION RECEIVED:", ntf);
+  const handler = (payload) => {
+  console.log("📩 REAL-TIME NOTIFICATION RECEIVED:", payload);
+  if (!payload) return;
 
-    if (!ntf) return;
+  // ✅ Normalize payload (array or single object)
+  const notifications = Array.isArray(payload) ? payload : [payload];
 
-    const formatted = {
-      id: ntf.notificationid,
-      title: ntf.title,
-      description: ntf.description,
-      isRead: false,
-      time: ntf.createddate,
-    };
-    
+  const formattedList = notifications.map(ntf => ({
+    id: ntf.notificationid,
+    title: ntf.title,
+    message: ntf.description,
+    isRead: ntf.isread ?? false,
+    time: ntf.createddate,
+  }));
 
-    setUnreadNotifications(prev => [formatted, ...prev]);
-    setAllNotifications(prev => [formatted, ...prev]);
-    setHasUnreadNotifications(true);
-  };
+  setAllNotifications(prev => {
+    const existingIds = new Set(prev.map(n => n.id));
+    const newOnes = formattedList.filter(n => !existingIds.has(n.id));
+    return [...newOnes, ...prev];
+  });
+
+  setUnreadNotifications(prev => {
+    const existingIds = new Set(prev.map(n => n.id));
+    const unread = formattedList.filter(
+      n => !n.isRead && !existingIds.has(n.id)
+    );
+    return [...unread, ...prev];
+  });
+};
 
   socket.on("receiveNotification", handler);
   console.log("👂 Listener attached: receiveNotification");
@@ -144,35 +158,63 @@ useEffect(() => {
   // ======================================================
   // 📨 MESSAGE LOGIC (unchanged)
   // ======================================================
-  const fetchUnreadMessages = useCallback(async () => {
-    if (!token) return;
+  useEffect(() => {
+  if (!token) return;
+
+  const fetchOnce = async () => {
     try {
+      setLoadingMessages(true);
       const res = await axios.get(`/chat/unread-messages`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      const newData = res.data?.data || [];
-      setUnreadMessages((prev) => {
-        const prevStr = JSON.stringify(prev);
-        const newStr = JSON.stringify(newData);
-        return prevStr !== newStr ? newData : prev;
-      });
-
-      if (!initialMessagesFetched) setInitialMessagesFetched(true);
+      setUnreadMessages(res.data?.data || []);
+      setInitialMessagesFetched(true);
     } catch (err) {
-      console.error("Error fetching unread messages:", err);
+      console.error(err);
     } finally {
       setLoadingMessages(false);
     }
-  }, [token, initialMessagesFetched]);
+  };
 
-  useEffect(() => {
-    if (!token) return;
-    setLoadingMessages(true);          
-    fetchUnreadMessages();
-    const interval = setInterval(fetchUnreadMessages, 3000);
-    return () => clearInterval(interval);
-  }, [token, fetchUnreadMessages]);
+  fetchOnce();
+}, [token]);  
+
+useEffect(() => {
+  if (!socket || !userId) return;
+
+  console.log("📩 Listening for real-time messages...");
+
+  socket.emit("joinUserRoom", userId);
+
+  const messageHandler = (payload) => {
+  console.log("💬 SOCKET MESSAGE RECEIVED:", payload);
+  console.log("🙋 CURRENT USER:", userId, "ROLE:", role);
+
+  const receiverId =
+    payload.roleid === "2"
+      ? payload.userid
+      : payload.vendorId;
+
+  console.log("🎯 EXPECTED RECEIVER:", receiverId);
+
+  if (String(receiverId) !== String(userId)) {
+    console.log("⛔ NOT FOR ME — ignored");
+    return;
+  }
+
+  console.log("✅ MESSAGE ACCEPTED");
+
+  setUnreadMessages((prev) => {
+    return [payload, ...prev];
+  });
+};
+
+  socket.on("receiveMessage", messageHandler);
+
+  return () => {
+    socket.off("receiveMessage", messageHandler);
+  };
+}, [socket, userId]);
 
   const memoizedMessages = useMemo(() => unreadMessages, [unreadMessages]);
 
@@ -342,7 +384,6 @@ useEffect(() => {
               setNotificationDropdownVisible(open);
 
               if (open) {
-                setHasUnreadNotifications(false);
                 setUnreadNotifications([]);
                 setAllNotifications(prev =>
                   prev.map(n => ({ ...n, isRead: true }))
@@ -359,13 +400,13 @@ useEffect(() => {
                 fetchNotifications();
                 setModalOpen(true);
               }}
-              onUnreadChange={setHasUnreadNotifications}
+              // onUnreadChange={setHasUnreadNotifications}
               notifications={allNotifications}
               loading={loadingNotifications}
             />
           }
         >
-          <Badge dot={hasUnreadNotifications} color="red" offset={[-3, 3]}>
+          <Badge dot={unreadNotifications.length > 0} color="red" offset={[-3, 3]}>
             <Button shape="circle" icon={<BellOutlined />} />
           </Badge>
         </Dropdown>

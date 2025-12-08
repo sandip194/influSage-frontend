@@ -399,41 +399,81 @@ useEffect(() => {
                     >
                       {/* reply preview */}
                       {msg.replyId && (
-                        <div
-                          onClick={() => {
-                            const el = document.getElementById(msg.replyId);
-                            if (el) {
-                              el.scrollIntoView({ behavior: "smooth", block: "center" });
-                              // setHighlightMsgId(msg.replyId);
-                              // setTimeout(() => setHighlightMsgId(null), 1200);
-                            }
-                          }}
-                          className={`mb-2 px-2 py-1 rounded-md border-l-4 text-xs cursor-pointer ${
-                            msg.sender === "user"
-                              ? "bg-white/20 border-blue-400 text-blue-100"
-                              : "bg-gray-200 border-blue-500 text-gray-700"
-                          }`}
-                        >
-                          {(() => {
-                            const repliedMsg = messages.find((m) => m.id === msg.replyId);
-                            let previewText = repliedMsg?.message;
-                            if (!previewText) {
-                              if (repliedMsg?.filetype === "image") previewText = "📷 Image";
-                              else if (repliedMsg?.filetype === "video") previewText = "🎬 Video";
-                              else if (repliedMsg?.filetype === "file")
-                                previewText = "📎 " + repliedMsg?.filepath?.split("/").pop();
-                            }
-                            return (
-                              <>
-                                {repliedMsg?.sender === "user" && (
-                                  <span className="font-semibold block">You</span>
-                                )}
-                                <span className="block truncate">{previewText}</span>
-                              </>
-                            );
-                          })()}
-                        </div>
-                      )}
+                                  <div
+                                    onClick={() => {
+                                      const el = document.getElementById(msg.replyId);
+                                      if (el) {
+                                        el.scrollIntoView({ behavior: "smooth", block: "center" });
+                                        setHighlightMsgId(msg.replyId);
+                                        setTimeout(() => setHighlightMsgId(null), 1200);
+                                      }
+                                    }}
+                                    className={`mb-2 p-2 rounded-md border-l-4 cursor-pointer flex items-center justify-between gap-2
+                                      ${msg.sender === "admin"
+                                        ? "bg-white/20 border-blue-400 text-blue-100"
+                                        : "bg-gray-200 border-blue-500 text-gray-700"
+                                      }`}
+                                  >
+                                    {/* LEFT SIDE → Text */}
+                                    <div className="flex flex-col flex-1 min-w-0">
+                                      {(() => {
+                                        const repliedMsg = messages.find((m) => m.id === msg.replyId);
+                                        if (!repliedMsg) return null;
+
+                                        return (
+                                          <>
+                                            {/* sender name (optional) */}
+                                            {repliedMsg.sender === "admin" && (
+                                              <span className="font-semibold text-xs">You</span>
+                                            )}
+
+                                            {/* TEXT PREVIEW */}
+                                            <span className="text-xs truncate">
+                                              {repliedMsg.message
+                                                ? repliedMsg.message
+                                                : repliedMsg.filetype === "image"
+                                                ? "📷 Photo"
+                                                : repliedMsg.filetype === "video"
+                                                ? "🎬 Video"
+                                                : repliedMsg.filetype === "file"
+                                                ? "📎 File"
+                                                : ""}
+                                            </span>
+                                          </>
+                                        );
+                                      })()}
+                                    </div>
+
+                                    {/* RIGHT SIDE → Thumbnail */}
+                                    {(() => {
+                                      const repliedMsg = messages.find((m) => m.id === msg.replyId);
+                                      if (!repliedMsg) return null;
+
+                                      return (
+                                        <>
+                                          {repliedMsg.filetype === "image" && (
+                                            <img
+                                              src={repliedMsg.filepath}
+                                              className="w-12 h-12 rounded-md object-cover ml-2"
+                                            />
+                                          )}
+
+                                          {repliedMsg.filetype === "video" && (
+                                            <div className="w-12 h-12 bg-black/40 rounded-md flex items-center justify-center text-white text-xs ml-2">
+                                              🎬
+                                            </div>
+                                          )}
+
+                                          {repliedMsg.filetype === "file" && (
+                                            <div className="w-12 h-12 bg-gray-300 rounded-md flex items-center justify-center text-xs ml-2">
+                                              📎
+                                            </div>
+                                          )}
+                                        </>
+                                      );
+                                    })()}
+                                  </div>
+                                )}  
 
                       {/* message text */}
                       {!msg.filepath && msg.message && <span>{msg.message}</span>}
