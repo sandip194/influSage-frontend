@@ -6,14 +6,12 @@ import { useSelector } from "react-redux";
 import {
   RiImageAddLine,
   RiInformationLine,
-  RiDeleteBin6Line,
 } from "react-icons/ri";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter"; // ✅ Add this
 import { toast } from "react-toastify";
 
 const { TextArea } = Input;
-const { Option } = Select;
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
@@ -104,7 +102,8 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
     const errors = {
       title: !formData.title?.trim(),
       description: !formData.description?.trim(),
-      budgetAmount: budgetAmount <= 0,
+      budgetAmount: budgetAmount <= 0 ||
+        String(budgetAmount).length > 7,
       applicationstartdate: !formData.applicationstartdate,
       applicationenddate:
         !formData.applicationenddate ||
@@ -134,8 +133,8 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       name: formData.title,
       description: formData.description,
       estimatedbudget: parseFloat(formData.budgetAmount),
-      startdate: formData.startDate?.format("DD-MM-YYYY") || null,
-      enddate: formData.endDate?.format("DD-MM-YYYY") || null,
+      campaignstartdate: formData.startDate?.format("DD-MM-YYYY") || null,
+      campaignenddate: formData.endDate?.format("DD-MM-YYYY") || null,
       applicationstartdate: formData.applicationstartdate?.format("DD-MM-YYYY") || null,
       applicationenddate: formData.applicationenddate?.format("DD-MM-YYYY") || null,
       branddetail: formData.aboutBrand,
@@ -252,7 +251,19 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
         size="large"
         placeholder="Enter Campaign Title"
         value={formData.title}
-        onChange={(e) => handleChange("title", e.target.value)}
+        maxLength={100}
+        onChange={(e) => {
+          let value = e.target.value.trimStart(); // remove leading spaces
+
+          // Allow only letters, numbers, spaces, hyphens, underscores
+          value = value.replace(/[^a-zA-Z0-9\s-_]/g, "");
+
+          // Hard limit
+          if (value.length > 100) return;
+
+          setFormData(prev => ({ ...prev, title: value }));
+          setErrors(prev => ({ ...prev, title: "" }));
+        }}
       />
       {errors.title && (
         <p className="text-red-500 text-sm mt-1">Please enter a title</p>
@@ -267,9 +278,17 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       <TextArea
         size="large"
         rows={4}
+        maxLength={500}
         placeholder="Enter Campaign Description"
         value={formData.description}
-        onChange={(e) => handleChange("description", e.target.value)}
+        onChange={(e) => {
+          const value = e.target.value;
+
+          if (value.length > 500) return;
+
+          setFormData(prev => ({ ...prev, description: value }));
+          setErrors(prev => ({ ...prev, description: "" }));
+        }}
       />
       {errors.description && (
         <p className="text-red-500 text-sm mt-1">Please enter a description</p>
@@ -439,14 +458,24 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
           onChange={(e) => {
             const value = e.target.value;
 
-            // Update form data
+            // Allow only digits
+            if (!/^\d*$/.test(value)) return;
+
+            // Max 7 digits
+            if (value.length > 7) {
+              setErrors((prev) => ({
+                ...prev,
+                budgetAmount: "Budget cannot exceed 7 digits."
+              }));
+              return;
+            }
+
             handleChange("budgetAmount", value);
 
-            // Inline validation: set error if 0 or empty
             if (!value || Number(value) <= 0) {
               setErrors((prev) => ({
                 ...prev,
-                budgetAmount: "Budget is required and must be greater than 0",
+                budgetAmount: "Budget is required and must be greater than 0 and cannot exceed 7 digits.",
               }));
             } else {
               setErrors((prev) => ({
@@ -455,11 +484,12 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
               }));
             }
           }}
+
         />
         <span>{formData.currency}</span>
       </div>
       {errors.budgetAmount && (
-        <p className="text-red-500 text-sm mt-1">Budget is required and must be greater than 0</p>
+        <p className="text-red-500 text-sm mt-1">Budget is required and must be greater than 0 and cannot exceed 7 digits.</p>
       )}
 
       <hr className="my-4 border-gray-200" />
@@ -471,9 +501,17 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       <TextArea
         size="large"
         rows={3}
+        maxLength={250}
         placeholder="About Brand"
         value={formData.aboutBrand}
-        onChange={(e) => handleChange("aboutBrand", e.target.value)}
+        onChange={(e) => {
+          const value = e.target.value;
+
+          if (value.length > 250) return;
+
+          setFormData(prev => ({ ...prev, aboutBrand: value }));
+          setErrors(prev => ({ ...prev, aboutBrand: "" }));
+        }}
       />
       {errors.aboutBrand && (
         <p className="text-red-500 text-sm mt-1">Please describe your brand</p>

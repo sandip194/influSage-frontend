@@ -28,7 +28,6 @@ const CampaignReviewStep = ({ onEdit }) => {
   const [lightboxVideo, setLightboxVideo] = useState({ open: false, src: "" });
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { campaignId } = useParams();
-  const [loadingAction, setLoadingAction] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [loadingSend, setLoadingSend] = useState(false);
 
@@ -490,11 +489,11 @@ const CampaignReviewStep = ({ onEdit }) => {
               <div className="flex justify-between">
                 <div>
                   <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
-                  <p className='text-gray-500'>{p_campaignjson.startdate || "—"}</p>
+                  <p className='text-gray-500'>{p_campaignjson.campaignstartdate || "—"}</p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold mb-1 my-2">End Date</p>
-                  <p className='text-gray-500'>{p_campaignjson.enddate || "—"}</p>
+                  <p className='text-gray-500'>{p_campaignjson.campaignenddate || "—"}</p>
                 </div>
               </div>
               <hr className="my-4 border-gray-200" />

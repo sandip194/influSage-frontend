@@ -36,6 +36,10 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
         if (!amount || Number(amount) <= 0) {
             newErrors.amount = "Please enter a valid amount greater than 0.";
         }
+
+        if (amount && amount.length > 7) {
+            newErrors.amount = "Amount cannot exceed 7 digits.";
+        }
         if (!proposal.trim()) {
             newErrors.proposal = "Please describe your proposal.";
         }
@@ -95,7 +99,7 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
 
     // ============= LOAD EDIT DATA =============
     const loadData = async () => {
-        
+
         try {
             setLoading(true);
             const res = await axios.get(`user/signle-applied/${campaignId}`, {
@@ -205,12 +209,24 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
                 type="number"
                 addonBefore="₹"
                 placeholder="0.00"
+                maxLength={7}
                 value={amount}
                 onChange={(e) => {
-                    setAmount(e.target.value);
+                    const value = e.target.value;
+
+                    // Allow only digits
+                    if (!/^\d*$/.test(value)) return;
+
+                    // Prevent entering more than 7 digits
+                    if (value.length > 7) {
+                        setErrors(prev => ({ ...prev, amount: "Amount cannot exceed 7 digits." }));
+                        return;
+                    }
+
+                    setAmount(value);
                     setErrors(prev => ({ ...prev, amount: "" }));
                 }}
-                status={errors.amount ? "error" : ""}
+
             />
             {errors.amount && <p className="text-red-500">{errors.amount}</p>}
 
