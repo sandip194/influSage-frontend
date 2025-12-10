@@ -47,11 +47,7 @@ export default function ChatAppPage() {
     if (!socket) return;
 
    const handleReceiveMessage = (msg) => {
-  // console.log("RAW SOCKET MSG:", msg);
-
-  const isMyMessage =
-    String(msg.roleid) === String(role) ||
-    String(msg.userid) === String(userId);
+    if (String(msg.userid) === String(userId)) return;
 
   const normalized = {
     id: msg.messageid || msg.id,
@@ -62,6 +58,7 @@ export default function ChatAppPage() {
     replyId: msg.replyid || null,
     time: msg.time || new Date().toISOString(),
   };
+
   dispatch(addMessage(normalized));
   setRefreshKey(prev => prev + 1);
 };
@@ -75,6 +72,7 @@ export default function ChatAppPage() {
   // ✉️ Handle sending messages
     const handleSendMessage = async ({ text, file, replyId }) => {
     if (!activeChat) return;
+    // console.log("chat is",activeChat);
     
     const newMsg = {
       id: Date.now(),

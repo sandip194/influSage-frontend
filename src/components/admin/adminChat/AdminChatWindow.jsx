@@ -75,6 +75,8 @@ useEffect(() => {
       else if (["mp4","mov","avi","mkv","webm"].includes(ext)) filetype = "video";
       else filetype = "file";
     }
+    const getSender = (msg, userId) =>
+      String(msg.userid) === String(userId) ? "admin" : "user";
 
     const formattedMsg = {
       id: msg.usersupportticketmessagesid,
@@ -82,7 +84,7 @@ useEffect(() => {
       filepath: file,
       filetype,
       replyId: msg.replyid || null,
-      sender: msg.userid === userId ? "admin" : "user",
+      sender: getSender(msg, userId),
       time: msg.createddate || msg.time || new Date().toISOString(),
     };
 
@@ -154,18 +156,6 @@ useEffect(() => {
 
 
       setMessages(formatted);
-
-      if (socket) {
-        const lastMsg = formatted[formatted.length - 1];
-        socket.emit("sendSupportMessage", {
-          ticketId: activeSubject.id,
-          id: lastMsg.id,
-          replyId: lastMsg.replyId,
-          message: lastMsg.message,
-          filepath: lastMsg.filepath,
-          roleid: 4,
-        });
-      }
 
       setMessage("");
       setAttachedFile(null);
@@ -554,70 +544,49 @@ useEffect(() => {
         className="px-6 sticky bottom-0 w-full bg-white border-t border-gray-300"
       >
         {replyToMessage && (
-          <div className="bg-gray-200 border-l-4 border-blue-600 px-3 py-2 rounded-md mb-2 flex justify-between items-center">
-            <div className="text-xs text-gray-700">
-              {(() => {
-                let previewText = replyToMessage?.message;
+          <div className="bg-gray-200 border-l-4 border-blue-600 p-3 rounded-md mb-2 flex items-center justify-between gap-3">
+            
+            {/* LEFT TEXT */}
+            <div className="flex flex-col flex-1 min-w-0 text-xs text-gray-700">
+              <span className="font-semibold">Replying to</span>
 
-                if (!previewText) {
-                  if (replyToMessage?.filetype === "image")
-                    previewText = "📷 Image";
-                  else if (replyToMessage?.filetype === "video")
-                    previewText = "🎬 Video";
-                  else if (replyToMessage?.filetype === "file")
-                    previewText =
-                      "📎 " + replyToMessage?.filepath?.split("/").pop();
-                }
-
-                return (
-                  <>
-                    <div className="flex items-center justify-between gap-2">
-                    {/* LEFT SIDE → TEXT PREVIEW */}
-                    <div className="flex flex-col flex-1 min-w-0 text-xs text-gray-700">
-                      <span className="font-semibold">Replying to:</span>
-
-                      <span className="truncate font-medium">
-                        {replyToMessage?.message
-                          ? replyToMessage.message.slice(0, 40)
-                          : replyToMessage?.filetype === "image"
-                          ? "📷 Photo"
-                          : replyToMessage?.filetype === "video"
-                          ? "🎬 Video"
-                          : replyToMessage?.filetype === "file"
-                          ? "📎 " + replyToMessage?.filepath?.split("/").pop()
-                          : ""}
-                      </span>
-                    </div>
-
-                    {/* RIGHT SIDE → IMAGE / VIDEO / FILE THUMBNAIL */}
-                    {replyToMessage?.filetype === "image" && (
-                      <img
-                        src={replyToMessage.filepath}
-                        className="w-12 h-12 rounded-md object-cover"
-                      />
-                    )}
-
-                    {replyToMessage?.filetype === "video" && (
-                      <div className="w-12 h-12 bg-black/40 rounded-md flex items-center justify-center text-white text-xs">
-                        🎬
-                      </div>
-                    )}
-
-                    {replyToMessage?.filetype === "file" && (
-                      <div className="w-12 h-12 bg-gray-300 rounded-md flex items-center justify-center text-xs">
-                        📎
-                      </div>
-                    )}
-                  </div>
-
-                  </>
-                );
-              })()}
+              <span className="truncate font-medium">
+                {replyToMessage.message
+                  ? replyToMessage.message
+                  : replyToMessage.filetype === "image"
+                  ? "📷 Photo"
+                  : replyToMessage.filetype === "video"
+                  ? "🎬 Video"
+                  : replyToMessage.filetype === "file"
+                  ? "📎 File"
+                  : ""}
+              </span>
             </div>
 
+            {/* RIGHT PREVIEW */}
+            {replyToMessage.filetype === "image" && (
+              <img
+                src={replyToMessage.filepath}
+                className="w-12 h-12 rounded-md object-cover flex-shrink-0"
+              />
+            )}
+
+            {replyToMessage.filetype === "video" && (
+              <div className="w-12 h-12 bg-black/40 rounded-md flex items-center justify-center text-white text-xs flex-shrink-0">
+                🎬
+              </div>
+            )}
+
+            {replyToMessage.filetype === "file" && (
+              <div className="w-12 h-12 bg-gray-300 rounded-md flex items-center justify-center text-xs flex-shrink-0">
+                📎
+              </div>
+            )}
+
+            {/* CLOSE */}
             <button
               onClick={() => setReplyToMessage(null)}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-600 hover:text-gray-900 font-bold"
             >
               ✕
             </button>

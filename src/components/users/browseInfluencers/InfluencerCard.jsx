@@ -4,6 +4,7 @@ import {
   RiHeartLine,
   RiHeartFill,
   RiUserAddLine,
+  RiStarFill,
 } from "@remixicon/react";
 import { Tooltip } from "antd";
 // import "./heartAnimation.css";
@@ -75,6 +76,21 @@ const InfluencerCard = ({ influencer, onLike, onInvite, BASE_URL }) => {
             <p className="text-xs text-gray-500">
               {influencer?.statename}, {influencer?.countryname}
             </p>
+
+            <div className="flex items-center gap-1 text-xs">
+              {Number(influencer?.ratingcount) > 0 && (
+                <div className="flex items-center gap-1 mt-1">
+                  {Array.from({ length: Math.round(influencer.ratingcount) }).map((_, i) => (
+                    <RiStarFill
+                      key={i}
+                      size={12}
+                      className="text-yellow-400"
+                      style={{ stroke: "black", strokeWidth: 1 }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

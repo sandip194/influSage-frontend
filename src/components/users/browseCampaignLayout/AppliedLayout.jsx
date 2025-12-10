@@ -92,7 +92,7 @@ const AppliedLayout = () => {
   const handleWithdraw = async (campaignapplicationid) => {
     try {
       const res = await axios.post(
-        `/user/withdraw-application`,
+        "/user/withdraw-application",
         {
           p_applicationid: campaignapplicationid,
           p_statusname: "Withdrawn",
@@ -100,10 +100,21 @@ const AppliedLayout = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success(res.data?.message);
+      if (res.data?.status === false) {
+        toast.error(res.data.message || "Action not allowed");
+        return;
+      }
+
+      toast.success(
+        res.data?.message || "Application withdrawn successfully"
+      );
       getAllAppliedCampaigns();
+
     } catch (error) {
-      toast.error(error || "Error withdrawing application");
+      toast.error(
+        error?.response?.data?.message ||
+        "Error withdrawing application"
+      );
     }
   };
 
@@ -238,7 +249,7 @@ const AppliedLayout = () => {
             className="px-6 py-2 rounded-full bg-[#0f122f] text-white"
           >
             Withdraw
-          </button>
+          </button> 
         </div>
       </Modal>
 

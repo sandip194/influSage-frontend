@@ -378,6 +378,9 @@ useEffect(() => {
           )}
             {messages.map((msg) => {
               if (!msg.message && !msg.filepath) return null;
+              const repliedMsg = msg.replyId
+                ? messages.find((m) => m.id === msg.replyId)
+              : null;
 
               return (
                 <motion.div
@@ -398,45 +401,64 @@ useEffect(() => {
                       }`}
                     >
                       {/* reply preview */}
-                      {msg.replyId && (
+                      {repliedMsg && (
                         <div
                           onClick={() => {
-                            const el = document.getElementById(msg.replyId);
+                            const el = document.getElementById(repliedMsg.id);
                             if (el) {
                               el.scrollIntoView({ behavior: "smooth", block: "center" });
-                              // setHighlightMsgId(msg.replyId);
-                              // setTimeout(() => setHighlightMsgId(null), 1200);
+                              setHighlightMsgId(repliedMsg.id);
+                              setTimeout(() => setHighlightMsgId(null), 1200);
                             }
                           }}
-                          className={`mb-2 px-2 py-1 rounded-md border-l-4 text-xs cursor-pointer ${
-                            msg.sender === "user"
+                          className={`mb-2 p-2 rounded-md border-l-4 cursor-pointer flex items-center justify-between gap-2
+                            ${msg.sender === "user"
                               ? "bg-white/20 border-blue-400 text-blue-100"
                               : "bg-gray-200 border-blue-500 text-gray-700"
-                          }`}
+                            }`}
                         >
-                          {(() => {
-                            const repliedMsg = messages.find((m) => m.id === msg.replyId);
-                            let previewText = repliedMsg?.message;
-                            if (!previewText) {
-                              if (repliedMsg?.filetype === "image") previewText = "📷 Image";
-                              else if (repliedMsg?.filetype === "video") previewText = "🎬 Video";
-                              else if (repliedMsg?.filetype === "file")
-                                previewText = "📎 " + repliedMsg?.filepath?.split("/").pop();
-                            }
-                            return (
-                              <>
-                                {repliedMsg?.sender === "user" && (
-                                  <span className="font-semibold block">You</span>
-                                )}
-                                <span className="block truncate">{previewText}</span>
-                              </>
-                            );
-                          })()}
+                          {/* LEFT → text */}
+                          <div className="flex flex-col flex-1 min-w-0">
+                            <span className="text-xs font-semibold">
+                              {repliedMsg.sender === msg.sender ? "You" : "Replied"}
+                            </span>
+
+                            <span className="text-xs truncate">
+                              {repliedMsg.message
+                                ? repliedMsg.message
+                                : repliedMsg.filetype === "image"
+                                ? "📷 Photo"
+                                : repliedMsg.filetype === "video"
+                                ? "🎬 Video"
+                                : repliedMsg.filetype === "file"
+                                ? "📎 File"
+                                : ""}
+                            </span>
+                          </div>
+
+                          {/* RIGHT → thumbnail */}
+                          {repliedMsg.filetype === "image" && (
+                            <img
+                              src={repliedMsg.filepath}
+                              className="w-11 h-11 rounded-md object-cover flex-shrink-0"
+                              alt=""
+                            />
+                          )}
+
+                          {repliedMsg.filetype === "video" && (
+                            <div className="w-11 h-11 bg-black/40 rounded-md flex items-center justify-center text-white text-xs flex-shrink-0">
+                              🎬
+                            </div>
+                          )}
+
+                          {repliedMsg.filetype === "file" && (
+                            <div className="w-11 h-11 bg-gray-300 rounded-md flex items-center justify-center text-xs flex-shrink-0">
+                              📎
+                            </div>
+                          )}
                         </div>
                       )}
 
-                      {/* message text */}
-                      {!msg.filepath && msg.message && <span>{msg.message}</span>}
 
                       {/* reply button */}
                       {hoveredMsgId === msg.id && (
@@ -491,6 +513,12 @@ useEffect(() => {
                           </span>
                         </div>
                       )}
+
+                      {msg.message && (
+                        <p className="mt-1 whitespace-pre-wrap break-words">
+                          {msg.message}
+                        </p>
+                      )}
                     </div>
 
                     {/* Message time */}
@@ -522,27 +550,52 @@ useEffect(() => {
         className="px-6 sticky bottom-0 w-full bg-white border-t border-gray-300"
       >
         {replyToMessage && (
-          <div className="bg-gray-200 border-l-4 border-blue-600 px-3 py-2 rounded-md mb-2 flex justify-between items-center">
-            <div className="text-xs text-gray-700">
-              {(() => {
-                let previewText = replyToMessage?.message;
+          <div className="mb-2 p-2 rounded-md border-l-4 border-blue-600 bg-gray-200 flex items-center justify-between gap-3">
+            
+            {/* LEFT → TEXT */}
+            <div className="flex flex-col flex-1 min-w-0 text-xs text-gray-700">
+              <span className="font-semibold">Replying to:</span>
 
-                if (!previewText) {
-                  if (replyToMessage?.filetype === "image") previewText = "📷 Image";
-                  else if (replyToMessage?.filetype === "video") previewText = "🎬 Video";
-                  else if (replyToMessage?.filetype === "file")
-                    previewText = "📎 " + replyToMessage?.filepath?.split("/").pop();
-                }
-
-                return (
-                  <>
-                    Replying to: <span className="font-semibold">{previewText?.slice(0, 40)}</span>
-                  </>
-                );
-              })()}
+              <span className="truncate font-medium">
+                {replyToMessage.message
+                  ? replyToMessage.message
+                  : replyToMessage.filetype === "image"
+                  ? "📷 Photo"
+                  : replyToMessage.filetype === "video"
+                  ? "🎬 Video"
+                  : replyToMessage.filetype === "file"
+                  ? "📎 " + replyToMessage.filepath?.split("/").pop()
+                  : ""}
+              </span>
             </div>
 
-            <button onClick={() => setReplyToMessage(null)} className="text-gray-500 hover:text-gray-700">✕</button>
+            {/* RIGHT → THUMBNAIL */}
+            {replyToMessage.filetype === "image" && (
+              <img
+                src={replyToMessage.filepath}
+                className="w-12 h-12 rounded-md object-cover"
+                alt=""
+              />
+            )}
+
+            {replyToMessage.filetype === "video" && (
+              <div className="w-12 h-12 bg-black/40 rounded-md flex items-center justify-center text-white text-xs">
+                🎬
+              </div>
+            )}
+
+            {replyToMessage.filetype === "file" && (
+              <div className="w-12 h-12 bg-gray-300 rounded-md flex items-center justify-center text-xs">
+                📎
+              </div>
+            )}
+
+           <button
+              onClick={() => setReplyToMessage(null)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
           </div>
         )}
         {attachedPreview && (

@@ -99,40 +99,40 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
 
     // ============= LOAD EDIT DATA =============
     const loadData = async () => {
-
         try {
             setLoading(true);
-            const res = await axios.get(`user/signle-applied/${campaignId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+
+            const res = await axios.get(
+            `user/signle-applied/${campaignId}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+            );
 
             const data = res.data?.data;
             if (!data) return;
 
+            setIsEdit(true);
             setAmount(data.budget || "");
             setProposal(data.description || "");
-            if (data.budget && data.description) setIsEdit(true);
+
+            resetFiles();
 
             if (data.filepaths?.length > 0) {
-                const formattedFiles = data.filepaths.map((f, i) => {
-                    const name = f.filepath.split("/").pop();
-                    return {
-                        uid: `existing-${i}`,
-                        name,
-                        url: f.filepath,
-                        filepath: f.filepath,
-                        type: "file",
-                    };
-                });
-                setExistingFiles(formattedFiles);
+            const formattedFiles = data.filepaths.map((f, i) => ({
+                uid: `existing-${i}`,
+                name: f.filepath.split("/").pop(),
+                url: f.filepath,
+                filepath: f.filepath,
+                type: "file",
+            }));
+
+            setExistingFiles(formattedFiles);
             }
         } catch (err) {
-            console.log(err)
-        }
-        finally {
+            console.error(err);
+        } finally {
             setLoading(false);
         }
-    };
+        };
 
     useEffect(() => {
         if (open) loadData();
