@@ -56,8 +56,6 @@ const VendorFeedbackModal = ({ campaignId, onClose }) => {
 
     if (!selectedInf) newErrors.influencer = "Please select an influencer.";
 
-    if (!rating) newErrors.rating = "Please select a rating.";
-
     if (!feedback.trim()) {
       newErrors.feedback = "Feedback cannot be empty.";
     } else if (feedback.trim().length < 10) {
@@ -153,7 +151,6 @@ const VendorFeedbackModal = ({ campaignId, onClose }) => {
                 className="text-yellow-400"
                 onClick={() => {
                   setRating(star);
-                  setErrors((prev) => ({ ...prev, rating: "" }));
                 }}
               />
             ) : (
@@ -163,7 +160,6 @@ const VendorFeedbackModal = ({ campaignId, onClose }) => {
                 className="text-yellow-400"
                 onClick={() => {
                   setRating(star);
-                  setErrors((prev) => ({ ...prev, rating: "" }));
                 }}
               />
             )

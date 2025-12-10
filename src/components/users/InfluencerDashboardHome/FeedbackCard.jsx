@@ -84,7 +84,7 @@ const FeedbackCard = () => {
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {feedbacks.map((fb) => (
+        {feedbacks.slice(0, 3).map((fb) => (
           <div
             key={fb.feedbackid}
             className="rounded-2xl p-4 flex flex-col justify-between h-full bg-white 
@@ -95,11 +95,13 @@ const FeedbackCard = () => {
               {[...Array(5)].map((_, i) => (
                 <i
                   key={i}
-                  className={`ri-star-${
-                    i < fb.rating ? "fill" : "line"
-                  } text-lg sm:text-xl ${
-                    i < fb.rating ? "text-yellow-500" : "text-gray-400"
-                  }`}
+                  className={`ri-star-${i < fb.rating ? "fill" : "line"} 
+                    text-lg sm:text-xl 
+                    ${i < fb.rating ? "text-yellow-500" : "text-gray-400"}
+                  `}
+                  style={{
+                    WebkitTextStroke: "0.8px black",
+                  }}
                 ></i>
               ))}
             </div>

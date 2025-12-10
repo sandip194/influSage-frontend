@@ -16,7 +16,7 @@ const CampaignCard = React.memo(
       <div
         key={campaign.id}
         onClick={() => handleCardClick(campaign.id)}
-        className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-xl/30 hover:shadow-lg transition-transform duration-200 flex flex-col justify-between cursor-pointer relative"
+        className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-lg transition-transform duration-200 flex flex-col justify-between cursor-pointer relative"
       >
         {/* --- Top Section --- */}
         <div className="flex justify-between items-start mb-3 pb-2">
@@ -41,7 +41,7 @@ const CampaignCard = React.memo(
                   ${
                     campaign.campaigsaved
                       ? "border-gray-300 bg-gray-50 text-gray-800 hover:bg-gray-100"
-                      : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                      : "border-gray-200 text-gray-600 bg-gray-200 hover:bg-gray-50"
                   }`}
               >
                 {campaign.campaigsaved ? (

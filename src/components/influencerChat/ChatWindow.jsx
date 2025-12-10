@@ -72,29 +72,41 @@ useEffect(() => {
   if (!socket) return;
 
   const handleReceiveMessage = (msg) => {
-    const file = msg.filePath || msg.filepath || msg.file || null;
-    let filetype = null;
-    if (file) {
-      const ext = file.split(".").pop().toLowerCase();
-      if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
-      else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
-      else filetype = "file";
-    }
+  const file = msg.filePath || msg.filepath || msg.file || null;
+
+  let filetype = null;
+  if (file) {
+    const ext = file.split(".").pop().toLowerCase();
+    if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
+    else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
+    else filetype = "file";
+  }
+
+  setMessages((prev) => {
+    const replyId = Number(msg.replyId || msg.replyid) || null;
+
+    const replyData =
+      msg.replyData ||
+      (replyId ? prev.find((m) => m.id === replyId) : null);
 
     const formattedMsg = {
       id: msg.usersupportticketmessagesid,
       message: msg.message,
       filepath: file,
       filetype,
-      replyId: Number(msg.replyId || msg.replyid) || null,
+      replyId,
+      replyData,
       sender: msg.senderId == userId ? "user" : "admin",
       time: msg.createddate || new Date().toISOString(),
     };
 
-    setMessages(prev => [...prev, formattedMsg]);
-    scrollToBottom();
     dispatch(addMessage(formattedMsg));
-  };
+    return [...prev, formattedMsg];
+  });
+
+  scrollToBottom();
+};
+
 
   socket.off("receiveSupportMessage");
   socket.on("receiveSupportMessage", handleReceiveMessage);
@@ -123,13 +135,25 @@ const handleSend = async () => {
 
     if (socket) {
       socket.emit("sendSupportMessage", {
-        ticketId: activeSubject.id,
-        senderId: userId,
-        message: msgData?.message,
-        filePath: msgData?.filePath || null,
-        replyid: msgData?.replyid || null,
-        time: msgData?.createdDate,
-      });
+  ticketId: activeSubject.id,
+  senderId: userId,
+  message: msgData?.message,
+  filePath: msgData?.filePath || null,
+  replyid: msgData?.replyid || null,
+
+  replyData: replyToMessage
+    ? {
+        id: replyToMessage.id,
+        message: replyToMessage.message,
+        filepath: replyToMessage.filepath,
+        filetype: replyToMessage.filetype,
+        sender: replyToMessage.sender,
+      }
+    : null,
+
+  time: msgData?.createdDate,
+});
+
     }
 
 
@@ -378,9 +402,11 @@ useEffect(() => {
           )}
             {messages.map((msg) => {
               if (!msg.message && !msg.filepath) return null;
-              const repliedMsg = msg.replyId
-                ? messages.find((m) => m.id === msg.replyId)
-              : null;
+              const repliedMsg =
+                msg.replyData ||
+                (msg.replyId
+                  ? messages.find((m) => m.id === msg.replyId)
+                  : null);
 
               return (
                 <motion.div

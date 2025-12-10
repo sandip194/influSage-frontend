@@ -87,6 +87,7 @@ useEffect(() => {
       filepath: file,
       filetype,
       replyId: Number(msg.replyId || msg.replyid) || null,
+      replyData: msg.replyData || null,
       sender: msg.senderId == userId ? "user" : "admin",
       time: msg.createddate || new Date().toISOString(),
     };
@@ -123,13 +124,25 @@ const handleSend = async () => {
 
     if (socket) {
       socket.emit("sendSupportMessage", {
-        ticketId: activeSubject.id,
-        senderId: userId,
-        message: msgData?.message,
-        filePath: msgData?.filePath || null,
-        replyid: msgData?.replyid || null,
-        time: msgData?.createdDate,
-      });
+      ticketId: activeSubject.id,
+      senderId: userId,
+      message: msgData?.message,
+      filePath: msgData?.filePath || null,
+      replyid: msgData?.replyid || null,
+
+      replyData: replyToMessage
+        ? {
+            id: replyToMessage.id,
+            message: replyToMessage.message,
+            filepath: replyToMessage.filepath,
+            filetype: replyToMessage.filetype,
+            sender: replyToMessage.sender,
+          }
+        : null,
+
+      time: msgData?.createdDate,
+    });
+
     }
 
 
@@ -378,9 +391,11 @@ useEffect(() => {
           )}
             {messages.map((msg) => {
               if (!msg.message && !msg.filepath) return null;
-              const repliedMsg = msg.replyId
-                ? messages.find((m) => m.id === msg.replyId)
-              : null;
+              const repliedMsg =
+                msg.replyData ||
+                (msg.replyId
+                  ? messages.find((m) => m.id === msg.replyId)
+                  : null);
 
               return (
                 <motion.div
