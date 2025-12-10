@@ -9,7 +9,7 @@ import {
     RiArrowLeftLine,
 } from "react-icons/ri";
 import { CheckOutlined, CloseOutlined, StopOutlined } from "@ant-design/icons";
-import { Button, Modal, Tooltip, Empty, Skeleton, Input } from "antd";
+import { Button, Modal, Tooltip, Empty, Skeleton, Input, Radio  } from "antd";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -28,6 +28,10 @@ const CampaignDetailsView = () => {
     const [previewImage, setPreviewImage] = useState(null);
     const openImageModal = (img) => setPreviewImage(img);
     const closeImageModal = () => setPreviewImage(null);
+    const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+    const [blockReasons, setBlockReasons] = useState([]);
+    const [selectedBlockReason, setSelectedBlockReason] = useState(null);
+    const [blockLoading, setBlockLoading] = useState(false);
 
 
     // For approval
@@ -128,6 +132,58 @@ const CampaignDetailsView = () => {
             setRejectLoading(false);
         }
     };
+
+    const fetchBlockReasons = async () => {
+    try {
+        setBlockLoading(true);
+        const res = await axios.get(
+            "/admin/dashboard/campaign-block-reason",
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (res.status === 200) {
+            setBlockReasons(res.data?.data || []);
+        }
+    } catch (err) {
+        console.error(err);
+        toast.error("Failed to load block reasons");
+    } finally {
+        setBlockLoading(false);
+    }
+};
+
+const handleBlockSubmit = async () => {
+  if (!selectedBlockReason) {
+    toast.error("Please select a block reason");
+    return;
+  }
+
+  try {
+    setActionLoading(true);
+
+    const res = await axios.post(
+      "admin/dashboard/profile-block",
+      {
+        p_campaignid: campaignId,
+        p_objective: selectedBlockReason,
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (res.status === 200) {
+      toast.success(res.data?.message || "Campaign blocked successfully");
+      setIsBlockModalOpen(false);
+      setSelectedBlockReason(null);
+      getCamapignDetails();
+    }
+
+  } catch (err) {
+    console.error(err);
+    toast.error(err.response?.data?.message || "Failed to block campaign");
+  } finally {
+    setActionLoading(false);
+  }
+};
 
     useEffect(() => {
         getCamapignDetails()
@@ -270,7 +326,10 @@ const CampaignDetailsView = () => {
                                                     type="text"
                                                     icon={<StopOutlined />}
                                                     disabled={actionLoading}
-                                                    onClick={() => openConfirmationModal("Blocked")}
+                                                    onClick={() => {
+                                                        setIsBlockModalOpen(true);
+                                                        fetchBlockReasons();
+                                                    }}
                                                     className="!border !border-gray-600 !text-gray-700 !bg-transparent hover:!bg-gray-800 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
                                                 >
                                                     Block
@@ -676,6 +735,53 @@ const CampaignDetailsView = () => {
                 />
             </Modal>
 
+            {/* Block Campaign Modal */}
+            <Modal
+                title={
+                    <>
+                        Block Campaign :
+                    </>
+                }
+                open={isBlockModalOpen}
+                onCancel={() => {
+                    setIsBlockModalOpen(false);
+                    setSelectedBlockReason(null);
+                }}
+                onOk={handleBlockSubmit}
+                okText="Confirm Block"
+                okButtonProps={{
+                    danger: true,
+                    loading: actionLoading,
+                    disabled: !selectedBlockReason,
+                }}
+            >
+                <p className="mb-4 text-gray-600">
+                    Please select a reason to block this campaign:
+                </p>
+
+                {blockLoading ? (
+                    <Skeleton active paragraph={{ rows: 6 }} />
+                ) : blockReasons?.length > 0 ? (
+                    <Radio.Group
+                        value={selectedBlockReason}
+                        onChange={(e) => setSelectedBlockReason(e.target.value)}
+                        className="flex flex-col"
+                    >
+                        {blockReasons.map((reason) => (
+                            <div key={reason.id} className="mb-4">
+                                <Radio
+                                    value={reason.id}
+                                    className="block w-full text-gray-800"
+                                >
+                                    {reason.name}
+                                </Radio>
+                            </div>
+                        ))}
+                    </Radio.Group>
+                ) : (
+                    <Empty description="No block reasons available" />
+                )}
+            </Modal>
         </div >
     );
 }

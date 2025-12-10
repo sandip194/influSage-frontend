@@ -209,15 +209,11 @@ export default function SidebarVendor({ onSelectChat }) {
           {campaigns?.map((campaign) => {
             const isSelected =
               selectedCampaign?.campaignid === campaign.campaignid;
-            const hasUnread = campaign.influencers?.some((inf) => {
-              const msg = unreadMessages.find(
-                (m) => String(m.userid) === String(inf.influencerid)
-              );
-              if (!inf.lastmessage || inf.lastmessage === null) {
-                return false;
-              }
-              return msg && msg.readbyvendor === false;
-            });
+            const hasUnread = campaign.influencers?.some(
+              (inf) =>
+                inf.lastmessage &&
+                inf.readbyvendor === false
+            );
 
             return (
               <div
@@ -297,21 +293,29 @@ export default function SidebarVendor({ onSelectChat }) {
           {filteredInfluencers?.length > 0 ? (
             filteredInfluencers.map((inf) => {
               const isSelected = selectedInfluencer === inf.influencerid;
-              const unread = (() => {
-              const msg = unreadMessages.find(
-                (m) => String(m.userid) === String(inf.influencerid)
-              );
-              if (!inf.lastmessage || inf.lastmessage === null) {
-                return false;
-              }
-              return msg && msg.readbyvendor === false;
-            })();
+              const unread =
+                inf.lastmessage &&
+                inf.readbyvendor === false;
 
               return (
                 <div
                   key={`${inf.campaignId}-${inf.influencerid}`}
                   onClick={() => {
                     setSelectedInfluencer(inf.influencerid);
+                    setCampaigns((prev) =>
+                      prev.map((c) =>
+                        c.campaignid === selectedCampaign.campaignid
+                          ? {
+                              ...c,
+                              influencers: c.influencers.map((i) =>
+                                i.conversationid === inf.conversationid
+                                  ? { ...i, readbyvendor: true }
+                                  : i
+                              ),
+                            }
+                          : c
+                      )
+                    );
 
                     const cid = inf.conversationid;
                     if (socket) {

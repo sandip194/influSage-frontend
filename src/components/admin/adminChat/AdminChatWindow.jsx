@@ -38,6 +38,7 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const shouldAutoScroll = useRef(true);
 
 const formatTime = (timestamp) => {
   const date = new Date(timestamp);
@@ -67,38 +68,47 @@ useEffect(() => {
   if (!socket || !activeSubject?.id) return;
 
   const handleReceiveMessage = (msg) => {
-    const file = msg.filePath || msg.filepath || msg.file || null;
-    let filetype = null;
-    if (file) {
-      const ext = file.split(".").pop().toLowerCase();
-      if (["jpg","jpeg","png","gif","webp"].includes(ext)) filetype = "image";
-      else if (["mp4","mov","avi","mkv","webm"].includes(ext)) filetype = "video";
-      else filetype = "file";
-    }
-    const getSender = (msg, userId) =>
-      String(msg.userid) === String(userId) ? "admin" : "user";
+  const file = msg.filePath || msg.filepath || msg.file || null;
 
-    const formattedMsg = {
-      id: msg.usersupportticketmessagesid,
-      message: msg.message || "",
-      filepath: file,
-      filetype,
-      replyId: msg.replyid || null,
-      sender: getSender(msg, userId),
-      time: msg.createddate || msg.time || new Date().toISOString(),
-    };
+  let filetype = null;
+  if (file) {
+    const ext = file.split(".").pop().toLowerCase();
+    if (["jpg","jpeg","png","gif","webp"].includes(ext)) filetype = "image";
+    else if (["mp4","mov","avi","mkv","webm"].includes(ext)) filetype = "video";
+    else filetype = "file";
+  }
 
-    setMessages((prev) => [...prev, formattedMsg]);
-    dispatch(addMessage(formattedMsg));
-  };
+  const replyId = msg.replyId ?? null;
 
-  socket.off("receiveSupportMessage");
+  setMessages(prev => {
+    const replyData = replyId
+      ? prev.find(m => String(m.id) === String(replyId))
+      : null;
+
+    return [
+      ...prev,
+      {
+        id: msg.usersupportticketmessagesid,
+        message: msg.message || "",
+        filepath: file,
+        filetype,
+        replyId,
+        replyData,
+        sender:
+          String(msg.senderId) === String(userId) ? "admin" : "user",
+        time: msg.createddate || new Date().toISOString(),
+      },
+    ];
+  });
+};
+
+  // socket.off("receiveSupportMessage");
   socket.on("receiveSupportMessage", handleReceiveMessage);
 
   return () => {
     socket.off("receiveSupportMessage", handleReceiveMessage);
   };
-}, [socket, activeSubject?.id]);
+}, [socket, activeSubject?.id, userId]);
 
   const handleSend = async () => {
     if (!activeSubject) return;
@@ -207,16 +217,31 @@ useEffect(() => {
   }, [activeSubject]);
 const handleScroll = () => {
   if (!chatRef.current) return;
+  const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
 
-  if (chatRef.current.scrollTop === 0 && hasMore && !loadingMore) {
+  shouldAutoScroll.current =
+    scrollHeight - scrollTop - clientHeight < 80;
+
+  if (scrollTop === 0 && hasMore && !loadingMore) {
     const prevHeight = chatRef.current.scrollHeight;
     loadMessages().then(() => {
       setTimeout(() => {
-        chatRef.current.scrollTop = chatRef.current.scrollHeight - prevHeight;
+        chatRef.current.scrollTop =
+          chatRef.current.scrollHeight - prevHeight;
       }, 50);
     });
   }
 };
+useEffect(() => {
+  if (!chatRef.current) return;
+  if (!shouldAutoScroll.current) return;
+
+  chatRef.current.scrollTo({
+    top: chatRef.current.scrollHeight,
+    behavior: "smooth",
+  });
+}, [messages.length]);
+
 
   const loadMessages = async (offsetParam = offset) => {
   if (!activeSubject?.id) return;
@@ -407,7 +432,9 @@ useEffect(() => {
                                     {/* LEFT SIDE → Text */}
                                     <div className="flex flex-col flex-1 min-w-0">
                                       {(() => {
-                                        const repliedMsg = messages.find((m) => m.id === msg.replyId);
+                                        const repliedMsg = messages.find(
+                                          m => String(m.id) === String(msg.replyId)
+                                        );
                                         if (!repliedMsg) return null;
 
                                         return (

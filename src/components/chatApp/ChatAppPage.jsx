@@ -47,17 +47,24 @@ export default function ChatAppPage() {
     if (!socket) return;
 
    const handleReceiveMessage = (msg) => {
-    if (String(msg.userid) === String(userId)) return;
+     const senderId = msg.userid ?? msg.senderId;
+      if (Number(senderId) === Number(userId)) {
+        return;
+      }
 
-  const normalized = {
-    id: msg.messageid || msg.id,
-    content: msg.message,
-    senderId: msg.userid,
-    roleId: msg.roleid,
-    file: msg.filepaths?.[0] || "",
-    replyId: msg.replyid || null,
-    time: msg.time || new Date().toISOString(),
-  };
+      if (String(msg.conversationid) !== String(activeChat?.id)) {
+        return;
+      }
+
+    const normalized = {
+      id: msg.messageid || msg.id,
+      senderId: msg.userid ?? msg.senderId,
+      roleId: Number(msg.roleid ?? msg.roleId),
+      content: msg.message,
+      file: msg.filepaths?.[0] || "",
+      replyId: msg.replyid || null,
+      time: msg.time || new Date().toISOString(),
+    };
 
   dispatch(addMessage(normalized));
   setRefreshKey(prev => prev + 1);
@@ -86,7 +93,7 @@ export default function ChatAppPage() {
       status: "sending",
     };
 
-    dispatch(addMessage(newMsg));
+    // dispatch(addMessage(newMsg));
     socket?.emit("sendMessage", newMsg);
 
     try {

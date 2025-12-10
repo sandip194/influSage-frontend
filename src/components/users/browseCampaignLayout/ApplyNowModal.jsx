@@ -50,6 +50,15 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
         return Object.keys(newErrors).length === 0;
     };
 
+    const resetForm = () => {
+        setAmount("");
+        setProposal("");
+        setErrors({});
+        setIsEdit(false);
+
+        setExistingFiles([]);
+    };
+
     // ============= SUBMIT FORM =============
     const handleSubmit = async () => {
         if (!validate()) return;
@@ -114,7 +123,7 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
             setAmount(data.budget || "");
             setProposal(data.description || "");
 
-            resetFiles();
+            // resetFiles();
 
             if (data.filepaths?.length > 0) {
             const formattedFiles = data.filepaths.map((f, i) => ({
@@ -140,6 +149,7 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
 
     return (
         <Modal
+         key={campaignId} 
             open={open}
             onCancel={onClose}
             footer={null}

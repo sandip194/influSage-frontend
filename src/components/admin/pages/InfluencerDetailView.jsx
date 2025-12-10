@@ -69,7 +69,7 @@ const InfluencerDetailView = () => {
             setActionLoading(true);
             const res = await axios.post(
                 "/admin/dashboard/approved-or-rejected",
-                { p_userid: userId, p_statusname: statusName },
+                { p_userid: userId},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 

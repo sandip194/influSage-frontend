@@ -374,7 +374,6 @@ const InfluencerCampaigns = () => {
           <table className="w-full text-left min-w-[700px]">
             <thead className="bg-white text-gray-700 text-sm tracking-wide">
               <tr>
-                <th className="p-4">Business</th>
                 <th className="p-4">Campaign</th>
                 <th className="p-4">Budget</th>
                 <th className="p-4">Campaign Start Date</th>
@@ -397,16 +396,18 @@ const InfluencerCampaigns = () => {
                     onClick={() => navigate(`/dashboard/my-campaigns/details/${row.id}`)}
                     className="border-t border-gray-200 hover:bg-gray-100 transition cursor-pointer"
                   >
-                    <td className="p-4 flex items-center gap-3">
-                      
-                      <img
-                        src={getImageUrl(row.photopath)}
-                        alt={row.businessname}
-                        className="w-9 h-9 rounded-full object-cover"
-                      />
-                      <span>{row.businessname}</span>
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={getImageUrl(row.photopath)}
+                          alt={row.businessname}
+                          className="w-9 h-9 rounded-full object-cover border"
+                        />
+                        <span className="whitespace-nowrap font-medium">
+                          {row.name}
+                        </span>
+                      </div>
                     </td>
-                    <td className="p-4">{row.name}</td>
                     <td className="p-4 font-medium">₹ {row.estimatedbudget}</td>
                     <td className="p-4">{row.campaignstartdate}</td>
                     <td className="p-4">

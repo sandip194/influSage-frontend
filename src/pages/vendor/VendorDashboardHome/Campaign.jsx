@@ -173,7 +173,7 @@ const Campaign = () => {
             <SwiperSlide key={item.id} className="!w-auto pb-4">
               <div
                 className="min-w-[260px] max-w-[260px] bg-[#e6eff9]
-    border border-gray-200 rounded-2xl shadow-xl/30 hover:shadow-lg transition-all duration-300 p-3 flex flex-col justify-between"
+    border border-gray-200 rounded-2xl shadow-lg hover:shadow-lg transition-all duration-300 p-3 flex flex-col justify-between"
               >
                 {/* ======= Top Section (Status + Menu) ======= */}
                 <div className="flex justify-end items-center">
