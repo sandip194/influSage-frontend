@@ -50,29 +50,38 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
     };
 
     const handleConfirmAccept = async () => {
-        if (!offerDetails?.applicationid) return toast.error("Missing Application ID");
+        if (!offerDetails?.applicationid) {
+            toast.error("Missing Application ID");
+            return;
+        }
 
         try {
             setLoading(true);
+
             const res = await axios.post(
-                `/chat/startconversation`,
-                { p_campaignapplicationid: Number(offerDetails.applicationid) },
-                { headers: { Authorization: `Bearer ${token}` } }
+            "/chat/startconversation",
+            { p_campaignapplicationid: Number(offerDetails.applicationid) },
+            { headers: { Authorization: `Bearer ${token}` } }
             );
-            if (res.data.p_status) {
-                toast.success(res.data.message || "Conversation started");
-                if (onStatusChange) onStatusChange();
-                fetchOffer();
+
+            if (res.data?.status === true) {
+            toast.success(res.data.message || "Conversation started");
+
+            if (onStatusChange) onStatusChange();
+            fetchOffer();
             } else {
-                toast.error(res.data.message || "Failed to start conversation");
+            toast.error(res.data?.message || "Failed to start conversation");
             }
+
         } catch (error) {
-            toast.error(error.response?.data?.message || "Something went wrong");
+            toast.error(
+            error.response?.data?.message || "Something went wrong"
+            );
         } finally {
             setLoading(false);
+            setIsAcceptModalOpen(false);
         }
-        setIsAcceptModalOpen(false);
-    };
+        };
 
     const followers = {};
     offerDetails?.providers?.forEach((p) => {
@@ -111,7 +120,24 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                 </h2>
                                 <p className="text-gray-600 text-sm mt-1">
                                     {offerDetails.statename}, {offerDetails.countryname}
-                                </p>
+                                </p> 
+                                {Number(offerDetails?.ratingcount) > 0 && (
+                                <div className="flex items-center gap-1 mt-1 justify-center sm:justify-start">
+                                    {[1, 2, 3, 4, 5].map((i) => (
+                                    <RiStarFill
+                                        key={i}
+                                        size={14}
+                                        className={i <= Math.round(offerDetails.ratingcount)
+                                        ? "text-yellow-400"
+                                        : "text-gray-300"}
+                                        style={{ stroke: "#000", strokeWidth: 0.6 }}
+                                    />
+                                    ))}
+                                    <span className="ml-1 text-xs font-semibold text-gray-700">
+                                    {Number(offerDetails.ratingcount).toFixed(1)}
+                                    </span>
+                                </div>
+                                )}
                                 <div className="flex flex-wrap gap-2 mt-2 justify-center sm:justify-start">
                                     {offerDetails.categories?.slice(0, 3).map((cat, idx) => (
                                         <span

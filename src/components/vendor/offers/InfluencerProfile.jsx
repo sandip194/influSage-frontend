@@ -1,4 +1,4 @@
-import { RiArrowLeftLine, RiFile3Line, RiHeartFill, RiHeart3Line, RiMessage2Line } from "@remixicon/react";
+import { RiArrowLeftLine, RiFile3Line, RiHeartFill, RiHeart3Line, RiMessage2Line, RiStarFill  } from "@remixicon/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -30,6 +30,15 @@ const InfluencerProfile = () => {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
 
+    const timeAgo = (date) => {
+    const diff = Math.floor((Date.now() - new Date(date)) / 1000);
+    const days = Math.floor(diff / 86400);
+    if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
+    const hours = Math.floor(diff / 3600);
+    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+    const mins = Math.floor(diff / 60);
+    return `${mins} min ago`;
+    };
 
 
     const getInfluencerDetails = async () => {
@@ -249,6 +258,26 @@ const InfluencerProfile = () => {
                                     <p className="text-sm text-gray-900 mt-1">
                                         {influDetails?.statename}, {influDetails?.countryname}
                                     </p>
+
+                                    {Number(influDetails?.ratingcount) > 0 && (
+                                        <div className="flex items-center gap-1 mt-2">
+                                            {Array.from({ length: Math.round(influDetails.ratingcount) }).map((_, i) => (
+                                            <RiStarFill
+                                                key={i}
+                                                size={16}
+                                                className="text-yellow-400"
+                                                style={{
+                                                stroke: "black",
+                                                strokeWidth: 1,
+                                                }}
+                                            />
+                                            ))}
+
+                                            <span className="ml-1 text-sm font-semibold text-gray-800">
+                                            {Number(influDetails.ratingcount).toFixed(1)}
+                                            </span>
+                                        </div>
+                                        )}
                                 </div>
 
                                 {/* Total Campaign (desktop alignment) */}
@@ -442,6 +471,67 @@ const InfluencerProfile = () => {
                             <p className="text-sm text-gray-500">No portfolio file uploaded.</p>
                         )}
                     </div>
+
+                    {/* Feedbacks */}
+                    {influDetails?.feedbacks?.length > 0 && (
+                    <div className="bg-white rounded-2xl p-6 mt-4">
+                        
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-5">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                            Feedbacks
+                        </h3>
+                        <button className="text-sm hover:underline">
+                            View All
+                        </button>
+                        </div>
+
+                        {/* Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {influDetails.feedbacks.map((fb) => (
+                            <div
+                            key={fb.feedbackid}
+                            className="bg-white rounded-xl p-4 border border-gray-200 shadow hover:shadow-md transition"
+                            >
+                            {/* Stars */}
+                            <div className="flex items-center gap-1 mb-3">
+                                {[1, 2, 3, 4, 5].map((i) => (
+                                <RiStarFill
+                                    key={i}
+                                    size={14}
+                                    className={i <= fb.rating ? "text-yellow-400" : "text-gray-300"}
+                                    style={{ stroke: "#000", strokeWidth: 0.6 }}
+                                />
+                                ))}
+                            </div>
+
+                            {/* Feedback text */}
+                            <p className="text-sm text-gray-800 mb-4 line-clamp-2">
+                                {fb.text}
+                            </p>
+
+                            {/* Campaign row */}
+                            <div className="flex items-center gap-3">
+                                <img
+                                src={fb.campaignpohoto}
+                                alt={fb.campaignname}
+                                className="w-9 h-9 rounded-full object-cover border"
+                                />
+
+                                <div>
+                                <p className="text-sm font-semibold text-gray-900 truncate">
+                                    {fb.campaignname}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    {timeAgo(fb.createddate)}
+                                </p>
+                                </div>
+                            </div>
+                            </div>
+                        ))}
+                        </div>
+                    </div>
+                    )}
                 </>
             )}
 

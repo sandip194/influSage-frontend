@@ -26,8 +26,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../features/auth/authSlice";
 import { getSocket } from "../../../sockets/socket";
 
-
-
 import NotificationDropdown from "./NotificationDropdown";
 import MessageDropdown from "./MessageDropdown";
 
@@ -38,8 +36,10 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { token, role, userId } = useSelector((state) => state.auth);
+  const activeChat = useSelector((state) => state.chat.activeChat);
 
-  const [notificationDropdownVisible, setNotificationDropdownVisible] = useState(false);
+  const [notificationDropdownVisible, setNotificationDropdownVisible] =
+    useState(false);
   const [messageDropdownVisible, setMessageDropdownVisible] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -47,7 +47,8 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const [allNotifications, setAllNotifications] = useState([]);
   // const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
-  const [initialNotificationsFetched, setInitialNotificationsFetched] = useState(false);
+  const [initialNotificationsFetched, setInitialNotificationsFetched] =
+    useState(false);
 
   const [unreadMessages, setUnreadMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -59,93 +60,88 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const basePath = role === 1 ? "/dashboard" : "/vendor-dashboard";
 
   const fetchNotifications = useCallback(async () => {
-  if (!token || initialNotificationsFetched) return;
+    if (!token || initialNotificationsFetched) return;
 
-  try {
-    setLoadingNotifications(true);
+    try {
+      setLoadingNotifications(true);
 
-    const res = await axios.get("/new/getallnotification", {
-      params: { limitedData: false },
-      headers: { Authorization: `Bearer ${token}` },
-    });
+      const res = await axios.get("/new/getallnotification", {
+        params: { limitedData: false },
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    const rawData = res.data?.data || [];
+      const rawData = res.data?.data || [];
 
-    const formatted = rawData.map(item => ({
-      id: item.notificationid,
-      title: item.title,
-      message: item.description,
-      isRead: item.isread,
-      time: item.createddate,
-    }));
+      const formatted = rawData.map((item) => ({
+        id: item.notificationid,
+        title: item.title,
+        message: item.description,
+        isRead: item.isread,
+        time: item.createddate,
+      }));
 
-    setAllNotifications(formatted);
-    setUnreadNotifications(formatted.filter(n => !n.isRead));
-    setInitialNotificationsFetched(true);
+      setAllNotifications(formatted);
+      setUnreadNotifications(formatted.filter((n) => !n.isRead));
+      setInitialNotificationsFetched(true);
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  }, [token, initialNotificationsFetched]);
 
-  } catch (err) {
-    console.error("Error fetching notifications:", err);
-  } finally {
-    setLoadingNotifications(false);
-  }
-}, [token, initialNotificationsFetched]);
+  useEffect(() => {
+    if (!socket) {
+      console.log("❌ No socket instance found!");
+      return;
+    }
 
-  
-useEffect(() => {
-  if (!socket) {
-    console.log("❌ No socket instance found!");
-    return;
-  }
+    // console.log("🔌 Socket connected:", socket.connected);
+    // console.log("🆔 Current userId:", userId);
 
-  console.log("🔌 Socket connected:", socket.connected);
-  console.log("🆔 Current userId:", userId);
+    // const room = `user_${userId}`;
+    // console.log("➡️ Joining room:", room);
 
-  const room = `user_${userId}`;
-  console.log("➡️ Joining room:", room);
+    socket.emit("joinUserRoom", userId);
 
-  socket.emit("joinUserRoom", userId);
+    const handler = (payload) => {
+      // console.log("📩 REAL-TIME NOTIFICATION RECEIVED:", payload);
+      if (!payload) return;
 
-  const handler = (payload) => {
-  console.log("📩 REAL-TIME NOTIFICATION RECEIVED:", payload);
-  if (!payload) return;
+      // ✅ Normalize payload (array or single object)
+      const notifications = Array.isArray(payload) ? payload : [payload];
 
-  // ✅ Normalize payload (array or single object)
-  const notifications = Array.isArray(payload) ? payload : [payload];
+      const formattedList = notifications.map((ntf) => ({
+        id: ntf.notificationid,
+        title: ntf.title,
+        message: ntf.description,
+        isRead: ntf.isread ?? false,
+        time: ntf.createddate,
+      }));
 
-  const formattedList = notifications.map(ntf => ({
-    id: ntf.notificationid,
-    title: ntf.title,
-    message: ntf.description,
-    isRead: ntf.isread ?? false,
-    time: ntf.createddate,
-  }));
+      setAllNotifications((prev) => {
+        const existingIds = new Set(prev.map((n) => n.id));
+        const newOnes = formattedList.filter((n) => !existingIds.has(n.id));
+        return [...newOnes, ...prev];
+      });
 
-  setAllNotifications(prev => {
-    const existingIds = new Set(prev.map(n => n.id));
-    const newOnes = formattedList.filter(n => !existingIds.has(n.id));
-    return [...newOnes, ...prev];
-  });
+      setUnreadNotifications((prev) => {
+        const existingIds = new Set(prev.map((n) => n.id));
+        const unread = formattedList.filter(
+          (n) => !n.isRead && !existingIds.has(n.id)
+        );
+        return [...unread, ...prev];
+      });
+    };
 
-  setUnreadNotifications(prev => {
-    const existingIds = new Set(prev.map(n => n.id));
-    const unread = formattedList.filter(
-      n => !n.isRead && !existingIds.has(n.id)
-    );
-    return [...unread, ...prev];
-  });
-};
+    socket.on("receiveNotification", handler);
+    // console.log("👂 Listener attached: receiveNotification");
 
-  socket.on("receiveNotification", handler);
-  console.log("👂 Listener attached: receiveNotification");
-
-  return () => {
-    socket.off("receiveNotification", handler);
-    console.log("🧹 Listener removed: receiveNotification");
-  };
-}, [socket, userId]);
-
-
-
+    return () => {
+      socket.off("receiveNotification", handler);
+      // console.log("🧹 Listener removed: receiveNotification");
+    };
+  }, [socket, userId]);
 
   // ======================================================
   // 🧭 LOGOUT
@@ -159,95 +155,83 @@ useEffect(() => {
   // 📨 MESSAGE LOGIC (unchanged)
   // ======================================================
   useEffect(() => {
-  if (!token) return;
+    if (!token) return;
 
-  const fetchOnce = async () => {
-    try {
-      setLoadingMessages(true);
-      const res = await axios.get(`/chat/unread-messages`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUnreadMessages(res.data?.data || []);
-      setInitialMessagesFetched(true);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingMessages(false);
-    }
-  };
+    const fetchOnce = async () => {
+      try {
+        setLoadingMessages(true);
+        const res = await axios.get(`/chat/unread-messages`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUnreadMessages(res.data?.data || []);
+        setInitialMessagesFetched(true);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingMessages(false);
+      }
+    };
 
-  fetchOnce();
-}, [token]);  
+    fetchOnce();
+  }, [token]);
 
-useEffect(() => {
-  if (!socket || !userId) return;
+  useEffect(() => {
+    if (!socket) return;
 
-  console.log("📩 Listening for real-time messages...");
+    const messageHandler = (payload) => {
+      if (!payload || !payload.conversationid) return;
 
-  socket.emit("joinUserRoom", userId);
+      if (String(payload.userid) === String(userId)) return;
+      if (activeChat?.id === payload.conversationid) return;
 
-  const messageHandler = (payload) => {
-  console.log("💬 SOCKET MESSAGE RECEIVED:", payload);
-  console.log("🙋 CURRENT USER:", userId, "ROLE:", role);
+      const isVendor = String(role) === "2";
 
-  const receiverId =
-    payload.roleid === "2"
-      ? payload.userid
-      : payload.vendorId;
+      setUnreadMessages((prev) => [
+        {
+          conversationid: payload.conversationid,
+          message: payload.message,
+          userid: payload.userid,
 
-  console.log("🎯 EXPECTED RECEIVER:", receiverId);
+          name: isVendor
+            ? activeChat?.name ||
+              `${activeChat?.firstname || ""} ${activeChat?.lastname || ""}`
+            : activeChat?.campaignname || activeChat?.name,
+          photopath: isVendor
+            ? activeChat?.img || activeChat?.userphoto
+            : activeChat?.img || activeChat?.campaign?.campaignphoto,
 
-  if (String(receiverId) !== String(userId)) {
-    console.log("⛔ NOT FOR ME — ignored");
-    return;
-  }
+          createddate: payload.createddate,
+        },
+        ...prev,
+      ]);
+    };
 
-  console.log("✅ MESSAGE ACCEPTED");
+    socket.on("receiveMessage", messageHandler);
 
-  setUnreadMessages((prev) => {
-    return [payload, ...prev];
-  });
-};
+    return () => {
+      socket.off("receiveMessage", messageHandler);
+    };
+  }, [socket, activeChat]);
 
-  socket.on("receiveMessage", messageHandler);
+  useEffect(() => {
+    if (!socket) return;
 
-  return () => {
-    socket.off("receiveMessage", messageHandler);
-  };
-}, [socket, userId]);
+    const unreadHandler = (lists) => {
+      // console.log("📥 UNREAD MESSAGE LIST RECEIVED:", lists);
+      if (Array.isArray(lists)) {
+        setUnreadMessages(lists);
+      }
+    };
+
+    socket.on("receiveUnreadMessages", unreadHandler);
+    // console.log("data is",unreadHandler )
+
+    return () => {
+      socket.off("receiveUnreadMessages", unreadHandler);
+    };
+  }, [socket]);
 
   const memoizedMessages = useMemo(() => unreadMessages, [unreadMessages]);
-
-  // ======================================================
-  // 🕒 POLLING UNREAD NOTIFICATIONS
-  // ======================================================
-  // useEffect(() => {
-  //   if (!token) return;
-  //   fetchNotifications({ mode: "unread" });
-  // }, [token, fetchNotifications]);
-
-  // ======================================================
-  // GET ALL NOTIFICATIONS
-  // ======================================================
-  // useEffect(() => {
-  //   if (modalOpen) {
-  //     fetchNotifications({ mode: "all" });
-  //   }
-  // }, [modalOpen, fetchNotifications]);
-
-  // ======================================================
-  // 📜 WHEN MODAL OPENS → FETCH LAST 3 UNREAD (mark read)
-  // ======================================================
-  // useEffect(() => {
-  //   if (notificationDropdownVisible) {
-  //     fetchNotifications({ mode: "last-three" });
-  //   }
-  // }, [notificationDropdownVisible, fetchNotifications]);
-
-  const memoizedNotifications = useMemo(
-    () => unreadNotifications,
-    [unreadNotifications]
-  );
 
   // ======================================================
   // PROFILE DATA
@@ -333,7 +317,6 @@ useEffect(() => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-
   // ======================================================
   // UI RETURN (unchanged)
   // ======================================================
@@ -349,7 +332,11 @@ useEffect(() => {
         </button>
 
         <div className="hidden sm:block flex-1">
-          <Input size="large" prefix={<SearchOutlined />} placeholder="Search" />
+          <Input
+            size="large"
+            prefix={<SearchOutlined />}
+            placeholder="Search"
+          />
         </div>
       </div>
 
@@ -379,21 +366,21 @@ useEffect(() => {
 
         {/* Notifications */}
         <Dropdown
-            open={notificationDropdownVisible}
-            onOpenChange={(open) => {
-              setNotificationDropdownVisible(open);
+          open={notificationDropdownVisible}
+          onOpenChange={(open) => {
+            setNotificationDropdownVisible(open);
 
-              if (open) {
-                setUnreadNotifications([]);
-                setAllNotifications(prev =>
-                  prev.map(n => ({ ...n, isRead: true }))
-                );
-              }
-            }}
-        placement={isMobile ? "bottom" : "bottomRight"}
+            if (open) {
+              setUnreadNotifications([]);
+              setAllNotifications((prev) =>
+                prev.map((n) => ({ ...n, isRead: true }))
+              );
+            }
+          }}
+          placement={isMobile ? "bottom" : "bottomRight"}
           trigger={["click"]}
           arrow
-           overlay={
+          overlay={
             <NotificationDropdown
               closeDropdown={() => setNotificationDropdownVisible(false)}
               onViewAll={() => {
@@ -406,7 +393,11 @@ useEffect(() => {
             />
           }
         >
-          <Badge dot={unreadNotifications.length > 0} color="red" offset={[-3, 3]}>
+          <Badge
+            dot={unreadNotifications.length > 0}
+            color="red"
+            offset={[-3, 3]}
+          >
             <Button shape="circle" icon={<BellOutlined />} />
           </Badge>
         </Dropdown>

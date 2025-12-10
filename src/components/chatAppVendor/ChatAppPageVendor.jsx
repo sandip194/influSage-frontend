@@ -83,7 +83,7 @@ export default function ChatAppPageVendor() {
   const handleSendMessage = async ({ text, file, replyId }) => {
     // console.log("📨 Sending message with replyId:", replyId); 
     if (!activeChat) return;
-    // console.log("Active Chat:", activeChat);
+    console.log("Active Chat:", activeChat);
 
     const tempMsg = {
       id: Date.now(),
