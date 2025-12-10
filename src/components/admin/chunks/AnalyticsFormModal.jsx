@@ -1,4 +1,3 @@
-// components/AdminContentLinks/AnalyticsFormModal.jsx
 import React, { useState, useEffect } from "react";
 import { Modal, Input, DatePicker, Row, Col } from "antd";
 import dayjs from "dayjs";
@@ -18,158 +17,149 @@ const fieldRules = {
     Facebook: {
         Post: { views: true, likes: true, comments: true, shares: true, other: [] },
         Reel: { views: true, likes: true, comments: true, shares: true, other: [] },
-
     },
-    TikTok: { Video: { views: true, likes: true, comments: true, shares: true, other: ["Caption"] } },
+    TikTok: {
+        Video: { views: true, likes: true, comments: true, shares: true, other: ["Caption"] }
+    },
     Pinterest: {
         Post: { views: false, likes: true, comments: true, shares: false, other: ["Title"] }
     },
-    Threads: { Post: { views: false, likes: true, comments: true, shares: true, other: [] } },
+    Threads: {
+        Post: { views: false, likes: true, comments: true, shares: true, other: [] }
+    },
     X: {
         Post: { views: true, likes: true, comments: true, shares: true, other: [] }
     },
 };
 
-const AnalyticsFormModal = ({ visible, onClose, contentData, data }) => {
-
+const AnalyticsFormModal = ({ visible, onClose, contentData }) => {
     const [formData, setFormData] = useState({
         views: null,
         likes: null,
         comments: null,
         shares: null,
         date: null
-        // dynamic fields will be added directly (flat)
     });
 
+    const [previousData, setPreviousData] = useState(null);
     const [errors, setErrors] = useState({});
-
     const { token } = useSelector((state) => state.auth);
 
-    // -----------------------------------------
-    // Load initial data
-    // -----------------------------------------
-    useEffect(() => {
-        if (data) {
-            let flatDynamic = {};
+    const isUpdate = contentData?.isUpdate;
 
-            // flatten ALL dynamic fields from backend
-            if (data.Title) flatDynamic.Title = data.Title;
-            if (data.Caption) flatDynamic.Caption = data.Caption;
-            if (data.Reactions) flatDynamic.Reactions = data.Reactions;
-            if (data.Bookmarks) flatDynamic.Bookmarks = data.Bookmarks;
-            if (data.Description) flatDynamic.Description = data.Description;
-            if (data.Quotes) flatDynamic.Quotes = data.Quotes;
-
-            setFormData({
-                views: data.views || null,
-                likes: data.likes || null,
-                comments: data.comments || null,
-                shares: data.shares || null,
-
-                date: data.date ? dayjs(data.date) : null,
-                ...flatDynamic
-            });
-
-        } else if (contentData) {
-            // Reset
-            setFormData({
-                views: null,
-                likes: null,
-                comments: null,
-                shares: null,
-
-                date: null
-            });
-        }
-    }, [data, contentData]);
-
-    // -----------------------------------------
-    // Handle updates
-    // -----------------------------------------
-    const handleChange = (field, value) => {
-        if (["views", "likes", "comments", "shares"].includes(field)) {
-            // numeric only
-            const numericValue = value.replace(/\D/g, "").slice(0, 10);
-            setFormData(prev => ({ ...prev, [field]: numericValue }));
-        } else if (field === "date") {
-            setFormData(prev => ({ ...prev, date: value }));
-        } else {
-            // dynamic fields stored flat
-            setFormData(prev => ({ ...prev, [field]: value }));
-        }
-    };
-
-    if (!contentData) return null;
-
-    const platform = contentData.platform;
-    const contentType = contentData.contentType;
+    const platform = contentData?.platform;
+    const contentType = contentData?.contentType;
     const rules = fieldRules[platform]?.[contentType] || {};
 
-    // -----------------------------------------
-    // Validation
-    // -----------------------------------------
-    const validate = () => {
-        const newErrors = {};
-
-        // required numeric fields
-        ["views", "likes", "comments", "shares",].forEach(field => {
-            if (rules[field] && !formData[field]) {
-                newErrors[field] = `${field[0].toUpperCase() + field.slice(1)} is required`;
-            }
-        });
-
-        // required date
-        if (!formData.date) {
-            newErrors.date = "Date is required";
-        } else if (formData.date.isAfter(dayjs(), "day")) {
-            newErrors.date = "Date cannot be in the future";
-        }
-
-        // required dynamic fields
-        rules.other.forEach(field => {
-            const value = formData[field];
-
-            if (!value) {
-                newErrors[field] = `${field} is required`;
+    // ------------------------------------------------------------------------------------
+    // LOAD EXISTING ANALYTICS WHEN EDITING
+    // ------------------------------------------------------------------------------------
+    useEffect(() => {
+        const loadLatestAnalytics = async () => {
+            if (!isUpdate || !contentData) {
+                setPreviousData(null);
+                return;
             }
 
-            // enforce 50-char limit on Title
-            if (["Title", "Caption"].includes(field) && value) {
-                formData[field] = value.trim().slice(0, field === "Title" ? 50 : undefined);
-            }
-        });
+            try {
+                const res = await axios.get("/admin/user-Platform-Analytics", {
+                    params: {
+                           p_userplatformanalyticid: contentData.userplatformanalyticid
+                    },
+                    headers: { Authorization: `Bearer ${token}` },
+                });
 
-        setErrors(newErrors);
+                const latest = res?.data?.data;
 
-        return Object.keys(newErrors).length === 0;
-    };
+                if (latest) {
+                    setPreviousData(latest);
 
-    // -----------------------------------------
-    // Save
-    // -----------------------------------------
-    const handleSave = async () => {
-        if (!validate()) return;
+                    let dynamic = {};
+                    if (latest.Title) dynamic.Title = latest.Title;
+                    if (latest.Caption) dynamic.Caption = latest.Caption;
 
-        const { date, Title, Caption, ...rest } = formData;
-
-        const payload = {
-            p_userplatformanalyticid: data?.userplatformanalyticid || null,
-            p_campaignid: contentData?.campaignid,
-            p_influencerid: contentData?.influencerid,
-            p_contentlinkid: contentData?.contractcontentlinkid,
-            p_metricsjson: {
-                ...rest, // views, likes, comments, shares
-                title: Title || null, 
-                caption : Caption || null,
-                postdate: date ? date.format("DD-MM-YYYY") : null, // map date → postdate
+                    setFormData({
+                        views: latest.views ?? "",
+                        likes: latest.likes ?? "",
+                        comments: latest.comments ?? "",
+                        shares: latest.shares ?? "",
+                        date: latest.postdate ? dayjs(latest.postdate) : null,
+                        ...dynamic
+                    });
+                }
+            } catch (err) {
+                console.error("Fetch Single Analytics Error", err);
             }
         };
 
-        console.log("FINAL PAYLOAD:", payload);
+        if (visible) loadLatestAnalytics();
+    }, [visible, contentData, isUpdate, token]);
+
+
+    // ------------------------------------------------------------------------------------
+    // HANDLE CHANGE
+    // ------------------------------------------------------------------------------------
+    const handleChange = (field, value) => {
+        if (["views", "likes", "comments", "shares"].includes(field)) {
+            const numericValue = value.replace(/\D/g, "").slice(0, 10);
+            setFormData((prev) => ({ ...prev, [field]: numericValue }));
+        } else {
+            setFormData((prev) => ({ ...prev, [field]: value }));
+        }
+    };
+
+    // ------------------------------------------------------------------------------------
+    // VALIDATION
+    // ------------------------------------------------------------------------------------
+    const validate = () => {
+        const newErrors = {};
+
+        ["views", "likes", "comments", "shares"].forEach((f) => {
+            if (rules[f] && !formData[f]) {
+                newErrors[f] = `${f} is required`;
+            }
+        });
+
+        // Date is required ONLY when adding first-time analytics
+        if (!isUpdate) {
+            if (!formData.date) {
+                newErrors.date = "Date is required";
+            } else if (formData.date.isAfter(dayjs(), "day")) {
+                newErrors.date = "Date cannot be in the future";
+            }
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    // ------------------------------------------------------------------------------------
+    // SAVE HANDLER
+    // ------------------------------------------------------------------------------------
+    const handleSave = async () => {
+        if (!validate()) return;
+
+        const payload = {
+            p_userplatformanalyticid: previousData?.userplatformanalyticid || null,
+            p_campaignid: contentData.campaignid,
+            p_influencerid: contentData.influencerid,
+            p_contentlinkid: contentData.contractcontentlinkid,
+            p_metricsjson: {
+                views: formData.views,
+                likes: formData.likes,
+                comments: formData.comments,
+                shares: formData.shares,
+                title: formData.Title || previousData?.Title || null,
+                caption: formData.Caption || previousData?.Caption || null,
+                postdate: isUpdate
+                    ? previousData?.postdate
+                    : formData.date?.format("DD-MM-YYYY"),
+            }
+        };
 
         try {
             const res = await axios.post("/admin/analytics/data/insert-edit", payload, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${token}` }
             });
 
             if (res.status === 200) {
@@ -180,23 +170,23 @@ const AnalyticsFormModal = ({ visible, onClose, contentData, data }) => {
             }
 
         } catch (err) {
-            console.error("Analytics Save Error:", err);
+            console.error(err);
             toast.error("Server error. Try again later.");
         }
     };
 
+    if (!contentData) return null;
 
-    // -----------------------------------------
+    // ------------------------------------------------------------------------------------
     // UI
-    // -----------------------------------------
+    // ------------------------------------------------------------------------------------
     return (
         <Modal
-            title={`${data?.isUpdate ? "Update Analytics" : "Add Initial Analytics"} — ${platform}`}
+            title={`${isUpdate ? "Update Analytics" : "Add Initial Analytics"} — ${platform}`}
             open={visible}
             onCancel={onClose}
             footer={null}
             centered
-            className="rounded-2xl"
             width={600}
         >
             <div className="flex flex-col space-y-4">
@@ -207,7 +197,6 @@ const AnalyticsFormModal = ({ visible, onClose, contentData, data }) => {
 
                 <Row gutter={[16, 16]}>
 
-                    {/* numeric fields */}
                     {rules.views && (
                         <Col xs={24} sm={12}>
                             <label>
@@ -264,18 +253,17 @@ const AnalyticsFormModal = ({ visible, onClose, contentData, data }) => {
                         </Col>
                     )}
 
-
-
-                    {/* Date */}
+                    {/* DATE FIELD (DISABLED IN UPDATE MODE) */}
                     <Col xs={24} sm={12}>
                         <label>
                             Date
                             <DatePicker
                                 value={formData.date}
-                                onChange={date => handleChange("date", date)}
+                                onChange={(date) => handleChange("date", date)}
                                 className="w-full"
                                 format="DD-MM-YYYY"
-                                disabledDate={current =>
+                                disabled={isUpdate}
+                                disabledDate={(current) =>
                                     current && current > dayjs().endOf("day")
                                 }
                             />
@@ -283,15 +271,16 @@ const AnalyticsFormModal = ({ visible, onClose, contentData, data }) => {
                         </label>
                     </Col>
 
-                    {/* dynamic OTHER fields */}
-                    {rules.other.map(field => (
+                    {/* DYNAMIC FIELDS (DISABLED IN UPDATE MODE) */}
+                    {rules.other.map((field) => (
                         <Col xs={24} sm={12} key={field}>
                             <label>
                                 {field}
                                 <Input
                                     value={formData[field] || ""}
-                                    onChange={e => handleChange(field, e.target.value)}
+                                    onChange={(e) => handleChange(field, e.target.value)}
                                     placeholder={`Enter ${field}`}
+                                    disabled={isUpdate}
                                     maxLength={field === "Title" ? 50 : undefined}
                                 />
                                 {errors[field] && (
@@ -302,7 +291,6 @@ const AnalyticsFormModal = ({ visible, onClose, contentData, data }) => {
                     ))}
                 </Row>
 
-                {/* footer buttons */}
                 <div className="flex justify-end space-x-2 mt-4">
                     <button
                         onClick={onClose}
