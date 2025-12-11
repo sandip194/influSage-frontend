@@ -16,7 +16,6 @@ import { getSocket } from "../../sockets/socket";
 import {
   setMessages,
   addMessage,
-  updateMessage,
   deleteMessage,
   undoDeleteMessage,
 } from "../../features/socket/chatSlice";
@@ -85,6 +84,13 @@ export default function ChatMessages({
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getMessageStatusIcon = (msg) => {
+    // console.log("✔️ TICK RENDER CHECK", {
+    //   msgId: msg.id,
+    //   role,
+    //   readbyvendor: msg.readbyvendor,
+    //   readbyinfluencer: msg.readbyinfluencer,
+    // });
+
     const isMe = msg.roleId === role;
     if (!isMe) return null;
 
@@ -198,9 +204,7 @@ export default function ChatMessages({
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("newMessage", (msg) => {
-      dispatch(addMessage(msg));
-    });
+    
 
     socket.on("deleteMessage", (messageId) => {
       dispatch(deleteMessage(messageId));
@@ -210,26 +214,30 @@ export default function ChatMessages({
       dispatch(undoDeleteMessage(messageId));
     });
 
-    socket.on("editMessage", (updatedMessage) => {
-      dispatch(updateMessage(updatedMessage));
-    });
+    // socket.on("editMessage", (updatedMessage) => {
+    //   dispatch(updateMessage(updatedMessage));
+    // });
 
-    socket.on(
-      "updateMessageStatus",
-      ({ messageId, readbyvendor, readbyinfluencer }) => {
-        dispatch({
-          type: "chat/setMessageRead",
-          payload: { messageId, readbyvendor, readbyinfluencer },
+    socket.on("updateMessageStatus", ({ messageId, readbyvendor, readbyinfluencer }) => {
+       console.log("✅ READ STATUS RECEIVED FROM SERVER", {
+          messageId,
+          readbyvendor,
+          readbyinfluencer,
         });
-      }
-    );
+      dispatch(setMessageRead({
+        messageId,
+        readbyvendor,
+        readbyinfluencer
+    }));
+
+    });
 
     return () => {
       socket.off("newMessage");
       socket.off("deleteMessage");
       socket.off("undoDeleteMessage");
       socket.off("updateMessageStatus");
-      socket.off("editMessage");
+      // socket.off("editMessage");
     };
   }, [socket, dispatch]);
 
@@ -299,13 +307,22 @@ export default function ChatMessages({
     messages.forEach((msg) => {
       const isMe = msg.roleId === role;
 
-      const isUnread = !isMe && !msg.readbyvendor && !msg.readbyinfluencer;
+      const isUnread =
+        !isMe &&
+        role === 1 && !msg.readbyvendor;
+
 
       if (isUnread) {
-        socket.emit("messageSeen", {
+        console.log("👀 EMIT messageSeen", {
+        messageId: msg.id,
+        role,
+        readbyvendor: msg.readbyvendor,
+        readbyinfluencer: msg.readbyinfluencer,
+      });
+        socket.emit("messageRead", {
           messageId: msg.id,
-          conversationId: chat.id,
-          roleId: role,
+          conversationId: chat.conversationid || chat.id,
+          role,
         });
       }
     });

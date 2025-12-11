@@ -223,37 +223,37 @@ const CampaignDetails = () => {
 
 
   const handleSaveDates = async () => {
-    if (!validateDates()) return;
+  if (!validateDates()) return;
 
-    const payload = {
-      campaignId: Number(campaignId),
-      isFinalSubmit: true,
-      p_campaignjson: {
-        startdate: formData.startDate?.format("DD-MM-YYYY"),
-        enddate: formData.endDate?.format("DD-MM-YYYY"),
-      },
-    };
-
-    try {
-      setLoading(true);
-      const res = await axios.post(`/vendor/update-campaign`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.data?.success) {
-        toast.success(res.data?.message || "Campaign dates updated successfully!");
-        setIsDateModalOpen(false);
-        getCampaignDetails();
-      } else {
-        toast.error(res.data?.message || "Failed to update dates");
-      }
-    } catch (err) {
-      console.error("❌ API Error:", err.response?.data || err.message);
-      toast.error("Failed to update campaign dates. Try again.");
-    } finally {
-      setLoading(false);
+  const payload = {
+    campaignId: Number(campaignId),
+    isFinalSubmit: true,
+    p_campaignjson: {
+      campaignstartdate: formData.startDate?.format("DD-MM-YYYY"),
+      campaignenddate: formData.endDate?.format("DD-MM-YYYY"),
     }
   };
+
+  try {
+    setLoading(true);
+    const res = await axios.post(`/vendor/update-campaign`, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.data?.status) {
+      toast.success("Campaign dates updated successfully!");
+      setIsDateModalOpen(false);
+      getCampaignDetails();
+    } else {
+      toast.error(res.data?.message || "Update failed");
+    }
+  } catch (err) {
+    console.error("API Error:", err);
+    toast.error("Failed to update dates");
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   if (loading || redirecting) {

@@ -46,29 +46,32 @@ export default function ChatAppPage() {
   useEffect(() => {
     if (!socket) return;
 
-   const handleReceiveMessage = (msg) => {
-     const senderId = msg.userid ?? msg.senderId;
-      if (Number(senderId) === Number(userId)) {
-        return;
-      }
+    const handleReceiveMessage = (msg) => {
+      console.log("RAW receiveMessage:", msg);
 
-      if (String(msg.conversationid) !== String(activeChat?.id)) {
-        return;
-      }
+    if (msg.tempId) {
+      dispatch(updateMessage({
+        tempId: msg.tempId,
+        newId: msg.messageid,
+        fileUrl: msg.filepaths?.[0] || "",
+      }));
+      return;
+    }
+
+  if (Number(msg.userid) === Number(userId)) return;
 
     const normalized = {
       id: msg.messageid || msg.id,
-      senderId: msg.userid ?? msg.senderId,
-      roleId: Number(msg.roleid ?? msg.roleId),
       content: msg.message,
+      senderId: msg.userid,
+      roleId: msg.roleid,
       file: msg.filepaths?.[0] || "",
       replyId: msg.replyid || null,
       time: msg.time || new Date().toISOString(),
     };
-
-  dispatch(addMessage(normalized));
-  setRefreshKey(prev => prev + 1);
-};
+      dispatch(addMessage(normalized));
+      setRefreshKey((prev) => prev + 1);
+    };
 
     socket.on("receiveMessage", handleReceiveMessage);
     return () => {
@@ -77,10 +80,9 @@ export default function ChatAppPage() {
   }, [socket, dispatch]);
 
   // ✉️ Handle sending messages
-    const handleSendMessage = async ({ text, file, replyId }) => {
+  const handleSendMessage = async ({ text, file, replyId }) => {
     if (!activeChat) return;
-    // console.log("chat is",activeChat);
-    
+
     const newMsg = {
       id: Date.now(),
       senderId: userId,
@@ -93,19 +95,14 @@ export default function ChatAppPage() {
       status: "sending",
     };
 
-    // dispatch(addMessage(newMsg));
+    dispatch(addMessage(newMsg));
     socket?.emit("sendMessage", newMsg);
 
     try {
       const formData = new FormData();
-      
       formData.append("p_conversationid", activeChat.id);
       formData.append("p_roleid", role);
       formData.append("p_messages", text);
-      formData.append("campaignid", activeChat.campaignid);
-      formData.append("campaignName", activeChat.campaignname); 
-      formData.append("vendorId", activeChat.vendorId);
-      formData.append("vendorName", activeChat.vendorName);
       if (file) formData.append("file", file);
       if (replyId) formData.append("p_replyid", replyId);
 
@@ -118,7 +115,7 @@ export default function ChatAppPage() {
 
       if (res.data?.p_status) {
         dispatch(
-          updateMessage({
+          updateMessageStatus({
             tempId: newMsg.id,
             newId: res.data.message_id,
             fileUrl: res.data.filepath || null,
@@ -130,7 +127,6 @@ export default function ChatAppPage() {
       console.error("Send failed", err);
     }
   };
-
 
   const handleEditMessage = async ({ id, content, file, replyId }) => {
     if (!activeChat || !id) return console.error("Missing activeChat or message id");
@@ -161,7 +157,6 @@ export default function ChatAppPage() {
         socket.emit("editMessage", updatedMessage);
         dispatch(updateMessage(updatedMessage));
         setEditingMessage(null);
-        setRefreshKey((prev) => prev + 1);
       }
     } catch (err) {
       console.error("Edit failed", err);
@@ -217,7 +212,6 @@ export default function ChatAppPage() {
 
           <div className="sticky bottom-0 bg-white border-t border-gray-100">
             <ChatInput
-              canstartchat={activeChat?.canstartchat}
               onSend={(data) =>
                 editingMessage
                   ? handleEditMessage({ ...editingMessage, ...data, replyId: selectedReplyMessage?.id })

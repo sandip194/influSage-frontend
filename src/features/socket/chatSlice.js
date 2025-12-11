@@ -41,8 +41,14 @@ const chatSlice = createSlice({
                 message.deleted = false;
             }
         },
-        setMessageRead: (state, action) => {
-            const { messageId, messageIds, readbyvendor, readbyinfluencer } = action.payload;
+       setMessageRead: (state, action) => {
+        const { messageId, messageIds, readbyvendor, readbyinfluencer } = action.payload;
+
+        console.log("🧠 REDUX UPDATE TICK", {
+            messageId: action.payload.messageId,
+            readbyvendor: action.payload.readbyvendor,
+            readbyinfluencer: action.payload.readbyinfluencer,
+        });
 
             const idsToUpdate = messageIds || (messageId ? [messageId] : []);
 

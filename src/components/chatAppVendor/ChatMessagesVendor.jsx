@@ -69,6 +69,13 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getMessageStatusIcon = (msg) => {
+    // console.log("✔️ TICK RENDER CHECK", {
+    //   msgId: msg.id,
+    //   role,
+    //   readbyvendor: msg.readbyvendor,
+    //   readbyinfluencer: msg.readbyinfluencer,
+    // });
+
     const isMe = msg.roleId === role;
     if (!isMe) return null;
 
@@ -241,9 +248,8 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("newMessage", (msg) => {
-      dispatch(addMessage(msg));
-    });
+    
+
 
     socket.on("deleteMessage", (messageId) => {
       dispatch(deleteMessage(messageId));
@@ -254,6 +260,11 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
     });
 
     socket.on("updateMessageStatus", ({ messageId, readbyvendor, readbyinfluencer }) => {
+       console.log("✅ READ STATUS RECEIVED FROM SERVER", {
+    messageId,
+    readbyvendor,
+    readbyinfluencer,
+  });
       dispatch({
         type: "chat/setMessageRead",
         payload: { messageId, readbyvendor, readbyinfluencer },
@@ -289,13 +300,21 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
     messages.forEach(msg => {
       const isMe = msg.roleId === role;
 
-      const isUnread = !isMe && !msg.readbyvendor && !msg.readbyinfluencer;
+      const isUnread =
+        !isMe &&
+        role === 2 && !msg.readbyinfluencer;
 
       if (isUnread) {
-        socket.emit("messageSeen", {
+        console.log("👀 EMIT messageSeen", {
+        messageId: msg.id,
+        role,
+        readbyvendor: msg.readbyvendor,
+        readbyinfluencer: msg.readbyinfluencer,
+      });
+       socket.emit("messageRead", {
           messageId: msg.id,
-          conversationId: chat.id,
-          roleId: role,
+          conversationId: chat.conversationid || chat.id,
+          role,
         });
       }
     });

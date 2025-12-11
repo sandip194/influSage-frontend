@@ -179,6 +179,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     if (!socket) return;
 
     const messageHandler = (payload) => {
+      // console.log(payload);
       if (!payload || !payload.conversationid) return;
 
       if (String(payload.userid) === String(userId)) return;

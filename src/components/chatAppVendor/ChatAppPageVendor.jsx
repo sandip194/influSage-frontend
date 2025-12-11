@@ -54,22 +54,31 @@ export default function ChatAppPageVendor() {
     if (!socket) return;
 
    const handleReceiveMessage = (msg) => {
-    if (Number(msg.userid) === Number(userId)) {
+   console.log("RAW receiveMessage:", msg);
+
+    if (msg.tempId) {
+      dispatch(updateMessage({
+        tempId: msg.tempId,
+        newId: msg.messageid,
+        fileUrl: msg.filepaths?.[0] || "",
+      }));
       return;
     }
 
-    const normalized = {
-      id: msg.messageid || msg.id,
-      senderId: msg.userid,
-      roleId: Number(msg.roleid),
-      content: msg.message,
-      file: msg.filepaths?.[0] || "",
-      replyId: msg.replyid || null,
-      time: msg.time || new Date().toISOString(),
-    };
+  if (Number(msg.userid) === Number(userId)) return;
 
-    dispatch(addMessage(normalized));
+  const normalized = {
+    id: msg.messageid || msg.id,
+    content: msg.message,
+    senderId: msg.userid,
+    roleId: msg.roleid,
+    file: msg.filepaths?.[0] || "",
+    replyId: msg.replyid || null,
+    time: msg.time || new Date().toISOString(),
   };
+  dispatch(addMessage(normalized));
+  setRefreshKey(prev => prev + 1);
+};
 
     socket.on("receiveMessage", handleReceiveMessage);
     return () => {
@@ -81,7 +90,7 @@ export default function ChatAppPageVendor() {
   const handleSendMessage = async ({ text, file, replyId }) => {
     // console.log("📨 Sending message with replyId:", replyId); 
     if (!activeChat) return;
-    // console.log("Active Chat:", activeChat);
+    // console.log("Active Chat:", activeChat); 
 
     const tempMsg = {
       id: Date.now(),
