@@ -53,7 +53,7 @@ const chatSlice = createSlice({
             const idsToUpdate = messageIds || (messageId ? [messageId] : []);
 
             state.messages = state.messages.map((msg) => {
-                if (!idsToUpdate.includes(msg.id)) return msg;
+                if (!idsToUpdate.includes(String(msg.id))) return msg;
 
                 return {
                     ...msg,

@@ -103,6 +103,7 @@ export default function ChatAppPage() {
       formData.append("p_conversationid", activeChat.id);
       formData.append("p_roleid", role);
       formData.append("p_messages", text);
+      formData.append("tempId", newMsg.id);
       if (file) formData.append("file", file);
       if (replyId) formData.append("p_replyid", replyId);
 

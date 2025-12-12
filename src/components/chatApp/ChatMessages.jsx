@@ -84,12 +84,14 @@ export default function ChatMessages({
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getMessageStatusIcon = (msg) => {
-    // console.log("✔️ TICK RENDER CHECK", {
-    //   msgId: msg.id,
-    //   role,
-    //   readbyvendor: msg.readbyvendor,
-    //   readbyinfluencer: msg.readbyinfluencer,
-    // });
+//    console.log("TICK CHECK → msgId:", msg.id, {
+//     senderId: msg.senderId,
+//     myUserId: userId,
+//     isMe_old: msg.senderId === userId,
+//     isMe_new: String(msg.senderId) === String(userId),
+//     readByVendor: msg.readbyvendor,
+//     readByInfluencer: msg.readbyinfluencer,
+// });
 
     const isMe = msg.roleId === role;
     if (!isMe) return null;
@@ -224,11 +226,10 @@ export default function ChatMessages({
           readbyvendor,
           readbyinfluencer,
         });
-      dispatch(setMessageRead({
-        messageId,
-        readbyvendor,
-        readbyinfluencer
-    }));
+      dispatch({
+        type: "chat/setMessageRead",
+        payload: { messageId, readbyvendor, readbyinfluencer },
+      });
 
     });
 
@@ -264,7 +265,7 @@ export default function ChatMessages({
 
             return {
               id: msg.messageid,
-              senderId: msg.userid ?? null,
+              senderId: msg.userid || msg.roleid || null,
               roleId: msg.roleid,
               content: unescaped,
               file: Array.isArray(msg.filepath)
@@ -302,31 +303,34 @@ export default function ChatMessages({
  }, [chat?.id, chat?.date, token, role]);
 
   useEffect(() => {
-    if (!socket || !messages.length) return;
+  if (!socket || !messages.length) return;
 
-    messages.forEach((msg) => {
-      const isMe = msg.roleId === role;
+  messages.forEach((msg) => {
+    const isMe = msg.roleId === role;
 
-      const isUnread =
-        !isMe &&
-        role === 1 && !msg.readbyvendor;
+    const isUnread =
+      !isMe &&
+      (
+        (Number(role) === 1 && !msg.readbyvendor) ||
+        (Number(role) === 2 && !msg.readbyinfluencer)
+      );
 
-
-      if (isUnread) {
-        console.log("👀 EMIT messageSeen", {
+    if (isUnread) {
+      console.log("👀 EMIT messageSeen", {
         messageId: msg.id,
         role,
         readbyvendor: msg.readbyvendor,
         readbyinfluencer: msg.readbyinfluencer,
       });
-        socket.emit("messageRead", {
-          messageId: msg.id,
-          conversationId: chat.conversationid || chat.id,
-          role,
-        });
-      }
-    });
-  }, [messages, socket, userId, chat?.id, role]);
+
+      socket.emit("messageRead", {
+        messageId: Number(msg.id),
+        conversationId: chat.conversationid || chat.id,
+        role: Number(role),
+      });
+    }
+  });
+}, [messages, socket, role, chat?.id]);
 
   // useEffect(() => {
   //   const handleClickOutside = (event) => {
@@ -411,6 +415,8 @@ export default function ChatMessages({
 
         const isLast = index === messages.length - 1;
         // console.log("Message:", msg.content, "senderId:", msg.senderId, "userId:", userId, "isMe:", isMe);
+        // console.log("RENDER CHECK → msgId:", msg.id, "senderId:", msg.senderId, "myUserId:", userId, "roleId:", msg.roleId, "myRole:", role);
+
 
         return (
           <div

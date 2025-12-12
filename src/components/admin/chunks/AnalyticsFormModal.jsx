@@ -74,9 +74,10 @@ const AnalyticsFormModal = ({ visible, onClose, contentData }) => {
                 if (latest) {
                     setPreviousData(latest);
 
-                    let dynamic = {};
-                    if (latest.Title) dynamic.Title = latest.Title;
-                    if (latest.Caption) dynamic.Caption = latest.Caption;
+                    let dynamic = {
+                        Title: latest.title ?? "",
+                        Caption: latest.caption ?? ""
+                    };
 
                     setFormData({
                         views: latest.views ?? "",
@@ -140,7 +141,7 @@ const AnalyticsFormModal = ({ visible, onClose, contentData }) => {
         if (!validate()) return;
 
         const payload = {
-            p_userplatformanalyticid: previousData?.userplatformanalyticid || null,
+            p_userplatformanalyticid: contentData?.userplatformanalyticid,
             p_campaignid: contentData.campaignid,
             p_influencerid: contentData.influencerid,
             p_contentlinkid: contentData.contractcontentlinkid,
@@ -149,10 +150,10 @@ const AnalyticsFormModal = ({ visible, onClose, contentData }) => {
                 likes: formData.likes,
                 comments: formData.comments,
                 shares: formData.shares,
-                title: formData.Title || previousData?.Title || null,
-                caption: formData.Caption || previousData?.Caption || null,
+                title: formData.Title ?? previousData?.title ?? null,
+                caption: formData.Caption ?? previousData?.caption ?? null,
                 postdate: isUpdate
-                    ? previousData?.postdate
+                    ? dayjs(previousData?.postdate).format("DD-MM-YYYY")
                     : formData.date?.format("DD-MM-YYYY"),
             }
         };

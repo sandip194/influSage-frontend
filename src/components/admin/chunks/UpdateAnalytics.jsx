@@ -185,6 +185,28 @@ const UpdateAnalytics = () => {
         fetchUpdateContents();
     }, [fetchUpdateContents]);
 
+    const handleClearFilters = () => {
+        setSearch("");
+        setSortBy("recent");
+        setPlatformFilter(null);
+        setContentType(null);
+
+        // Reset pagination to page 1
+        setPagination((prev) => ({
+        ...prev,
+        current: 1,
+        }));
+
+    // Fetch fresh list without filters
+        fetchAllContents({
+        search: "",
+        sortBy: "recent",
+        platformFilter: null,
+        contentType: null,
+        page: 1,
+        pageSize: pagination.pageSize,
+        });
+    };
     //---------------------------------------------
     // TABLE COLUMNS
     //---------------------------------------------
@@ -304,7 +326,7 @@ const UpdateAnalytics = () => {
                     />
                     <button
                         onClick={handleSearch}
-                        className="bg-[#0D132D] text-white px-4 py-2 rounded"
+                        className="bg-[#0D132D] text-white px-4 py-2 rounded-2xl"
                     >
                         Search
                     </button>
@@ -362,9 +384,15 @@ const UpdateAnalytics = () => {
 
                 <button
                     onClick={handleApply}
-                    className="bg-[#0D132D] text-white px-4 py-2 rounded"
+                    className="bg-[#0D132D] text-white px-4 py-2 rounded-2xl"
                 >
                     Apply
+                </button>
+                <button
+                    onClick={handleClearFilters}
+                    className="bg-[#0D132D] text-white px-4 py-2 rounded-2xl"
+                    >
+                    Clear
                 </button>
             </div>
 

@@ -1,7 +1,10 @@
-
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { RiArrowUpLine, RiArrowDownLine } from "@remixicon/react";
+import { useSelector } from "react-redux";
 import PerformanceChart from "../../users/analytics/PerformanceChart";
 import TopContentChart from "../../users/analytics/TopContentChart";
+import { Select } from "antd";
 
 import {
     RiBriefcaseLine,
@@ -12,6 +15,7 @@ import {
     RiStarLine
 } from "@remixicon/react";
 
+const { Option } = Select;
 
 
 // Static KPI Data
@@ -32,17 +36,21 @@ const campaigns = [
     { name: "Clothify Drops", platform: "TikTok", views: 58000, engagement: 6500, status: "Completed" },
 ];
 
-// Platform Breakdown (Blue Shades Only)
-const platforms = [
-    { platform: "Instagram", views: 48000, color: "#1A3E5C", icon: "https://cdn-icons-png.flaticon.com/512/2111/2111463.png" },
-    { platform: "TikTok", views: 72000, color: "#0D132D", icon: "https://cdn-icons-png.flaticon.com/512/3046/3046121.png" },
-    { platform: "YouTube", views: 58000, color: "#2541B2", icon: "https://cdn-icons-png.flaticon.com/512/1384/1384060.png" },
+const providerIcons = {
+    YouTube: "https://cdn-icons-png.flaticon.com/512/1384/1384060.png",
+    Facebook: "https://cdn-icons-png.flaticon.com/512/733/733547.png",
+    Instagram: "https://cdn-icons-png.flaticon.com/512/2111/2111463.png",
+    TikTok: "https://cdn-icons-png.flaticon.com/512/3046/3046121.png",
+    Twitter: "https://cdn-icons-png.flaticon.com/512/733/733579.png",
+};
 
-    // Social-only additions (blue palette)
-    { platform: "Facebook", views: 39000, color: "#1877F2", icon: "https://cdn-icons-png.flaticon.com/512/733/733547.png" },
-    { platform: "X (Twitter)", views: 27000, color: "#1B263B", icon: "https://cdn-icons-png.flaticon.com/512/5968/5968958.png" },
-    { platform: "Threads", views: 22000, color: "#0F1E44", icon: "https://cdn-icons-png.flaticon.com/512/12172/12172054.png" },
-];
+const providerColors = {
+    YouTube: "#FF0000",
+    Facebook: "#1877F2",
+    Instagram: "#E1306C",
+    TikTok: "#000000",
+    Twitter: "#1DA1F2",
+};
 
 
 // Recent Content
@@ -74,6 +82,66 @@ const contentList = [
 // -------------------------
 const BrandAnalyticsDashboard = () => {
 
+    const { token, userId } = useSelector((state) => state.auth);
+
+    const [timelineData, setTimelineData] = useState([]);
+    const [filterType, setFilterType] = useState("month");
+    const [year, setYear] = useState(new Date().getFullYear());
+    const [month, setMonth] = useState(new Date().getMonth() + 1);
+    const [platforms, setPlatforms] = useState([]);
+
+
+    const fetchTimelineData = async () => {
+        try {
+            const res = await axios.get("vendor/analytics/performance-timeline", {
+                params: {
+                    p_userid: userId,
+                    p_filtertype: filterType
+                },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            setTimelineData(res.data?.data || []);
+        } catch (err) {
+            console.error("Timeline fetch error:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchTimelineData();
+    }, [filterType]);
+
+    const fetchPlatformBreakdown = async () => {
+    try {
+        const res = await axios.get("vendor/analytics/platform-breakdown", {
+            params: {
+                p_year: year,
+                p_month: filterType === "month" ? month : null,
+            },
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res?.data?.data) {
+            const formatted = res.data.data.map(item => ({
+                platform: item.providername,
+                views: item.totallikes,
+                percentage: item.percentage,
+                color: providerColors[item.providername] || "#0D132D",
+                icon: providerIcons[item.providername] || "https://cdn-icons-png.flaticon.com/512/565/565547.png",
+            }));
+
+            setPlatforms(formatted);
+        }
+    } catch (err) {
+        console.error("Error fetching platform breakdown:", err);
+    }
+};
+
+    useEffect(() => {
+    fetchPlatformBreakdown();
+    }, [filterType]);
 
     return (
         <div className="w-full space-y-6 text-sm">
@@ -164,8 +232,26 @@ const BrandAnalyticsDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Performance Chart */}
                 <div className="bg-white rounded-2xl p-5 shadow-sm">
-                    <h2 className="text-lg font-bold mb-4">Performance Over Time</h2>
-                    <PerformanceChart />
+                    {/* Header + Filter same line */}
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-bold">Performance Over Time</h2>
+
+                        <div className="flex items-center gap-2">
+
+                            <Select
+                                value={filterType}
+                                onChange={setFilterType}
+                                className="w-[120px]"
+                                size="large"
+                            >
+                                <Option value="week">Week</Option>
+                                <Option value="month">Month</Option>
+                                <Option value="year">Year</Option>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <PerformanceChart data={timelineData} filter={filterType} />
                 </div>
 
                 {/* Top Content */}
@@ -179,7 +265,23 @@ const BrandAnalyticsDashboard = () => {
             {/* Platform Breakdown */}
             {/* ------------------------- */}
             <div className="bg-white rounded-2xl p-5 shadow-sm">
-                <h2 className="text-lg font-bold mb-4">Platform Breakdown</h2>
+
+                {/* HEADER ROW */}
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-bold">Platform Breakdown</h2>
+
+                    <Select
+                        value={filterType}
+                        onChange={setFilterType}
+                        className="w-[120px]"
+                        size="large"
+                    >
+                        <Option value="month">Month</Option>
+                        <Option value="year">Year</Option>
+                    </Select>
+                </div>
+
+                {/* PLATFORM BARS */}
                 <div className="space-y-4">
                     {platforms.map((p, idx) => {
                         const maxViews = Math.max(...platforms.map(d => d.views));
@@ -190,8 +292,11 @@ const BrandAnalyticsDashboard = () => {
                                 <div className="flex-1 bg-gray-200 h-3 rounded-full">
                                     <div
                                         className="h-3 rounded-full"
-                                        style={{ width: `${(p.views / maxViews) * 100}%`, backgroundColor: p.color }}
-                                    ></div>
+                                        style={{
+                                            width: `${(p.views / maxViews) * 100}%`,
+                                            backgroundColor: p.color
+                                        }}
+                                    />
                                 </div>
                                 <p className="w-16 text-sm font-bold text-gray-800 text-right">
                                     {p.views >= 1000 ? `${(p.views / 1000).toFixed(1)}k` : p.views}

@@ -1,216 +1,257 @@
-import React from "react";
-import { Table, Button, Tooltip } from "antd";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { Table, Button, Tooltip, Select, Empty } from "antd";
 import { RiEyeLine } from "react-icons/ri";
+import axios from "axios";
+import { useSelector } from "react-redux";
+const { Option } = Select;
 
-const allContentData = [
-  {
-    key: 1,
-    influencer: "@ritesh",
-    platform: "Instagram",
-    link: "https://instagram.com/reel/xyz",
-    firstAdded: "10:00 AM",
-    lastUpdated: "01:00 PM",
-    views: 12300,
-    likes: 800,
-    comments: 23,
-    history: [
-      { time: "10:00 AM", views: 10000, likes: 500 },
-      { time: "01:00 PM", views: 12300, likes: 800 },
-    ],
-  },
-  {
-    key: 2,
-    influencer: "@sana_art",
-    platform: "TikTok",
-    link: "https://tiktok.com/video/abc",
-    firstAdded: "09:30 AM",
-    lastUpdated: "12:15 PM",
-    views: 9800,
-    likes: 640,
-    comments: 45,
-    history: [
-      { time: "09:30 AM", views: 7000, likes: 400 },
-      { time: "12:15 PM", views: 9800, likes: 640 },
-    ],
-  },
-  {
-    key: 3,
-    influencer: "@travelwithraj",
-    platform: "YouTube",
-    link: "https://youtube.com/watch/123",
-    firstAdded: "08:00 AM",
-    lastUpdated: "02:00 PM",
-    views: 50200,
-    likes: 3200,
-    comments: 180,
-    history: [
-      { time: "08:00 AM", views: 40000, likes: 2500 },
-      { time: "02:00 PM", views: 50200, likes: 3200 },
-    ],
-  },
-  {
-    key: 4,
-    influencer: "@neha_vlog",
-    platform: "Instagram",
-    link: "https://instagram.com/reel/pqr",
-    firstAdded: "11:00 AM",
-    lastUpdated: "03:00 PM",
-    views: 22000,
-    likes: 1500,
-    comments: 78,
-    history: [
-      { time: "11:00 AM", views: 15000, likes: 900 },
-      { time: "03:00 PM", views: 22000, likes: 1500 },
-    ],
-  },
-  {
-    key: 5,
-    influencer: "@gamezone",
-    platform: "YouTube",
-    link: "https://youtube.com/watch/789",
-    firstAdded: "07:30 AM",
-    lastUpdated: "11:45 AM",
-    views: 75000,
-    likes: 5200,
-    comments: 300,
-    history: [
-      { time: "07:30 AM", views: 55000, likes: 3500 },
-      { time: "11:45 AM", views: 75000, likes: 5200 },
-    ],
-  },
-  {
-    key: 6,
-    influencer: "@fashion_beauty",
-    platform: "Instagram",
-    link: "https://instagram.com/reel/aaa",
-    firstAdded: "01:00 PM",
-    lastUpdated: "05:30 PM",
-    views: 34000,
-    likes: 2100,
-    comments: 120,
-    history: [
-      { time: "01:00 PM", views: 26000, likes: 1500 },
-      { time: "05:30 PM", views: 34000, likes: 2100 },
-    ],
-  },
-  {
-    key: 7,
-    influencer: "@techguru",
-    platform: "YouTube",
-    link: "https://youtube.com/watch/tech",
-    firstAdded: "06:00 AM",
-    lastUpdated: "10:00 AM",
-    views: 88000,
-    likes: 6500,
-    comments: 420,
-    history: [
-      { time: "06:00 AM", views: 70000, likes: 5000 },
-      { time: "10:00 AM", views: 88000, likes: 6500 },
-    ],
-  },
-  {
-    key: 8,
-    influencer: "@cookwithme",
-    platform: "TikTok",
-    link: "https://tiktok.com/video/food123",
-    firstAdded: "02:00 PM",
-    lastUpdated: "06:45 PM",
-    views: 41000,
-    likes: 3100,
-    comments: 160,
-    history: [
-      { time: "02:00 PM", views: 30000, likes: 2000 },
-      { time: "06:45 PM", views: 41000, likes: 3100 },
-    ],
-  },
-  {
-    key: 9,
-    influencer: "@daily_fitness",
-    platform: "Instagram",
-    link: "https://instagram.com/reel/fit111",
-    firstAdded: "04:00 PM",
-    lastUpdated: "08:30 PM",
-    views: 29000,
-    likes: 1700,
-    comments: 95,
-    history: [
-      { time: "04:00 PM", views: 21000, likes: 1200 },
-      { time: "08:30 PM", views: 29000, likes: 1700 },
-    ],
-  },
-  {
-    key: 10,
-    influencer: "@cryptoAlerts",
-    platform: "YouTube",
-    link: "https://youtube.com/watch/crypto77",
-    firstAdded: "05:00 AM",
-    lastUpdated: "09:20 AM",
-    views: 102000,
-    likes: 7800,
-    comments: 500,
-    history: [
-      { time: "05:00 AM", views: 85000, likes: 6000 },
-      { time: "09:20 AM", views: 102000, likes: 7800 },
-    ],
-  },
-];
+const SAFE_IMG = "https://placehold.co/80x80?text=No+Img";
 
+const CustomEmpty = () => (
+  <Empty
+    image={Empty.PRESENTED_IMAGE_SIMPLE}
+    description={<span className="text-gray-500">No data found</span>}
+  />
+);
 
 const AllContent = ({ onViewHistory }) => {
+  const { token, userId } = useSelector((state) => state.auth);
+  const [tableData, setTableData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("recent");
+  const [platformFilter, setPlatformFilter] = useState(null);
+  const [contentType, setContentType] = useState(null);
+
+  const [allPlatform, setAllPlatform] = useState([]);
+  const [allContentType, setAllContentType] = useState([]);
+
+  const [statusFilter, setStatusFilter] = useState(null);
+  const [allStatus, setAllStatus] = useState([]);
+
+
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
+
+  // Safe Date formatting
+  const formatDate = useCallback((isoString) => {
+    if (!isoString) return "N/A";
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return "Invalid Date";
+    return date.toLocaleString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "numeric",
+      month: "short",
+    });
+  }, []);
+
+  // Search
+  const handleSearch = () => {
+    fetchAllContents({ search, page: 1 });
+  };
+
+  // Apply filters
+  const handleApply = () => {
+    fetchAllContents({
+      sortBy,
+      platformFilter,
+      statusFilter,
+      contentType,
+      page: 1,
+      pageSize: pagination.pageSize,
+    });
+  };
+
+  const fetchAllContents = useCallback(
+    async (params = {}) => {
+      try {
+        setLoading(true);
+
+        const query = {
+          p_adminid: userId || null,
+          p_statusid: params.statusFilter ?? statusFilter ?? null,
+
+          p_providers: params.platformFilter
+            ? JSON.stringify([params.platformFilter])
+            : null,
+
+          p_contenttype: params.contentType
+            ? JSON.stringify([params.contentType])
+            : null,
+
+          p_sortorder: (params.sortBy ?? sortBy) === "recent" ? "DESC" : "ASC",
+
+          p_pagenumber: params.page || pagination.current,
+          p_pagesize: params.pageSize || pagination.pageSize,
+          p_search: (params.search ?? search) || null,
+        };
+
+        const res = await axios.get("/admin/analytics/contents-histories", {
+          params: query,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const api = res?.data?.data || {};
+        const records = Array.isArray(api.records) ? api.records : [];
+
+        const formatted = records.map((item = {}) => {
+          return {
+            key: item.contractcontentlinkid,
+            photo: item.userphoto,
+            influencer: item.influencername,
+            platform: item.providername,
+            contentType: item.contenttypname,
+            link: item.link,
+
+            firstAdded: item.oldestcreateddate
+              ? formatDate(item.oldestcreateddate)
+              : "N/A",
+
+            lastUpdated: item.latestcreateddate
+              ? formatDate(item.latestcreateddate)
+              : "N/A",
+
+            views: item.views,
+            raw: item,
+          };
+        });
+
+        setTableData(formatted);
+
+        setPagination((prev) => ({
+          ...prev,
+          total: api.totalcount || 0,
+        }));
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token, pagination.current, pagination.pageSize, formatDate]
+  );
+
+  useEffect(() => {
+    fetchAllContents();
+  }, [fetchAllContents]);
+
+  //---------------------------------------------
+  // Load Filters (Providers + ContentTypes)
+  //---------------------------------------------
+  useEffect(() => {
+    const loadFilters = async () => {
+        try {
+            const [pRes, cRes, sRes] = await Promise.all([
+                axios.get("/providers", {
+                    headers: { Authorization: `Bearer ${token}` },
+                }),
+                axios.get("/content-type", {
+                    headers: { Authorization: `Bearer ${token}` },
+                }),
+                axios.get("/admin/analytics/status-filters", {
+                    headers: { Authorization: `Bearer ${token}` },
+                }),
+            ]);
+
+            setAllPlatform(Array.isArray(pRes?.data?.data) ? pRes.data.data : []);
+            setAllContentType(
+                Array.isArray(cRes?.data?.contentType)
+                    ? cRes.data.contentType
+                    : []
+            );
+            setAllStatus(
+                Array.isArray(sRes?.data?.data)
+                    ? sRes.data.data
+                    : []
+            );
+        } catch (err) {
+            console.error("Filter loading error:", err);
+        }
+    };
+
+    loadFilters();
+}, [token]);
+
+  const handleViewHistory = async (item) => {
+  try {
+    const res = await axios.get(
+      `/admin/analytics/content-history/${item.contractcontentlinkid}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    onViewHistory(res.data.data);
+  } catch (error) {
+    console.error("History fetch error:", error);
+  }
+};
+
   const columns = [
     {
       title: "Influencer",
       dataIndex: "influencer",
-      ellipsis: true,
-      responsive: ["xs", "sm", "md", "lg"],
+      render: (_, record) => (
+        <div className="flex items-center gap-2">
+          <img
+            src={record.photo}
+            onError={(e) => (e.target.src = SAFE_IMG)}
+            alt="profile"
+            className="w-10 h-10 rounded-full object-cover border border-gray-200"
+          />
+          <span className="font-medium">{record.influencer}</span>
+        </div>
+      ),
     },
     {
       title: "Platform",
       dataIndex: "platform",
-      responsive: ["sm", "md", "lg"],
+    },
+    {
+      title: "Content Type",
+      dataIndex: "contentType",
     },
     {
       title: "Link",
       dataIndex: "link",
-      responsive: ["xs", "sm", "md", "lg"],
-      render: (link) => (
-        <Tooltip title={link}>
-          <a
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="truncate max-w-[120px] inline-block"
-          >
-            {link}
-          </a>
-        </Tooltip>
-      ),
+      render: (link) =>
+        link && link !== "#" ? (
+          <Tooltip title={link}>
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="truncate max-w-[150px] inline-block"
+            >
+              {link}
+            </a>
+          </Tooltip>
+        ) : (
+          <span className="text-gray-400">No Link</span>
+        ),
     },
     {
       title: "First Added",
       dataIndex: "firstAdded",
-      responsive: ["sm", "md", "lg"],
     },
     {
       title: "Last Updated",
       dataIndex: "lastUpdated",
-      responsive: ["sm", "md", "lg"],
     },
     {
       title: "Views",
       dataIndex: "views",
-      responsive: ["sm", "md", "lg"],
     },
     {
-      title: "",
-      fixed: "right",
-      width: 100,
-      responsive: ["xs", "sm", "md", "lg"],
+      title: "Action",
+      width: 80,
       render: (_, record) => (
         <Button
           icon={<RiEyeLine />}
-          className="border-[#0D132D] text-[#0D132D] hover:bg-[#0D132D] hover:text-white px-4"
-          onClick={() => onViewHistory(record.history)}
+          onClick={() => handleViewHistory(record.raw)}
+          className="border-[#0D132D] text-[#0D132D]"
         >
           View
         </Button>
@@ -218,25 +259,154 @@ const AllContent = ({ onViewHistory }) => {
     },
   ];
 
+  // Pagination change
+  const handleTableChange = (p) => {
+    setPagination(p);
+    fetchAllContents({
+      page: p.current,
+      pageSize: p.pageSize,
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSearch("");
+    setSortBy("recent");
+    setPlatformFilter(null);
+    setContentType(null);
+
+    // Reset pagination to page 1
+    setPagination((prev) => ({
+      ...prev,
+      current: 1,
+    }));
+
+  // Fetch fresh list without filters
+  setStatusFilter(null);
+    fetchAllContents({
+      search: "",
+      sortBy: "recent",
+      platformFilter: null,
+      contentType: null,
+      statusFilter: null,
+      page: 1,
+      pageSize: pagination.pageSize,
+    });
+  };
+
   return (
     <div className="my-2">
       <h1 className="text-lg my-4">All Content (History Overview)</h1>
 
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row flex-wrap gap-3 mb-4 sm:items-center">
+        {/* Search */}
+        <div className="flex w-full gap-2">
+          <input
+            type="text"
+            placeholder="Search influencer or campaign"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-white px-4 py-2 border border-gray-200 rounded-lg"
+          />
+          <button
+            onClick={handleSearch}
+            className="bg-[#0D132D] text-white px-4 py-2 rounded-2xl"
+          >
+            Search
+          </button>
+        </div>
+
+        {/* Platform Filter */}
+        <Select
+          allowClear
+          placeholder="Platform"
+          value={platformFilter}
+          onChange={setPlatformFilter}
+          className="w-[150px]"
+          size="large"
+        >
+          {allPlatform.map((p) => (
+            <Option key={p.id} value={p.id}>
+              <div className="flex items-center gap-2">
+                <img
+                  src={p.iconpath || SAFE_IMG}
+                  onError={(e) => (e.target.src = SAFE_IMG)}
+                  className="w-5 h-5 object-contain"
+                />
+                <span>{p.name}</span>
+              </div>
+            </Option>
+          ))}
+        </Select>
+
+        {/* Content Type */}
+        <Select
+          allowClear
+          placeholder="Content Type"
+          value={contentType}
+          onChange={setContentType}
+          className="w-[160px]"
+          size="large"
+        >
+          {allContentType.map((t) => (
+            <Option key={t.id} value={t.id}>
+              {t.name}
+            </Option>
+          ))}
+        </Select>
+        <Select
+            placeholder="Campaign Status"
+            allowClear
+            value={statusFilter}
+            onChange={setStatusFilter}
+            className="w-[150px]"
+            size="large"
+        >
+            {allStatus.map((s) => (
+                <Option key={s.id} value={s.id}>
+                  {s.name}
+                </Option>
+            ))}
+        </Select>
+
+        {/* Sort */}
+        <Select
+          value={sortBy}
+          onChange={setSortBy}
+          className="w-[160px]"
+          size="large"
+        >
+          <Option value="recent">Sort by: Recent</Option>
+          <Option value="oldest">Sort by: Oldest</Option>
+        </Select>
+
+        <button
+          onClick={handleApply}
+          className="bg-[#0D132D] text-white px-4 py-2 rounded-2xl"
+        >
+          Apply
+        </button>
+        <button
+          onClick={handleClearFilters}
+          className="bg-[#0D132D] text-white px-4 py-2 rounded-2xl"
+        >
+          Clear
+        </button>
+
+      </div>
+
       <Table
-        dataSource={allContentData}
+        loading={{ spinning: loading }}
+        dataSource={tableData}
         columns={columns}
-        bordered={false}
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-          pageSizeOptions: ["10", "20", "50"],
-          showTotal: (total) => `Total ${total} items`,
+        pagination={pagination}
+        onChange={handleTableChange}
+        scroll={{
+          x: true,
         }}
+        rowKey="key"
         className="rounded-lg shadow-sm"
-        scroll={{ x: "max-content" }}
-        rowClassName={() =>
-          "hover:bg-gray-50 transition-colors border-b last:border-b-0"
-        }
+        locale={{ emptyText: <CustomEmpty /> }}
       />
     </div>
   );

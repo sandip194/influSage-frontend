@@ -113,6 +113,7 @@ export default function ChatAppPageVendor() {
       formData.append("p_conversationid", activeChat.conversationid);
       formData.append("p_roleid", role);
       formData.append("p_messages", text);
+      formData.append("tempId", tempMsg.id);
       formData.append("campaignid", activeChat.campaignId);
       formData.append("campaignName", activeChat.campaignName);
       formData.append("influencerId", activeChat.influencerid);

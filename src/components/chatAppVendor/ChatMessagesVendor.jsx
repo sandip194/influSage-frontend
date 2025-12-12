@@ -84,6 +84,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
     if (isRead) {
       return <RiCheckDoubleLine className="text-blue-500 text-xs" size={17} />;
     }
+    
 
     if (isRecipientOnline) {
       return <RiCheckDoubleLine className="text-gray-500 text-xs" size={17} />;
@@ -312,9 +313,9 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
         readbyinfluencer: msg.readbyinfluencer,
       });
        socket.emit("messageRead", {
-          messageId: msg.id,
+          messageId: Number(msg.id),
           conversationId: chat.conversationid || chat.id,
-          role,
+          role: Number(role),
         });
       }
     });
