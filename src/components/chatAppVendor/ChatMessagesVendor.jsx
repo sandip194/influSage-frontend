@@ -64,36 +64,29 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
   const [isNearBottom, setIsNearBottom] = useState(true);
   const lastMessageId = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const emittedReadRef = useRef(new Set())
   const { token, userId, role } = useSelector((state) => state.auth) || {};
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  const getMessageStatusIcon = (msg) => {
-    // console.log("✔️ TICK RENDER CHECK", {
-    //   msgId: msg.id,
-    //   role,
-    //   readbyvendor: msg.readbyvendor,
-    //   readbyinfluencer: msg.readbyinfluencer,
-    // });
+   const getMessageStatusIcon = (msg) => {
+  const isMe = Number(msg.roleId) === Number(role);
+  if (!isMe) return null;
 
-    const isMe = msg.roleId === role;
-    if (!isMe) return null;
+  const otherRead =
+    Number(msg.roleId) === 1
+      ? msg.readbyvendor
+      : msg.readbyinfluencer;
 
-    const isRead = role === 2 ? msg.readbyinfluencer : msg.readbyvendor;
+  if (otherRead) {
+    return <RiCheckDoubleLine className="text-blue-500" size={16} />;
+  }
 
-    if (isRead) {
-      return <RiCheckDoubleLine className="text-blue-500 text-xs" size={17} />;
-    }
-    
+  if (isRecipientOnline) {
+    return <RiCheckDoubleLine className="text-gray-400" size={16} />;
+  }
 
-    if (isRecipientOnline) {
-      return <RiCheckDoubleLine className="text-gray-500 text-xs" size={17} />;
-    }
-
-    return <RiCheckLine className="text-gray-500 text-xs" size={17} />;
-  };
-
-
+  return <RiCheckLine className="text-gray-400" size={16} />;
+};
 
   const fetchMessages = async () => {
     if (!chat?.conversationid || !token) return;
@@ -296,30 +289,40 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
 
 
   useEffect(() => {
-    if (!socket || !messages.length) return;
+  if (!socket || !messages.length) return;
 
-    messages.forEach(msg => {
-      const isMe = msg.roleId === role;
+  messages.forEach((msg) => {
+    // ✅ STRICT sender check
+    if (Number(msg.roleId) === Number(role)) return;
 
-      const isUnread =
-        !isMe &&
-        role === 2 && !msg.readbyinfluencer;
+    // ✅ must be persisted message
+    if (!msg.id || msg.isLocal) return;
 
-      if (isUnread) {
-        console.log("👀 EMIT messageSeen", {
-        messageId: msg.id,
-        role,
-        readbyvendor: msg.readbyvendor,
-        readbyinfluencer: msg.readbyinfluencer,
-      });
-       socket.emit("messageRead", {
-          messageId: Number(msg.id),
-          conversationId: chat.conversationid || chat.id,
-          role: Number(role),
-        });
-      }
+    const isUnread =
+      (Number(role) === 1 && msg.readbyvendor !== true) ||
+      (Number(role) === 2 && msg.readbyinfluencer !== true);
+
+    if (!isUnread) return;
+
+    if (emittedReadRef.current.has(msg.id)) return;
+
+    emittedReadRef.current.add(msg.id);
+
+    console.log("📤 EMIT messageRead", msg.id);
+
+    socket.emit("messageRead", {
+      messageId: Number(msg.id),
+      conversationId: chat.conversationid ?? chat.id,
+      role: Number(role),
     });
-  }, [messages, socket, userId, chat?.id, role]);
+  });
+}, [messages, socket, role, chat?.conversationid, chat?.id]);
+
+
+// reset when chat changes
+useEffect(() => {
+  emittedReadRef.current.clear();
+}, [chat?.id]);
 
   // useEffect(() => {
   //   const handleClickOutside = (event) => {

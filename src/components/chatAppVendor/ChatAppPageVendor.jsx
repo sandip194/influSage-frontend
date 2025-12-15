@@ -102,6 +102,8 @@ export default function ChatAppPageVendor() {
       replyId: replyId || null,
       status: "sending",
       time: new Date().toISOString(),
+      readbyinfluencer: Number(role) === 1,
+      readbyvendor: Number(role) === 2,
     };
 
 

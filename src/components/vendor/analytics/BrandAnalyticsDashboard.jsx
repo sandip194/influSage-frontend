@@ -18,65 +18,6 @@ import {
 const { Option } = Select;
 
 
-// Static KPI Data
-const kpis = [
-    { label: "Total Campaigns", value: 14, change: 12, positive: true, icon: <RiBriefcaseLine size={28} /> },
-    { label: "Active Influencers", value: 8, change: 5, positive: true, icon: <RiGroupLine size={28} /> },
-    { label: "Total Impressions", value: 152930, change: 12, positive: true, icon: <RiEyeLine size={28} /> },
-    { label: "Engagement Rate", value: "4.3%", change: 1.2, positive: true, icon: <RiHeartLine size={28} /> },
-    { label: "Total Content Pieces", value: 48, change: 7, positive: true, icon: <RiImage2Line size={28} /> },
-    { label: "Avg Engagement/Influencer", value: "3.8%", change: 0.8, positive: true, icon: <RiStarLine size={28} /> },
-];
-
-
-// Campaign Table
-const campaigns = [
-    { name: "GlowSkincare Launch", platform: "IG, TikTok", views: 48000, engagement: 8300, status: "Active" },
-    { name: "FitPro Campaign", platform: "IG, YT", views: 72000, engagement: 9200, status: "Active" },
-    { name: "Clothify Drops", platform: "TikTok", views: 58000, engagement: 6500, status: "Completed" },
-];
-
-const providerIcons = {
-    YouTube: "https://cdn-icons-png.flaticon.com/512/1384/1384060.png",
-    Facebook: "https://cdn-icons-png.flaticon.com/512/733/733547.png",
-    Instagram: "https://cdn-icons-png.flaticon.com/512/2111/2111463.png",
-    TikTok: "https://cdn-icons-png.flaticon.com/512/3046/3046121.png",
-    Twitter: "https://cdn-icons-png.flaticon.com/512/733/733579.png",
-};
-
-const providerColors = {
-    YouTube: "#FF0000",
-    Facebook: "#1877F2",
-    Instagram: "#E1306C",
-    TikTok: "#000000",
-    Twitter: "#1DA1F2",
-};
-
-
-// Recent Content
-const contentList = [
-    {
-        platform: "Instagram",
-        type: "Reel",
-        date: "12 Feb 2025",
-        caption: "Trying the new Glow Serum…",
-        views: 12593,
-        likes: 1204,
-        comments: 82,
-        thumbnail: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
-    },
-    {
-        platform: "TikTok",
-        type: "Video",
-        date: "8 Feb 2025",
-        caption: "Unboxing the new FitPro pack!",
-        views: 30021,
-        likes: 3100,
-        comments: 210,
-        thumbnail: "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
-    },
-];
-
 // -------------------------
 // Brand Dashboard Component
 // -------------------------
@@ -85,63 +26,116 @@ const BrandAnalyticsDashboard = () => {
     const { token, userId } = useSelector((state) => state.auth);
 
     const [timelineData, setTimelineData] = useState([]);
-    const [filterType, setFilterType] = useState("month");
+    
+    const [timelineFilter, setTimelineFilter] = useState("month"); 
+    const [campaignFilter, setCampaignFilter] = useState("month"); 
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [summaryFilter, setSummaryFilter] = useState("month"); 
+    const [topContentFilter, setTopContentFilter] = useState("month");
+    
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
     const [platforms, setPlatforms] = useState([]);
 
+    const [kpis, setKpis] = useState([]);
+    const [recentContent, setRecentContent] = useState([]);
+    const [campaigns, setCampaigns] = useState([]);
+
+    const currentYear = new Date().getFullYear();
+
+    const yearOptions = Array.from(
+    { length: 5 },
+    (_, i) => currentYear - 2 + i
+    );
 
     const fetchTimelineData = async () => {
-        try {
-            const res = await axios.get("vendor/analytics/performance-timeline", {
-                params: {
-                    p_userid: userId,
-                    p_filtertype: filterType
-                },
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            setTimelineData(res.data?.data || []);
-        } catch (err) {
-            console.error("Timeline fetch error:", err);
-        }
-    };
-
-    useEffect(() => {
-        fetchTimelineData();
-    }, [filterType]);
-
-    const fetchPlatformBreakdown = async () => {
-    try {
-        const res = await axios.get("vendor/analytics/platform-breakdown", {
+        const res = await axios.get("vendor/analytics/performance-timeline", {
             params: {
-                p_year: year,
-                p_month: filterType === "month" ? month : null,
+            p_userid: userId,
+            p_filtertype: timelineFilter,
             },
             headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (res?.data?.data) {
-            const formatted = res.data.data.map(item => ({
-                platform: item.providername,
-                views: item.totallikes,
-                percentage: item.percentage,
-                color: providerColors[item.providername] || "#0D132D",
-                icon: providerIcons[item.providername] || "https://cdn-icons-png.flaticon.com/512/565/565547.png",
-            }));
-
-            setPlatforms(formatted);
-        }
-    } catch (err) {
-        console.error("Error fetching platform breakdown:", err);
-    }
-};
+        setTimelineData(res.data?.data || []);
+        };
 
     useEffect(() => {
-    fetchPlatformBreakdown();
-    }, [filterType]);
+        fetchTimelineData();
+    }, [timelineFilter]);
+
+    const fetchAnalyticsSummary = async () => {
+  const res = await axios.get("vendor/analytics/summary", {
+    params: {
+      p_year: year,
+      p_month: summaryFilter === "month" ? month : null,
+    },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = res.data?.data;
+  if (!data) return;
+
+  setKpis([
+    { label: "Total Campaigns", value: data.totalcampaigncount, icon: <RiBriefcaseLine size={28}/> },
+    { label: "Active Influencers", value: data.totalactiveinfluencercount, icon: <RiGroupLine size={28}/> },
+    { label: "Total Impressions", value: data.totalimpression, icon: <RiEyeLine size={28}/> },
+    { label: "Engagement Rate", value: `${data.engagementrate}%`, icon: <RiHeartLine size={28}/> },
+    { label: "Total Content Pieces", value: data.totalcontentpieces, icon: <RiImage2Line size={28}/> },
+    { label: "Avg Engagement / Influencer", value: Math.round(data.averageengagementperinfluencer), icon: <RiStarLine size={28}/> },
+  ]);
+
+  setRecentContent(data.recentcontents || []);
+};
+
+useEffect(() => {
+  fetchAnalyticsSummary();
+}, [summaryFilter, year, month]);
+
+const fetchPlatformBreakdown = async () => {
+  try {
+    const res = await axios.get("vendor/analytics/platform-breakdown", {
+      params: {
+        p_year: selectedYear,
+        p_month: selectedMonth,
+      },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const apiData = res.data?.data || [];
+
+    setPlatforms(
+      apiData.map(item => ({
+        platform: item.providername,
+        views: item.totallikes,
+        percentage: item.percentage,
+        icon: item.providericonpath,
+        color: "#0D132D",
+      }))
+    );
+  } catch (err) {
+    console.error("Platform breakdown error:", err);
+  }
+};
+
+useEffect(() => {
+  fetchPlatformBreakdown();
+}, [selectedMonth, selectedYear]);
+
+const fetchCampaignOverview = async () => {
+  const res = await axios.get("vendor/analytics/campaign-overview", {
+    params: { p_filtertype: campaignFilter },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  setCampaigns(res.data?.data || []);
+};
+
+useEffect(() => {
+  fetchCampaignOverview();
+}, [campaignFilter]);
+
 
     return (
         <div className="w-full space-y-6 text-sm">
@@ -158,37 +152,18 @@ const BrandAnalyticsDashboard = () => {
             {/* ------------------------- */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {kpis.map((kpi, idx) => (
-                    <div
-                        key={idx}
-                        className="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 hover:shadow-lg transition-shadow duration-300"
-                    >
-                        {/* Icon */}
+                    <div key={idx} className="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4">
                         <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#0B132B]">
-                            <div className="text-white text-lg">{kpi.icon}</div>
+                        <div className="text-white">{kpi.icon}</div>
                         </div>
 
-                        {/* Right Text Area */}
-                        <div className="flex flex-col">
-
-                            {/* Label */}
-                            <p className="text-gray-500 text-md">{kpi.label}</p>
-
-                            {/* Value + Change */}
-                            <div className="flex items-center gap-2">
-                                <p className="text-[#0D132D] font-bold text-3xl">
-                                    {typeof kpi.value === "number"
-                                        ? kpi.value.toLocaleString()
-                                        : kpi.value}
-                                </p>
-
-                                <span
-                                    className={`flex items-center text-xs font-medium ${kpi.positive ? "text-green-700" : "text-red-500"
-                                        }`}
-                                >
-                                    {kpi.positive ? <RiArrowUpLine size={12} /> : <RiArrowDownLine size={12} />}
-                                    {kpi.change}%
-                                </span>
-                            </div>
+                        <div>
+                        <p className="text-gray-500">{kpi.label}</p>
+                        <p className="text-[#0D132D] font-bold text-3xl">
+                            {typeof kpi.value === "number"
+                            ? kpi.value.toLocaleString()
+                            : kpi.value}
+                        </p>
                         </div>
                     </div>
                 ))}
@@ -201,7 +176,19 @@ const BrandAnalyticsDashboard = () => {
             {/* Campaign Table */}
             {/* ------------------------- */}
             <div className="bg-white rounded-2xl p-5 shadow-sm overflow-x-auto">
-                <h2 className="text-lg font-bold mb-4">Campaign Overview</h2>
+                <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-bold">Campaign Overview</h2>
+
+                        <div className="flex items-center gap-2">
+
+                            <Select value={campaignFilter} onChange={setCampaignFilter}>
+                                <Option value="week">Week</Option>
+                                <Option value="month">Month</Option>
+                                <Option value="year">Year</Option>
+                            </Select>
+
+                        </div>
+                    </div>
                 <table className="min-w-full text-left">
                     <thead>
                         <tr className="border-b border-gray-300">
@@ -211,18 +198,61 @@ const BrandAnalyticsDashboard = () => {
                             <th className="py-2 px-3 text-gray-500 text-xs">Engagement</th>
                             <th className="py-2 px-3 text-gray-500 text-xs">Status</th>
                         </tr>
-                    </thead>
+                        </thead>
                     <tbody>
-                        {campaigns.map((c, idx) => (
-                            <tr key={idx} className="border-b border-gray-200 hover:bg-gray-50">
-                                <td className="py-2 px-3">{c.name}</td>
-                                <td className="py-2 px-3">{c.platform}</td>
-                                <td className="py-2 px-3">{c.views.toLocaleString()}</td>
-                                <td className="py-2 px-3">{c.engagement.toLocaleString()}</td>
-                                <td className="py-2 px-3">{c.status}</td>
+                        {campaigns.length === 0 ? (
+                            <tr>
+                            <td colSpan={5} className="py-4 text-center text-gray-500">
+                                No campaigns found
+                            </td>
                             </tr>
-                        ))}
-                    </tbody>
+                        ) : (
+                            campaigns.map((c) => (
+                            <tr
+                                key={c.campaignid}
+                                className="border-b border-gray-200 hover:bg-gray-50"
+                            >
+                                {/* Campaign Name */}
+                                <td className="py-2 px-3 font-medium text-[#0D132D]">
+                                {c.campaignname}
+                                </td>
+
+                                {/* Platforms (from providers array) */}
+                                <td className="py-2 px-3">
+                                {c.providers?.length
+                                    ? c.providers.map(p => p.providername).join(", ")
+                                    : "-"}
+                                </td>
+
+                                {/* Views */}
+                                <td className="py-2 px-3">
+                                {c.totalviews?.toLocaleString()}
+                                </td>
+
+                                {/* Engagement */}
+                                <td className="py-2 px-3">
+                                {c.totalengagement?.toLocaleString()}
+                                </td>
+
+                                {/* Status */}
+                                <td className="py-2 px-3">
+                                <span
+                                    className={`px-2 py-1 rounded-full text-xs font-medium
+                                    ${
+                                        c.statusname === "Published"
+                                        ? "bg-green-100 text-green-700"
+                                        : c.statusname === "InProgress"
+                                        ? "bg-yellow-100 text-yellow-700"
+                                        : "bg-gray-100 text-gray-600"
+                                    }`}
+                                >
+                                    {c.statusname}
+                                </span>
+                                </td>
+                            </tr>
+                            ))
+                        )}
+                        </tbody>
                 </table>
             </div>
 
@@ -238,26 +268,35 @@ const BrandAnalyticsDashboard = () => {
 
                         <div className="flex items-center gap-2">
 
-                            <Select
-                                value={filterType}
-                                onChange={setFilterType}
-                                className="w-[120px]"
-                                size="large"
-                            >
+                            <Select value={timelineFilter} onChange={setTimelineFilter}>
                                 <Option value="week">Week</Option>
                                 <Option value="month">Month</Option>
                                 <Option value="year">Year</Option>
                             </Select>
+
                         </div>
                     </div>
 
-                    <PerformanceChart data={timelineData} filter={filterType} />
+                    <PerformanceChart data={timelineData} filter={timelineFilter} />
                 </div>
 
                 {/* Top Content */}
                 <div className="bg-white rounded-2xl p-5 shadow-sm">
-                    <h2 className="text-lg font-bold mb-4">Top Performing Content</h2>
-                    <TopContentChart />
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-bold">Top Performing Content</h2>
+
+                        <Select
+                        value={topContentFilter}
+                        onChange={setTopContentFilter}
+                        className="w-[120px]"
+                        size="large"
+                        >
+                        <Option value="week">Week</Option>
+                        <Option value="month">Month</Option>
+                        <Option value="year">Year</Option>
+                        </Select>
+                    </div>
+                    <TopContentChart filterType={topContentFilter} />
                 </div>
             </div>
 
@@ -270,16 +309,43 @@ const BrandAnalyticsDashboard = () => {
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold">Platform Breakdown</h2>
 
-                    <Select
-                        value={filterType}
-                        onChange={setFilterType}
+                    <div className="flex items-center gap-2">
+                        {/* Month Dropdown */}
+                        <Select
+                        value={selectedMonth}
+                        onChange={setSelectedMonth}
                         className="w-[120px]"
                         size="large"
-                    >
-                        <Option value="month">Month</Option>
-                        <Option value="year">Year</Option>
-                    </Select>
-                </div>
+                        >
+                        <Option value={1}>January</Option>
+                        <Option value={2}>February</Option>
+                        <Option value={3}>March</Option>
+                        <Option value={4}>April</Option>
+                        <Option value={5}>May</Option>
+                        <Option value={6}>June</Option>
+                        <Option value={7}>July</Option>
+                        <Option value={8}>August</Option>
+                        <Option value={9}>September</Option>
+                        <Option value={10}>October</Option>
+                        <Option value={11}>November</Option>
+                        <Option value={12}>December</Option>
+                        </Select>
+
+                        {/* Year Dropdown */}
+                        <Select
+                            value={selectedYear}
+                            onChange={setSelectedYear}
+                            className="w-[100px]"
+                            size="large"
+                            >
+                            {yearOptions.map((y) => (
+                                <Option key={y} value={y}>
+                                {y}
+                                </Option>
+                            ))}
+                        </Select>
+                    </div>
+                    </div>
 
                 {/* PLATFORM BARS */}
                 <div className="space-y-4">
@@ -313,19 +379,30 @@ const BrandAnalyticsDashboard = () => {
             <div className="bg-white rounded-2xl p-5 shadow-sm">
                 <h2 className="text-lg font-bold mb-4">Recent Content</h2>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {contentList.map((c, idx) => (
+                    {recentContent.map((c, idx) => (
                         <div key={idx} className="bg-gray-50 rounded-xl p-4 shadow-sm">
-                            <img src={c.thumbnail} alt="Thumbnail" className="w-full h-40 object-cover rounded-lg mb-3" />
-                            <p className="text-xs text-gray-500">{c.platform} • {c.type}</p>
-                            <p className="text-sm font-semibold text-gray-800">Posted on {c.date}</p>
-                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">{c.caption}</p>
+                            <p className="text-xs text-gray-500">
+                            {c.providername} • {c.contenttypname}
+                            </p>
+
+                            <p className="text-sm font-semibold text-gray-800">
+                            Posted on {c.postdate}
+                            </p>
+
+                            {(c.title || c.caption) && (
+                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                {c.title || c.caption}
+                            </p>
+                            )}
+
                             <div className="flex justify-between mt-3 text-sm font-medium text-gray-800">
-                                <p>👁 {c.views.toLocaleString()}</p>
-                                <p>❤️ {c.likes.toLocaleString()}</p>
-                                <p>💬 {c.comments.toLocaleString()}</p>
+                            <p>👁 {c.views.toLocaleString()}</p>
+                            <p>❤️ {c.likes.toLocaleString()}</p>
+                            <p>💬 {c.comments.toLocaleString()}</p>
+                            <p>🔁 {c.shares.toLocaleString()}</p>
                             </div>
                         </div>
-                    ))}
+                        ))}
                 </div>
             </div>
         </div>

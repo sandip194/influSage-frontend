@@ -247,7 +247,7 @@ export default function SidebarVendor({ onSelectChat }) {
                           : "text-gray-500"
                       }`}
                     >
-                      {hasUnread ? "New message" : "Click to chat"}
+                      {hasUnread ? "New message" : campaigns.lastmessage || "No messages yet"}
                     </div>
                   </div>
                 </div>
@@ -365,7 +365,7 @@ export default function SidebarVendor({ onSelectChat }) {
                             : "text-gray-500"
                         }`}
                       >
-                        {unread ? "New message" : "Click to chat"}
+                        {unread ? "New message" : inf.message}
                       </div>
                     </div>
                   </div>

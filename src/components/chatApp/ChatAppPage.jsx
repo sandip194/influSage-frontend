@@ -61,7 +61,7 @@ export default function ChatAppPage() {
   if (Number(msg.userid) === Number(userId)) return;
 
     const normalized = {
-      id: msg.messageid || msg.id,
+      id: Number(msg.messageid || msg.id),
       content: msg.message,
       senderId: msg.userid,
       roleId: msg.roleid,
@@ -93,6 +93,8 @@ export default function ChatAppPage() {
       replyId: replyId || null,
       time: new Date().toISOString(),
       status: "sending",
+      readbyinfluencer: Number(role) === 1,
+      readbyvendor: Number(role) === 2,
     };
 
     dispatch(addMessage(newMsg));
@@ -116,7 +118,7 @@ export default function ChatAppPage() {
 
       if (res.data?.p_status) {
         dispatch(
-          updateMessageStatus({
+          updateMessage({
             tempId: newMsg.id,
             newId: res.data.message_id,
             fileUrl: res.data.filepath || null,

@@ -25,6 +25,7 @@ const chatSlice = createSlice({
                     content: content || state.messages[index].content,
                     file: fileUrl || state.messages[index].file,
                     status: "sent",
+                    isLocal: false,
                 };
             }
         },
@@ -41,28 +42,18 @@ const chatSlice = createSlice({
                 message.deleted = false;
             }
         },
-       setMessageRead: (state, action) => {
-        const { messageId, messageIds, readbyvendor, readbyinfluencer } = action.payload;
+      setMessageRead: (state, action) => {
+        const { messageId, readbyvendor, readbyinfluencer } = action.payload;
 
-        console.log("🧠 REDUX UPDATE TICK", {
-            messageId: action.payload.messageId,
-            readbyvendor: action.payload.readbyvendor,
-            readbyinfluencer: action.payload.readbyinfluencer,
+        state.messages = state.messages.map((msg) => {
+            if (Number(msg.id) !== Number(messageId)) return msg;
+
+            return {
+            ...msg,
+            readbyvendor: readbyvendor === true ? true : msg.readbyvendor,
+            readbyinfluencer: readbyinfluencer === true ? true : msg.readbyinfluencer,
+            };
         });
-
-            const idsToUpdate = messageIds || (messageId ? [messageId] : []);
-
-            state.messages = state.messages.map((msg) => {
-                if (!idsToUpdate.includes(String(msg.id))) return msg;
-
-                return {
-                    ...msg,
-                    readbyvendor: readbyvendor !== undefined ? readbyvendor : msg.readbyvendor,
-                    readbyinfluencer: readbyinfluencer !== undefined
-                        ? readbyinfluencer
-                        : msg.readbyinfluencer,
-                };
-            });
         },
 
 

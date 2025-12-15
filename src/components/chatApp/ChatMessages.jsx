@@ -73,7 +73,7 @@ export default function ChatMessages({
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const [deletedMessage, setDeletedMessage] = useState({});
   const scrollRef = useRef(null);
-
+  const emittedReadRef = useRef(new Set())
   const scrollContainerRef = useRef(null);
   const bottomRef = useRef(null);
   const [isNearBottom, setIsNearBottom] = useState(true);
@@ -84,30 +84,24 @@ export default function ChatMessages({
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getMessageStatusIcon = (msg) => {
-//    console.log("TICK CHECK → msgId:", msg.id, {
-//     senderId: msg.senderId,
-//     myUserId: userId,
-//     isMe_old: msg.senderId === userId,
-//     isMe_new: String(msg.senderId) === String(userId),
-//     readByVendor: msg.readbyvendor,
-//     readByInfluencer: msg.readbyinfluencer,
-// });
+  const isMe = Number(msg.roleId) === Number(role);
+  if (!isMe) return null;
 
-    const isMe = msg.roleId === role;
-    if (!isMe) return null;
+  const otherRead =
+    Number(msg.roleId) === 1
+      ? msg.readbyvendor
+      : msg.readbyinfluencer;
 
-    const isRead = role === 2 ? msg.readbyinfluencer : msg.readbyvendor;
+  if (otherRead) {
+    return <RiCheckDoubleLine className="text-blue-500" size={16} />;
+  }
 
-    if (isRead) {
-      return <RiCheckDoubleLine className="text-blue-500 text-xs" size={17} />;
-    }
+  if (isRecipientOnline) {
+    return <RiCheckDoubleLine className="text-gray-400" size={16} />;
+  }
 
-    if (isRecipientOnline) {
-      return <RiCheckDoubleLine className="text-gray-500 text-xs" size={17} />;
-    }
-
-    return <RiCheckLine className="text-gray-500 text-xs" size={17} />;
-  };
+  return <RiCheckLine className="text-gray-400" size={16} />;
+};
 
   useEffect(() => {
     if (isLoading || messages.length === 0) return;
@@ -221,7 +215,7 @@ export default function ChatMessages({
     // });
 
     socket.on("updateMessageStatus", ({ messageId, readbyvendor, readbyinfluencer }) => {
-       console.log("✅ READ STATUS RECEIVED FROM SERVER", {
+        console.log("🟢 SOCKET → updateMessageStatus", {
           messageId,
           readbyvendor,
           readbyinfluencer,
@@ -264,7 +258,7 @@ export default function ChatMessages({
             const isHtml = /<\/?[a-z][\s\S]*>/i.test(unescaped);
 
             return {
-              id: msg.messageid,
+              id: Number(msg.messageid),
               senderId: msg.userid || msg.roleid || null,
               roleId: msg.roleid,
               content: unescaped,
@@ -303,34 +297,37 @@ export default function ChatMessages({
  }, [chat?.id, chat?.date, token, role]);
 
   useEffect(() => {
-  if (!socket || !messages.length) return;
+  if (!socket || !messages.length || !chat?.id) return;
 
   messages.forEach((msg) => {
-    const isMe = msg.roleId === role;
+  if (Number(msg.roleId) === Number(role)) return;
 
-    const isUnread =
-      !isMe &&
-      (
-        (Number(role) === 1 && !msg.readbyvendor) ||
-        (Number(role) === 2 && !msg.readbyinfluencer)
-      );
+  if (msg.tempId || !msg.id) return;
 
-    if (isUnread) {
-      console.log("👀 EMIT messageSeen", {
-        messageId: msg.id,
-        role,
-        readbyvendor: msg.readbyvendor,
-        readbyinfluencer: msg.readbyinfluencer,
-      });
+  const isUnread =
+    (Number(role) === 1 && msg.readbyvendor !== true) ||
+    (Number(role) === 2 && msg.readbyinfluencer !== true);
 
-      socket.emit("messageRead", {
-        messageId: Number(msg.id),
-        conversationId: chat.conversationid || chat.id,
-        role: Number(role),
-      });
-    }
+  if (!isUnread) return;
+
+  if (emittedReadRef.current.has(msg.id)) return;
+
+  emittedReadRef.current.add(msg.id);
+
+  socket.emit("messageRead", {
+    messageId: Number(msg.id),
+    conversationId: chat.id,
+    role: Number(role),
   });
+});
 }, [messages, socket, role, chat?.id]);
+
+
+// reset when chat changes
+useEffect(() => {
+  emittedReadRef.current.clear();
+}, [chat?.id]);
+
 
   // useEffect(() => {
   //   const handleClickOutside = (event) => {
@@ -411,11 +408,18 @@ export default function ChatMessages({
       className="flex-1 overflow-y-auto overflow-x-hidden px-0 pt-6 space-y-1"
     >
       {messages.map((msg, index) => {
-        const isMe = msg.roleId === role;
+        const isMe = Number(msg.roleId) === Number(role);
 
         const isLast = index === messages.length - 1;
         // console.log("Message:", msg.content, "senderId:", msg.senderId, "userId:", userId, "isMe:", isMe);
         // console.log("RENDER CHECK → msgId:", msg.id, "senderId:", msg.senderId, "myUserId:", userId, "roleId:", msg.roleId, "myRole:", role);
+// console.log("🎨 UI RENDER", {
+//   msgId: msg.id,
+//   roleId: msg.roleId,
+//   myRole: role,
+//   readbyvendor: msg.readbyvendor,
+//   readbyinfluencer: msg.readbyinfluencer,
+// });
 
 
         return (
