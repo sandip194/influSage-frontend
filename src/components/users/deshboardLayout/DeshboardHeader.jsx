@@ -28,6 +28,7 @@ import { getSocket } from "../../../sockets/socket";
 
 import NotificationDropdown from "./NotificationDropdown";
 import MessageDropdown from "./MessageDropdown";
+import { clearNotifications } from "../../../features/socket/notificationSlice";
 
 const { Text } = Typography;
 
@@ -59,10 +60,19 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
   const basePath = role === 1 ? "/dashboard" : "/vendor-dashboard";
 
+  const unreadCount = useSelector(
+  (state) => state.notifications.unreadCount
+);
+
+const notifications = useSelector(
+  (state) => state.notifications.items
+);
+
+
   const fetchNotifications = useCallback(async () => {
     if (!token || initialNotificationsFetched) return;
 
-    try {
+    try { 
       setLoadingNotifications(true);
 
       const res = await axios.get("/new/getallnotification", {
@@ -90,64 +100,67 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     }
   }, [token, initialNotificationsFetched]);
 
-  useEffect(() => {
-    if (!socket) {
-      console.log("❌ No socket instance found!");
-      return;
-    }
+  
 
-    // console.log("🔌 Socket connected:", socket.connected);
-    // console.log("🆔 Current userId:", userId);
+  // useEffect(() => {
+  //   if (!socket) {
+  //     console.log("❌ No socket instance found!");
+  //     return;
+  //   }
 
-    // const room = `user_${userId}`;
-    // console.log("➡️ Joining room:", room);
+  //   //  console.log("🔌 Socket connected:", socket.connected);
+  //   //  console.log("🆔 Current userId:", userId);
 
-    socket.emit("joinUserRoom", userId);
+  //   // const room = `user_${userId}`;
+  //   // console.log("➡️ Joining room:", room);
 
-    const handler = (payload) => {
-      // console.log("📩 REAL-TIME NOTIFICATION RECEIVED:", payload);
-      if (!payload) return;
+  //   // socket.emit("joinUserRoom", userId);
 
-      // ✅ Normalize payload (array or single object)
-      const notifications = Array.isArray(payload) ? payload : [payload];
+  //   const handler = (payload) => {
+  //     console.log("📩 REAL-TIME NOTIFICATION RECEIVED:", payload);
+  //     if (!payload) return;
 
-      const formattedList = notifications.map((ntf) => ({
-        id: ntf.notificationid,
-        title: ntf.title,
-        message: ntf.description,
-        isRead: ntf.isread ?? false,
-        time: ntf.createddate,
-      }));
+  //     // ✅ Normalize payload (array or single object)
+  //     const notifications = Array.isArray(payload) ? payload : [payload];
 
-      setAllNotifications((prev) => {
-        const existingIds = new Set(prev.map((n) => n.id));
-        const newOnes = formattedList.filter((n) => !existingIds.has(n.id));
-        return [...newOnes, ...prev];
-      });
+  //     const formattedList = notifications.map((ntf) => ({
+  //       id: ntf.notificationid,
+  //       title: ntf.title,
+  //       message: ntf.description,
+  //       isRead: ntf.isread ?? false,
+  //       time: ntf.createddate,
+  //     }));
 
-      setUnreadNotifications((prev) => {
-        const existingIds = new Set(prev.map((n) => n.id));
-        const unread = formattedList.filter(
-          (n) => !n.isRead && !existingIds.has(n.id)
-        );
-        return [...unread, ...prev];
-      });
-    };
+  //     setAllNotifications((prev) => {
+  //       const existingIds = new Set(prev.map((n) => n.id));
+  //       const newOnes = formattedList.filter((n) => !existingIds.has(n.id));
+  //       return [...newOnes, ...prev];
+  //     });
 
-    socket.on("receiveNotification", handler);
-    // console.log("👂 Listener attached: receiveNotification");
+  //     setUnreadNotifications((prev) => {
+  //       const existingIds = new Set(prev.map((n) => n.id));
+  //       const unread = formattedList.filter(
+  //         (n) => !n.isRead && !existingIds.has(n.id)
+  //       );
+  //       return [...unread, ...prev];
+  //     });
+  //   };
 
-    return () => {
-      socket.off("receiveNotification", handler);
-      // console.log("🧹 Listener removed: receiveNotification");
-    };
-  }, [socket, userId]);
+  //   socket.on("receiveNotification", handler);
+  //   //  console.log("👂 Listener attached: receiveNotification");
+
+  //   return () => {
+  //     socket.off("receiveNotification", handler);
+  //     // console.log("🧹 Listener removed: receiveNotification");
+  //   };
+  // }, [socket, userId]);
 
   // ======================================================
   // 🧭 LOGOUT
   // ======================================================
   const handleLogout = useCallback(() => {
     dispatch(logout());
+     dispatch(clearNotifications());
     navigate("/login");
   }, [dispatch, navigate]);
 
@@ -195,7 +208,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
           name: isVendor
             ? activeChat?.name ||
-              `${activeChat?.firstname || ""} ${activeChat?.lastname || ""}`
+            `${activeChat?.firstname || ""} ${activeChat?.lastname || ""}`
             : activeChat?.campaignname || activeChat?.name,
           photopath: isVendor
             ? activeChat?.img || activeChat?.userphoto
@@ -371,12 +384,12 @@ const DeshboardHeader = ({ toggleSidebar }) => {
           onOpenChange={(open) => {
             setNotificationDropdownVisible(open);
 
-            if (open) {
-              setUnreadNotifications([]);
-              setAllNotifications((prev) =>
-                prev.map((n) => ({ ...n, isRead: true }))
-              );
-            }
+            // if (open) {
+            //   setUnreadNotifications([]);
+            //   setAllNotifications((prev) =>
+            //     prev.map((n) => ({ ...n, isRead: true }))
+            //   );
+            // }
           }}
           placement={isMobile ? "bottom" : "bottomRight"}
           trigger={["click"]}
@@ -386,16 +399,21 @@ const DeshboardHeader = ({ toggleSidebar }) => {
               closeDropdown={() => setNotificationDropdownVisible(false)}
               onViewAll={() => {
                 fetchNotifications();
+                setUnreadNotifications([]);
+                setAllNotifications((prev) =>
+                  prev.map((n) => ({ ...n, isRead: true }))
+                );
                 setModalOpen(true);
               }}
+
               // onUnreadChange={setHasUnreadNotifications}
-              notifications={allNotifications}
+              notifications={notifications}
               loading={loadingNotifications}
             />
           }
         >
           <Badge
-            dot={unreadNotifications.length > 0}
+            dot={unreadCount > 0}
             color="red"
             offset={[-3, 3]}
           >

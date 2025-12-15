@@ -67,15 +67,17 @@ export const SetPassword = () => {
             token,
             id: user.id,
             role: user.role,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
+            name: user.name,
+            p_code: user.p_code,
           })
         );
 
         toast.success("Password set successfully!");
-        if (user.role === 1) navigate("/complate-profile");
-        else if (user.role === 2) navigate("/complate-vendor-profile");
+        if (Number(user.role) === 2 && user.p_code === "SUCCESS") navigate("/vendor-dashboard");
+        else if (Number(user.role) === 2) navigate("/complate-vendor-profile");
+        else if (Number(user.role) === 1 && user.p_code === "SUCCESS") navigate("/dashboard");
+        else if (Number(user.role) === 1) navigate("/complate-profile");
+        else if (Number(user.role) === 4) navigate("/admin-dashboard");
         else navigate("/");
       }
     } catch (error) {

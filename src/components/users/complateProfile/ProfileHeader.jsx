@@ -3,6 +3,7 @@ import { RiShutDownLine } from 'react-icons/ri';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../../features/auth/authSlice'; // adjust path as needed
+import { clearNotifications } from '../../../features/socket/notificationSlice';
 
 export const ProfileHeader = () => {
   const dispatch = useDispatch();
@@ -10,6 +11,7 @@ export const ProfileHeader = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+     dispatch(clearNotifications());
     navigate("/login");
   };
 
