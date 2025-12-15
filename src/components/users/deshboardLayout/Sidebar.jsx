@@ -17,6 +17,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../../features/auth/authSlice';
 import { Tooltip } from 'antd';
+import { clearNotifications } from '../../../features/socket/notificationSlice';
 
 
 
@@ -48,6 +49,7 @@ const Sidebar = forwardRef((props, ref) => {
     const navigate = useNavigate();
     const handleLogout = () => {
         dispatch(logout());
+         dispatch(clearNotifications());
         navigate("/login");
     };
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Skeleton, Tooltip } from "antd";
-import { RiMessage2Line, RiEyeLine } from "@remixicon/react";
+import { RiMessage2Line, RiEyeLine, RiStarFill } from "@remixicon/react";
 import { FaInstagram, FaYoutube, FaFacebook, FaTiktok } from "react-icons/fa";
 import { useNavigate, } from "react-router-dom";
 import { useSelector } from "react-redux";

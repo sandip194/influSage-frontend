@@ -6,6 +6,7 @@ import { logout } from "../../../features/auth/authSlice";
 import React, { useState, useEffect } from "react";
 import {DownOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { clearNotifications } from "../../../features/socket/notificationSlice";
 
 const AdminDashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
   const dispatch = useDispatch();
@@ -15,6 +16,7 @@ const AdminDashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
 
   const handleLogout = () => {
     dispatch(logout());
+     dispatch(clearNotifications());
     navigate("/login");
   };
 

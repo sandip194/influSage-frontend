@@ -15,6 +15,7 @@ import { useDispatch } from "react-redux";
 import { Tooltip } from 'antd';
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { logout } from "../../../features/auth/authSlice";
+import { clearNotifications } from "../../../features/socket/notificationSlice";
 
 const navItems = [
   { name: "Dashboard", icon: <RiHome2Line />, path: "/admin-dashboard" },
@@ -63,6 +64,7 @@ const AdminSidebar = forwardRef(({ onStateChange }, ref) => {
 
   const handleLogout = () => {
     dispatch(logout());
+     dispatch(clearNotifications());
     navigate("/login");
   };
 

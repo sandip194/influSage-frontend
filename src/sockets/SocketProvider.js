@@ -2,14 +2,18 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { initSocket, getSocket } from "./socket";
 import { setConnected, setOnlineUsers } from "../features/socket/socketSlice";
+import { addNotification, incrementUnread } from "../features/socket/notificationSlice";
 
 const SocketProvider = ({ children }) => {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
-  const userId = useSelector((state) => state.auth.id);
+  const userId = useSelector((state) => state.auth.userId);
+
+  const notificationsInStore = useSelector(state => state.notifications.items);
 
   useEffect(() => {
     if (token) {
+      console.log("token recived")
       const socket = initSocket(token);
 
       socket.connect();
@@ -19,12 +23,42 @@ const SocketProvider = ({ children }) => {
         socket.emit("register", userId);
       });
 
+      socket.on("receiveNotification", (payload) => {
+        if (!payload) return;
+
+        const notifications = Array.isArray(payload) ? payload : [payload];
+
+        notifications.forEach((ntf) => {
+          const notification = {
+            id: ntf.notificationid,
+            title: ntf.title,
+            message: ntf.description,
+            isRead: ntf.isread ?? false,
+            time: ntf.createddate,
+          };
+
+          // Check if it already exists in Redux
+          const exists = notificationsInStore.find((n) => n.id === notification.id);
+
+          if (!exists) {
+            dispatch(addNotification(notification));
+
+            if (!notification.isRead) {
+              dispatch(incrementUnread());
+            }
+          }
+        });
+      });
+
+
+
       socket.on("disconnect", () => {
         dispatch(setConnected(false));
       });
 
       socket.on("onlineUsers", (users) => {
         dispatch(setOnlineUsers(users));
+        console.log("onlineUsers using this userid", userId)
       });
 
       // Add other socket event listeners here (e.g., chat messages, notifications)
@@ -33,10 +67,12 @@ const SocketProvider = ({ children }) => {
         socket.off("connect");
         socket.off("disconnect");
         socket.off("onlineUsers");
+        socket.off("receiveNotification");
         // Remove other listeners
         socket.disconnect();
       };
     }
+    console.log("no token found")
   }, [token, userId, dispatch]);
 
   return children;
