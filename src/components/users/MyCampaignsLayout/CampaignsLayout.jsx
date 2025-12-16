@@ -1,6 +1,7 @@
+
+
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { SearchOutlined, CloseCircleFilled, } from "@ant-design/icons";
 import {
   Pagination,
   Input,
@@ -11,9 +12,15 @@ import {
   Checkbox,
   DatePicker,
 } from "antd";
+import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { RiEyeLine, RiArrowDownSLine, RiCloseFill, RiFilterLine, RiEraserLine  } from "react-icons/ri";
+import {
+  RiArrowDownSLine,
+  RiCloseFill,
+  RiFilterLine,
+  RiEraserLine,
+} from "react-icons/ri";
 import { RiEqualizerFill } from "@remixicon/react";
 
 const { Option } = Select;
@@ -38,13 +45,16 @@ const sortOptions = [
   { value: "estimatedbudget_asc", label: "Budget: Low to High" },
 ];
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const getImageUrl = (path) => (path ? path : "/placeholder.jpg");
+const getImageUrl = (path) => path || "/placeholder.jpg";
+
 
 const InfluencerCampaigns = () => {
+  const navigate = useNavigate();
+  const { token } = useSelector((state) => state.auth);
+
   const [searchInput, setSearchInput] = useState("");
   const [filters, setFilters] = useState({
-    status: "all",
+    statusId: null,
     sortby: "createddate",
     sortorder: "desc",
     pagenumber: 1,
@@ -69,210 +79,161 @@ const InfluencerCampaigns = () => {
 
   const [campaigns, setCampaigns] = useState([]);
   const [platforms, setPlatforms] = useState([]);
-  const [clients, setClients] = useState([])
+  const [clients, setClients] = useState([]);
+  const [statuses, setStatuses] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
 
+  /* ================= FETCH CAMPAIGNS ================= */
+  const fetchCampaigns = useCallback(
+    async (signal) => {
+      try {
+        setLoading(true);
 
+        const params = {
+          p_statuslabelid: filters.statusId ?? undefined,
+          p_sortby: filters.sortby,
+          p_sortorder: filters.sortorder,
+          p_pagenumber: filters.pagenumber,
+          p_pagesize: filters.pagesize,
+          p_search: filters.search?.trim() || undefined,
+          p_providers: filters.providers.length
+            ? JSON.stringify(filters.providers)
+            : undefined,
+          p_clients: filters.clients.length
+            ? JSON.stringify(filters.clients)
+            : undefined,
+          p_minbudget: filters.minbudget ?? undefined,
+          p_maxbudget: filters.maxbudget ?? undefined,
+          p_startdate: filters.startdate ?? undefined,
+          p_enddate: filters.enddate ?? undefined,
+        };
 
-  const navigate = useNavigate();
-  const { token } = useSelector((state) => state.auth);
+        const cleanParams = Object.fromEntries(
+          Object.entries(params).filter(([, v]) => v != null && v !== "")
+        );
 
+        const res = await axios.get("/user/influencer-campaigns", {
+          params: cleanParams,
+          signal,
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-
-  const fetchCampaigns = useCallback(async () => {
-    try {
-      setLoading(true);
-      const statusMap = {all: undefined, inprogress: 1, completed: 2, cancelled: 3 };
-
-      const params = {
-        // p_statuslabelid: filters.status !== "all" ? filters.status : undefined, 
-        p_statuslabelid: statusMap[filters.status],
-        p_sortby: filters.sortby,
-        p_sortorder: filters.sortorder,
-        p_pagenumber: filters.pagenumber,
-        p_pagesize: filters.pagesize,
-        p_search: filters.search?.trim() || undefined,
-        p_providers: filters.providers.length > 0 ? JSON.stringify(filters.providers) : undefined,
-        p_clients: filters.clients.length > 0 ? JSON.stringify(filters.clients) : undefined,
-        p_minbudget: filters.minbudget || undefined,
-        p_maxbudget: filters.maxbudget || undefined,
-        p_startdate: filters.startdate || undefined,
-        p_enddate: filters.enddate || undefined,
-      };
-
-      // Clean undefined params
-      const cleanParams = Object.fromEntries(
-        Object.entries(params).filter(([_, v]) => v !== undefined && v !== null && v !== "")
-      );
-
-      const res = await axios.get("/user/influencer-campaigns", {
-        params: cleanParams,
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setCampaigns(res?.data?.data?.records || []);
-      setTotalCount(res?.data?.data?.totalcount || 0);
-    } catch (err) {
-      console.error("Error fetching influencer campaigns", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, token]);
-
-  const getAllPlatforms = async () => {
-    try {
-      const res = await axios.get("providers", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setPlatforms(res.data.data || []);
-    } catch (error) {
-      console.error("Error fetching platforms:", error);
-    }
-  };
-
-  const getAllClients = async () => {
-    try {
-      const res = await axios.get("user/client-list", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      //console.log(res.data.data)
-      setClients(res.data.data || []);
-    } catch (error) {
-      console.error("Error fetching platforms:", error);
-    }
-  }
+        setCampaigns(res?.data?.data?.records ?? []);
+        setTotalCount(res?.data?.data?.totalcount ?? 0);
+      } catch (err) {
+        if (err.name !== "CanceledError") {
+          console.error("Error fetching campaigns", err);
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [filters, token]
+  );
 
   useEffect(() => {
-    fetchCampaigns();
+    const controller = new AbortController();
+    fetchCampaigns(controller.signal);
+    return () => controller.abort();
   }, [fetchCampaigns]);
 
+  /* ================= STATIC DATA ================= */
   useEffect(() => {
-    getAllClients();
-    getAllPlatforms();
+    const headers = { Authorization: `Bearer ${token}` };
+
+    axios.get("providers", { headers }).then((r) =>
+      setPlatforms(r?.data?.data ?? [])
+    );
+    axios.get("user/client-list", { headers }).then((r) =>
+      setClients(r?.data?.data ?? [])
+    );
+    axios
+      .get("user/influencer-campaign-status", { headers })
+      .then((r) => setStatuses(r?.data?.data ?? []));
   }, [token]);
 
-  // Search
+  /* ================= HANDLERS ================= */
   const handleSearch = (e) => {
     if (e.key === "Enter") {
-      setFilters((prev) => ({
-        ...prev,
-        search: searchInput,
+      setFilters((p) => ({
+        ...p,
+        search: searchInput.trim(),
         pagenumber: 1,
       }));
     }
   };
 
-  // Sort change
   const handleSortChange = (value) => {
     const [sortby, sortorder] = value.split("_");
-    setFilters((prev) => ({
-      ...prev,
-      sortby,
-      sortorder,
-      pagenumber: 1,
-    }));
+    setFilters((p) => ({ ...p, sortby, sortorder, pagenumber: 1 }));
   };
 
-  // Pagination
   const handlePaginationChange = (page, pageSize) => {
-    setFilters((prev) => ({
-      ...prev,
-      pagenumber: page,
-      pagesize: pageSize,
-    }));
+    setFilters((p) => ({ ...p, pagenumber: page, pagesize: pageSize }));
   };
 
-  // Status filter (tabs)
-  const handleStatusFilter = (status) => {
-    setFilters((prev) => ({
-      ...prev,
-      status,
-      pagenumber: 1,
-    }));
-  };
-
-  // Filter modal handlers
-
-  // Providers checkbox change (temp)
-  const handleProviderChange = (id) => {
-    setTempFilters((prev) => {
-      const providers = prev.providers.includes(id)
-        ? prev.providers.filter((p) => p !== id)
-        : [...prev.providers, id];
-      return { ...prev, providers };
-    });
-  };
-
-  const handleClientChange = (id) => {
-    setTempFilters((prev) => {
-      const clients = prev.clients.includes(id)
-        ? prev.clients.filter((c) => c !== id)
-        : [...prev.clients, id];
-      return { ...prev, clients };
-    });
+  const handleStatusFilter = (statusId) => {
+    setFilters((p) => ({ ...p, statusId, pagenumber: 1 }));
   };
 
 
-  // Budget change (temp)
-  const handleBudgetChange = (field, value) => {
-    setTempFilters((prev) => ({ ...prev, [field]: value ? Number(value) : null }));
-  };
+  // TEMP FILTER HANDLERS (DO NOT TRIGGER API)
 
-  // Date range change (temp)
-  const handleDateChange = (dates) => {
-    if (!dates) {
-      setTempFilters((prev) => ({ ...prev, startdate: null, enddate: null }));
-    } else {
-      setTempFilters((prev) => ({
-        ...prev,
-        startdate: dates[0]?.format("YYYY-MM-DD") || null,
-        enddate: dates[1]?.format("YYYY-MM-DD") || null,
-      }));
-    }
-  };
+const handleProviderChange = (id) => {
+  setTempFilters((prev) => ({
+    ...prev,
+    providers: prev.providers.includes(id)
+      ? prev.providers.filter((p) => p !== id)
+      : [...prev.providers, id],
+  }));
+};
 
-  // Clear filters: reset both temp and main filters (except status, sort, pagination, search)
-  const clearFilters = () => {
-    setTempFilters({
-      providers: [],
-      clients: [],
-      minbudget: null,
-      maxbudget: null,
-      startdate: null,
-      enddate: null,
-    });
-    setFilters((prev) => ({
-      ...prev,
-      providers: [],
-      clients: [],
-      minbudget: null,
-      maxbudget: null,
-      startdate: null,
-      enddate: null,
-      pagenumber: 1,
-    }));
-    setShowFilter(false);
-  };
+const handleClientChange = (id) => {
+  setTempFilters((prev) => ({
+    ...prev,
+    clients: prev.clients.includes(id)
+      ? prev.clients.filter((c) => c !== id)
+      : [...prev.clients, id],
+  }));
+};
 
-  // Apply filters from temp to main filters and close modal
+const handleBudgetChange = (field, value) => {
+  setTempFilters((prev) => ({
+    ...prev,
+    [field]: value === "" ? null : Number(value),
+  }));
+};
+
+const handleDateChange = (dates) => {
+  setTempFilters((prev) => ({
+    ...prev,
+    startdate: dates?.[0]?.format("YYYY-MM-DD") ?? null,
+    enddate: dates?.[1]?.format("YYYY-MM-DD") ?? null,
+  }));
+};
+
+
   const applyFilters = () => {
-    setFilters((prev) => ({
-      ...prev,
-      providers: tempFilters.providers,
-      clients: tempFilters.clients,
-      minbudget: tempFilters.minbudget,
-      maxbudget: tempFilters.maxbudget,
-      startdate: tempFilters.startdate,
-      enddate: tempFilters.enddate,
-      pagenumber: 1,
-    }));
+    setFilters((p) => ({ ...p, ...tempFilters, pagenumber: 1 }));
     setShowFilter(false);
   };
 
-  // Sync temp filters when filter modal opens
+  const clearFilters = () => {
+    const reset = {
+      providers: [],
+      clients: [],
+      minbudget: null,
+      maxbudget: null,
+      startdate: null,
+      enddate: null,
+    };
+    setTempFilters(reset);
+    setFilters((p) => ({ ...p, ...reset, pagenumber: 1 }));
+    setShowFilter(false);
+  };
+
   useEffect(() => {
     if (showFilter) {
       setTempFilters({
@@ -286,6 +247,7 @@ const InfluencerCampaigns = () => {
     }
   }, [showFilter, filters]);
 
+
   return (
     <div className="w-full text-sm">
       {/* Header */}
@@ -294,21 +256,32 @@ const InfluencerCampaigns = () => {
 
       </div>
 
-      {/* Status Tabs */}
-      <div className="bg-white p-3 rounded-lg mb-4 flex flex-wrap gap-3">
-        {["all", "inprogress", "completed", "cancelled"].map((st) => (
-          <button
-            key={st}
-            onClick={() => handleStatusFilter(st)}
-            className={`px-4 py-2 rounded-lg border transition font-medium ${filters.status === st
-              ? "bg-[#0f122f] text-white border-[#0f122f]"
-              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-              }`}
-          >
-            {st === "all" ? "All" : statusLabels[st] || st}
-          </button>
-        ))}
-      </div>
+       {/* Status Tabs */}
+    <div className="bg-white p-3 rounded-lg mb-4 flex flex-wrap gap-3">
+      <button
+        onClick={() => handleStatusFilter(null)}
+        className={`px-4 py-2 rounded-lg border border-gray-300 ${filters.statusId === null
+            ? "bg-[#0f122f] text-white"
+            : "bg-white text-gray-700"
+          }`}
+      >
+        All
+      </button>
+
+      {statuses.map((status) => (
+        <button
+          key={status.id}
+          onClick={() => handleStatusFilter(status.id)}
+          className={`px-4 py-2 rounded-lg border border-gray-300 ${filters.statusId === status.id
+              ? "bg-[#0f122f] text-white"
+              : "bg-white text-gray-700"
+            }`}
+        >
+          {status.name}
+        </button>
+      ))}
+    </div>
+
 
       {/* Search, Sort, and Filter Header */}
       <div className="bg-white p-4 rounded-lg mb-4">
@@ -327,7 +300,7 @@ const InfluencerCampaigns = () => {
                   <CloseCircleFilled
                     onClick={() => {
                       setSearchInput("");
-                      setSearchTerm("");
+                      // setSearchTerm("");
                     }}
                     className="text-gray-400 hover:text-gray-600 cursor-pointer"
                   />
@@ -336,35 +309,35 @@ const InfluencerCampaigns = () => {
             }
           />
 
-            {!showFilter && (
-              <div className="sm:static fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-200 flex gap-2 justify-between sm:flex-row sm:w-auto sm:border-none sm:p-0 z-30">
-                <Select
-                  size="large"
-                  value={`${filters.sortby}_${filters.sortorder}`}
-                  onChange={handleSortChange}
-                  className="flex-1 sm:w-48"
-                  placeholder="Sort By"
-                  suffixIcon={<RiArrowDownSLine size={16} />}
-                >
-                  {sortOptions.map((option) => (
-                    <Option key={option.value} value={option.value}>
-                      {option.label}
-                    </Option>
-                  ))}
-                </Select>
+          {!showFilter && (
+            <div className="sm:static fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-200 flex gap-2 justify-between sm:flex-row sm:w-auto sm:border-none sm:p-0 z-30">
+              <Select
+                size="large"
+                value={`${filters.sortby}_${filters.sortorder}`}
+                onChange={handleSortChange}
+                className="flex-1 sm:w-48"
+                placeholder="Sort By"
+                suffixIcon={<RiArrowDownSLine size={16} />}
+              >
+                {sortOptions.map((option) => (
+                  <Option key={option.value} value={option.value}>
+                    {option.label}
+                  </Option>
+                ))}
+              </Select>
 
-                <button
-                  onClick={() => {
-                    setTempFilters(filters);
-                    setShowFilter(true); 
-                  }}
-                  className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition flex-1 sm:w-auto"
-                >
-                  Filter
-                  <RiEqualizerFill size={16} />
-                </button>
-              </div>
-            )}
+              <button
+                onClick={() => {
+                  setTempFilters(filters);
+                  setShowFilter(true);
+                }}
+                className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition flex-1 sm:w-auto"
+              >
+                Filter
+                <RiEqualizerFill size={16} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -401,7 +374,7 @@ const InfluencerCampaigns = () => {
                         <img
                           src={getImageUrl(row.photopath)}
                           alt={row.businessname}
-                          className="w-9 h-9 rounded-full object-cover border"
+                          className="w-9 h-9 rounded-full object-cover border border-gray-200"
                         />
                         <span className="whitespace-nowrap font-medium">
                           {row.name}
@@ -578,7 +551,7 @@ const InfluencerCampaigns = () => {
               <p className="text-xs text-gray-500 mt-1">Filter by campaign start and end dates.</p>
             </div>
 
-            
+
           </div>
         </>
       )}
@@ -587,3 +560,4 @@ const InfluencerCampaigns = () => {
 };
 
 export default InfluencerCampaigns;
+
