@@ -53,16 +53,18 @@ const CampaignCard = ({ campaign }) => {
                 ))}
             </div>
 
-            <div className="flex justify-between items-center pt-2 border-t border-gray-300">
-                <div>
-                    <p className="font-semibold text-gray-800">₹{campaign.estimatedbudget}</p>
-                    <p className="text-xs text-gray-500">Budget</p>
-                </div>
-                <Link to={`/dashboard/browse/description/${campaign.id}`}>
+            <div className="flex justify-between items-start pt-2 border-t border-gray-300">
+
+
+                <p className="text-xs  text-gray-600 mt-1">Budget</p>
+                <p className="font-bold text-xl text-black">
+                    ₹{Number(campaign.estimatedbudget).toLocaleString('en-IN')}
+                </p>
+                {/* <Link to={`/dashboard/browse/description/${campaign.id}`}>
                     <button className="px-3 py-1 bg-black text-white rounded-full text-sm hover:bg-gray-900">
                         View
                     </button>
-                </Link>
+                </Link> */}
             </div>
         </div>
     );

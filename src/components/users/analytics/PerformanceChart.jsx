@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useMemo, memo, useCallback } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -10,112 +10,163 @@ import {
   Legend,
 } from "chart.js";
 import zoomPlugin from "chartjs-plugin-zoom";
+import { Select, Spin, Empty } from "antd";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
-ChartJS.register(
-  LineElement,
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-  zoomPlugin
-);
+ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, zoomPlugin);
+
+const { Option } = Select;
+const MemoLine = memo(Line);
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const currentYear = new Date().getFullYear();
 const YEARS = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 const WEEKS = Array.from({ length: 52 }, (_, i) => `Week ${i + 1}`);
 
+const ENDPOINT_BY_ROLE = {
+  2: "/vendor/analytics/performance-timeline",
+  1: "/user/analytics/performance-overtime",
+};
 
-const PerformanceChart = ({ data = [], filter = "year" }) => {
+const CAMPAIGN_ENDPOINT_BY_ROLE = {
+  2: "/vendor/analytics/campaign-performance-timeline",
+  1: "/user/analytics/campaign-performanceovertime",
+};
 
+const toNumber = (value) => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+};
+
+const PerformanceChart = ({ campaignId }) => {
   const wrapperRef = useRef(null);
-  const [isPanning, setIsPanning] = useState(false);
+  const [filter, setFilter] = useState("month");
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  let labels = [], views = [], likes = [], comments = [], shares = [];
-  const lookup = {};
-  data.forEach(item => {
-      if (filter === "week") lookup[item.week] = item;
-      if (filter === "month") lookup[item.month] = item;
-      if (filter === "year") lookup[item.year] = item;
-  });
+  const { token, role } = useSelector((state) => state.auth);
 
+  const getEndpoint = useCallback(() => {
+    return campaignId ? CAMPAIGN_ENDPOINT_BY_ROLE[role] : ENDPOINT_BY_ROLE[role];
+  }, [campaignId, role]);
 
-  // --- LABEL LOGIC ---
-  if (filter === "week") {
-    labels = WEEKS;
-    views = labels.map((_, i) => lookup[i + 1]?.totalviews || 0);
-    likes = labels.map((_, i) => lookup[i + 1]?.totallikes || 0);
-    comments = labels.map((_, i) => lookup[i + 1]?.totalcomments || 0);
-    shares = labels.map((_, i) => lookup[i + 1]?.totalshares || 0);
-  }
+  const fetchData = useCallback(async () => {
+    if (!role || !token) {
+      setData([]);
+      return;
+    }
 
-  if (filter === "month") {
-    labels = MONTHS;
-    views = labels.map((_, i) => lookup[i + 1]?.totalviews || 0);
-    likes = labels.map((_, i) => lookup[i + 1]?.totallikes || 0);
-    comments = labels.map((_, i) => lookup[i + 1]?.totalcomments || 0);
-    shares = labels.map((_, i) => lookup[i + 1]?.totalshares || 0);
-  }
+    const controller = new AbortController();
+    setLoading(true);
 
-  if (filter === "year") {
-    labels = YEARS;
-    views = YEARS.map(y => lookup[y]?.totalviews || 0);
-    likes = YEARS.map(y => lookup[y]?.totallikes || 0);
-    comments = YEARS.map(y => lookup[y]?.totalcomments || 0);
-    shares = YEARS.map(y => lookup[y]?.totalshares || 0);
-  }
+    try {
+      const endpoint = getEndpoint();
+      if (!endpoint) return;
 
-  // --- CHART DATA ---
-  const chartData = {
-    labels,
-    datasets: [
-      { label: "Views", data: views, borderColor: "#335CFF", tension: 0.4, fill: true },
-      { label: "Likes", data: likes, borderColor: "#0D132D", tension: 0.4, fill: true },
-      { label: "Comments", data: comments, borderColor: "#1A3E5C", tension: 0.4, fill: true },
-      { label: "Shares", data: shares, borderColor: "#0A84FF", tension: 0.4, fill: true },
-    ],
-  };
+      const params = campaignId ? { p_campaignid: campaignId, p_filtertype: filter } : { p_filtertype: filter };
+      const res = await axios.get(endpoint, {
+        params,
+        headers: { Authorization: `Bearer ${token}` },
+        signal: controller.signal,
+      });
 
-  // --- ZOOM + PAN OPTIONS ---
-  const options = {
+      setData(Array.isArray(res?.data?.data) ? res.data.data : []);
+    } catch (err) {
+      if (err.name !== "CanceledError") {
+        console.error("Performance chart error:", err);
+        setData([]);
+      }
+    } finally {
+      setLoading(false);
+    }
+
+    return () => controller.abort();
+  }, [role, token, filter, campaignId, getEndpoint]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchData();
+    return () => controller.abort();
+  }, [fetchData]);
+
+  const chartData = useMemo(() => {
+    if (!Array.isArray(data) || data.length === 0) return { labels: [], datasets: [] };
+
+    const lookup = Object.create(null);
+    data.forEach(item => {
+      if (!item) return;
+      if (filter === "week" && item.week != null) lookup[item.week] = item;
+      if (filter === "month" && item.month != null) lookup[item.month] = item;
+      if (filter === "year" && item.year != null) lookup[item.year] = item;
+    });
+
+    let labels = [], views = [], likes = [], comments = [], shares = [];
+
+    if (filter === "week") {
+      labels = WEEKS;
+      views = labels.map((_, i) => toNumber(lookup[i + 1]?.totalviews));
+      likes = labels.map((_, i) => toNumber(lookup[i + 1]?.totallikes));
+      comments = labels.map((_, i) => toNumber(lookup[i + 1]?.totalcomments));
+      shares = labels.map((_, i) => toNumber(lookup[i + 1]?.totalshares));
+    } else if (filter === "month") {
+      labels = MONTHS;
+      views = labels.map((_, i) => toNumber(lookup[i + 1]?.totalviews));
+      likes = labels.map((_, i) => toNumber(lookup[i + 1]?.totallikes));
+      comments = labels.map((_, i) => toNumber(lookup[i + 1]?.totalcomments));
+      shares = labels.map((_, i) => toNumber(lookup[i + 1]?.totalshares));
+    } else {
+      labels = YEARS;
+      views = labels.map(y => toNumber(lookup[y]?.totalviews));
+      likes = labels.map(y => toNumber(lookup[y]?.totallikes));
+      comments = labels.map(y => toNumber(lookup[y]?.totalcomments));
+      shares = labels.map(y => toNumber(lookup[y]?.totalshares));
+    }
+
+    return {
+      labels,
+      datasets: [
+        { label: "Views", data: views, borderColor: "#335CFF", tension: 0.4, fill: true },
+        { label: "Likes", data: likes, borderColor: "#0D132D", tension: 0.4, fill: true },
+        { label: "Comments", data: comments, borderColor: "#1A3E5C", tension: 0.4, fill: true },
+        { label: "Shares", data: shares, borderColor: "#0A84FF", tension: 0.4, fill: true },
+      ],
+    };
+  }, [data, filter]);
+
+  const options = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
-
     plugins: {
       legend: { position: "bottom", labels: { usePointStyle: true } },
       tooltip: { intersect: false, mode: "index" },
-
       zoom: {
-        zoom: {
-          wheel: { enabled: true },   // Enabled for week + month + year
-          pinch: { enabled: true },
-          mode: "x",
-        },
-        pan: {
-          enabled: filter !== "year",
-          mode: "x",
-          onPanStart: () => setIsPanning(true),
-          onPanComplete: () => setIsPanning(false),
-        },
+        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: "x" },
+        pan: { enabled: filter !== "year", mode: "x" },
       },
     },
-  };
+  }), [filter]);
 
-  // --- CURSOR CLASS ---
-  const cursorClass =
-    filter === "year"
-      ? "cursor-zoom-in"
-      : isPanning
-      ? "cursor-grabbing"
-      : "cursor-zoom-in";
+  const isEmpty = !loading && (!chartData.labels?.length);
 
   return (
-    <div
-      ref={wrapperRef}
-      className={`relative w-full h-64 sm:h-48 md:h-64 lg:h-72 ${cursorClass}`}
-    >
-      <Line data={chartData} options={options} />
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-bold text-gray-900">
+          {campaignId ? "Campaign Performance" : "Performance"}
+        </h2>
+        <Select value={filter} onChange={setFilter} style={{ width: 120 }}>
+          <Option value="week">Week</Option>
+          <Option value="month">Month</Option>
+          <Option value="year">Year</Option>
+        </Select>
+      </div>
+
+      <div ref={wrapperRef} className="relative w-full h-64 sm:h-48 md:h-64 lg:h-72">
+        {loading && <Spin />}
+        {!loading && isEmpty && <Empty description="No performance data" />}
+        {!loading && !isEmpty && <MemoLine data={chartData} options={options} />}
+      </div>
     </div>
   );
 };

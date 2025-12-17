@@ -69,88 +69,103 @@ export const PlatformBreakdown = () => {
     fetchPlatformData();
   }, [fetchPlatformData]);
 
-  const totalViews = useMemo(
-    () => platformData.reduce((acc, cur) => acc + (cur.views || 0), 0),
-    [platformData]
-  );
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm w-full">
-      <Row justify="space-between" align="middle" className="mb-4">
-        <Col>
-          <h2 className="text-lg font-bold text-gray-900">Platform Breakdown</h2>
-        </Col>
-        <Col>
-          <div className="flex space-x-2">
-            <Select
-              value={month}
-              onChange={setMonth}
-              size="middle"
-              style={{ width: 100 }}
-            >
-              {monthList.map((m) => (
-                <Option key={m.value} value={m.value}>
-                  {m.label}
-                </Option>
-              ))}
-            </Select>
+    <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm w-full">
 
-            <Select
-              value={year}
-              onChange={setYear}
-              size="middle"
-              style={{ width: 80 }}
-            >
-              {yearList.map((y) => (
-                <Option key={y} value={y}>
-                  {y}
-                </Option>
-              ))}
-            </Select>
-          </div>
-        </Col>
-      </Row>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <h2 className="text-base sm:text-lg font-bold text-gray-900">
+          Platform Breakdown
+        </h2>
 
+        <div className="flex gap-2">
+          <Select
+            value={month}
+            onChange={setMonth}
+            size="middle"
+            className="w-full sm:w-[100px]"
+          >
+            {monthList.map((m) => (
+              <Option key={m.value} value={m.value}>
+                {m.label}
+              </Option>
+            ))}
+          </Select>
+
+          <Select
+            value={year}
+            onChange={setYear}
+            size="middle"
+            className="w-full sm:w-[80px]"
+          >
+            {yearList.map((y) => (
+              <Option key={y} value={y}>
+                {y}
+              </Option>
+            ))}
+          </Select>
+        </div>
+      </div>
+
+      {/* Content */}
       {loading ? (
         <Skeleton active paragraph={{ rows: 3 }} />
       ) : platformData.length === 0 ? (
-        <p className="text-gray-500 text-sm">No data available for the selected month/year.</p>
+        <p className="text-gray-500 text-sm text-center py-6">
+          No data available for the selected period
+        </p>
       ) : (
-        <div className="space-y-4">
-          {platformData.map((item, idx) => {
-            const percentage =
-              totalViews > 0 ? ((item.views || 0) / totalViews) * 100 : 0;
-            return (
-              <div key={idx} className="flex items-center space-x-3">
+        <div className="space-y-5">
+          {platformData.map((item) => (
+            <div
+              key={item.providerid}
+              className="flex flex-col sm:flex-row sm:items-center gap-3"
+            >
+              {/* Platform Info */}
+              <div className="flex items-center gap-2 sm:w-40">
                 <img
-                  src={item.icon || ""}
-                  alt={item.platform || "Unknown"}
+                  src={item.providericonpath}
+                  alt={item.providername}
                   className="w-6 h-6"
                 />
-                <p className="w-20 text-sm text-gray-700">{item.platform || "Unknown"}</p>
-
-                {/* Bar */}
-                <div className="flex-1 bg-gray-200 h-3 rounded-full relative">
-                  <div
-                    className="h-3 rounded-full"
-                    style={{
-                      width: `${percentage.toFixed(1)}%`,
-                      backgroundColor: item.color || "#0D132D",
-                    }}
-                  ></div>
-
-                  <span className="absolute right-1 text-[10px] text-blue-400 font-medium">
-                    {percentage.toFixed(1)}%
-                  </span>
-                </div>
-
-                {/* Count with k/M format */}
-                <p className="w-20 text-sm font-bold text-gray-800 text-right">
-                  {formatNumber(item.views)} Views
+                <p className="text-sm font-medium text-gray-700 truncate">
+                  {item.providername}
                 </p>
               </div>
-            );
-          })}
+
+              {/* Progress Bar */}
+              <div className="flex-1">
+                <div className="relative bg-gray-200 h-3 sm:h-2.5 rounded-full">
+                  <div
+                    className="absolute left-0 top-0 h-full rounded-full transition-all"
+                    style={{
+                      width: `${item.percentage}%`,
+                      backgroundColor: "#0D132D",
+                    }}
+                  />
+                </div>
+
+                {/* Percentage (mobile below bar) */}
+                {/* <p className="text-xs text-blue-500 mt-1 sm:hidden">
+                  {item.percentage}%
+                </p> */}
+              </div>
+
+              {/* Percentage (desktop) */}
+              <p className="hidden sm:block w-12 text-xs text-blue-500 font-medium text-right">
+                {item.percentage}%
+              </p>
+
+              {/* Likes */}
+              <p className="text-sm font-bold text-gray-800 sm:w-24 text-right">
+                {formatNumber(item.totallikes)}
+                <span className="font-normal text-xs text-gray-500 ml-1">
+                  Likes
+                </span>
+              </p>
+            </div>
+          ))}
         </div>
       )}
     </div>
