@@ -178,11 +178,11 @@ const Browse = () => {
   /* ------------------------ UI ------------------------ */
   return (
     <div className="browslayout w-full text-sm pb-24 sm:pb-0">
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
-      <p className="mb-6 text-gray-700 text-sm">Track your campaigns & Browse</p>
+      {/* <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
+      <p className="mb-6 text-gray-700 text-sm">Track your campaigns & Browse</p> */}
 
       {/* Buttons */}
-      <div className="bg-white p-4 rounded-lg mb-6 flex flex-row gap-2 flex-wrap sm:flex-nowrap">
+      <div className="bg-white p-4 rounded-lg mb-3 flex flex-row gap-2 flex-wrap sm:flex-nowrap">
         {buttons.map(({ id, label, path }) => (
           <button
             key={id}

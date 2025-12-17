@@ -8,25 +8,42 @@ import FeedbackCard from '../../../components/users/InfluencerDashboardHome/Feed
 import CampaignCarousel from '../../../components/users/InfluencerDashboardHome/CampaignCarousel'
 
 const DashboardPage = () => {
-    return (
-        <div>
-            <div className="header mb-4">
-                <h3 className='text-2xl text-[#0D132D] font-bold mb-2'>Welcome Back</h3>
-                <p className='text-base text-[#0D132D]'>Track Your Campaign & Earning Progress</p>
-            </div>
-            <div className="mian-box">
-                <ProfileComplation />
-                <CampaignStats />
-                <CampaignCarousel />    
-                <EarningsSummarySection />
-                <div className="flex flex-col md:flex-row gap-4 my-3">
-                    <PerformanceCard />
-                    <TodoListCard />
-                </div>
-                <FeedbackCard />
-            </div>
+  return (
+    <div className="">
+      {/* Top cards */}
+      <div className="flex flex-col lg:flex-row gap-4 mb-6">
+        <div className="flex-1">
+          <ProfileComplation />
         </div>
-    )
-}
+        <div className="flex-1">
+          <CampaignStats />
+        </div>
+      </div>
 
-export default DashboardPage
+      {/* Carousel */}
+      <div className="mb-6">
+        <CampaignCarousel />
+      </div>
+
+      {/* Earnings Summary */}
+      <div className="mb-6">
+        <EarningsSummarySection />
+      </div>
+
+      {/* Performance & Todo */}
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex-1">
+          <PerformanceCard />
+        </div>
+        <div className="flex-1">
+          <TodoListCard />
+        </div>
+      </div>
+
+      {/* Feedback */}
+      <FeedbackCard />
+    </div>
+  );
+};
+
+export default DashboardPage;

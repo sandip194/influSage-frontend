@@ -39,133 +39,36 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const { token, role, userId } = useSelector((state) => state.auth);
   const activeChat = useSelector((state) => state.chat.activeChat);
 
-  const [notificationDropdownVisible, setNotificationDropdownVisible] =
-    useState(false);
+  const unreadCount = useSelector((state) => state.notifications.unreadCount);
+  const notifications = useSelector((state) => state.notifications.items);
+
+  const [notificationDropdownVisible, setNotificationDropdownVisible] = useState(false);
   const [messageDropdownVisible, setMessageDropdownVisible] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const [unreadNotifications, setUnreadNotifications] = useState([]);
-  const [allNotifications, setAllNotifications] = useState([]);
-  // const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
-  const [loadingNotifications, setLoadingNotifications] = useState(false);
-  const [initialNotificationsFetched, setInitialNotificationsFetched] =
-    useState(false);
+  // 🟢 Local state for dropdown notifications (latest 3 + mark as read)
+  const [dropdownNotifications, setDropdownNotifications] = useState([]);
+  const [dropdownLoading, setDropdownLoading] = useState(false);
 
   const [unreadMessages, setUnreadMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [initialMessagesFetched, setInitialMessagesFetched] = useState(false);
   const [profileData, setProfileData] = useState(null);
-
   const [isMobile, setIsMobile] = useState(false);
 
   const basePath = role === 1 ? "/dashboard" : "/vendor-dashboard";
 
-  const unreadCount = useSelector(
-  (state) => state.notifications.unreadCount
-);
-
-const notifications = useSelector(
-  (state) => state.notifications.items
-);
-
-
-  const fetchNotifications = useCallback(async () => {
-    if (!token || initialNotificationsFetched) return;
-
-    try { 
-      setLoadingNotifications(true);
-
-      const res = await axios.get("/new/getallnotification", {
-        params: { limitedData: false },
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const rawData = res.data?.data || [];
-
-      const formatted = rawData.map((item) => ({
-        id: item.notificationid,
-        title: item.title,
-        message: item.description,
-        isRead: item.isread,
-        time: item.createddate,
-      }));
-
-      setAllNotifications(formatted);
-      setUnreadNotifications(formatted.filter((n) => !n.isRead));
-      setInitialNotificationsFetched(true);
-    } catch (err) {
-      console.error("Error fetching notifications:", err);
-    } finally {
-      setLoadingNotifications(false);
-    }
-  }, [token, initialNotificationsFetched]);
-
-  
-
-  // useEffect(() => {
-  //   if (!socket) {
-  //     console.log("❌ No socket instance found!");
-  //     return;
-  //   }
-
-  //   //  console.log("🔌 Socket connected:", socket.connected);
-  //   //  console.log("🆔 Current userId:", userId);
-
-  //   // const room = `user_${userId}`;
-  //   // console.log("➡️ Joining room:", room);
-
-  //   // socket.emit("joinUserRoom", userId);
-
-  //   const handler = (payload) => {
-  //     console.log("📩 REAL-TIME NOTIFICATION RECEIVED:", payload);
-  //     if (!payload) return;
-
-  //     // ✅ Normalize payload (array or single object)
-  //     const notifications = Array.isArray(payload) ? payload : [payload];
-
-  //     const formattedList = notifications.map((ntf) => ({
-  //       id: ntf.notificationid,
-  //       title: ntf.title,
-  //       message: ntf.description,
-  //       isRead: ntf.isread ?? false,
-  //       time: ntf.createddate,
-  //     }));
-
-  //     setAllNotifications((prev) => {
-  //       const existingIds = new Set(prev.map((n) => n.id));
-  //       const newOnes = formattedList.filter((n) => !existingIds.has(n.id));
-  //       return [...newOnes, ...prev];
-  //     });
-
-  //     setUnreadNotifications((prev) => {
-  //       const existingIds = new Set(prev.map((n) => n.id));
-  //       const unread = formattedList.filter(
-  //         (n) => !n.isRead && !existingIds.has(n.id)
-  //       );
-  //       return [...unread, ...prev];
-  //     });
-  //   };
-
-  //   socket.on("receiveNotification", handler);
-  //   //  console.log("👂 Listener attached: receiveNotification");
-
-  //   return () => {
-  //     socket.off("receiveNotification", handler);
-  //     // console.log("🧹 Listener removed: receiveNotification");
-  //   };
-  // }, [socket, userId]);
-
   // ======================================================
-  // 🧭 LOGOUT
+  // LOGOUT
   // ======================================================
   const handleLogout = useCallback(() => {
     dispatch(logout());
-     dispatch(clearNotifications());
+    dispatch(clearNotifications());
     navigate("/login");
   }, [dispatch, navigate]);
 
   // ======================================================
-  // 📨 MESSAGE LOGIC (unchanged)
+  // MESSAGE LOGIC
   // ======================================================
   useEffect(() => {
   if (!token) return;
@@ -299,20 +202,6 @@ const notifications = useSelector(
         console.log("⚠️ Duplicate unread skipped");
         return prev;
       }
-
-      return [
-        {
-          conversationid: payload.conversationid,
-          message: payload.message,
-          userid: payload.userid,
-          photopath:
-            payload.userphoto || payload.campaignphoto,
-          createddate: payload.createddate,
-          readbyvendor: payload.readbyvendor,
-          readbyinfluencer: payload.readbyinfluencer,
-        },
-        ...prev,
-      ];
     });
   };
 
@@ -357,6 +246,7 @@ useEffect(() => {
 }, [socket, role]);
 
 
+
   const memoizedMessages = useMemo(() => unreadMessages, [unreadMessages]);
 
   // ======================================================
@@ -369,15 +259,36 @@ useEffect(() => {
         const res = await axios.get("/user-profile-info", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (res.data?.userData) {
-          setProfileData(res.data.userData);
-        }
-      } catch (error) {
-        console.error("Error fetching profile info:", error);
+        if (res.data?.userData) setProfileData(res.data.userData);
+      } catch (err) {
+        console.error("Error fetching profile info:", err);
       }
     };
-
     fetchProfileData();
+  }, [token]);
+
+  // ======================================================
+  // NOTIFICATION MODAL FETCH
+  // ======================================================
+  const fetchNotifications = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await axios.get("/new/getallnotification", {
+        params: { limitedData: false },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      return (res.data?.data || []).map((item) => ({
+        id: item.notificationid,
+        title: item.title,
+        message: item.description,
+        isRead: item.isread,
+        time: item.createddate,
+      }));
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
   }, [token]);
 
   // ======================================================
@@ -387,8 +298,7 @@ useEffect(() => {
     if (!timestamp) return "";
     const date = new Date(timestamp);
     const now = new Date();
-    const diffMs = now - date;
-    const diffSec = Math.floor(diffMs / 1000);
+    const diffSec = Math.floor((now - date) / 1000);
     const diffMin = Math.floor(diffSec / 60);
     const diffHr = Math.floor(diffMin / 60);
     const diffDay = Math.floor(diffHr / 24);
@@ -403,11 +313,11 @@ useEffect(() => {
 
   const modalContent = useMemo(
     () =>
-      allNotifications.length === 0 ? (
+      dropdownNotifications.length === 0 ? (
         <Empty description="No Notifications" />
       ) : (
         <List
-          dataSource={allNotifications}
+          dataSource={dropdownNotifications}
           renderItem={(item) => (
             <List.Item key={item.id}>
               <List.Item.Meta
@@ -430,7 +340,7 @@ useEffect(() => {
           )}
         />
       ),
-    [allNotifications]
+    [dropdownNotifications]
   );
 
   // ======================================================
@@ -444,7 +354,7 @@ useEffect(() => {
   }, []);
 
   // ======================================================
-  // UI RETURN (unchanged)
+  // UI RETURN
   // ======================================================
   return (
     <div className="w-full flex justify-between items-center p-4 bg-white shadow-sm border-b border-gray-200">
@@ -458,11 +368,7 @@ useEffect(() => {
         </button>
 
         <div className="hidden sm:block flex-1">
-          <Input
-            size="large"
-            prefix={<SearchOutlined />}
-            placeholder="Search"
-          />
+          <Input size="large" prefix={<SearchOutlined />} placeholder="Search" />
         </div>
       </div>
 
@@ -476,12 +382,7 @@ useEffect(() => {
             if (open && !initialMessagesFetched) setLoadingMessages(true);
           }}
           placement={isMobile ? "bottom" : "bottomRight"}
-          overlay={
-            <MessageDropdown
-              messages={memoizedMessages}
-              loading={!initialMessagesFetched || loadingMessages}
-            />
-          }
+          overlay={<MessageDropdown messages={memoizedMessages} loading={!initialMessagesFetched || loadingMessages} />}
           trigger={["click"]}
           arrow
         >
@@ -493,15 +394,31 @@ useEffect(() => {
         {/* Notifications */}
         <Dropdown
           open={notificationDropdownVisible}
-          onOpenChange={(open) => {
+          onOpenChange={async (open) => {
             setNotificationDropdownVisible(open);
 
-            // if (open) {
-            //   setUnreadNotifications([]);
-            //   setAllNotifications((prev) =>
-            //     prev.map((n) => ({ ...n, isRead: true }))
-            //   );
-            // }
+            if (open && unreadCount > 0) {
+              setDropdownLoading(true);
+              try {
+                const res = await axios.get("/new/getallnotification", {
+                  params: { limitedData: true }, // ✅ marks these as read
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+
+                const formatted = (res.data?.data || []).map((item) => ({
+                  id: item.notificationid,
+                  title: item.title,
+                  message: item.description,
+                  time: item.createddate,
+                }));
+
+                setDropdownNotifications(formatted);
+              } catch (err) {
+                console.error("Error fetching dropdown notifications:", err);
+              } finally {
+                setDropdownLoading(false);
+              }
+            }
           }}
           placement={isMobile ? "bottom" : "bottomRight"}
           trigger={["click"]}
@@ -509,26 +426,17 @@ useEffect(() => {
           overlay={
             <NotificationDropdown
               closeDropdown={() => setNotificationDropdownVisible(false)}
-              onViewAll={() => {
-                fetchNotifications();
-                setUnreadNotifications([]);
-                setAllNotifications((prev) =>
-                  prev.map((n) => ({ ...n, isRead: true }))
-                );
+              onViewAll={async () => {
+                const allNtf = await fetchNotifications();
+                setDropdownNotifications(allNtf);
                 setModalOpen(true);
               }}
-
-              // onUnreadChange={setHasUnreadNotifications}
-              notifications={notifications}
-              loading={loadingNotifications}
+              notifications={dropdownNotifications.length > 0 ? dropdownNotifications : notifications}
+              loading={dropdownLoading}
             />
           }
         >
-          <Badge
-            dot={unreadCount > 0}
-            color="red"
-            offset={[-3, 3]}
-          >
+          <Badge dot={unreadCount > 0} color="red" offset={[-3, 3]}>
             <Button shape="circle" icon={<BellOutlined />} />
           </Badge>
         </Dropdown>
@@ -562,10 +470,7 @@ useEffect(() => {
           arrow
         >
           <div className="flex items-center gap-2 cursor-pointer border border-gray-200 px-3 py-1 rounded-full">
-            <Avatar
-              src={profileData?.photopath || "/default.jpg"}
-              alt={profileData?.firstname}
-            />
+            <Avatar src={profileData?.photopath || "/default.jpg"} alt={profileData?.firstname} />
             <span className="hidden sm:inline text-sm font-medium">
               {`${profileData?.firstname || ""} ${profileData?.lastname || ""}`}
             </span>
@@ -584,7 +489,7 @@ useEffect(() => {
         bodyStyle={{ maxHeight: "90vh", overflowY: "auto" }}
         centered
       >
-        {loadingNotifications ? (
+        {dropdownLoading ? (
           <div className="flex justify-center py-5">
             <p className="text-gray-500 text-sm">Loading...</p>
           </div>

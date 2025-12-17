@@ -96,7 +96,7 @@ const CampaignCarousel = () => {
 
     return (
         <div className=" my-3 bg-white p-3 rounded-2xl">
-            <div className="p-2 mb-2">
+            <div className="p-2 mb-1">
                 <h2 className="text-lg sm:text-xl font-semibold">Browse Campaign</h2>
             </div>
             <Swiper
