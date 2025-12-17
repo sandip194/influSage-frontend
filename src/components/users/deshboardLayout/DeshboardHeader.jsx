@@ -168,82 +168,194 @@ const notifications = useSelector(
   // 📨 MESSAGE LOGIC (unchanged)
   // ======================================================
   useEffect(() => {
-    if (!token) return;
+  if (!token) return;
 
-    const fetchOnce = async () => {
-      try {
-        setLoadingMessages(true);
-        const res = await axios.get(`/chat/unread-messages`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUnreadMessages(res.data?.data || []);
-        setInitialMessagesFetched(true);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoadingMessages(false);
-      }
+  const fetchOnce = async () => {
+    try {
+      console.log("📡 Fetching unread messages API...");
+      setLoadingMessages(true);
+
+      const res = await axios.get(`/chat/unread-messages`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("📦 RAW unread API response:", res.data);
+
+      const raw = (res.data?.data || []).map((m) => ({
+        ...m,
+        conversationid: String(m.conver),
+      }));
+
+
+      console.log("👤 ROLE:", role);
+      console.log("📋 RAW unread list:", raw);
+
+      const filtered = raw.filter((msg) => {
+        if (String(role) === "2") {
+          console.log(
+            "🧪 vendor check →",
+            msg.conver,
+            "readbyvendor:",
+            msg.readbyvendor
+          );
+          return msg.readbyvendor === false;
+        }
+        console.log(
+          "🧪 influencer check →",
+          msg.conver,
+          "readbyinfluencer:",
+          msg.readbyinfluencer
+        );
+        return msg.readbyinfluencer === false;
+      });
+
+      console.log("✅ FILTERED unread list:", filtered);
+      setUnreadMessages(filtered);
+      setInitialMessagesFetched(true);
+    } catch (err) {
+      console.error("❌ unread API error:", err);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  fetchOnce();
+}, [token, role]);
+
+ useEffect(() => {
+  if (!socket) return;
+
+  const messageHandler = (rawPayload) => {
+    console.log("📩 RAW socket payload:", rawPayload);
+
+    // 🔥 NORMALIZE PAYLOAD
+    const payload = {
+      conversationid:
+        rawPayload.conversationid ??
+        rawPayload.conversationId ??
+        rawPayload.conver,
+
+      userid:
+        rawPayload.userid ??
+        rawPayload.senderId ??
+        rawPayload.userId,
+
+      message:
+        rawPayload.message ??
+        rawPayload.content,
+
+      readbyvendor: rawPayload.readbyvendor,
+      readbyinfluencer: rawPayload.readbyinfluencer,
+      createddate: rawPayload.createddate,
+      userphoto: rawPayload.userphoto,
+      campaignphoto: rawPayload.campaignphoto,
     };
 
-    fetchOnce();
-  }, [token]);
+    console.log("🔁 NORMALIZED payload:", payload);
 
-  useEffect(() => {
-    if (!socket) return;
+    if (!payload.conversationid) {
+      console.log("❌ Still invalid after normalize");
+      return;
+    }
 
-    const messageHandler = (payload) => {
-      // console.log(payload);
-      if (!payload || !payload.conversationid) return;
+    console.log("👤 Role:", role, "UserId:", userId);
 
-      if (String(payload.userid) === String(userId)) return;
-      if (activeChat?.id === payload.conversationid) return;
+    // Ignore own message
+    if (String(payload.userid) === String(userId)) {
+      console.log("⏭️ Own message ignored");
+      return;
+    }
 
-      const isVendor = String(role) === "2";
+    // Ignore if chat open
+    if (
+      String(activeChat?.id) ===
+      String(payload.conversationid)
+    ) {
+      console.log("👁️ Chat open → no unread");
+      return;
+    }
 
-      setUnreadMessages((prev) => [
+    // 🔥 READ FLAG FILTER
+    if (String(role) === "2" && payload.readbyvendor === true) {
+      console.log("❌ Vendor already read → skip");
+      return;
+    }
+
+    if (String(role) === "1" && payload.readbyinfluencer === true) {
+      console.log("❌ Influencer already read → skip");
+      return;
+    }
+
+    console.log("✅ ADDING unread message");
+
+    setUnreadMessages((prev) => {
+      const exists = prev.some(
+        (m) =>
+          String(m.conversationid) ===
+          String(payload.conversationid)
+      );
+
+      if (exists) {
+        console.log("⚠️ Duplicate unread skipped");
+        return prev;
+      }
+
+      return [
         {
           conversationid: payload.conversationid,
           message: payload.message,
           userid: payload.userid,
-
-          name: isVendor
-            ? activeChat?.name ||
-            `${activeChat?.firstname || ""} ${activeChat?.lastname || ""}`
-            : activeChat?.campaignname || activeChat?.name,
-          photopath: isVendor
-            ? activeChat?.img || activeChat?.userphoto
-            : activeChat?.img || activeChat?.campaign?.campaignphoto,
-
+          photopath:
+            payload.userphoto || payload.campaignphoto,
           createddate: payload.createddate,
+          readbyvendor: payload.readbyvendor,
+          readbyinfluencer: payload.readbyinfluencer,
         },
         ...prev,
-      ]);
-    };
+      ];
+    });
+  };
 
-    socket.on("receiveMessage", messageHandler);
+  socket.on("receiveMessage", messageHandler);
+  return () => socket.off("receiveMessage", messageHandler);
+}, [socket, role, userId, activeChat]);
 
-    return () => {
-      socket.off("receiveMessage", messageHandler);
-    };
-  }, [socket, activeChat]);
 
-  useEffect(() => {
-    if (!socket) return;
+useEffect(() => {
+  if (!socket) return;
 
-    const unreadHandler = (lists) => {
-      // console.log("📥 UNREAD MESSAGE LIST RECEIVED:", lists);
-      if (Array.isArray(lists)) {
-        setUnreadMessages(lists);
-      }
-    };
+  const statusHandler = ({
+    conversationId,
+    readbyvendor,
+    readbyinfluencer,
+  }) => {
+    console.log("📡 updateMessageStatus", {
+      conversationId,
+      readbyvendor,
+      readbyinfluencer,
+      role,
+    });
 
-    socket.on("receiveUnreadMessages", unreadHandler);
-    // console.log("data is",unreadHandler )
+    // CLEAR ONLY FOR THE USER WHO READ
+    if (
+  (String(role) === "2" && readbyvendor === true) ||
+  (String(role) === "1" && readbyinfluencer === true)
+) {
+  setUnreadMessages((prev) =>
+    prev.filter(
+      (msg) =>
+        String(msg.conversationid) !==
+        String(conversationId)
+    )
+  );
+}
+  };
 
-    return () => {
-      socket.off("receiveUnreadMessages", unreadHandler);
-    };
-  }, [socket]);
+  socket.on("updateMessageStatus", statusHandler);
+  return () =>
+    socket.off("updateMessageStatus", statusHandler);
+}, [socket, role]);
+
 
   const memoizedMessages = useMemo(() => unreadMessages, [unreadMessages]);
 

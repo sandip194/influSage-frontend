@@ -254,11 +254,11 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
     });
 
     socket.on("updateMessageStatus", ({ messageId, readbyvendor, readbyinfluencer }) => {
-       console.log("✅ READ STATUS RECEIVED FROM SERVER", {
-    messageId,
-    readbyvendor,
-    readbyinfluencer,
-  });
+  //      console.log("✅ READ STATUS RECEIVED FROM SERVER", {
+  //   messageId,
+  //   readbyvendor,
+  //   readbyinfluencer,
+  // });
       dispatch({
         type: "chat/setMessageRead",
         payload: { messageId, readbyvendor, readbyinfluencer },
@@ -308,7 +308,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
 
     emittedReadRef.current.add(msg.id);
 
-    console.log("📤 EMIT messageRead", msg.id);
+    // console.log("📤 EMIT messageRead", msg.id);
 
     socket.emit("messageRead", {
       messageId: Number(msg.id),

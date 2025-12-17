@@ -46,8 +46,8 @@ export default function ChatAppPage() {
   useEffect(() => {
     if (!socket) return;
 
-    const handleReceiveMessage = (msg) => {
-      console.log("RAW receiveMessage:", msg);
+   const handleReceiveMessage = (msg) => {
+  //  console.log("RAW receiveMessage:", msg);
 
     if (msg.tempId) {
       dispatch(updateMessage({
@@ -60,18 +60,18 @@ export default function ChatAppPage() {
 
   if (Number(msg.userid) === Number(userId)) return;
 
-    const normalized = {
-      id: Number(msg.messageid || msg.id),
-      content: msg.message,
-      senderId: msg.userid,
-      roleId: msg.roleid,
-      file: msg.filepaths?.[0] || "",
-      replyId: msg.replyid || null,
-      time: msg.time || new Date().toISOString(),
-    };
-      dispatch(addMessage(normalized));
-      setRefreshKey((prev) => prev + 1);
-    };
+  const normalized = {
+    id: msg.messageid || msg.id,
+    content: msg.message,
+    senderId: msg.userid,
+    roleId: msg.roleid,
+    file: msg.filepaths?.[0] || "",
+    replyId: msg.replyid || null,
+    time: msg.time || new Date().toISOString(),
+  };
+  dispatch(addMessage(normalized));
+  setRefreshKey(prev => prev + 1);
+};
 
     socket.on("receiveMessage", handleReceiveMessage);
     return () => {

@@ -215,11 +215,11 @@ export default function ChatMessages({
     // });
 
     socket.on("updateMessageStatus", ({ messageId, readbyvendor, readbyinfluencer }) => {
-        console.log("🟢 SOCKET → updateMessageStatus", {
-          messageId,
-          readbyvendor,
-          readbyinfluencer,
-        });
+        // console.log("🟢 SOCKET → updateMessageStatus", {
+        //   messageId,
+        //   readbyvendor,
+        //   readbyinfluencer,
+        // });
       dispatch({
         type: "chat/setMessageRead",
         payload: { messageId, readbyvendor, readbyinfluencer },
@@ -304,9 +304,14 @@ export default function ChatMessages({
 
   if (msg.tempId || !msg.id) return;
 
-  const isUnread =
-    (Number(role) === 1 && msg.readbyvendor !== true) ||
-    (Number(role) === 2 && msg.readbyinfluencer !== true);
+  // const isUnread =
+  //   (Number(role) === 1 && msg.readbyvendor !== true) ||
+  //   (Number(role) === 2 && msg.readbyinfluencer !== true);
+
+    // ✅ Correct unread logic (THIS ROLE)
+    const isUnread =
+      (Number(role) === 1 && msg.readbyinfluencer !== true) ||
+      (Number(role) === 2 && msg.readbyvendor !== true);
 
   if (!isUnread) return;
 
@@ -392,6 +397,7 @@ useEffect(() => {
       }, 100);
     }
   }, [isLoading, messages]);
+  
 
   if (chat && isLoading && messages.length === 0) {
     return (

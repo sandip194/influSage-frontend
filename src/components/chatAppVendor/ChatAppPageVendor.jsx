@@ -54,7 +54,7 @@ export default function ChatAppPageVendor() {
     if (!socket) return;
 
    const handleReceiveMessage = (msg) => {
-   console.log("RAW receiveMessage:", msg);
+  //  console.log("RAW receiveMessage:", msg);
 
     if (msg.tempId) {
       dispatch(updateMessage({
