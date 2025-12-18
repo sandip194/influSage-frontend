@@ -304,8 +304,19 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
         size="large"
         placeholder="Search Hashtags"
         value={formData.hashtags}
-        onChange={(value) => handleChange("hashtags", value)}
+        onChange={(value) => {
+          // Split any entries that contain spaces
+          const processed = value.flatMap((tag) =>
+            tag.includes(" ") ? tag.split(" ").filter(Boolean) : tag
+          );
+
+          // Remove duplicates
+          const uniqueTags = Array.from(new Set(processed));
+
+          handleChange("hashtags", uniqueTags);
+        }}
       />
+
       {errors.hashtags && (
         <p className="text-red-500 text-sm mt-1">Please enter hashtages</p>
       )}

@@ -15,7 +15,7 @@ const AdminDashboardLayout = () => {
   const mainPaddingLeft = sidebarOpen ? '16rem' : '4rem'; // 256px : 64px
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800">
+    <div className="min-h-screen bg-gray-100 text-gray-800">
       {/* Sidebar */}
       <AdminSidebar ref={sidebarRef} onStateChange={setSidebarOpen} />
 

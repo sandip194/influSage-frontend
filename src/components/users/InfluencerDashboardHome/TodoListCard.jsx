@@ -129,7 +129,7 @@ const TodoListCard = () => {
         return (
           <div
             key={todo.id}
-            className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 border-b border-gray-200 pb-3"
+            className="flex flex-col flex-row items-start gap-2 sm:gap-4 border-b border-gray-200 pb-3"
           >
             {isCompleted ? (
               <RiCheckLine className="text-white w-5 h-5 bg-[#121A3F] flex-shrink-0" />
@@ -143,7 +143,7 @@ const TodoListCard = () => {
                     onOk: () => handleTodoAction({ id: todo.id, isCompleted: true }),
                   })
                 }
-                className="form-checkbox h-5 w-5 text-gray-600 flex-shrink-0 cursor-pointer"
+                className="form-checkbox h-5 w-5 text-gray-600 flex-shrink-0 cursor-pointer mt-1"
               />
             )}
 

@@ -69,7 +69,7 @@ const InfluencerDetailView = () => {
             setActionLoading(true);
             const res = await axios.post(
                 "/admin/dashboard/approved-or-rejected",
-                { p_userid: userId},
+                { p_userid: userId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -323,44 +323,48 @@ const InfluencerDetailView = () => {
 
                         {/* Files */}
                         {safeArray(influDetails.filepaths).some((f) => safeText(f.filepath, null)) ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                {safeArray(influDetails.filepaths).map((item, i) => {
-                                    const file = safeText(item.filepath, null);
-                                    if (!file) return null;
+                            <div className="mb-4">
+                                <p className="font-medium mb-2">Refrence Files</p>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
 
-                                    const ext = file.split(".").pop().toLowerCase();
-                                    const isImage = ["jpg", "jpeg", "png", "gif"].includes(ext);
-                                    const isVideo = ["mp4", "mov", "webm"].includes(ext);
+                                    {safeArray(influDetails.filepaths).map((item, i) => {
+                                        const file = safeText(item.filepath, null);
+                                        if (!file) return null;
 
-                                    return (
-                                        <div key={i} className="border border-gray-200 rounded overflow-hidden">
-                                            {isImage && (
-                                                <img
-                                                    src={file}
-                                                    className="w-full h-40 object-cover cursor-pointer"
-                                                    onClick={() => setPreviewImage(file)}
-                                                    onError={(e) => (e.target.src = "/fallback-image.png")}
-                                                />
-                                            )}
+                                        const ext = file.split(".").pop().toLowerCase();
+                                        const isImage = ["jpg", "jpeg", "png", "gif"].includes(ext);
+                                        const isVideo = ["mp4", "mov", "webm"].includes(ext);
 
-                                            {isVideo && (
-                                                <video className="w-full h-40 object-cover" controls>
-                                                    <source src={file} type="video/mp4" />
-                                                </video>
-                                            )}
+                                        return (
+                                            <div key={i} className="border border-gray-200 rounded overflow-hidden">
+                                                {isImage && (
+                                                    <img
+                                                        src={file}
+                                                        className="w-full h-40 object-cover cursor-pointer"
+                                                        onClick={() => setPreviewImage(file)}
+                                                        onError={(e) => (e.target.src = "/fallback-image.png")}
+                                                    />
+                                                )}
 
-                                            {!isImage && !isVideo && (
-                                                <a
-                                                    href={file}
-                                                    target="_blank"
-                                                    className="w-full h-40 flex items-center justify-center bg-gray-200 text-xs"
-                                                >
-                                                    {file.split("/").pop()}
-                                                </a>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                                                {isVideo && (
+                                                    <video className="w-full h-40 object-cover" controls>
+                                                        <source src={file} type="video/mp4" />
+                                                    </video>
+                                                )}
+
+                                                {!isImage && !isVideo && (
+                                                    <a
+                                                        href={file}
+                                                        target="_blank"
+                                                        className="w-full h-40 flex items-center justify-center bg-gray-200 text-xs"
+                                                    >
+                                                        {file.split("/").pop()}
+                                                    </a>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         ) : (
                             <div className="flex justify-center py-6">

@@ -49,7 +49,7 @@ const Sidebar = forwardRef((props, ref) => {
     const navigate = useNavigate();
     const handleLogout = () => {
         dispatch(logout());
-         dispatch(clearNotifications());
+        dispatch(clearNotifications());
         navigate("/login");
     };
 
@@ -136,23 +136,26 @@ const Sidebar = forwardRef((props, ref) => {
                         </li>
                     )}
                     {generalItems.map((item, index) => (
-                        <NavLink
+                        <Tooltip
                             key={index}
-                            to={item.to}
-                            end={item.end}
-                            onClick={() => isMobile && toggleSidebar()}
-                            title={!isOpen ? item.label : ""}
-                            className={({ isActive }) =>
-                                `flex items-center ${isOpen ? "justify-start" : "justify-center"}
-                  mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#0D132D] 
-                  ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
-                            }
+                            title={item.label}
+                            placement="right"
+                            disabled={isOpen} // show tooltip only when sidebar is collapsed
                         >
-                            <Tooltip title={item.label} placement="right" disabled={isOpen}>
+                            <NavLink
+                                to={item.to}
+                                end={item.end}
+                                onClick={() => isMobile && toggleSidebar()}
+                                className={({ isActive }) =>
+                                    `flex items-center ${isOpen ? "justify-start" : "justify-center"}
+                                mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#0D132D] 
+                                ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
+                                }
+                            >
                                 <span className="text-base">{item.icon}</span>
-                            </Tooltip>
-                            {isOpen && <span className="text-sm">{item.label}</span>}
-                        </NavLink>
+                                {isOpen && <span className="text-sm">{item.label}</span>}
+                            </NavLink>
+                        </Tooltip>
                     ))}
 
                     <hr className="my-2 border-gray-200" />
@@ -164,46 +167,56 @@ const Sidebar = forwardRef((props, ref) => {
                         </li>
                     )}
                     {financeItems.map((item, index) => (
-                        <NavLink
+                        <Tooltip
                             key={index}
-                            to={item.to}
-                            title={!isOpen ? item.label : ""}
-                            className={({ isActive }) =>
-                                `flex items-center ${isOpen ? "justify-start" : "justify-center"}
-                  mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#0D132D] 
-                  ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
-                            }
+                            title={item.label}
+                            placement="right"
+                            disabled={isOpen} // show tooltip only when sidebar is collapsed
                         >
-                            <Tooltip title={item.label} placement="right" disabled={isOpen}>
+                            <NavLink
+                                to={item.to}
+                                end={item.end}
+                                onClick={() => isMobile && toggleSidebar()}
+                                className={({ isActive }) =>
+                                    `flex items-center ${isOpen ? "justify-start" : "justify-center"}
+                                mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#0D132D] 
+                                ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
+                                }
+                            >
                                 <span className="text-base">{item.icon}</span>
-                            </Tooltip>
-                            {isOpen && <span className="text-sm">{item.label}</span>}
-                        </NavLink>
+                                {isOpen && <span className="text-sm">{item.label}</span>}
+                            </NavLink>
+                        </Tooltip>
                     ))}
                     <hr className="my-2 border-gray-200" />
                     {/* Support Section */}
                     {isOpen && (
-                    <li className="text-xs text-gray-400 uppercase px-4 mb-4 mt-4">
-                        Support
-                    </li>
+                        <li className="text-xs text-gray-400 uppercase px-4 mb-4 mt-4">
+                            Support
+                        </li>
                     )}
 
                     {supportItems.map((item, index) => (
-                    <NavLink
-                        key={index}
-                        to={item.to}
-                        onClick={() => isMobile && toggleSidebar()}
-                        className={({ isActive }) =>
-                        `flex items-center ${isOpen ? "justify-start" : "justify-center"}
-                        mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#0D132D] 
-                        ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
-                        }
-                    >
-                        <Tooltip title={item.label} placement="right" disabled={isOpen}>
-                        <span className="text-base">{item.icon}</span>
+                        <Tooltip
+                            key={index}
+                            title={item.label}
+                            placement="right"
+                            disabled={isOpen} // show tooltip only when sidebar is collapsed
+                        >
+                            <NavLink
+                                to={item.to}
+                                end={item.end}
+                                onClick={() => isMobile && toggleSidebar()}
+                                className={({ isActive }) =>
+                                    `flex items-center ${isOpen ? "justify-start" : "justify-center"}
+                             mb-1 gap-4 px-2 py-2 cursor-pointer rounded-2xl hover:text-white hover:bg-[#0D132D] 
+                             ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
+                                }
+                            >
+                                <span className="text-base">{item.icon}</span>
+                                {isOpen && <span className="text-sm">{item.label}</span>}
+                            </NavLink>
                         </Tooltip>
-                        {isOpen && <span className="text-sm">{item.label}</span>}
-                    </NavLink>
                     ))}
                 </ul>
 
@@ -212,13 +225,12 @@ const Sidebar = forwardRef((props, ref) => {
                     <div className="logout-btn mb-2">
                         <Tooltip title="Logout" placement="right" disabled={isOpen}>
                             <button
-                            onClick={handleLogout}
-                            className={`flex items-center cursor-pointer ${
-                                isOpen ? "px-3 gap-3" : "justify-center"
-                                } w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm`}
+                                onClick={handleLogout}
+                                className={`flex items-center cursor-pointer ${isOpen ? "px-3 gap-3" : "justify-center"
+                                    } w-full py-2 border border-red-300 rounded-full text-red-600 font-semibold hover:text-white hover:bg-red-600 text-sm`}
                             >
-                            <RiLogoutBoxRLine className="text-lg" />
-                            {isOpen && <span className="ml-1">Logout</span>}
+                                <RiLogoutBoxRLine className="text-lg" />
+                                {isOpen && <span className="ml-1">Logout</span>}
                             </button>
                         </Tooltip>
                     </div>
