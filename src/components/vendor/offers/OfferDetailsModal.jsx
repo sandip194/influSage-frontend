@@ -153,15 +153,17 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
 
                         {/* Right: Buttons */}
                         <div className="flex flex-wrap flex-col justify-center sm:justify-end gap-1 sm:gap-1 mt-0 sm:mt-0 flex-shrink-0">
-                            <Tooltip title="Message">
-                                <button
-                                    onClick={handleMessageClick}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] text-sm w-full sm:w-auto justify-center"
-                                >
-                                    <RiMessage2Line size={16} /> Message
-                                </button>
-                            </Tooltip>
-                        </div>
+                                                    {offerDetails?.ismessaged && (
+                                                        <Tooltip title="Message">
+                                                            <button
+                                                                onClick={handleMessageClick}
+                                                                className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] text-sm w-full sm:w-auto justify-center"
+                                                            >
+                                                                <RiMessage2Line size={16} /> Message
+                                                            </button>
+                                                        </Tooltip>
+                                                    )}
+                                                </div>
                     </div>
 
                     {/* Desktop layout flex */}
@@ -185,7 +187,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                             </div>
 
                             {/* Buttons */}
-                            <div className="flex justify-start gap-3 ">
+                            <div className="flex justify-start gap-3 mt-4">
                                 {!offerDetails?.ismessaged && (
                                     <button
                                         onClick={() => setIsAcceptModalOpen(true)}

@@ -7,6 +7,10 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewType, setPreviewType] = useState("");
+
   // Delete reference image (local state only; no API call - works for vendor, but hidden for user)
   const handleDeleteImage = (index) => {
     setImages(images.filter((_, i) => i !== index));
@@ -20,22 +24,6 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
     {
       label: "Duration:",
       value: `${campaignData?.requirements?.postdurationdays || "N/A"} Days`,
-    },
-    {
-      label: "Application Start Date:",
-      value: campaignData?.applicationstartdate || "N/A",
-    },
-    {
-      label: "Application End Date:",
-      value: campaignData?.applicationenddate || "N/A",
-    },
-    {
-      label: "Campaign Start Date:",
-      value: campaignData?.requirements?.campaignstartdate || "N/A",
-    },
-    {
-      label: "Campaign End Date:",
-      value: campaignData?.requirements?.campaignenddate || "N/A",
     },
     {
       label: "Vendor Profile Link Included:",
@@ -144,69 +132,57 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
               return (
                 <div
                   key={i}
-                  className="w-42 h-42 rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition relative flex items-center justify-center bg-gray-100"
-                  title="Open file in new tab"
+                  className="w-42 h-42 rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition relative flex items-center justify-center bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setPreviewOpen(true);
+                    setPreviewUrl(fileUrl);
+                    setPreviewType(fileType);
+                  }}
                 >
-                  {/* Delete Button - Hidden for users (non-editable) */}
+                  {/* DELETE ICON FOR EDIT MODE */}
                   {isEditable && (
                     <button
-                      onClick={() => handleDeleteImage(i)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteImage(i);
+                      }}
                       className="absolute top-1 right-1 bg-gray-600 bg-opacity-70 text-white p-1 rounded-full z-10"
                     >
                       <RiDeleteBin6Line className="w-4 h-4" />
                     </button>
                   )}
 
-                  {/* File Preview */}
-                  {fileType === 'image' ? (
-                    <a
-                      href={fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full h-full block"
-                    >
-                      <img
-                        src={fileUrl}
-                        alt={`Campaign file ${i + 1}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </a>
-                  ) : fileType === 'video' ? (
+                  {/* IMAGE */}
+                  {fileType === "image" && (
+                    <img
+                      src={fileUrl}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+
+                  {/* VIDEO */}
+                  {fileType === "video" && (
                     <video
                       src={fileUrl}
                       className="w-full h-full object-cover"
                       muted
                       playsInline
-                      controls
                     />
-                  ) : fileType === 'pdf' ? (
-                    <a
-                      href={fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-col items-center justify-center text-red-600 text-xs font-semibold w-full h-full"
-                    >
+                  )}
+
+                  {/* PDF */}
+                  {fileType === "pdf" && (
+                    <p className="flex flex-col items-center justify-center text-red-600 text-xs font-semibold">
                       📄 PDF
-                    </a>
-                  ) : fileType === 'doc' ? (
-                    <a
-                      href={fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-col items-center justify-center text-blue-600 text-xs font-semibold w-full h-full"
-                    >
+                    </p>
+                  )}
+
+                  {/* DOC */}
+                  {fileType === "doc" && (
+                    <p className="flex flex-col items-center justify-center text-blue-600 text-xs font-semibold">
                       📝 DOC
-                    </a>
-                  ) : (
-                    <a
-                      href={fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center text-gray-900 text-xs w-full h-full"
-                    >
-                      View File
-                    </a>
+                    </p>
                   )}
                 </div>
               );
@@ -215,6 +191,53 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
             <p className="text-gray-500 text-sm">No references available.</p>
           )}
         </div>
+        {previewOpen && (
+          <div
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center"
+            onClick={() => setPreviewOpen(false)}
+          >
+            <button
+              onClick={() => setPreviewOpen(false)}
+              className="absolute top-5 right-6 text-white text-3xl font-bold"
+            >
+              ×
+            </button>
+
+            {previewType === "image" && (
+              <img
+                src={previewUrl}
+                className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
+
+            {previewType === "video" && (
+              <video
+                controls
+                className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <source src={previewUrl} />
+              </video>
+            )}
+
+            {previewType === "pdf" && (
+              <iframe
+                src={previewUrl}
+                className="max-w-[90vw] max-h-[85vh] bg-white rounded-xl"
+                onClick={(e) => e.stopPropagation()}
+              ></iframe>
+            )}
+
+            {previewType === "doc" && (
+              <iframe
+                src={`https://docs.google.com/viewer?url=${previewUrl}&embedded=true`}
+                className="max-w-[90vw] max-h-[85vh] bg-white rounded-xl"
+                onClick={(e) => e.stopPropagation()}
+              ></iframe>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

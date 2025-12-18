@@ -37,6 +37,9 @@ const Details = () => {
   const [campaign, setCampaign] = useState(null)
   const [loading, setLoading] = useState(false)
 
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewType, setPreviewType] = useState("");
 
   const navigate = useNavigate();
   const { campaignId } = useParams()
@@ -215,13 +218,39 @@ const Details = () => {
           <div className="bg-white rounded-xl p-6 border border-gray-100">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-4">
               {/* Left Section */}
-              <div className="flex items-start gap-4">
+              <div className="flex items-center gap-4">
                 {/* Profile */}
                 <img
                   src={campaign?.photopath}
                   alt="Profile"
-                  className="w-16 h-16 rounded-full object-cover"
+                  className="w-16 h-16 rounded-full object-cover cursor-pointer"
+                  onClick={() => {
+                      setPreviewUrl(campaign?.photopath);
+                      setPreviewType("image");
+                      setPreviewOpen(true);
+                  }}
                 />
+                {previewOpen && (
+                  <div
+                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                    onClick={() => setPreviewOpen(false)}
+                  >
+                    <button
+                      onClick={() => setPreviewOpen(false)}
+                      className="absolute top-5 right-6 text-white text-3xl font-bold"
+                    >
+                      ×
+                    </button>
+
+                    {previewType === "image" && (
+                      <img
+                        src={previewUrl}
+                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    )}
+                  </div>
+                )}
                 <div>
                   <h2 className="font-semibold text-lg text-gray-900">
                     {campaign?.name || "Campaign Name"}
@@ -233,8 +262,9 @@ const Details = () => {
               {/* Right Buttons */}
               <div className="flex gap-2 items-start">
                 <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="bg-[#0f122f] text-white px-4 py-1.5 rounded-lg font-medium hover:bg-[#1a1d4f] transition"
+                  disabled
+                  aria-disabled="true"
+                  className="bg-[#0f122f] text-white px-4 py-1.5 rounded-lg font-medium opacity-50 cursor-not-allowed transition"
                 >
                   Complete & Payment
                 </button>
@@ -251,27 +281,30 @@ const Details = () => {
             </div>
 
             {/* Info Section */}
-            <div className="mt-3 flex flex-wrap justify-between gap-4 pt-2">
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+
               {/* Budget */}
-              <div>
-                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                  <RiMoneyRupeeCircleLine className="w-5 h-5" />
-                  <span>Budget</span>
+              <div className="min-w-[150px]">
+                <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
+                  <RiMoneyRupeeCircleLine className="w-4 h-4" />
+                  Budget
                 </div>
-                <p className="text-gray-800 font-medium">₹{campaign?.estimatedbudget}</p>
+                <p className="text-[#0D132D] font-bold text-xl">
+                  ₹{campaign?.estimatedbudget}
+                </p>
               </div>
 
               {/* Language */}
-              <div>
-                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                  <RiTranslate className="w-5 h-5" />
-                  <span>Language</span>
+              <div className="min-w-[150px]">
+                <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
+                  <RiTranslate className="w-4 h-4" />
+                  Language
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   {campaign?.campaignlanguages?.map((lang) => (
                     <span
                       key={lang.languageid}
-                      className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md text-sm"
+                      className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-lg text-xs font-medium"
                     >
                       {lang.languagename}
                     </span>
@@ -280,16 +313,16 @@ const Details = () => {
               </div>
 
               {/* Gender */}
-              <div>
-                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                  <RiMenLine className="w-5 h-5" />
-                  <span>Gender</span>
+              <div className="min-w-[150px]">
+                <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
+                  <RiMenLine className="w-4 h-4" />
+                  Gender
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   {campaign?.campaigngenders?.map((gender) => (
                     <span
                       key={gender.genderid}
-                      className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md text-sm"
+                      className="bg-pink-100 text-pink-800 px-3 py-1 rounded-lg text-xs font-medium"
                     >
                       {gender.gendername}
                     </span>
@@ -381,10 +414,6 @@ const Details = () => {
               </p>
             </div>
 
-            <div className="py-4 border-b border-gray-200">
-              <p className="text-sm font-bold text-gray-900">Delivery Date</p>
-              <p>{campaign?.requirements?.campaignenddate}</p>
-            </div>
 
             <div className="py-4">
               <p className="text-sm font-bold text-gray-900">Total Price</p>
@@ -396,18 +425,30 @@ const Details = () => {
             {/* Platform Card */}
             <div className="bg-white p-4 rounded-2xl">
               <h3 className="font-semibold text-lg py-3">Platform</h3>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {campaign?.providercontenttype?.map((platform) => (
-                  <div key={platform.providercontenttypeid} className="flex items-center justify-between pb-2">
-                    <div className="flex items-center gap-2">
-                      {/* {platform.providerid === 1 && <RiInstagramFill className="text-pink-600" />}
-                      {platform.providerid === 2 && <RiYoutubeFill className="text-red-600" />} */}
-                      {/* Add conditions for other platforms as needed */}
-                      <span className="text-gray-700 font-medium">{platform.providername}</span>
+                  <div key={platform.providercontenttypeid}>
+                    
+                    {/* Top Row */}
+                    <div className="flex items-center justify-between pb-1">
+                      <span className="text-gray-800 font-medium">
+                        {platform.providername}
+                      </span>
+
+                      <span className="text-gray-500 text-sm text-right">
+                        {platform.contenttypes && platform.contenttypes.length > 0
+                          ? platform.contenttypes.map((ct) => ct.contenttypename).join(", ")
+                          : "No types"}
+                      </span>
                     </div>
-                    <span className="text-gray-500 text-sm">
-                      {platform.contenttypename}
-                    </span>
+
+                    {/* Caption under platform */}
+                    {platform.caption && (
+                      <p className="text-gray-600 italic text-xs border-l-2 border-gray-200 pl-3">
+                        {platform.caption}
+                      </p>
+                    )}
+
                   </div>
                 ))}
               </div>
