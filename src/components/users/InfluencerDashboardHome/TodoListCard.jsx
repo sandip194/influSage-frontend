@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { RiAddLine, RiMore2Fill,RiCheckLine } from "@remixicon/react";
+import React, { useState, useEffect, useMemo } from "react";
+import { RiAddLine, RiMore2Fill, RiCheckLine } from "@remixicon/react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { Dropdown, Menu, Modal, message, Input, DatePicker, Button } from "antd";
+import { Dropdown, Menu, Modal, message, Input, DatePicker, Button, Skeleton, Empty } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -39,7 +39,7 @@ const TodoListCard = () => {
 
   const handleTodoAction = async ({ id, description, duedate, isCompleted = null, isDeleted = false }) => {
     try {
-      setLoading(true)
+      setLoading(true);
       const body = {
         p_userid: user?.id,
         p_todolistid: id || null,
@@ -48,11 +48,9 @@ const TodoListCard = () => {
         p_iscompleted: isCompleted,
         p_isdeleted: isDeleted,
       };
-
       await axios.post("user/dashboard/todo/insert-edit-delete", body, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       await getTodoList();
       setShowModal(false);
       setSelectedTodo(null);
@@ -61,7 +59,7 @@ const TodoListCard = () => {
       console.error("Error updating todo:", error);
       message.error("Action failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -88,8 +86,100 @@ const TodoListCard = () => {
     setShowModal(true);
   };
 
-  // Disable past dates
   const disabledDate = (current) => current && current < dayjs().startOf("day");
+
+  // Memoized todo items for rendering
+  const todoItems = useMemo(
+    () =>
+      todos.map((todo) => {
+        const isCompleted = todo.iscompleted;
+        const dueInDays = todo.duedate ? dayjs(todo.duedate).diff(dayjs(), "day") : null;
+
+        const menu = (
+          <Menu>
+            {!isCompleted && (
+              <Menu.Item
+                key="complete"
+                onClick={() =>
+                  showConfirm({
+                    title: "Mark this todo as complete?",
+                    onOk: () => handleTodoAction({ id: todo.id, isCompleted: true }),
+                  })
+                }
+              >
+                Mark as Complete
+              </Menu.Item>
+            )}
+            {!isCompleted && <Menu.Item key="edit" onClick={() => openModal(todo)}>Edit</Menu.Item>}
+            <Menu.Item
+              key="delete"
+              danger
+              onClick={() =>
+                showConfirm({
+                  title: "Are you sure you want to delete this todo?",
+                  onOk: () => handleTodoAction({ id: todo.id, isDeleted: true }),
+                })
+              }
+            >
+              Delete
+            </Menu.Item>
+          </Menu>
+        );
+
+        return (
+          <div
+            key={todo.id}
+            className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 border-b border-gray-200 pb-3"
+          >
+            {isCompleted ? (
+              <RiCheckLine className="text-white w-5 h-5 bg-[#121A3F] flex-shrink-0" />
+            ) : (
+              <input
+                type="checkbox"
+                checked={isCompleted}
+                onChange={() =>
+                  showConfirm({
+                    title: "Mark this todo as complete?",
+                    onOk: () => handleTodoAction({ id: todo.id, isCompleted: true }),
+                  })
+                }
+                className="form-checkbox h-5 w-5 text-gray-600 flex-shrink-0 cursor-pointer"
+              />
+            )}
+
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm font-medium mb-1 ${isCompleted ? "text-gray-600 " : ""}`}>
+                {todo.description}
+              </p>
+              {dueInDays !== null && !isCompleted && (
+                <p
+                  className={`text-xs ${
+                    dueInDays < 0
+                      ? "text-red-500 font-semibold"
+                      : dueInDays === 0
+                      ? "text-orange-500 font-semibold"
+                      : "text-gray-500"
+                  }`}
+                >
+                  {dueInDays < 0
+                    ? `Overdue by ${Math.abs(dueInDays)} day${Math.abs(dueInDays) !== 1 ? "s" : ""}`
+                    : dueInDays === 0
+                    ? "Due today"
+                    : `Due in ${dueInDays} day${dueInDays !== 1 ? "s" : ""}`}
+                </p>
+              )}
+            </div>
+
+            <div className="ml-auto self-start sm:self-auto">
+              <Dropdown overlay={menu} trigger={["hover"]} placement="bottomRight">
+                <Button icon={<RiMore2Fill />} type="text" />
+              </Dropdown>
+            </div>
+          </div>
+        );
+      }),
+    [todos]
+  );
 
   return (
     <div className="bg-white p-6 rounded-2xl w-full">
@@ -101,107 +191,14 @@ const TodoListCard = () => {
         </Button>
       </div>
 
-      {/* Todo List */}
-      <div className="space-y-4">
-        {loading ? (
-          <p>Loading...</p>
-        ) : todos.length === 0 ? (
-          <p className="text-gray-400 text-sm">No todos yet.</p>
-        ) : (
-          todos.map((todo) => {
-            const isCompleted = todo.iscompleted;
-            const dueInDays = todo.duedate ? dayjs(todo.duedate).diff(dayjs(), "day") : null;
-
-            const menu = (
-              <Menu>
-                {!isCompleted && (
-                  <Menu.Item
-                    key="complete"
-                    onClick={() =>
-                      showConfirm({
-                        title: "Mark this todo as complete?",
-                        onOk: () => handleTodoAction({ id: todo.id, isCompleted: true }),
-                      })
-                    }
-                  >
-                    Mark as Complete
-                  </Menu.Item>
-                )}
-                {!isCompleted && (
-                  <Menu.Item key="edit" onClick={() => openModal(todo)}>
-                    Edit
-                  </Menu.Item>
-                )}
-                <Menu.Item
-                  key="delete"
-                  danger
-                  onClick={() =>
-                    showConfirm({
-                      title: "Are you sure you want to delete this todo?",
-                      onOk: () => handleTodoAction({ id: todo.id, isDeleted: true }),
-                    })
-                  }
-                >
-                  Delete
-                </Menu.Item>
-              </Menu>
-            );
-
-            return (
-              <div
-                key={todo.id}
-                className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 border-b border-gray-200 pb-3"
-              >
-                {isCompleted ? (
-                  <RiCheckLine className="text-white w-5 h-5 bg-[#121A3F] flex-shrink-0" />
-
-                  ) : (
-                    <input
-                      type="checkbox"
-                      checked={isCompleted}
-                      onChange={() =>
-                        showConfirm({
-                          title: "Mark this todo as complete?",
-                          onOk: () => handleTodoAction({ id: todo.id, isCompleted: true }),
-                        })
-                      }
-                      className="form-checkbox h-5 w-5 text-gray-600 flex-shrink-0 cursor-pointer"
-                    />
-                  )}
-
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium mb-1 ${isCompleted ? "text-gray-600 " : ""}`}>
-                    {todo.description}
-                  </p>
-                  {dueInDays !== null && !isCompleted && (
-                    <p
-                      className={`text-xs ${dueInDays < 0
-                          ? "text-red-500 font-semibold"
-                          : dueInDays === 0
-                            ? "text-orange-500 font-semibold"
-                            : "text-gray-500"
-                        }`}
-                    >
-                      {dueInDays < 0
-                        ? `Overdue by ${Math.abs(dueInDays)} day${Math.abs(dueInDays) !== 1 ? "s" : ""}`
-                        : dueInDays === 0
-                          ? "Due today"
-                          : `Due in ${dueInDays} day${dueInDays !== 1 ? "s" : ""}`}
-                    </p>
-                  )}
-                </div>
-
-                <div className="ml-auto self-start sm:self-auto">
-                  <Dropdown overlay={menu} trigger={["hover"]} placement="bottomRight">
-                    <Button icon={<RiMore2Fill />} type="text" />
-                  </Dropdown>
-                </div>
-              </div>
-
-            );
-          })
-        )}
-      </div>
+      {/* Todo List Content */}
+      {loading ? (
+        <Skeleton active paragraph={{ rows: 3 }} />
+      ) : todos.length === 0 ? (
+        <Empty description="No todos yet." />
+      ) : (
+        <div className="space-y-4">{todoItems}</div>
+      )}
 
       {/* Add/Edit Modal */}
       <Modal

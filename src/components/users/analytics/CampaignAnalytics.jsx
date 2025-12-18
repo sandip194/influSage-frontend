@@ -1,76 +1,150 @@
-import TopContentChart from "./TopContentChart";
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { Empty, Skeleton } from "antd";
+
+
 import PerformanceChart from "./PerformanceChart";
 import EngagementGauge from "./EngagementGauge";
-import { RiChat1Line, RiEyeLine, RiHeartLine, RiShareForwardLine } from "react-icons/ri";
+import TopContentChart from "./TopContentChart";
 
-const CampaignAnalytics = () => {
-    const campaign = {
-        name: "Summer Glow Skincare Campaign",
-        platforms: ["Instagram", "TikTok"],
-        totalViews: 82000,
-        totalLikes: 12500,
-        totalComments: 2150,
-        totalShares: 980,
-    };
+
+import {
+    RiEyeLine,
+    RiHeartLine,
+    RiChat1Line,
+    RiShareForwardLine,
+} from "react-icons/ri";
+
+const KPI_CONFIG = {
+    views: {
+        icon: RiEyeLine,
+        iconColor: "text-blue-600",
+        bgColor: "bg-blue-100",
+    },
+    likes: {
+        icon: RiHeartLine,
+        iconColor: "text-rose-500",
+        bgColor: "bg-rose-100",
+    },
+    comments: {
+        icon: RiChat1Line,
+        iconColor: "text-emerald-600",
+        bgColor: "bg-emerald-100",
+    },
+    shares: {
+        icon: RiShareForwardLine,
+        iconColor: "text-amber-500",
+        bgColor: "bg-amber-100",
+    },
+};
+
+
+/* ------------------------------------
+   Component
+------------------------------------- */
+const CampaignAnalytics = ({ selectedCampaignId }) => {
+    const { token } = useSelector((state) => state.auth);
+
+    const [summary, setSummary] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    /* ------------------------------------
+       Fetch Campaign Summary
+    ------------------------------------- */
+    useEffect(() => {
+        if (!selectedCampaignId || !token) return;
+
+        const fetchCampaignSummary = async () => {
+            try {
+                setLoading(true);
+
+                const res = await axios.get("/user/analytics/campaign-insight", {
+                    params: { p_campaignid: selectedCampaignId },
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                setSummary(res?.data?.data || null);
+            } catch (err) {
+                console.error("Campaign summary error:", err);
+                setSummary(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCampaignSummary();
+    }, [selectedCampaignId, token]);
+
+    /* ------------------------------------
+       KPI Config (Memoized)
+    ------------------------------------- */
+    const kpis = useMemo(() => {
+        if (!summary) return [];
+
+        return [
+            { key: "views", label: "Total Views", value: summary.totalviews },
+            { key: "likes", label: "Likes", value: summary.totallikes },
+            { key: "comments", label: "Comments", value: summary.totalcomments },
+            { key: "shares", label: "Shares", value: summary.totalshares },
+        ];
+    }, [summary]);
+
+    /* ------------------------------------
+       NO CAMPAIGN SELECTED
+    ------------------------------------- */
+    if (!selectedCampaignId) {
+        return (
+            <div className="bg-white rounded-2xl p-10 shadow-sm">
+                <Empty
+                    description="Please select a campaign to view analytics"
+                />
+            </div>
+        );
+    }
+
+    /* ------------------------------------
+       LOADING STATE
+    ------------------------------------- */
+    if (loading) {
+        return (
+            <div className="bg-white rounded-2xl p-6 shadow-sm">
+                <Skeleton active paragraph={{ rows: 6 }} />
+            </div>
+        );
+    }
 
     return (
         <div className="w-full space-y-6">
-
-            {/* Header */}
-            <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-[#0D132D]">{campaign.name}</h2>
-                <p className="text-gray-500 text-sm sm:text-base">Campaign performance summary</p>
-            </div>
-
-            {/* Stats Overview */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <StatCard
-                    label="Total Views"
-                    value={campaign.totalViews.toLocaleString()}
-                    icon={<RiEyeLine size={20} className="text-[#335CFF]" />}
-                />
-                <StatCard
-                    label="Likes"
-                    value={campaign.totalLikes.toLocaleString()}
-                    icon={<RiHeartLine size={20} className="text-[#FF5C5C]" />}
-                />
-                <StatCard
-                    label="Comments"
-                    value={campaign.totalComments.toLocaleString()}
-                    icon={<RiChat1Line size={20} className="text-[#22C55E]" />}
-                />
-                <StatCard
-                    label="Shares"
-                    value={campaign.totalShares.toLocaleString()}
-                    icon={<RiShareForwardLine size={20} className="text-[#F59E0B]" />}
-                />
-            </div>
-
-            {/* Performance Chart */}
-            <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm w-full">
-                <h2 className="text-lg sm:text-xl font-bold mb-4">Performance Over Time</h2>
-                <div className="w-full h-64 sm:h-72 md:h-80 lg:h-96">
-                    <PerformanceChart />
-                </div>
-            </div>
-
-            {/* Engagement & Top Content Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Engagement Gauge */}
-                <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm w-full">
-                    <EngagementGauge
-                        views={campaign.totalViews}
-                        likes={campaign.totalLikes}
-                        comments={campaign.totalComments}
-                        shares={campaign.totalShares}
+            {/* ---------------- KPI CARDS ---------------- */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {kpis.map((kpi) => (
+                    <StatCard
+                        key={kpi.key}
+                        label={kpi.label}
+                        value={kpi.value}
+                        iconKey={kpi.key}
                     />
+                ))}
+
+            </div>
+
+            {/* ---------------- PERFORMANCE CHART ---------------- */}
+            <div className="bg-white rounded-2xl p-5 shadow-sm">
+
+                <div className="w-full h-64 sm:h-72 md:h-80">
+                    <PerformanceChart campaignId={selectedCampaignId} />
+                </div>
+            </div>
+
+            {/* ---------------- ENGAGEMENT + TOP CONTENT ---------------- */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="bg-white rounded-2xl p-5 shadow-sm">
+                    <EngagementGauge campaignId={selectedCampaignId} />
                 </div>
 
-                {/* Top Performing Content */}
-                <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm w-full">
-                    <h2 className="text-lg sm:text-xl font-bold mb-4">Top Performing Content</h2>
-
-                    <TopContentChart />
+                <div className="bg-white rounded-2xl p-5 shadow-sm">
+                    <TopContentChart campaignId={selectedCampaignId} />
                 </div>
             </div>
         </div>
@@ -79,15 +153,34 @@ const CampaignAnalytics = () => {
 
 export default CampaignAnalytics;
 
-// Mini Overview Card
-const StatCard = ({ label, value, icon }) => (
-    <div className="bg-white p-3 sm:p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3">
-        <div className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full">
-            {icon}
+/* ------------------------------------
+   Stat Card (Safe Icon Rendering)
+------------------------------------- */
+const StatCard = ({ label, value, iconKey }) => {
+    const config = KPI_CONFIG[iconKey];
+    const Icon = config?.icon;
+
+    return (
+        <div className="bg-white px-4 py-3 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-3">
+            <div
+                className={`w-10 h-10 flex items-center justify-center rounded-full ${config?.bgColor || "bg-gray-100"
+                    }`}
+            >
+                {Icon ? (
+                    <Icon
+                        size={20}
+                        className={config?.iconColor || "text-gray-500"}
+                    />
+                ) : null}
+            </div>
+
+            <div>
+                <p className="text-gray-500 text-xs">{label}</p>
+                <p className="text-lg font-bold text-[#0D132D]">
+                    {typeof value === "number" ? value.toLocaleString() : 0}
+                </p>
+            </div>
         </div>
-        <div className="flex flex-col">
-            <p className="text-gray-500 text-xs sm:text-sm">{label}</p>
-            <p className="text-lg sm:text-xl font-bold text-[#0D132D] mt-1 sm:mt-2">{value}</p>
-        </div>
-    </div>
-);
+    );
+};
+

@@ -24,7 +24,7 @@ const { Option } = Select;
 // -------------------------
 const BrandAnalyticsDashboard = () => {
 
-    const { token, userId } = useSelector((state) => state.auth);
+    const { token } = useSelector((state) => state.auth);
 
     const [timelineData, setTimelineData] = useState([]);
     
@@ -34,7 +34,7 @@ const BrandAnalyticsDashboard = () => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [summaryFilter, setSummaryFilter] = useState("year"); 
     const [topContentFilter, setTopContentFilter] = useState("year");
-    
+
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
     const [platforms, setPlatforms] = useState([]);
@@ -46,97 +46,83 @@ const BrandAnalyticsDashboard = () => {
     const currentYear = new Date().getFullYear();
 
     const yearOptions = Array.from(
-    { length: 5 },
-    (_, i) => currentYear - 2 + i
+        { length: 5 },
+        (_, i) => currentYear - 2 + i
     );
 
-    const fetchTimelineData = async () => {
-        const res = await axios.get("vendor/analytics/performance-timeline", {
+
+
+    const fetchAnalyticsSummary = async () => {
+        const res = await axios.get("vendor/analytics/summary", {
             params: {
-            p_userid: userId,
-            p_filtertype: timelineFilter,
+                p_year: year,
+                p_month: summaryFilter === "month" ? month : null,
             },
             headers: { Authorization: `Bearer ${token}` },
         });
 
-        setTimelineData(res.data?.data || []);
-        };
+        const data = res.data?.data;
+        if (!data) return;
+
+        setKpis([
+            { label: "Total Campaigns", value: data.totalcampaigncount, icon: <RiBriefcaseLine size={28} /> },
+            { label: "Active Influencers", value: data.totalactiveinfluencercount, icon: <RiGroupLine size={28} /> },
+            { label: "Total Impressions", value: data.totalimpression, icon: <RiEyeLine size={28} /> },
+            { label: "Engagement Rate", value: `${data.engagementrate}%`, icon: <RiHeartLine size={28} /> },
+            { label: "Total Content Pieces", value: data.totalcontentpieces, icon: <RiImage2Line size={28} /> },
+            { label: "Avg Engagement / Influencer", value: Math.round(data.averageengagementperinfluencer), icon: <RiStarLine size={28} /> },
+        ]);
+
+        setRecentContent(data.recentcontents || []);
+    };
 
     useEffect(() => {
-        fetchTimelineData();
-    }, [timelineFilter]);
+        fetchAnalyticsSummary();
+    }, [summaryFilter, year, month]);
 
-    const fetchAnalyticsSummary = async () => {
-  const res = await axios.get("vendor/analytics/summary", {
-    params: {
-      p_year: year,
-      p_month: summaryFilter === "month" ? month : null,
-    },
-    headers: { Authorization: `Bearer ${token}` },
-  });
+    const fetchPlatformBreakdown = async () => {
+        try {
+            const res = await axios.get("vendor/analytics/platform-breakdown", {
+                params: {
+                    p_year: selectedYear,
+                    p_month: selectedMonth,
+                },
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-  const data = res.data?.data;
-  if (!data) return;
+            const apiData = res.data?.data || [];
 
-  setKpis([
-    { label: "Total Campaigns", value: data.totalcampaigncount, icon: <RiBriefcaseLine size={28}/> },
-    { label: "Active Influencers", value: data.totalactiveinfluencercount, icon: <RiGroupLine size={28}/> },
-    { label: "Total Impressions", value: data.estimatedimpression, icon: <RiEyeLine size={28}/> },
-    { label: "Engagement Rate", value: `${data.engagementscore}%`, icon: <RiHeartLine size={28}/> },
-    { label: "Total Content Pieces", value: data.totalcontentpieces, icon: <RiImage2Line size={28}/> },
-    { label: "Avg Engagement / Influencer", value: Math.round(data.averageengagementperinfluencer), icon: <RiStarLine size={28}/> },
-  ]);
+            setPlatforms(
+                apiData.map(item => ({
+                    platform: item.providername,
+                    views: item.totallikes,
+                    percentage: item.percentage,
+                    icon: item.providericonpath,
+                    color: "#0D132D",
+                }))
+            );
+        } catch (err) {
+            console.error("Platform breakdown error:", err);
+        }
+    };
 
-  setRecentContent(data.recentcontents || []);
-};
+    useEffect(() => {
+        fetchPlatformBreakdown();
+    }, [selectedMonth, selectedYear]);
 
-useEffect(() => {
-  fetchAnalyticsSummary();
-}, [summaryFilter, year, month]);
+    const fetchCampaignOverview = async () => {
+        const res = await axios.get("vendor/analytics/campaign-overview", {
+            params: { p_filtertype: campaignFilter },
+            headers: { Authorization: `Bearer ${token}` },
+        });
 
-const fetchPlatformBreakdown = async () => {
-  try {
-    const res = await axios.get("vendor/analytics/platform-breakdown", {
-      params: {
-        p_year: selectedYear,
-        p_month: selectedMonth,
-      },
-      headers: { Authorization: `Bearer ${token}` },
-    });
+        setCampaigns(res.data?.data || []);
+    };
 
-    const apiData = res.data?.data || [];
+    useEffect(() => {
+        fetchCampaignOverview();
+    }, [campaignFilter]);
 
-    setPlatforms(
-      apiData.map(item => ({
-        platform: item.providername,
-        totallikes: item.totallikes,
-        views: item.totallikes,
-        percentage: item.percentage,
-        icon: item.providericonpath,
-        color: "#0D132D",
-      }))
-    );
-  } catch (err) {
-    console.error("Platform breakdown error:", err);
-  }
-};
-
-useEffect(() => {
-  fetchPlatformBreakdown();
-}, [selectedMonth, selectedYear]);
-
-const fetchCampaignOverview = async () => {
-  const res = await axios.get("vendor/analytics/campaign-overview", {
-    params: { p_filtertype: campaignFilter },
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  setCampaigns(res.data?.data || []);
-};
-
-useEffect(() => {
-  fetchCampaignOverview();
-}, [campaignFilter]);
 
 
     return (
@@ -156,16 +142,16 @@ useEffect(() => {
                 {kpis.map((kpi, idx) => (
                     <div key={idx} className="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4">
                         <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#0B132B]">
-                        <div className="text-white">{kpi.icon}</div>
+                            <div className="text-white">{kpi.icon}</div>
                         </div>
 
                         <div>
-                        <p className="text-gray-500">{kpi.label}</p>
-                        <p className="text-[#0D132D] font-bold text-3xl">
-                            {typeof kpi.value === "number"
-                            ? kpi.value.toLocaleString()
-                            : kpi.value}
-                        </p>
+                            <p className="text-gray-500">{kpi.label}</p>
+                            <p className="text-[#0D132D] font-bold text-3xl">
+                                {typeof kpi.value === "number"
+                                    ? kpi.value.toLocaleString()
+                                    : kpi.value}
+                            </p>
                         </div>
                     </div>
                 ))}
@@ -179,18 +165,18 @@ useEffect(() => {
             {/* ------------------------- */}
             <div className="bg-white rounded-2xl p-5 shadow-sm overflow-x-auto">
                 <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-bold">Campaign Overview</h2>
+                    <h2 className="text-lg font-bold">Campaign Overview</h2>
 
-                        <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
 
-                            <Select value={campaignFilter} onChange={setCampaignFilter}>
-                                <Option value="week">Week</Option>
-                                <Option value="month">Month</Option>
-                                <Option value="year">Year</Option>
-                            </Select>
+                        <Select value={campaignFilter} onChange={setCampaignFilter}>
+                            <Option value="week">Week</Option>
+                            <Option value="month">Month</Option>
+                            <Option value="year">Year</Option>
+                        </Select>
 
-                        </div>
                     </div>
+                </div>
                 <table className="min-w-full text-left">
                     <thead>
                         <tr className="border-b border-gray-300">
@@ -200,61 +186,60 @@ useEffect(() => {
                             <th className="py-2 px-3 text-gray-500 text-xs">Engagement</th>
                             <th className="py-2 px-3 text-gray-500 text-xs">Status</th>
                         </tr>
-                        </thead>
+                    </thead>
                     <tbody>
                         {campaigns.length === 0 ? (
                             <tr>
-                            <td colSpan={5} className="py-4 text-center text-gray-500">
-                                No campaigns found
-                            </td>
+                                <td colSpan={5} className="py-4 text-center text-gray-500">
+                                    No campaigns found
+                                </td>
                             </tr>
                         ) : (
                             campaigns.map((c) => (
-                            <tr
-                                key={c.campaignid}
-                                className="border-b border-gray-200 hover:bg-gray-50"
-                            >
-                                {/* Campaign Name */}
-                                <td className="py-2 px-3 font-medium text-[#0D132D]">
-                                {c.campaignname}
-                                </td>
-
-                                {/* Platforms (from providers array) */}
-                                <td className="py-2 px-3">
-                                {c.providers?.length
-                                    ? c.providers.map(p => p.providername).join(", ")
-                                    : "-"}
-                                </td>
-
-                                {/* Views */}
-                                <td className="py-2 px-3">
-                                {c.totalviews?.toLocaleString()}
-                                </td>
-
-                                {/* Engagement */}
-                                <td className="py-2 px-3">
-                                {c.totalengagement?.toLocaleString()}
-                                </td>
-
-                                {/* Status */}
-                                <td className="py-2 px-3">
-                                <span
-                                    className={`px-2 py-1 rounded-full text-xs font-medium
-                                    ${
-                                        c.statusname === "Published"
-                                        ? "bg-green-100 text-green-700"
-                                        : c.statusname === "InProgress"
-                                        ? "bg-yellow-100 text-yellow-700"
-                                        : "bg-gray-100 text-gray-600"
-                                    }`}
+                                <tr
+                                    key={c.campaignid}
+                                    className="border-b border-gray-200 hover:bg-gray-50"
                                 >
-                                    {c.statusname}
-                                </span>
-                                </td>
-                            </tr>
+                                    {/* Campaign Name */}
+                                    <td className="py-2 px-3 font-medium text-[#0D132D]">
+                                        {c.campaignname}
+                                    </td>
+
+                                    {/* Platforms (from providers array) */}
+                                    <td className="py-2 px-3">
+                                        {c.providers?.length
+                                            ? c.providers.map(p => p.providername).join(", ")
+                                            : "-"}
+                                    </td>
+
+                                    {/* Views */}
+                                    <td className="py-2 px-3">
+                                        {c.totalviews?.toLocaleString()}
+                                    </td>
+
+                                    {/* Engagement */}
+                                    <td className="py-2 px-3">
+                                        {c.totalengagement?.toLocaleString()}
+                                    </td>
+
+                                    {/* Status */}
+                                    <td className="py-2 px-3">
+                                        <span
+                                            className={`px-2 py-1 rounded-full text-xs font-medium
+                                    ${c.statusname === "Published"
+                                                    ? "bg-green-100 text-green-700"
+                                                    : c.statusname === "InProgress"
+                                                        ? "bg-yellow-100 text-yellow-700"
+                                                        : "bg-gray-100 text-gray-600"
+                                                }`}
+                                        >
+                                            {c.statusname}
+                                        </span>
+                                    </td>
+                                </tr>
                             ))
                         )}
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
 
@@ -264,41 +249,12 @@ useEffect(() => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Performance Chart */}
                 <div className="bg-white rounded-2xl p-5 shadow-sm">
-                    {/* Header + Filter same line */}
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-bold">Performance Over Time</h2>
-
-                        <div className="flex items-center gap-2">
-
-                            <Select value={timelineFilter} onChange={setTimelineFilter}>
-                                <Option value="week">Week</Option>
-                                <Option value="month">Month</Option>
-                                <Option value="year">Year</Option>
-                            </Select>
-
-                        </div>
-                    </div>
-
-                    <PerformanceChart data={timelineData} filter={timelineFilter} />
+                    <PerformanceChart />
                 </div>
 
                 {/* Top Content */}
                 <div className="bg-white rounded-2xl p-5 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-bold">Top Performing Content</h2>
-
-                        <Select
-                        value={topContentFilter}
-                        onChange={setTopContentFilter}
-                        className="w-[120px]"
-                        size="large"
-                        >
-                        <Option value="week">Week</Option>
-                        <Option value="month">Month</Option>
-                        <Option value="year">Year</Option>
-                        </Select>
-                    </div>
-                    <TopContentChart filterType={topContentFilter} />
+                    <TopContentChart />
                 </div>
             </div>
 
@@ -314,23 +270,23 @@ useEffect(() => {
                     <div className="flex items-center gap-2">
                         {/* Month Dropdown */}
                         <Select
-                        value={selectedMonth}
-                        onChange={setSelectedMonth}
-                        className="w-[120px]"
-                        size="large"
+                            value={selectedMonth}
+                            onChange={setSelectedMonth}
+                            className="w-[120px]"
+                            size="large"
                         >
-                        <Option value={1}>January</Option>
-                        <Option value={2}>February</Option>
-                        <Option value={3}>March</Option>
-                        <Option value={4}>April</Option>
-                        <Option value={5}>May</Option>
-                        <Option value={6}>June</Option>
-                        <Option value={7}>July</Option>
-                        <Option value={8}>August</Option>
-                        <Option value={9}>September</Option>
-                        <Option value={10}>October</Option>
-                        <Option value={11}>November</Option>
-                        <Option value={12}>December</Option>
+                            <Option value={1}>January</Option>
+                            <Option value={2}>February</Option>
+                            <Option value={3}>March</Option>
+                            <Option value={4}>April</Option>
+                            <Option value={5}>May</Option>
+                            <Option value={6}>June</Option>
+                            <Option value={7}>July</Option>
+                            <Option value={8}>August</Option>
+                            <Option value={9}>September</Option>
+                            <Option value={10}>October</Option>
+                            <Option value={11}>November</Option>
+                            <Option value={12}>December</Option>
                         </Select>
 
                         {/* Year Dropdown */}
@@ -339,10 +295,10 @@ useEffect(() => {
                             onChange={setSelectedYear}
                             className="w-[100px]"
                             size="large"
-                            >
+                        >
                             {yearOptions.map((y) => (
                                 <Option key={y} value={y}>
-                                {y}
+                                    {y}
                                 </Option>
                             ))}
                         </Select>
@@ -403,27 +359,27 @@ useEffect(() => {
                     {recentContent.map((c, idx) => (
                         <div key={idx} className="bg-gray-50 rounded-xl p-4 shadow-sm">
                             <p className="text-xs text-gray-500">
-                            {c.providername} • {c.contenttypname}
+                                {c.providername} • {c.contenttypname}
                             </p>
 
                             <p className="text-sm font-semibold text-gray-800">
-                            Posted on {c.postdate}
+                                Posted on {c.postdate}
                             </p>
 
                             {(c.title || c.caption) && (
-                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                                {c.title || c.caption}
-                            </p>
+                                <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                    {c.title || c.caption}
+                                </p>
                             )}
 
                             <div className="flex justify-between mt-3 text-sm font-medium text-gray-800">
-                            <p>👁 {c.views.toLocaleString()}</p>
-                            <p>❤️ {c.likes.toLocaleString()}</p>
-                            <p>💬 {c.comments.toLocaleString()}</p>
-                            <p>🔁 {c.shares.toLocaleString()}</p>
+                                <p>👁 {c.views.toLocaleString()}</p>
+                                <p>❤️ {c.likes.toLocaleString()}</p>
+                                <p>💬 {c.comments.toLocaleString()}</p>
+                                <p>🔁 {c.shares.toLocaleString()}</p>
                             </div>
                         </div>
-                        ))}
+                    ))}
                 </div>
             </div>
         </div>
