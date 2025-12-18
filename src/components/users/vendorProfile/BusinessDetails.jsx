@@ -184,6 +184,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
     };
 
     const handleSubmit = async () => {
+        await form.validateFields();
         if (!profileImage && !existingPhotoPath) {
             setProfileError("Profile image is required");
             return;
