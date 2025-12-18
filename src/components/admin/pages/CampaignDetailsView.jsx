@@ -162,7 +162,7 @@ const handleBlockSubmit = async () => {
     setActionLoading(true);
 
     const res = await axios.post(
-      "admin/dashboard/profile-block",
+      "admin/dashboard/profile-campaign-block",
       {
         p_campaignid: campaignId,
         p_objective: selectedBlockReason,

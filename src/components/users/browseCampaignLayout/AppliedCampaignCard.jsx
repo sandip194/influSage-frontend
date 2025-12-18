@@ -30,7 +30,7 @@ const AppliedCampaignCard = ({
           <div
             key={campaign.id}
             onClick={() => handleCardClick(campaign.id)}
-            className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-xl/30 hover:shadow-lg transition-all duration-300 flex flex-col justify-between cursor-pointer relative"
+            className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-lg transition-all duration-300 flex flex-col justify-between cursor-pointer relative"
           >
             {/* Top Bar */}
             <div className="flex justify-between items-start mb-3 pb-1">
@@ -38,21 +38,24 @@ const AppliedCampaignCard = ({
                 Applied on {new Date(campaign.createddate).toLocaleDateString()}
               </p>
 
-              <div className="absolute top-3 right-3 z-10">
-                <Tooltip title="Withdraw Application">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedApplicationId(campaign.campaignapplicationid);
-                      setWithdrawModalOpen(true);
-                    }}
-                    className="flex items-center gap-1 px-2 py-1 border border-red-300 bg-white text-red-600 rounded-lg text-sm hover:bg-red-50 hover:border-red-500"
-                  >
-                    <span>Withdraw</span>
-                    <RiDeleteBinLine size={16} className="text-red-500" />
-                  </button>
-                </Tooltip>
-              </div>
+              {campaign.canwithdraw === true && (
+                <div className="absolute top-3 right-3 z-10">
+                  <Tooltip title="Withdraw Application">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedApplicationId(campaign.campaignapplicationid);
+                        setWithdrawModalOpen(true);
+                      }}
+                      className="flex items-center gap-1 px-2 py-1 border border-red-300 bg-white text-red-600 rounded-lg text-sm hover:bg-red-50 hover:border-red-500"
+                    >
+                      <span>Withdraw</span>
+                      <RiDeleteBinLine size={16} className="text-red-500" />
+                    </button>
+                  </Tooltip>
+                </div>
+              )}
+
             </div>
 
             {/* Header */}

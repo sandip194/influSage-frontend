@@ -88,7 +88,7 @@ const InfluencerDetailView = () => {
         try {
             setActionLoading(true);
             const res = await axios.post(
-                "/admin/dashboard/profile-block",
+                "/admin/dashboard/profile-campaign-block",
                 { p_userid: userId, p_objective: selectedReason },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

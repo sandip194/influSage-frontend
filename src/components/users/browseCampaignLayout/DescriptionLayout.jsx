@@ -5,6 +5,9 @@
     RiTranslate,
     RiArrowLeftSLine,
     RiCheckLine,
+    RiAppsLine,
+    RiMapPinLine,
+    RiBriefcase4Line
   } from '@remixicon/react';
   import axios from 'axios';
   import React, { useEffect, useState, useMemo, useCallback } from 'react';
@@ -27,6 +30,8 @@
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
     const { campaignId } = useParams();
     const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
+
+    const [previewFile, setPreviewFile] = useState(null);
 
     const fetchCampaignDetails = useCallback(async () => {
       if (!campaignId || !token) return;
@@ -227,30 +232,53 @@
                     onClick={() => setIsCampaignPreviewOpen(true)}
                   />
 
-                  <div>
-                    <h2 className="font-semibold text-lg text-gray-900">
+                  <div className="w-full">
+                    {/* Campaign Title */}
+                    <h2 className="font-semibold text-lg text-gray-900 leading-tight">
                       {campaignDetails?.name || "Campaign Name"}
                     </h2>
-                    <p className="text-gray-500 text-sm">
-                      {campaignDetails?.businessname || "Business Name"}
+
+                    {/* Application Window */}
+                    <p
+                      className="
+                        text-xs mt-1 
+                        flex flex-col sm:flex-row 
+                        sm:items-center 
+                        gap-[2px] sm:gap-1 
+                        leading-tight
+                      "
+                    >
+                      <span className="font-semibold text-indigo-600 whitespace-nowrap">
+                        Application Window:
+                      </span>
+
+                      <span className="text-gray-800 whitespace-nowrap">
+                        {campaignDetails?.requirements?.applicationstartdate || "N/A"} - {campaignDetails?.requirements?.applicationenddate || "N/A"}
+                      </span>
                     </p>
 
-                    {/* Apply Period */}
-                    <p className="text-xs mt-1">
-                      <span className="font-semibold text-indigo-600">Apply:</span>{" "}
-                      <span className="text-gray-800">{campaignDetails?.requirements?.applicationstartdate || "N/A"}</span> -{" "}
-                      <span className="text-gray-800">{campaignDetails?.requirements?.applicationenddate || "N/A"}</span>
+                    {/* Campaign Start Date */}
+                    <p
+                      className="
+                        text-xs mt-1 
+                        flex flex-col sm:flex-row 
+                        sm:items-center 
+                        gap-[2px] sm:gap-1 
+                        leading-tight
+                      "
+                    >
+                      <span className="font-semibold text-indigo-600 whitespace-nowrap">
+                        Campaign Start Date:
+                      </span>
+
+                      <span className="text-gray-800 whitespace-nowrap">
+                        {campaignDetails?.requirements?.campaignstartdate || "N/A"}
+                      </span>
                     </p>
 
-                    {/* Campaign Start */}
+                    {/* Total Application */}
                     <p className="text-xs">
-                      <span className="font-semibold text-indigo-600">Start:</span>{" "}
-                      <span className="text-gray-800">{campaignDetails?.requirements?.campaignstartdate || "N/A"}</span>
-                    </p>
-
-                    {/* Applied Influencers */}
-                    <p className="text-xs">
-                      <span className="font-semibold text-indigo-600">Applied Influencers:</span>{" "}
+                      <span className="font-semibold text-indigo-600">Total Application:</span>{" "}
                       <span className="text-gray-800">{campaignDetails?.appliedinfluencercount ?? "N/A"}</span>
                     </p>
                   </div>
@@ -282,7 +310,7 @@
               </div>
 
               {/* Bottom Grid Section */}
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-2">
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-2">
 
                 {/* Budget */}
                 <div>
@@ -448,14 +476,16 @@
                             title="Open file in new tab"
                           >
                             {isImage ? (
-                              <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="w-full h-full block">
+                              <div
+                                onClick={() => setPreviewFile(fileUrl)}
+                                className="cursor-pointer w-full h-full"
+                              >
                                 <img
                                   src={fileUrl}
-                                  alt={`Campaign file ${i + 1}`}
+                                  alt=""
                                   className="w-full h-full object-cover"
-                                  loading="lazy"
                                 />
-                              </a>
+                              </div>
                             ) : isVideo ? (
                               <video
                                 src={fileUrl}
@@ -520,35 +550,87 @@
                 )}
 
               </div>
+              {previewFile && (
+                <div
+                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                  onClick={() => setPreviewFile(null)}
+                >
+                  <button
+                    onClick={() => setPreviewFile(null)}
+                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                  >
+                    &times;
+                  </button>
+                  {/\.(png|jpe?g|gif|svg)$/i.test(previewFile) && (
+                    <img
+                      src={previewFile}
+                      className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
+
+                  {/\.(mp4|webm|ogg)$/i.test(previewFile) && (
+                    <video
+                      src={previewFile}
+                      controls
+                      autoPlay
+                      className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
+                  {previewFile.endsWith(".pdf") && (
+                    <iframe
+                      src={previewFile}
+                      className="max-w-[90vw] max-h-[85vh] rounded-xl bg-white shadow-lg"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
+                </div>
+              )}
             </div>
 
           </div>
 
           {/* Right Side */}
           <aside className="w-full md:w-[300px] space-y-6 flex-shrink-0">
-            <div className="bg-white rounded-2xl p-6 w-full text-sm   ">
-              <h3 className="font-semibold text-lg mb-5">About Brand</h3>
-              <div className="space-y-3">
-                <div>
-                  <p className="font-medium text-gray-900">Brand Name</p>
-                  <p className=" text-gray-900">{campaignDetails.branddetails?.aboutbrand || "N/A"}</p>
-                </div>
-                <hr className="border-gray-200" />
-                <div>
-                  <p className="font-medium text-gray-900">Location</p>
-                  <p className=" text-gray-900">{campaignDetails.branddetails?.location || "N/A"}</p>
-                </div>
-                <hr className="border-gray-200" />
-                <div>
-                  <p className="font-medium text-gray-900">Industry</p>
-                  <p className=" text-gray-900">{campaignDetails.branddetails?.Industry || "N/A"}</p>
-                </div>
+           <div className="bg-white rounded-xl p-4 w-full text-sm">
+              {/* Brand Name Header */}
+            <div className="mb-4">
+              <p className="text-gray-900 font-semibold text-base truncate">
+                {campaignDetails.branddetails?.aboutbrand || "N/A"}
+              </p>
+            </div>
+
+            <hr className="border-gray-200 mb-4" />
+
+            {/* Location + Industry row */}
+            <div className="flex items-center justify-between gap-6">
+
+              {/* Location */}
+              <div className="flex items-center gap-2 w-1/2">
+                <RiMapPinLine className="w-5 h-5 text-gray-500" />
+                <p className="text-gray-700 truncate">
+                  {campaignDetails.branddetails?.location || "N/A"}
+                </p>
               </div>
+
+              {/* Industry */}
+              <div className="flex items-center gap-2 w-1/2">
+                <RiAppsLine className="w-5 h-5 text-gray-500" />
+                <p className="text-gray-700 truncate">
+                  {campaignDetails.branddetails?.Industry || "N/A"}
+                </p>
+              </div>
+
+            </div>
+
             </div>
 
             {/* Provider Content Types with optional captions */}
             <div className="bg-white p-6 rounded-2xl">
-              <h3 className="font-semibold text-lg text-gray-900 mb-4">Platform Content Types</h3>
+              <h3 className="font-semibold text-lg text-gray-900 mb-4">
+                Platform Content Types
+              </h3>
 
               <div className="space-y-4">
                 {campaignDetails?.providercontenttype?.length > 0 ? (
@@ -557,6 +639,7 @@
                       key={platform.providercontenttypeid}
                       className="border-b border-gray-100 pb-3 last:border-none"
                     >
+                      {/* header row */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-gray-900 font-medium">
@@ -564,11 +647,17 @@
                           </span>
                         </div>
 
-                        <span className="text-gray-600 text-sm font-normal">
-                          {platform.contenttypename}
+                        {/* Content Types at end */}
+                        <span className="text-gray-500 text-sm text-right">
+                          {platform.contenttypes && platform.contenttypes.length > 0
+                            ? platform.contenttypes
+                                .map((ct) => ct.contenttypename)
+                                .join(", ")
+                            : "No types"}
                         </span>
                       </div>
 
+                      {/* Caption */}
                       {platform.caption && (
                         <p className="text-gray-600 italic mt-2 border-l-2 border-gray-200 pl-3">
                           {platform.caption}
