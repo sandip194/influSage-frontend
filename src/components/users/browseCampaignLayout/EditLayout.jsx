@@ -6,6 +6,9 @@ import {
   RiArrowLeftSLine,
   RiCheckLine,
   RiDeleteBinLine,
+  RiAppsLine,
+  RiMapPinLine,
+  RiBriefcase3Line
 } from "@remixicon/react";
 import axios from "axios";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -23,6 +26,11 @@ const EditLayout = () => {
   const [error, setError] = useState(null);
   const [showFullDetails, setShowFullDetails] = useState(false);
   const [showFullBrandDesc, setShowFullBrandDesc] = useState(false);
+
+  const [filePreviewOpen, setFilePreviewOpen] = useState(false);
+  const [filePreviewUrl, setFilePreviewUrl] = useState("");
+  const [filePreviewType, setFilePreviewType] = useState("");
+
 
   const [isWithdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
@@ -217,46 +225,64 @@ const EditLayout = () => {
 
               {/* Left Section - Profile + Basic Info */}
               <div className="flex items-start gap-4">
-                <img
-                  src={campaignDetails?.photopath}
-                  alt="Campaign"
-                  className="w-20 h-20 rounded-full object-cover cursor-pointer shadow-md"
-                  onClick={() => setIsCampaignPreviewOpen(true)}
-                />
+                  <img
+                    src={campaignDetails?.photopath}
+                    alt="Campaign"
+                    className="w-16 h-16 rounded-full object-cover cursor-pointer shadow"
+                    onClick={() => setIsCampaignPreviewOpen(true)}
+                  />
 
-                <div>
-                  <h2 className="font-semibold text-lg text-gray-900">
-                    {campaignDetails?.name}
-                  </h2>
-                  <p className="text-gray-500 text-sm">
-                    {campaignDetails?.businessname}
-                  </p>
+                  <div className="w-full">
+                    {/* Campaign Title */}
+                    <h2 className="font-semibold text-lg text-gray-900 leading-tight">
+                      {campaignDetails?.name || "Campaign Name"}
+                    </h2>
 
-                  {/* Apply Period */}
-                  <p className="text-xs mt-2">
-                    <span className="font-semibold text-indigo-600">Apply:</span>{" "}
-                    <span className="text-gray-800">
-                      {campaignDetails?.requirements?.applicationstartdate || "N/A"}
-                    </span>{" "}
-                    -{" "}
-                    <span className="text-gray-800">
-                      {campaignDetails?.requirements?.applicationenddate || "N/A"}
-                    </span>
-                  </p>
+                    {/* Application Window */}
+                    <p
+                      className="
+                        text-xs mt-1 
+                        flex flex-col sm:flex-row 
+                        sm:items-center 
+                        gap-[2px] sm:gap-1 
+                        leading-tight
+                      "
+                    >
+                      <span className="font-semibold text-indigo-600 whitespace-nowrap">
+                        Application Window:
+                      </span>
 
-                  {/* Campaign Start */}
-                  <p className="text-xs">
-                    <span className="font-semibold text-indigo-600">Campaign Start:</span>{" "}
-                    <span className="text-gray-800">{campaignDetails?.requirements?.campaignstartdate || "N/A"}</span>
-                  </p>
+                      <span className="text-gray-800 whitespace-nowrap">
+                        {campaignDetails?.requirements?.applicationstartdate || "N/A"} - {campaignDetails?.requirements?.applicationenddate || "N/A"}
+                      </span>
+                    </p>
 
-                  {/* Applied Influencers */}
-                  <p className="text-xs">
-                    <span className="font-semibold text-indigo-600">Applied Influencers:</span>{" "}
-                    <span className="text-gray-800">{campaignDetails?.appliedinfluencercount ?? "N/A"}</span>
-                  </p>
+                    {/* Campaign Start Date */}
+                    <p
+                      className="
+                        text-xs mt-1 
+                        flex flex-col sm:flex-row 
+                        sm:items-center 
+                        gap-[2px] sm:gap-1 
+                        leading-tight
+                      "
+                    >
+                      <span className="font-semibold text-indigo-600 whitespace-nowrap">
+                        Campaign Start Date:
+                      </span>
+
+                      <span className="text-gray-800 whitespace-nowrap">
+                        {campaignDetails?.requirements?.campaignstartdate || "N/A"}
+                      </span>
+                    </p>
+
+                    {/* Total Application */}
+                    <p className="text-xs">
+                      <span className="font-semibold text-indigo-600">Total Application:</span>{" "}
+                      <span className="text-gray-800">{campaignDetails?.appliedinfluencercount ?? "N/A"}</span>
+                    </p>
+                  </div>
                 </div>
-              </div>
 
               {/* Right Buttons */}
               <div className="flex gap-2 items-start">
@@ -294,7 +320,7 @@ const EditLayout = () => {
             </div>
 
             {/* Bottom Grid Section */}
-            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-2">
 
               {/* Budget */}
               <div>
@@ -491,11 +517,12 @@ const EditLayout = () => {
                                 title="Open file in new tab"
                               >
                                 {isImage ? (
-                                  <a
-                                    href={fileUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full h-full block"
+                                  <div
+                                    onClick={() => {
+                                      setFilePreviewUrl(fileUrl);
+                                      setFilePreviewOpen(true);
+                                    }}
+                                    className="w-full h-full block cursor-pointer"
                                   >
                                     <img
                                       src={fileUrl}
@@ -503,8 +530,8 @@ const EditLayout = () => {
                                       className="w-full h-full object-cover"
                                       loading="lazy"
                                     />
-                                  </a>
-                                ) : isVideo ? (
+                                  </div>
+                                )  : isVideo ? (
                                   <video
                                     src={fileUrl}
                                     className="w-full h-full object-cover"
@@ -569,10 +596,32 @@ const EditLayout = () => {
                                   </a>
                                 )}
                               </div>
+                              
                             );
                           }
                         )}
                       </div>
+                      {filePreviewOpen && (
+                        <div
+                          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                          onClick={() => setFilePreviewOpen(false)}
+                        >
+
+                          <button
+                            className="absolute top-6 right-6 text-white text-3xl font-bold"
+                            onClick={() => setFilePreviewOpen(false)}
+                          >
+                            &times;
+                          </button>
+
+                          <img
+                            src={filePreviewUrl}
+                            className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      )}
+
                     </div>
                   )}
                 </div>
@@ -663,47 +712,64 @@ const EditLayout = () => {
                           hover:shadow-md transition flex items-center justify-center bg-white"
                         >
                           {isImage ? (
-                            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                            <div
+                              onClick={() => {
+                                setFilePreviewUrl(fileUrl);
+                                setFilePreviewType("image");
+                                setFilePreviewOpen(true);
+                              }}
+                              className="w-full h-full cursor-pointer"
+                            >
                               <img
                                 src={fileUrl}
                                 className="w-full h-full object-cover"
                                 alt="file"
                               />
-                            </a>
+                            </div>
                           ) : isVideo ? (
-                            <video
-                              src={fileUrl}
-                              className="w-full h-full object-cover"
-                              muted
-                              controls
-                            />
+                            <div
+                              onClick={() => {
+                                setFilePreviewUrl(fileUrl);
+                                setFilePreviewType("video");
+                                setFilePreviewOpen(true);
+                              }}
+                              className="w-full h-full cursor-pointer"
+                            >
+                              <video src={fileUrl} className="w-full h-full object-cover" muted />
+                            </div>
                           ) : isPdf ? (
-                            <a
-                              href={fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex flex-col items-center justify-center text-red-600 text-xs font-semibold w-full h-full"
+                            <div
+                              onClick={() => {
+                                setFilePreviewUrl(fileUrl);
+                                setFilePreviewType("pdf");
+                                setFilePreviewOpen(true);
+                              }}
+                              className="flex flex-col items-center justify-center text-red-600 text-xs font-semibold w-full h-full cursor-pointer"
                             >
                               PDF
-                            </a>
+                            </div>
                           ) : isDoc ? (
-                            <a
-                              href={fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex flex-col items-center justify-center text-blue-600 text-xs font-semibold w-full h-full"
+                            <div
+                              onClick={() => {
+                                setFilePreviewUrl(fileUrl);
+                                setFilePreviewType("doc");
+                                setFilePreviewOpen(true);
+                              }}
+                              className="flex flex-col items-center justify-center text-blue-600 text-xs font-semibold w-full h-full cursor-pointer"
                             >
                               DOC
-                            </a>
+                            </div>
                           ) : (
-                            <a
-                              href={fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-gray-500 text-xs text-center px-2"
+                            <div
+                              onClick={() => {
+                                setFilePreviewUrl(fileUrl);
+                                setFilePreviewType("file");
+                                setFilePreviewOpen(true);
+                              }}
+                              className="text-gray-500 text-xs text-center px-2 cursor-pointer"
                             >
                               View File
-                            </a>
+                            </div>
                           )}
                         </div>
                       );
@@ -713,6 +779,54 @@ const EditLayout = () => {
                   <p className="text-gray-700">No files uploaded.</p>
                 )}
               </div>
+              {filePreviewOpen && (
+                <div
+                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                  onClick={() => setFilePreviewOpen(false)}
+                >
+                  
+                  <button
+                    className="absolute top-6 right-6 text-white text-3xl font-bold"
+                    onClick={() => setFilePreviewOpen(false)}
+                  >
+                    &times;
+                  </button>
+
+                  <div onClick={(e) => e.stopPropagation()}>
+                    {filePreviewType === "image" && (
+                      <img
+                        src={filePreviewUrl}
+                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
+                      />
+                    )}
+
+                    {filePreviewType === "video" && (
+                      <video
+                        autoPlay
+                        controls
+                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
+                      >
+                        <source src={filePreviewUrl} />
+                      </video>
+                    )}
+
+                    {filePreviewType === "pdf" && (
+                      <iframe
+                        src={filePreviewUrl}
+                        className="w-[90vw] h-[90vh] rounded-xl bg-white"
+                      />
+                    )}
+
+                    {filePreviewType === "doc" && (
+                      <iframe
+                        src={`https://docs.google.com/viewer?url=${filePreviewUrl}&embedded=true`}
+                        className="w-[90vw] h-[90vh] rounded-xl bg-white"
+                      />
+                    )}
+                  </div>
+
+                </div>
+              )}
             </div>
           </div>
 
@@ -720,48 +834,57 @@ const EditLayout = () => {
 
         {/* Right Side */}
         <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
-          <div className="bg-white rounded-2xl p-4 w-full text-sm">
-            <h3 className="font-semibold text-lg mb-4">About Brand</h3>
+          <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
+            <div className="bg-white rounded-2xl p-4 w-full text-sm">
+              <h2 className="text-lg font-semibold mb-4 text-[#0D132D]">
+                Brand Details
+              </h2>
 
-            <div className="space-y-3">
-              {/* Brand Description (Paragraph with toggle) */}
-              <div>
-                <p className="font-medium text-gray-900">Brand Name</p>
-                <p
-                  className={` text-gray-800 whitespace-pre-line ${showFullBrandDesc ? "" : "line-clamp-2"
+              {/* Brand Description */}
+              <div className="space-y-4">
+
+                <div>
+                  <p
+                    className={`text-gray-800 whitespace-pre-line ${
+                      showFullBrandDesc ? "" : "line-clamp-2"
                     }`}
-                >
-                  {campaignDetails.branddetails?.aboutbrand || "N/A"}
-                </p>
-                {campaignDetails.branddetails?.aboutbrand &&
-                  campaignDetails.branddetails.aboutbrand.length > 100 && (
-                    <button
-                      onClick={() => setShowFullBrandDesc((prev) => !prev)}
-                      className="text-blue-600 text-xs font-semibold mt-1 hover:underline"
-                    >
-                      {showFullBrandDesc ? "View Less" : "View More"}
-                    </button>
+                  >
+                    {campaignDetails.branddetails?.aboutbrand || "N/A"}
+                  </p>
+
+                  {campaignDetails.branddetails?.aboutbrand &&
+                    campaignDetails.branddetails.aboutbrand.length > 100 && (
+                      <button
+                        onClick={() => setShowFullBrandDesc((prev) => !prev)}
+                        className="text-blue-600 text-xs font-semibold mt-1 hover:underline"
+                      >
+                        {showFullBrandDesc ? "View Less" : "View More"}
+                      </button>
                   )}
+                </div>
+
+                <hr className="border-gray-200" />
+
+                {/* Location + Industry (Same Row) */}
+                <div className="flex items-center justify-between gap-6 text-sm">
+    
+                  {/* Location */}
+                  <div className="flex items-center gap-1 text-gray-700">
+                      <RiMapPinLine className="w-4 h-4 text-gray-700" />
+                      <span className="truncate">
+                          {campaignDetails.branddetails?.location || "N/A"}
+                      </span>
+                  </div>
+
+                  {/* Category */}
+                  <div className="flex items-center gap-1 text-gray-700">
+                      <RiAppsLine className="w-4 h-4 text-gray-700" />
+                      <span className="truncate">
+                          {campaignDetails.branddetails?.Industry || "N/A"}
+                      </span>
+                  </div>
+
               </div>
-
-              <hr className="border-gray-200" />
-
-              {/* Location */}
-              <div>
-                <p className="font-medium text-gray-900">Location</p>
-                <p className="text-gray-800">
-                  {campaignDetails.branddetails?.location || "N/A"}
-                </p>
-              </div>
-
-              <hr className="border-gray-200" />
-
-              {/* Industry */}
-              <div>
-                <p className="font-medium text-gray-900">Industry</p>
-                <p className="text-gray-800">
-                  {campaignDetails.branddetails?.Industry || "N/A"}
-                </p>
               </div>
             </div>
           </div>

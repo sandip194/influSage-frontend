@@ -47,7 +47,7 @@ export const Role = () => {
       </div>
 
       {/* 🔹 Foreground glass card */}
-      <div className="relative z-10 bg-white/40 backdrop-blur-lg rounded-2xl shadow-lg w-full max-w-md p-8">
+      <div className="relative z-10 bg-white/40 backdrop-blur-lg rounded-2xl shadow-lg w-full max-w-xl p-8">
         <div className="flex flex-col items-start gap-5">
           {/* Logo */}
           <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
@@ -62,7 +62,7 @@ export const Role = () => {
 
           <div className="flex flex-col items-center text-center gap-5 w-full">
             {/* Role Options */}
-            <div className="grid grid-cols-3 gap-4 mt-4 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6 w-full justify-items-center">
               {roles.map((role) => (
                 <div
                   key={role.id}
@@ -70,17 +70,18 @@ export const Role = () => {
                     setSelectedRole(role.id);
                     setShowError(false);
                   }}
-                  className={`flex flex-col items-center justify-center border rounded-xl p-4 cursor-pointer transition duration-300 hover:shadow-md ${Number(selectedRole) === role.id
+                  className={`w-full sm:w-48 md:w-56 flex flex-col items-center justify-center border rounded-xl p-6 cursor-pointer transition duration-300 hover:shadow-md ${
+                    (selectedRole) === role.id
                       ? "border-indigo-600 bg-indigo-50 shadow-lg scale-105 ring-2 ring-indigo-300"
                       : "border-gray-300 bg-white/70"
-                    }`}
+                  }`}
                 >
                   <img
                     src={role.iconpath}
                     alt={role.name}
-                    className="w-16 h-16 object-contain rounded-full bg-gray-50"
+                    className="w-20 h-20 object-contain rounded-full bg-gray-50"
                   />
-                  <p className="mt-2 font-medium text-gray-800">{role.name}</p>
+                  <p className="mt-3 text-lg font-semibold text-gray-800">{role.name}</p>
                 </div>
               ))}
             </div>

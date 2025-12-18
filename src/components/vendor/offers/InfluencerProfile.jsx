@@ -22,6 +22,9 @@ const InfluencerProfile = () => {
     const [isInviteModalVisible, setIsInviteModalVisible] = useState(false);
     const [selectedInfluencer, setSelectedInfluencer] = useState(null);
 
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState("");
+    const [previewType, setPreviewType] = useState("");
 
     const navigate = useNavigate();
     const { userId } = useParams()
@@ -194,7 +197,27 @@ const InfluencerProfile = () => {
                 <>
                     {/* Actual content goes here (your current JSX remains unchanged) */}
                     {/* Top Header */}
-                    <div className="flex bg-white rounded-2xl p-6 flex-col md:flex-row  md:items-start gap-6  pb-6">
+                    <div className="flex bg-white rounded-2xl p-6 flex-col md:flex-row md:items-start gap-6 pb-6 relative">
+                        {/* MOBILE LIKE BUTTON – TOP RIGHT OF CARD */}
+                        <div className="absolute top-3 right-3 sm:hidden z-10">
+                            <Tooltip title={influDetails?.savedinfluencer ? "Unfavorite" : "Favorite"}>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleLike();
+                                    }}
+                                    className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border border-[#0e102b]"
+                                >
+                                    {influDetails?.savedinfluencer ? (
+                                        <RiHeartFill size={18} className="text-red-500" />
+                                    ) : (
+                                        <RiHeart3Line size={18} />
+                                    )}
+                                </button>
+                            </Tooltip>
+                        </div>
+
+                        {/* IMAGE */}
                         <div className="relative">
                             <img
                                 src={influDetails?.photopath}
@@ -227,57 +250,46 @@ const InfluencerProfile = () => {
                         <div className="flex-1 w-full">
                             {/* Header Section */}
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center relative">
-                                {/* Mobile Like Button */}
-                                <div className="absolute right-0 top-2 sm:hidden">
-                                    <Tooltip title={influDetails?.savedinfluencer ? "Unfavorite" : "Favorite"}>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleLike();
-                                            }}
-                                            className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border border-[#0e102b]"
-                                        >
-                                            {influDetails?.savedinfluencer ? (
-                                                <RiHeartFill size={18} className="text-red-500" />
-                                            ) : (
-                                                <RiHeart3Line size={18} />
-                                            )}
-                                        </button>
-                                    </Tooltip>
-                                </div>
-
+                               
                                 {/* Influencer Info */}
-                                <div>
-                                    <h2 className="text-3xl font-semibold capitalize text-gray-900">
+                                <div className="w-full text-center sm:text-left break-words">
+                                    <h2 
+                                        className="text-2xl sm:text-3xl font-semibold capitalize text-gray-900 leading-tight break-words"
+                                    >
                                         {influDetails?.firstname} {influDetails?.lastname}
                                     </h2>
-                                    <p className="text-sm text-gray-900 mt-1">{influDetails?.email}</p>
+
+                                    <p className="text-sm text-gray-900 mt-1 break-all">
+                                        {influDetails?.email}
+                                    </p>
+
                                     <p className="text-sm text-gray-900 mt-1">
                                         {influDetails?.genderid === 1 ? "Male" : "Female"}
                                     </p>
+
                                     <p className="text-sm text-gray-900 mt-1">
                                         {influDetails?.statename}, {influDetails?.countryname}
                                     </p>
 
                                     {Number(influDetails?.ratingcount) > 0 && (
-                                        <div className="flex items-center gap-1 mt-2">
+                                        <div className="flex items-center justify-center sm:justify-start gap-1 mt-2">
                                             {Array.from({ length: Math.round(influDetails.ratingcount) }).map((_, i) => (
-                                            <RiStarFill
-                                                key={i}
-                                                size={16}
-                                                className="text-yellow-400"
-                                                style={{
-                                                stroke: "black",
-                                                strokeWidth: 1,
-                                                }}
-                                            />
+                                                <RiStarFill
+                                                    key={i}
+                                                    size={16}
+                                                    className="text-yellow-400"
+                                                    style={{
+                                                        stroke: "black",
+                                                        strokeWidth: 1,
+                                                    }}
+                                                />
                                             ))}
 
                                             <span className="ml-1 text-sm font-semibold text-gray-800">
-                                            {Number(influDetails.ratingcount).toFixed(1)}
+                                                {Number(influDetails.ratingcount).toFixed(1)}
                                             </span>
                                         </div>
-                                        )}
+                                    )}
                                 </div>
 
                                 {/* Total Campaign (desktop alignment) */}
@@ -343,10 +355,6 @@ const InfluencerProfile = () => {
                                         </button>
                                     </Tooltip>
                                 </div>
-
-                                <span className="sm:ml-auto bg-yellow-50 border border-yellow-200 text-yellow-700 px-3 py-2 rounded-2xl text-sm font-medium text-center">
-                                    Invitation Pending
-                                </span>
                             </div>
                         </div>
 
@@ -411,6 +419,7 @@ const InfluencerProfile = () => {
                         {influDetails?.portfoliofiles?.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {influDetails?.portfoliofiles?.map((file, index) => {
+
                                     const url = file.filepath;
                                     const extension = url.split('.').pop().toLowerCase();
 
@@ -422,44 +431,56 @@ const InfluencerProfile = () => {
                                     return (
                                         <div
                                             key={index}
-                                            className="border border-gray-200 items-center justify-center rounded-2xl flex flex-col gap-2 bg-gray-50"
+                                            className="border border-gray-200 items-center justify-center rounded-2xl flex flex-col gap-2 bg-gray-50 cursor-pointer"
+                                            onClick={() => {
+                                                setPreviewOpen(true);
+                                                setPreviewUrl(url);
+                                                if (isImage) setPreviewType("image");
+                                                else if (isVideo) setPreviewType("video");
+                                                else if (isPDF) setPreviewType("pdf");
+                                                else setPreviewType("doc");
+                                            }}
                                         >
+
                                             {isImage && (
                                                 <img
                                                     src={url}
-                                                    alt={`Portfolio ${index + 1}`}
+                                                    alt=""
                                                     className="w-full h-48 object-cover rounded-2xl"
                                                 />
                                             )}
 
                                             {isVideo && (
-                                                <video
-                                                    controls
-                                                    className="w-full h-48 rounded-2xl object-cover"
-                                                >
+                                                <video className="w-full h-48 rounded-2xl object-cover">
                                                     <source src={url} type={`video/${extension}`} />
-                                                    Your browser does not support the video tag.
                                                 </video>
                                             )}
 
                                             {isPDF && (
-                                                <iframe
-                                                    src={url}
-                                                    className="w-full h-48 rounded-2xl"
-                                                    title={`PDF ${index + 1}`}
-                                                ></iframe>
+                                                <div className="w-full h-48 rounded-2xl flex flex-col items-center justify-center gap-2 p-4 bg-white">
+                                                    <iframe
+                                                        src={url}
+                                                        className="w-full h-full rounded-xl"
+                                                        title=""
+                                                    ></iframe>
+
+                                                    <a
+                                                        href={url}
+                                                        download
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="text-blue-600 underline text-sm"
+                                                    >
+                                                        Download PDF
+                                                    </a>
+                                                </div>
                                             )}
 
                                             {(isDoc || (!isImage && !isVideo && !isPDF)) && (
                                                 <div className="flex flex-col items-center justify-center text-center gap-2 py-4">
-                                                    <RiFile3Line className="w-16  h-16 text-gray-500" />
-                                                    <a
-                                                        href={url}
-                                                        download
-                                                        className="text-blue-600 text-sm underline break-all"
-                                                    >
+                                                    <RiFile3Line className="w-16 h-16 text-gray-500" />
+                                                    <p className="text-gray-800 text-sm break-all px-2">
                                                         {url.split("/").pop()}
-                                                    </a>
+                                                    </p>
                                                 </div>
                                             )}
 
@@ -471,6 +492,59 @@ const InfluencerProfile = () => {
                             <p className="text-sm text-gray-500">No portfolio file uploaded.</p>
                         )}
                     </div>
+                        {previewOpen && (
+                            <div
+                                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                            >
+
+                                <button
+                                className="absolute top-5 right-6 text-white text-3xl font-bold"
+                                onClick={() => setPreviewOpen(false)}
+                                >
+                                &times;
+                                </button>
+
+                                <div
+                                className="relative"
+                                onClick={(e) => e.stopPropagation()}
+                                >
+
+                                {previewType === "video" && (
+                                    <video
+                                    controls
+                                    autoPlay
+                                    playsInline
+                                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain bg-black"
+                                    >
+                                    <source src={previewUrl} type="video/mp4" />
+                                    </video>
+                                )}
+
+                                {previewType === "image" && (
+                                    <img
+                                    src={previewUrl}
+                                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                    />
+                                )}
+
+                                {previewType === "pdf" && (
+                                    <iframe
+                                    src={previewUrl}
+                                    className="w-[90vw] h-[90vh] rounded-xl bg-white"
+                                    />
+                                )}
+
+                                {previewType === "doc" && (
+                                    <iframe
+                                    src={`https://docs.google.com/viewer?url=${previewUrl}&embedded=true`}
+                                    className="w-[90vw] h-[90vh] rounded-xl bg-white"
+                                    />
+                                )}
+
+                                </div>
+
+                            </div>
+                            )}
 
                     {/* Feedbacks */}
                     {influDetails?.feedbacks?.length > 0 && (

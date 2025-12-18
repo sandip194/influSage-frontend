@@ -236,7 +236,7 @@ const UserTableLayout = () => {
         }
 
         try {
-            const res = await axios.post('/admin/dashboard/profile-block', {
+            const res = await axios.post('/admin/dashboard/profile-campaign-block', {
                 p_userid: currentUserId,
                 p_objective: selectedReason,
             }, {

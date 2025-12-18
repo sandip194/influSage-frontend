@@ -119,6 +119,13 @@ const InfluencerCard = ({ influencer, onLike, onInvite, BASE_URL }) => {
           ))}
         </div>
       )}
+      
+      {/* --- Bio --- */}
+      {influencer?.bio && (
+        <div className="text-sm text-gray-700 mb-4 line-clamp-2">
+          {influencer.bio}
+        </div>
+      )}
 
       {/* --- Followers --- */}
       {influencer?.providers?.some((p) => p.nooffollowers > 0) && (

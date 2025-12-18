@@ -18,6 +18,10 @@ const Profile = () => {
   // const [showAllHistory, setShowAllHistory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
+  const [portfolioPreviewOpen, setPortfolioPreviewOpen] = useState(false);
+  const [portfolioPreviewUrl, setPortfolioPreviewUrl] = useState("");
+  const [portfolioPreviewType, setPortfolioPreviewType] = useState("");
+
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
 
@@ -194,7 +198,20 @@ const Profile = () => {
                   const isDoc = ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(fileExtension);
 
                   return (
-                    <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200">
+                    <div
+                      key={index}
+                      className="relative group rounded-lg overflow-hidden border border-gray-200 cursor-pointer"
+                      onClick={() => {
+                        setPortfolioPreviewUrl(item.filepath);
+
+                        if (isImage) setPortfolioPreviewType("image");
+                        else if (isVideo) setPortfolioPreviewType("video");
+                        else if (isDoc) setPortfolioPreviewType("doc");
+                        else setPortfolioPreviewType("file");
+
+                        setPortfolioPreviewOpen(true);
+                      }}
+                    >
                       {isImage && (
                         <img
                           src={item.filepath}
@@ -231,6 +248,51 @@ const Profile = () => {
               </div>
             )}
           </div>
+          {portfolioPreviewOpen && (
+            <div
+              className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+              onClick={() => setPortfolioPreviewOpen(false)}
+            >
+
+              <button
+                className="absolute top-6 right-6 text-white text-3xl font-bold"
+                onClick={() => setPortfolioPreviewOpen(false)}
+              >
+                &times;
+              </button>
+
+              {/* IMAGE */}
+              {portfolioPreviewType === "image" && (
+                <img
+                  src={portfolioPreviewUrl}
+                  className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )}
+
+              {/* VIDEO */}
+              {portfolioPreviewType === "video" && (
+                <video
+                  controls
+                  autoPlay
+                  className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <source src={portfolioPreviewUrl} />
+                </video>
+              )}
+
+              {/* DOC/PDF */}
+              {portfolioPreviewType === "doc" && (
+                <iframe
+                  src={`https://docs.google.com/viewer?url=${portfolioPreviewUrl}&embedded=true`}
+                  className="w-[90vw] h-[90vh] rounded-xl bg-white"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )}
+
+            </div>
+          )}
         </div>
 
         {/* Right Side */}

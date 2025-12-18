@@ -161,15 +161,14 @@ const CampaignDetailsView = () => {
         try {
             setActionLoading(true);
 
-            const res = await axios.post(
-                "admin/dashboard/profile-block",
-                {
-                    p_campaignid: campaignId,
-                    p_objective: selectedBlockReason,
-                },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
+    const res = await axios.post(
+      "admin/dashboard/profile-campaign-block",
+      {
+        p_campaignid: campaignId,
+        p_objective: selectedBlockReason,
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
             if (res.status === 200) {
                 toast.success(res.data?.message || "Campaign blocked successfully");
                 setIsBlockModalOpen(false);

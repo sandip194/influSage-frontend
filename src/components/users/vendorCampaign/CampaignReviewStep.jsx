@@ -554,16 +554,17 @@ const CampaignReviewStep = ({ onEdit }) => {
                 p_contenttypejson.map((p, i) => (
                   <div key={p.providername + i}>
                     <div className="flex items-center justify-between pb-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col">
                         <span className="text-gray-700 font-medium">
                           {p.providername}
                         </span>
+                        <p className="text-gray-600 italic text-sm mt-2 border-l-2 border-gray-200 pl-3">
+                            {p.caption}
+                          </p>
                       </div>
                       <span className="text-gray-500 text-sm">
                         {p.contenttypes && p.contenttypes.length > 0
-                          ? p.contenttypes
-                            .map((ct) => ct.contenttypename)
-                            .join(", ")
+                          ? p.contenttypes.map((ct) => ct.contenttypename).join(", ")
                           : "No types"}
                       </span>
                     </div>
@@ -583,46 +584,49 @@ const CampaignReviewStep = ({ onEdit }) => {
       </div>
 
       {/* Buttons */}
-      <div className="flex max-w-sm gap-3 mt-3">
-        <button
-          className="flex-1 bg-white border border-gray-300 text-gray-800 py-3 rounded-full disabled:opacity-60"
-          onClick={onEdit}
-          type="button"
-          disabled={loadingDraft || loadingSend}
-        >
-          Edit Campaign
-        </button>
+      <div className="flex flex-row max-sm:flex-col w-full max-w-sm gap-3 mt-3">
 
-        <button
-          className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full disabled:opacity-60 flex items-center justify-center gap-2"
-          onClick={() => handleCreateCampaign("Draft")}
-          type="button"
-          disabled={loadingDraft || loadingSend}
-        >
-          {loadingDraft ? (
-            <>
-              <Spin size="small" /> <span>Saving...</span>
-            </>
-          ) : (
-            "Save Draft"
-          )}
-        </button>
+          <button
+            className="flex-1 bg-white border border-gray-300 text-gray-800 py-3 rounded-full disabled:opacity-60"
+            onClick={onEdit}
+            type="button"
+            disabled={loadingDraft || loadingSend}
+          >
+            Edit Campaign
+          </button>
 
-        <button
-          className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full disabled:opacity-60 flex items-center justify-center gap-2"
-          onClick={() => handleCreateCampaign("ApprovalPending")}
-          type="button"
-          disabled={loadingDraft || loadingSend}
-        >
-          {loadingSend ? (
-            <>
-              <Spin size="small" /> <span>Sending...</span>
-            </>
-          ) : (
-            "Send For Approcval"
-          )}
-        </button>
-      </div>
+          <button
+            className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full disabled:opacity-60 flex items-center justify-center gap-2"
+            onClick={() => handleCreateCampaign("Draft")}
+            type="button"
+            disabled={loadingDraft || loadingSend}
+          >
+            {loadingDraft ? (
+              <>
+                <Spin size="small" /> <span>Saving...</span>
+              </>
+            ) : (
+              "Save Draft"
+            )}
+          </button>
+
+          <button
+            className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full disabled:opacity-60 flex items-center justify-center gap-2"
+            onClick={() => handleCreateCampaign("ApprovalPending")}
+            type="button"
+            disabled={loadingDraft || loadingSend}
+          >
+            {loadingSend ? (
+              <>
+                <Spin size="small" /> <span>Sending...</span>
+              </>
+            ) : (
+              "Send For Approcval"
+            )}
+          </button>
+
+        </div>
+
     </div>
   );
 };
