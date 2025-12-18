@@ -99,6 +99,7 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
             toast.success(res.data.message);
 
             onClose(); // close modal
+            resetForm();
         } catch (err) {
             toast.error(err);
         } finally {
@@ -119,7 +120,7 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
             const data = res.data?.data;
             if (!data) return;
 
-            setIsEdit(true);
+            setIsEdit(data.isapplied);
             setAmount(data.budget || "");
             setProposal(data.description || "");
 

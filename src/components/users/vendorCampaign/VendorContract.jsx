@@ -174,14 +174,29 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
           {contracts.map((contract) => (
             <div
               key={contract.id}
-              className="relative bg-white/70 backdrop-blur-xl border border-gray-200 
-              rounded-xl p-5 shadow-md hover:shadow-xl 
-              transition-all duration-300 cursor-pointer group"
+              className="relative bg-white/80 backdrop-blur-xl border border-gray-200 
+      rounded-xl p-4 sm:p-5 shadow-md hover:shadow-xl 
+      transition-all duration-300"
             >
-              {/* STATUS RIBBON */}
+              {/* 🔹 MOBILE HEADER: Influencer + Status + Payment */}
+              <div className="flex sm:hidden justify-between items-start mb-3">
+                {/* Influencer */}
+                <div className="flex items-center gap-2">
+                  {contract.influencer}
+                </div>
+
+                {/* Status + Payment */}
+                <div className="flex flex-col items-end">
+                  <p className="text-lg font-bold text-gray-900 leading-none mt-5" >
+                    {contract.payment}
+                  </p>
+                </div>
+              </div>
+
+              {/* STATUS RIBBON - visible on all screen sizes */}
               <span
                 className={`absolute top-0 right-0 px-3 py-1 text-xs font-semibold rounded-bl-xl 
-                ${contract.status === "Accepted"
+    ${contract.status === "Accepted"
                     ? "bg-green-500 text-white"
                     : contract.status === "Rejected"
                       ? "bg-red-500 text-white"
@@ -191,57 +206,77 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                 {contract.status}
               </span>
 
-              <div className="flex justify-between items-start gap-6">
-                {/* LEFT SIDE → Details */}
-                <div className="flex flex-col gap-2 w-full">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+
+              {/* MAIN LAYOUT */}
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+
+                {/* LEFT CONTENT */}
+                <div className="flex flex-col gap-3 w-full">
+
+                  {/* Influencer (desktop only) */}
+                  <h3 className="hidden sm:flex text-lg font-semibold text-gray-900 items-center gap-2">
                     {contract.influencer}
                   </h3>
 
-                  <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
+                  {/* DETAILS GRID */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+
+                    {/* Contract Dates */}
                     <div>
                       <p className="font-medium text-gray-800">Contract Duration</p>
-                      <p>{contract.contractStart} → {contract.contractEnd}</p>
+                      <p className="text-xs sm:text-sm">
+                        {contract.contractStart} → {contract.contractEnd}
+                      </p>
                     </div>
 
+                    {/* Campaign Dates */}
                     <div>
                       <p className="font-medium text-gray-800">Campaign Dates</p>
-                      <p>{contract.campaignStart} → {contract.campaignEnd}</p>
+                      <p className="text-xs sm:text-sm">
+                        {contract.campaignStart} → {contract.campaignEnd}
+                      </p>
                     </div>
 
-                    <div className="col-span-2 mt-1 text-sm text-gray-700">
+                    {/* Product + Address */}
+                    <div className="sm:col-span-2 space-y-1">
                       {contract.productLink && (
-                        <p>
-                          <span className="font-medium">Product Link: </span>
-                          <a href={contract.productLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-                            {contract.productLink}
+                        <p className="break-all">
+                          <span className="font-medium">Product: </span>
+                          <a
+                            href={contract.productLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            View Link
                           </a>
                         </p>
                       )}
+
                       {contract.vendorAddress && (
                         <p>
-                          <span className="font-medium">Vendor Address: </span>
+                          <span className="font-medium">Address: </span>
                           {contract.vendorAddress}
                         </p>
                       )}
                     </div>
 
-
-                    <div className="col-span-2">
+                    {/* Deliverables */}
+                    <div className="sm:col-span-2">
                       <p className="font-medium text-gray-800">Deliverables</p>
                       <div className="flex flex-col gap-2 mt-1">
                         {safeArray(contract.deliverables).map((platform, idx) => (
-                          <div key={idx} className="flex items-center gap-2">
+                          <div key={idx} className="flex items-start gap-2">
                             <img
                               src={platform.icon}
                               alt={platform.provider}
-                              className="w-5 h-5 rounded-full"
+                              className="w-4 h-4 mt-1 rounded-full"
                             />
-                            <div className="flex flex-wrap gap-1 text-xs text-gray-700">
+                            <div className="flex flex-wrap gap-1">
                               {safeArray(platform.contenttypes).map((ct, ctIdx) => (
                                 <span
                                   key={ctIdx}
-                                  className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md border border-blue-100"
+                                  className="px-2 py-1 text-[11px] bg-blue-50 text-blue-700 rounded-md border border-blue-100"
                                 >
                                   {ct.contenttypename}
                                 </span>
@@ -252,27 +287,28 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                       </div>
                     </div>
 
-
+                    {/* Notes */}
                     {contract.notes && (
-                      <div className="col-span-2 mt-1">
-                        <p className="italic text-gray-500 text-xs">"{contract.notes}"</p>
+                      <div className="sm:col-span-2">
+                        <p className="italic text-gray-500 text-xs">
+                          “{contract.notes}”
+                        </p>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* RIGHT SIDE → Payment + Buttons */}
-                <div className="flex flex-col items-end gap-3 min-w-[120px]">
+                {/* RIGHT SIDE – DESKTOP ONLY */}
+                <div className="hidden sm:flex flex-col items-end gap-3 min-w-[120px]">
                   <p className="text-lg font-semibold text-gray-900 mt-3">
                     {contract.payment}
                   </p>
 
-                  {/* Show edit button only if status is Rejected */}
                   {contract.status === "Rejected" && (
                     <button
                       onClick={() => handleEdit(contract)}
-                      className="px-4 py-1.5 text-xs font-medium bg-blue-600 text-white 
-                        rounded-lg transition-all hover:bg-blue-700 shadow-sm"
+                      className="px-4 py-2 text-xs font-medium bg-blue-600 text-white 
+              rounded-lg hover:bg-blue-700 transition"
                     >
                       Edit Contract
                     </button>
@@ -282,6 +318,8 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
             </div>
           ))}
         </div>
+
+
       )}
 
       {/* CONTRACT MODAL */}

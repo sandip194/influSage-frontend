@@ -298,34 +298,36 @@ const VendorCampaignsLayout = () => {
         </button>
       </div>
       {/* Status Tabs */}
-      <div className="bg-white p-3 sm:p-4 rounded-lg mb-6 flex flex-wrap gap-3">
-        {statusList.map((statusItem) => {
-          const id = getStatusKey(statusItem); // For key and highlighting
-          const label =
-            typeof statusItem === "string"
-              ? statusItem
-              : statusLabels[getStatusKey(statusItem.name)] || statusItem.name;
+      <div className="bg-white p-3 sm:p-4 rounded-lg mb-6 overflow-x-auto">
+        <div className="flex gap-3 flex-nowrap">
+          {statusList.map((statusItem) => {
+            const id = getStatusKey(statusItem);
+            const label =
+              typeof statusItem === "string"
+                ? statusItem
+                : statusLabels[getStatusKey(statusItem.name)] || statusItem.name;
 
-          // For key, use ID if available (for objects), else fallback to string key
-          const uniqueKey =
-            typeof statusItem === "object" && statusItem.id
-              ? statusItem.id
-              : id;
+            const uniqueKey =
+              typeof statusItem === "object" && statusItem.id
+                ? statusItem.id
+                : id;
 
-          return (
-            <button
-              key={uniqueKey} // Use ID for better uniqueness
-              onClick={() => handleStatusFilter(statusItem)} // Pass full statusItem
-              className={`px-4 py-2 rounded-lg border transition font-medium ${statusFilter === id
-                  ? "bg-[#141843] text-white border-[#141843]"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                }`}
-            >
-              {label}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={uniqueKey}
+                onClick={() => handleStatusFilter(statusItem)}
+                className={`px-3 sm:px-4 py-2 rounded-lg border transition font-medium ${statusFilter === id
+                    ? "bg-[#141843] text-white border-[#141843]"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                  }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
+
 
       {/* Search, Sort, and Filter Header */}
       <div className="bg-white p-4 rounded-lg mb-4">
@@ -396,8 +398,8 @@ const VendorCampaignsLayout = () => {
                 <th className="p-4">Campaign Name</th>
                 <th className="p-4">Budget</th>
                 <th className="p-4">Date Started</th>
-                <th className="p-4">Due Date</th>
-                <th className="p-4">Status</th>
+                <th className="p-4 min-w-30">Due Date</th>
+                <th className="p-4 min-w-40">Status</th>
                 {/* <th className="p-4">Action</th> */}
               </tr>
             </thead>
@@ -439,20 +441,7 @@ const VendorCampaignsLayout = () => {
                         {statusLabels[getStatusKey(row.status)] || row.status}
                       </span>
                     </td>
-                    {/* <td className="p-4">
-                      <button
-                        onClick={() =>
-                          navigate(
-                            `/vendor-dashboard/vendor-campaign/campaignDetails/${row.id}`
-                          )
-                        }
-                        className="flex items-center gap-1 cursor-pointer text-[#141843] hover:text-[#1d214f] transition text-sm font-medium"
-                      >
-                        <Tooltip title="View Details">
-                          <RiEyeLine className="text-lg" />
-                        </Tooltip>
-                      </button>
-                    </td> */}
+
                   </tr>
                 ))
               ) : (

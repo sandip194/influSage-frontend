@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { RiArrowUpLine, RiArrowDownLine } from "@remixicon/react";
 import { useSelector } from "react-redux";
 import PerformanceChart from "../../users/analytics/PerformanceChart";
 import TopContentChart from "../../users/analytics/TopContentChart";
@@ -13,8 +12,12 @@ import {
     RiEyeLine,
     RiHeartLine,
     RiImage2Line,
-    RiStarLine
+    RiStarLine,
+    RiHeart3Line,
+    RiChat3Line,
+    RiShareForwardLine
 } from "@remixicon/react";
+import CampaignAnalytics from "../../users/analytics/CampaignAnalytics";
 
 const { Option } = Select;
 
@@ -26,14 +29,10 @@ const BrandAnalyticsDashboard = () => {
 
     const { token } = useSelector((state) => state.auth);
 
-    const [timelineData, setTimelineData] = useState([]);
-    
-    const [timelineFilter, setTimelineFilter] = useState("year"); 
-    const [campaignFilter, setCampaignFilter] = useState("year"); 
+    const [campaignFilter, setCampaignFilter] = useState("year");
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-    const [summaryFilter, setSummaryFilter] = useState("year"); 
-    const [topContentFilter, setTopContentFilter] = useState("year");
+    const [summaryFilter, setSummaryFilter] = useState("year");
 
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -42,6 +41,8 @@ const BrandAnalyticsDashboard = () => {
     const [kpis, setKpis] = useState([]);
     const [recentContent, setRecentContent] = useState([]);
     const [campaigns, setCampaigns] = useState([]);
+    const [campaignList, setCampaignList] = useState([])
+    const [selectedCampaignId, setSelectedCampaignId] = useState(null);
 
     const currentYear = new Date().getFullYear();
 
@@ -125,6 +126,23 @@ const BrandAnalyticsDashboard = () => {
 
 
 
+    const fetchCampaignList = async () => {
+        try {
+            const res = await axios.get("/vendor/analytics/campaign-list", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setCampaignList(res?.data?.data || []);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    useEffect(() => {
+        fetchCampaignList();
+    }, [token]);
+
+
+
     return (
         <div className="w-full space-y-6 text-sm">
             {/* ------------------------- */}
@@ -157,9 +175,6 @@ const BrandAnalyticsDashboard = () => {
                 ))}
             </div>
 
-
-
-
             {/* ------------------------- */}
             {/* Campaign Table */}
             {/* ------------------------- */}
@@ -167,15 +182,11 @@ const BrandAnalyticsDashboard = () => {
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold">Campaign Overview</h2>
 
-                    <div className="flex items-center gap-2">
-
-                        <Select value={campaignFilter} onChange={setCampaignFilter}>
-                            <Option value="week">Week</Option>
-                            <Option value="month">Month</Option>
-                            <Option value="year">Year</Option>
-                        </Select>
-
-                    </div>
+                    <Select value={campaignFilter} onChange={setCampaignFilter} style={{ width: 120 }}>
+                        <Option value="week">Week</Option>
+                        <Option value="month">Month</Option>
+                        <Option value="year">Year</Option>
+                    </Select>
                 </div>
                 <table className="min-w-full text-left">
                     <thead>
@@ -307,47 +318,73 @@ const BrandAnalyticsDashboard = () => {
 
                 {/* PLATFORM BARS */}
                 <div className="space-y-4">
-  {platforms.map((p, idx) => {
-    const maxViews = Math.max(...platforms.map(d => d.views));
+                    {platforms.map((p, idx) => {
+                        const maxViews = Math.max(...platforms.map(d => d.views));
 
-    return (
-      <div key={idx} className="flex items-center space-x-3">
-        {/* Icon */}
-        <img src={p.icon} alt={p.platform} className="w-6 h-6" />
+                        return (
+                            <div key={idx} className="flex items-center space-x-3">
+                                {/* Icon */}
+                                <img src={p.icon} alt={p.platform} className="w-6 h-6" />
 
-        {/* Name */}
-        <p className="w-20 text-sm text-gray-700">{p.platform}</p>
+                                {/* Name */}
+                                <p className="w-20 text-sm text-gray-700">{p.platform}</p>
 
-        {/* Bar */}
-        <div className="flex-1 bg-gray-200 h-3 rounded-full relative">
-          <Tooltip
-            placement="top"
-            title={
-              <div className="text-sm">
-                <p><strong>{p.platform}</strong></p>
-                <p>Likes: {p.totallikes.toLocaleString()}</p>
-                <p>Share: {p.percentage.toFixed(2)}%</p>
-              </div>
-            }
-          >
-            <div
-              className="h-3 rounded-full cursor-pointer"
-              style={{
-                width: `${(p.views / maxViews) * 100}%`,
-                backgroundColor: p.color,
-              }}
-            />
-          </Tooltip>
-        </div>
+                                {/* Bar */}
+                                <div className="flex-1 bg-gray-200 h-3 rounded-full relative">
+                                    <Tooltip
+                                        placement="top"
+                                        title={
+                                            <div className="text-sm">
+                                                <p><strong>{p.platform}</strong></p>
+                                                <p>Likes: {p.views.toLocaleString()}</p>
+                                                <p>Percentage: {p.percentage.toFixed(2)}%</p>
+                                            </div>
+                                        }
+                                    >
+                                        <div
+                                            className="h-3 rounded-full cursor-pointer"
+                                            style={{
+                                                width: `${(p.views / maxViews) * 100}%`,
+                                                backgroundColor: p.color,
+                                            }}
+                                        />
+                                    </Tooltip>
+                                </div>
 
-        {/* Value */}
-        <p className="w-16 text-sm font-bold text-gray-800 text-right">
-          {p.views >= 1000 ? `${(p.views / 1000).toFixed(1)}k` : p.views}
-        </p>
-      </div>
-    );
-  })}
-</div>
+                                {/* Value */}
+                                <p className="w-16 text-sm font-bold text-gray-800 text-right">
+                                    {p.views >= 1000 ? `${(p.views / 1000).toFixed(1)}k` : p.views}
+                                </p>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* ------------------------- */}
+            {/* Campaign Wise Analytics */}
+            {/* ------------------------- */}
+            <div className="bg-white rounded-2xl p-5 w-full shadow-sm mt-6">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-lg font-bold text-gray-900">Campaign Insights</h2>
+
+                    <Select
+                        className="w-64"
+                        placeholder="Select Campaign"
+                        value={selectedCampaignId}
+                        onChange={(value) => setSelectedCampaignId(value)}
+                    >
+                        {campaignList.map((campaign) => (
+                            <Option key={campaign.campaignid} value={campaign.campaignid}>
+                                {campaign.campaignname}
+                            </Option>
+                        ))}
+                    </Select>
+                </div>
+
+                <div className="mt-5">
+                    <CampaignAnalytics selectedCampaignId={selectedCampaignId} />
+                </div>
             </div>
 
             {/* ------------------------- */}
@@ -355,33 +392,60 @@ const BrandAnalyticsDashboard = () => {
             {/* ------------------------- */}
             <div className="bg-white rounded-2xl p-5 shadow-sm">
                 <h2 className="text-lg font-bold mb-4">Recent Content</h2>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                     {recentContent.map((c, idx) => (
-                        <div key={idx} className="bg-gray-50 rounded-xl p-4 shadow-sm">
-                            <p className="text-xs text-gray-500">
-                                {c.providername} • {c.contenttypname}
+                        <div
+                            key={idx}
+                            className="group bg-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
+                        >
+                            {/* Top row: Provider + Date */}
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-semibold px-2 py-1 rounded-full bg-gray-200 text-gray-700">
+                                    {c.providername}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                    {c.postdate}
+                                </span>
+                            </div>
+
+                            {/* Content Type */}
+                            <p className="text-xs text-gray-500 mb-2">
+                                {c.contenttypname}
                             </p>
 
-                            <p className="text-sm font-semibold text-gray-800">
-                                Posted on {c.postdate}
-                            </p>
-
+                            {/* Title / Caption */}
                             {(c.title || c.caption) && (
-                                <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                <p className="text-sm font-semibold text-gray-800 mb-3 
+                line-clamp-2 min-h-[2.5rem]">
                                     {c.title || c.caption}
                                 </p>
                             )}
 
-                            <div className="flex justify-between mt-3 text-sm font-medium text-gray-800">
-                                <p>👁 {c.views.toLocaleString()}</p>
-                                <p>❤️ {c.likes.toLocaleString()}</p>
-                                <p>💬 {c.comments.toLocaleString()}</p>
-                                <p>🔁 {c.shares.toLocaleString()}</p>
+                            <div className="mt-auto">
+                                {/* Views */}
+                                <div className="flex items-center gap-2 mb-2">
+                                    <RiEyeLine className="text-gray-700" size={18} />
+                                    <span className="text-lg font-bold text-gray-900">
+                                        {c.views.toLocaleString()}
+                                    </span>
+                                    <span className="text-xs text-gray-500">views</span>
+                                </div>
+
+
+                                {/* Engagement */}
+                                <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
+                                    <div className="flex items-center gap-1"> <RiHeart3Line className="text-red-500" size={14} /> {c.likes}</div>
+                                    <div className="flex items-center gap-1"> <RiChat3Line className="text-blue-500" size={14} /> {c.comments}</div>
+                                    <div className="flex items-center gap-1"><RiShareForwardLine className="text-green-500" size={14} /> {c.shares}</div>
+                                </div>
                             </div>
+
                         </div>
                     ))}
                 </div>
             </div>
+
         </div>
     );
 };

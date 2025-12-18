@@ -9,7 +9,7 @@ import {
     RiArrowLeftLine,
 } from "react-icons/ri";
 import { CheckOutlined, CloseOutlined, StopOutlined } from "@ant-design/icons";
-import { Button, Modal, Tooltip, Empty, Skeleton, Input, Radio  } from "antd";
+import { Button, Modal, Tooltip, Empty, Skeleton, Input, Radio } from "antd";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -134,56 +134,56 @@ const CampaignDetailsView = () => {
     };
 
     const fetchBlockReasons = async () => {
-    try {
-        setBlockLoading(true);
-        const res = await axios.get(
-            "/admin/dashboard/campaign-block-reason",
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
+        try {
+            setBlockLoading(true);
+            const res = await axios.get(
+                "/admin/dashboard/campaign-block-reason",
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
 
-        if (res.status === 200) {
-            setBlockReasons(res.data?.data || []);
+            if (res.status === 200) {
+                setBlockReasons(res.data?.data || []);
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to load block reasons");
+        } finally {
+            setBlockLoading(false);
         }
-    } catch (err) {
-        console.error(err);
-        toast.error("Failed to load block reasons");
-    } finally {
-        setBlockLoading(false);
-    }
-};
+    };
 
-const handleBlockSubmit = async () => {
-  if (!selectedBlockReason) {
-    toast.error("Please select a block reason");
-    return;
-  }
+    const handleBlockSubmit = async () => {
+        if (!selectedBlockReason) {
+            toast.error("Please select a block reason");
+            return;
+        }
 
-  try {
-    setActionLoading(true);
+        try {
+            setActionLoading(true);
 
-    const res = await axios.post(
-      "admin/dashboard/profile-block",
-      {
-        p_campaignid: campaignId,
-        p_objective: selectedBlockReason,
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+            const res = await axios.post(
+                "admin/dashboard/profile-block",
+                {
+                    p_campaignid: campaignId,
+                    p_objective: selectedBlockReason,
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
 
-    if (res.status === 200) {
-      toast.success(res.data?.message || "Campaign blocked successfully");
-      setIsBlockModalOpen(false);
-      setSelectedBlockReason(null);
-      getCamapignDetails();
-    }
+            if (res.status === 200) {
+                toast.success(res.data?.message || "Campaign blocked successfully");
+                setIsBlockModalOpen(false);
+                setSelectedBlockReason(null);
+                getCamapignDetails();
+            }
 
-  } catch (err) {
-    console.error(err);
-    toast.error(err.response?.data?.message || "Failed to block campaign");
-  } finally {
-    setActionLoading(false);
-  }
-};
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.message || "Failed to block campaign");
+        } finally {
+            setActionLoading(false);
+        }
+    };
 
     useEffect(() => {
         getCamapignDetails()
@@ -208,7 +208,7 @@ const handleBlockSubmit = async () => {
 
 
     return (
-        <div className="w-full text-sm overflow-x-hidden bg-gray-50">
+        <div className="w-full text-sm overflow-x-hidden ">
             <button
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-2 text-gray-600 mb-2"
@@ -631,8 +631,13 @@ const handleBlockSubmit = async () => {
 
                             <div>
                                 <p className="text-sm font-semibold">Phone</p>
-                                <p className="text-gray-500">+{safeText(cmapignDetails?.phonenumber)}</p>
+                                <p className="text-gray-500">
+                                    {cmapignDetails?.phonenumber
+                                        ? `+${cmapignDetails.phonenumber.slice(0, 2)} ${cmapignDetails.phonenumber.slice(2)}`
+                                        : ""}
+                                </p>
                             </div>
+
 
                             <div className="pt-2 border-t border-gray-200">
                                 <p className="text-sm font-semibold">Total Campaigns</p>
