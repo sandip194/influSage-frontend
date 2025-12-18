@@ -4,6 +4,7 @@ import { RiArrowUpLine, RiArrowDownLine } from "@remixicon/react";
 import { useSelector } from "react-redux";
 import PerformanceChart from "../../users/analytics/PerformanceChart";
 import TopContentChart from "../../users/analytics/TopContentChart";
+import { Tooltip } from "antd";
 import { Select } from "antd";
 
 import {
@@ -27,12 +28,12 @@ const BrandAnalyticsDashboard = () => {
 
     const [timelineData, setTimelineData] = useState([]);
     
-    const [timelineFilter, setTimelineFilter] = useState("month"); 
-    const [campaignFilter, setCampaignFilter] = useState("month"); 
+    const [timelineFilter, setTimelineFilter] = useState("year"); 
+    const [campaignFilter, setCampaignFilter] = useState("year"); 
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-    const [summaryFilter, setSummaryFilter] = useState("month"); 
-    const [topContentFilter, setTopContentFilter] = useState("month");
+    const [summaryFilter, setSummaryFilter] = useState("year"); 
+    const [topContentFilter, setTopContentFilter] = useState("year");
     
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -80,8 +81,8 @@ const BrandAnalyticsDashboard = () => {
   setKpis([
     { label: "Total Campaigns", value: data.totalcampaigncount, icon: <RiBriefcaseLine size={28}/> },
     { label: "Active Influencers", value: data.totalactiveinfluencercount, icon: <RiGroupLine size={28}/> },
-    { label: "Total Impressions", value: data.totalimpression, icon: <RiEyeLine size={28}/> },
-    { label: "Engagement Rate", value: `${data.engagementrate}%`, icon: <RiHeartLine size={28}/> },
+    { label: "Total Impressions", value: data.estimatedimpression, icon: <RiEyeLine size={28}/> },
+    { label: "Engagement Rate", value: `${data.engagementscore}%`, icon: <RiHeartLine size={28}/> },
     { label: "Total Content Pieces", value: data.totalcontentpieces, icon: <RiImage2Line size={28}/> },
     { label: "Avg Engagement / Influencer", value: Math.round(data.averageengagementperinfluencer), icon: <RiStarLine size={28}/> },
   ]);
@@ -108,6 +109,7 @@ const fetchPlatformBreakdown = async () => {
     setPlatforms(
       apiData.map(item => ({
         platform: item.providername,
+        totallikes: item.totallikes,
         views: item.totallikes,
         percentage: item.percentage,
         icon: item.providericonpath,
@@ -345,32 +347,51 @@ useEffect(() => {
                             ))}
                         </Select>
                     </div>
-                    </div>
+                </div>
 
                 {/* PLATFORM BARS */}
                 <div className="space-y-4">
-                    {platforms.map((p, idx) => {
-                        const maxViews = Math.max(...platforms.map(d => d.views));
-                        return (
-                            <div key={idx} className="flex items-center space-x-3">
-                                <img src={p.icon} alt={p.platform} className="w-6 h-6" />
-                                <p className="w-20 text-sm text-gray-700">{p.platform}</p>
-                                <div className="flex-1 bg-gray-200 h-3 rounded-full">
-                                    <div
-                                        className="h-3 rounded-full"
-                                        style={{
-                                            width: `${(p.views / maxViews) * 100}%`,
-                                            backgroundColor: p.color
-                                        }}
-                                    />
-                                </div>
-                                <p className="w-16 text-sm font-bold text-gray-800 text-right">
-                                    {p.views >= 1000 ? `${(p.views / 1000).toFixed(1)}k` : p.views}
-                                </p>
-                            </div>
-                        );
-                    })}
-                </div>
+  {platforms.map((p, idx) => {
+    const maxViews = Math.max(...platforms.map(d => d.views));
+
+    return (
+      <div key={idx} className="flex items-center space-x-3">
+        {/* Icon */}
+        <img src={p.icon} alt={p.platform} className="w-6 h-6" />
+
+        {/* Name */}
+        <p className="w-20 text-sm text-gray-700">{p.platform}</p>
+
+        {/* Bar */}
+        <div className="flex-1 bg-gray-200 h-3 rounded-full relative">
+          <Tooltip
+            placement="top"
+            title={
+              <div className="text-sm">
+                <p><strong>{p.platform}</strong></p>
+                <p>Likes: {p.totallikes.toLocaleString()}</p>
+                <p>Share: {p.percentage.toFixed(2)}%</p>
+              </div>
+            }
+          >
+            <div
+              className="h-3 rounded-full cursor-pointer"
+              style={{
+                width: `${(p.views / maxViews) * 100}%`,
+                backgroundColor: p.color,
+              }}
+            />
+          </Tooltip>
+        </div>
+
+        {/* Value */}
+        <p className="w-16 text-sm font-bold text-gray-800 text-right">
+          {p.views >= 1000 ? `${(p.views / 1000).toFixed(1)}k` : p.views}
+        </p>
+      </div>
+    );
+  })}
+</div>
             </div>
 
             {/* ------------------------- */}

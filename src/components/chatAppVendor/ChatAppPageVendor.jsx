@@ -6,6 +6,7 @@ import ChatHeaderVendor from "./ChatHeaderVendor";
 import ChatMessages from "./ChatMessagesVendor";
 import ChatInput from "./ChatInputVendor";
 import { useLocation } from "react-router-dom";
+import useSocketRegister from "../../sockets/useSocketRegister";
 
 import { getSocket } from "../../sockets/socket"; // Already connected globally
 import {
@@ -15,6 +16,7 @@ import {
 } from "../../features/socket/chatSlice";
 
 export default function ChatAppPageVendor() {
+  useSocketRegister();
   const dispatch = useDispatch();
   const { token, id: userId, role } = useSelector((state) => state.auth);
   const socket = getSocket();
@@ -65,18 +67,9 @@ export default function ChatAppPageVendor() {
       return;
     }
 
-  if (Number(msg.userid) === Number(userId)) return;
+  // if (Number(msg.userid) === Number(userId)) return;
 
-  const normalized = {
-    id: msg.messageid || msg.id,
-    content: msg.message,
-    senderId: msg.userid,
-    roleId: msg.roleid,
-    file: msg.filepaths?.[0] || "",
-    replyId: msg.replyid || null,
-    time: msg.time || new Date().toISOString(),
-  };
-  dispatch(addMessage(normalized));
+  dispatch(addMessage(msg));
   setRefreshKey(prev => prev + 1);
 };
 
@@ -115,7 +108,6 @@ export default function ChatAppPageVendor() {
       formData.append("p_conversationid", activeChat.conversationid);
       formData.append("p_roleid", role);
       formData.append("p_messages", text);
-      formData.append("tempId", tempMsg.id);
       formData.append("campaignid", activeChat.campaignId);
       formData.append("campaignName", activeChat.campaignName);
       formData.append("influencerId", activeChat.influencerid);

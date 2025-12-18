@@ -2,8 +2,10 @@ import { useEffect, useState, useRef } from "react";
 import { RiArrowLeftLine } from "react-icons/ri";
 import { useSelector } from "react-redux";
 import { getSocket } from "../../sockets/socket";
+import useSocketRegister from "../../sockets/useSocketRegister";
 
 export default function ChatHeader({ chat, onBack, onOnlineStatusChange }) {
+  useSocketRegister();
 
   // console.log("ChatHeader rendered");
   // console.log("ChatHeader props chat:", chat);

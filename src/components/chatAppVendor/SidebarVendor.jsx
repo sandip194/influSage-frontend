@@ -6,8 +6,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { CloseCircleFilled } from "@ant-design/icons";
 import { Tooltip } from "antd";
 import { getSocket } from "../../sockets/socket";
+import useSocketRegister from "../../sockets/useSocketRegister";
 
 export default function SidebarVendor({ onSelectChat }) {
+    useSocketRegister();
   const socket = getSocket();
   const { token } = useSelector((state) => state.auth);
   const location = useLocation();

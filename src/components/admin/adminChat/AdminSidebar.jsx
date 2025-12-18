@@ -4,9 +4,11 @@ import axios from "axios";
 import { RiBook2Line, RiTicket2Line } from "@remixicon/react";
 import { useSelector } from "react-redux";
 import { getSocket } from "../../../sockets/socket";
+import useSocketRegister from "../../../sockets/useSocketRegister";
 
 const AdminSidebar = forwardRef (({ setActiveSubject }, ref) => {
-const refresh = async () => {
+  useSocketRegister();
+  const refresh = async () => {
   const active = statusList.find(x => x.name === activeTab);
   if (active) {
     await fetchTickets(active);

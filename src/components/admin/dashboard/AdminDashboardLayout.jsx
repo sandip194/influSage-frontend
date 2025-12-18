@@ -32,7 +32,7 @@ const AdminDashboardLayout = () => {
 
       {/* Main Content */}
       <main 
-        className="pt-16 transition-all duration-300"
+        className="pt-16 transition-all duration-300 bg-gray-100"
         style={{ paddingLeft: window.innerWidth >= 768 ? mainPaddingLeft : '0' }}
       >
         <div className="p-4">

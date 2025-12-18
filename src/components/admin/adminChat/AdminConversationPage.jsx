@@ -1,8 +1,10 @@
 import React, { useState, useRef } from "react";
 import AdminChatWindow from "./AdminChatWindow";
 import AdminSidebar from "./AdminSidebar";
+import useSocketRegister from "../../../sockets/useSocketRegister";
 
 const AdminConversationPage = () => {
+  useSocketRegister();
   const [activeSubject, setActiveSubject] = useState(null);
   const sidebarRef = useRef(null);
 
@@ -23,7 +25,7 @@ const AdminConversationPage = () => {
 
       {/* Chat Window */}
       <div
-        className={`flex-1 w-full
+        className={`flex-1 w-full bg-gray-50
         ${activeSubject ? "block" : "hidden md:block"}`}
       >
         <AdminChatWindow

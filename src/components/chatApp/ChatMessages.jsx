@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import { Tooltip } from "antd";
 import { Image } from "primereact/image";
 import { getSocket } from "../../sockets/socket";
+import useSocketRegister from "../../sockets/useSocketRegister";
 import {
   setMessages,
   addMessage,
@@ -68,6 +69,7 @@ export default function ChatMessages({
   setEditingMessage,
   editingMessage,
 }) {
+    useSocketRegister();
   const dispatch = useDispatch();
   const socket = getSocket();
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
@@ -645,31 +647,39 @@ useEffect(() => {
                           </span>
 
                           {/* Quoted Text */}
-                          {repliedMsg.content ? (
+                          {repliedMsg.content && (
                             <span className="truncate max-w-[230px]">
                               {repliedMsg.content}
-                            </span>
-                          ) : fileUrl ? (
-                            <span className="text-gray-500 italic">
-                              Attachment
-                            </span>
-                          ) : (
-                            <span className="text-gray-400 italic">
-                              No text content
                             </span>
                           )}
 
                           {/* Quoted File */}
-                          {fileUrl && (
-                            <a
-                              href={fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-500 text-[10px] underline mt-1 break-all"
-                            >
-                              {repliedMsg.file.split("/").pop()}
-                            </a>
-                          )}
+                          {repliedMsg.file && (() => {
+                            const fileName = repliedMsg.file.split("/").pop();
+                            const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(fileName);
+
+                            if (!isImage) {
+                              return (
+                                <span className="text-blue-500 text-[10px] underline mt-1 truncate max-w-[180px]">
+                                  {fileName}
+                                </span>
+                              );
+                            }
+
+                            return (
+                              <div className="mt-1 flex items-center gap-2 max-w-[200px]">
+                                {/* Image thumbnail */}
+                                <div className="w-12 h-12 rounded overflow-hidden flex-shrink-0">
+                                  <Image
+                                    src={repliedMsg.file}
+                                    alt={fileName}
+                                    preview
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
                       );
                     })()}

@@ -7,8 +7,10 @@ import {
 } from "react-icons/ri";
 import EmojiPicker from "emoji-picker-react";
 import { toast } from "react-toastify";
+import useSocketRegister from "../../sockets/useSocketRegister";
 
 export default function ChatInputVendor({
+  
   canstartchat = true, // 👈 new prop (default true)
   onSend,
   replyTo,
@@ -16,6 +18,7 @@ export default function ChatInputVendor({
   editingMessage,
   onEditComplete,
 }) {
+    useSocketRegister();
   const [text, setText] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [file, setFile] = useState(null);
@@ -153,13 +156,6 @@ export default function ChatInputVendor({
             <span className="font-semibold">Replying to: </span>
             <span className="truncate">{replyTo.content || "Attachment"}</span>
           </div>
-          <button
-            type="button"
-            onClick={onCancelReply}
-            className="text-gray-500 hover:text-red-500 ml-0 sm:ml-4"
-          >
-            <RiCloseLine />
-          </button>
         </div>
       )}
 
@@ -167,12 +163,28 @@ export default function ChatInputVendor({
       {file && previewUrl && (
         <div className="relative w-full max-w-xs">
           {previewUrl.type === "image" && (
-            <img
-              src={previewUrl.url}
-              alt="preview"
-              className="h-28 w-full object-cover rounded-lg shadow cursor-pointer"
-              onClick={() => window.open(previewUrl.url, "_blank")}
-            />
+            <div className="relative inline-block">
+              {/* Image */}
+              <div
+                className="w-20 aspect-square rounded-lg overflow-hidden shadow cursor-pointer"
+                onClick={() => window.open(previewUrl.url, "_blank")}
+              >
+                <img
+                  src={previewUrl.url}
+                  alt="preview"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Close button */}
+              <button
+                type="button"
+                onClick={removeFile}
+                className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow hover:bg-red-100 z-10"
+              >
+                <RiCloseLine size={14} />
+              </button>
+            </div>
           )}
           {previewUrl.type === "pdf" && (
             <iframe

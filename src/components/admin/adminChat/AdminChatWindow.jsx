@@ -16,8 +16,10 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Tooltip } from "antd";
+import useSocketRegister from "../../../sockets/useSocketRegister";
 
 const AdminChatWindow = ({ activeSubject, onBack }) => {
+  useSocketRegister();
   const dispatch = useDispatch();
   const socket = getSocket();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);

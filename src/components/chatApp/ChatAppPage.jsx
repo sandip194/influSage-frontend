@@ -4,6 +4,7 @@ import axios from "axios";
 import Sidebar from "./Sidebar";
 import ChatHeader from "./ChatHeader";
 import ChatMessages from "./ChatMessages";
+import useSocketRegister from "../../sockets/useSocketRegister";
 import ChatInput from "./ChatInput";
 
 import { getSocket } from "../../sockets/socket";
@@ -14,6 +15,7 @@ import {
 } from "../../features/socket/chatSlice";
 
 export default function ChatAppPage() {
+  useSocketRegister();
   const dispatch = useDispatch();
   const { token, id: userId, role } = useSelector((state) => state.auth);
   const socket = getSocket();
@@ -57,19 +59,9 @@ export default function ChatAppPage() {
       }));
       return;
     }
-
   if (Number(msg.userid) === Number(userId)) return;
 
-  const normalized = {
-    id: msg.messageid || msg.id,
-    content: msg.message,
-    senderId: msg.userid,
-    roleId: msg.roleid,
-    file: msg.filepaths?.[0] || "",
-    replyId: msg.replyid || null,
-    time: msg.time || new Date().toISOString(),
-  };
-  dispatch(addMessage(normalized));
+  dispatch(addMessage(msg));
   setRefreshKey(prev => prev + 1);
 };
 
@@ -105,7 +97,11 @@ export default function ChatAppPage() {
       formData.append("p_conversationid", activeChat.id);
       formData.append("p_roleid", role);
       formData.append("p_messages", text);
-      formData.append("tempId", newMsg.id);
+      formData.append("campaignid", activeChat.campaignId);
+      formData.append("campaignName", activeChat.campaignName);
+      formData.append("influencerId", activeChat.influencerid);
+      const firstName = activeChat.name?.split(" ")[0]?.trim() || activeChat.name || "";
+      formData.append("influencerName", firstName);
       if (file) formData.append("file", file);
       if (replyId) formData.append("p_replyid", replyId);
 
@@ -119,7 +115,7 @@ export default function ChatAppPage() {
       if (res.data?.p_status) {
         dispatch(
           updateMessage({
-            tempId: newMsg.id,
+            tempId: tempMsg.id,
             newId: res.data.message_id,
             fileUrl: res.data.filepath || null,
           })
@@ -215,6 +211,7 @@ export default function ChatAppPage() {
 
           <div className="sticky bottom-0 bg-white border-t border-gray-100">
             <ChatInput
+              canstartchat={activeChat?.canstartchat}
               onSend={(data) =>
                 editingMessage
                   ? handleEditMessage({ ...editingMessage, ...data, replyId: selectedReplyMessage?.id })

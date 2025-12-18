@@ -3,6 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { Modal, Button, Select } from "antd";
 import { getSocket } from "../../sockets/socket";
+import useSocketRegister from "../../../sockets/useSocketRegister";
 
 import { RiBook2Line, RiAddLine } from "@remixicon/react";
 
@@ -13,6 +14,7 @@ const VendorSidebar = forwardRef(({ setActiveSubject }, ref) => {
     Close: [],
     Released: [],
   };
+    useSocketRegister();
   const socket = getSocket();
   const [activeTab, setActiveTab] = useState("Open");
   const [subjectsByTab, setSubjectsByTab] = useState(initialByTab);

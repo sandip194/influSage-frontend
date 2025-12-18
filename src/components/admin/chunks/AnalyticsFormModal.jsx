@@ -142,8 +142,8 @@ const AnalyticsFormModal = ({ visible, onClose, contentData }) => {
 
         const payload = {
             p_userplatformanalyticid: contentData?.userplatformanalyticid,
-            p_campaignid: contentData.campaignid,
-            p_influencerid: contentData.influencerid,
+            // p_campaignid: contentData.campaignid,
+            // p_influencerid: contentData.influencerid,
             p_contentlinkid: contentData.contractcontentlinkid,
             p_metricsjson: {
                 views: formData.views,
@@ -273,7 +273,7 @@ const AnalyticsFormModal = ({ visible, onClose, contentData }) => {
                     </Col>
 
                     {/* DYNAMIC FIELDS (DISABLED IN UPDATE MODE) */}
-                    {rules.other.map((field) => (
+                    {(rules.other || []).map((field) => (
                         <Col xs={24} sm={12} key={field}>
                             <label>
                                 {field}

@@ -22,7 +22,7 @@ const VendorConversationPage = () => {
       </div>
 
       <div
-        className={`flex-1 w-full ${
+        className={`flex-1 w-full bg-gray-50 ${
           activeSubject ? "block" : "hidden md:block"
         }`}
       >
