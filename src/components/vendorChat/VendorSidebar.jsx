@@ -3,7 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { Modal, Button, Select } from "antd";
 import { getSocket } from "../../sockets/socket";
-import useSocketRegister from "../../../sockets/useSocketRegister";
+import useSocketRegister from "../../sockets/useSocketRegister";
 
 import { RiBook2Line, RiAddLine } from "@remixicon/react";
 
