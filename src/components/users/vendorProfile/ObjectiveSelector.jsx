@@ -91,7 +91,7 @@ const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSa
   };
 
   return (
-    <div className="bg-white p-2 rounded-3xl text-inter">
+    <div className="bg-white p-6 rounded-3xl text-inter">
       <h2 className="text-2xl sm:text-3xl font-bold text-[#141843] mb-1">
         Objectives
       </h2>

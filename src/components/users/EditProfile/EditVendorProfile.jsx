@@ -97,12 +97,12 @@ const EditVendorProfile = () => {
         <div className="w-full text-sm">
             <button
                 onClick={() => window.history.back()}
-                className="text-gray-600 flex items-center gap-2 hover:text-gray-900 transition mb-4"
+                className="text-gray-600 flex items-center gap-2 hover:text-gray-900 transition mb-2"
             >
                 <RiArrowLeftSLine /> Back
             </button>
 
-            <h1 className="text-2xl font-semibold mb-6">Edit Profile</h1>
+            <h1 className="text-2xl font-semibold mb-4">Edit Profile</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {/* Sidebar Navigation */}
@@ -127,7 +127,7 @@ const EditVendorProfile = () => {
 
                 {/* Content */}
                 <div className="md:col-span-3">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm min-h-[400px] w-full">
+                    <div className="bg-white p-2 rounded-2xl shadow-sm min-h-[400px] w-full">
                         {steps[currentStep]?.component}
                     </div>
                 </div>
