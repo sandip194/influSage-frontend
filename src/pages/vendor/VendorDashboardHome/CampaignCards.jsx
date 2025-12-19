@@ -67,7 +67,7 @@ const CampaignStatsVendor = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
       {stats.map(({ label, value, icon }, idx) => (
         <div
           key={idx}

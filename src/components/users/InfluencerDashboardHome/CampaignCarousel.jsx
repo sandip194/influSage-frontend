@@ -15,60 +15,54 @@ const SkeletonCard = () => (
 
 
 // ---------- Campaign Card ----------
+
 const CampaignCard = ({ campaign }) => {
     return (
-        <div className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-xl hover:shadow-lg transition-transform  p-4 pb-3 flex flex-col justify-between mb-8 h-64">
-            <div className="flex items-center gap-3 mb-2">
-                <img
-                    loading="lazy"
-                    src={campaign.photopath}
-                    alt={campaign.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                />
-                <Link
-                    to={`/dashboard/browse/description/${campaign.id}`}
-                    className="text-lg font-semibold text-gray-900 hover:text-blue-600"
-                >
-                    {campaign.name}
-                </Link>
-            </div>
+        <Link
+            to={`/dashboard/browse/description/${campaign.id}`}
+            className="block" // ensures full card is clickable
+        >
+            <div className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-xl hover:shadow-lg transition-transform flex flex-col justify-between mb-8 h-64 cursor-pointer">
+                <div className="flex items-center gap-3 mb-2">
+                    <img
+                        loading="lazy"
+                        src={campaign.photopath}
+                        alt={campaign.name}
+                        className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <span className="text-lg font-semibold text-gray-900">{campaign.name}</span>
+                </div>
 
-            {/* Description */}
-            <p className="text-sm text-gray-700 mb-4 flex-grow">
-                {campaign.description.length > 50
-                    ? `${campaign.description.slice(0, 50)}...`
-                    : campaign.description
-                }
-            </p>
-
-
-            <div className="flex flex-wrap gap-1 mb-2 min-h-[20px]">
-                {campaign.campaigncategories?.map((tag, i) => (
-                    <span
-                        key={i}
-                        className="px-2 py-1 bg-blue-200 rounded-full text-xs text-black"
-                    >
-                        {tag.categoryname}
-                    </span>
-                ))}
-            </div>
-
-            <div className="flex justify-between items-start pt-2 border-t border-gray-300">
-
-
-                <p className="text-xs  text-gray-600 mt-1">Budget</p>
-                <p className="font-bold text-xl text-black">
-                    ₹{Number(campaign.estimatedbudget).toLocaleString('en-IN')}
+                {/* Description */}
+                <p className="text-sm text-gray-700 mb-4 flex-grow">
+                    {campaign.description.length > 50
+                        ? `${campaign.description.slice(0, 50)}...`
+                        : campaign.description
+                    }
                 </p>
-                {/* <Link to={`/dashboard/browse/description/${campaign.id}`}>
-                    <button className="px-3 py-1 bg-black text-white rounded-full text-sm hover:bg-gray-900">
-                        View
-                    </button>
-                </Link> */}
+
+                <div className="flex flex-wrap gap-1 mb-2 min-h-[20px]">
+                    {campaign.campaigncategories?.map((tag, i) => (
+                        <span
+                            key={i}
+                            className="px-2 py-1 bg-blue-200 rounded-full text-xs text-black"
+                        >
+                            {tag.categoryname}
+                        </span>
+                    ))}
+                </div>
+
+                <div className="flex justify-between items-start pt-2 border-t border-gray-300">
+                    <p className="text-xs text-gray-600 mt-1">Budget</p>
+                    <p className="font-bold text-xl text-black">
+                        ₹{Number(campaign.estimatedbudget).toLocaleString('en-IN')}
+                    </p>
+                </div>
             </div>
-        </div>
+        </Link>
     );
 };
+
 
 // ---------- Main Carousel ----------
 const CampaignCarousel = () => {

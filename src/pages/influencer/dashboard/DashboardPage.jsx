@@ -6,6 +6,8 @@ import PerformanceCard from '../../../components/users/InfluencerDashboardHome/P
 import TodoListCard from '../../../components/users/InfluencerDashboardHome/TodoListCard'
 import FeedbackCard from '../../../components/users/InfluencerDashboardHome/FeedbackCard'
 import CampaignCarousel from '../../../components/users/InfluencerDashboardHome/CampaignCarousel'
+import ActiveCampaignList from '../../../components/users/InfluencerDashboardHome/ActiveCampaignList'
+import PendingUploadContent from '../../../components/users/InfluencerDashboardHome/PendingUploadContent'
 
 const DashboardPage = () => {
   return (
@@ -20,24 +22,39 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      {/* Carousel */}
+      {/* Browse Campaign Carousel */}
       <div className="mb-6">
         <CampaignCarousel />
       </div>
 
-      {/* Earnings Summary */}
-      <div className="mb-6">
-        <EarningsSummarySection />
+      {/*Active Campaign & Pending Uploads*/}
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex-1 overflow-x-auto">
+          <PendingUploadContent />
+        </div>
+        <div className="flex-1 overflow-x-auto">
+          <ActiveCampaignList />
+        </div>
+
       </div>
+
+
 
       {/* Performance & Todo */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
+
         <div className="flex-1">
           <PerformanceCard />
         </div>
         <div className="flex-1">
           <TodoListCard />
         </div>
+
+      </div>
+
+      {/* Earnings Summary */}
+      <div className="mb-6">
+        <EarningsSummarySection />
       </div>
 
       {/* Feedback */}
