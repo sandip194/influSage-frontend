@@ -140,7 +140,7 @@ const Sidebar = forwardRef((props, ref) => {
                             key={index}
                             title={item.label}
                             placement="right"
-                            disabled={isOpen} // show tooltip only when sidebar is collapsed
+                            trigger={isMobile ? [] : ['hover']}
                         >
                             <NavLink
                                 to={item.to}
@@ -171,7 +171,7 @@ const Sidebar = forwardRef((props, ref) => {
                             key={index}
                             title={item.label}
                             placement="right"
-                            disabled={isOpen} // show tooltip only when sidebar is collapsed
+                            trigger={isMobile ? [] : ['hover']}
                         >
                             <NavLink
                                 to={item.to}
@@ -201,7 +201,7 @@ const Sidebar = forwardRef((props, ref) => {
                             key={index}
                             title={item.label}
                             placement="right"
-                            disabled={isOpen} // show tooltip only when sidebar is collapsed
+                            trigger={isMobile ? [] : ['hover']}
                         >
                             <NavLink
                                 to={item.to}
@@ -223,7 +223,7 @@ const Sidebar = forwardRef((props, ref) => {
                 {/* Logout */}
                 {!(isMobile && !isOpen) && (
                     <div className="logout-btn mb-2">
-                        <Tooltip title="Logout" placement="right" disabled={isOpen}>
+                        <Tooltip title="Logout" placement="right" trigger={isMobile ? [] : ['hover']}>
                             <button
                                 onClick={handleLogout}
                                 className={`flex items-center cursor-pointer ${isOpen ? "px-3 gap-3" : "justify-center"

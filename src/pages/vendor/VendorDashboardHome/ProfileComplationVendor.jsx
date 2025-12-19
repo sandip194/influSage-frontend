@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 const ProfileComplationVendor = () => {
   const [completion, setCompletion] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { token , role } = useSelector((state) => state.auth);
+  const { token  } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchCompletion = async () => {

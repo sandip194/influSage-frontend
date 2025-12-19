@@ -1,111 +1,191 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import { Doughnut } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
 
-ChartJS.register(ArcElement, Tooltip);
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+const COLORS = {
+  applied: '#3B82F6',
+  invited: '#335CFF',
+  inProgress: '#60A5FA',
+  completed: '#0F172A',
+};
+
+// Map frontend labels/colors to backend keys
+const METRIC_KEYS = [
+  { label: 'Applied Campaigns', color: COLORS.applied, backendKey: 'appliedcampaigncount' },
+  { label: 'Invited Campaigns', color: COLORS.invited, backendKey: 'invitedcampaigncount' },
+  { label: 'In Progress Campaigns', color: COLORS.inProgress, backendKey: 'inprogresscampaign' },
+  { label: 'Completed Campaigns', color: COLORS.completed, backendKey: 'completedcampaign' },
+];
 
 const PerformanceCard = () => {
-  const data = {
-    datasets: [
-      {
-        data: Array(12).fill(1),
-        backgroundColor: [
-          '#3B82F6', '#3B82F6', '#3B82F6',
-          '#335CFF', '#335CFF', '#335CFF',
-          '#335CFF', '#335CFF', '#335CFF',
-          '#0F172A', '#0F172A', '#0F172A'
-        ],
-        borderWidth: 0,
-        cutout: '80%',
-        spacing: 20,
-      }
-    ]
+  const { token } = useSelector((state) => state.auth);
+
+  const [counts, setCounts] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [animatedTotal, setAnimatedTotal] = useState(0);
+
+  const getCountData = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get('/user/dashboard/counts', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCounts(res?.data?.data ?? null);
+    } catch (error) {
+      console.error(error);
+      setCounts(null);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    getCountData();
+  }, []);
+
+  // Animate total campaigns count
+  useEffect(() => {
+    if (!counts) return;
+    const total = counts.totalcampaignsparticipated ?? 0;
+    let start = 0;
+    const duration = 1000; // 1 second
+    const increment = total / (duration / 16);
+
+    const counter = setInterval(() => {
+      start += increment;
+      if (start >= total) {
+        start = total;
+        clearInterval(counter);
+      }
+      setAnimatedTotal(Math.floor(start));
+    }, 16);
+
+    return () => clearInterval(counter);
+  }, [counts]);
+
+  const chartData = useMemo(() => {
+    if (!counts) return null;
+
+    return {
+      labels: METRIC_KEYS.map((m) => m.label),
+      datasets: [
+        {
+          data: METRIC_KEYS.map((m) => counts[m.backendKey] ?? 0),
+          backgroundColor: METRIC_KEYS.map((m) => m.color),
+          borderWidth: 0,
+          cutout: '75%',
+        },
+      ],
+    };
+  }, [counts]);
 
   const options = {
-    cutout: '80%',
-    rotation: -90,
-    circumference: 360,
-    plugins: { tooltip: { enabled: false } },
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const value = Number(context.raw) || 0;
+            const total = context.dataset.data.reduce((sum, val) => sum + Number(val || 0), 0);
+            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+            return `${context.label}: ${value} (${percentage}%)`;
+          },
+        },
+      },
+    },
+    animation: {
+      animateRotate: true,
+      animateScale: true,
+      duration: loading ? 0 : 1200,
+      easing: 'easeOutQuart',
+    },
+    hover: {
+      mode: 'nearest',
+      intersect: true,
+    },
+    onHover: (event, elements) => {
+      if (elements && elements.length) {
+        setHoveredIndex(elements[0].index);
+      } else {
+        setHoveredIndex(null);
+      }
+    },
   };
 
-  return (
-    <div className="bg-white p-6 rounded-2xl w-full">
-       {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 sm:gap-0">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900">Performance</h2>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
-            <button className="border border-gray-300 rounded-full px-3 py-1 sm:px-4 sm:py-1 text-xs sm:text-sm text-gray-700 flex items-center gap-1 justify-center">
-              Instagram <i className="ri-arrow-down-s-line"></i>
-            </button>
-            <button className="border border-gray-300 rounded-full px-3 py-1 sm:px-4 sm:py-1 text-xs sm:text-sm text-gray-700 flex items-center gap-1 justify-center">
-              Monthly <i className="ri-arrow-down-s-line"></i>
-            </button>
-          </div>
+  if (loading) {
+    return (
+      <div className="bg-white p-6 rounded-2xl animate-pulse">
+        <div className="h-6 w-32 bg-gray-200 rounded mb-6" />
+        <div className="h-48 w-48 bg-gray-200 rounded-full mx-auto mb-6" />
+        <div className="space-y-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-4 bg-gray-200 rounded" />
+          ))}
         </div>
+      </div>
+    );
+  }
 
-      {/* Donut Chart */}
-      <div className="relative w-full max-w-[200px] sm:max-w-[192px] mx-auto mb-6 aspect-[1/1]">
-        <Doughnut data={data} options={options} />
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-sm sm:text-base text-gray-400">Avg. Performance</span>
-          <span className="text-xl sm:text-2xl font-semibold text-gray-800">75%</span>
+  if (!counts) {
+    return (
+      <div className="bg-white p-6 rounded-2xl text-center text-gray-500">
+        Failed to load performance data
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white p-6 rounded-2xl w-full h-full">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-lg font-bold text-gray-900">Performance</h2>
+      </div>
+
+      {/* Donut */}
+      <div className="relative w-full max-w-[220px] aspect-square mx-auto mb-6 p-2">
+        {chartData && <Doughnut data={chartData} options={options} />}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <span className="text-sm text-gray-400">Total Participations</span>
+          <span className="text-2xl font-semibold text-gray-800">{animatedTotal}</span>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="space-y-4 text-sm">
-        <MetricRow
-          color="bg-blue-500"
-          label="Followers Growth"
-          value="2.4k"
-          change="26"
-          icon="ri-arrow-up-line"
-          positive
-        />
-        <MetricRow
-          color="bg-blue-900"
-          label="Engagement Rate"
-          value="10.3k"
-          change="26"
-          icon="ri-arrow-down-line"
-          positive={false}
-        />
-        <MetricRow
-          color="bg-blue-800"
-          label="Impressions / Clicks"
-          value="11.4k"
-          change="26"
-          icon="ri-arrow-up-line"
-          positive
-        />
+      {/* Metrics */}
+      <div className="space-y-1 text-sm">
+        {METRIC_KEYS.map(({ label, color, backendKey }, index) => (
+          <MetricRow
+            key={label}
+            color={color}
+            label={label}
+            value={counts[backendKey] ?? 0}
+            highlighted={hoveredIndex === index}
+          />
+        ))}
       </div>
     </div>
   );
 };
 
-const MetricRow = ({ color, label, value, icon, change, positive }) => {
-  return (
-    <div className="flex items-center justify-between border-b-1 border-gray-200 pb-3">
-      <div className="flex items-center gap-2">
-        <div className={`w-2.5 h-2.5 rounded-full ${color}`}></div>
-        <span className="text-gray-800">{label}</span>
-      </div>
-      <div className="flex items-center gap-4 flex-wrap">
-        <span className="font-bold text-gray-900">{value}</span>
-        <div className="flex items-center gap-1 px-2 py-1 border rounded-full text-xs text-gray-700 bg-gray-100">
-          <i className={`${icon} ${positive ? 'text-green-500' : 'text-red-500'}`}></i>
-          78.8%
-        </div>
-        <span className={`${positive ? 'text-green-500' : 'text-red-500'}`}>
-          {positive ? '+' : '-'} {change}% Today
-        </span>
-      </div>
+const MetricRow = ({ color, label, value, highlighted }) => (
+  <div
+    className={`flex items-center justify-between px-2 rounded ${
+      highlighted ? 'bg-gray-50' : ''
+    }`}
+  >
+    <div className="flex items-center gap-2">
+      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+      <span className="text-gray-800 text-xs">{label}</span>
     </div>
-  );
-};
+    <span className="font-semibold text-gray-900 text-xs">{value ?? 0}</span>
+  </div>
+);
 
 export default PerformanceCard;

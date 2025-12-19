@@ -182,7 +182,7 @@ const TodoListCard = () => {
   );
 
   return (
-    <div className="bg-white p-6 rounded-2xl w-full">
+    <div className="bg-white p-6 rounded-2xl w-full h-full">
       {/* Header */}
       <div className="flex justify-between items-center mb-5">
         <h2 className="text-lg font-semibold">To-do List</h2>

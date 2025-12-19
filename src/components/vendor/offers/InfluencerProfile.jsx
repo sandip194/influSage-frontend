@@ -421,7 +421,7 @@ const InfluencerProfile = () => {
                                 {influDetails?.portfoliofiles?.map((file, index) => {
 
                                     const url = file.filepath;
-                                    const extension = url.split('.').pop().toLowerCase();
+                                    const extension = url && url.split('.').pop().toLowerCase();
 
                                     const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension);
                                     const isVideo = ['mp4', 'mov', 'webm', 'ogg'].includes(extension);
@@ -479,7 +479,7 @@ const InfluencerProfile = () => {
                                                 <div className="flex flex-col items-center justify-center text-center gap-2 py-4">
                                                     <RiFile3Line className="w-16 h-16 text-gray-500" />
                                                     <p className="text-gray-800 text-sm break-all px-2">
-                                                        {url.split("/").pop()}
+                                                        {url?.split("/").pop()}
                                                     </p>
                                                 </div>
                                             )}

@@ -159,7 +159,7 @@ export const CategorySelector = ({
   );
 
   return (
-    <div className="bg-white p-2 rounded-3xl text-inter min-h-[80vh]">
+    <div className="bg-white p-6 rounded-3xl text-inter min-h-[80vh]">
 
       {/* ---------- HEADER ---------- */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
