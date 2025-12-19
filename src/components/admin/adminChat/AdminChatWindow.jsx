@@ -152,7 +152,7 @@ useEffect(() => {
           else filetype = "file";
         }
         let isSystemMsg = m.message?.includes(
-          "Your support request has been submitted successfully"
+          "Your support request has been submitted. Our team will review it shortly."
         );
 
         return {
@@ -275,7 +275,7 @@ if (offsetParam !== 0 && (loadingMore || !hasMore)) return;
           else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
           else filetype = "file";
         }
-        let isSystemMsg = m.message?.includes("Your support request has been submitted successfully");
+        let isSystemMsg = m.message?.includes("Your support request has been submitted. Our team will review it shortly.");
         return {
           id: m.usersupportticketmessagesid,
           replyId: m.replyid,

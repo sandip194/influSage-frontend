@@ -91,7 +91,12 @@ export const CategorySelector = ({ onBack, onNext }) => {
                                 className={`cursor-pointer px-3 py-2 text-sm rounded-md hover:bg-gray-100 ${selectedParentId === cat.parentcategoryid ? 'bg-[#121A3F] text-white font-semibold' : 'text-gray-800'
                                     }`}
                             >
-                                {cat.name}
+                                <span
+                                    dangerouslySetInnerHTML={{
+                                    __html: cat.name.replaceAll("/", "/<wbr>")
+                                    }}
+                                    className="text-sm"
+                                ></span>
                             </li>
                         ))}
                     </ul>

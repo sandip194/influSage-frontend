@@ -24,7 +24,7 @@ const VendorFeedbackModal = ({ campaignId, onClose }) => {
     const fetchInfluencers = async () => {
       setLoadingInfluencers(true);
       try {
-        const res = await axios.get("/vendor/selected/influencer", {
+        const res = await axios.get("/vendor/feedback/influencer-list", {
           params: { campaign_id: campaignId },
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -38,6 +38,7 @@ const VendorFeedbackModal = ({ campaignId, onClose }) => {
             data.map((inf) => ({
               id: inf.userid,
               name: `${inf.firstname} ${inf.lastname}`,
+              photopath: inf.userphotopath,
             }))
           );
         }
@@ -70,30 +71,35 @@ const VendorFeedbackModal = ({ campaignId, onClose }) => {
   };
 
   const handleSubmit = async () => {
-    if (!validate()) return;
+  if (!validate()) return;
 
-    try {
-      const res = await axios.post(
-        "/vendor/feedback",
-        {
-          p_campaignid: campaignId,
-          influencerid: selectedInf.id,
-          p_rating: rating,
-          p_text: feedback,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  try {
+    const res = await axios.post(
+      "/vendor/feedback",
+      {
+        p_campaignid: campaignId,
+        influencerid: selectedInf.id,
+        p_rating: rating,
+        p_text: feedback,
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      if (res.data.status) {
-        toast.success(res.data.message);
-        onClose();
-      } else {
-        toast.error(res.data.message);
-      }
-    } catch (err) {
-      toast.error("Failed to submit feedback.");
+    // SUCCESS
+    if (res.data.status === true) {
+      toast.success(res.data.message);
+      onClose();
+      return;
     }
-  };
+
+    // DB VALIDATION / DUPLICATE / ANY FAIL
+    toast.error(res.data.message);
+    
+  } catch (err) {
+    toast.error(err?.response?.data?.message || "Failed to submit feedback.");
+  }
+};
+
 
   return (
     <Modal open={true} onCancel={onClose} footer={null} centered width={550}>
@@ -122,7 +128,14 @@ const VendorFeedbackModal = ({ campaignId, onClose }) => {
         >
           {influencers.map((inf) => (
             <Select.Option key={inf.id} value={inf.id}>
-              <span className="font-medium text-gray-800">{inf.name}</span>
+              <div className="flex items-center gap-2">
+                <img
+                  src={inf.photopath}
+                  alt={inf.name}
+                  className="w-6 h-6 rounded-full object-cover"
+                />
+                <span className="font-medium text-gray-800">{inf.name}</span>
+              </div>
             </Select.Option>
           ))}
         </Select>
@@ -133,9 +146,17 @@ const VendorFeedbackModal = ({ campaignId, onClose }) => {
 
         {selectedInf && (
           <div className="p-4 rounded-xl border border-gray-200 bg-gray-50 flex items-center gap-4 mb-6 shadow-sm mt-3">
+
+            <img
+              src={selectedInf.photopath}
+              alt={selectedInf.name}
+              className="w-12 h-12 rounded-full object-cover border"
+            />
+
             <h3 className="font-semibold text-gray-900 text-lg">
               {selectedInf.name}
             </h3>
+
           </div>
         )}
 

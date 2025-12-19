@@ -162,6 +162,17 @@ export const LoginForm = () => {
   };
 
   return (
+    <>
+    <style>
+        {`
+          input[type="password"]::-ms-reveal,
+          input[type="password"]::-ms-clear,
+          input[type="text"]::-ms-clear,
+          input[type="text"]::-ms-reveal {
+            display: none;
+          }
+        `}
+        </style>
     <div className="relative flex justify-center items-center min-h-screen bg-gray-100 p-5 font-[Segoe_UI,Tahoma,Geneva,Verdana,sans-serif] overflow-hidden">
       {/* 🔹 Background slider (behind everything) */}
       <div className="absolute inset-0 z-0">
@@ -272,6 +283,7 @@ export const LoginForm = () => {
         </div>
       </div>
     </div>
+    </>
   );
 
 };

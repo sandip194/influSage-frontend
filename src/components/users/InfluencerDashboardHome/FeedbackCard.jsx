@@ -51,20 +51,8 @@ const FeedbackCard = () => {
     <div
       key={fb.feedbackid}
       className="rounded-2xl p-4 flex flex-col justify-between h-full bg-white 
-                 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100"
+                 shadow-md hover:shadow-lg transition-shadow duration-300"
     >
-      <div className="flex mb-3">
-        {[...Array(5)].map((_, i) => (
-          <i
-            key={i}
-            className={`ri-star-${i < fb.rating ? "fill" : "line"} text-lg ${
-              i < fb.rating ? "text-yellow-500" : "text-gray-400"
-            }`}
-          />
-        ))}
-      </div>
-
-      <p className="text-sm text-gray-700 mb-4 text-justify">{fb.text || "No feedback"}</p>
 
       <div className="flex items-center gap-3 mt-auto">
         <img
@@ -81,6 +69,17 @@ const FeedbackCard = () => {
           </p>
         </div>
       </div>
+      <div className="flex mb-3 gap-1">
+        {[...Array(5)].map((_, i) => (
+          <i
+            key={i}
+            className={`ri-star-${i < fb.rating ? "fill" : "line"} text-2xl ${
+              i < fb.rating ? "text-yellow-500" : "text-gray-400"
+            }`}
+          />
+        ))}
+      </div>
+      <p className="text-sm text-gray-700 mb-4 text-justify">{fb.text || "No feedback"}</p>
     </div>
   );
 

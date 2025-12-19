@@ -78,7 +78,7 @@ export default function ChatAppPage() {
     const newMsg = {
       id: Date.now(),
       senderId: userId,
-      roleId: role, // ✅ Add this line
+      roleId: role,
       content: text,
       conversationId: activeChat.id,
       file: file || null,
@@ -113,15 +113,16 @@ export default function ChatAppPage() {
       });
 
       if (res.data?.p_status) {
-        dispatch(
-          updateMessage({
-            tempId: tempMsg.id,
-            newId: res.data.message_id,
-            fileUrl: res.data.filepath || null,
-          })
-        );
-        setRefreshKey((prev) => prev + 1);
+        dispatch(updateMessage({
+          tempId: newMsg.id,
+          newId: res.data.message_id,
+          content: text,
+          fileUrl: res.data.filepath || null,
+        }));
+
+        setRefreshKey(prev => prev + 1);
       }
+
     } catch (err) {
       console.error("Send failed", err);
     }

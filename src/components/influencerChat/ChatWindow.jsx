@@ -260,7 +260,7 @@ if (offsetParam !== 0 && (loadingMore || !hasMore)) return;
 
     const formatted = sorted.map((m) => {
       let isSystemMsg =
-        m.message?.includes("Your support request has been submitted successfully");
+        m.message?.includes("Your support request has been submitted. Our team will review it shortly.");
 
       let filetype = null;
       if (m.filepath) {

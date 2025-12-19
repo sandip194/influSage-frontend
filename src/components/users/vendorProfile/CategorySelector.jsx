@@ -246,7 +246,12 @@ export const CategorySelector = ({
                     }
                   `}
                 >
-                  <span>{cat.name}</span>
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: cat.name.replaceAll("/", "/<wbr>")
+                    }}
+                    className="text-sm"
+                  ></span>
 
                   {getSelectedCount(cat) > 0 && (
                     <span className="text-xs bg-[#121A3F] text-white px-2 py-1 rounded-full ml-2">

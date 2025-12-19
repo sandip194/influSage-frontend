@@ -42,6 +42,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
   const unreadCount = useSelector((state) => state.notifications.unreadCount);
   const notifications = useSelector((state) => state.notifications.items);
+  const [firstNotificationOpen, setFirstNotificationOpen] = useState(true);
 
   const [notificationDropdownVisible, setNotificationDropdownVisible] = useState(false);
   const [messageDropdownVisible, setMessageDropdownVisible] = useState(false);
@@ -348,7 +349,7 @@ useEffect(() => {
             setMessageDropdownVisible(open);
 
             if (open) {
-          -   setUnreadMessages([]);
+             setUnreadMessages([]);
 
               setLoadingMessages(true);
               refreshUnreadMessages().finally(() => {
@@ -376,45 +377,46 @@ useEffect(() => {
 
         {/* Notifications */}
         <Dropdown
+          trigger={["click"]}
           open={notificationDropdownVisible}
           onOpenChange={async (open) => {
             setNotificationDropdownVisible(open);
 
-            if (open && unreadCount > 0) {
+            if (!open) return;
+
+            try {
               setDropdownLoading(true);
-              try {
-                const res = await axios.get("/new/getallnotification", {
-                  params: { limitedData: true }, // ✅ marks these as read
-                  headers: { Authorization: `Bearer ${token}` },
-                });
+              const res = await axios.get("/new/getallnotification", {
+                params: { limitedData: true },
+                headers: { Authorization: `Bearer ${token}` },
+              });
 
-                const formatted = (res.data?.data || []).map((item) => ({
-                  id: item.notificationid,
-                  title: item.title,
-                  message: item.description,
-                  time: item.createddate,
-                }));
+              const formatted = (res.data?.data || []).map((item) => ({
+                id: item.notificationid,
+                title: item.title,
+                message: item.description,
+                time: item.createddate,
+              }));
 
-                setDropdownNotifications(formatted);
-              } catch (err) {
-                console.error("Error fetching dropdown notifications:", err);
-              } finally {
-                setDropdownLoading(false);
-              }
+              setDropdownNotifications(formatted);
+
+              dispatch(clearNotifications());
+
+            } catch (err) {
+              console.error("dropdown api failed", err);
+            } finally {
+              setDropdownLoading(false);
             }
           }}
-          placement={isMobile ? "bottom" : "bottomRight"}
-          trigger={["click"]}
-          arrow
           overlay={
             <NotificationDropdown
               closeDropdown={() => setNotificationDropdownVisible(false)}
               onViewAll={async () => {
-                const allNtf = await fetchNotifications();
-                setDropdownNotifications(allNtf);
+                const all = await fetchNotifications();
+                setDropdownNotifications(all);
                 setModalOpen(true);
               }}
-              notifications={dropdownNotifications.length > 0 ? dropdownNotifications : notifications}
+              notifications={dropdownNotifications}
               loading={dropdownLoading}
             />
           }
