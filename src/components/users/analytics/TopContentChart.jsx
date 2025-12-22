@@ -23,7 +23,7 @@ const ENDPOINT_BY_ROLE = {
 
 // Campaign endpoints by role
 const CAMPAIGN_ENDPOINT_BY_ROLE = {
-  2: "/vendor/analytics/campaign-top-performing-content",
+  2: "/vendor/analytics/campaign-topperformig-contents",
   1: "/user/analytics/campaign-topperformingcontent",
 };
 
@@ -81,7 +81,7 @@ const TopContentChart = ({ campaignId }) => {
     const values = [];
 
     dataList.forEach((item) => {
-      labels.push(`${item.contenttypename || "Unknown"} • ${item.campaignname || "N/A"}`);
+      labels.push(`${item.contenttypename || "Unknown"} • ${item.campaignname || item.contenttitle  || item.contentcaption || "N/A"}`);
       values.push(item.totalengagement || 0);
     });
 

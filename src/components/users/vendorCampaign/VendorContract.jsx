@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, Typography, Modal, Spin, Empty, Skeleton } from "antd";
-import { RiAddLine } from "@remixicon/react";
+import { RiAddLine, RiStarFill, RiStarLine } from "@remixicon/react";
 import ContractModal from "./ContractModal";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -16,6 +16,19 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
   const [editingContract, setEditingContract] = useState(null);
   const { token } = useSelector((state) => state.auth);
   const [contracts, setContracts] = useState([]);
+
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [closingContract, setClosingContract] = useState(null);
+  const [feedback, setFeedback] = useState("");
+  const [closingLoading, setClosingLoading] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [errors, setErrors] = useState({
+    rating: "",
+    feedback: "",
+  });
+
+
+
 
   // Fetch contracts from API
   const fetchAllContracts = async () => {
@@ -123,6 +136,78 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
   };
 
 
+  // VALIDATE FEEDBACK
+  const validateFeedback = () => {
+    const newErrors = {};
+
+    // Rating is required
+    if (!rating) {
+      newErrors.rating = "Please provide a rating.";
+    }
+
+    // If rating is given, feedback is required (10-100 chars)
+    if (rating) {
+      if (!feedback || feedback.trim().length < 10) {
+        newErrors.feedback = "Please write at least 10 characters about the influencer.";
+      } else if (feedback.trim().length > 100) {
+        newErrors.feedback = "Feedback cannot exceed 100 characters.";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+
+  const handleSkipClose = () => {
+    setErrors({});
+    handleCloseContract();
+  };
+
+
+  const handleSubmitClose = () => {
+    if (!validateFeedback()) return;
+    handleCloseContract();
+  };
+
+
+
+  const handleCloseContract = async () => {
+    try {
+      setClosingLoading(true);
+
+      const payload = {
+        p_contractid: closingContract.id,
+        //influencerid: closingContract.influencerId,
+        p_text: feedback || null,
+        p_rating: rating || null,
+      };
+
+      const res = await axios.post(
+        "/vendor/feedback",
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.status === 200) {
+        toast.success(res.data.message || "Contract closed successfully");
+
+        setIsFeedbackOpen(false);
+        setClosingContract(null);
+        setFeedback("");
+
+        fetchAllContracts(); // refresh list
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to close contract");
+    } finally {
+      setClosingLoading(false);
+    }
+  };
+
+
+
   return (
     <div className="bg-white rounded-2xl p-0">
       <div className="flex justify-between items-center mb-4">
@@ -195,16 +280,21 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
 
               {/* STATUS RIBBON - visible on all screen sizes */}
               <span
-                className={`absolute top-0 right-0 px-3 py-1 text-xs font-semibold rounded-bl-xl 
+                className={`absolute top-0 right-0 px-3 py-1 text-xs font-semibold rounded-bl-xl
     ${contract.status === "Accepted"
                     ? "bg-green-500 text-white"
-                    : contract.status === "Rejected"
-                      ? "bg-red-500 text-white"
-                      : "bg-yellow-500 text-white"
+                    : contract.status === "Completed"
+                      ? "bg-emerald-600 text-white"
+                      : contract.status === "Closed"
+                        ? "bg-gray-700 text-white"
+                        : contract.status === "Rejected"
+                          ? "bg-red-500 text-white"
+                          : "bg-yellow-500 text-white"
                   }`}
               >
                 {contract.status}
               </span>
+
 
 
               {/* MAIN LAYOUT */}
@@ -217,6 +307,35 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                   <h3 className="hidden sm:flex text-lg font-semibold text-gray-900 items-center gap-2">
                     {contract.influencer}
                   </h3>
+
+                  {/* 📱 MOBILE ACTION BUTTONS */}
+                  <div className="flex sm:hidden gap-2 mt-3">
+                    {contract.status === "Rejected" && (
+                      <button
+                        onClick={() => handleEdit(contract)}
+                        className="flex-1 py-2 text-xs cursor-pointer font-medium 
+                 bg-blue-600 text-white rounded-lg 
+                 active:scale-95 transition cursor-pointer"
+                      >
+                        Edit Contract
+                      </button>
+                    )}
+
+                    {contract.status === "Completed" && (
+                      <button
+                        onClick={() => {
+                          setClosingContract(contract);
+                          setIsFeedbackOpen(true);
+                        }}
+                        className="flex-1 py-2 text-xs cursor-pointer font-medium 
+                 bg-red-600 text-white rounded-lg 
+                 active:scale-95 transition"
+                      >
+                        Close Contract
+                      </button>
+                    )}
+                  </div>
+
 
                   {/* DETAILS GRID */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
@@ -307,12 +426,25 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                   {contract.status === "Rejected" && (
                     <button
                       onClick={() => handleEdit(contract)}
-                      className="px-4 py-2 text-xs font-medium bg-blue-600 text-white 
+                      className="px-4 py-2 text-xs cursor-pointer font-medium bg-blue-600 text-white 
               rounded-lg hover:bg-blue-700 transition"
                     >
                       Edit Contract
                     </button>
                   )}
+                  {contract.status === "Completed" && (
+                    <button
+                      onClick={() => {
+                        setClosingContract(contract);
+                        setIsFeedbackOpen(true);
+                      }}
+                      className="px-4 py-2 text-sm cursor-pointer font-medium bg-red-600 text-white 
+               rounded-lg hover:bg-red-700 transition"
+                    >
+                      Close Contract
+                    </button>
+                  )}
+
                 </div>
               </div>
             </div>
@@ -328,6 +460,9 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         onClose={() => {
           setEditingContract(null);
           setIsModalOpen(false);
+          setErrors({});
+          setRating(0);
+          setFeedback("");
         }}
         campaignId={campaignId}
         existingCampaignStart={campaignStart}
@@ -335,6 +470,91 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         editData={editingContract}
         onSubmit={handleSubmit}
       />
+
+
+      <Modal
+        open={isFeedbackOpen}
+        title="Close Contract"
+        onCancel={() => {
+          setIsFeedbackOpen(false);
+          setClosingContract(null);
+          setFeedback("");
+          setRating(0);
+        }}
+        footer={[
+          <Button
+            key="skip"
+            onClick={handleSkipClose}
+            loading={closingLoading}
+          >
+            Skip & Close
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+
+            onClick={handleSubmitClose}
+            loading={closingLoading}
+          >
+            Submit & Close
+          </Button>
+
+        ]}
+      >
+        <p className="text-gray-600 mb-3 text-sm">
+          Optional: Share your experience for this contract.
+        </p>
+
+        {/* ⭐ RATING */}
+        <p className="font-medium text-gray-800 mb-2">Overall Rating</p>
+        <div className="mb-4">
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span
+                key={star}
+                onClick={() => {
+                  setRating(star);
+                  setErrors((prev) => ({ ...prev, rating: "" }));
+                }}
+                className="cursor-pointer transition-transform active:scale-95"
+              >
+                {star <= rating ? (
+                  <RiStarFill size={26} className="text-yellow-400" />
+                ) : (
+                  <RiStarLine size={26} className="text-yellow-400" />
+                )}
+              </span>
+            ))}
+          </div>
+
+          {errors.rating && (
+            <p className="text-red-500 text-xs mt-1">{errors.rating}</p>
+          )}
+        </div>
+
+
+        {/* ✍️ FEEDBACK */}
+        <p className="font-medium text-gray-800 mb-2">Feedback</p>
+        <textarea
+          rows={4}
+          value={feedback}
+          onChange={(e) => {
+            setFeedback(e.target.value);
+            setErrors((prev) => ({ ...prev, feedback: "" }));
+          }}
+          placeholder="Write something about the influencer (10-100 chars if rating given)"
+          className="w-full border rounded-lg p-3 text-sm 
+       focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        {errors.feedback && (
+          <p className="text-red-500 text-xs mt-1">{errors.feedback}</p>
+        )}
+
+
+      </Modal>
+
+
     </div>
   );
 };

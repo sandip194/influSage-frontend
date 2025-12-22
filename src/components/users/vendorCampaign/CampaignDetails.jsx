@@ -56,8 +56,8 @@ const CampaignDetails = () => {
   // const [isModalVisible, setIsModalVisible] = useState(false);
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   // const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
-  const [feedbackModal, setFeedbackModal] = useState(false);
-  const [selectedInfluencer, setSelectedInfluencer] = useState(null);
+  // const [feedbackModal, setFeedbackModal] = useState(false);
+  // const [selectedInfluencer, setSelectedInfluencer] = useState(null);
 
   const getCampaignDetails = async () => {
     try {
@@ -415,7 +415,7 @@ const CampaignDetails = () => {
                 >
                   Cancel Campaign
                 </button>
-                {campaignDetails?.isfeedback === true && (
+                {/* {campaignDetails?.isfeedback === true && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -426,7 +426,7 @@ const CampaignDetails = () => {
                   >
                     Send Feedback
                   </button>
-                )}
+                )} */}
               </div>
             </div>
 
@@ -895,14 +895,14 @@ const CampaignDetails = () => {
         </div>
       </Modal>
 
-      {feedbackModal && (
+      {/* {feedbackModal && (
             <FeedbackForm
               campaignId={campaignId}
               vendorId={campaignDetails?.vendorid}
               influencer={selectedInfluencer}
               onClose={() => setFeedbackModal(false)}
             />
-          )}
+          )} */}
     </div>
   );
 };

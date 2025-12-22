@@ -3,8 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import PerformanceChart from "../../users/analytics/PerformanceChart";
 import TopContentChart from "../../users/analytics/TopContentChart";
-import { Tooltip } from "antd";
-import { Select } from "antd";
+import { Tooltip, Select, Skeleton, Empty } from "antd";
 
 import {
     RiBriefcaseLine,
@@ -36,13 +35,18 @@ const BrandAnalyticsDashboard = () => {
 
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
-    const [platforms, setPlatforms] = useState([]);
+    
 
     const [kpis, setKpis] = useState([]);
     const [recentContent, setRecentContent] = useState([]);
     const [campaigns, setCampaigns] = useState([]);
     const [campaignList, setCampaignList] = useState([])
     const [selectedCampaignId, setSelectedCampaignId] = useState(null);
+
+
+    const [platforms, setPlatforms] = useState([]);
+    const [platformLoading, setPlatformLoading] = useState(false);
+
 
     const currentYear = new Date().getFullYear();
 
@@ -68,8 +72,8 @@ const BrandAnalyticsDashboard = () => {
         setKpis([
             { label: "Total Campaigns", value: data.totalcampaigncount, icon: <RiBriefcaseLine size={28} /> },
             { label: "Active Influencers", value: data.totalactiveinfluencercount, icon: <RiGroupLine size={28} /> },
-            { label: "Total Impressions", value: data.totalimpression, icon: <RiEyeLine size={28} /> },
-            { label: "Engagement Rate", value: `${data.engagementrate}%`, icon: <RiHeartLine size={28} /> },
+            { label: "Estimated Impressions", value: data.estimatedimpression, icon: <RiEyeLine size={28} /> },
+            { label: "Estimated Engagement Score", value: data.engagementscore, icon: <RiHeartLine size={28} /> },
             { label: "Total Content Pieces", value: data.totalcontentpieces, icon: <RiImage2Line size={28} /> },
             { label: "Avg Engagement / Influencer", value: Math.round(data.averageengagementperinfluencer), icon: <RiStarLine size={28} /> },
         ]);
@@ -82,6 +86,8 @@ const BrandAnalyticsDashboard = () => {
     }, [summaryFilter, year, month]);
 
     const fetchPlatformBreakdown = async () => {
+        setPlatformLoading(true);
+
         try {
             const res = await axios.get("vendor/analytics/platform-breakdown", {
                 params: {
@@ -91,21 +97,25 @@ const BrandAnalyticsDashboard = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            const apiData = res.data?.data || [];
+            const apiData = res?.data?.data || [];
 
             setPlatforms(
                 apiData.map(item => ({
-                    platform: item.providername,
-                    views: item.totallikes,
-                    percentage: item.percentage,
-                    icon: item.providericonpath,
+                    platform: item?.providername ?? "Unknown",
+                    views: Number(item?.totallikes) || 0,
+                    percentage: Number(item?.percentage) || 0,
+                    icon: item?.providericonpath ?? "",
                     color: "#0D132D",
                 }))
             );
         } catch (err) {
             console.error("Platform breakdown error:", err);
+            setPlatforms([]);
+        } finally {
+            setPlatformLoading(false);
         }
     };
+
 
     useEffect(() => {
         fetchPlatformBreakdown();
@@ -158,7 +168,7 @@ const BrandAnalyticsDashboard = () => {
             {/* ------------------------- */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {kpis.map((kpi, idx) => (
-                    <div key={idx} className="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4">
+                    <div key={idx} className="bg-white rounded-2xl  p-4 flex items-center gap-4">
                         <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#0B132B]">
                             <div className="text-white">{kpi.icon}</div>
                         </div>
@@ -178,7 +188,7 @@ const BrandAnalyticsDashboard = () => {
             {/* ------------------------- */}
             {/* Campaign Table */}
             {/* ------------------------- */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm overflow-x-auto">
+            <div className="bg-white rounded-2xl p-5  overflow-x-auto">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold">Campaign Overview</h2>
 
@@ -259,12 +269,12 @@ const BrandAnalyticsDashboard = () => {
             {/* ------------------------- */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Performance Chart */}
-                <div className="bg-white rounded-2xl p-5 shadow-sm">
+                <div className="bg-white rounded-2xl p-5 ">
                     <PerformanceChart />
                 </div>
 
                 {/* Top Content */}
-                <div className="bg-white rounded-2xl p-5 shadow-sm">
+                <div className="bg-white rounded-2xl p-5 ">
                     <TopContentChart />
                 </div>
             </div>
@@ -272,7 +282,7 @@ const BrandAnalyticsDashboard = () => {
             {/* ------------------------- */}
             {/* Platform Breakdown */}
             {/* ------------------------- */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm">
+            <div className="bg-white rounded-2xl p-5 ">
 
                 {/* HEADER ROW */}
                 <div className="flex items-center justify-between mb-4">
@@ -318,16 +328,46 @@ const BrandAnalyticsDashboard = () => {
 
                 {/* PLATFORM BARS */}
                 <div className="space-y-4">
-                    {platforms.map((p, idx) => {
-                        const maxViews = Math.max(...platforms.map(d => d.views));
 
-                        return (
+                    {/* Loading State */}
+                    {platformLoading && (
+                        <div className="space-y-3">
+                            {[1, 2, 3].map(i => (
+                                <Skeleton
+                                    key={i}
+                                    active
+                                    paragraph={{ rows: 1 }}
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Empty State */}
+                    {!platformLoading && platforms.length === 0 && (
+                        <Empty
+                            description="No platform data available"
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        />
+                    )}
+
+                    {/* Data State */}
+                    {!platformLoading && platforms.length > 0 && (() => {
+                        const maxViews = Math.max(...platforms.map(p => p.views || 0), 1);
+
+                        return platforms.map((p, idx) => (
                             <div key={idx} className="flex items-center space-x-3">
+
                                 {/* Icon */}
-                                <img src={p.icon} alt={p.platform} className="w-6 h-6" />
+                                {p.icon ? (
+                                    <img src={p.icon} alt={p.platform} className="w-6 h-6" />
+                                ) : (
+                                    <div className="w-6 h-6 bg-gray-300 rounded-full" />
+                                )}
 
                                 {/* Name */}
-                                <p className="w-20 text-sm text-gray-700">{p.platform}</p>
+                                <p className="w-20 text-sm text-gray-700 truncate">
+                                    {p.platform}
+                                </p>
 
                                 {/* Bar */}
                                 <div className="flex-1 bg-gray-200 h-3 rounded-full relative">
@@ -342,7 +382,7 @@ const BrandAnalyticsDashboard = () => {
                                         }
                                     >
                                         <div
-                                            className="h-3 rounded-full cursor-pointer"
+                                            className="h-3 rounded-full cursor-pointer transition-all"
                                             style={{
                                                 width: `${(p.views / maxViews) * 100}%`,
                                                 backgroundColor: p.color,
@@ -353,18 +393,21 @@ const BrandAnalyticsDashboard = () => {
 
                                 {/* Value */}
                                 <p className="w-16 text-sm font-bold text-gray-800 text-right">
-                                    {p.views >= 1000 ? `${(p.views / 1000).toFixed(1)}k` : p.views}
+                                    {p.views >= 1000
+                                        ? `${(p.views / 1000).toFixed(1)}k`
+                                        : p.views}
                                 </p>
                             </div>
-                        );
-                    })}
+                        ));
+                    })()}
                 </div>
+
             </div>
 
             {/* ------------------------- */}
             {/* Campaign Wise Analytics */}
             {/* ------------------------- */}
-            <div className="bg-white rounded-2xl p-5 w-full shadow-sm mt-6">
+            <div className="bg-white rounded-2xl p-5 w-full  mt-6">
                 <div className="flex justify-between items-center">
                     <h2 className="text-lg font-bold text-gray-900">Campaign Insights</h2>
 
@@ -390,14 +433,14 @@ const BrandAnalyticsDashboard = () => {
             {/* ------------------------- */}
             {/* Recent Content */}
             {/* ------------------------- */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm">
+            <div className="bg-white rounded-2xl p-5 ">
                 <h2 className="text-lg font-bold mb-4">Recent Content</h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                     {recentContent.map((c, idx) => (
                         <div
                             key={idx}
-                            className="group bg-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
+                            className="group bg-gray-200 rounded-2xl p-4  hover:shadow-md transition-shadow duration-200"
                         >
                             {/* Top row: Provider + Date */}
                             <div className="flex items-center justify-between mb-2">
