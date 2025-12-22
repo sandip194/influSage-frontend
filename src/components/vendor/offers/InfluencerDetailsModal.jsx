@@ -29,6 +29,10 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
   const [influDetails, setInfluDetails] = useState(null);
   const [showAnimation, setShowAnimation] = useState(false);
 
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewPortfolioImage, setPreviewPortfolioImage] = useState(null);
+  const [previewPortfolioVideo, setPreviewPortfolioVideo] = useState(null);
+
   const getInfluencerDetails = async () => {
     if (!influencerId) return;
     try {
@@ -93,11 +97,32 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
           {/* Header */}
           <div className="flex flex-col bg-gray-50 rounded-2xl sm:flex-row items-center sm:items-start sm:justify-between gap-4 p-6 ">
             <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-              <img
+             <img
                 src={influDetails?.photopath}
                 alt="Profile"
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-gray-100 shadow-sm"
+                onClick={() => setIsPreviewOpen(true)}
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-gray-100 shadow-sm cursor-pointer hover:opacity-90"
               />
+              {isPreviewOpen && (
+                <div
+                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
+                  onClick={() => setIsPreviewOpen(false)}
+                >
+                  <button
+                    onClick={() => setIsPreviewOpen(false)}
+                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                  >
+                    &times;
+                  </button>
+
+                  <img
+                    src={influDetails?.photopath}
+                    alt="Preview"
+                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
               <div>
                 <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 capitalize">
                   {influDetails?.firstname} {influDetails?.lastname}
@@ -229,22 +254,34 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
             <div className="lg:w-1/4 flex flex-col gap-4">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="text-gray-900 font-semibold mb-2">Portfolio</h3>
+
                 {influDetails?.portfoliofiles?.length > 0 ? (
                   <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
+
                     {influDetails?.portfoliofiles?.slice(0, 6).map((file, i) => {
                       const url = file.filepath;
                       const ext = url.split(".").pop().toLowerCase();
                       const isImage = ["jpg", "jpeg", "png", "gif", "webp"].includes(ext);
                       const isVideo = ["mp4", "mov", "webm", "ogg"].includes(ext);
+
                       return (
                         <div
                           key={i}
-                          className="rounded-lg overflow-hidden bg-gray-100 border border-gray-200 hover:shadow-md transition"
+                          className="rounded-lg overflow-hidden bg-gray-100 border border-gray-200 hover:shadow-md transition cursor-pointer"
                         >
                           {isImage ? (
-                            <img src={url} alt="portfolio" className="w-full h-28 object-cover" />
+                            <img
+                              src={url}
+                              onClick={() => setPreviewPortfolioImage(url)}
+                              alt="portfolio"
+                              className="w-full h-28 object-cover"
+                            />
                           ) : isVideo ? (
-                            <video src={url} controls className="w-full h-28 object-cover" />
+                            <video
+                              onClick={() => setPreviewPortfolioVideo(url)}
+                              src={url}
+                              className="w-full h-28 object-cover"
+                            />
                           ) : (
                             <div className="flex flex-col items-center justify-center h-28 text-xs text-gray-500">
                               <RiFile3Line className="text-gray-400 text-3xl mb-1" />
@@ -254,11 +291,53 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                         </div>
                       );
                     })}
+
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500">No portfolio files uploaded.</p>
                 )}
               </div>
+              {previewPortfolioImage && (
+                <div
+                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
+                  onClick={() => setPreviewPortfolioImage(null)}
+                >
+                  <button
+                    onClick={() => setPreviewPortfolioImage(null)}
+                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                  >
+                    ×
+                  </button>
+
+                  <img
+                    src={previewPortfolioImage}
+                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
+
+              {previewPortfolioVideo && (
+                <div
+                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
+                  onClick={() => setPreviewPortfolioVideo(null)}
+                >
+                  <button
+                    onClick={() => setPreviewPortfolioVideo(null)}
+                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                  >
+                    ×
+                  </button>
+
+                  <video
+                    src={previewPortfolioVideo}
+                    controls
+                    autoPlay
+                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

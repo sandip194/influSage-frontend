@@ -18,7 +18,7 @@ import {
 export default function ChatAppPageVendor() {
   useSocketRegister();
   const dispatch = useDispatch();
-  const { token, id: userId, role } = useSelector((state) => state.auth);
+  const { token, userId, role } = useSelector((state) => state.auth);
   const socket = getSocket();
   const location = useLocation();
   const [chatToSelect, setChatToSelect] = useState(null);

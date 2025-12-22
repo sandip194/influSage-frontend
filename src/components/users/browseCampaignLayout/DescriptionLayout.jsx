@@ -252,32 +252,13 @@
                         Application Window:
                       </span>
 
-                      <span className="text-gray-800 whitespace-nowrap">
-                        {campaignDetails?.requirements?.applicationstartdate || "N/A"} - {campaignDetails?.requirements?.applicationenddate || "N/A"}
-                      </span>
-                    </p>
-
-                    {/* Campaign Start Date */}
-                    <p
-                      className="
-                        text-xs mt-1 
-                        flex flex-col sm:flex-row 
-                        sm:items-center 
-                        gap-[2px] sm:gap-1 
-                        leading-tight
-                      "
-                    >
-                      <span className="font-semibold text-indigo-600 whitespace-nowrap">
-                        Campaign Start Date:
-                      </span>
-
-                      <span className="text-gray-800 whitespace-nowrap">
-                        {campaignDetails?.requirements?.campaignstartdate || "N/A"}
-                      </span>
+                       <span className="text-gray-800 whitespace-nowrap">
+                          {campaignDetails?.requirements?.applicationstartdate || "N/A"} {'->'} {campaignDetails?.requirements?.applicationenddate || "N/A"}
+                        </span>
                     </p>
 
                     {/* Total Application */}
-                    <p className="text-xs">
+                    <p className="text-xs mt-1">
                       <span className="font-semibold text-indigo-600">Total Application:</span>{" "}
                       <span className="text-gray-800">{campaignDetails?.appliedinfluencercount ?? "N/A"}</span>
                     </p>
@@ -304,7 +285,7 @@
                   ) : (
                     <button className="px-4 py-1.5 bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed">
                       Not Eligible
-                    </button>
+                    </button> 
                   )}
                 </div>
               </div>
@@ -629,7 +610,7 @@
             {/* Provider Content Types with optional captions */}
             <div className="bg-white p-6 rounded-2xl">
               <h3 className="font-semibold text-lg text-gray-900 mb-4">
-                Platform Content Types
+                Platform & Content Deliverables
               </h3>
 
               <div className="space-y-4">

@@ -106,7 +106,10 @@ const ApplyNow = () => {
       );
 
       if (response.status === 200) {
-        navigate("/dashboard/browse/applied");
+        navigate("/dashboard/browse/applied", {
+          state: { refresh: true },
+          replace: true,
+        });
       }
       toast.success(response.data.message);
     } catch (err) {

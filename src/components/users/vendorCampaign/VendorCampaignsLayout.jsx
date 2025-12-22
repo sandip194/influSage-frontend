@@ -397,8 +397,8 @@ const VendorCampaignsLayout = () => {
               <tr>
                 <th className="p-4">Campaign Name</th>
                 <th className="p-4">Budget</th>
-                <th className="p-4">Date Started</th>
-                <th className="p-4 min-w-30">Due Date</th>
+                <th className="p-4">Start Date</th>
+                <th className="p-4 min-w-30">End Date</th>
                 <th className="p-4 min-w-40">Status</th>
                 {/* <th className="p-4">Action</th> */}
               </tr>

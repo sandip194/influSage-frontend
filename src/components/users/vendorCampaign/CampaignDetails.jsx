@@ -58,6 +58,7 @@ const CampaignDetails = () => {
   // const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState(false);
   const [selectedInfluencer, setSelectedInfluencer] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const getCampaignDetails = async () => {
     try {
@@ -377,10 +378,30 @@ const CampaignDetails = () => {
               {/* Left Section */}
               <div className="flex items-start gap-4">
                 <img
-                  src={campaignDetails?.photopath}
-                  alt="Profile"
-                  className="w-16 h-16 rounded-full object-cover"
-                />
+                    src={campaignDetails?.photopath}
+                    alt="Profile"
+                    onClick={() => setIsPreviewOpen(true)}
+                    className="w-16 h-16 rounded-full object-cover cursor-pointer hover:opacity-90 transition"
+                  />
+                  {isPreviewOpen && (
+                    <div
+                      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                      onClick={() => setIsPreviewOpen(false)}
+                    >
+                      <button
+                        onClick={() => setIsPreviewOpen(false)}
+                        className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                      >
+                        ×
+                      </button>
+                      <img
+                        src={campaignDetails?.photopath}
+                        alt="Preview"
+                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  )}
 
                 <div>
                   <h2 className="font-semibold text-lg text-gray-900">
@@ -439,7 +460,7 @@ const CampaignDetails = () => {
                   <RiMoneyRupeeCircleLine className="w-5 h-5" />
                   <span>Budget</span>
                 </div>
-                <p className="text-gray-800 font-medium">
+                <p className="text-[#0D132D] font-bold text-xl">
                   ₹{campaignDetails?.estimatedbudget}
                 </p>
               </div>
@@ -455,7 +476,7 @@ const CampaignDetails = () => {
                   {campaignDetails?.campaignlanguages?.map((lang) => (
                     <span
                       key={lang.languageid}
-                      className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md text-sm"
+                      className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-lg text-xs font-medium"
                     >
                       {lang.languagename}
                     </span>
@@ -474,7 +495,7 @@ const CampaignDetails = () => {
                   {campaignDetails?.campaigngenders?.map((gender) => (
                     <span
                       key={gender.genderid}
-                      className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md text-sm"
+                      className="bg-pink-100 text-pink-800 px-3 py-1 rounded-lg text-xs font-medium"
                     >
                       {gender.gendername}
                     </span>
@@ -585,11 +606,6 @@ const CampaignDetails = () => {
               </p>
             </div>
 
-            <div className="py-4 border-b border-gray-200">
-              <p className="text-sm font-bold text-gray-900">Delivery Date</p>
-              <p>{campaignDetails?.requirements.campaignenddate}</p>
-            </div>
-
             <div className="py-4">
               <p className="text-sm font-bold text-gray-900">Total Price</p>
               <p>₹{campaignDetails?.estimatedbudget}</p>
@@ -605,27 +621,24 @@ const CampaignDetails = () => {
               <div className="space-y-4">
                 {campaignDetails?.providercontenttype?.map((platform) => (
                   <div
-                    key={platform.providercontenttypeid}
+                    key={platform.providerid}
                     className="pb-3 border-b border-gray-100 last:border-0"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {/* Optional platform icons */}
-                        {/* {platform.providerid === 1 && <RiInstagramFill className="text-pink-600 text-xl" />} */}
-                        {/* {platform.providerid === 2 && <RiYoutubeFill className="text-red-600 text-xl" />} */}
 
-                        <span className="text-gray-800 font-medium">
-                          {platform.providername}
-                        </span>
-                      </div>
+                      <span className="text-gray-800 font-medium">
+                        {platform.providername}
+                      </span>
 
                       <span className="text-gray-500 text-sm">
-                        {platform.contenttypename}
+                        {platform.contenttypes
+                          ?.map((c) => c.contenttypename)
+                          ?.join(", ")}
                       </span>
                     </div>
 
                     {platform.caption && (
-                      <p className="text-gray-600 text-sm mt-1 pl-3">
+                      <p className="text-gray-600 italic text-xs border-l-2 border-gray-200 pl-3">
                         {platform.caption}
                       </p>
                     )}

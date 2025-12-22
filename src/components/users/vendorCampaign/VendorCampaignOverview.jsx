@@ -148,7 +148,6 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
                       }}
                       className="absolute top-1 right-1 bg-gray-600 bg-opacity-70 text-white p-1 rounded-full z-10"
                     >
-                      <RiDeleteBin6Line className="w-4 h-4" />
                     </button>
                   )}
 

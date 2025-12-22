@@ -14,9 +14,10 @@ const ProfileComplation = () => {
     const fetchCompletion = async () => {
       try {
         const authToken = token || localStorage.getItem("token");
-        const response = await axios.get(`user/dashboard/profile-completion`, {
+        const response = await axios.get("user/dashboard/profile-completion", {
           headers: { Authorization: `Bearer ${authToken}` },
         });
+
         setCompletion(response.data?.percentage || 0);
       } catch (err) {
         console.error(err);
@@ -24,65 +25,88 @@ const ProfileComplation = () => {
         setLoading(false);
       }
     };
+
     fetchCompletion();
   }, [token]);
 
-  /* ------------------ Skeleton UI ------------------ */
   if (loading) {
     return (
-      <div className="bg-white p-4 rounded-2xl flex flex-col gap-4 h-full">
-        <div className="flex items-center gap-4">
-          <Skeleton.Avatar active size={40} shape="circle" />
-          <div className="flex-1 flex flex-col gap-2">
-            <Skeleton.Input active size="small" style={{ width: "40%" }} />
-            {/* Progress bar skeleton */}
-            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-              <Skeleton.Node active style={{ width: "60%", height: "8px" }} />
-            </div>
-            <Skeleton.Input active size="small" style={{ width: "30%" }} />
-          </div>
-        </div>
-
-        <div className="mt-auto">
-          <Skeleton.Button active shape="round" style={{ width: 160, height: 36 }} />
-        </div>
+      <div className="bg-white rounded-2xl p-6 flex items-center justify-center">
+        <Skeleton active />
       </div>
     );
   }
 
-  /* ------------------ Actual UI ------------------ */
   return (
-    <div className="bg-white p-6 rounded-2xl flex flex-col gap-4 h-full">
-      <div className="flex items-center gap-4">
-        <div className="bg-[#0D132D] rounded-full p-3 flex-shrink-0">
-          <RiUserLine className="text-white text-xl" />
-        </div>
+  <div className="bg-white rounded-2xl p-4 flex flex-col w-full max-w-[400px]">
 
-        <div className="flex-1">
-          <p className="text-gray-700 font-medium text-sm">
-            Profile Completion
-          </p>
-
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-            <div
-              className="bg-[#0D132D] h-2 rounded-full transition-all duration-500"
-              style={{ width: `${completion}%` }}
-            />
-          </div>
-
-          <p className="text-xs text-gray-500 mt-1">
-            {completion}% of your profile is complete.
-          </p>
-        </div>
+    {/* Title */}
+    <div className="flex items-center gap-3">
+      <div className="bg-[#0D132D] p-2.5 rounded-full">
+        <RiUserLine className="text-white text-lg" />
       </div>
+      <span className="text-[15px] font-semibold text-[#0D132D]">
+        Profile Completion
+      </span>
+    </div>
 
-      <Link to="/dashboard/editProfile" className="mt-auto">
-        <button className="w-full sm:w-auto bg-[#121A3F] text-white px-4 py-2 rounded-full hover:bg-[#0D132D]">
+    {/* Content wrapper */}
+    <div className="flex flex-col items-center my-6">
+
+      {/* FULL CIRCLE */}
+      <div className="relative w-[120px] h-[140px]">
+
+        {/* base circle */}
+        <svg className="w-[140px] h-[140px] rotate-[-90deg]">
+          <circle
+            cx="70"
+            cy="70"
+            r="58"
+            stroke="#e5e7eb"
+            strokeWidth="12"
+            fill="transparent"
+          />
+        </svg>
+
+        {/* progress */}
+        <svg className="w-[140px] h-[140px] rotate-[-90deg] absolute top-0 left-0">
+          <circle
+            cx="70"
+            cy="70"
+            r="58"
+            stroke="#6D5BFF"
+            strokeWidth="12"
+            fill="transparent"
+            strokeDasharray={2 * Math.PI * 58}
+            strokeDashoffset={(2 * Math.PI * 58 * (100 - completion)) / 100}
+            className="transition-all duration-700"
+          />
+        </svg>
+
+        {/* percent text */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-3xl font-semibold text-gray-800">
+            {completion}%
+          </span>
+          <span className="text-xs text-gray-500">
+            Complete
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    {/* button positioned right */}
+    <div className="flex justify-end">
+      <Link to="/dashboard/editProfile">
+        <button className="bg-[#121A3F] text-white text-xs px-4 py-2 rounded-full hover:bg-[#0D132D] transition">
           Complete Profile
         </button>
       </Link>
     </div>
-  );
+
+  </div>
+);
 };
 
 export default ProfileComplation;

@@ -138,22 +138,25 @@ const Invited = () => {
 
       {/* Tabs */}
       <div className="bg-white p-4 rounded-lg mb-6 flex flex-row gap-2 flex-wrap sm:flex-nowrap">
-        {buttons.map(({ id, label, path }) => (
-          <button
-            key={id}
-            onClick={() => {
-              setActiveTab(id);
-              navigate(path);
-            }}
-            className={`flex-1 sm:flex-none px-3 py-2 rounded-md border border-gray-300 transition text-sm
-              ${activeTab === id
-                ? "bg-[#141843] text-white border-[#141843]"
-                : "bg-white text-[#141843] border-gray-300 hover:bg-gray-100"
-              }`}
-          >
-            {label}
-          </button>
-        ))}
+        <div className="flex gap-3 flex-nowrap">
+          {buttons.map(({ id, label, path }) => (
+            <button
+              key={id}
+              onClick={() => {
+                setActiveTab(id);
+                navigate(path);
+              }}
+              className={`px-3 sm:px-4 py-2 rounded-lg border transition font-medium
+                ${activeTab === id
+                  ? "bg-[#141843] text-white border-[#141843]"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                }
+              `}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Main Card Wrapper */}

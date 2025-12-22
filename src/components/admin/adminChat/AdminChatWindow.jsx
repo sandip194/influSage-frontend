@@ -161,7 +161,7 @@ useEffect(() => {
           message: m.message,
           filepath: m.filepath || null,
           filetype,
-          sender: isSystemMsg ? "admin" : (m.userid === userId ? "admin" : "user"),
+          sender: isSystemMsg ? "admin" : (m.roleid === 4 ? "admin" : "user"),
           time: m.createddate,
         };
       });
@@ -284,8 +284,8 @@ if (offsetParam !== 0 && (loadingMore || !hasMore)) return;
           filetype,
           // sender: isSystemMsg ? "admin" : (m.roleid === 4 ? "admin" : "user"),
           sender: isSystemMsg
-      ? "admin"
-      : (m.userid === userId ? "admin" : "user"),
+            ? "admin"
+            : (m.roleid === 4 ? "admin" : "user"),
           time: m.createddate,
         };
       });

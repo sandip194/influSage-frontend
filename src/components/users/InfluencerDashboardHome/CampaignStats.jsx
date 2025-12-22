@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { RiCheckLine, RiLoopLeftLine } from "@remixicon/react";
+import { RiLoopLeftLine, RiCheckLine, RiMailAddLine, RiMailSendLine, RiGroupLine } from "@remixicon/react";
 import { useSelector } from "react-redux";
 import { Skeleton } from "antd";
 
@@ -19,9 +19,32 @@ const CampaignStats = () => {
 
         const data = response.data?.data;
         const formattedStats = [
-          { label: "In-Progress Campaigns", value: data.inprogresscampaign, icon: <RiLoopLeftLine /> },
-          { label: "Completed Campaigns", value: data.completedcampaign, icon: <RiCheckLine /> },
-        ];
+        {
+          label: "In-Progress Campaigns",
+          value: data.inprogresscampaign ?? 0,
+          icon: <RiLoopLeftLine className="text-white text-xl" />,
+        },
+        {
+          label: "Completed Campaigns",
+          value: data.completedcampaign ?? 0,
+          icon: <RiCheckLine className="text-white text-xl" />,
+        },
+        {
+          label: "Applied Campaigns",
+          value: data.appliedcampaigncount ?? 0,
+          icon: <RiMailSendLine className="text-white text-xl" />,
+        },
+        {
+          label: "Invited Campaigns",
+          value: data.invitedcampaigncount ?? 0,
+          icon: <RiMailAddLine className="text-white text-xl" />,
+        },
+        {
+          label: "Total Campaigns Participated",
+          value: data.totalcampaignsparticipated ?? 0,
+          icon: <RiGroupLine className="text-white text-xl" />,
+        },
+      ];
         setStats(formattedStats);
       } catch (err) {
         console.error(err);
@@ -49,15 +72,19 @@ const CampaignStats = () => {
   }
 
   return (
-    <div className="rounded-2xl h-full flex flex-col gap-4">
+    <div className="bg-white rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
       {stats.map(({ label, value, icon }, idx) => (
-        <div key={idx} className="flex items-center gap-3 p-4 bg-white rounded-2xl">
-          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#0D132D] text-white text-base flex-shrink-0">
+        <div
+          key={idx}
+          className="flex items-center gap-3 bg-gray-50 rounded-xl p-4"
+        >
+          <div className="w-12 h-12 bg-[#0D132D] flex items-center justify-center rounded-lg text-white">
             {icon}
           </div>
-          <div className="flex flex-col">
-            <p className="text-sm text-[#0D132D] font-medium">{label}</p>
-            <p className="text-lg font-bold text-gray-800">{Number(value).toLocaleString()}</p>
+
+          <div>
+            <p className="text-sm text-gray-500 font-medium">{label}</p>
+            <p className="text-xl font-bold text-gray-800">{value}</p>
           </div>
         </div>
       ))}

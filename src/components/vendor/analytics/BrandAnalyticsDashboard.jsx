@@ -68,8 +68,8 @@ const BrandAnalyticsDashboard = () => {
         setKpis([
             { label: "Total Campaigns", value: data.totalcampaigncount, icon: <RiBriefcaseLine size={28} /> },
             { label: "Active Influencers", value: data.totalactiveinfluencercount, icon: <RiGroupLine size={28} /> },
-            { label: "Total Impressions", value: data.totalimpression, icon: <RiEyeLine size={28} /> },
-            { label: "Engagement Rate", value: `${data.engagementrate}%`, icon: <RiHeartLine size={28} /> },
+            { label: "Total Impressions", value: data.estimatedimpression, icon: <RiEyeLine size={28} /> },
+            { label: "Engagement Rate", value: `${data.engagementscore}%`, icon: <RiHeartLine size={28} /> },
             { label: "Total Content Pieces", value: data.totalcontentpieces, icon: <RiImage2Line size={28} /> },
             { label: "Avg Engagement / Influencer", value: Math.round(data.averageengagementperinfluencer), icon: <RiStarLine size={28} /> },
         ]);

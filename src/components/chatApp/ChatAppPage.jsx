@@ -17,7 +17,7 @@ import {
 export default function ChatAppPage() {
   useSocketRegister();
   const dispatch = useDispatch();
-  const { token, id: userId, role } = useSelector((state) => state.auth);
+  const { token, userId, role } = useSelector((state) => state.auth);
   const socket = getSocket();
 
   const activeChat = useSelector((state) => state.chat.activeChat);

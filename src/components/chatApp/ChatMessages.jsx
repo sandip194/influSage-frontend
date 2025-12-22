@@ -261,8 +261,8 @@ export default function ChatMessages({
 
             return {
               id: Number(msg.messageid),
-              senderId: msg.userid || msg.roleid || null,
-              roleId: msg.roleid,
+              senderId: Number(msg.userid),
+              roleId: Number(msg.roleid),
               content: unescaped,
               file: Array.isArray(msg.filepath)
                 ? msg.filepath.join(",")
@@ -416,7 +416,10 @@ useEffect(() => {
       className="flex-1 overflow-y-auto overflow-x-hidden px-0 pt-6 space-y-1"
     >
       {messages.map((msg, index) => {
-        const isMe = Number(msg.roleId) === Number(role);
+       const isMe =
+  Number(msg.senderId) === Number(userId) ||
+  Number(msg.roleId) === Number(role);
+
 
         const isLast = index === messages.length - 1;
         // console.log("Message:", msg.content, "senderId:", msg.senderId, "userId:", userId, "isMe:", isMe);
@@ -699,13 +702,15 @@ useEffect(() => {
                   </div>
                 ) :(
                   <div
-                    className={`text-sm break-words ${msg.ishtml ? "bg-white text-gray-900 p-2 rounded-md" : ""}`}
-                    dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(
-                        msg.ishtml ? msg.content : (msg.content || "").replace(/\n/g, "<br>")
-                      ),
-                    }}
-                  />
+ className={`text-sm break-words ${msg.ishtml ? "bg-white text-gray-900 p-2 rounded-md" : ""}`}
+ dangerouslySetInnerHTML={{
+   __html: DOMPurify.sanitize(
+     (msg.content || msg.message || msg.text || "")
+       .replace(/\n/g, "<br>")
+   ),
+ }}
+/>
+
                 )}
               </div>
 
