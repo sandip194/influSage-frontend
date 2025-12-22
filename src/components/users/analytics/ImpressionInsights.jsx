@@ -18,7 +18,7 @@ const { Option } = Select;
 const ImpressionInsights = () => {
   const { token } = useSelector((state) => state.auth);
   const [impressionData, setImpressionData] = useState([]);
-  const [sortBy, setSortBy] = useState("year");
+  const [sortBy, setSortBy] = useState("month");
   const [loading, setLoading] = useState(false);
 
   const fetchImpressionInsights = async () => {

@@ -30,7 +30,7 @@ const ENDPOINT_BY_ROLE = {
 };
 
 const CAMPAIGN_ENDPOINT_BY_ROLE = {
-  2: "/vendor/analytics/campaign-performance-timeline",
+  2: "/vendor/analytics/campaign-performance-overtime",
   1: "/user/analytics/campaign-performanceovertime",
 };
 

@@ -71,7 +71,7 @@ export const PlatformBreakdown = () => {
 
 
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm w-full">
+    <div className="bg-white rounded-2xl p-4 sm:p-5  w-full">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">

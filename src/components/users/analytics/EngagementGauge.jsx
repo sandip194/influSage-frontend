@@ -30,7 +30,7 @@ const CAMPAIGN_ENDPOINT_BY_ROLE = {
 
 /* ---------- Component ---------- */
 const EngagementGauge = ({ campaignId }) => {
-  const [sortBy, setSortBy] = useState("year");
+  const [sortBy, setSortBy] = useState("month");
   const [score, setScore] = useState(0);
   const [animatedScore, setAnimatedScore] = useState(0);
   const [loading, setLoading] = useState(true);

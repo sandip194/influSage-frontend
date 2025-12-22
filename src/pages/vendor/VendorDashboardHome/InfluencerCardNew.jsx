@@ -7,7 +7,7 @@ import {
 } from "@remixicon/react";
 import { Tooltip } from "antd";
 
-const InfluencerCardNew = ({ influencer, onLike, onInvite }) => {
+const InfluencerCardNew = ({ influencer, onLike}) => {
     const navigate = useNavigate();
 
     return (

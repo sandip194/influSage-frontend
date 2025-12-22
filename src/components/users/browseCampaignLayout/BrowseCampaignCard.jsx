@@ -16,7 +16,7 @@ const CampaignCard = React.memo(
       <div
         key={campaign.id}
         onClick={() => handleCardClick(campaign.id)}
-        className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-lg transition-transform duration-200 flex flex-col justify-between cursor-pointer relative"
+        className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-transform duration-200 flex flex-col justify-between cursor-pointer relative"
       >
         {/* --- Top Section --- */}
         <div className="flex justify-between items-start mb-3 pb-2">
@@ -30,6 +30,7 @@ const CampaignCard = React.memo(
             </p>
           )}
 
+          {/* Save Button */}
           <div className="absolute top-3 right-3 z-10">
             <Tooltip title={campaign.campaigsaved ? "Unsave Campaign" : "Save Campaign"}>
               <button
@@ -38,10 +39,9 @@ const CampaignCard = React.memo(
                   handleSave(campaign.id);
                 }}
                 className={`flex items-center gap-1 px-2 py-1 border rounded-lg text-sm font-medium transition 
-                  ${
-                    campaign.campaigsaved
-                      ? "border-gray-300 bg-gray-50 text-gray-800 hover:bg-gray-100"
-                      : "border-gray-200 text-gray-600 bg-gray-200 hover:bg-gray-50"
+                  ${campaign.campaigsaved
+                    ? "border-gray-300 bg-gray-50 text-gray-800 hover:bg-gray-100"
+                    : "border-gray-200 text-gray-600 bg-gray-200 hover:bg-gray-50"
                   }`}
               >
                 {campaign.campaigsaved ? (
@@ -79,22 +79,22 @@ const CampaignCard = React.memo(
           </div>
         </div>
 
-        {/* --- Tags --- */}
+        {/* --- Tags (Provider Types) --- */}
         <div className="flex flex-wrap gap-2 mb-4">
           {campaign.providercontenttype?.map((provider, pIdx) => (
             <div
               key={pIdx}
-              className="flex items-center gap-2 px-1 py-1 text-xs text-black rounded-full"
+              className="flex items-center gap-2 px-2 py-1 bg-gray-50 rounded-full text-xs text-black"
             >
               {provider.iconpath && (
                 <img
                   loading="lazy"
                   src={provider.iconpath}
                   alt={provider.providername}
-                  className="w-6 h-6 object-contain"
+                  className="w-5 h-5 object-contain"
                 />
               )}
-              <span className="text-xs text-black">
+              <span className="text-xs text-gray-800">
                 {provider.contenttypes
                   ?.map((ct) => ct.contenttypename)
                   .filter(Boolean)
@@ -105,23 +105,26 @@ const CampaignCard = React.memo(
         </div>
 
         {/* --- Description --- */}
-        <p
-          className="text-black text-sm mb-4 text-justify overflow-hidden"
-          style={{
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-          }}
-        >
-          {campaign.description}
-        </p>
+        {campaign.description && (
+          <p
+            className="text-black text-sm mb-4 font-inter text-justify"
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 3, // show 3 lines
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {campaign.description}
+          </p>
+        )}
 
         {/* --- Categories --- */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-1 mb-4">
           {campaign.campaigncategories?.map((tag, idx) => (
             <span
               key={idx}
-              className="px-2 py-1 bg-blue-200 rounded-xl text-xs text-black"
+              className="px-3 py-1 bg-teal-50 text-teal-900 rounded-lg text-xs font-semibold shadow-sm"
             >
               {tag.categoryname}
             </span>
@@ -131,8 +134,8 @@ const CampaignCard = React.memo(
         {/* --- Applied Count --- */}
         {campaign.appliedinfluencercount > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
-            <span className="px-3 py-1.5 border-2 border-gray-300 bg-gray-300 rounded-lg text-xs text-gray-900 flex items-center gap-2 font-semibold">
-              <span className="inline-flex items-center justify-center w-5 h-5 bg-gray-500 text-white rounded-full text-xs">
+            <span className="px-3 py-1 bg-gradient-to-r from-purple-50 to-purple-100 rounded-full text-xs font-semibold flex items-center gap-2">
+              <span className="inline-flex items-center justify-center w-5 h-5 bg-[#0D132D]   text-white rounded-full text-xs">
                 {campaign.appliedinfluencercount}
               </span>
               <span className="whitespace-nowrap">
@@ -147,8 +150,8 @@ const CampaignCard = React.memo(
         {/* --- Footer (Budget + Apply Button) --- */}
         <div className="mt-auto flex justify-between items-center border-t border-black pt-4">
           <div>
-            <p className="text-sm font-semibold text-gray-900">
-              ₹{campaign.estimatedbudget}
+            <p className="text-lg font-bold text-gray-900">
+              ₹{campaign.estimatedbudget.toLocaleString()}
             </p>
             <p className="text-xs text-gray-500">Estimated Budget</p>
           </div>
@@ -177,6 +180,7 @@ const CampaignCard = React.memo(
     );
   }
 );
+
 
 /* --- Grid Component --- */
 const CampaignCardGrid = React.memo(
