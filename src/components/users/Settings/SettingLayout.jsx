@@ -37,7 +37,7 @@ const SettingLayout = () => {
   ];
 
   return (
-    <div className="w-full max-w-7xl mx-auto text-sm overflow-x-hidden">
+    <div className="w-full  text-sm overflow-x-hidden">
       <h1 className="text-2xl font-semibold mb-6">Settings</h1>
 
       {/* Sidebar */}

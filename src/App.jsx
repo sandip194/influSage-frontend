@@ -204,7 +204,7 @@ const App = () => {
 
 
                                                                 <Route path="payment" element={<ComingSoon />} />
-                                                                <Route path="setting" element={<ComingSoon />} />
+                                                                <Route path="setting" element={<Settings />} />
 
 
                                                                 <Route path='vendorMessagepage' element={<VendorConversationPage />} />

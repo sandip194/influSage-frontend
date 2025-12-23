@@ -9,6 +9,7 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
+import { Empty, Skeleton } from 'antd';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -74,7 +75,7 @@ const CampaignOverview = () => {
                 {
                     data: values,
                     backgroundColor: [
-                        
+
                         '#60A5FA',
                         '#335CFF',
                         '#0F172A',
@@ -90,19 +91,40 @@ const CampaignOverview = () => {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center py-16 text-sm text-slate-500">
-                Loading campaign overview...
+            <div className="bg-white p-6 rounded-2xl w-full mt-4">
+                <Skeleton
+                    active
+                    title={{ width: '40%' }}
+                    paragraph={false}
+                />
+                <div className="flex justify-center items-center mt-8">
+                    <Skeleton.Avatar
+                        active
+                        shape="circle"
+                        size={256}
+                    />
+                </div>
             </div>
         );
     }
 
+
     if (!chartData) {
         return (
-            <div className="flex items-center justify-center py-16 text-sm text-slate-500">
-                No campaign data available
+            <div className="bg-white p-6 rounded-2xl w-full mt-4">
+                <h2 className="text-lg font-bold text-gray-900 mb-6">
+                    Campaign Overview
+                </h2>
+
+                <div className="flex justify-center items-center py-16">
+                    <Empty
+                        description="No campaign data available"
+                    />
+                </div>
             </div>
         );
     }
+
 
     return (
         <div className="bg-white p-6 rounded-2xl w-full overflow-x-auto mt-4">

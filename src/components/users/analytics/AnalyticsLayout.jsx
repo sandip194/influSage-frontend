@@ -1,13 +1,11 @@
 import {
-  RiCheckLine,
-  RiExchange2Line,
-  RiStackLine,
-  RiArrowUpLine,
-  RiArrowDownLine,
   RiHeart3Line,
   RiChat3Line,
   RiShareForwardLine,
   RiEyeLine,
+  RiThumbUpLine,
+  RiFileList3Line,
+  RiBarChartLine,
 } from "@remixicon/react";
 
 import PerformanceChart from "./PerformanceChart";
@@ -113,54 +111,55 @@ const AnalyticsLayout = () => {
     fetchRecentPostedContent();
   }, [fetchRecentPostedContent]);
 
-  const globalStats = useMemo(() => {
-    if (!summary) return [];
+ const globalStats = useMemo(() => {
+  if (!summary) return [];
 
-    return [
-      {
-        label: "Total Views",
-        value: safeNumber(summary.totalviews),
-        change: "0.0 %",
-        isPositive: true,
-        icon: <RiStackLine size={20} />,
-      },
-      {
-        label: "Total Likes",
-        value: safeNumber(summary.totallikes),
-        change: "0.0 %",
-        isPositive: true,
-        icon: <RiExchange2Line size={20} />,
-      },
-      {
-        label: "Total Comments",
-        value: safeNumber(summary.totalcomments),
-        change: "0.0 %",
-        isPositive: true,
-        icon: <RiCheckLine size={20} />,
-      },
-      {
-        label: "Total Shares",
-        value: safeNumber(summary.totalshares),
-        change: "0.0 %",
-        isPositive: true,
-        icon: <RiStackLine size={20} />,
-      },
-      {
-        label: "Content Pieces",
-        value: safeNumber(summary.totalcontentpiecescount),
-        change: "0.0 %",
-        isPositive: true,
-        icon: <RiCheckLine size={20} />,
-      },
-      {
-        label: "Avg Engagement Rate",
-        value: `${safeNumber(summary.avgengagementrate)}%`,
-        change: "0.0 %",
-        isPositive: true,
-        icon: <RiExchange2Line size={20} />,
-      },
-    ];
-  }, [summary]);
+  return [
+    {
+      label: "Total Views",
+      value: safeNumber(summary.totalviews),
+      change: "0.0 %",
+      isPositive: true,
+      icon: <RiEyeLine size={20} />,
+    },
+    {
+      label: "Total Likes",
+      value: safeNumber(summary.totallikes),
+      change: "0.0 %",
+      isPositive: true,
+      icon: <RiThumbUpLine size={20} />,
+    },
+    {
+      label: "Total Comments",
+      value: safeNumber(summary.totalcomments),
+      change: "0.0 %",
+      isPositive: true,
+      icon: <RiChat3Line size={20} />,
+    },
+    {
+      label: "Total Shares",
+      value: safeNumber(summary.totalshares),
+      change: "0.0 %",
+      isPositive: true,
+      icon: <RiShareForwardLine size={20} />,
+    },
+    {
+      label: "Content Pieces",
+      value: safeNumber(summary.totalcontentpiecescount),
+      change: "0.0 %",
+      isPositive: true,
+      icon: <RiFileList3Line size={20} />,
+    },
+    {
+      label: "Avg Engagement Rate",
+      value: `${safeNumber(summary.avgengagementrate)}%`,
+      change: "0.0 %",
+      isPositive: true,
+      icon: <RiBarChartLine size={20} />,
+    },
+  ];
+}, [summary]);
+
 
 
 
@@ -243,10 +242,6 @@ const AnalyticsLayout = () => {
         <div className="bg-white rounded-2xl  flex  justify-center">
           <CampaignContribution />
         </div>
-
-
-
-
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
         {/* 🔥 Top Content (Replaced with Chart) */}
@@ -298,7 +293,6 @@ const AnalyticsLayout = () => {
         {!contentLoading && contentList.length === 0 && (
           <Empty
             description="No recent content available"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
         )}
 
