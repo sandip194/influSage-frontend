@@ -6,11 +6,61 @@ import {
   RiArrowUpSLine,
   RiFileTextLine,
 } from '@remixicon/react';
+import { Empty, Skeleton } from 'antd';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
+
+
+
+const ProfileSkeleton = () => {
+  return (
+    <div className="w-full text-sm">
+      {/* Header */}
+      <Skeleton active title={{ width: 120 }} paragraph={{ rows: 1 }} />
+
+      <div className="flex flex-col lg:flex-row gap-4 mt-4">
+        {/* Left Side */}
+        <div className="flex-1 space-y-4">
+          {/* Profile Card */}
+          <div className="bg-white rounded-2xl p-6">
+            <Skeleton.Avatar size={80} shape="circle" />
+            <Skeleton active paragraph={{ rows: 2 }} className="mt-4" />
+          </div>
+
+          {/* Bio */}
+          <div className="bg-white rounded-2xl p-6">
+            <Skeleton active paragraph={{ rows: 4 }} />
+          </div>
+
+          {/* Portfolio */}
+          <div className="bg-white rounded-2xl p-4">
+            <Skeleton active title={{ width: 100 }} />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton.Image
+                  key={i}
+                  className="!w-full !h-40 rounded-lg"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side */}
+        <div className="w-full md:w-[300px] space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white rounded-2xl p-4">
+              <Skeleton active paragraph={{ rows: 4 }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Profile = () => {
   const [showAll, setShowAll] = useState(false);
@@ -58,8 +108,16 @@ const Profile = () => {
     if (userId && token) getMyProfileDetails();
   }, [userId, token]);
 
-  if (loading) return <div className="py-10 text-center">Loading...</div>;
-  if (!profileData) return <div className="py-10 text-center">No profile found.</div>;
+  if (loading) return <ProfileSkeleton />
+  if (!profileData) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Empty
+          description="Profile not found"
+        />
+      </div>
+    );
+  }
 
   // Destructure API data
   const { p_profile, p_socials, p_categories, p_portfolios, p_paymentaccounts } = profileData;

@@ -59,14 +59,14 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const [isMobile, setIsMobile] = useState(false);
 
   const basePath = role === 1 ? "/dashboard" : "/vendor-dashboard";
-    const removeFromHeader = (conversationId) => {
-      setUnreadMessages((prev) =>
-        prev.filter(
-          (m) =>
-            String(m.conversationid) !== String(conversationId)
-        )
-      );
-    };
+  const removeFromHeader = (conversationId) => {
+    setUnreadMessages((prev) =>
+      prev.filter(
+        (m) =>
+          String(m.conversationid) !== String(conversationId)
+      )
+    );
+  };
 
   // ======================================================
   // LOGOUT
@@ -112,105 +112,105 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   }, [token, role]);
 
 
- useEffect(() => {
-  if (!socket) return;
+  useEffect(() => {
+    if (!socket) return;
 
-  const messageHandler = (rawPayload) => {
-  console.log("📩 RAW socket payload:", rawPayload);
+    const messageHandler = (rawPayload) => {
+      console.log("📩 RAW socket payload:", rawPayload);
 
-  // ✅ Ignore deleted messages
-  if (rawPayload.is_deleted === true) {
-    console.log("⏭️ deleted message ignored");
-    return;
-  }
+      // ✅ Ignore deleted messages
+      if (rawPayload.is_deleted === true) {
+        console.log("⏭️ deleted message ignored");
+        return;
+      }
 
-  if (!rawPayload.name || !rawPayload.photopath) return;
+      if (!rawPayload.name || !rawPayload.photopath) return;
 
-  const payload = {
-    conversationid:
-      rawPayload.conversationid ?? rawPayload.conversationId,
-    userid:
-      rawPayload.userid ?? rawPayload.userId,
-    message:
-      rawPayload.message ?? rawPayload.content,
-    createddate: rawPayload.createddate,
-    readbyvendor: rawPayload.readbyvendor,
-    readbyinfluencer: rawPayload.readbyinfluencer,
-    name: rawPayload.name,
-    photopath: rawPayload.photopath,
-    entityType: rawPayload.entityType,
-  };
+      const payload = {
+        conversationid:
+          rawPayload.conversationid ?? rawPayload.conversationId,
+        userid:
+          rawPayload.userid ?? rawPayload.userId,
+        message:
+          rawPayload.message ?? rawPayload.content,
+        createddate: rawPayload.createddate,
+        readbyvendor: rawPayload.readbyvendor,
+        readbyinfluencer: rawPayload.readbyinfluencer,
+        name: rawPayload.name,
+        photopath: rawPayload.photopath,
+        entityType: rawPayload.entityType,
+      };
 
-  if (!payload.conversationid) return;
-  if (String(payload.userid) === String(userId)) return;
+      if (!payload.conversationid) return;
+      if (String(payload.userid) === String(userId)) return;
 
-  setUnreadMessages(prev => {
-    if (prev.some(m => String(m.conversationid) === String(payload.conversationid))) {
-      return prev;
-    }
-    return [payload, ...prev];
-  });
-};
+      setUnreadMessages(prev => {
+        if (prev.some(m => String(m.conversationid) === String(payload.conversationid))) {
+          return prev;
+        }
+        return [payload, ...prev];
+      });
+    };
 
-  socket.on("receiveMessage", messageHandler);
-  return () => socket.off("receiveMessage", messageHandler);
-}, [socket, role, userId]);
+    socket.on("receiveMessage", messageHandler);
+    return () => socket.off("receiveMessage", messageHandler);
+  }, [socket, role, userId]);
 
 
-useEffect(() => {
-  if (!socket) return;
+  useEffect(() => {
+    if (!socket) return;
 
-  const statusHandler = ({
-    conversationId,
-    readbyvendor,
-    readbyinfluencer,
-  }) => {
-    // console.log("📡 updateMessageStatus", {
-    //   conversationId,
-    //   readbyvendor,
-    //   readbyinfluencer,
-    //   role,
-    // });
+    const statusHandler = ({
+      conversationId,
+      readbyvendor,
+      readbyinfluencer,
+    }) => {
+      // console.log("📡 updateMessageStatus", {
+      //   conversationId,
+      //   readbyvendor,
+      //   readbyinfluencer,
+      //   role,
+      // });
 
-    const shouldRemove =
-      (String(role) === "2" && readbyvendor === true) ||
-      (String(role) === "1" && readbyinfluencer === true);
+      const shouldRemove =
+        (String(role) === "2" && readbyvendor === true) ||
+        (String(role) === "1" && readbyinfluencer === true);
 
-    if (!shouldRemove) return;
+      if (!shouldRemove) return;
 
-    setUnreadMessages((prev) =>
-      prev.filter(
-        (msg) =>
-          String(msg.conversationid) !==
-          String(conversationId)
-      )
-    );
-  };
+      setUnreadMessages((prev) =>
+        prev.filter(
+          (msg) =>
+            String(msg.conversationid) !==
+            String(conversationId)
+        )
+      );
+    };
 
-  socket.on("updateMessageStatus", statusHandler);
-  return () =>
-    socket.off("updateMessageStatus", statusHandler);
-}, [socket, role]);
+    socket.on("updateMessageStatus", statusHandler);
+    return () =>
+      socket.off("updateMessageStatus", statusHandler);
+  }, [socket, role]);
 
-useEffect(() => {
-  if (!socket) return;
+  useEffect(() => {
+    if (!socket) return;
 
-  const deleteHandler = ({ messageId, conversationId }) => {
-    console.log("🗑️ deleteMessage payload:", { messageId, conversationId });
+    const deleteHandler = ({ messageId, conversationId }) => {
+      console.log("🗑️ deleteMessage payload:", { messageId, conversationId });
 
-    if (!conversationId) return;
+      if (!conversationId) return;
 
-    deletedConversationsRef.current.add(String(conversationId));
+      deletedConversationsRef.current.add(String(conversationId));
 
-    setUnreadMessages(prev =>
-      prev.filter(
-        msg => String(msg.conversationid) !== String(conversationId)
-      )
-    );
-  };
-  socket.on("deleteMessage", deleteHandler);
-  return () => socket.off("deleteMessage", deleteHandler);
-}, [socket]);
+      setUnreadMessages(prev =>
+        prev.filter(
+          msg => String(msg.conversationid) !== String(conversationId)
+        )
+      );
+    };
+    socket.on("deleteMessage", deleteHandler);
+    return () => socket.off("deleteMessage", deleteHandler);
+  }, [socket]);
 
 
 
@@ -349,7 +349,7 @@ useEffect(() => {
             setMessageDropdownVisible(open);
 
             if (open) {
-             setUnreadMessages([]);
+              setUnreadMessages([]);
 
               setLoadingMessages(true);
               refreshUnreadMessages().finally(() => {
@@ -378,6 +378,8 @@ useEffect(() => {
         {/* Notifications */}
         <Dropdown
           trigger={["click"]}
+          placement={isMobile ? "bottom" : "bottomRight"}
+          getPopupContainer={(trigger) => trigger.parentElement}
           open={notificationDropdownVisible}
           onOpenChange={async (open) => {
             setNotificationDropdownVisible(open);

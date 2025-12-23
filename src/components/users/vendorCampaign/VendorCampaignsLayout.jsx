@@ -396,9 +396,9 @@ const VendorCampaignsLayout = () => {
             <thead className="bg-white text-gray-700 text-sm tracking-wide">
               <tr>
                 <th className="p-4">Campaign Name</th>
-                <th className="p-4">Budget</th>
-                <th className="p-4">Start Date</th>
-                <th className="p-4 min-w-30">End Date</th>
+                <th className="p-4 min-w-[100px]">Budget</th>
+                <th className="p-4 min-w-[80px]"> Campaign Start</th>
+                <th className="p-4 min-w-[80px]"> Campaign End</th>
                 <th className="p-4 min-w-40">Status</th>
                 {/* <th className="p-4">Action</th> */}
               </tr>

@@ -31,10 +31,15 @@ const VenderDashboardPage = () => {
                     </div>
                 </div>
                 <Campaign />
+<<<<<<< HEAD
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
 
                     {/* Smaller */}
                     <div className="w-full md:flex-[2] overflow-x-auto">
+=======
+                <div className="flex flex-col md:flex-row gap-4 mb-6 ">
+                    <div className="flex-1 overflow-x-auto">
+>>>>>>> f6e62e9182c51d6ff9d59778c1161fdff7929b04
                         <CampaignOverview />
                     </div>
 

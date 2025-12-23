@@ -65,12 +65,21 @@ const CampaignCard = ({ campaign }) => {
           {campaign.name}
         </h3>
 
+<<<<<<< HEAD
         {/* Description (fixed height via clamp) */}
         {campaign.description && (
           <p className="text-sm text-gray-700 mt-1 line-clamp-2 min-h-[2.5rem]">
             {campaign.description}
           </p>
         )}
+=======
+                    {/* Description */}
+                    {campaign.description && (
+                        <p className="text-sm text-gray-700 mt-1 line-clamp-2 h-10">
+                            {campaign.description}
+                        </p>
+                    )}
+>>>>>>> f6e62e9182c51d6ff9d59778c1161fdff7929b04
 
         {/* Categories */}
         <div className="flex flex-wrap gap-1 mt-2">

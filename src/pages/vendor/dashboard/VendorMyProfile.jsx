@@ -121,7 +121,7 @@ const VendorMyProfile = () => {
                                 src={profileData?.p_profile?.photopath}
                                 alt="Profile"
                                 onClick={() => setIsPreviewOpen(true)}
-                                className="absolute left-6 -bottom-10 w-20 h-20 rounded-full border-4 border-white shadow cursor-pointer"
+                                className="absolute left-6 -bottom-10 w-20 h-20 object-cover rounded-full border-4 border-white shadow cursor-pointer"
                             />
 
                             {isPreviewOpen && (

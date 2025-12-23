@@ -181,38 +181,38 @@ const InfluencerCampaigns = () => {
 
   // TEMP FILTER HANDLERS (DO NOT TRIGGER API)
 
-const handleProviderChange = (id) => {
-  setTempFilters((prev) => ({
-    ...prev,
-    providers: prev.providers.includes(id)
-      ? prev.providers.filter((p) => p !== id)
-      : [...prev.providers, id],
-  }));
-};
+  const handleProviderChange = (id) => {
+    setTempFilters((prev) => ({
+      ...prev,
+      providers: prev.providers.includes(id)
+        ? prev.providers.filter((p) => p !== id)
+        : [...prev.providers, id],
+    }));
+  };
 
-const handleClientChange = (id) => {
-  setTempFilters((prev) => ({
-    ...prev,
-    clients: prev.clients.includes(id)
-      ? prev.clients.filter((c) => c !== id)
-      : [...prev.clients, id],
-  }));
-};
+  const handleClientChange = (id) => {
+    setTempFilters((prev) => ({
+      ...prev,
+      clients: prev.clients.includes(id)
+        ? prev.clients.filter((c) => c !== id)
+        : [...prev.clients, id],
+    }));
+  };
 
-const handleBudgetChange = (field, value) => {
-  setTempFilters((prev) => ({
-    ...prev,
-    [field]: value === "" ? null : Number(value),
-  }));
-};
+  const handleBudgetChange = (field, value) => {
+    setTempFilters((prev) => ({
+      ...prev,
+      [field]: value === "" ? null : Number(value),
+    }));
+  };
 
-const handleDateChange = (dates) => {
-  setTempFilters((prev) => ({
-    ...prev,
-    startdate: dates?.[0]?.format("YYYY-MM-DD") ?? null,
-    enddate: dates?.[1]?.format("YYYY-MM-DD") ?? null,
-  }));
-};
+  const handleDateChange = (dates) => {
+    setTempFilters((prev) => ({
+      ...prev,
+      startdate: dates?.[0]?.format("YYYY-MM-DD") ?? null,
+      enddate: dates?.[1]?.format("YYYY-MM-DD") ?? null,
+    }));
+  };
 
 
   const applyFilters = () => {
@@ -249,50 +249,41 @@ const handleDateChange = (dates) => {
 
 
   return (
-    <div className="w-full text-sm">
+    <div className="w-full text-sm  pb-16 sm:pb-0">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-gray-900">My Campaigns</h2>
 
       </div>
 
-       {/* Status Tabs */}
-   <div
-      className="
-        bg-white p-3 rounded-lg mb-4
-        flex gap-3
-        overflow-x-auto
-        flex-nowrap
-        sm:flex-wrap
-      "
-    >
-      <button
-        onClick={() => handleStatusFilter(null)}
-        className={`px-4 py-2 rounded-lg border border-gray-300 shrink-0
-          ${
-            filters.statusId === null
-              ? "bg-[#0f122f] text-white"
-              : "bg-white text-gray-700"
-          }`}
-      >
-        All
-      </button>
-
-      {statuses.map((status) => (
-        <button
-          key={status.id}
-          onClick={() => handleStatusFilter(status.id)}
-          className={`px-4 py-2 rounded-lg border border-gray-300 shrink-0
-            ${
-              filters.statusId === status.id
+      {/* Status Tabs */}
+      <div className="bg-white p-3 rounded-lg mb-4">
+        <div className="flex gap-3 overflow-x-auto whitespace-nowrap scrollbar-hide">
+          <button
+            onClick={() => handleStatusFilter(null)}
+            className={`px-4 py-2 rounded-lg border flex-shrink-0 ${filters.statusId === null
                 ? "bg-[#0f122f] text-white"
                 : "bg-white text-gray-700"
-            }`}
-        >
-          {status.name}
-        </button>
-      ))}
-    </div>
+              }`}
+          >
+            All
+          </button>
+
+          {statuses.map((status) => (
+            <button
+              key={status.id}
+              onClick={() => handleStatusFilter(status.id)}
+              className={`px-4 py-2 rounded-lg border border-gray-200 cursor-pointer flex-shrink-0 ${filters.statusId === status.id
+                  ? "bg-[#0f122f] text-white"
+                  : "bg-white text-gray-700"
+                }`}
+            >
+              {status.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
 
 
       {/* Search, Sort, and Filter Header */}
@@ -360,9 +351,9 @@ const handleDateChange = (dates) => {
             <thead className="bg-white text-gray-700 text-sm tracking-wide">
               <tr>
                 <th className="p-4">Campaign</th>
-                <th className="p-4">Budget</th>
-                <th className="p-4">Campaign Start Date</th>
-                <th className="p-4">Status</th>
+                <th className="p-4 w-[130px]">Budget</th>
+                <th className="p-4 w-[160px]">Campaign Start</th>
+                <th className="p-4 w-[160px]">Status</th>
               </tr>
             </thead>
             <tbody className="text-sm text-gray-700">
