@@ -5,63 +5,81 @@ import { useSelector } from "react-redux";
 import { Dropdown, Menu, Modal, message, Input, DatePicker, Button, Skeleton, Empty } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useDispatch } from "react-redux";
+import { showLoader, hideLoader } from "../../../features/ui/uiSlice";
 
 dayjs.extend(relativeTime);
 
 const TodoListCard = () => {
+  const dispatch = useDispatch();
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState(null);
   const [formData, setFormData] = useState({ description: "", duedate: null });
   const [confirmModal, setConfirmModal] = useState({ visible: false, title: "", onOk: null });
+  const [errors, setErrors] = useState({ description: "", duedate: ""});
 
   const { token, user } = useSelector((state) => state.auth);
 
   const getTodoList = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get("user/dashboard/todo-list", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTodos(res.data.data || []);
-    } catch (error) {
-      console.error("Error fetching todos:", error);
-      message.error("Failed to fetch todos");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    dispatch(showLoader());
+
+    const res = await axios.get("user/dashboard/todo-list", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    setTodos(res.data.data || []);
+  } catch (error) {
+    console.error("Error fetching todos:", error);
+    message.error("Failed to fetch todos");
+  } finally {
+    dispatch(hideLoader());
+  }
+};
 
   useEffect(() => {
     getTodoList();
   }, []);
 
-  const handleTodoAction = async ({ id, description, duedate, isCompleted = null, isDeleted = false }) => {
-    try {
-      setLoading(true);
-      const body = {
-        p_userid: user?.id,
-        p_todolistid: id || null,
-        p_description: description || null,
-        p_duedate: duedate ? duedate.format("YYYY-MM-DD") : null,
-        p_iscompleted: isCompleted,
-        p_isdeleted: isDeleted,
-      };
-      await axios.post("user/dashboard/todo/insert-edit-delete", body, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      await getTodoList();
-      setShowModal(false);
-      setSelectedTodo(null);
-      setFormData({ description: "", duedate: null });
-    } catch (error) {
-      console.error("Error updating todo:", error);
-      message.error("Action failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleTodoAction = async ({
+  id,
+  description,
+  duedate,
+  isCompleted = null,
+  isDeleted = false,
+}) => {
+  try {
+    dispatch(showLoader());
+
+    const body = {
+      p_userid: user?.id,
+      p_todolistid: id || null,
+      p_description: description || null,
+      p_duedate: duedate ? duedate.format("YYYY-MM-DD") : null,
+      p_iscompleted: isCompleted,
+      p_isdeleted: isDeleted,
+    };
+
+    await axios.post(
+      "user/dashboard/todo/insert-edit-delete",
+      body,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    await getTodoList(); // ✅ refresh list
+
+    setShowModal(false);
+    setSelectedTodo(null);
+    setFormData({ description: "", duedate: null });
+  } catch (error) {
+    console.error("Error updating todo:", error);
+    message.error("Action failed");
+  } finally {
+    dispatch(hideLoader());
+  }
+};
 
   const showConfirm = ({ title, onOk }) => {
     setConfirmModal({ visible: true, title, onOk });
@@ -69,9 +87,12 @@ const TodoListCard = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!validateTodo()) return;
+
     handleTodoAction({
       id: selectedTodo?.id || null,
-      description: formData.description,
+      description: formData.description.trim(),
       duedate: formData.duedate,
     });
   };
@@ -83,10 +104,29 @@ const TodoListCard = () => {
         ? { description: todo.description, duedate: todo.duedate ? dayjs(todo.duedate) : null }
         : { description: "", duedate: null }
     );
+    setErrors({ description: "", duedate: "" });
     setShowModal(true);
   };
 
   const disabledDate = (current) => current && current < dayjs().startOf("day");
+
+  const validateTodo = () => {
+    const newErrors = {};
+
+    if (!formData.description?.trim()) {
+      newErrors.description = "Description is required";
+    } else if (formData.description.trim().length < 3) {
+      newErrors.description = "Description must be at least 3 characters";
+    } else if (formData.description.trim().length > 500) {
+      newErrors.description = "Description must not exceed 500 characters";
+    }
+
+    if (!formData.duedate) {
+      newErrors.duedate = "Due date is required";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // Memoized todo items for rendering
   const todoItems = useMemo(
@@ -212,20 +252,34 @@ const TodoListCard = () => {
             <label className="block text-sm font-medium mb-1">Description</label>
             <Input
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, description: e.target.value });
+                setErrors((p) => ({ ...p, description: "" }));
+              }}
               placeholder="Enter todo description"
-              required
+              status={errors.description ? "error" : ""}
             />
+
+            {errors.description && (
+              <p className="text-xs text-red-500 mt-1">{errors.description}</p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Due Date</label>
             <DatePicker
               value={formData.duedate}
-              onChange={(date) => setFormData({ ...formData, duedate: date })}
+              onChange={(date) => {
+                setFormData({ ...formData, duedate: date });
+                setErrors((p) => ({ ...p, duedate: "" }));
+              }}
               disabledDate={disabledDate}
               style={{ width: "100%" }}
-              required
+              status={errors.duedate ? "error" : ""}
             />
+
+            {errors.duedate && (
+              <p className="text-xs text-red-500 mt-1">{errors.duedate}</p>
+            )}
           </div>
           <div className="flex justify-end gap-3 pt-3">
             <Button onClick={() => setShowModal(false)}>Cancel</Button>

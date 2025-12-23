@@ -31,17 +31,20 @@ const VenderDashboardPage = () => {
                     </div>
                 </div>
                 <Campaign />
-                <div className="flex flex-col md:flex-row gap-4 mb-6 ">
-                    <div className="flex-1 overflow-x-auto">
-                        <CampaignOverview />
-                    </div>
+                <div className="flex flex-col md:flex-row gap-4 mb-6 items-stretch">
 
-                    {/* Wider */}
-                    <div className="w-full md:flex-[4] overflow-x-auto">
-                        <PendingContentList />
-                    </div>
+  {/* Smaller */}
+  <div className="w-full md:flex-[2] flex">
+    <CampaignOverview />
+  </div>
 
-                </div>
+  {/* Wider */}
+  <div className="w-full md:flex-[4] flex">
+    <PendingContentList />
+  </div>
+
+</div>
+
                 
                 
                 <EarningsSummarySectionVendor />

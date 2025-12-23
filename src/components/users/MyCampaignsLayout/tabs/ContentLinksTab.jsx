@@ -624,22 +624,28 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
         setSaving(true);
 
         try {
-            await axios.post(
+            const res = await axios.post(
                 "/user/upload/content-link",
                 {
-                    p_contractid: contractId,
-                    p_contentlinkjson: payload,
+                p_contractid: contractId,
+                p_contentlinkjson: payload,
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+            toast.success(
+                res.data?.message ||
+                "Links saved successfully!"
+            );
 
-            toast.success("Links saved successfully!");
-        } catch (err) {
+            } catch (err) {
             console.error(err);
-            toast.error("Failed to save links.");
-        } finally {
+            toast.error(
+                err?.response?.data?.message ||
+                "Failed to save links."
+            );
+            } finally {
             setSaving(false);
-        }
+            }
     };
 
     return (

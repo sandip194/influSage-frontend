@@ -76,6 +76,7 @@ const FeedbackCard = () => {
             className={`ri-star-${i < fb.rating ? "fill" : "line"} text-2xl ${
               i < fb.rating ? "text-yellow-500" : "text-gray-400"
             }`}
+            style={{ textShadow: "0 0 1px black", stroke: "#000", strokeWidth: 0.6 }}
           />
         ))}
       </div>

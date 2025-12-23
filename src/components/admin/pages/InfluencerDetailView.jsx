@@ -283,7 +283,24 @@ const InfluencerDetailView = () => {
                                 ))
                             )}
                         </div>
+                        {/* Languages */}
+                        {safeArray(influDetails.contentlanguages).length > 0 && (
+                            <div className="mb-4 mt-3">
+                                <p className="font-bold text-base mb-3">Content Languages</p>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {safeArray(influDetails.contentlanguages).map((lang, i) => (
+                                        <span
+                                            key={i}
+                                            className="px-3 py-1 bg-gray-100 rounded-full text-xs"
+                                        >
+                                            {safeText(lang.languagename)}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
+
 
                     {/* PORTFOLIO */}
                     <div className="bg-white p-4 rounded-2xl shadow-sm">
@@ -304,22 +321,7 @@ const InfluencerDetailView = () => {
                             </div>
                         )}
 
-                        {/* Languages */}
-                        {safeArray(influDetails.contentlanguages).length > 0 && (
-                            <div className="mb-4">
-                                <p className="font-medium">Content Languages</p>
-                                <div className="flex flex-wrap gap-2">
-                                    {safeArray(influDetails.contentlanguages).map((lang, i) => (
-                                        <span
-                                            key={i}
-                                            className="px-3 py-1 bg-gray-100 rounded-full text-xs"
-                                        >
-                                            {safeText(lang.languagename)}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        
 
                         {/* Files */}
                         {safeArray(influDetails.filepaths).some((f) => safeText(f.filepath, null)) ? (

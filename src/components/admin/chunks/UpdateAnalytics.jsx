@@ -298,7 +298,7 @@ const UpdateAnalytics = () => {
                         }}
                     >
                         <RiEditLine className="mr-2" />
-                        Edit
+                        Update
                     </button>
                 ),
             },

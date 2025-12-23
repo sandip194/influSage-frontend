@@ -92,7 +92,7 @@ const ProfileComplation = () => {
           visibility by completing the final steps of your profile.
         </p>
 
-        <Link to="/dashboard/my-profile">
+        <Link to="/vendor-dashboard/my-profile">
           <button className="mt-4 bg-[#0D132D] text-white text-sm px-6 py-2 rounded-full hover:bg-[#121A3F] transition">
             Complete Your Profile →
           </button>
