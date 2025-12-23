@@ -58,7 +58,7 @@ const CampaignCard = ({ campaign }) => {
 
                     {/* Description */}
                     {campaign.description && (
-                        <p className="text-sm text-gray-700 mt-1 line-clamp-2">
+                        <p className="text-sm text-gray-700 mt-1 line-clamp-2 h-10">
                             {campaign.description}
                         </p>
                     )}

@@ -10,7 +10,7 @@ import {
   RiUser3Line,
 } from "@remixicon/react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, FreeMode } from "swiper/modules";
+import { Navigation, FreeMode, Autoplay } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -188,24 +188,26 @@ const Campaign = () => {
             spaceBetween={15}
             slidesPerView={1} // mobile default
             breakpoints={{
-              640: { slidesPerView: 2 },
-              768: { slidesPerView: 3 },
-              1024: { slidesPerView: 4 },
+              640: { slidesPerView: 1.2 },
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+              1280: { slidesPerView: 4 },
             }}
             freeMode={true}
+            autoplay={{ delay: 3000, disableOnInteraction: true }}
             grabCursor={true}
             navigation={{
               nextEl: ".swiper-button-next-custom",
               prevEl: ".swiper-button-prev-custom",
             }}
-            modules={[FreeMode, Navigation]}
+            modules={[FreeMode, Navigation, Autoplay]}
             className="mySwiper pb-5"
           >
             {campaigns.map((item) => (
               <SwiperSlide key={item.id} className="pb-4">
                 <div
                   onClick={() => navigate(`/vendor-dashboard/vendor-campaign/campaignDetails/${item.id}`)}
-                  className="cursor-pointer min-w-[260px] max-w-[280px] bg-[#e6eff9] border border-gray-200 
+                  className="cursor-pointer  bg-[#e6eff9] border border-gray-200 
       rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col overflow-hidden"
                 >
                   {/* ======= Campaign Banner + Status ======= */}
@@ -299,17 +301,19 @@ const Campaign = () => {
             spaceBetween={15}
             slidesPerView={1} // default for mobile
             breakpoints={{
-              640: { slidesPerView: 2 },
-              768: { slidesPerView: 3 },
-              1024: { slidesPerView: 4 },
+              640: { slidesPerView: 1.2 },
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+              1280: { slidesPerView: 4 },
             }}
             freeMode={true}
+            autoplay={{ delay: 3000, disableOnInteraction: true }}
             grabCursor={true}
             navigation={{
               nextEl: ".influencer-button-next",
               prevEl: ".influencer-button-prev",
             }}
-            modules={[FreeMode, Navigation]}
+            modules={[FreeMode, Navigation, Autoplay]}
             className="pb-5"
           >
             {

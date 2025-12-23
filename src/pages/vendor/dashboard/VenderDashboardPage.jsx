@@ -18,8 +18,7 @@ const VenderDashboardPage = () => {
                 <ProfileComplationVendor />
                 <CampaignCards />
                 <Campaign />
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
-
+                <div className="flex flex-col md:flex-row gap-4 mb-6 ">
                     <div className="flex-1 overflow-x-auto">
                         <CampaignOverview />
                     </div>

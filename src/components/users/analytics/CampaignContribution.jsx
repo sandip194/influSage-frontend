@@ -113,7 +113,7 @@ const CampaignContribution = () => {
       </div>
 
       {/* Chart */}
-      <div className="relative w-full h-64 sm:h-56 md:h-64">
+      <div className="relative w-full h-80 md:h-94">
         {loading && (
           <div className="flex justify-center items-center h-full">
             <Spin />

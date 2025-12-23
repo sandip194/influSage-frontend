@@ -1,24 +1,24 @@
 import React from 'react';
-// import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RiVerifiedBadgeLine } from '@remixicon/react';
+import { useNavigate } from 'react-router-dom';
 
 const ThankYouScreen = () => {
   const { role } = useSelector((state) => state.auth);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const roleId = Number(role);
 
-  // const handleGoToHome = () => {
-  //   if (roleId === 1) {
-  //     navigate("/dashboard");
-  //   } else if (roleId === 2) {
-  //     navigate("/vendor-dashboard");
-  //   }
-  // };
+  const handleGoToHome = () => {
+    if (roleId === 1) {
+      navigate("/dashboard");
+    } else if (roleId === 2) {
+      navigate("/vendor-dashboard");
+    }
+  };
 
   return (
     <div className="flex items-center justify-start ">
-            <div className="bg-white rounded-3xl p-10  text-start w-full">
+      <div className="bg-white rounded-3xl p-10  text-start w-full">
         {/* Icon */}
         <div className="mb-6">
           <div className="w-20 h-20 flex items-center justify-center rounded-full bg-[#F3F4F6]">
@@ -48,7 +48,7 @@ const ThankYouScreen = () => {
             </p>
             <p className="text-gray-600 mb-8 text-justify">
               <span className="font-bold text-[#121A3F]">
-                Thank you for submitting your business details!  
+                Thank you for submitting your business details!
                 You can now create campaigns, connect with influencers,
                 and grow your brand presence with us.
               </span>
@@ -60,13 +60,15 @@ const ThankYouScreen = () => {
           </p>
         )}
 
-        {/* Button
-        <button
-          onClick={handleGoToHome}
-          className="bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer text-white font-semibold px-6 py-3 rounded-full shadow-md"
-        >
-          Go To Home
-        </button> */}
+        {roleId === 2 && (
+          <button
+            onClick={handleGoToHome}
+            className="bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer text-white font-semibold px-6 py-3 rounded-full shadow-md"
+          >
+            Go To Home
+          </button>
+        )}
+
       </div>
     </div>
   );

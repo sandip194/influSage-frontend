@@ -50,7 +50,7 @@ const NotificationDropdown = React.memo(
 
 
     return (
-      <div className="w-80 sm:w-80 bg-white p-4 shadow-xl rounded-2xl">
+      <div className="w-80 max-w-80 bg-white p-4 shadow-xl rounded-2xl">
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-lg font-semibold text-[#0b0d28]">Notifications</h3>
           <button
