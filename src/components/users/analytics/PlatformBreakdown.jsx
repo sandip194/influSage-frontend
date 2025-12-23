@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Skeleton, Select, Row, Col } from "antd";
+import { Skeleton, Select, Empty } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
@@ -12,10 +12,41 @@ const formatNumber = (num) => {
   return num;
 };
 
+/* ---------- Skeleton Row ---------- */
+const PlatformSkeletonRow = () => (
+  <div className="flex flex-col sm:flex-row sm:items-center gap-3 overflow-hidden">
+    {/* Platform icon + name */}
+    <div className="flex items-center gap-2 ">
+      <Skeleton.Avatar size={24} shape="circle" active />
+      <Skeleton.Input size="small" style={{ width: 90 }} active />
+    </div>
+
+    {/* Progress bar */}
+    <div className="flex-1">
+      <Skeleton.Input
+        size="small"
+        style={{ width: "100%", height: 10, borderRadius: 999 }}
+        active
+      />
+    </div>
+
+    {/* Percentage */}
+    <Skeleton.Input
+      size="small"
+      style={{ width: 30 }}
+      active
+      className="hidden sm:block"
+    />
+
+    {/* Likes */}
+    <Skeleton.Input size="small" style={{ width: 60 }} active />
+  </div>
+);
+
 export const PlatformBreakdown = () => {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1; // 1-indexed
+  const currentMonth = currentDate.getMonth() + 1;
 
   const [year, setYear] = useState(currentYear);
   const [month, setMonth] = useState(currentMonth);
@@ -24,13 +55,11 @@ export const PlatformBreakdown = () => {
 
   const { token } = useSelector((state) => state.auth);
 
-  // Years dropdown (e.g., last 5 years)
   const yearList = useMemo(
     () => Array.from({ length: 5 }, (_, i) => currentYear - i),
     [currentYear]
   );
 
-  // Months dropdown
   const monthList = useMemo(
     () => [
       { value: 1, label: "Jan" },
@@ -63,16 +92,14 @@ export const PlatformBreakdown = () => {
     } finally {
       setLoading(false);
     }
-  }, [year, month]);
+  }, [year, month, token]);
 
   useEffect(() => {
     fetchPlatformData();
   }, [fetchPlatformData]);
 
-
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-5  w-full">
-
+    <div className="bg-white rounded-2xl p-4 sm:p-5 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <h2 className="text-base sm:text-lg font-bold text-gray-900">
@@ -80,12 +107,7 @@ export const PlatformBreakdown = () => {
         </h2>
 
         <div className="flex gap-2">
-          <Select
-            value={month}
-            onChange={setMonth}
-            size="middle"
-            className="w-full sm:w-[100px]"
-          >
+          <Select value={month} onChange={setMonth} className="w-[100px]">
             {monthList.map((m) => (
               <Option key={m.value} value={m.value}>
                 {m.label}
@@ -93,12 +115,7 @@ export const PlatformBreakdown = () => {
             ))}
           </Select>
 
-          <Select
-            value={year}
-            onChange={setYear}
-            size="middle"
-            className="w-full sm:w-[80px]"
-          >
+          <Select value={year} onChange={setYear} className="w-[80px]">
             {yearList.map((y) => (
               <Option key={y} value={y}>
                 {y}
@@ -110,11 +127,16 @@ export const PlatformBreakdown = () => {
 
       {/* Content */}
       {loading ? (
-        <Skeleton active paragraph={{ rows: 3 }} />
+        <div className="space-y-5 overflow-hidden">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <PlatformSkeletonRow key={i} />
+          ))}
+        </div>
       ) : platformData.length === 0 ? (
-        <p className="text-gray-500 text-sm text-center py-6">
-          No data available for the selected period
-        </p>
+        <Empty
+          description="No data available for this period"
+          className="py-10"
+        />
       ) : (
         <div className="space-y-5">
           {platformData.map((item) => (
@@ -145,14 +167,9 @@ export const PlatformBreakdown = () => {
                     }}
                   />
                 </div>
-
-                {/* Percentage (mobile below bar) */}
-                {/* <p className="text-xs text-blue-500 mt-1 sm:hidden">
-                  {item.percentage}%
-                </p> */}
               </div>
 
-              {/* Percentage (desktop) */}
+              {/* Percentage */}
               <p className="hidden sm:block w-12 text-xs text-blue-500 font-medium text-right">
                 {item.percentage}%
               </p>

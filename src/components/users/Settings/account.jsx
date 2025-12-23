@@ -1,86 +1,123 @@
-import React from 'react';
-import { Form, Select, Button, Card } from 'antd';
+import React, { useEffect } from "react";
+import { Form, Select } from "antd";
+import { useSelector } from "react-redux";
 
 const { Option } = Select;
 
-const AccountSettings = () => {
+/* Role mapping */
+const ROLE_MAP = {
+  1: "creator",
+  2: "brand",
+};
+
+/* Field configuration */
+const FIELD_CONFIG = {
+  common: [
+    {
+      label: "Visibility",
+      name: "visibility",
+      options: ["Private", "Public"],
+    },
+    {
+      label: "Time zone",
+      name: "timezone",
+      options: ["GMT +5:30", "GMT +0:00", "GMT -5:00"],
+    },
+    {
+      label: "Language",
+      name: "language",
+      options: ["English", "Hindi", "Spanish"],
+    },
+    {
+      label: "Theme",
+      name: "theme",
+      options: ["Light", "Dark"],
+    },
+  ],
+
+  creator: [
+    {
+      label: "Campaign Preference",
+      name: "campaignPreference",
+      options: [
+        "Short term",
+        "Long term",
+        "Both Short term and long term",
+      ],
+    },
+  ],
+
+  brand: [
+    {
+      label: "Influencer Preference",
+      name: "influencerPreference",
+      options: [
+        "Mega Influencer (1M+ Followers)",
+        "Macro Influencer (100k - 1M Followers)",
+        "Micro Influencer (50k - 100k Followers)",
+        "Mini Influencer (10k - 50k Followers)",
+        "Nano Influencer (1k - 10k Followers)"
+      ],
+    },
+  ],
+};
+
+const AccountSettings = ({ apiData }) => {
   const [form] = Form.useForm();
+  const { role } = useSelector((state) => state.auth);
+
+  const userType = ROLE_MAP[role]; // creator | brand
+
+  useEffect(() => {
+    if (apiData) {
+      form.setFieldsValue(apiData);
+    }
+  }, [apiData, form]);
 
   const handleFinish = (values) => {
     console.log("Form Submitted:", values);
   };
 
+  const renderFields = (fields) =>
+    fields.map((field) => (
+      <Form.Item
+        key={field.name}
+        label={field.label}
+        name={field.name}
+      >
+        <Select size="large">
+          {field.options.map((opt) => (
+            <Option key={opt} value={opt}>
+              {opt}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
+    ));
+
   return (
-    <div
-      bodyStyle={{ padding: "24px" }}
-    >
+    <div>
       <h2 className="text-xl font-semibold mb-6">Account Settings</h2>
 
       <Form
         layout="vertical"
         form={form}
-        initialValues={{
-          visibility: "Private",
-          campaignPreference: "Both Short term and long term",
-          timezone: "GMT +5:30",
-          language: "English",
-          theme: "Light",
-        }}
         onFinish={handleFinish}
       >
-        {/* Visibility */}
-        <Form.Item label="Visibility" name="visibility">
-          <Select size="large">
-            <Option value="Private">Private</Option>
-            <Option value="Public">Public</Option>
-          </Select>
-        </Form.Item>
+        {/* Common fields */}
+        {renderFields(FIELD_CONFIG.common)}
 
-        {/* Campaign Preference */}
-        <Form.Item label="Campaign Preference" name="campaignPreference">
-          <Select size="large">
-            <Option value="Short term">Short term</Option>
-            <Option value="Long term">Long term</Option>
-            <Option value="Both Short term and long term">
-              Both Short term and long term
-            </Option>
-          </Select>
-        </Form.Item>
+        {/* Role specific fields */}
+        {renderFields(FIELD_CONFIG[userType] || [])}
 
-        {/* Time zone */}
-        <Form.Item label="Time zone" name="timezone">
-          <Select size="large">
-            <Option value="GMT +5:30">GMT +5:30</Option>
-            <Option value="GMT +0:00">GMT +0:00</Option>
-            <Option value="GMT -5:00">GMT -5:00</Option>
-          </Select>
-        </Form.Item>
-
-        {/* Language */}
-        <Form.Item label="Language" name="language">
-          <Select size="large">
-            <Option value="English">English</Option>
-            <Option value="Hindi">Hindi</Option>
-            <Option value="Spanish">Spanish</Option>
-          </Select>
-        </Form.Item>
-
-        {/* Theme */}
-        <Form.Item label="Theme" name="theme">
-          <Select size="large">
-            <Option value="Light">Light</Option>
-            <Option value="Dark">Dark</Option>
-          </Select>
-        </Form.Item>
-
-        {/* Buttons */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 ">
-            <button
-              className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
-            >
-              Save Changes
-            </button>
-          </div>
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            className="bg-[#121A3F] text-white px-8 py-3 rounded-full hover:bg-[#0D132D]"
+          >
+            Save Changes
+          </button>
+        </div>
       </Form>
     </div>
   );

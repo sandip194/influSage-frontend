@@ -35,13 +35,15 @@ const BrandAnalyticsDashboard = () => {
 
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
-    
+
 
     const [kpis, setKpis] = useState([]);
     const [recentContent, setRecentContent] = useState([]);
     const [campaigns, setCampaigns] = useState([]);
     const [campaignList, setCampaignList] = useState([])
     const [selectedCampaignId, setSelectedCampaignId] = useState(null);
+    const [campaignLoading, setCampaignLoading] = useState(false);
+
 
 
     const [platforms, setPlatforms] = useState([]);
@@ -122,13 +124,23 @@ const BrandAnalyticsDashboard = () => {
     }, [selectedMonth, selectedYear]);
 
     const fetchCampaignOverview = async () => {
-        const res = await axios.get("vendor/analytics/campaign-overview", {
-            params: { p_filtertype: campaignFilter },
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        setCampaignLoading(true);
 
-        setCampaigns(res.data?.data || []);
+        try {
+            const res = await axios.get("vendor/analytics/campaign-overview", {
+                params: { p_filtertype: campaignFilter },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setCampaigns(res.data?.data || []);
+        } catch (err) {
+            console.error(err);
+            setCampaigns([]);
+        } finally {
+            setCampaignLoading(false);
+        }
     };
+
 
     useEffect(() => {
         fetchCampaignOverview();
@@ -198,70 +210,83 @@ const BrandAnalyticsDashboard = () => {
                         <Option value="year">Year</Option>
                     </Select>
                 </div>
-                <table className="min-w-full text-left">
-                    <thead>
-                        <tr className="border-b border-gray-300">
-                            <th className="py-2 px-3 text-gray-500 text-xs">Campaign</th>
-                            <th className="py-2 px-3 text-gray-500 text-xs">Platform</th>
-                            <th className="py-2 px-3 text-gray-500 text-xs">Views</th>
-                            <th className="py-2 px-3 text-gray-500 text-xs">Engagement</th>
-                            <th className="py-2 px-3 text-gray-500 text-xs">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {campaigns.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} className="py-4 text-center text-gray-500">
-                                    No campaigns found
+                <tbody>
+                    {/* 🔄 Loading State */}
+                    {campaignLoading && (
+                        [...Array(5)].map((_, idx) => (
+                            <tr key={idx} className="border-b border-gray-200">
+                                <td colSpan={5} className="py-3 px-3">
+                                    <Skeleton
+                                        active
+                                        paragraph={{ rows: 1 }}
+                                        title={false}
+                                    />
                                 </td>
                             </tr>
-                        ) : (
-                            campaigns.map((c) => (
-                                <tr
-                                    key={c.campaignid}
-                                    className="border-b border-gray-200 hover:bg-gray-50"
-                                >
-                                    {/* Campaign Name */}
-                                    <td className="py-2 px-3 font-medium text-[#0D132D]">
-                                        {c.campaignname}
-                                    </td>
+                        ))
+                    )}
 
-                                    {/* Platforms (from providers array) */}
-                                    <td className="py-2 px-3">
-                                        {c.providers?.length
-                                            ? c.providers.map(p => p.providername).join(", ")
-                                            : "-"}
-                                    </td>
+                    {/* 📭 Empty State */}
+                    {!campaignLoading && campaigns.length === 0 && (
+                        <tr colspan={5}>
+                            <td colSpan={5} className="block w-full">
+                                <div className="flex justify-center py-12">
+                                    <Empty description="No campaigns found" />
+                                </div>
+                            </td>
 
-                                    {/* Views */}
-                                    <td className="py-2 px-3">
-                                        {c.totalviews?.toLocaleString()}
-                                    </td>
+                        </tr>
+                    )}
 
-                                    {/* Engagement */}
-                                    <td className="py-2 px-3">
-                                        {c.totalengagement?.toLocaleString()}
-                                    </td>
 
-                                    {/* Status */}
-                                    <td className="py-2 px-3">
-                                        <span
-                                            className={`px-2 py-1 rounded-full text-xs font-medium
-                                    ${c.statusname === "Published"
-                                                    ? "bg-green-100 text-green-700"
-                                                    : c.statusname === "InProgress"
-                                                        ? "bg-yellow-100 text-yellow-700"
-                                                        : "bg-gray-100 text-gray-600"
-                                                }`}
-                                        >
-                                            {c.statusname}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                    {/* ✅ Data State */}
+                    {!campaignLoading && campaigns.length > 0 &&
+                        campaigns.map((c) => (
+                            <tr
+                                key={c.campaignid}
+                                className="border-b border-gray-200 hover:bg-gray-50"
+                            >
+                                {/* Campaign Name */}
+                                <td className="py-2 px-3 font-medium text-[#0D132D]">
+                                    {c.campaignname}
+                                </td>
+
+                                {/* Platforms */}
+                                <td className="py-2 px-3">
+                                    {c.providers?.length
+                                        ? c.providers.map(p => p.providername).join(", ")
+                                        : "-"}
+                                </td>
+
+                                {/* Views */}
+                                <td className="py-2 px-3">
+                                    {c.totalviews?.toLocaleString()}
+                                </td>
+
+                                {/* Engagement */}
+                                <td className="py-2 px-3">
+                                    {c.totalengagement?.toLocaleString()}
+                                </td>
+
+                                {/* Status */}
+                                <td className="py-2 px-3">
+                                    <span
+                                        className={`px-2 py-1 rounded-full text-xs font-medium
+                        ${c.statusname === "Published"
+                                                ? "bg-green-100 text-green-700"
+                                                : c.statusname === "InProgress"
+                                                    ? "bg-yellow-100 text-yellow-700"
+                                                    : "bg-gray-100 text-gray-600"
+                                            }`}
+                                    >
+                                        {c.statusname}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))
+                    }
+                </tbody>
+
             </div>
 
             {/* ------------------------- */}
