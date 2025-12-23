@@ -257,12 +257,22 @@ const handleDateChange = (dates) => {
       </div>
 
        {/* Status Tabs */}
-    <div className="bg-white p-3 rounded-lg mb-4 flex flex-wrap gap-3">
+   <div
+      className="
+        bg-white p-3 rounded-lg mb-4
+        flex gap-3
+        overflow-x-auto
+        flex-nowrap
+        sm:flex-wrap
+      "
+    >
       <button
         onClick={() => handleStatusFilter(null)}
-        className={`px-4 py-2 rounded-lg border border-gray-300 ${filters.statusId === null
-            ? "bg-[#0f122f] text-white"
-            : "bg-white text-gray-700"
+        className={`px-4 py-2 rounded-lg border border-gray-300 shrink-0
+          ${
+            filters.statusId === null
+              ? "bg-[#0f122f] text-white"
+              : "bg-white text-gray-700"
           }`}
       >
         All
@@ -272,9 +282,11 @@ const handleDateChange = (dates) => {
         <button
           key={status.id}
           onClick={() => handleStatusFilter(status.id)}
-          className={`px-4 py-2 rounded-lg border border-gray-300 ${filters.statusId === status.id
-              ? "bg-[#0f122f] text-white"
-              : "bg-white text-gray-700"
+          className={`px-4 py-2 rounded-lg border border-gray-300 shrink-0
+            ${
+              filters.statusId === status.id
+                ? "bg-[#0f122f] text-white"
+                : "bg-white text-gray-700"
             }`}
         >
           {status.name}

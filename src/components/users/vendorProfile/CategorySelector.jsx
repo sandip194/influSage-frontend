@@ -107,10 +107,14 @@ export const CategorySelector = ({
       const res = await axios.post(endpoint, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (res.status === 200) {
-        if (showToast) toast.success("Profile updated successfully!");
+        const successMessage =
+          res?.data?.message || "Profile updated successfully";
+
+        if (showToast) toast.success(successMessage);
+
         setIsFormChanged(false);
+
         if (onNext) onNext();
         if (onSave) onSave(formData);
       }
@@ -172,28 +176,7 @@ export const CategorySelector = ({
           </p>
         </div>
 
-        {(showControls || onNext) && (
-          <div className="w-full sm:w-auto">
-            <button
-              onClick={handleSubmit}
-              disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
-              className={`w-full sm:w-auto px-6 py-2 sm:px-8 sm:py-3 rounded-full text-white font-medium transition
-                ${
-                  (onNext || isFormChanged) && !isSubmitting
-                    ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
-                    : "bg-gray-400 cursor-not-allowed"
-                }`}
-            >
-              {isSubmitting ? (
-                <Spin size="small" />
-              ) : onNext ? (
-                "Continue"
-              ) : (
-                "Save Changes"
-              )}
-            </button>
-          </div>
-        )}
+        
       </div>
 
       {/* ---------- GLOBAL COUNTER (NEW) ---------- */}
@@ -380,7 +363,28 @@ export const CategorySelector = ({
           )}
         </div>
       )}
-
+      {(showControls || onNext) && (
+        <div className="flex justify-end mt-6">
+          <button
+            onClick={handleSubmit}
+            disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
+            className={`px-6 py-2 sm:px-8 sm:py-3 rounded-full text-white font-medium transition
+              ${
+                (onNext || isFormChanged) && !isSubmitting
+                  ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
+          >
+            {isSubmitting ? (
+              <Spin size="small" />
+            ) : onNext ? (
+              "Continue"
+            ) : (
+              "Save Changes"
+            )}
+          </button>
+        </div>
+      )}
       {/* ERROR */}
       {error && (
         <div className="text-red-500 text-sm font-medium mt-4">

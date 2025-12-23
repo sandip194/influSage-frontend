@@ -14,11 +14,14 @@ const DashboardPage = () => {
     <div className="">
       {/* Top cards */}
       <div className="flex flex-col lg:flex-row gap-4 mb-6">
-        <div className="flex-1">
-          <ProfileComplation />
-        </div>
-        <div className="flex-1">
+      {/* Left */}
+        <div className="w-full lg:w-2/2 order-1">
           <CampaignStats />
+        </div>
+
+        {/* Right */}
+        <div className="w-full lg:w-2/3 order-2">
+          <ProfileComplation />
         </div>
       </div>
 

@@ -15,16 +15,32 @@ const VenderDashboardPage = () => {
                 <p className='text-base text-[#0D132D]'>Track Your Campaign & Earning Progress</p>
             </div> */}
             <div className="">
-                <ProfileComplationVendor />
-                <CampaignCards />
+                {/* <ProfileComplationVendor />
+                <CampaignCards /> */}
+
+                {/* Top cards */}
+                <div className="flex flex-col lg:flex-row gap-4 mb-6">
+                {/* Left */}
+                    <div className="w-full lg:w-2/2 order-1">
+                    <CampaignCards />
+                    </div>
+
+                    {/* Right */}
+                    <div className="w-full lg:w-2/3 order-2">
+                    <ProfileComplationVendor />
+                    </div>
+                </div>
                 <Campaign />
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
 
-                    <div className="flex-1 overflow-x-auto">
+                    {/* Smaller */}
+                    <div className="w-full md:flex-[2] overflow-x-auto">
                         <CampaignOverview />
                     </div>
-                    <div className="flex-1 overflow-x-auto">
-                       <PendingContentList />
+
+                    {/* Wider */}
+                    <div className="w-full md:flex-[4] overflow-x-auto">
+                        <PendingContentList />
                     </div>
 
                 </div>

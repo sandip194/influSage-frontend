@@ -27,66 +27,77 @@ const CampaignCard = ({ campaign }) => {
 
 
     return (
-        <Link
-            to={`/dashboard/browse/description/${campaign.id}`}
-            className="block"
-        >
-            <div className="bg-[#e6eff9] border border-gray-200 rounded-2xl overflow-hidden shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow duration-300 relative">
+  <Link
+    to={`/dashboard/browse/description/${campaign.id}`}
+    className="block h-full"
+  >
+    <div className="
+      bg-[#e6eff9] border border-gray-200 rounded-2xl
+      overflow-hidden shadow-sm
+      flex flex-col h-full
+      cursor-pointer hover:shadow-md transition-shadow duration-300
+      relative
+    ">
 
-                {/* ===== Banner ===== */}
-                <div className="relative h-36">
-                    <img
-                        src={campaign.photopath || "/placeholder.jpg"}
-                        alt={campaign.name}
-                        className="w-full h-full object-cover"
-                    />
+      {/* ===== Banner ===== */}
+      <div className="relative h-36 shrink-0">
+        <img
+          src={campaign.photopath || '/placeholder.jpg'}
+          alt={campaign.name}
+          className="w-full h-full object-cover"
+        />
 
-                    {/* ===== Apply Dates Badge ===== */}
-                    {campaign.applicationstartdate && campaign.applicationenddate && (
-                        <div className="absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full shadow-md 
-                bg-gradient-to-r from-blue-100 to-blue-300 text-[#0D132D] text-center whitespace-nowrap">
-                            Apply: {parseDDMMYYYY(campaign.applicationstartdate).toLocaleDateString("en-GB")}{" - "}
-                            {parseDDMMYYYY(campaign.applicationenddate).toLocaleDateString("en-GB")}
-                        </div>
-                    )}
-                </div>
+        {/* Apply Dates Badge */}
+        {campaign.applicationstartdate && campaign.applicationenddate && (
+          <div className="absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full shadow-md 
+            bg-gradient-to-r from-blue-100 to-blue-300 text-[#0D132D] whitespace-nowrap">
+            Apply: {parseDDMMYYYY(campaign.applicationstartdate).toLocaleDateString("en-GB")}
+            {" - "}
+            {parseDDMMYYYY(campaign.applicationenddate).toLocaleDateString("en-GB")}
+          </div>
+        )}
+      </div>
 
-                {/* ===== Info Section ===== */}
-                <div className="p-4 flex flex-col flex-1">
-                    {/* Campaign Name */}
-                    <h3 className="text-lg font-bold text-gray-900 truncate">{campaign.name}</h3>
+      {/* ===== Info Section ===== */}
+      <div className="p-4 flex flex-col flex-1">
+        {/* Campaign Name */}
+        <h3 className="text-lg font-bold text-gray-900 truncate">
+          {campaign.name}
+        </h3>
 
-                    {/* Description */}
-                    {campaign.description && (
-                        <p className="text-sm text-gray-700 mt-1 line-clamp-2">
-                            {campaign.description}
-                        </p>
-                    )}
+        {/* Description (fixed height via clamp) */}
+        {campaign.description && (
+          <p className="text-sm text-gray-700 mt-1 line-clamp-2 min-h-[2.5rem]">
+            {campaign.description}
+          </p>
+        )}
 
-                    {/* Categories */}
-                    <div className="flex flex-wrap gap-1 mt-2">
-                        {campaign.campaigncategories?.map((tag, i) => (
-                            <span
-                                key={i}
-                                className="px-2 py-1 bg-blue-200 text-gray-800 rounded-full text-xs text-black"
-                            >
-                                {tag.categoryname}
-                            </span>
-                        ))}
-                    </div>
+        {/* Categories */}
+        <div className="flex flex-wrap gap-1 mt-2">
+          {campaign.campaigncategories?.slice(0, 3).map((tag, i) => (
+            <span
+              key={i}
+              className="px-2 py-1 bg-blue-200 rounded-full text-xs text-black"
+            >
+              {tag.categoryname}
+            </span>
+          ))}
+        </div>
 
-                    
+        {/* Push budget to bottom */}
+        <div className="mt-3">
+          {campaign.estimatedbudget && (
+            <span className="inline-block bg-[#0D132D] text-white font-semibold px-3 py-1 rounded-full text-sm shadow-sm">
+              Budget: ₹{campaign.estimatedbudget.toLocaleString()}
+            </span>
+          )}
+        </div>
+      </div>
 
-                    {campaign.estimatedbudget && (
-                        <span className="inline-block bg-[#0D132D] text-white
-          font-semibold px-3 py-1 rounded-full mt-3 text-sm shadow-sm w-max">
-                            Budget: ₹{campaign.estimatedbudget?.toLocaleString()}
-                        </span>
-                    )}
-                </div>
-            </div>
-        </Link>
-    );
+    </div>
+  </Link>
+);
+
 };
 
 

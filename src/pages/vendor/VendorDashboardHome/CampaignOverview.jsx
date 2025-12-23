@@ -105,12 +105,12 @@ const CampaignOverview = () => {
     }
 
     return (
-        <div className="bg-white p-6 rounded-2xl w-full mt-4">
+        <div className="bg-white p-6 rounded-2xl w-full overflow-x-auto mt-4">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-bold text-gray-900">Campaign Overview</h2>
             </div>
 
-            <div className="flex justify-center">
+            <div className="flex-1 flex items-center justify-center">
                 <div className="h-64 w-64">
                     <Doughnut
                         data={chartData}

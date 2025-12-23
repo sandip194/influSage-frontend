@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { RiUserLine } from "@remixicon/react";
 import { useSelector } from "react-redux";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
-
-const ProfileComplationVendor = () => {
+const ProfileComplation = () => {
   const [completion, setCompletion] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { token  } = useSelector((state) => state.auth);
+  const { token } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchCompletion = async () => {
@@ -35,41 +33,73 @@ const ProfileComplationVendor = () => {
 
   if (loading) {
     return (
-      <div className="bg-white p-6 rounded-2xl flex items-center justify-center mb-3">
-        <p className="text-gray-500 text-sm">Loading profile completion...</p>
+      <div className="bg-white rounded-2xl p-6 text-center">
+        Loading...
       </div>
     );
   }
 
+  // Circular progress math
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (completion / 100) * circumference;
+
   return (
-    <div className="bg-white p-6 rounded-2xl flex-row sm:flex items-center justify-between mb-3">
-      <div className="flex items-center gap-4">
-        <div className="bg-[#0D132D] rounded-full p-3">
-          <RiUserLine className="text-white" />
-        </div>
+    <div className="relative bg-white rounded-2xl p-6 flex flex-col sm:flex-row gap-6 items-center h-full">
 
-        <div>
-          <p className="text-gray-700 font-semibold">Profile Completion</p>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-            <div
-              className="bg-[#0D132D] h-2 rounded-full transition-all duration-500"
-              style={{ width: `${completion}%` }}
-            ></div>
-          </div>
+      {/* CIRCULAR PROGRESS */}
+      <div className="relative w-36 h-36 shrink-0">
+        <svg className="w-full h-full rotate-[-90deg]">
+          <circle
+            cx="72"
+            cy="72"
+            r={radius}
+            stroke="#E5E7EB"
+            strokeWidth="8"
+            fill="none"
+          />
+          <circle
+            cx="72"
+            cy="72"
+            r={radius}
+            stroke="#0D132D"
+            strokeWidth="8"
+            fill="none"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+          />
+        </svg>
 
-          <p className="text-sm text-gray-500 mt-1">
-            {completion}% of your profile is complete.
+        {/* CENTER TEXT */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <p className="text-2xl font-bold text-gray-900">
+            {completion}%
+          </p>
+          <p className="text-sm text-gray-500">
+            Complete
           </p>
         </div>
       </div>
 
-     <Link to="/vendor-dashboard/my-profile" className="inline-block">
-        <button className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D] mt-3 sm:mt-0">
-          Complete Profile
-        </button>
-      </Link>
+      <div className="flex-1 text-center sm:text-left">
+        <h3 className="text-base font-semibold text-gray-900">
+          Profile Completion
+        </h3>
+
+        <p className="text-sm text-gray-500 mt-1 max-w-md justify">
+          You are almost there! Unlock new opportunities and increase your
+          visibility by completing the final steps of your profile.
+        </p>
+
+        <Link to="/dashboard/my-profile">
+          <button className="mt-4 bg-[#0D132D] text-white text-sm px-6 py-2 rounded-full hover:bg-[#121A3F] transition">
+            Complete Your Profile →
+          </button>
+        </Link>
+      </div>
     </div>
   );
 };
 
-export default ProfileComplationVendor;
+export default ProfileComplation;

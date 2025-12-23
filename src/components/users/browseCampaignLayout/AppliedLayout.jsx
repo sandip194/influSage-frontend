@@ -120,20 +120,25 @@ const AppliedLayout = () => {
 
   return (
     <div className="appliedlayout w-full text-sm pb-24 sm:pb-0">
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
-      <p className="mb-6 text-gray-700 text-sm">Track your campaigns & Browse</p>
+      {/* <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
+      <p className="mb-6 text-gray-700 text-sm">Track your campaigns & Browse</p> */}
 
-      {/* Top Navigation Buttons */}
-      <div className="bg-white p-4 rounded-lg mb-6 flex flex-row gap-2 flex-wrap sm:flex-nowrap">
+      {/* Buttons */}
+      <div className="
+        bg-white p-3 rounded-lg mb-3
+        flex flex-row gap-2
+        overflow-x-auto sm:overflow-visible
+        no-scrollbar
+      ">
         {buttons.map(({ id, label, path }) => (
           <button
             key={id}
             onClick={() => navigate(path)}
-            className={`flex-1 sm:flex-none px-3 py-2 rounded-md border 
-            ${selectedButton === id
-                ? "bg-[#0f122f] text-white"
+            className={`whitespace-nowrap flex-shrink-0 px-4 py-2 rounded-md border transition text-sm ${
+              selectedButton === id
+                ? "bg-[#0f122f] text-white border-[#0f122f]"
                 : "bg-white text-[#141843] border-gray-300 hover:bg-gray-100"
-              }`}
+            }`}
           >
             {label}
           </button>
@@ -147,23 +152,30 @@ const AppliedLayout = () => {
             size="large"
             prefix={<SearchOutlined />}
             placeholder="Search for anything here..."
-            className="w-full flex-1"
+            className="w-full sm:w-auto flex-1"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                setSearchTerm(searchInput.trim());
+              const trimmedInput = searchInput.trim();
+
+              if ((e.key === "Enter" || e.key === " ") && trimmedInput !== "") {
+                setPageNumber(1);
+                setSearchTerm(trimmedInput);
+              }
+
+              if (e.key === "Enter" && trimmedInput === "") {
+                // Reset search
+                setSearchTerm("");
                 setPageNumber(1);
               }
             }}
             suffix={
               searchInput ? (
-                <Tooltip title="Clear search">
+                <Tooltip title="Clear search" placement="top">
                   <CloseCircleFilled
                     onClick={() => {
                       setSearchInput("");
                       setSearchTerm("");
-                      setPageNumber(1);
                     }}
                     className="text-gray-400 hover:text-gray-600 cursor-pointer"
                   />
@@ -172,25 +184,57 @@ const AppliedLayout = () => {
             }
           />
 
-          {/* Sort Dropdown */}
-          <Select
-            size="large"
-            value={`${sortby}_${sortorder}`}
-            onChange={(value) => {
-              const [newSortBy, newSortOrder] = value.split("_");
-              setSortBy(newSortBy);
-              setSortOrder(newSortOrder);
-              setPageNumber(1);
-            }}
-            className="w-48"
-            suffixIcon={<RiArrowDownSLine size={16} />}
-          >
-            {sortOptions.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
-                {option.label}
-              </Select.Option>
-            ))}
-          </Select>
+
+
+          <div className="flex gap-2 w-full sm:w-auto justify-end">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-end">
+              {/* Desktop view */}
+              <div className="hidden sm:block w-full sm:w-auto">
+                <Select
+                  size="large"
+                  value={`${sortby}_${sortorder}`}
+                  onChange={(value) => {
+                    const [newSortBy, newSortOrder] = value.split("_");
+                    setSortBy(newSortBy);
+                    setSortOrder(newSortOrder);
+                    setPageNumber(1);
+                  }}
+                  className="w-48"
+                  placeholder="Sort By"
+                  suffixIcon={<RiArrowDownSLine size={16} />}
+                >
+                  {sortOptions.map((option) => (
+                    <Select.Option key={option.value} value={option.value}>
+                      {option.label}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+
+              {/* Mobile view: fixed at bottom */}
+              <div className="sm:hidden fixed bottom-0 left-0 w-full z-30 bg-white p-4 shadow-md">
+                <Select
+                  size="large"
+                  value={`${sortby}_${sortorder}`}
+                  onChange={(value) => {
+                    const [newSortBy, newSortOrder] = value.split("_");
+                    setSortBy(newSortBy);
+                    setSortOrder(newSortOrder);
+                    setPageNumber(1);
+                  }}
+                  className="w-full"
+                  placeholder="Sort By"
+                  suffixIcon={<RiArrowDownSLine size={16} />}
+                >
+                  {sortOptions.map((option) => (
+                    <Select.Option key={option.value} value={option.value}>
+                      {option.label}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Cards */}

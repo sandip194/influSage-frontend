@@ -163,8 +163,13 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
         );
 
         if (res.status === 200) {
+          const successMessage =
+            res?.data?.message || "Profile updated successfully";
+
           onChange?.(payload.paymentjson);
-          if (showToast) toast.success('Profile updated successfully!');
+
+          if (showToast) toast.success(successMessage);
+
           setIsFormChanged(false);
 
           // Stepper: Go to next
@@ -172,7 +177,8 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
 
           // Edit Profile: Custom save handler
           if (onSave) onSave(formData);
-        } else {
+        }
+      else {
           message.error("Failed to save payment info");
         }
       }

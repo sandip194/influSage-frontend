@@ -188,9 +188,9 @@ const handleFileUpload = (e) => {
 };
 
   const handleClose = async () => {
-  if (!activeSubject) return;
-  try {
-    await axios.post(
+    if (!activeSubject) return;
+    try {
+    const res = await axios.post(
       "/chat/support/ticket/create-or-update-status",
       {
         p_usersupportticketid: activeSubject.id,
@@ -200,17 +200,30 @@ const handleFileUpload = (e) => {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    toast.success("Ticket closed successfully");
+    const successMessage =
+      res?.data?.message ||
+      res?.data?.p_message ||
+      "Ticket closed successfully";
+
+    toast.success(successMessage);
+
     setIsClosed(true);
 
     if (onCloseSuccess) onCloseSuccess();
+
     setMessages([]);
     setMessage("");
-
   } catch (err) {
-    console.error("Error resolving ticket:", err);
+    console.error("Error closing ticket:", err);
+
+    const errorMessage =
+      err?.response?.data?.message ||
+      "Failed to close ticket";
+
+    toast.error(errorMessage);
   }
 };
+
 useEffect(() => {
   const status = activeSubject?.status?.toLowerCase();
   setIsClosed(status === "open" || status === "closed");

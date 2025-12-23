@@ -85,13 +85,18 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
       );
 
       if (response.status === 200) {
-        if (showToast) toast.success('Profile updated successfully!');
+        const successMessage =
+          response?.data?.message || "Profile updated successfully";
+
+        if (showToast) toast.success(successMessage);
+
         setIsFormChanged(false);
+
         // Stepper: Go to next
         if (onNext) onNext();
 
         // Edit Profile: Custom save handler
-        if (onSave) onSave(formData);
+        if (onSave) onSave(socialaccountjson);
       }
 
     } catch (error) {

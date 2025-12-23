@@ -119,21 +119,27 @@ const SavedLayout = () => {
 
   return (
     <div className='w-full text-sm pb-24 sm:pb-0' >
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
+      {/* <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
       <p className="mb-6 text-gray-700 text-sm">
         Track your campaigns & Browse
-      </p>
+      </p> */}
 
-      <div className="bg-white p-4 rounded-lg mb-6 flex flex-row gap-2 flex-wrap sm:flex-nowrap">
+      {/* Buttons */}
+      <div className="
+        bg-white p-3 rounded-lg mb-3
+        flex flex-row gap-2
+        overflow-x-auto sm:overflow-visible
+        no-scrollbar
+      ">
         {buttons.map(({ id, label, path }) => (
           <button
             key={id}
-            onClick={() => handleClick(path)}
-            className={`flex-1 sm:flex-none px-3 py-2 rounded-md border border-gray-300 transition text-sm
-              ${selectedButton === id
-                ? "bg-[#0f122f] text-white"
-                : "bg-white text-[#141843] hover:bg-gray-100"
-              }`}
+            onClick={() => navigate(path)}
+            className={`whitespace-nowrap flex-shrink-0 px-4 py-2 rounded-md border transition text-sm ${
+              selectedButton === id
+                ? "bg-[#0f122f] text-white border-[#0f122f]"
+                : "bg-white text-[#141843] border-gray-300 hover:bg-gray-100"
+            }`}
           >
             {label}
           </button>

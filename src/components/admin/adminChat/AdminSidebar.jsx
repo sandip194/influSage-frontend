@@ -134,35 +134,47 @@ useEffect(() => {
   };
 
   const handleSubjectClick = async (ticket) => {
-    try {
-      setActiveSubject(ticket);
-      setActiveSubjectId(ticket.id);
+  try {
+    const wasAlreadyInprogress = activeTab === "Inprogress";
 
-      await axios.post(
-        "/chat/support/ticket/create-or-update-status",
-        {
-          p_usersupportticketid: ticket.id,
-          p_objectiveid: null,
-          p_statusname: "Inprogress",
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    setActiveSubject(ticket);
+    setActiveSubjectId(ticket.id);
 
-      setSubjectsByTab((prev) => {
-        const updated = { ...prev };
-        Object.keys(updated).forEach((tab) => {
-          updated[tab] = updated[tab].map((t) =>
-            t.id === ticket.id ? { ...t, unread: false } : t
-          );
-        });
-        return updated;
-      }); 
+    await axios.post(
+      "/chat/support/ticket/create-or-update-status",
+      {
+        p_usersupportticketid: ticket.id,
+        p_objectiveid: null,
+        p_statusname: "Inprogress",
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setSubjectsByTab((prev) => {
+      const updated = { ...prev };
 
+      Object.keys(updated).forEach((tab) => {
+        updated[tab] = updated[tab].map((t) =>
+          t.id === ticket.id
+            ? {
+                ...t,
+                statusname: "Inprogress",
+                unread: false,
+                isclaimedbyadmin: true,
+              }
+            : t
+        );
+      });
+
+      return updated;
+    });
+    if (!wasAlreadyInprogress) {
       setActiveTab("Inprogress");
-    } catch (err) {
-      console.error("Error updating ticket status:", err);
     }
-  };
+
+  } catch (err) {
+    console.error("Error updating ticket status:", err);
+  }
+};
 
   const subjects = subjectsByTab[activeTab] || [];
 

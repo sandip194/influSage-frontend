@@ -152,11 +152,16 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
     });
 
     if (res.status === 200) {
-      if (showToast) toast.success("Profile updated successfully!");
+      const successMessage =
+        res?.data?.message || "Profile updated successfully";
+
+      if (showToast) toast.success(successMessage);
+
       setIsFormChanged(false);
+
       onSave?.(formData);
       onNext?.();
-    } else {
+    }else {
       message.error("Something went wrong while saving.");
     }
   } catch (err) {

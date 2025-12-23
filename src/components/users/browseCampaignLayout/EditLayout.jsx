@@ -64,14 +64,14 @@ const EditLayout = () => {
           ? "Yes"
           : "No",
       },
-      {
-        label: "Campaign Start Date: ",
-        value: campaignDetails.requirements.campaignstartdate,
-      },
-      {
-        label: "Campaign End Date: ",
-        value: campaignDetails.requirements.campaignenddate,
-      },
+      // {
+      //   label: "Campaign Start Date: ",
+      //   value: campaignDetails.requirements.campaignstartdate,
+      // },
+      // {
+      //   label: "Campaign End Date: ",
+      //   value: campaignDetails.requirements.campaignenddate,
+      // },
     ];
   }, [campaignDetails]);
 
@@ -253,31 +253,12 @@ const EditLayout = () => {
                       </span>
 
                       <span className="text-gray-800 whitespace-nowrap">
-                        {campaignDetails?.requirements?.applicationstartdate || "N/A"} - {campaignDetails?.requirements?.applicationenddate || "N/A"}
+                        {campaignDetails?.requirements?.applicationstartdate || "N/A"} {'->'} {campaignDetails?.requirements?.applicationenddate || "N/A"}
                       </span>
-                    </p>
-
-                    {/* Campaign Start Date */}
-                    <p
-                      className="
-                        text-xs mt-1 
-                        flex flex-col sm:flex-row 
-                        sm:items-center 
-                        gap-[2px] sm:gap-1 
-                        leading-tight
-                      "
-                    >
-                      <span className="font-semibold text-indigo-600 whitespace-nowrap">
-                        Campaign Start Date:
-                      </span>
-
-                      <span className="text-gray-800 whitespace-nowrap">
-                        {campaignDetails?.requirements?.campaignstartdate || "N/A"}
-                      </span>
-                    </p>
+                    </p>           
 
                     {/* Total Application */}
-                    <p className="text-xs">
+                    <p className="text-xs mt-1">
                       <span className="font-semibold text-indigo-600">Total Application:</span>{" "}
                       <span className="text-gray-800">{campaignDetails?.appliedinfluencercount ?? "N/A"}</span>
                     </p>
@@ -836,9 +817,6 @@ const EditLayout = () => {
         <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
           <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
             <div className="bg-white rounded-2xl p-4 w-full text-sm">
-              <h2 className="text-lg font-semibold mb-4 text-[#0D132D]">
-                Brand Details
-              </h2>
 
               {/* Brand Description */}
               <div className="space-y-4">
@@ -885,9 +863,77 @@ const EditLayout = () => {
                   </div>
 
               </div>
+              <hr className="border-gray-200" />
+                {/* Campaign Dates */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-[#0D132D]">
+                    Campaign Dates
+                  </h3>
+
+                  <div className="flex justify-between text-sm">
+                    <div>
+                      <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
+                      <p className="flex items-center gap-1 text-gray-700">
+                        {campaignDetails?.requirements.campaignstartdate || "N/A"}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-sm font-semibold mb-1 my-2">End Date</p>
+                      <p className="flex items-center gap-1 text-gray-700">
+                        {campaignDetails?.requirements.campaignenddate || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Provider Content Types with optional captions */}
+            <div className="bg-white p-6 rounded-2xl">
+              <h3 className="font-semibold text-lg text-gray-900 mb-4">
+                Platform & Content Deliverables
+              </h3>
+
+              <div className="space-y-4">
+                {campaignDetails?.providercontenttype?.length > 0 ? (
+                  campaignDetails.providercontenttype.map((platform) => (
+                    <div
+                      key={platform.providercontenttypeid}
+                      className="border-b border-gray-100 pb-3 last:border-none"
+                    >
+                      {/* header row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-900 font-medium">
+                            {platform.providername}
+                          </span>
+                        </div>
+
+                        {/* Content Types at end */}
+                        <span className="text-gray-500 text-sm text-right">
+                          {platform.contenttypes && platform.contenttypes.length > 0
+                            ? platform.contenttypes
+                                .map((ct) => ct.contenttypename)
+                                .join(", ")
+                            : "No types"}
+                        </span>
+                      </div>
+
+                      {/* Caption */}
+                      {platform.caption && (
+                        <p className="text-gray-600 italic mt-2 border-l-2 border-gray-200 pl-3">
+                          {platform.caption}
+                        </p>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">No platform content types available.</p>
+                )}
+              </div>
+            </div>
         </div>
       </div>
 

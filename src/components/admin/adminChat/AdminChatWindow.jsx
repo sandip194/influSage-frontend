@@ -198,20 +198,32 @@ useEffect(() => {
   const handleResolve = async () => {
     if (!activeSubject || isResolved) return;
     try {
-      setIsResolved(true);
-      await axios.post(
-        "/chat/support/ticket/create-or-update-status",
-        {
-          p_usersupportticketid: activeSubject.id,
-          p_objectiveid: null,
-          p_statusname: "Resolved",
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success("Ticket resolved successfully");
-    } catch {
-      setIsResolved(false);
-    }
+  setIsResolved(true);
+
+  const res = await axios.post(
+    "/chat/support/ticket/create-or-update-status",
+    {
+      p_usersupportticketid: activeSubject.id,
+      p_objectiveid: null,
+      p_statusname: "Resolved",
+    },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  const message =
+    res?.data?.message ||
+    res?.data?.p_message ||
+    "Ticket resolved successfully";
+
+  toast.success(message);
+} catch (error) {
+  setIsResolved(false);
+  const errorMsg =
+    error?.response?.data?.message ||
+    "Failed to resolve ticket";
+
+  toast.error(errorMsg);
+}
   };
 
   useEffect(() => {

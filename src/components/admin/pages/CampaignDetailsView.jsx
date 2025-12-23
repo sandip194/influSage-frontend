@@ -341,42 +341,60 @@ const CampaignDetailsView = () => {
 
                             {/* Campaign Info Grid */}
                             <div className="flex flex-wrap justify-between gap-6 border border-gray-200 rounded-2xl p-4">
-                                <div>
-                                    <div className="flex gap-2 items-center text-gray-400 mb-2">
-                                        <RiMoneyRupeeCircleLine className="w-5" />
-                                        <span>Budget</span>
+                                <div className="min-w-[140px]">
+                                    <div className="flex items-center gap-2 text-gray-400 mb-2">
+                                    <RiMoneyRupeeCircleLine className="w-5 h-5" />
+                                    <span className="text-sm">Budget</span>
                                     </div>
-                                    <p>₹{safeNumber(cmapignDetails?.estimatedbudget, "-").toLocaleString()}</p>
+                                    <p className="text-[#0D132D] font-bold text-xl">
+                                    ₹{safeNumber(cmapignDetails?.estimatedbudget, 0).toLocaleString()}
+                                    </p>
                                 </div>
 
-                                <div>
-                                    <div className="flex gap-2 items-center text-gray-400 mb-2">
-                                        <RiTranslate className="w-5" />
-                                        <span>Languages</span>
+                                {/* Languages */}
+                                <div className="min-w-[180px]">
+                                    <div className="flex items-center gap-2 text-gray-400 mb-2">
+                                    <RiTranslate className="w-5 h-5" />
+                                    <span className="text-sm">Language</span>
                                     </div>
-                                    {/* Languages */}
+
+                                    <div className="flex flex-wrap gap-2">
                                     {safeArray(cmapignDetails?.campaignlanguages).length > 0 ? (
                                         cmapignDetails.campaignlanguages.map((lang) => (
-                                            <p key={lang.languageid}>{safeText(lang.languagename)}</p>
+                                        <span
+                                            key={lang.languageid}
+                                            className="px-3 py-1 text-sm rounded-lg bg-indigo-100 text-indigo-700 font-medium"
+                                        >
+                                            {safeText(lang.languagename)}
+                                        </span>
                                         ))
                                     ) : (
-                                        <p> - </p>
+                                        <span className="text-gray-400">-</span>
                                     )}
+                                    </div>
                                 </div>
 
-                                <div>
-                                    <div className="flex gap-2 items-center text-gray-400 mb-2">
-                                        <RiMenLine className="w-5" />
-                                        <span>Gender</span>
+                                {/* Gender */}
+                                <div className="min-w-[140px]">
+                                    <div className="flex items-center gap-2 text-gray-400 mb-2">
+                                    <RiMenLine className="w-5 h-5" />
+                                    <span className="text-sm">Gender</span>
                                     </div>
-                                    {/* Genders */}
+
+                                    <div className="flex flex-wrap gap-2">
                                     {safeArray(cmapignDetails?.campaigngenders).length > 0 ? (
                                         cmapignDetails.campaigngenders.map((gender) => (
-                                            <p key={gender.genderid}>{safeText(gender.gendername)}</p>
+                                        <span
+                                            key={gender.genderid}
+                                            className="px-3 py-1 text-sm rounded-lg bg-pink-100 text-pink-700 font-medium"
+                                        >
+                                            {safeText(gender.gendername)}
+                                        </span>
                                         ))
                                     ) : (
-                                        <p> - </p>
+                                        <span className="text-gray-400">-</span>
                                     )}
+                                    </div>
                                 </div>
 
 
@@ -458,18 +476,6 @@ const CampaignDetailsView = () => {
                                     <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
                                     <p>
                                         Product Shipping: <span className="text-gray-500">{cmapignDetails?.requirements?.isproductshipping ? "Yes" : "No"}</span>
-                                    </p>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
-                                    <p>
-                                        Application Start Date: <span className="text-gray-500">{safeText(cmapignDetails?.requirements?.applicationstartdate)}</span>
-                                    </p>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
-                                    <p>
-                                        Application End Date: <span className="text-gray-500">{safeText(cmapignDetails?.requirements?.applicationenddate)}</span>
                                     </p>
                                 </li>
                             </ul>
@@ -575,8 +581,14 @@ const CampaignDetailsView = () => {
 
                     {/* Campaign Info */}
                     <div className="bg-white p-4 rounded-2xl">
-                        <h3 className="font-semibold text-lg">Campaign Details</h3>
+                         <h3 className="font-semibold text-lg">Campaign Details</h3>
                         <hr className="my-2 border-gray-200" />
+                        <div className="py-2 border-b border-gray-200">
+                            <p className="text-sm mb-1 font-semibold">Campaign Number</p>
+                            <p className="text-gray-500">
+                                {cmapignDetails?.branddetails?.campaignnumber || "-"}
+                            </p>
+                        </div>
                         <div className="py-2 border-b border-gray-200">
                             <p className="text-sm mb-1 font-semibold">Campaign Dates</p>
                             <div className="flex justify-between">
@@ -590,6 +602,23 @@ const CampaignDetailsView = () => {
                                     <p className="text-sm font-semibold mb-1 my-2">End Date</p>
                                     <p className="text-gray-500">
                                         {cmapignDetails?.requirements?.campaignenddate || "-"}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="py-2 border-b border-gray-200">
+                            <p className="text-sm mb-1 font-semibold">Application Dates</p>
+                            <div className="flex justify-between">
+                                <div>
+                                    <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
+                                    <p className="text-gray-500">
+                                        {cmapignDetails?.requirements?.applicationstartdate || "-"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold mb-1 my-2">End Date</p>
+                                    <p className="text-gray-500">
+                                        {cmapignDetails?.requirements?.applicationenddate || "-"}
                                     </p>
                                 </div>
                             </div>

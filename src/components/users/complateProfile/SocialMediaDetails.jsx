@@ -91,9 +91,14 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
         }
       );
 
-      if (response.status == 200) {
-        if (showToast) toast.success('Profile updated successfully!');
+      if (response.status === 200) {
+        const successMessage =
+          response?.data?.message || "Profile updated successfully";
+
+        if (showToast) toast.success(successMessage);
+
         setIsFormChanged(false);
+
         // Stepper: Go to next
         if (onNext) onNext();
 

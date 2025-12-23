@@ -82,14 +82,6 @@
           label: "Include Profile Link: ",
           value: campaignDetails.requirements?.isincludevendorprofilelink ? "Yes" : "No",
         },
-        {
-          label: "Campaign Start Date: ",
-          value: campaignDetails.requirements.campaignstartdate,
-        },
-        {
-          label: "Campaign End Date: ",
-          value: campaignDetails.requirements.campaignenddate,
-        },
       ];
     }, [campaignDetails]);
 
@@ -604,7 +596,29 @@
               </div>
 
             </div>
+            <hr className="border-gray-200 mt-3" />
+                {/* Campaign Dates */}
+                <div className="space-y-2 mt-2">
+                  <h3 className="text-sm font-semibold text-[#0D132D]">
+                    Campaign Dates
+                  </h3>
 
+                  <div className="flex justify-between text-sm">
+                    <div>
+                      <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
+                      <p className="flex items-center gap-1 text-gray-700">
+                        {campaignDetails?.requirements.campaignstartdate || "N/A"}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-sm font-semibold mb-1 my-2">End Date</p>
+                      <p className="flex items-center gap-1 text-gray-700">
+                        {campaignDetails?.requirements.campaignenddate || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
             </div>
 
             {/* Provider Content Types with optional captions */}

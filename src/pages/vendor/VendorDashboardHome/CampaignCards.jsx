@@ -66,25 +66,35 @@ const CampaignStatsVendor = () => {
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-      {stats.map(({ label, value, icon }, idx) => (
-        <div
-          key={idx}
-          className="bg-white p-4 rounded-xl flex items-center gap-3"
-        >
-          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#0D132D] text-white text-base flex-shrink-0">
-            {icon}
-          </div>
+    return (
+    <div className="bg-white rounded-2xl p-6 h-full flex flex-col">
 
-          <div className="flex flex-col">
-            <p className="text-sm text-[#0D132D] font-medium">{label}</p>
-            <p className="text-lg font-bold text-gray-800">
-              {Number(value).toLocaleString()}
-            </p>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 gap-4 flex-1">
+        {stats.map(({ label, value, icon }, idx) => (
+          <div
+            key={idx}
+            className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3"
+          >
+            {/* Icon */}
+            <div className="w-9 h-9 bg-[#0D132D] rounded-full flex items-center justify-center shrink-0">
+              {React.cloneElement(icon, {
+                className: "text-white text-sm",
+              })}
+            </div>
+
+            {/* Text */}
+            <div className="leading-tight">
+              <p className="text-xs text-gray-500 font-medium">
+                {label}
+              </p>
+              <p className="text-base font-semibold text-gray-900">
+                {value}
+              </p>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

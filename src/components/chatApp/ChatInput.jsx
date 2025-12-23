@@ -185,13 +185,6 @@ export default function ChatInput({
               <span className="truncate max-w-[120px] text-sm">{previewUrl.name}</span>
             </div>
           )}
-          <button
-            type="button"
-            onClick={removeFile}
-            className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow hover:bg-red-100"
-          >
-            <RiCloseLine />
-          </button>
         </div>
       )}
 

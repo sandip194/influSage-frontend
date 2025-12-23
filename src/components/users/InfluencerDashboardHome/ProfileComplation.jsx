@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { RiUserLine } from "@remixicon/react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { Skeleton } from "antd";
 
 const ProfileComplation = () => {
   const [completion, setCompletion] = useState(0);
@@ -14,7 +12,7 @@ const ProfileComplation = () => {
     const fetchCompletion = async () => {
       try {
         const authToken = token || localStorage.getItem("token");
-        const response = await axios.get("user/dashboard/profile-completion", {
+        const response = await axios.get(`user/dashboard/profile-completion`, {
           headers: { Authorization: `Bearer ${authToken}` },
         });
 
@@ -31,82 +29,73 @@ const ProfileComplation = () => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl p-6 flex items-center justify-center">
-        <Skeleton active />
+      <div className="bg-white rounded-2xl p-6 text-center">
+        Loading...
       </div>
     );
   }
 
+  // Circular progress math
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (completion / 100) * circumference;
+
   return (
-  <div className="bg-white rounded-2xl p-4 flex flex-col w-full max-w-[400px]">
+    <div className="relative bg-white rounded-2xl p-6 flex flex-col sm:flex-row gap-6 items-center h-full">
 
-    {/* Title */}
-    <div className="flex items-center gap-3">
-      <div className="bg-[#0D132D] p-2.5 rounded-full">
-        <RiUserLine className="text-white text-lg" />
-      </div>
-      <span className="text-[15px] font-semibold text-[#0D132D]">
-        Profile Completion
-      </span>
-    </div>
-
-    {/* Content wrapper */}
-    <div className="flex flex-col items-center my-6">
-
-      {/* FULL CIRCLE */}
-      <div className="relative w-[120px] h-[140px]">
-
-        {/* base circle */}
-        <svg className="w-[140px] h-[140px] rotate-[-90deg]">
+      {/* CIRCULAR PROGRESS */}
+      <div className="relative w-36 h-36 shrink-0">
+        <svg className="w-full h-full rotate-[-90deg]">
           <circle
-            cx="70"
-            cy="70"
-            r="58"
-            stroke="#e5e7eb"
-            strokeWidth="12"
-            fill="transparent"
+            cx="72"
+            cy="72"
+            r={radius}
+            stroke="#E5E7EB"
+            strokeWidth="8"
+            fill="none"
+          />
+          <circle
+            cx="72"
+            cy="72"
+            r={radius}
+            stroke="#0D132D"
+            strokeWidth="8"
+            fill="none"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
           />
         </svg>
 
-        {/* progress */}
-        <svg className="w-[140px] h-[140px] rotate-[-90deg] absolute top-0 left-0">
-          <circle
-            cx="70"
-            cy="70"
-            r="58"
-            stroke="#6D5BFF"
-            strokeWidth="12"
-            fill="transparent"
-            strokeDasharray={2 * Math.PI * 58}
-            strokeDashoffset={(2 * Math.PI * 58 * (100 - completion)) / 100}
-            className="transition-all duration-700"
-          />
-        </svg>
-
-        {/* percent text */}
+        {/* CENTER TEXT */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-semibold text-gray-800">
+          <p className="text-2xl font-bold text-gray-900">
             {completion}%
-          </span>
-          <span className="text-xs text-gray-500">
+          </p>
+          <p className="text-sm text-gray-500">
             Complete
-          </span>
+          </p>
         </div>
+      </div>
 
+      <div className="flex-1 text-center sm:text-left">
+        <h3 className="text-base font-semibold text-gray-900">
+          Profile Completion
+        </h3>
+
+        <p className="text-sm text-gray-500 mt-1 max-w-md justify">
+          You are almost there! Unlock new opportunities and increase your
+          visibility by completing the final steps of your profile.
+        </p>
+
+        <Link to="/dashboard/my-profile">
+          <button className="mt-4 bg-[#0D132D] text-white text-sm px-6 py-2 rounded-full hover:bg-[#121A3F] transition">
+            Complete Your Profile →
+          </button>
+        </Link>
       </div>
     </div>
-
-    {/* button positioned right */}
-    <div className="flex justify-end">
-      <Link to="/dashboard/editProfile">
-        <button className="bg-[#121A3F] text-white text-xs px-4 py-2 rounded-full hover:bg-[#0D132D] transition">
-          Complete Profile
-        </button>
-      </Link>
-    </div>
-
-  </div>
-);
+  );
 };
 
 export default ProfileComplation;

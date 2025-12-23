@@ -240,11 +240,15 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
       });
 
       if (response.status === 200) {
-        if (showToast) toast.success('Profile updated successfully!');
+        const successMessage =
+          response?.data?.message || "Profile updated successfully";
+
+        if (showToast) toast.success(successMessage);
+
         setIsFormChanged(false);
         if (onNext) onNext();
         if (onSave) onSave(profilePayload);
-      } else {
+      }else {
         message.error('Failed to submit form, please try again.');
       }
     } catch (errorInfo) {
