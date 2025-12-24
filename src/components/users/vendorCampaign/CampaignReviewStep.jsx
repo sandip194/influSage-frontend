@@ -30,6 +30,7 @@ const CampaignReviewStep = ({ onEdit }) => {
   const { campaignId } = useParams();
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [loadingSend, setLoadingSend] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
 
 
 
@@ -189,65 +190,142 @@ const CampaignReviewStep = ({ onEdit }) => {
           {/* Banner */}
           <div className="bg-white rounded-2xl overflow-hidden">
             <div className="relative h-40">
-              <img
+               <img
                 src={influencer}
                 alt="Banner"
-                className="w-full h-28 object-cover rounded-lg"
+                className="w-full h-28 object-cover rounded-lg cursor-pointer"
+                onClick={() => setPreviewImage(influencer)}
               />
+              {/* Campaign Profile */}
               {camp_profile && (
                 <img
                   src={camp_profile}
                   alt="Campaign"
-                  className="absolute object-cover rounded-full top-18 left-4 w-22 h-22"
+                  className="absolute object-cover rounded-full top-18 left-4 w-22 h-22 cursor-pointer"
+                  onClick={() => setPreviewImage(camp_profile)}
                 />
               )}
+              {previewImage && (
+                <div
+                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                  onClick={() => setPreviewImage(null)}
+                >
+                  <button
+                    onClick={() => setPreviewImage(null)}
+                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                  >
+                    &times;
+                  </button>
+
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
+
             </div>
-            <div className="p-4">
-              <h2 className="font-semibold text-lg mb-1">
+            <div className="p-5">
+              {/* Title */}
+              <h2 className="font-semibold text-xl text-gray-900 mb-1">
                 {p_campaignjson.name}
               </h2>
-              <p className="text-gray-500">{p_campaignjson.branddetail}</p>
+              <p className="text-gray-500 mb-5">
+                {p_campaignjson.branddetail}
+              </p>
 
-              <div className="flex flex-wrap md:justify-around mt-3 gap-6 border border-gray-200 rounded-2xl p-4">
-                {/* Platforms */}
-                <div>
-                  <div className="flex gap-2 items-center mb-2 text-gray-500">
-                    <RiStackLine className="w-5" />
-                    <span> Platforms</span>
-                  </div>
-                  {platforms.length > 0
-                    ? platforms.map((p, i) => <p key={p + i}>{p}</p>)
-                    : "—"}
-                </div>
+              {/* Info Card */}
+              <div className="
+                grid grid-cols-2 
+                sm:grid-cols-2 
+                md:grid-cols-4 
+                gap-6 
+                mt-3 
+                border border-gray-200 
+                rounded-2xl 
+                p-4
+              ">
 
                 {/* Budget */}
                 <div>
-                  <div className="flex gap-2 items-center mb-2 text-gray-500">
-                    <RiMoneyRupeeCircleLine className="w-5" />
-                    <span> Budget </span>
+                  <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
+                    <RiMoneyRupeeCircleLine className="w-4 h-4" />
+                    <span>Budget</span>
                   </div>
-                  <p>₹{p_campaignjson.estimatedbudget || "0"}</p>
+                  <p className="text-[#0D132D] font-semibold text-lg">
+                    ₹{p_campaignjson.estimatedbudget || 0}
+                  </p>
                 </div>
 
-                {/* Languages */}
-                <div>
-                  <div className="flex gap-2 items-center mb-2 text-gray-500">
-                    <RiTranslate className="w-5" />
-                    <span> Languages </span>
+                {/* Language */}
+                <div className="min-w-[160px]">
+                  <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
+                    <RiTranslate className="w-4 h-4" />
+                    <span>Language</span>
                   </div>
-                  {languages.length > 0
-                    ? languages.map((l, i) => <p key={l + i}>{l}</p>)
-                    : "—"}
+                  <div className="flex flex-wrap gap-2">
+                    {languages?.length > 0 ? (
+                      languages.map((l, i) => (
+                        <span
+                          key={l + i}
+                          className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md text-sm font-medium"
+                        >
+                          {l}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
+                  </div>
                 </div>
 
-                <div>
-                  <div className="flex gap-2 items-center mb-2 text-gray-500">
-                    <RiMenLine className="w-5" />
-                    <span> Gender </span>
+                {/* Gender */}
+                <div className="min-w-[140px]">
+                  <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
+                    <RiMenLine className="w-4 h-4" />
+                    <span>Gender</span>
                   </div>
-                  {genders.length > 0
-                    ? genders.map((g) => <p key={g.genderid}>{g.gendername}</p>)
-                    : "—"}
+                  <div className="flex flex-wrap gap-2">
+                    {genders?.length > 0 ? (
+                      genders.map((g) => (
+                        <span
+                          key={g.genderid}
+                          className="bg-pink-100 text-pink-800 px-2 py-0.5 rounded-md text-sm font-medium"
+                        >
+                          {g.gendername}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Platform */}
+                <div className="min-w-[200px]">
+                  <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
+                    <RiStackLine className="w-4 h-4" />
+                    <span>Platform</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                      {p_contenttypejson?.length > 0 ? (
+                        p_contenttypejson.map((p) => (
+                          <span
+                            key={p.providerid}
+                            className="rounded-md bg-blue-100 text-blue-800 px-3 py-1 text-xs font-medium"
+                          >
+                            {p.providername} - {" "}
+                            {p.contenttypes
+                              ?.map((ct) => ct.contenttypename)
+                              .join(", ")}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
+                    </div>
                 </div>
               </div>
             </div>

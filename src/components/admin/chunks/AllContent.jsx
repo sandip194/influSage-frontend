@@ -176,18 +176,6 @@ const AllContent = ({ onViewHistory }) => {
     loadFilters();
 }, [token]);
 
-  const handleViewHistory = async (item) => {
-  try {
-    const res = await axios.get(
-      `/admin/analytics/content-history/${item.contractcontentlinkid}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    onViewHistory(res.data.data);
-  } catch (error) {
-    console.error("History fetch error:", error);
-  }
-};
 
   const columns = [
     {
@@ -250,7 +238,7 @@ const AllContent = ({ onViewHistory }) => {
       render: (_, record) => (
         <Button
           icon={<RiEyeLine />}
-          onClick={() => handleViewHistory(record.raw)}
+          onClick={() => onViewHistory(record.raw)}
           className="border-[#0D132D] text-[#0D132D]"
         >
           View

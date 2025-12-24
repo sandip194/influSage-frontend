@@ -59,7 +59,8 @@ export default function ChatAppPage() {
       }));
       return;
     }
-  if (Number(msg.userid) === Number(userId)) return;
+
+  // if (Number(msg.userid) === Number(userId)) return;
 
   dispatch(addMessage(msg));
   setRefreshKey(prev => prev + 1);

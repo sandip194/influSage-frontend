@@ -5,11 +5,20 @@ import UpdateAnalytics from "../chunks/UpdateAnalytics";
 import AllContent from "../chunks/AllContent";
 import AnalyticsFormModal from "../chunks/AnalyticsFormModal";
 import AnalyticsHistoryModal from "../chunks/AnalyticsHistoryModal";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
 
 const AdminContentLinks = () => {
+    const { token } = useSelector((state) => state.auth);
     const [analyticsModal, setAnalyticsModal] = useState({ visible: false, data: null });
-    const [historyModal, setHistoryModal] = useState({ visible: false, data: null });
+    const [historyModal, setHistoryModal] = useState({
+        visible: false,
+        data: [],
+        page: 1,
+        loading: false,
+        item: null,
+    });
 
     const openAnalyticsModal = (data) => setAnalyticsModal({ visible: true, data });
     const closeAnalyticsModal = () => setAnalyticsModal({ visible: false, data: null });
@@ -22,6 +31,33 @@ const AdminContentLinks = () => {
         closeAnalyticsModal();
     };
 
+    const handleViewHistory = async (item, page = 1) => {
+    try {
+      setHistoryModal(prev => ({ ...prev, loading: true }));
+
+      const res = await axios.get(
+        `/admin/analytics/content-history/${item.contractcontentlinkid}`,
+        {
+          params: { p_pagenumber: page, p_pagesize: 10 },
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const records = res.data?.data?.records || [];
+
+      setHistoryModal(prev => ({
+        visible: true,
+        item,
+        page,
+        loading: false,
+        data: page === 1 ? records : [...prev.data, ...records],
+      }));
+    } catch (err) {
+      console.error(err);
+      setHistoryModal(prev => ({ ...prev, loading: false }));
+    }
+ };
+ 
     return (
         <div className="">
 
@@ -44,7 +80,7 @@ const AdminContentLinks = () => {
                         {
                             key: "all",
                             label: "All Content",
-                            children: <AllContent onViewHistory={openHistoryModal} />,
+                            children: <AllContent onViewHistory={handleViewHistory} />,
                         },
                     ]}
                 />
@@ -61,9 +97,15 @@ const AdminContentLinks = () => {
 
             <AnalyticsHistoryModal
                 visible={historyModal.visible}
-                onClose={closeHistoryModal}
+                onClose={() =>
+                    setHistoryModal({ visible: false, data: [], page: 1, loading: false, item: null })
+                }
                 history={historyModal.data}
-            />
+                loading={historyModal.loading}
+                onLoadMore={() =>
+                    handleViewHistory(historyModal.item, historyModal.page + 1)
+                }
+                />
         </div>
     );
 };
