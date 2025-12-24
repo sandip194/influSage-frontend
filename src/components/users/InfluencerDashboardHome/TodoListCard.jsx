@@ -5,13 +5,10 @@ import { useSelector } from "react-redux";
 import { Dropdown, Menu, Modal, message, Input, DatePicker, Button, Skeleton, Empty } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useDispatch } from "react-redux";
-import { showLoader, hideLoader } from "../../../features/ui/uiSlice";
 
 dayjs.extend(relativeTime);
 
 const TodoListCard = () => {
-  const dispatch = useDispatch();
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -24,7 +21,6 @@ const TodoListCard = () => {
 
   const getTodoList = async () => {
   try {
-    dispatch(showLoader());
 
     const res = await axios.get("user/dashboard/todo-list", {
       headers: { Authorization: `Bearer ${token}` },
@@ -34,9 +30,7 @@ const TodoListCard = () => {
   } catch (error) {
     console.error("Error fetching todos:", error);
     message.error("Failed to fetch todos");
-  } finally {
-    dispatch(hideLoader());
-  }
+  } 
 };
 
   useEffect(() => {
@@ -51,7 +45,6 @@ const TodoListCard = () => {
   isDeleted = false,
 }) => {
   try {
-    dispatch(showLoader());
 
     const body = {
       p_userid: user?.id,
@@ -68,16 +61,12 @@ const TodoListCard = () => {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    await getTodoList(); // ✅ refresh list
-
     setShowModal(false);
     setSelectedTodo(null);
     setFormData({ description: "", duedate: null });
   } catch (error) {
     console.error("Error updating todo:", error);
     message.error("Action failed");
-  } finally {
-    dispatch(hideLoader());
   }
 };
 

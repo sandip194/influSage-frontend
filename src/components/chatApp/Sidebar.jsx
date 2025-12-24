@@ -191,7 +191,13 @@ const hasUnreadMessage = (vendor) => {
                       className={`text-sm truncate max-w-[180px] ${unread ? "text-gray-900 font-semibold" : "text-gray-500"
                         }`}
                     >
-                      {unread ? "New message" : vendor.lastmessage}
+                      {
+                        unread
+                          ? "New message"
+                          : vendor.ishtml
+                            ? "Campaign invitation received"
+                            : vendor.lastmessage || "No messages yet"
+                      }
                     </div>
                   </div>
                 </div>

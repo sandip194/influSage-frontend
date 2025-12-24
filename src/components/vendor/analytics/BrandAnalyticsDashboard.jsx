@@ -228,9 +228,9 @@ const BrandAnalyticsDashboard = () => {
 
                     {/* 📭 Empty State */}
                     {!campaignLoading && campaigns.length === 0 && (
-                        <tr colspan={5}>
-                            <td colSpan={5} className="block w-full">
-                                <div className="flex justify-center py-12">
+                        <tr>
+                            <td colSpan={5} className="py-12">
+                                <div className="flex justify-center w-full">
                                     <Empty description="No campaigns found" />
                                 </div>
                             </td>

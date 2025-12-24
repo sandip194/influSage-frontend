@@ -47,7 +47,7 @@ const ContractTab = ({ campaignId, token }) => {
       // If API returns nothing → Show No Contract Component
       if (!api) {
         setContract(null);
-        setContractStatus(true);
+        setContractStatus(null);
 
         return;
       }

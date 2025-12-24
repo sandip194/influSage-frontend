@@ -326,7 +326,7 @@ const InfluencerProfile = () => {
                                                 onClick={handleMessageClick}
                                                 className="flex items-center justify-center gap-2 bg-[#0f122f] text-white px-4 py-2 rounded-3xl hover:bg-[#23265a]"
                                             >
-                                                <RiMessage2Line size={18} /> Send Message
+                                                <RiMessage2Line size={18} /> Send Message 
                                             </button>
                                         </Tooltip>
                                     )}
