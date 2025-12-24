@@ -262,8 +262,8 @@ const InfluencerCampaigns = () => {
           <button
             onClick={() => handleStatusFilter(null)}
             className={`px-4 py-2 rounded-lg border flex-shrink-0 ${filters.statusId === null
-                ? "bg-[#0f122f] text-white"
-                : "bg-white text-gray-700"
+              ? "bg-[#0f122f] text-white"
+              : "bg-white text-gray-700"
               }`}
           >
             All
@@ -274,8 +274,8 @@ const InfluencerCampaigns = () => {
               key={status.id}
               onClick={() => handleStatusFilter(status.id)}
               className={`px-4 py-2 rounded-lg border border-gray-200 cursor-pointer flex-shrink-0 ${filters.statusId === status.id
-                  ? "bg-[#0f122f] text-white"
-                  : "bg-white text-gray-700"
+                ? "bg-[#0f122f] text-white"
+                : "bg-white text-gray-700"
                 }`}
             >
               {status.name}
@@ -351,7 +351,7 @@ const InfluencerCampaigns = () => {
             <thead className="bg-white text-gray-700 text-sm tracking-wide">
               <tr>
                 <th className="p-4">Campaign</th>
-                <th className="p-4 w-[130px]">Budget</th>
+                <th className="p-4 w-[160px]">Budget</th>
                 <th className="p-4 w-[160px]">Campaign Start</th>
                 <th className="p-4 w-[160px]">Status</th>
                 <th className="p-4 w-[160px]">Contract Status</th>
@@ -374,16 +374,21 @@ const InfluencerCampaigns = () => {
                     className="border-t border-gray-200 hover:bg-gray-100 transition cursor-pointer"
                   >
                     <td className="p-4">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 max-w-[260px]">
                         <img
                           src={getImageUrl(row.photopath)}
                           alt={row.businessname}
-                          className="w-9 h-9 rounded-full object-cover border border-gray-200"
+                          className="w-9 h-9 rounded-full object-cover border border-gray-200 flex-shrink-0"
                         />
-                        <span className="whitespace-nowrap font-medium">
+
+                        <span
+                          className="font-medium truncate block"
+                          title={row.name}
+                        >
                           {row.name}
                         </span>
                       </div>
+
                     </td>
                     <td className="p-4 font-medium">₹ {row.estimatedbudget}</td>
                     <td className="p-4">{row.campaignstartdate}</td>
