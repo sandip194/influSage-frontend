@@ -354,6 +354,7 @@ const InfluencerCampaigns = () => {
                 <th className="p-4 w-[130px]">Budget</th>
                 <th className="p-4 w-[160px]">Campaign Start</th>
                 <th className="p-4 w-[160px]">Status</th>
+                <th className="p-4 w-[160px]">Contract Status</th>
               </tr>
             </thead>
             <tbody className="text-sm text-gray-700">
@@ -395,6 +396,7 @@ const InfluencerCampaigns = () => {
                         {statusLabels[row.status.toLowerCase()] || row.status}
                       </span>
                     </td>
+                    <td className="p-4">{row.contract_status}</td>
                   </tr>
                 ))
               ) : (
