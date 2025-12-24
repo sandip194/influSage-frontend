@@ -140,7 +140,7 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
                   }}
                 >
                   {/* DELETE ICON FOR EDIT MODE */}
-                  {isEditable && (
+                  {/* {isEditable && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -149,7 +149,7 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
                       className="absolute top-1 right-1 bg-gray-600 bg-opacity-70 text-white p-1 rounded-full z-10"
                     >
                     </button>
-                  )}
+                  )} */}
 
                   {/* IMAGE */}
                   {fileType === "image" && (

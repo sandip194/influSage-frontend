@@ -363,8 +363,25 @@ export const CategorySelector = ({
           )}
         </div>
       )}
-      {(showControls || onNext) && (
-        <div className="flex justify-end mt-6">
+      
+      {/* ERROR */}
+      {error && (
+        <div className="text-red-500 text-sm font-medium mt-4">
+          Please select at least one subcategory.
+        </div>
+      )}
+
+      <div className="flex flex-row items-center gap-4 mt-6">
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
+          >
+            Back
+          </button>
+        )}
+        {(showControls || onNext) && (
           <button
             onClick={handleSubmit}
             disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
@@ -383,25 +400,7 @@ export const CategorySelector = ({
               "Save Changes"
             )}
           </button>
-        </div>
       )}
-      {/* ERROR */}
-      {error && (
-        <div className="text-red-500 text-sm font-medium mt-4">
-          Please select at least one subcategory.
-        </div>
-      )}
-
-      <div className="flex flex-row items-center gap-4 mt-6">
-        {onBack && (
-          <button
-            type="button"
-            onClick={onBack}
-            className="bg-white cursor-pointer text-[#0D132D] px-8 py-3 rounded-full hover:text-white border border-[#121a3f26] hover:bg-[#0D132D] transition-colors"
-          >
-            Back
-          </button>
-        )}
       </div>
     </div>
   );

@@ -5,13 +5,10 @@ import { useSelector } from "react-redux";
 import { Dropdown, Menu, Modal, message, Input, DatePicker, Button, Skeleton, Empty } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useDispatch } from "react-redux";
-import { showLoader, hideLoader } from "../../../features/ui/uiSlice";
 
 dayjs.extend(relativeTime);
 
 const TodoListCard = () => {
-  const dispatch = useDispatch();
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -23,63 +20,49 @@ const TodoListCard = () => {
   const { token, user } = useSelector((state) => state.auth);
 
   const getTodoList = async () => {
-  try {
-    dispatch(showLoader());
-
-    const res = await axios.get("user/dashboard/todo-list", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    setTodos(res.data.data || []);
-  } catch (error) {
-    console.error("Error fetching todos:", error);
-    message.error("Failed to fetch todos");
-  } finally {
-    dispatch(hideLoader());
-  }
-};
+    try {
+      setLoading(true);
+      const res = await axios.get("user/dashboard/todo-list", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setTodos(res.data.data || []);
+    } catch (error) {
+      console.error("Error fetching todos:", error);
+      message.error("Failed to fetch todos");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     getTodoList();
   }, []);
 
-  const handleTodoAction = async ({
-  id,
-  description,
-  duedate,
-  isCompleted = null,
-  isDeleted = false,
-}) => {
-  try {
-    dispatch(showLoader());
-
-    const body = {
-      p_userid: user?.id,
-      p_todolistid: id || null,
-      p_description: description || null,
-      p_duedate: duedate ? duedate.format("YYYY-MM-DD") : null,
-      p_iscompleted: isCompleted,
-      p_isdeleted: isDeleted,
-    };
-
-    await axios.post(
-      "user/dashboard/todo/insert-edit-delete",
-      body,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    await getTodoList(); // ✅ refresh list
-
-    setShowModal(false);
-    setSelectedTodo(null);
-    setFormData({ description: "", duedate: null });
-  } catch (error) {
-    console.error("Error updating todo:", error);
-    message.error("Action failed");
-  } finally {
-    dispatch(hideLoader());
-  }
-};
+   const handleTodoAction = async ({ id, description, duedate, isCompleted = null, isDeleted = false }) => {
+    try {
+      setLoading(true);
+      const body = {
+        p_userid: user?.id,
+        p_todolistid: id || null,
+        p_description: description || null,
+        p_duedate: duedate ? duedate.format("YYYY-MM-DD") : null,
+        p_iscompleted: isCompleted,
+        p_isdeleted: isDeleted,
+      };
+      await axios.post("user/dashboard/todo/insert-edit-delete", body, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      await getTodoList();
+      setShowModal(false);
+      setSelectedTodo(null);
+      setFormData({ description: "", duedate: null });
+    } catch (error) {
+      console.error("Error updating todo:", error);
+      message.error("Action failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const showConfirm = ({ title, onOk }) => {
     setConfirmModal({ visible: true, title, onOk });
@@ -92,7 +75,7 @@ const TodoListCard = () => {
 
     handleTodoAction({
       id: selectedTodo?.id || null,
-      description: formData.description.trim(),
+      description: formData.description,
       duedate: formData.duedate,
     });
   };
