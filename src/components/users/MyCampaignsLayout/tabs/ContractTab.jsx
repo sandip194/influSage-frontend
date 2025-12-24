@@ -58,8 +58,8 @@ const ContractTab = ({ campaignId, token }) => {
         id: safeText(api.contractid),
         contractStart: safeText(api.contractstartdate),     // already in dd-mm-yyyy
         contractEnd: safeText(api.contractenddate),
-        campaignStart: safeText(api.contractstartdate),
-        campaignEnd: safeText(api.contractenddate),
+        campaignStart: safeText(api.campaignstartdate),
+        campaignEnd: safeText(api.campaignenddate),
         payment: `₹${safeNumber(api.paymentamount, 0)}`,
         deliverables: safeText(api.providercontenttype, "N/A"),
         notes: safeText(api.note),

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Input, Button, Upload } from "antd";
-import { RiVerifiedBadgeLine, RiUpload2Line } from "@remixicon/react";
+import { Modal, Input, Button, Upload,  } from "antd";
+import { RiUpload2Line } from "@remixicon/react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-// Reusable file handlers
 import useFileUpload from "../../../hooks/useFileUpload";
 import FilePreview from "../../common/FilePreview";
 
@@ -24,42 +23,39 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
         deletedFilePaths,
         fileError,
         setExistingFiles,
+        setDeletedFilePaths,
         handleFileChange,
         handleRemove,
+        resetFiles,  // <-- add this
     } = useFileUpload();
+
 
     const token = useSelector((state) => state.auth.token);
 
-    // ============= VALIDATION =============
+    // ========== VALIDATION ==========
     const validate = () => {
         const newErrors = {};
-        if (!amount || Number(amount) <= 0) {
-            newErrors.amount = "Please enter a valid amount greater than 0.";
-        }
-
-        if (amount && amount.length > 7) {
-            newErrors.amount = "Amount cannot exceed 7 digits.";
-        }
-        if (!proposal.trim()) {
-            newErrors.proposal = "Please describe your proposal.";
-        }
-        if (fileList.length + existingFiles.length < 1) {
-            newErrors.portfolioFile = "Please upload at least one portfolio file.";
-        }
+        if (!amount || Number(amount) <= 0) newErrors.amount = "Please enter a valid amount greater than 0.";
+        if (amount && amount.length > 7) newErrors.amount = "Amount cannot exceed 7 digits.";
+        if (!proposal.trim()) newErrors.proposal = "Please describe your proposal.";
+        if (fileList.length + existingFiles.length < 1) newErrors.portfolioFile = "Please upload at least one portfolio file.";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
+
+
+    // ===== RESET FORM =====
     const resetForm = () => {
         setAmount("");
         setProposal("");
         setErrors({});
         setIsEdit(false);
-
-        setExistingFiles([]);
+        resetFiles(); // <-- clears all files and previews
     };
 
-    // ============= SUBMIT FORM =============
+
+    // ===== SUBMIT FORM =====
     const handleSubmit = async () => {
         if (!validate()) return;
 
@@ -71,35 +67,24 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
 
         const formData = new FormData();
         formData.append("applycampaignjson", JSON.stringify(applycampaignjson));
-
         fileList.forEach((f) => formData.append("portfolioFiles", f));
 
-        // delete removed files
+        // Delete removed files
         for (const path of deletedFilePaths) {
             try {
-                await axios.post(
-                    "/user/apply-now/portfoliofile-delete",
-                    { filePath: path },
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
+                await axios.post("/user/apply-now/portfoliofile-delete", { filePath: path }, { headers: { Authorization: `Bearer ${token}` } });
             } catch (err) {
-                toast.error(err)
+                toast.error(err);
                 console.error("Delete failed:", path);
             }
         }
 
         try {
             setLoading(true);
-            const res = await axios.post(
-                `user/apply-for-campaign/${campaignId}`,
-                formData,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
+            const res = await axios.post(`user/apply-for-campaign/${campaignId}`, formData, { headers: { Authorization: `Bearer ${token}` } });
             toast.success(res.data.message);
-
-            onClose(); // close modal
             resetForm();
+            onClose();
         } catch (err) {
             toast.error(err);
         } finally {
@@ -107,16 +92,11 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
         }
     };
 
-    // ============= LOAD EDIT DATA =============
+    // ===== LOAD EDIT DATA =====
     const loadData = async () => {
         try {
             setLoading(true);
-
-            const res = await axios.get(
-            `user/signle-applied/${campaignId}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-            );
-
+            const res = await axios.get(`user/signle-applied/${campaignId}`, { headers: { Authorization: `Bearer ${token}` } });
             const data = res.data?.data;
             if (!data) return;
 
@@ -124,42 +104,40 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
             setAmount(data.budget || "");
             setProposal(data.description || "");
 
-            // resetFiles();
-
             if (data.filepaths?.length > 0) {
-            const formattedFiles = data.filepaths.map((f, i) => ({
-                uid: `existing-${i}`,
-                name: f.filepath.split("/").pop(),
-                url: f.filepath,
-                filepath: f.filepath,
-                type: "file",
-            }));
-
-            setExistingFiles(formattedFiles);
+                const formattedFiles = data.filepaths.map((f, i) => ({
+                    uid: `existing-${i}`,
+                    name: f.filepath.split("/").pop(),
+                    url: f.filepath,
+                    filepath: f.filepath,
+                    type: "file",
+                }));
+                setExistingFiles(formattedFiles);
             }
         } catch (err) {
             console.error(err);
         } finally {
             setLoading(false);
         }
-        };
+    };
 
     useEffect(() => {
-        if (open) loadData();
-    }, [open]);
+        if (open) {
+            resetForm(); // clear previous state
+            loadData();  // load campaign-specific data
+        }
+    }, [open, campaignId]);
 
     return (
         <Modal
-         key={campaignId} 
+            key={campaignId}
             open={open}
-            onCancel={onClose}
+            onCancel={() => { resetForm(); onClose(); }}
             footer={null}
             width={700}
             destroyOnClose
         >
-            <h2 className="text-xl font-semibold mb-4">
-                {isEdit ? "Edit Application" : "Apply Now"}
-            </h2>
+            <h2 className="text-xl font-semibold mb-4">{isEdit ? "Edit Application" : "Apply Now"}</h2>
 
             {isEdit && (
                 <div className="p-3 mb-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded">
@@ -167,26 +145,18 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
                 </div>
             )}
 
-            {/* Proposal */}
-            <label className="font-medium mb-2">
-                Describe Your Proposal <span className="text-red-500">*</span>
-            </label>
+            <label className="font-medium mb-2">Describe Your Proposal <span className="text-red-500">*</span></label>
             <TextArea
                 rows={4}
                 placeholder="Describe your proposal..."
                 value={proposal}
-                onChange={(e) => {
-                    setProposal(e.target.value);
-                    setErrors(prev => ({ ...prev, proposal: "" }));
-                }}
+                onChange={(e) => { setProposal(e.target.value); setErrors(prev => ({ ...prev, proposal: "" })); }}
                 status={errors.proposal ? "error" : ""}
                 className="mt-2"
             />
             {errors.proposal && <p className="text-red-500">{errors.proposal}</p>}
 
-            {/* Files */}
             <h3 className="mt-5 font-semibold mb-2">Portfolio <span className="text-red-500">*</span></h3>
-
             <Upload.Dragger
                 beforeUpload={() => false}
                 fileList={[]}
@@ -207,15 +177,9 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
             {fileError && <p className="text-red-500">{fileError}</p>}
             {errors.portfolioFile && <p className="text-red-500">{errors.portfolioFile}</p>}
 
-            <FilePreview
-                files={[...existingFiles, ...fileList]}
-                onRemove={(file) => handleRemove(file.uid)}
-            />
+            <FilePreview files={[...existingFiles, ...fileList]} onRemove={(file) => handleRemove(file.uid)} />
 
-            {/* Amount */}
-            <label className="block mt-4 mb-2 font-medium">
-                Proposal Amount <span className="text-red-500">*</span>
-            </label>
+            <label className="block mt-4 mb-2 font-medium">Proposal Amount <span className="text-red-500">*</span></label>
             <Input
                 type="number"
                 addonBefore="₹"
@@ -224,35 +188,19 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
                 value={amount}
                 onChange={(e) => {
                     const value = e.target.value;
-
-                    // Allow only digits
                     if (!/^\d*$/.test(value)) return;
-
-                    // Prevent entering more than 7 digits
-                    if (value.length > 7) {
-                        setErrors(prev => ({ ...prev, amount: "Amount cannot exceed 7 digits." }));
-                        return;
-                    }
-
+                    if (value.length > 7) { setErrors(prev => ({ ...prev, amount: "Amount cannot exceed 7 digits." })); return; }
                     setAmount(value);
                     setErrors(prev => ({ ...prev, amount: "" }));
                 }}
-
             />
             {errors.amount && <p className="text-red-500">{errors.amount}</p>}
 
-            {/* Submit */}
             <div className="mt-6 flex justify-end">
-                <Button
-                    type="primary"
-                    className="!bg-[#0f122f]"
-                    loading={loading}
-                    onClick={handleSubmit}
-                >
+                <Button type="primary" className="!bg-[#0f122f]" loading={loading} onClick={handleSubmit}>
                     {isEdit ? "Save Changes" : "Apply Now"}
                 </Button>
             </div>
-
         </Modal>
     );
 };
