@@ -371,7 +371,7 @@ const InfluencerCampaigns = () => {
                   <tr
                     key={row.id}
                     onClick={() => navigate(`/dashboard/my-campaigns/details/${row.id}`)}
-                    className="border-t border-gray-200 hover:bg-gray-100 transition cursor-pointer"
+                    className="border-t border-gray-200 hover:bg-gray-200 transition cursor-pointer"
                   >
                     <td className="p-4">
                       <div className="flex items-center gap-3 max-w-[260px]">

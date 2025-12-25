@@ -20,7 +20,7 @@ const CampaignStats = () => {
         const data = response.data?.data;
         const formattedStats = [
         {
-          label: "In-Progress Campaigns",
+          label: "In-Progress",
           value: data.inprogresscampaign ?? 0,
           icon: <RiLoopLeftLine className="text-white text-xl" />,
         },
@@ -68,24 +68,27 @@ const CampaignStats = () => {
 
   return (
   <div className="bg-white rounded-xl p-3 w-full h-full flex flex-col">
+    <h3 className="font-semibold text-gray-700 mb-3">
+      Campaign Statistics
+    </h3>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
       {stats.map(({ label, value, icon }, idx) => (
         <div
           key={idx}
-          className="flex items-center gap-2 bg-gray-50 rounded-md px-3 py-2"
+          className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3"
         >
-          <div className="bg-[#0D132D] rounded-full p-2 shrink-0">
+          <div className="w-9 h-9 bg-[#0D132D] rounded-full flex items-center justify-center shrink-0">
             {React.cloneElement(icon, { className: "text-sm text-white" })}
           </div>
 
           <div className="leading-tight">
-            <p className="text-[11px] text-gray-500 font-medium truncate">
-              {label}
-            </p>
-            <p className="text-sm font-semibold text-gray-800">
-              {value}
-            </p>
-          </div>
+              <p className="text-sm text-gray-500 font-medium">
+                {label}
+              </p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {value}
+              </p>
+            </div>
         </div>
       ))}
     </div>

@@ -31,46 +31,58 @@ const CampaignCard = ({ campaign }) => {
     to={`/dashboard/browse/description/${campaign.id}`}
     className="block h-full"
   >
-    <div className="
-      bg-[#e6eff9] border border-gray-200 rounded-2xl
-      overflow-hidden shadow-sm
-      flex flex-col h-full
-      cursor-pointer hover:shadow-md transition-shadow duration-300
-      relative
-    ">
-
+    <div
+      className="
+        bg-[#e6eff9] border border-gray-200 rounded-2xl
+        overflow-hidden shadow-sm
+        flex flex-col
+        cursor-pointer hover:shadow-md transition-shadow duration-300
+        relative
+        w-[300px]
+      "
+    >
       {/* ===== Banner ===== */}
-      <div className="relative h-36 shrink-0">
+      <div className="relative h-32 shrink-0">
         <img
-          src={campaign.photopath || '/placeholder.jpg'}
+          src={campaign.photopath || "/placeholder.jpg"}
           alt={campaign.name}
           className="w-full h-full object-cover"
         />
 
         {/* Apply Dates Badge */}
         {campaign.applicationstartdate && campaign.applicationenddate && (
-          <div className="absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full shadow-md 
-            bg-gradient-to-r from-blue-100 to-blue-300 text-[#0D132D] whitespace-nowrap">
-            Apply: {parseDDMMYYYY(campaign.applicationstartdate).toLocaleDateString("en-GB")}
-            {" - "}
-            {parseDDMMYYYY(campaign.applicationenddate).toLocaleDateString("en-GB")}
+          <div
+            className="
+              absolute top-3 right-3 px-3 py-1 text-xs font-semibold
+              rounded-full shadow-md
+              bg-white
+              text-[#0D132D] whitespace-nowrap
+            "
+          >
+            Apply:{" "}
+            {parseDDMMYYYY(
+              campaign.applicationstartdate
+            ).toLocaleDateString("en-GB")}{" "}
+            -{" "}
+            {parseDDMMYYYY(
+              campaign.applicationenddate
+            ).toLocaleDateString("en-GB")}
           </div>
         )}
       </div>
 
       {/* ===== Info Section ===== */}
-      <div className="p-4 flex flex-col flex-1">
+      <div className="p-3 flex flex-col flex-1">
         {/* Campaign Name */}
-        <h3 className="text-lg font-bold text-gray-900 truncate">
+        <h3 className="text-base font-semibold text-gray-900 truncate">
           {campaign.name}
         </h3>
 
-
         {/* Description */}
         {campaign.description && (
-          <p className="text-sm text-gray-700 mt-1 line-clamp-2 h-10">
+          <p className="text-xs text-gray-700 mt-1 line-clamp-2 h-9">
             {campaign.description}
-            </p>
+          </p>
         )}
 
         {/* Categories */}
@@ -84,17 +96,41 @@ const CampaignCard = ({ campaign }) => {
             </span>
           ))}
         </div>
+        <hr className="my-2" />
 
-        {/* Push budget to bottom */}
-        <div className="mt-3">
+        {/* Budget */}
+        <div className="mt-auto pt-1">
           {campaign.estimatedbudget && (
-            <span className="inline-block bg-[#0D132D] text-white font-semibold px-3 py-1 rounded-full text-sm shadow-sm">
-              Budget: ₹{campaign.estimatedbudget.toLocaleString()}
-            </span>
+            <div
+              className="
+                flex items-center justify-between
+                bg-white
+                border border-blue-100
+                rounded-xl
+                px-4 py-3
+                cursor-default
+                select-none
+                min-w-[180px]
+              "
+            >
+              {/* Text */}
+              <div>
+                <div className="text-base font-semibold text-[#0D132D] leading-tight">
+                  ₹{campaign.estimatedbudget.toLocaleString()}
+                </div>
+                <div className="text-[11px] uppercase tracking-wide text-gray-400">
+                  Estimated Budget
+                </div>
+              </div>
+
+              {/* Icon */}
+              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                ₹
+              </div>
+            </div>
           )}
         </div>
       </div>
-
     </div>
   </Link>
 );
@@ -142,7 +178,7 @@ const CampaignCarousel = () => {
                 <Empty description="No campaigns found" />
             ) : (
                 <Swiper
-                    spaceBetween={15}
+                    spaceBetween={12}
                     slidesPerView="auto"
                     freeMode={true}
                     grabCursor={true}
@@ -155,12 +191,15 @@ const CampaignCarousel = () => {
                         1024: { slidesPerView: 2.5 },
                         1280: { slidesPerView: 3 },
                     }}
-                >
-                    {campaigns.map((c) => (
-                        <SwiperSlide key={c.id} style={{ height: "auto" }}>
-                            <CampaignCard campaign={c} />
-                        </SwiperSlide>
-                    ))}
+                >            
+                {campaigns.map((c) => (
+                  <SwiperSlide
+                    key={c.id}
+                    className="!w-[300px]"
+                  >
+                    <CampaignCard campaign={c} />
+                  </SwiperSlide>
+                ))}
                 </Swiper>
             )}
         </div>
