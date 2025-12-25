@@ -6,8 +6,8 @@
 
   const SocketProvider = ({ children }) => {
     const dispatch = useDispatch();
+    const userId = useSelector((state) => state.auth.userId); 
     const token = useSelector((state) => state.auth.token);
-    const userId = useSelector((state) => state.auth.userId);
 
     const notificationsInStore = useSelector(
       (state) => state.notifications.items
@@ -50,6 +50,7 @@
           );
 
           if (!exists) {
+            console.log(notification)
             dispatch(addNotification(notification));
             if (!notification.isRead) {
               dispatch(incrementUnread());

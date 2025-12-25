@@ -74,7 +74,7 @@ const MessageDropdown = React.memo(({ messages = [], loading }) => {
         </div>
       ) : messages.length === 0 ? (
         <div className="flex justify-center py-5">
-          <Empty description="No Notifications" />
+          <Empty description="No Unread Messages" />
         </div>
       ) : (
         <div className="divide-y divide-gray-200">

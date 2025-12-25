@@ -7,7 +7,19 @@ import {
 } from "@remixicon/react";
 import { Tooltip } from "antd";
 
-const InfluencerCardNew = ({ influencer, onLike}) => {
+// Helper function to format numbers
+const formatNumber = (num) => {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    }
+    return num.toString();
+};
+
+
+const InfluencerCardNew = ({ influencer, onLike }) => {
     const navigate = useNavigate();
 
     return (
@@ -93,11 +105,12 @@ const InfluencerCardNew = ({ influencer, onLike}) => {
                             <div key={p.providerid} className="flex items-center gap-2">
                                 <img src={p.iconpath} className="w-5 h-5" />
                                 <span className="text-sm font-semibold">
-                                    {p.nooffollowers}
+                                    {formatNumber(p.nooffollowers)}
                                 </span>
                             </div>
                         ))}
                 </div>
+
             </div>
 
             {/* <div className="mt-auto pt-3 border-t border-gray-300 flex justify-between gap-2">

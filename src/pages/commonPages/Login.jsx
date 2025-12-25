@@ -92,7 +92,7 @@ export const LoginForm = () => {
       localStorage.setItem("p_code", p_code || "");
 
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      dispatch(setCredentials({ token, id: userId, role: Number(roleId), name, email, p_code }));
+      dispatch(setCredentials({  id: userId, role: Number(roleId), name, email, p_code, token }));
       window.history.replaceState({}, document.title, window.location.pathname);
 
       if (Number(roleId) === 2 && p_code === "SUCCESS") navigate("/vendor-dashboard");
@@ -144,7 +144,7 @@ export const LoginForm = () => {
 
         toast.success(res.data.message || "Login successful!");
         const { id, role, token, name, p_code } = res.data;
-        dispatch(setCredentials({ token, id, role, name, p_code }));
+        dispatch(setCredentials({  id, role, name, p_code, token, }));
         localStorage.setItem("p_code", p_code || "");
 
         if (Number(role) === 2 && p_code === "SUCCESS") navigate("/vendor-dashboard");

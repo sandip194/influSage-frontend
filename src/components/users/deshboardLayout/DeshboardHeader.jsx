@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../features/auth/authSlice";
-import { getSocket } from "../../../sockets/socket";
+import { getSocket, resetSocket } from "../../../sockets/socket";
 
 import NotificationDropdown from "./NotificationDropdown";
 import MessageDropdown from "./MessageDropdown";
@@ -41,8 +41,8 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const { token, role, userId } = useSelector((state) => state.auth);
 
   const unreadCount = useSelector((state) => state.notifications.unreadCount);
-  const notifications = useSelector((state) => state.notifications.items);
-  const [firstNotificationOpen, setFirstNotificationOpen] = useState(true);
+  // const notifications = useSelector((state) => state.notifications.items);
+  // const [firstNotificationOpen, setFirstNotificationOpen] = useState(true);
 
   const [notificationDropdownVisible, setNotificationDropdownVisible] = useState(false);
   const [messageDropdownVisible, setMessageDropdownVisible] = useState(false);
@@ -72,6 +72,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   // LOGOUT
   // ======================================================
   const handleLogout = useCallback(() => {
+    resetSocket();
     dispatch(logout());
     dispatch(clearNotifications());
     navigate("/login");
@@ -213,6 +214,10 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   }, [socket]);
 
 
+  // Fetch initial unread messages for badge
+  useEffect(() => {
+    refreshUnreadMessages();
+  }, [refreshUnreadMessages]);
 
 
   const memoizedMessages = useMemo(() => unreadMessages, [unreadMessages]);
