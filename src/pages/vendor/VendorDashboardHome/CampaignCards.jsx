@@ -31,12 +31,12 @@ const CampaignStatsVendor = () => {
             icon: <RiStackLine />,
           },
           {
-            label: "Active Campaigns",
+            label: "Active",
             value: data.totalactivecampaigncount,
             icon: <RiLoopLeftLine />,
           },
           {
-            label: "Completed Campaigns",
+            label: "Completed",
             value: data.totalcompletedcampaigncount,
             icon: <RiCheckLine />,
           },
@@ -67,36 +67,39 @@ const CampaignStatsVendor = () => {
   }
 
     return (
-  <div className="bg-white rounded-xl p-3 w-full h-full flex flex-col">
+      <div className="bg-white rounded-xl p-3 w-full h-full flex flex-col">
+        <h3 className="font-semibold text-gray-700 mb-3">
+            Campaign Statistics
+        </h3>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+            
+            {stats.map(({ label, value, icon }, idx) => (
+              <div
+                key={idx}
+                className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3"
+              >
+                {/* Icon */}
+                <div className="w-9 h-9 bg-[#0D132D] rounded-full flex items-center justify-center shrink-0">
+                  {React.cloneElement(icon, {
+                    className: "text-white text-sm",
+                  })}
+                </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
-        {stats.map(({ label, value, icon }, idx) => (
-          <div
-            key={idx}
-            className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3"
-          >
-            {/* Icon */}
-            <div className="w-9 h-9 bg-[#0D132D] rounded-full flex items-center justify-center shrink-0">
-              {React.cloneElement(icon, {
-                className: "text-white text-sm",
-              })}
-            </div>
-
-            {/* Text */}
-            <div className="leading-tight">
-              <p className="text-xs text-gray-500 font-medium">
-                {label}
-              </p>
-              <p className="text-base font-semibold text-gray-900">
-                {value}
-              </p>
-            </div>
+                {/* Text */}
+                <div className="leading-tight">
+                  <p className="text-sm text-gray-500 font-medium">
+                    {label}
+                  </p>
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {value}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-    </div>
-  );
+        </div>
+      );
 };
 
 export default CampaignStatsVendor;

@@ -416,7 +416,7 @@ const VendorCampaignsLayout = () => {
                 paginatedData.map((row) => (
                   <tr
                     key={row.id}
-                    className="border-t border-gray-200 hover:bg-gray-100 transition cursor-pointer"
+                    className="border-t border-gray-200 hover:bg-gray-200 transition cursor-pointer"
                     onClick={() =>
                       navigate(`/vendor-dashboard/vendor-campaign/campaignDetails/${row.id}`)
                     }
