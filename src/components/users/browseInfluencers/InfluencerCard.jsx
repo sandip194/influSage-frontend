@@ -9,7 +9,7 @@ import {
 import { Tooltip } from "antd";
 // import "./heartAnimation.css";
 
-const InfluencerCard = ({ influencer, onLike, onInvite, BASE_URL }) => {
+const InfluencerCard = ({ influencer, onLike, onInvite }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -24,33 +24,33 @@ const InfluencerCard = ({ influencer, onLike, onInvite, BASE_URL }) => {
       className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-lg transition-all duration-300 flex flex-col justify-between cursor-pointer relative"
     >
 
-       <div className="absolute top-3 right-3 z-10">
-          <Tooltip title={influencer?.savedinfluencer ? "Unfavorite" : "Favorite"}>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onLike(influencer?.id);
-              }}
-              className="flex items-center justify-center w-9 h-9 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition relative overflow-visible"
-            >
-              {influencer?.savedinfluencer ? (
-                <RiHeartFill
-                  key={`heart-${influencer?.id}-fill`}
-                  size={22}
-                  className="text-red-500 animate-like"
-                />
-              ) : (
-                <RiHeartLine
-                  key={`heart-${influencer?.id}-line`}
-                  size={22}
-                  className="text-gray-600 animate-dislike"
-                />
-              )}
-            </button>
-          </Tooltip>
-        </div>
+      <div className="absolute top-3 right-3 z-10">
+        <Tooltip title={influencer?.savedinfluencer ? "Unfavorite" : "Favorite"}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onLike(influencer?.id);
+            }}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition relative overflow-visible"
+          >
+            {influencer?.savedinfluencer ? (
+              <RiHeartFill
+                key={`heart-${influencer?.id}-fill`}
+                size={22}
+                className="text-red-500 animate-like"
+              />
+            ) : (
+              <RiHeartLine
+                key={`heart-${influencer?.id}-line`}
+                size={22}
+                className="text-gray-600 animate-dislike"
+              />
+            )}
+          </button>
+        </Tooltip>
+      </div>
 
       {/* --- Top Section: Image + Actions --- */}
       <div className="flex justify-between items-start mb-4 relative">
@@ -94,7 +94,7 @@ const InfluencerCard = ({ influencer, onLike, onInvite, BASE_URL }) => {
           </div>
         </div>
 
-       
+
       </div>
 
       {/* --- Languages --- */}
@@ -119,7 +119,7 @@ const InfluencerCard = ({ influencer, onLike, onInvite, BASE_URL }) => {
           ))}
         </div>
       )}
-      
+
       {/* --- Bio --- */}
       {influencer?.bio && (
         <div className="text-sm text-gray-700 mb-4 line-clamp-2">
@@ -132,30 +132,39 @@ const InfluencerCard = ({ influencer, onLike, onInvite, BASE_URL }) => {
         <div className="flex flex-wrap gap-3 mb-4 text-sm text-gray-700">
           {influencer.providers
             .filter((p) => p.nooffollowers > 0)
-            .map((p) => (
-              <div key={p.providerid} className="flex items-center gap-2">
-                <img
-                  src={p.iconpath}
-                  alt={p.providername}
-                  className="w-5 h-5 object-contain"
-                />
-                <span>{p.nooffollowers}</span>
-              </div>
-            ))}
+            .map((p) => {
+              const formatFollowers = (num) => {
+                if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+                if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+                return num;
+              };
+
+              return (
+                <div key={p.providerid} className="flex items-center gap-2">
+                  <img
+                    src={p.iconpath}
+                    alt={p.providername}
+                    className="w-5 h-5 object-contain"
+                  />
+                  <span>{formatFollowers(p.nooffollowers)}</span>
+                </div>
+              );
+            })}
         </div>
       )}
+
       {influencer?.completedcampaigncount > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="px-3 py-1.5 border-2 border-gray-300 bg-gray-100 rounded-lg text-xs text-gray-900 flex items-center gap-2 font-semibold">
-                      <span className="inline-flex items-center justify-center w-5 h-5 bg-gray-500 text-white rounded-full text-xs">
-                      {influencer.completedcampaigncount}
-                      </span>
-                      <span className="whitespace-nowrap">
-                      {influencer.completedcampaigncount === 1 ? "completed campaign" : "completed campaigns"}
-                      </span>
-                    </span>
-                    </div>
-                  )}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <span className="px-3 py-1.5 border-2 border-gray-300 bg-gray-100 rounded-lg text-xs text-gray-900 flex items-center gap-2 font-semibold">
+            <span className="inline-flex items-center justify-center w-5 h-5 bg-gray-500 text-white rounded-full text-xs">
+              {influencer.completedcampaigncount}
+            </span>
+            <span className="whitespace-nowrap">
+              {influencer.completedcampaigncount === 1 ? "completed campaign" : "completed campaigns"}
+            </span>
+          </span>
+        </div>
+      )}
 
       {/* --- Action Buttons --- */}
       <div className="mt-auto border-t border-black pt-4 flex justify-end items-center">
