@@ -148,11 +148,6 @@ const App = () => {
 
                                                                 <Route path='messagepage' element={<InfluencerMessagePage />} />
 
-
-
-
-
-
                                                                 <Route path="referrals" element={<ComingSoon />} />
 
                                                         </Route>

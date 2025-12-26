@@ -45,6 +45,59 @@ const sortOptions = [
   { value: "estimatedbudget_asc", label: "Budget: Low to High" },
 ];
 
+const CAMPAIGN_COLUMNS_BY_STATUS = {
+  ApprovalPending: [
+    "Campaign",
+    "Vendor",
+    "Categories",
+    "Platforms",
+    "Budget",
+    "StartDate",
+    "EndDate",
+    "Actions",
+  ],
+
+  Approved: [
+    "Campaign",
+    "Vendor",
+    "ApprovedBy",
+    "ApprovedOn",
+    "Actions",
+  ],
+
+  Rejected: [
+    "Campaign",
+    "Vendor",
+    "RejectedBy",
+    "RejectedOn",
+    "Actions",
+  ],
+
+  Blocked: [
+    "Campaign",
+    "Vendor",
+    "BlockedBy",
+    "BlockedOn",
+    "Actions",
+  ],
+};
+
+
+const formatDate = (date, fallback = "—") => {
+  if (!date) return fallback;
+
+  const d = new Date(date);
+  if (isNaN(d)) return fallback;
+
+  return d.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+
+
 const CampaignTableLayout = () => {
   const { token } = useSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -246,6 +299,9 @@ const CampaignTableLayout = () => {
 
 
   const activeStatusName = statusList.find(s => String(s.id) === String(activeStatusId))?.name;
+  const activeColumns =
+    CAMPAIGN_COLUMNS_BY_STATUS[activeStatusName] || [];
+
 
 
   // New function for reject with reason
@@ -385,20 +441,61 @@ const CampaignTableLayout = () => {
             {/* Table Header */}
             <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
               <tr>
-                <th className="p-4 min-w-[300px]">Campaign</th>
-                <th className="p-4 min-w-[100px]">Vendor</th>
-                <th className="p-4 min-w-[150px]">Categories</th>
-                <th className="p-4 min-w-[150px]">Platforms</th>
-                <th className="p-4 min-w-[100px]">Budget</th>
-                <th className="p-4 whitespace-nowrap min-w-[100px]">Campaign Start Date</th>
-                <th className="p-4 whitespace-nowrap min-w-[100px]">Campaign End Date</th>
+                {activeColumns.includes("Campaign") && (
+                  <th className="p-4 min-w-[300px]">Campaign</th>
+                )}
+                {activeColumns.includes("Vendor") && (
+                  <th className="p-4 min-w-[100px]">Vendor</th>
+                )}
+                {activeColumns.includes("Categories") && (
+                  <th className="p-4 min-w-[150px]">Categories</th>
+                )}
+                {activeColumns.includes("Platforms") && (
+                  <th className="p-4 min-w-[150px]">Platforms</th>
+                )}
+                {activeColumns.includes("Budget") && (
+                  <th className="p-4 min-w-[100px]">Budget</th>
+                )}
+                {activeColumns.includes("StartDate") && (
+                  <th className="p-4 whitespace-nowrap min-w-[100px]">
+                    Campaign Start
+                  </th>
+                )}
+                {activeColumns.includes("EndDate") && (
+                  <th className="p-4 whitespace-nowrap min-w-[100px]">
+                    Campaign End
+                  </th>
+                )}
+                {activeColumns.includes("Status") && (
+                  <th className="p-4 min-w-[150px]">Campaign Status</th>
+                )}
+                {activeColumns.includes("ApprovedBy") && (
+                  <th className="p-4 min-w-[150px]">Approved By</th>
+                )}
+                {activeColumns.includes("ApprovedOn") && (
+                  <th className="p-4 min-w-[150px]">Approved On</th>
+                )}
 
-                {/* ✅ Show Status column only for "Approved" tab */}
-                {activeStatusName === "Approved" && <th className="p-4 min-w-[150px]">Campaign Status</th>}
+                {activeColumns.includes("RejectedBy") && (
+                  <th className="p-4 min-w-[150px]">Rejected By</th>
+                )}
+                {activeColumns.includes("RejectedOn") && (
+                  <th className="p-4 min-w-[150px]">Rejected On</th>
+                )}
 
-                <th className="p-4 text-right">Actions</th>
+                {activeColumns.includes("BlockedBy") && (
+                  <th className="p-4 min-w-[150px]">Blocked By</th>
+                )}
+                {activeColumns.includes("BlockedOn") && (
+                  <th className="p-4 min-w-[150px]">Blocked On</th>
+                )}
+
+                {activeColumns.includes("Actions") && (
+                  <th className="p-4 text-right">Actions</th>
+                )}
               </tr>
             </thead>
+
 
 
             <tbody>
@@ -427,74 +524,126 @@ const CampaignTableLayout = () => {
                   </td>
 
                   {/* Vendor */}
-                  <td className="p-4">{safeText(c.firstname)}</td>
+                  {activeColumns.includes("Vendor") && (
+                    <td className="p-4">{safeText(c.firstname)}</td>
+                  )}
 
                   {/* Categories */}
-                  <td className="p-4">
-                    {safeArray(c.campaigncategories).length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {c.campaigncategories.map((cat) => (
-                          <span
-                            key={cat.id}
-                            className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full border border-blue-100"
-                          >
-                            {safeText(cat.categoryname)}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-gray-400 text-xs">No categories</span>
-                    )}
-                  </td>
+                  {activeColumns.includes("Categories") && (
+                    <td className="p-4">
+                      {safeArray(c.campaigncategories).length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {c.campaigncategories.map((cat) => (
+                            <span
+                              key={cat.id}
+                              className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full border border-blue-100"
+                            >
+                              {safeText(cat.categoryname)}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-xs">No categories</span>
+                      )}
+                    </td>
+                  )}
 
                   {/* Platforms */}
-                  <td className="p-4">
-                    {safeArray(c.providercontenttype).length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {c.providercontenttype.map((p, i) => (
-                          <span
-                            key={i}
-                            className="bg-purple-50 text-purple-700 text-xs px-2 py-0.5 rounded-full border border-purple-100"
-                          >
-                            {`${safeText(p.providername)} (${safeText(p.contenttypename)})`}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-gray-400 text-xs">No platforms</span>
-                    )}
-                  </td>
+                  {activeColumns.includes("Platforms") && (
+                    <td className="p-4">
+                      {safeArray(c.providercontenttype).length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {c.providercontenttype.map((p, i) => (
+                            <span
+                              key={i}
+                              className="bg-purple-50 text-purple-700 text-xs px-2 py-0.5 rounded-full border border-purple-100"
+                            >
+                              {`${safeText(p.providername)} (${safeText(
+                                p.contenttypename
+                              )})`}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-xs">No platforms</span>
+                      )}
+                    </td>
+                  )}
 
                   {/* Budget */}
-                  <td className="p-4">
-                    ₹ {safeNumber(c.estimatedbudget).toLocaleString()}
-                  </td>
+                  {activeColumns.includes("Budget") && (
+                    <td className="p-4">
+                      ₹ {safeNumber(c.estimatedbudget).toLocaleString()}
+                    </td>
+                  )}
 
                   {/* Start Date */}
-                  <td className="p-4 whitespace-nowrap">
-                    {safeText(c.campaignstartdate)}
-                  </td>
+                  {activeColumns.includes("StartDate") && (
+                    <td className="p-4 whitespace-nowrap">
+                      {safeText(c.campaignstartdate)}
+                    </td>
+                  )}
 
                   {/* End Date */}
-                  <td className="p-4 whitespace-nowrap">
-                    {safeText(c.campaignenddate)}
-                  </td>
+                  {activeColumns.includes("EndDate") && (
+                    <td className="p-4 whitespace-nowrap">
+                      {safeText(c.campaignenddate)}
+                    </td>
+                  )}
 
                   {/* Status */}
-                  {activeStatusName === "Approved" && (
+                  {activeColumns.includes("Status") && (
                     <td className="p-4">
                       <span
                         className={`text-xs font-medium px-2 py-0.5 rounded-full ${c.status === "Approved"
-                            ? "bg-green-50 text-green-700 border border-green-100"
-                            : c.status === "Rejected"
-                              ? "bg-red-50 text-red-700 border border-red-100"
-                              : "bg-yellow-50 text-yellow-700 border border-yellow-100"
+                          ? "bg-green-50 text-green-700 border border-green-100"
+                          : c.status === "Rejected"
+                            ? "bg-red-50 text-red-700 border border-red-100"
+                            : "bg-yellow-50 text-yellow-700 border border-yellow-100"
                           }`}
                       >
                         {safeText(c.status)}
                       </span>
                     </td>
                   )}
+
+
+                  {activeColumns.includes("ApprovedBy") && (
+                    <td className="p-4">
+                      {safeText(c.approvedby, "—")}
+                    </td>
+                  )}
+
+                  {activeColumns.includes("ApprovedOn") && (
+                    <td className="p-4">
+                      {formatDate(c.approveddate)}
+                    </td>
+                  )}
+
+                  {activeColumns.includes("RejectedBy") && (
+                    <td className="p-4">
+                      {safeText(c.rejectedby, "—")}
+                    </td>
+                  )}
+
+                  {activeColumns.includes("RejectedOn") && (
+                    <td className="p-4">
+                     {formatDate(c.rejecteddate)}
+                    </td>
+                  )}
+
+                  {activeColumns.includes("BlockedBy") && (
+                    <td className="p-4">
+                      {safeText(c.blockedby, "—")}
+                    </td>
+                  )}
+
+                  {activeColumns.includes("BlockedOn") && (
+                    <td className="p-4">
+                     {formatDate(c.blockeddate)}
+                    </td>
+                  )}
+
 
 
                   {/* Actions */}

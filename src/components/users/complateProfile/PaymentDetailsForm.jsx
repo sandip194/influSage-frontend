@@ -69,19 +69,6 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
     form.setFieldsValue({ bank: "" }); // reset bank on country change
   };
 
-  // Form validation before submit
-  const validateForm = (values) => {
-    if (values.accountNumber !== values.confirmAccountNumber) {
-      message.error("Account numbers do not match");
-      return false;
-    }
-    if (!values.agree) {
-      message.error("You must agree to the terms");
-      return false;
-    }
-    return true;
-  };
-
   // Build payment method array for payload
   const buildPaymentMethod = (values) => {
     switch (values.paymentMethod) {
@@ -178,7 +165,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
           // Edit Profile: Custom save handler
           if (onSave) onSave(formData);
         }
-      else {
+        else {
           message.error("Failed to save payment info");
         }
       }
@@ -190,12 +177,20 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
     }
   };
 
-  // Called when form is submitted successfully
   const onFinish = async (values) => {
-    if (!validateForm(values)) return;
+    if (!values.agree) {
+      message.error("You must agree to Payment Terms & Conditions");
+      return;
+    }
+    if (!values.phone || values.phone.replace(/\D/g, '').length < 10) {
+      message.error("Enter a valid mobile number");
+      return;
+    }
+
     const payload = formatPaymentAccount(values);
     await submitToBackend(payload);
   };
+
 
   // Map backend data to form fields on load
   const mapBackendToFormValues = (data) => {
@@ -216,8 +211,8 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
         return hexString;
       }
       finally {
-      setIsSubmitting(false); // ✅ Stop loading
-    }
+        setIsSubmitting(false); // ✅ Stop loading
+      }
     };
 
     return {
@@ -236,7 +231,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
       paypalEmail: paymentMethod === "paypal" ? methodObj.paymentdetails : null,
       upiId: paymentMethod === "upi" ? methodObj.paymentdetails : null,
       otherDetails: paymentMethod === "other" ? methodObj.paymentdetails : null,
-      agree: true,
+      agree: payment.agreedToTerms || false,
     };
   };
 
@@ -402,33 +397,24 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
                 name="phone"
                 rules={[
                   {
-                    required: true,
-                    message: 'Phone number is required',
-                  },
-                  {
                     validator: (_, value) => {
-                      if (!value || value.trim() === '') {
-                        // If empty, allow it (optional field)
-                        return Promise.resolve();
+                      if (!value || value.replace(/\D/g, '').length === 0) {
+                        return Promise.reject(new Error("Mobile number is required"));
                       }
-
-                      if (value.length >= 12) {
-                        return Promise.resolve();
+                      if (value.replace(/\D/g, '').length < 10) {
+                        return Promise.reject(new Error("Enter a valid mobile number"));
                       }
-
-                      return Promise.reject(new Error('Enter valid phone number'));
-                    },
-                  },
+                      return Promise.resolve();
+                    }
+                  }
                 ]}
+                valuePropName="value"  // bind value correctly
+                getValueFromEvent={e => e} // preserve PhoneInput's value
               >
                 <PhoneInput
                   country={'in'}
                   enableSearch
-                  inputStyle={{
-                    width: '100%',
-                    height: '40px',
-                    borderRadius: "8px"
-                  }}
+                  inputStyle={{ width: '100%', height: '40px', borderRadius: "8px" }}
                   containerStyle={{ width: '100%' }}
                   specialLabel=""
                 />
@@ -560,8 +546,8 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
                   value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("You must agree to Payment Terms & Conditions")
-                      ),
+                      new Error("You must agree to Payment Terms & Conditions")
+                    ),
               },
             ]}
           >
@@ -598,10 +584,9 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
                 type="submit"
                 disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
                 className={`px-8 py-3 rounded-full text-white font-medium transition
-                  ${
-                    (onNext || isFormChanged) && !isSubmitting
-                      ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
-                      : "bg-gray-400 cursor-not-allowed"
+                  ${(onNext || isFormChanged) && !isSubmitting
+                    ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                    : "bg-gray-400 cursor-not-allowed"
                   }`}
               >
                 {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}

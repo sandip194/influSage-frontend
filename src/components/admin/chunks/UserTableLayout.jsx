@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-    Tabs,
     Input,
     Drawer,
     Checkbox,
@@ -12,7 +11,6 @@ import {
     Empty,
 } from "antd";
 import {
-    RiEyeLine,
     RiCheckLine,
     RiCloseLine,
     RiProhibitedLine,
@@ -28,6 +26,16 @@ import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { safeText, safeArray, safeNumber, safeDate } from "../../../App/safeAccess";
+
+
+
+const columnsByStatus = {
+    ApprovalPending: ["User", "Email", "Followers", "Category", "Location", "AppliedOn", "Actions"],
+    Approved: ["User", "Email",  "ApprovedBy", "ApprovedOn", "Actions"],
+    Rejected: ["User", "Email",  "RejectedBy", "RejectedOn", "Actions"],
+    Blocked: ["User", "Email",  "BlockedBy", "BlockedOn", "Actions"],
+};
+
 
 const UserTableLayout = () => {
     const { token } = useSelector((state) => state.auth);
@@ -298,6 +306,10 @@ const UserTableLayout = () => {
         }
     }, [location.search, statusList]);
 
+    const activeStatusName = statusList.find(s => s.id === activeStatusId)?.name || "";
+    const activeColumns = columnsByStatus[activeStatusName] || [];
+
+
     return (
         <div className="w-full">
             <div className="mb-6">
@@ -373,12 +385,12 @@ const UserTableLayout = () => {
                         <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full">
                             <thead className="bg-gray-100 text-gray-700 text-xs sm:text-sm uppercase tracking-wide">
                                 <tr>
-                                    <th>User</th>
-                                    <th>Email</th>
-                                    <th>Followers</th>
-                                    <th>Category</th>
-                                    <th>Location</th>
-                                    <th>Applied On</th>
+                                    <th className="p-4">User</th>
+                                    <th className="p-4">Email</th>
+                                    <th className="p-4">Followers</th>
+                                    <th className="p-4">Category</th>
+                                    <th className="p-4">Location</th>
+                                    <th className="p-4">Applied On</th>
                                     <th className="text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -416,15 +428,14 @@ const UserTableLayout = () => {
                         <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full">
                             <thead className="bg-gray-100 text-gray-700 text-xs sm:text-sm uppercase tracking-wide">
                                 <tr>
-                                    <th className="min-w-[200px]">User</th>
-                                    <th className="min-w-[150px]">Email</th>
-                                    <th className="min-w-[150px]">Followers</th>
-                                    <th className="min-w-[150px]">Category</th>
-                                    <th className="min-w-[100px]">Location</th>
-                                    <th className="min-w-[100px]">Applied On</th>
-                                    <th className="text-right">Actions</th>
+                                    {activeColumns.map((col) => (
+                                        <th key={col} className="p-3 text-left min-w-[100px]">
+                                            {col === "AppliedOn" ? "Applied On" : col}
+                                        </th>
+                                    ))}
                                 </tr>
                             </thead>
+
 
                             <tbody className="text-sm bg-white text-gray-700">
                                 {safeArray(userList).map((user) => (
@@ -433,106 +444,131 @@ const UserTableLayout = () => {
                                         onClick={() => navigate(`/admin-dashboard/influencers/details/${safeText(user?.id, "")}`)}
                                         className="border-t border-gray-200 hover:bg-gray-100 transition cursor-pointer"
                                     >
-                                        {/* USER */}
-                                        <td className="px-4">
-                                            <div className="flex items-center space-x-3">
-                                                <img
-                                                    src={user?.photopath }
-                                                    alt={safeText(user?.firstname, "User")}
-                                                    className="w-10 h-10 rounded-full object-cover"
-                                                />
+                                        {activeColumns.map((col) => {
+                                            switch (col) {
+                                                case "User":
+                                                    return (
+                                                        <td key="User" className="px-4">
+                                                            <div className="flex items-center space-x-3">
+                                                                <img src={user?.photopath} alt={safeText(user?.firstname, "User")} className="w-10 h-10 rounded-full object-cover" />
+                                                                <span className="font-medium">{safeText(user?.firstname)} {safeText(user?.lastname)}</span>
+                                                            </div>
+                                                        </td>
+                                                    );
 
-                                                <span className="font-medium">
-                                                    {safeText(user?.firstname)} {safeText(user?.lastname, "")}
-                                                </span>
-                                            </div>
-                                        </td>
+                                                case "Email":
+                                                    return <td key="Email" className="p-4">{safeText(user?.email)}</td>;
 
-                                        {/* EMAIL */}
-                                        <td className="p-4">{safeText(user?.email)}</td>
+                                                case "Followers":
+                                                    return (
+                                                        <td key="Followers" className="p-4">
+                                                            {safeArray(user?.providers).map((p) => (
+                                                                <div key={p?.providerid ?? crypto.randomUUID()}>
+                                                                    <span className="font-medium">{safeText(p?.providername, "Unknown")}:</span>{" "}
+                                                                    {safeNumber(p?.nooffollowers).toLocaleString()}
+                                                                </div>
+                                                            ))}
+                                                        </td>
+                                                    );
 
-                                        {/* FOLLOWERS */}
-                                        <td className="p-4">
-                                            {safeArray(user?.providers).map((p) => (
-                                                <div key={p?.providerid ?? crypto.randomUUID()}>
-                                                    <span className="font-medium">{safeText(p?.providername, "Unknown")}:</span>{" "}
-                                                    {safeNumber(p?.nooffollowers).toLocaleString()}
-                                                </div>
-                                            ))}
-                                        </td>
+                                                case "Category":
+                                                    return (
+                                                        <td key="Category" className="p-4">
+                                                            {safeArray(user?.categories).map((c) => (
+                                                                <span key={c?.categoryid ?? crypto.randomUUID()} className="inline-block mr-1 mb-1 px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                                                                    {safeText(c?.categoryname)}
+                                                                </span>
+                                                            ))}
+                                                        </td>
+                                                    );
 
-                                        {/* CATEGORY */}
-                                        <td className="p-4">
-                                            {safeArray(user?.categories).map((c) => (
-                                                <span
-                                                    key={c?.categoryid ?? crypto.randomUUID()}
-                                                    className="inline-block mr-1 mb-1 px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700"
-                                                >
-                                                    {safeText(c?.categoryname)}
-                                                </span>
-                                            ))}
-                                        </td>
+                                                case "Location":
+                                                    return <td key="Location" className="p-4">{safeText(user?.statename)}</td>;
 
-                                        {/* LOCATION */}
-                                        <td className="p-4">{safeText(user?.statename)}</td>
+                                                case "AppliedOn":
+                                                    return <td key="AppliedOn" className="p-4">{safeDate(user?.createddate)}</td>;
 
-                                        {/* DATE */}
-                                        <td className="p-4">{safeDate(user?.createddate)}</td>
+                                                case "ApprovedBy":
+                                                    return <td key="ApprovedBy" className="p-4">{safeText(user?.approvedby, "—")}</td>;
 
-                                        {/* ACTION BUTTONS */}
-                                        <td className="px-4 py-3 text-right">
-                                            <div
-                                                className="flex justify-end items-center gap-1"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                {user?.status === "ApprovalPending" && (
-                                                    <>
-                                                        <Tooltip title="Approve">
-                                                            <button
-                                                                onClick={() => openConfirmationModal(user, "Approved")}
-                                                                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
+                                                case "ApprovedOn":
+                                                    return <td key="ApprovedOn" className="p-4">{safeDate(user?.approveddate)}</td>;
+
+                                                case "RejectedBy":
+                                                    return <td key="RejectedBy" className="p-4">{safeText(user?.rejectedby, "—")}</td>;
+
+                                                case "RejectedOn":
+                                                    return <td key="RejectedOn" className="p-4">{safeDate(user?.rejecteddate)}</td>;
+
+                                                case "BlockedBy":
+                                                    return <td key="BlockedBy" className="p-4">{safeText(user?.blockedby, "—")}</td>;
+
+                                                case "BlockedOn":
+                                                    return <td key="BlockedOn" className="p-4">{safeDate(user?.blockeddate)}</td>;
+
+                                                case "Actions":
+                                                    return (
+                                                        <td key="Actions" className="px-4 py-3 text-right">
+                                                            <div
+                                                                className="flex justify-right items-center gap-1"
+                                                                onClick={(e) => e.stopPropagation()}
                                                             >
-                                                                <RiCheckLine size={18} />
-                                                            </button>
-                                                        </Tooltip>
+                                                                {user?.status === "ApprovalPending" && (
+                                                                    <>
+                                                                        <Tooltip title="Approve">
+                                                                            <button
+                                                                                onClick={() => openConfirmationModal(user, "Approved")}
+                                                                                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
+                                                                            >
+                                                                                <RiCheckLine size={18} />
+                                                                            </button>
+                                                                        </Tooltip>
 
-                                                        <Tooltip title="Reject">
-                                                            <button
-                                                                onClick={() => openConfirmationModal(user, "Rejected")}
-                                                                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
-                                                            >
-                                                                <RiCloseLine size={18} />
-                                                            </button>
-                                                        </Tooltip>
-                                                    </>
-                                                )}
+                                                                        <Tooltip title="Reject">
+                                                                            <button
+                                                                                onClick={() => openConfirmationModal(user, "Rejected")}
+                                                                                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
+                                                                            >
+                                                                                <RiCloseLine size={18} />
+                                                                            </button>
+                                                                        </Tooltip>
+                                                                    </>
+                                                                )}
 
-                                                {user?.status === "Approved" && (
-                                                    <Tooltip title="Block">
-                                                        <button
-                                                            onClick={() => openConfirmationModal(user, "Blocked")}
-                                                            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
-                                                        >
-                                                            <RiProhibitedLine size={18} />
-                                                        </button>
-                                                    </Tooltip>
-                                                )}
+                                                                {user?.status === "Approved" && (
+                                                                    <Tooltip title="Block">
+                                                                        <button
+                                                                            onClick={() => openConfirmationModal(user, "Blocked")}
+                                                                            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
+                                                                        >
+                                                                            <RiProhibitedLine size={18} />
+                                                                        </button>
+                                                                    </Tooltip>
+                                                                )}
 
-                                                {user?.status === "Rejected" && (
-                                                    <Tooltip title="Approve">
-                                                        <button
-                                                            onClick={() => openConfirmationModal(user, "Approved")}
-                                                            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
-                                                        >
-                                                            <RiCheckLine size={18} />
-                                                        </button>
-                                                    </Tooltip>
-                                                )}
-                                            </div>
-                                        </td>
+                                                                {user?.status === "Rejected" && (
+                                                                    <Tooltip title="Approve">
+                                                                        <button
+                                                                            onClick={() => openConfirmationModal(user, "Approved")}
+                                                                            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
+                                                                        >
+                                                                            <RiCheckLine size={18} />
+                                                                        </button>
+                                                                    </Tooltip>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    );
+
+                                                default:
+                                                    return null;
+                                            }
+
+                                        })}
                                     </tr>
                                 ))}
                             </tbody>
+
                         </table>
 
                     ) : (
@@ -780,3 +816,7 @@ const UserTableLayout = () => {
 };
 
 export default UserTableLayout;
+
+
+
+

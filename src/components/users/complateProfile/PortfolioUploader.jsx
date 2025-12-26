@@ -22,7 +22,10 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
   const [loadingLanguages, setLoadingLanguages] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFormChanged, setIsFormChanged] = useState(false);
-  const [validationError, setValidationError] = useState(""); // ✅ NEW
+  const [portfolioError, setPortfolioError] = useState("");
+  const [languageError, setLanguageError] = useState("");
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
 
   // Custom hook for file handling
   const {
@@ -31,7 +34,6 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
     deletedFilePaths,
     fileError,
     setExistingFiles,
-    setDeletedFilePaths,
     handleFileChange,
     handleRemove
   } = useFileUpload();
@@ -83,94 +85,107 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
   }, [data, languages, setExistingFiles]);
 
   const handleSubmit = async () => {
-  if (isSubmitting) return;
+    if (isSubmitting) return;
 
-  try {
+    setHasSubmitted(true);
     setIsSubmitting(true);
-    setValidationError("");
+
+    // reset errors
+    setPortfolioError("");
+    setLanguageError("");
 
     const hasFiles = fileList.length > 0 || existingFiles.length > 0;
     const url = portfolioUrl.trim();
     const isValidUrl = /^https?:\/\/.+/.test(url);
 
-    // ✅ Require at least one: file OR valid URL
+    let hasError = false;
+
+    // Portfolio validation
     if (!hasFiles && !isValidUrl) {
-      setValidationError("Please upload at least one portfolio file or enter a valid portfolio URL.");
-      message.error("Please upload at least one portfolio file or enter a valid portfolio URL.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    // ✅ Require language selection
-    if (selectedLanguages.length === 0) {
-      message.error("Please select at least one language.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    for (const filepath of deletedFilePaths) {
-      await axios.post(
-        "/user/profile/delete-portfolio-file",
-        { userId, filepath },
-        { headers: { Authorization: `Bearer ${token}` } }
+      setPortfolioError(
+        "Please upload at least one portfolio file or provide a valid portfolio URL."
       );
+      hasError = true;
     }
 
-    const formData = new FormData();
-
-    const existingFilePaths = existingFiles.map(f => ({
-      filepath: f.url.startsWith("http")
-        ? f.url.replace(`${BASE_URL}/`, "")
-        : f.url
-    }));
-
-    const selectedLanguagesData = selectedLanguages
-      .map(langId => {
-        const lang = languages.find(l => l.id === langId);
-        return lang ? { languageid: lang.id, languagename: lang.name } : null;
-      })
-      .filter(Boolean);
-
-    formData.append(
-      "portfoliojson",
-      JSON.stringify({
-        portfoliourl: isValidUrl ? url : null,
-        filepaths: existingFilePaths.length
-          ? existingFilePaths
-          : [{ filepath: null }],
-        languages: selectedLanguagesData,
-      })
-    );
-
-    fileList.forEach(f => formData.append("portfolioFiles", f));
-
-    const res = await axios.post("user/complete-profile", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (res.status === 200) {
-      const successMessage =
-        res?.data?.message || "Profile updated successfully";
-
-      if (showToast) toast.success(successMessage);
-
-      setIsFormChanged(false);
-
-      onSave?.(formData);
-      onNext?.();
-    }else {
-      message.error("Something went wrong while saving.");
+    // Language validation
+    if (selectedLanguages.length === 0) {
+      setLanguageError("Please select at least one language.");
+      hasError = true;
     }
-  } catch (err) {
-    console.error("Submit error:", err);
-    message.error("Failed to submit portfolio.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+
+    // ⛔ Stop submission ONLY AFTER checking everything
+    if (hasError) {
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+
+
+      for (const filepath of deletedFilePaths) {
+        await axios.post(
+          "/user/profile/delete-portfolio-file",
+          { userId, filepath },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      const formData = new FormData();
+
+      const existingFilePaths = existingFiles.map(f => ({
+        filepath: f.url.startsWith("http")
+          ? f.url.replace(`${BASE_URL}/`, "")
+          : f.url
+      }));
+
+      const selectedLanguagesData = selectedLanguages
+        .map(langId => {
+          const lang = languages.find(l => l.id === langId);
+          return lang ? { languageid: lang.id, languagename: lang.name } : null;
+        })
+        .filter(Boolean);
+
+      formData.append(
+        "portfoliojson",
+        JSON.stringify({
+          portfoliourl: isValidUrl ? url : null,
+          filepaths: existingFilePaths.length
+            ? existingFilePaths
+            : [{ filepath: null }],
+          languages: selectedLanguagesData,
+        })
+      );
+
+      fileList.forEach(f => formData.append("portfolioFiles", f));
+
+      const res = await axios.post("user/complete-profile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.status === 200) {
+        const successMessage =
+          res?.data?.message || "Profile updated successfully";
+
+        if (showToast) toast.success(successMessage);
+
+        setIsFormChanged(false);
+
+        onSave?.(formData);
+        onNext?.();
+      } else {
+        message.error("Something went wrong while saving.");
+      }
+    } catch (err) {
+      console.error("Submit error:", err);
+      message.error("Failed to submit portfolio.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
 
   return (
@@ -191,6 +206,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
             onChange={(info) => {
               handleFileChange(info);
               setIsFormChanged(true);
+              setPortfolioError("");
               info.fileList.length = 0;
             }}
             showUploadList={false}
@@ -203,11 +219,18 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
               </p>
             </div>
           </Dragger>
-          {(fileError || validationError) && (
+          {fileError && (
             <p className="text-red-500 text-sm mt-2 text-center">
-              {fileError || validationError}
+              {fileError}
             </p>
           )}
+
+          {hasSubmitted && portfolioError && !fileError && (
+            <p className="text-red-500 text-sm mt-2 text-center">
+              {portfolioError}
+            </p>
+          )}
+
         </Form.Item>
 
         {/* File Previews */}
@@ -243,8 +266,12 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
             size="large"
             value={portfolioUrl}
             onChange={(e) => {
-              setPortfolioUrl(e.target.value);
+              const value = e.target.value;
+              setPortfolioUrl(value);
               setIsFormChanged(true);
+              if (/^https?:\/\/.+/.test(value)) {
+                setPortfolioError("");
+              }
             }}
             className="rounded-lg"
           />
@@ -263,6 +290,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
             value={selectedLanguages}
             onChange={(values) => {
               setSelectedLanguages(values);
+              setLanguageError("");
               setIsFormChanged(true);
             }}
             loading={loadingLanguages}
@@ -271,11 +299,13 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
               <Option key={id} value={id}>{name}</Option>
             ))}
           </Select>
-          {selectedLanguages.length === 0 && (
+          {hasSubmitted && languageError && (
             <p className="text-red-500 text-sm mt-2 text-center">
-              Please select at least one language.
+              {languageError}
             </p>
           )}
+
+
         </Form.Item>
 
         {/* Buttons */}
@@ -294,10 +324,9 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
               type="submit"
               disabled={onNext ? isSubmitting : !isFormChanged || isSubmitting}
               className={`px-8 py-3 rounded-full text-white font-medium transition
-                ${
-                  (onNext || isFormChanged) && !isSubmitting
-                    ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
-                    : "bg-gray-400 cursor-not-allowed"
+                ${(onNext || isFormChanged) && !isSubmitting
+                  ? "bg-[#121A3F] hover:bg-[#0D132D] cursor-pointer"
+                  : "bg-gray-400 cursor-not-allowed"
                 }`}
             >
               {isSubmitting ? <Spin size="small" /> : onNext ? "Continue" : "Save Changes"}

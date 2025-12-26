@@ -71,7 +71,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
       );
 
       if (!hasValidEntry) {
-        setCustomValidationError("Please fill at least one social media URL and 1000+ followers.");
+        setCustomValidationError("Please add at least one social media profile with a valid link and 1,000 or more followers.");
         return;
       }
 
