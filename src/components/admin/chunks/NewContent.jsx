@@ -193,18 +193,18 @@ const NewContent = () => {
 
         // Reset pagination to page 1
         setPagination((prev) => ({
-        ...prev,
-        current: 1,
+            ...prev,
+            current: 1,
         }));
 
-    // Fetch fresh list without filters
-        fetchAllContents({
-        search: "",
-        sortBy: "recent",
-        platformFilter: null,
-        contentType: null,
-        page: 1,
-        pageSize: pagination.pageSize,
+        // Fetch fresh list without filters
+        fetchNewContents({
+            search: "",
+            sortBy: "recent",
+            platformFilter: null,
+            contentType: null,
+            page: 1,
+            pageSize: pagination.pageSize,
         });
     };
 
@@ -386,7 +386,7 @@ const NewContent = () => {
                 <button
                     onClick={handleClearFilters}
                     className="bg-[#0D132D] text-white px-4 py-2 rounded-2xl"
-                    >
+                >
                     Clear
                 </button>
             </div>
@@ -410,13 +410,21 @@ const NewContent = () => {
                 }}
             />
 
-
             <AnalyticsFormModal
+                key={selectedContent?.contractcontentlinkid}
                 visible={isModalVisible}
-                onClose={() => setIsModalVisible(false)}
                 contentData={selectedContent}
-                data={null}
+                onClose={() => {
+                    setIsModalVisible(false);
+                    setSelectedContent(null);
+                }}
+                onSuccess={() => {
+                    setIsModalVisible(false);
+                    setSelectedContent(null);
+                    fetchNewContents({ page: pagination.current });
+                }}
             />
+
 
         </div>
     );

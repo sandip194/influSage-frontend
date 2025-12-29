@@ -12,6 +12,8 @@ import {
   DatePicker,
   InputNumber,
   Empty,
+  Skeleton,
+  Radio,
 } from "antd";
 import {
   SearchOutlined,
@@ -134,11 +136,18 @@ const CampaignTableLayout = () => {
   const [currentCampaign, setCurrentCampaign] = useState(null); // store full Campaign object
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCampaignId, setCurrentCampaignId] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   // New states for reject modal
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectLoading, setRejectLoading] = useState(false)
+
+  // New states for Block modal
+  const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  const [blockReasons, setBlockReasons] = useState([]);
+  const [selectedBlockReason, setSelectedBlockReason] = useState(null);
+  const [blockLoading, setBlockLoading] = useState(false);
 
   // 📍 Fetch Status Tabs
   const fetchStatusList = async () => {
@@ -202,6 +211,27 @@ const CampaignTableLayout = () => {
       setLoading(false);
     }
   };
+
+  const fetchBlockReasons = async () => {
+    try {
+      setBlockLoading(true);
+      const res = await axios.get(
+        "/admin/dashboard/campaign-block-reason",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.status === 200) {
+        setBlockReasons(res.data?.data || []);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load block reasons");
+    } finally {
+      setBlockLoading(false);
+    }
+  };
+
+
 
 
   const handleSubmit = async (id, statusName) => {
@@ -291,6 +321,8 @@ const CampaignTableLayout = () => {
 
     if (type === 'Rejected') {
       setIsRejectModalOpen(true);
+    } else if (type === 'Blocked') {
+      setIsBlockModalOpen(true);
     } else {
       setIsModalOpen(true);
     }
@@ -332,6 +364,40 @@ const CampaignTableLayout = () => {
       setRejectLoading(false)
     }
   };
+
+    // New function for Block with reason
+  const handleBlockSubmit = async () => {
+    if (!selectedBlockReason) {
+      toast.error("Please select a block reason");
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+
+      const res = await axios.post(
+        "admin/dashboard/profile-campaign-block",
+        {
+          p_campaignid: currentCampaignId,
+          p_objective: selectedBlockReason,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.status === 200) {
+        fetchCampaigns();
+        toast.success(res.data?.message || "Campaign blocked successfully");
+        setIsBlockModalOpen(false);
+        setSelectedBlockReason(null);
+      }
+
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to block campaign");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
 
 
   // 🧱 UI
@@ -628,7 +694,7 @@ const CampaignTableLayout = () => {
 
                   {activeColumns.includes("RejectedOn") && (
                     <td className="p-4">
-                     {formatDate(c.rejecteddate)}
+                      {formatDate(c.rejecteddate)}
                     </td>
                   )}
 
@@ -640,7 +706,7 @@ const CampaignTableLayout = () => {
 
                   {activeColumns.includes("BlockedOn") && (
                     <td className="p-4">
-                     {formatDate(c.blockeddate)}
+                      {formatDate(c.blockeddate)}
                     </td>
                   )}
 
@@ -679,7 +745,10 @@ const CampaignTableLayout = () => {
                       {activeStatusName === "Approved" && (
                         <Tooltip title="Block">
                           <button
-                            onClick={() => openConfirmationModal(c, 'Blocked')}
+                            onClick={() => {
+                              fetchBlockReasons();
+                              openConfirmationModal(c, 'Blocked')
+                            }}
                             className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
                           >
                             <RiProhibitedLine size={18} />
@@ -788,6 +857,54 @@ const CampaignTableLayout = () => {
           maxLength={250}
           showCount={{ formatter: ({ count, maxLength }) => `${count} / ${maxLength}` }}
         />
+      </Modal>
+
+      {/* Block Campaign Modal */}
+      <Modal
+        title={
+          <>
+            Block Campaign :
+          </>
+        }
+        open={isBlockModalOpen}
+        onCancel={() => {
+          setIsBlockModalOpen(false);
+          setSelectedBlockReason(null);
+        }}
+        onOk={handleBlockSubmit}
+        okText="Confirm Block"
+        okButtonProps={{
+          danger: true,
+          loading: actionLoading,
+          disabled: !selectedBlockReason,
+        }}
+      >
+        <p className="mb-4 text-gray-600">
+          Please select a reason to block this campaign:
+        </p>
+
+        {blockLoading ? (
+          <Skeleton active paragraph={{ rows: 6 }} />
+        ) : blockReasons?.length > 0 ? (
+          <Radio.Group
+            value={selectedBlockReason}
+            onChange={(e) => setSelectedBlockReason(e.target.value)}
+            className="flex flex-col"
+          >
+            {blockReasons.map((reason) => (
+              <div key={reason.id} className="mb-4">
+                <Radio
+                  value={reason.id}
+                  className="block w-full text-gray-800"
+                >
+                  {reason.name}
+                </Radio>
+              </div>
+            ))}
+          </Radio.Group>
+        ) : (
+          <Empty description="No block reasons available" />
+        )}
       </Modal>
 
       {/* Filters Drawer */}

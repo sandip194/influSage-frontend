@@ -32,7 +32,7 @@ const fieldRules = {
     },
 };
 
-const AnalyticsFormModal = ({ visible, onClose, contentData }) => {
+const AnalyticsFormModal = ({ visible, onClose, onSuccess, contentData }) => {
     const [formData, setFormData] = useState({
         views: null,
         likes: null,
@@ -51,6 +51,21 @@ const AnalyticsFormModal = ({ visible, onClose, contentData }) => {
     const contentType = contentData?.contentType;
     const rules = fieldRules[platform]?.[contentType] || {};
 
+    useEffect(() => {
+        if (visible && contentData) {
+            setFormData({
+                views: null,
+                likes: null,
+                comments: null,
+                shares: null,
+                date: null,
+            });
+            setErrors({});
+            setPreviousData(null);
+        }
+    }, [visible, contentData?.contractcontentlinkid]);
+
+
     // ------------------------------------------------------------------------------------
     // LOAD EXISTING ANALYTICS WHEN EDITING
     // ------------------------------------------------------------------------------------
@@ -64,7 +79,7 @@ const AnalyticsFormModal = ({ visible, onClose, contentData }) => {
             try {
                 const res = await axios.get("/admin/user-Platform-Analytics", {
                     params: {
-                           p_userplatformanalyticid: contentData.userplatformanalyticid
+                        p_userplatformanalyticid: contentData.userplatformanalyticid
                     },
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -165,6 +180,7 @@ const AnalyticsFormModal = ({ visible, onClose, contentData }) => {
 
             if (res.status === 200) {
                 toast.success(res.data.message || "Analytics saved");
+                onSuccess?.();
                 onClose();
             } else {
                 toast.error(res.data.message || "Something went wrong");
@@ -185,7 +201,18 @@ const AnalyticsFormModal = ({ visible, onClose, contentData }) => {
         <Modal
             title={`${isUpdate ? "Update Analytics" : "Add Initial Analytics"} — ${platform}`}
             open={visible}
-            onCancel={onClose}
+            onCancel={() => {
+                onClose();
+                setFormData({
+                    views: null,
+                    likes: null,
+                    comments: null,
+                    shares: null,
+                    date: null,
+                });
+                setErrors({});
+            }}
+
             footer={null}
             centered
             width={600}

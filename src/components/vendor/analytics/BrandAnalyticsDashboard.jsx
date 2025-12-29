@@ -210,83 +210,93 @@ const BrandAnalyticsDashboard = () => {
                         <Option value="year">Year</Option>
                     </Select>
                 </div>
-                <tbody>
-                    {/* 🔄 Loading State */}
-                    {campaignLoading && (
-                        [...Array(5)].map((_, idx) => (
-                            <tr key={idx} className="border-b border-gray-200">
-                                <td colSpan={5} className="py-3 px-3">
-                                    <Skeleton
-                                        active
-                                        paragraph={{ rows: 1 }}
-                                        title={false}
-                                    />
-                                </td>
-                            </tr>
-                        ))
-                    )}
-
-                    {/* 📭 Empty State */}
-                    {!campaignLoading && campaigns.length === 0 && (
-                        <tr>
-                            <td colSpan={5} className="py-12">
-                                <div className="flex justify-center w-full">
-                                    <Empty description="No campaigns found" />
-                                </div>
-                            </td>
-
+                <table className="min-w-full text-left">
+                    <thead>
+                        <tr className="border-b border-gray-300">
+                            <th className="py-2 px-3 text-gray-500 text-xs">Campaign</th>
+                            <th className="py-2 px-3 text-gray-500 text-xs">Platform</th>
+                            <th className="py-2 px-3 text-gray-500 text-xs">Views</th>
+                            <th className="py-2 px-3 text-gray-500 text-xs">Engagement</th>
+                            <th className="py-2 px-3 text-gray-500 text-xs">Status</th>
                         </tr>
-                    )}
+                    </thead>
+                    <tbody>
+                        {/* 🔄 Loading State */}
+                        {campaignLoading && (
+                            [...Array(5)].map((_, idx) => (
+                                <tr key={idx} className="border-b border-gray-200">
+                                    <td colSpan={5} className="py-3 px-3">
+                                        <Skeleton
+                                            active
+                                            paragraph={{ rows: 1 }}
+                                            title={false}
+                                        />
+                                    </td>
+                                </tr>
+                            ))
+                        )}
 
-
-                    {/* ✅ Data State */}
-                    {!campaignLoading && campaigns.length > 0 &&
-                        campaigns.map((c) => (
-                            <tr
-                                key={c.campaignid}
-                                className="border-b border-gray-200 hover:bg-gray-50"
-                            >
-                                {/* Campaign Name */}
-                                <td className="py-2 px-3 font-medium text-[#0D132D]">
-                                    {c.campaignname}
+                        {/* 📭 Empty State */}
+                        {!campaignLoading && campaigns.length === 0 && (
+                            <tr>
+                                <td colSpan={5} className="py-12">
+                                    <div className="flex justify-center w-full">
+                                        <Empty description="No campaigns found" />
+                                    </div>
                                 </td>
 
-                                {/* Platforms */}
-                                <td className="py-2 px-3">
-                                    {c.providers?.length
-                                        ? c.providers.map(p => p.providername).join(", ")
-                                        : "-"}
-                                </td>
-
-                                {/* Views */}
-                                <td className="py-2 px-3">
-                                    {c.totalviews?.toLocaleString()}
-                                </td>
-
-                                {/* Engagement */}
-                                <td className="py-2 px-3">
-                                    {c.totalengagement?.toLocaleString()}
-                                </td>
-
-                                {/* Status */}
-                                <td className="py-2 px-3">
-                                    <span
-                                        className={`px-2 py-1 rounded-full text-xs font-medium
-                        ${c.statusname === "Published"
-                                                ? "bg-green-100 text-green-700"
-                                                : c.statusname === "InProgress"
-                                                    ? "bg-yellow-100 text-yellow-700"
-                                                    : "bg-gray-100 text-gray-600"
-                                            }`}
-                                    >
-                                        {c.statusname}
-                                    </span>
-                                </td>
                             </tr>
-                        ))
-                    }
-                </tbody>
+                        )}
 
+
+                        {/* ✅ Data State */}
+                        {!campaignLoading && campaigns.length > 0 &&
+                            campaigns.map((c) => (
+                                <tr
+                                    key={c.campaignid}
+                                    className="border-b border-gray-100 hover:bg-gray-50"
+                                >
+                                    {/* Campaign Name */}
+                                    <td className="py-2 px-3 font-medium text-[#0D132D]">
+                                        {c.campaignname}
+                                    </td>
+
+                                    {/* Platforms */}
+                                    <td className="py-2 px-3">
+                                        {c.providers?.length
+                                            ? c.providers.map(p => p.providername).join(", ")
+                                            : "-"}
+                                    </td>
+
+                                    {/* Views */}
+                                    <td className="py-2 px-3">
+                                        {c.totalviews?.toLocaleString()}
+                                    </td>
+
+                                    {/* Engagement */}
+                                    <td className="py-2 px-3">
+                                        {c.totalengagement?.toLocaleString()}
+                                    </td>
+
+                                    {/* Status */}
+                                    <td className="py-2 px-3">
+                                        <span
+                                            className={`px-2 py-1 rounded-full text-xs font-medium
+                        ${c.statusname === "Published"
+                                                    ? "bg-green-100 text-green-700"
+                                                    : c.statusname === "InProgress"
+                                                        ? "bg-yellow-100 text-yellow-700"
+                                                        : "bg-gray-100 text-gray-600"
+                                                }`}
+                                        >
+                                            {c.statusname}
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))
+                        }
+                    </tbody>
+                </table>
             </div>
 
             {/* ------------------------- */}

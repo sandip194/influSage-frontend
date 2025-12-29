@@ -14,6 +14,18 @@ import { toast } from "react-toastify"; // Optional: for error notifications; in
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
+
+function debounce(func, delay) {
+  let timer;
+  return (...args) => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+}
+
+
 const statusStyles = {
   draft: "bg-gray-100 text-gray-700",
   published: "bg-blue-100 text-blue-700",
@@ -60,7 +72,7 @@ const getImageUrl = (path) => {
 
 const VendorCampaignsLayout = () => {
   const [showFilter, setShowFilter] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+  // const [statusFilter, setStatusFilter] = useState("all");
   //const [searchText, setSearchText] = useState("");
   const [searchInput, setSearchInput] = useState(""); // For controlled input
   const [loading, setLoading] = useState(false);
@@ -158,19 +170,19 @@ const VendorCampaignsLayout = () => {
   };
 
   // Handle status tab click (updates filters with ID and refetches)
-  const handleStatusFilter = useCallback((statusItem) => {
-    if (statusItem === "All") {
-      // For "All", clear statuslabelid
-      setStatusFilter("all");
-      setFilters((prev) => ({ ...prev, status: null, pagenumber: 1 }));
-    } else {
-      // Assume statusItem is an object with 'id' and 'name'
-      const statusId = statusItem.id; // Adjust if property is different, e.g., statusItem.statuslabelid
-      const statusKey = getStatusKey(statusItem); // For UI highlighting
-      setStatusFilter(statusKey);
-      setFilters((prev) => ({ ...prev, status: statusId, pagenumber: 1 }));
-    }
-  }, []);
+  // const handleStatusFilter = useCallback((statusItem) => {
+  //   if (statusItem === "All") {
+  //     // For "All", clear statuslabelid
+  //     setStatusFilter("all");
+  //     setFilters((prev) => ({ ...prev, status: null, pagenumber: 1 }));
+  //   } else {
+  //     // Assume statusItem is an object with 'id' and 'name'
+  //     const statusId = statusItem.id; // Adjust if property is different, e.g., statusItem.statuslabelid
+  //     const statusKey = getStatusKey(statusItem); // For UI highlighting
+  //     setStatusFilter(statusKey);
+  //     setFilters((prev) => ({ ...prev, status: statusId, pagenumber: 1 }));
+  //   }
+  // }, []);
 
   // Handle search (on Enter)
   const handleSearch = useCallback(
@@ -238,7 +250,7 @@ const VendorCampaignsLayout = () => {
     };
     setFilters(resetFilters);
     setTempFilters(resetFilters);
-    setStatusFilter("all");
+    //setStatusFilter("all");
     // setSearchText("");
     setSearchInput("");
     fetchCampaigns(); // Refetch with reset
@@ -265,15 +277,28 @@ const VendorCampaignsLayout = () => {
   useEffect(() => {
     const handleResize = () => {
       const newPageSize = window.innerWidth < 640 ? 10 : 15;
-      setFilters((prev) => ({
-        ...prev,
-        pagesize: newPageSize,
-        pagenumber: 1,
-      }));
+
+      setFilters((prev) => {
+        // Only update if the pageSize actually changes to avoid unnecessary fetch
+        if (prev.pagesize !== newPageSize) {
+          return {
+            ...prev,
+            pagesize: newPageSize,
+            pagenumber: 1,
+          };
+        }
+        return prev;
+      });
     };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+
+    // Debounce resize to 300ms
+    const debouncedResize = debounce(handleResize, 300);
+
+    window.addEventListener("resize", debouncedResize);
+
+    return () => window.removeEventListener("resize", debouncedResize);
   }, []);
+
 
   const paginatedData = useMemo(() => campaigns, [campaigns]); // Server-side pagination, so full campaigns are the "paginated" data
 
@@ -297,7 +322,7 @@ const VendorCampaignsLayout = () => {
           Add Campaign
         </button>
       </div>
-      {/* Status Tabs */}
+      {/* Status Tabs
       <div className="bg-white p-3 sm:p-4 rounded-lg mb-6 overflow-x-auto">
         <div className="flex gap-3 flex-nowrap">
           {statusList.map((statusItem) => {
@@ -317,8 +342,8 @@ const VendorCampaignsLayout = () => {
                 key={uniqueKey}
                 onClick={() => handleStatusFilter(statusItem)}
                 className={`px-3 sm:px-4 py-2 rounded-lg border transition font-medium ${statusFilter === id
-                    ? "bg-[#141843] text-white border-[#141843]"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                  ? "bg-[#141843] text-white border-[#141843]"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
                   }`}
               >
                 {label}
@@ -326,7 +351,7 @@ const VendorCampaignsLayout = () => {
             );
           })}
         </div>
-      </div>
+      </div> */}
 
 
       {/* Search, Sort, and Filter Header */}
@@ -346,7 +371,7 @@ const VendorCampaignsLayout = () => {
                   <CloseCircleFilled
                     onClick={() => {
                       setSearchInput("");
-                      setSearchTerm("");
+                      // setSearchTerm("");
                     }}
                     className="text-gray-400 hover:text-gray-600 cursor-pointer"
                   />
@@ -354,6 +379,40 @@ const VendorCampaignsLayout = () => {
               ) : null
             }
           />
+
+          {/* Status Dropdown */}
+          <div className="flex-shrink-0 w-full sm:w-38">
+            <Select
+              size="large"
+              value={filters.status || "all"}
+              onChange={(value) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: value === "all" ? null : value,
+                  pagenumber: 1,
+                }))
+              }
+              placeholder="Status"
+              className="w-full"
+            >
+              {statusList.map((statusItem) => {
+                const key =
+                  typeof statusItem === "object" && statusItem.id
+                    ? statusItem.id
+                    : getStatusKey(statusItem);
+                const label =
+                  typeof statusItem === "string"
+                    ? statusItem
+                    : statusLabels[getStatusKey(statusItem.name)] || statusItem.name;
+                return (
+                  <Option key={key} value={key}>
+                    {label}
+                  </Option>
+                );
+              })}
+            </Select>
+          </div>
+
 
           {!showFilter && (
             <div className="sm:static fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-200 flex gap-2 justify-between sm:flex-row sm:w-auto sm:border-none sm:p-0 z-30">

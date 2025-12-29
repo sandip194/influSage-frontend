@@ -107,7 +107,7 @@ const UpdateAnalytics = () => {
                         platform: item.providername ?? "N/A",
                         contentType: item.contenttypname ?? "N/A",
                         link: linkUrl,
-                        postdate: formatDate(item.postdate),
+                        postdate: item.postdate,
                         lastUpdated: formatDate(item.modifieddate ? item.modifieddate : item.createddate),
                         raw: item,
                     };
@@ -198,7 +198,7 @@ const UpdateAnalytics = () => {
         }));
 
     // Fetch fresh list without filters
-        fetchAllContents({
+        fetchUpdateContents({
         search: "",
         sortBy: "recent",
         platformFilter: null,
@@ -417,11 +417,20 @@ const UpdateAnalytics = () => {
                 visible={isModalVisible}
                 onClose={() => {
                     setIsModalVisible(false);
-                    fetchUpdateContents();
+                    setSelectedContent(null);
+                }}
+                onSuccess={() => {
+                    setIsModalVisible(false);
+                    setSelectedContent(null);
+                    fetchUpdateContents({ page: pagination.current });
                 }}
                 contentData={selectedContent}
                 data={null}
             />
+
+            
+            
+            
         </div>
     );
 };

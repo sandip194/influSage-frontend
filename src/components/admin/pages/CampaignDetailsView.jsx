@@ -286,16 +286,19 @@ const CampaignDetailsView = () => {
                                                 Reject
                                             </Button>
 
-                                            {/* 🚫 Block Button */}
-                                            <Button
-                                                type="text"
-                                                icon={<StopOutlined />}
-                                                disabled={actionLoading}
-                                                onClick={() => openConfirmationModal("Blocked")}
-                                                className="!border !border-gray-600 !text-gray-700 !bg-transparent hover:!bg-gray-800 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
-                                            >
-                                                Block
-                                            </Button>
+                                             {/* 🚫 Block Button */}
+                                                <Button
+                                                    type="text"
+                                                    icon={<StopOutlined />}
+                                                    disabled={actionLoading}
+                                                    onClick={() => {
+                                                        setIsBlockModalOpen(true);
+                                                        fetchBlockReasons();
+                                                    }}
+                                                    className="!border !border-gray-600 !text-gray-700 !bg-transparent hover:!bg-gray-800 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
+                                                >
+                                                    Block
+                                                </Button>
                                         </>
                                     )}
 

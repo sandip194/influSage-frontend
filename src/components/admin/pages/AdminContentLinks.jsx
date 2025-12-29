@@ -32,32 +32,32 @@ const AdminContentLinks = () => {
     };
 
     const handleViewHistory = async (item, page = 1) => {
-    try {
-      setHistoryModal(prev => ({ ...prev, loading: true }));
+        try {
+            setHistoryModal(prev => ({ ...prev, loading: true }));
 
-      const res = await axios.get(
-        `/admin/analytics/content-history/${item.contractcontentlinkid}`,
-        {
-          params: { p_pagenumber: page, p_pagesize: 10 },
-          headers: { Authorization: `Bearer ${token}` },
+            const res = await axios.get(
+                `/admin/analytics/content-history/${item.contractcontentlinkid}`,
+                {
+                    params: { p_pagenumber: page, p_pagesize: 10 },
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            const records = res.data?.data?.records || [];
+
+            setHistoryModal(prev => ({
+                visible: true,
+                item,
+                page,
+                loading: false,
+                data: page === 1 ? records : [...prev.data, ...records],
+            }));
+        } catch (err) {
+            console.error(err);
+            setHistoryModal(prev => ({ ...prev, loading: false }));
         }
-      );
+    };
 
-      const records = res.data?.data?.records || [];
-
-      setHistoryModal(prev => ({
-        visible: true,
-        item,
-        page,
-        loading: false,
-        data: page === 1 ? records : [...prev.data, ...records],
-      }));
-    } catch (err) {
-      console.error(err);
-      setHistoryModal(prev => ({ ...prev, loading: false }));
-    }
- };
- 
     return (
         <div className="">
 
@@ -105,7 +105,7 @@ const AdminContentLinks = () => {
                 onLoadMore={() =>
                     handleViewHistory(historyModal.item, historyModal.page + 1)
                 }
-                />
+            />
         </div>
     );
 };

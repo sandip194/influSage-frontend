@@ -30,13 +30,27 @@ const statusStyles = {
   inprogress: "bg-yellow-100 text-yellow-700",
   completed: "bg-green-100 text-green-700",
   cancelled: "bg-red-100 text-red-700",
+
+  published: "bg-blue-100 text-blue-700",
+  blocked: "bg-gray-100 text-gray-700",
+  pending: "bg-orange-100 text-orange-700",
+  rejected: "bg-pink-100 text-pink-700",
+  accepted: "bg-emerald-100 text-emerald-700", // ✅ added
 };
 
 const statusLabels = {
   inprogress: "In Progress",
   completed: "Completed",
   cancelled: "Cancelled",
+
+  published: "Published",
+  blocked: "Blocked",
+  pending: "Pending",
+  rejected: "Rejected",
+  accepted: "Accepted", // ✅ added
 };
+
+
 
 const sortOptions = [
   { value: "createddate_desc", label: "Newest" },
@@ -347,14 +361,14 @@ const InfluencerCampaigns = () => {
       {/* Table */}
       <div className="bg-white rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left min-w-[700px]">
+          <table className="w-full text-left min-w-[800px]">
             <thead className="bg-white text-gray-700 text-sm tracking-wide">
               <tr>
                 <th className="p-4">Campaign</th>
                 <th className="p-4 w-[160px]">Budget</th>
                 <th className="p-4 w-[160px]">Campaign Start</th>
-                <th className="p-4 w-[160px]">Status</th>
-                <th className="p-4 w-[160px]">Contract Status</th>
+                <th className="p-4 w-[180px]">Campaign Status</th>
+                <th className="p-4 w-[180px]">Contract Status</th>
               </tr>
             </thead>
             <tbody className="text-sm text-gray-700">
@@ -401,7 +415,14 @@ const InfluencerCampaigns = () => {
                         {statusLabels[row.status.toLowerCase()] || row.status}
                       </span>
                     </td>
-                    <td className="p-4">{row.contract_status}</td>
+                    <td className="p-4">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[row.contract_status.toLowerCase()] ||
+                          "bg-gray-100 text-gray-600"
+                          }`}
+                      >
+                        {statusLabels[row.contract_status.toLowerCase()] || row.contract_status}
+                      </span></td>
                   </tr>
                 ))
               ) : (
