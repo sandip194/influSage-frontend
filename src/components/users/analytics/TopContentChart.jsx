@@ -10,7 +10,7 @@ import {
   Legend,
 } from "chart.js";
 import { useSelector } from "react-redux";
-import { Skeleton, Empty, Select } from "antd";
+import { Skeleton, Select } from "antd";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 const { Option } = Select;
@@ -27,6 +27,15 @@ const CAMPAIGN_ENDPOINT_BY_ROLE = {
   1: "/user/analytics/campaign-topperformingcontent",
 };
 
+// Fallback labels when no data
+const EMPTY_LABELS = [
+  "Content A",
+  "Content B",
+  "Content C",
+  "Content D",
+  "Content E",
+];
+
 const TopContentChart = ({ campaignId }) => {
   const { token, role } = useSelector((state) => state.auth);
 
@@ -41,21 +50,26 @@ const TopContentChart = ({ campaignId }) => {
 
   const fetchTopContent = useCallback(async () => {
     const endpoint = getEndpoint();
-    if (!token || !endpoint) return;
+    if (!token || !endpoint) {
+      setDataList([]);
+      return;
+    }
 
     const controller = new AbortController();
     setLoading(true);
 
     try {
-      const params = campaignId ? { p_campaignid: campaignId, p_filtertype: filterType } : { p_filtertype: filterType };
+      const params = campaignId
+        ? { p_campaignid: campaignId, p_filtertype: filterType }
+        : { p_filtertype: filterType };
+
       const res = await axios.get(endpoint, {
         params,
         headers: { Authorization: `Bearer ${token}` },
         signal: controller.signal,
       });
 
-      const apiData = res.data?.data || [];
-      setDataList(Array.isArray(apiData) ? apiData : []);
+      setDataList(Array.isArray(res?.data?.data) ? res.data.data : []);
     } catch (err) {
       if (err.name !== "CanceledError") {
         console.error("Top content fetch error:", err);
@@ -69,21 +83,30 @@ const TopContentChart = ({ campaignId }) => {
   }, [filterType, token, getEndpoint, campaignId]);
 
   useEffect(() => {
-    const controller = new AbortController();
     fetchTopContent();
-    return () => controller.abort();
   }, [fetchTopContent]);
 
+  /* =========================
+     CHART DATA (UPDATED)
+  ========================== */
   const chartData = useMemo(() => {
-    if (!dataList.length) return { labels: [], datasets: [] };
+    const hasData = Array.isArray(dataList) && dataList.length > 0;
 
-    const labels = [];
-    const values = [];
+    const labels = hasData
+      ? dataList.map(
+          (item) =>
+            `${item.contenttypename || "Unknown"} • ${
+              item.campaignname ||
+              item.contenttitle ||
+              item.contentcaption ||
+              "N/A"
+            }`
+        )
+      : EMPTY_LABELS;
 
-    dataList.forEach((item) => {
-      labels.push(`${item.contenttypename || "Unknown"} • ${item.campaignname || item.contenttitle  || item.contentcaption || "N/A"}`);
-      values.push(item.totalengagement || 0);
-    });
+    const values = hasData
+      ? dataList.map((item) => Number(item.totalengagement) || 0)
+      : new Array(EMPTY_LABELS.length).fill(0);
 
     return {
       labels,
@@ -91,7 +114,9 @@ const TopContentChart = ({ campaignId }) => {
         {
           label: "Engagement",
           data: values,
-          backgroundColor: "#335CFF",
+          backgroundColor: hasData
+            ? "#335CFF"
+            : "rgba(51, 92, 255, 0.25)", // lighter for empty state
           borderRadius: 8,
           barThickness: 8,
         },
@@ -119,20 +144,29 @@ const TopContentChart = ({ campaignId }) => {
             callback: (v) => (v >= 1000 ? `${v / 1000}k` : v),
             color: "#6B7280",
           },
+          beginAtZero: true,
         },
-        y: { ticks: { color: "#6B7280" } },
+        y: {
+          ticks: { color: "#6B7280" },
+        },
       },
     }),
     []
   );
 
   return (
-    <div className="bg-white rounded-2xl ">
+    <div className="bg-white rounded-2xl">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold text-gray-900">
+        <h2 className="text-xl font-bold text-gray-900">
           {campaignId ? "Campaign Top Content" : "Top Performing Content"}
         </h2>
-        <Select value={filterType} onChange={setFilterType} style={{ width: 120 }} size="middle">
+
+        <Select
+          value={filterType}
+          onChange={setFilterType}
+          style={{ width: 120 }}
+          size="middle"
+        >
           <Option value="week">Week</Option>
           <Option value="month">Month</Option>
           <Option value="year">Year</Option>
@@ -142,10 +176,8 @@ const TopContentChart = ({ campaignId }) => {
       <div className="relative w-full min-h-[250px]">
         {loading ? (
           <Skeleton active paragraph={{ rows: 4 }} />
-        ) : dataList.length ? (
-          <Bar data={chartData} options={options} />
         ) : (
-          <Empty description="No data available" className="mt-10" />
+          <Bar data={chartData} options={options} />
         )}
       </div>
     </div>

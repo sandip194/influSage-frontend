@@ -141,7 +141,10 @@ const CampaignAnalytics = ({ selectedCampaignId }) => {
   if (!selectedCampaignId) {
     return (
       <div className="bg-white rounded-2xl p-10 shadow-sm">
-        <Empty description="Please select a campaign to view analytics" />
+        <Empty
+          description="Please select a campaign to view analytics"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
       </div>
     );
   }
@@ -163,7 +166,10 @@ const CampaignAnalytics = ({ selectedCampaignId }) => {
   if (isEmpty) {
     return (
       <div className="bg-white rounded-2xl p-10 shadow-sm">
-        <Empty description="No analytics available for this campaign" />
+        <Empty
+          description="No analytics available for this campaign"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
       </div>
     );
   }
@@ -218,21 +224,20 @@ const StatCard = ({ label, value, iconKey }) => {
   return (
     <div className="bg-white px-4 py-3 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-3">
       <div
-        className={`w-10 h-10 flex items-center justify-center rounded-full ${
-          config?.bgColor || "bg-gray-100"
-        }`}
+        className={`w-10 h-10 flex items-center justify-center rounded-full ${config?.bgColor || "bg-gray-100"
+          }`}
       >
         {Icon && (
           <Icon
-            size={20}
+            size={24}
             className={config?.iconColor || "text-gray-500"}
           />
         )}
       </div>
 
       <div>
-        <p className="text-gray-500 text-xs">{label}</p>
-        <p className="text-lg font-bold text-[#0D132D]">
+        <p className="text-gray-500">{label}</p>
+        <p className="text-xl font-bold text-[#0D132D]">
           {value.toLocaleString()}
         </p>
       </div>

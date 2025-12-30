@@ -77,6 +77,13 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
     }
   };
 
+  const validPortfolioFiles =
+    influDetails?.portfoliofiles?.filter(
+      (f) => typeof f?.filepath === "string" && f.filepath.trim() !== ""
+    ) || [];
+
+
+
   return (
     <Modal
       open={visible}
@@ -97,7 +104,7 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
           {/* Header */}
           <div className="flex flex-col bg-gray-50 rounded-2xl sm:flex-row items-center sm:items-start sm:justify-between gap-4 p-6 ">
             <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-             <img
+              <img
                 src={influDetails?.photopath}
                 alt="Profile"
                 onClick={() => setIsPreviewOpen(true)}
@@ -141,11 +148,10 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
             >
               <button
                 onClick={handleLike}
-                className={`relative flex items-center justify-center sm:justify-start gap-2 px-4 py-1 rounded-full text-sm font-medium border transition ${
-                  influDetails?.savedinfluencer
-                    ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
-                    : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
-                }`}
+                className={`relative flex items-center justify-center sm:justify-start gap-2 px-4 py-1 rounded-full text-sm font-medium border transition ${influDetails?.savedinfluencer
+                  ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+                  : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                  }`}
               >
                 <div className="relative flex items-center justify-center w-8 h-8">
                   <motion.div
@@ -255,12 +261,12 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="text-gray-900 font-semibold mb-2">Portfolio</h3>
 
-                {influDetails?.portfoliofiles?.length > 0 ? (
+                {validPortfolioFiles.length > 0 ? (
                   <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
-
-                    {influDetails?.portfoliofiles?.slice(0, 6).map((file, i) => {
+                    {validPortfolioFiles.slice(0, 6).map((file, i) => {
                       const url = file.filepath;
                       const ext = url.split(".").pop().toLowerCase();
+
                       const isImage = ["jpg", "jpeg", "png", "gif", "webp"].includes(ext);
                       const isVideo = ["mp4", "mov", "webm", "ogg"].includes(ext);
 
@@ -278,24 +284,24 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                             />
                           ) : isVideo ? (
                             <video
-                              onClick={() => setPreviewPortfolioVideo(url)}
                               src={url}
+                              onClick={() => setPreviewPortfolioVideo(url)}
                               className="w-full h-28 object-cover"
                             />
                           ) : (
                             <div className="flex flex-col items-center justify-center h-28 text-xs text-gray-500">
                               <RiFile3Line className="text-gray-400 text-3xl mb-1" />
-                              File
+                              Unsupported
                             </div>
                           )}
                         </div>
                       );
                     })}
-
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500">No portfolio files uploaded.</p>
                 )}
+
               </div>
               {previewPortfolioImage && (
                 <div

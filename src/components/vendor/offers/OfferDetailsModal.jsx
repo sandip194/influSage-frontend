@@ -206,7 +206,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                 <h3 className="font-semibold text-gray-900 mb-3">Sample Work</h3>
                                 {offerDetails.filepaths?.length ? (
                                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-1">
-                                        {offerDetails.filepaths.slice(0, 3).map((file, i) => {
+                                        {offerDetails.filepaths.map((file, i) => {
                                             const url = file.filepath;
                                             const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
                                             return (

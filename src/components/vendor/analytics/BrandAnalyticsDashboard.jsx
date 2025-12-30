@@ -20,6 +20,12 @@ import CampaignAnalytics from "../../users/analytics/CampaignAnalytics";
 
 const { Option } = Select;
 
+const EMPTY_PLATFORMS = [
+    { platform: "Instagram", views: 0, percentage: 0, color: "#E5E7EB" },
+    { platform: "Facebook", views: 0, percentage: 0, color: "#E5E7EB" },
+    { platform: "YouTube", views: 0, percentage: 0, color: "#E5E7EB" },
+];
+
 
 // -------------------------
 // Brand Dashboard Component
@@ -72,12 +78,12 @@ const BrandAnalyticsDashboard = () => {
         if (!data) return;
 
         setKpis([
-            { label: "Total Campaigns", value: data.totalcampaigncount, icon: <RiBriefcaseLine size={28} /> },
-            { label: "Active Influencers", value: data.totalactiveinfluencercount, icon: <RiGroupLine size={28} /> },
-            { label: "Estimated Impressions", value: data.estimatedimpression, icon: <RiEyeLine size={28} /> },
-            { label: "Estimated Engagement Score", value: data.engagementscore, icon: <RiHeartLine size={28} /> },
-            { label: "Total Content Pieces", value: data.totalcontentpieces, icon: <RiImage2Line size={28} /> },
-            { label: "Avg Engagement / Influencer", value: Math.round(data.averageengagementperinfluencer), icon: <RiStarLine size={28} /> },
+            { label: "Total Campaigns", value: data.totalcampaigncount, icon: <RiBriefcaseLine size={24} /> },
+            { label: "Active Influencers", value: data.totalactiveinfluencercount, icon: <RiGroupLine size={24} /> },
+            { label: "Estimated Impressions", value: data.estimatedimpression, icon: <RiEyeLine size={24} /> },
+            { label: "Estimated Engagement Score", value: data.engagementscore, icon: <RiHeartLine size={24} /> },
+            { label: "Total Content Pieces", value: data.totalcontentpieces, icon: <RiImage2Line size={24} /> },
+            { label: "Avg Engagement / Influencer", value: Math.round(data.averageengagementperinfluencer), icon: <RiStarLine size={24} /> },
         ]);
 
         setRecentContent(data.recentcontents || []);
@@ -164,6 +170,8 @@ const BrandAnalyticsDashboard = () => {
     }, [token]);
 
 
+    const hasPlatformData = platforms.length > 0;
+    const displayPlatforms = hasPlatformData ? platforms : EMPTY_PLATFORMS;
 
     return (
         <div className="w-full space-y-6 text-sm">
@@ -187,7 +195,7 @@ const BrandAnalyticsDashboard = () => {
 
                         <div>
                             <p className="text-gray-500">{kpi.label}</p>
-                            <p className="text-[#0D132D] font-bold text-3xl">
+                            <p className="text-[#0D132D] font-bold text-xl">
                                 {typeof kpi.value === "number"
                                     ? kpi.value.toLocaleString()
                                     : kpi.value}
@@ -202,7 +210,7 @@ const BrandAnalyticsDashboard = () => {
             {/* ------------------------- */}
             <div className="bg-white rounded-2xl p-5  overflow-x-auto">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-bold">Campaign Overview</h2>
+                    <h2 className="text-xl font-bold">Campaign Overview</h2>
 
                     <Select value={campaignFilter} onChange={setCampaignFilter} style={{ width: 120 }}>
                         <Option value="week">Week</Option>
@@ -213,11 +221,11 @@ const BrandAnalyticsDashboard = () => {
                 <table className="min-w-full text-left">
                     <thead>
                         <tr className="border-b border-gray-300">
-                            <th className="py-2 px-3 text-gray-500 text-xs">Campaign</th>
-                            <th className="py-2 px-3 text-gray-500 text-xs">Platform</th>
-                            <th className="py-2 px-3 text-gray-500 text-xs">Views</th>
-                            <th className="py-2 px-3 text-gray-500 text-xs">Engagement</th>
-                            <th className="py-2 px-3 text-gray-500 text-xs">Status</th>
+                            <th className="py-2 px-3 text-gray-900 text-md">Campaign</th>
+                            <th className="py-2 px-3 text-gray-900 text-md">Platform</th>
+                            <th className="py-2 px-3 text-gray-900 text-md">Views</th>
+                            <th className="py-2 px-3 text-gray-900 text-md">Engagement</th>
+                            <th className="py-2 px-3 text-gray-900 text-md">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -241,7 +249,10 @@ const BrandAnalyticsDashboard = () => {
                             <tr>
                                 <td colSpan={5} className="py-12">
                                     <div className="flex justify-center w-full">
-                                        <Empty description="No campaigns found" />
+                                        <Empty
+                                            description="No campaigns found"
+                                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                        />
                                     </div>
                                 </td>
 
@@ -376,20 +387,14 @@ const BrandAnalyticsDashboard = () => {
                             ))}
                         </div>
                     )}
-
-                    {/* Empty State */}
-                    {!platformLoading && platforms.length === 0 && (
-                        <Empty
-                            description="No platform data available"
-                            image={Empty.PRESENTED_IMAGE_SIMPLE}
-                        />
-                    )}
-
                     {/* Data State */}
-                    {!platformLoading && platforms.length > 0 && (() => {
-                        const maxViews = Math.max(...platforms.map(p => p.views || 0), 1);
+                    {!platformLoading && (() => {
+                        const maxViews = Math.max(
+                            ...displayPlatforms.map(p => p.views || 0),
+                            1
+                        );
 
-                        return platforms.map((p, idx) => (
+                        return displayPlatforms.map((p, idx) => (
                             <div key={idx} className="flex items-center space-x-3">
 
                                 {/* Icon */}
@@ -417,10 +422,10 @@ const BrandAnalyticsDashboard = () => {
                                         }
                                     >
                                         <div
-                                            className="h-3 rounded-full cursor-pointer transition-all"
+                                            className="h-3 rounded-full transition-all"
                                             style={{
                                                 width: `${(p.views / maxViews) * 100}%`,
-                                                backgroundColor: p.color,
+                                                backgroundColor: hasPlatformData ? p.color : "#fff",
                                             }}
                                         />
                                     </Tooltip>
@@ -435,6 +440,8 @@ const BrandAnalyticsDashboard = () => {
                             </div>
                         ));
                     })()}
+
+
                 </div>
 
             </div>
@@ -468,61 +475,70 @@ const BrandAnalyticsDashboard = () => {
             {/* ------------------------- */}
             {/* Recent Content */}
             {/* ------------------------- */}
-            <div className="bg-white rounded-2xl p-5 ">
+            <div className="bg-white rounded-2xl p-5">
                 <h2 className="text-lg font-bold mb-4">Recent Content</h2>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                    {recentContent.map((c, idx) => (
-                        <div
-                            key={idx}
-                            className="group bg-gray-200 rounded-2xl p-4  hover:shadow-md transition-shadow duration-200"
-                        >
-                            {/* Top row: Provider + Date */}
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-semibold px-2 py-1 rounded-full bg-gray-200 text-gray-700">
-                                    {c.providername}
-                                </span>
-                                <span className="text-xs text-gray-400">
-                                    {c.postdate}
-                                </span>
-                            </div>
-
-                            {/* Content Type */}
-                            <p className="text-xs text-gray-500 mb-2">
-                                {c.contenttypname}
-                            </p>
-
-                            {/* Title / Caption */}
-                            {(c.title || c.caption) && (
-                                <p className="text-sm font-semibold text-gray-800 mb-3 
-                line-clamp-2 min-h-[2.5rem]">
-                                    {c.title || c.caption}
-                                </p>
-                            )}
-
-                            <div className="mt-auto">
-                                {/* Views */}
-                                <div className="flex items-center gap-2 mb-2">
-                                    <RiEyeLine className="text-gray-700" size={18} />
-                                    <span className="text-lg font-bold text-gray-900">
-                                        {c.views.toLocaleString()}
+                {recentContent.length === 0 ? (
+                    <div className="py-10">
+                        <Empty
+                            description="No recent content available"
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        />
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                        {recentContent.map((c, idx) => (
+                            <div
+                                key={idx}
+                                onClick={() => c.link && window.open(c.link, "_blank")}
+                                className="relative group bg-gray-100 rounded-2xl p-4 hover:shadow-lg hover:scale-105 transition-transform duration-200 cursor-pointer flex flex-col"
+                            >
+                                {/* Top row */}
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs font-semibold px-2 py-1 rounded-full bg-gray-200 text-gray-700">
+                                        {c.providername}
                                     </span>
-                                    <span className="text-xs text-gray-500">views</span>
+                                    <span className="text-xs text-gray-400">{c.postdate}</span>
                                 </div>
 
+                                {/* Content type */}
+                                <span className="text-xs text-center px-2 py-1 w-12 rounded-full bg-blue-100 text-blue-700 mb-2 inline-block">
+                                    {c.contenttypname}
+                                </span>
 
-                                {/* Engagement */}
-                                <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
-                                    <div className="flex items-center gap-1"> <RiHeart3Line className="text-red-500" size={14} /> {c.likes}</div>
-                                    <div className="flex items-center gap-1"> <RiChat3Line className="text-blue-500" size={14} /> {c.comments}</div>
-                                    <div className="flex items-center gap-1"><RiShareForwardLine className="text-green-500" size={14} /> {c.shares}</div>
+                                {/* Title / Caption */}
+                                {(c.title || c.caption) && (
+                                    <p className="text-sm font-semibold text-gray-800 mb-3 line-clamp-2 min-h-[2.5rem]">
+                                        {c.title || c.caption}
+                                    </p>
+                                )}
+
+                                {/* Metrics */}
+                                <div className="mt-auto space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <RiEyeLine size={18} />
+                                        <span className="text-lg font-bold">{c.views.toLocaleString()}</span>
+                                        <span className="text-xs text-gray-500">views</span>
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
+                                        <div className="flex items-center gap-1">
+                                            <RiHeart3Line className="text-red-500" size={14} /> {c.likes}
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <RiChat3Line className="text-blue-500" size={14} /> {c.comments}
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <RiShareForwardLine className="text-green-500" size={14} /> {c.shares}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
+
 
         </div>
     );
