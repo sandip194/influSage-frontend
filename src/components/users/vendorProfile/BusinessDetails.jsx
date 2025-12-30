@@ -367,10 +367,10 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                                 if (trimmed.length < 5 || trimmed.length > 100) {
                                     return Promise.reject(new Error('Address must be between 5 and 100 characters'));
                                 }
-                                const pattern = /^[a-zA-Z0-9\s,.\-]+$/;
-                                if (!pattern.test(trimmed)) {
-                                    return Promise.reject(new Error('Address contains invalid characters'));
-                                }
+                                // const pattern = /^[a-zA-Z0-9\s,.\-]+$/;
+                                // if (!pattern.test(trimmed)) {
+                                //     return Promise.reject(new Error('Address contains invalid characters'));
+                                // }
                                 return Promise.resolve();
                             },
                         },

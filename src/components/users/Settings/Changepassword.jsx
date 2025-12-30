@@ -1,12 +1,46 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, Card } from 'antd';
-import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+import React, { useState } from "react";
+import { Form, Input } from "antd";
+import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const ChangePassword = () => {
   const [form] = Form.useForm();
+  const { token } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(false);
 
-  const handleFinish = (values) => {
-    console.log("Password Changed:", values);
+  const handleFinish = async (values) => {
+    const payload = {
+      oldPassword: values.currentPassword,
+      newPassword: values.newPassword,
+      confirmPassword: values.confirmPassword,
+    };
+
+    try {
+      setLoading(true);
+
+      const res = await axios.post(
+        "/setting/change-password",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success(res.data?.message || "Password changed successfully");
+      form.resetFields();
+    } catch (error) {
+      const msg =
+        error.response?.data?.message ||
+        "Failed to change password";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -22,7 +56,9 @@ const ChangePassword = () => {
         <Form.Item
           label="Current Password"
           name="currentPassword"
-          rules={[{ required: true, message: "Please enter your current password" }]}
+          rules={[
+            { required: true, message: "Please enter your current password" },
+          ]}
         >
           <Input.Password
             size="large"
@@ -79,14 +115,24 @@ const ChangePassword = () => {
           />
         </Form.Item>
 
-        {/* Buttons */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 ">
-            <button
-              className="bg-[#121A3F] text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D]"
-            >
-              Save Changes
-            </button>
-          </div>
+        {/* Submit Button */}
+        <div className="flex items-center justify-between mt-6">
+          <button
+            type="submit"
+            disabled={loading}
+            className={`bg-[#121A3F] text-white px-8 py-3 rounded-full 
+              ${loading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#0D132D]"}`}
+          >
+            {loading ? "Saving..." : "Save Changes"}
+          </button>
+
+          <Link
+            to="/forgot-password"
+            className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
       </Form>
     </div>
   );

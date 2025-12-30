@@ -158,7 +158,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
   }, [messages]);
 
 
-  const handleDeleteMessage = async (messageId) => {
+ const handleDeleteMessage = async (messageId) => {
     dispatch(deleteMessage(messageId));
     socket.emit("deleteMessage", {
       messageId,
@@ -166,10 +166,14 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
     });
     try {
       const res = await axios.put(
-        `/chat/undodeletemessage`,
-        { p_messageid: messageId, p_roleid: role, p_action: "delete" },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      `/chat/undodeletemessage`,
+      {
+        p_messageid: messageId,
+        p_roleid: role,
+        p_action: "delete",
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
       if (res.data?.p_status) {
         toast.success(res.data.message);
@@ -179,7 +183,7 @@ export default function ChatMessagesVendor({ chat, messages, isRecipientOnline, 
       }
     } catch (err) {
       console.error("Delete error:", err);
-      toast.error("Something went wrong while deleting.");
+      // toast.error(res.data.message);
     }
   };
 

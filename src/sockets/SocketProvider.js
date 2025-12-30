@@ -15,7 +15,7 @@
 
     useEffect(() => {
       if (!token || !userId) {
-        console.log("⏳ Waiting for token & userId...");
+        // console.log("⏳ Waiting for token & userId...");
         return;
       }
 

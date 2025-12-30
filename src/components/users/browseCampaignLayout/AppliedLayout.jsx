@@ -41,9 +41,9 @@ const AppliedLayout = () => {
   const location = useLocation();
 
   const buttons = [
-    { id: "browse", label: "Browse Campaign", path: "/dashboard/browse" },
-    { id: "applied", label: "Applied Campaign", path: "/dashboard/browse/applied" },
-    { id: "saved", label: "Saved Campaign", path: "/dashboard/browse/saved" },
+    { id: "browse", label: "Discover", path: "/dashboard/browse" },
+    { id: "applied", label: "Applied", path: "/dashboard/browse/applied" },
+    { id: "saved", label: "Saved", path: "/dashboard/browse/saved" },
   ];
 
   const selectedButton = useMemo(

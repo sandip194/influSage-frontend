@@ -117,45 +117,25 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     if (!socket) return;
 
     const messageHandler = (rawPayload) => {
-      console.log("📩 RAW socket payload:", rawPayload);
+      if (rawPayload.is_deleted) return;
 
-      // ✅ Ignore deleted messages
-      if (rawPayload.is_deleted === true) {
-        console.log("⏭️ deleted message ignored");
-        return;
-      }
+      const conversationid =
+        rawPayload.conversationid ?? rawPayload.conversationId;
 
-      if (!rawPayload.name || !rawPayload.photopath) return;
+      if (!conversationid) return;
+      if (String(rawPayload.userid) === String(userId)) return;
 
-      const payload = {
-        conversationid:
-          rawPayload.conversationid ?? rawPayload.conversationId,
-        userid:
-          rawPayload.userid ?? rawPayload.userId,
-        message:
-          rawPayload.message ?? rawPayload.content,
-        createddate: rawPayload.createddate,
-        readbyvendor: rawPayload.readbyvendor,
-        readbyinfluencer: rawPayload.readbyinfluencer,
-        name: rawPayload.name,
-        photopath: rawPayload.photopath,
-        entityType: rawPayload.entityType,
-      };
-
-      if (!payload.conversationid) return;
-      if (String(payload.userid) === String(userId)) return;
-
-      setUnreadMessages(prev => {
-        if (prev.some(m => String(m.conversationid) === String(payload.conversationid))) {
+      setUnreadMessages((prev) => {
+        if (prev.some(m => String(m.conversationid) === String(conversationid))) {
           return prev;
         }
-        return [payload, ...prev];
+        return [{ ...rawPayload, conversationid }, ...prev];
       });
     };
 
     socket.on("receiveMessage", messageHandler);
     return () => socket.off("receiveMessage", messageHandler);
-  }, [socket, role, userId]);
+  }, [socket, userId]);
 
 
   useEffect(() => {
@@ -354,8 +334,6 @@ const DeshboardHeader = ({ toggleSidebar }) => {
             setMessageDropdownVisible(open);
 
             if (open) {
-              setUnreadMessages([]);
-
               setLoadingMessages(true);
               refreshUnreadMessages().finally(() => {
                 setLoadingMessages(false);
