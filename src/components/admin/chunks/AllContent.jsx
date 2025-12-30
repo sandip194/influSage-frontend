@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState,  useCallback } from "react";
 import { Table, Button, Tooltip, Select, Empty } from "antd";
 import { RiEyeLine } from "react-icons/ri";
 import axios from "axios";
@@ -144,43 +144,44 @@ const AllContent = ({ onViewHistory }) => {
   //---------------------------------------------
   useEffect(() => {
     const loadFilters = async () => {
-        try {
-            const [pRes, cRes, sRes] = await Promise.all([
-                axios.get("/providers", {
-                    headers: { Authorization: `Bearer ${token}` },
-                }),
-                axios.get("/content-type", {
-                    headers: { Authorization: `Bearer ${token}` },
-                }),
-                axios.get("/admin/analytics/status-filters", {
-                    headers: { Authorization: `Bearer ${token}` },
-                }),
-            ]);
+      try {
+        const [pRes, cRes, sRes] = await Promise.all([
+          axios.get("/providers", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("/content-type", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("/admin/analytics/status-filters", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-            setAllPlatform(Array.isArray(pRes?.data?.data) ? pRes.data.data : []);
-            setAllContentType(
-                Array.isArray(cRes?.data?.contentType)
-                    ? cRes.data.contentType
-                    : []
-            );
-            setAllStatus(
-                Array.isArray(sRes?.data?.data)
-                    ? sRes.data.data
-                    : []
-            );
-        } catch (err) {
-            console.error("Filter loading error:", err);
-        }
+        setAllPlatform(Array.isArray(pRes?.data?.data) ? pRes.data.data : []);
+        setAllContentType(
+          Array.isArray(cRes?.data?.contentType)
+            ? cRes.data.contentType
+            : []
+        );
+        setAllStatus(
+          Array.isArray(sRes?.data?.data)
+            ? sRes.data.data
+            : []
+        );
+      } catch (err) {
+        console.error("Filter loading error:", err);
+      }
     };
 
     loadFilters();
-}, [token]);
+  }, [token]);
 
 
   const columns = [
     {
       title: "Influencer",
       dataIndex: "influencer",
+      width: 200,
       render: (_, record) => (
         <div className="flex items-center gap-2">
           <img
@@ -196,14 +197,17 @@ const AllContent = ({ onViewHistory }) => {
     {
       title: "Platform",
       dataIndex: "platform",
+      width: 150,
     },
     {
       title: "Content Type",
       dataIndex: "contentType",
+      width: 100,
     },
     {
       title: "Link",
       dataIndex: "link",
+      width: 200,
       render: (link) =>
         link && link !== "#" ? (
           <Tooltip title={link}>
@@ -223,14 +227,17 @@ const AllContent = ({ onViewHistory }) => {
     {
       title: "First Added",
       dataIndex: "firstAdded",
+      width: 200,
     },
     {
       title: "Last Updated",
       dataIndex: "lastUpdated",
+      width: 200,
     },
     {
       title: "Views",
       dataIndex: "views",
+      width: 100,
     },
     {
       title: "Action",
@@ -268,8 +275,8 @@ const AllContent = ({ onViewHistory }) => {
       current: 1,
     }));
 
-  // Fetch fresh list without filters
-  setStatusFilter(null);
+    // Fetch fresh list without filters
+    setStatusFilter(null);
     fetchAllContents({
       search: "",
       sortBy: "recent",
@@ -343,18 +350,18 @@ const AllContent = ({ onViewHistory }) => {
           ))}
         </Select>
         <Select
-            placeholder="Campaign Status"
-            allowClear
-            value={statusFilter}
-            onChange={setStatusFilter}
-            className="w-[150px]"
-            size="large"
+          placeholder="Campaign Status"
+          allowClear
+          value={statusFilter}
+          onChange={setStatusFilter}
+          className="w-[150px]"
+          size="large"
         >
-            {allStatus.map((s) => (
-                <Option key={s.id} value={s.id}>
-                  {s.name}
-                </Option>
-            ))}
+          {allStatus.map((s) => (
+            <Option key={s.id} value={s.id}>
+              {s.name}
+            </Option>
+          ))}
         </Select>
 
         {/* Sort */}
@@ -389,9 +396,8 @@ const AllContent = ({ onViewHistory }) => {
         columns={columns}
         pagination={pagination}
         onChange={handleTableChange}
-        scroll={{
-          x: true,
-        }}
+        scroll={{ x: "max-content" }}
+
         rowKey="key"
         className="rounded-lg shadow-sm"
         locale={{ emptyText: <CustomEmpty /> }}

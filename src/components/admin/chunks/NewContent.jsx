@@ -213,6 +213,7 @@ const NewContent = () => {
             {
                 title: "Influencer",
                 dataIndex: "influencer",
+                 width: 220,
                 ellipsis: true,
                 render: (_, record) => (
                     <div className="flex items-center gap-2">
@@ -229,6 +230,7 @@ const NewContent = () => {
             {
                 title: "Campaign",
                 dataIndex: "campaign",
+                 width: 220,
                 ellipsis: true,
                 render: (value) => value || "N/A",
             },
@@ -251,6 +253,7 @@ const NewContent = () => {
             {
                 title: "Link",
                 dataIndex: "link",
+                 width: 200,
                 render: (link) =>
                     link && link !== "#" ? (
                         <Tooltip title={link}>
@@ -400,9 +403,8 @@ const NewContent = () => {
                 columns={columns}
                 pagination={pagination}
                 onChange={handleTableChange}
-                scroll={{
-                    x: true,
-                }}
+               scroll={{ x: "max-content" }}
+
                 rowKey="key"
                 className="rounded-lg shadow-sm"
                 locale={{

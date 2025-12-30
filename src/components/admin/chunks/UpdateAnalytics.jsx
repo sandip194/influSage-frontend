@@ -215,6 +215,7 @@ const UpdateAnalytics = () => {
             {
                 title: "Influencer",
                 dataIndex: "influencer",
+                 width: 220,
                 ellipsis: true,
                 render: (_, record) => (
                     <div className="flex items-center gap-2">
@@ -230,6 +231,8 @@ const UpdateAnalytics = () => {
             }, {
                 title: "Campaign Name",
                 dataIndex: "campaignname",
+                  width: 220,
+
             },
             {
                 title: "Platform",
@@ -249,6 +252,7 @@ const UpdateAnalytics = () => {
             {
                 title: "Link",
                 dataIndex: "link",
+                 width: 200,
                 render: (link) =>
                     link && link !== "#" ? (
                         <Tooltip title={link}>
@@ -361,7 +365,7 @@ const UpdateAnalytics = () => {
                     placeholder="Content Type"
                     value={contentType}
                     onChange={setContentType}
-                    className="w-[160px]"
+                    className="w-[120px]"
                     size="large"
                 >
                     {allContentType.map((t) => (
@@ -403,9 +407,7 @@ const UpdateAnalytics = () => {
                 columns={columns}
                 pagination={pagination}
                 onChange={handleTableChange}
-                scroll={{
-                    x: true,
-                }}
+               scroll={{ x: "max-content" }}
                 rowKey="key"
                 className="rounded-lg shadow-sm"
                 locale={{ emptyText: <CustomEmpty /> }}
