@@ -197,7 +197,7 @@ const AllContent = ({ onViewHistory }) => {
     {
       title: "Platform",
       dataIndex: "platform",
-      width: 150,
+      width: 120,
     },
     {
       title: "Content Type",
@@ -227,12 +227,12 @@ const AllContent = ({ onViewHistory }) => {
     {
       title: "First Added",
       dataIndex: "firstAdded",
-      width: 200,
+      width: 150,
     },
     {
       title: "Last Updated",
       dataIndex: "lastUpdated",
-      width: 200,
+      width: 150,
     },
     {
       title: "Views",

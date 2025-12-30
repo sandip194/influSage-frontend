@@ -22,6 +22,7 @@ const columns = [
   {
     title: "Post Date",
     dataIndex: "postdate",
+    width: 100,
     render: (v) => new Date(v).toLocaleDateString() || "-",
   },
   {
@@ -29,32 +30,38 @@ const columns = [
     dataIndex: "title",
     render: (v) => v || "-",
     ellipsis: true,
+    width: 200,
   },
   {
     title: "Caption",
     dataIndex: "caption",
     render: (v) => v || "-",
     ellipsis: true,
+    width: 150,
   },
   {
     title: "Views",
     dataIndex: "views",
     render: (v) => v || "-",
+    width: 120,
   },
   {
     title: "Likes",
     dataIndex: "likes",
     render: (v) => v || "-",
+    width: 120,
   },
   {
     title: "Comments",
     dataIndex: "comments",
     render: (v) => v || "-",
+    width: 120,
   },
   {
     title: "Shares",
     dataIndex: "shares",
     render: (v) => v || "-",
+    width: 100,
   },
 ];
 
@@ -77,6 +84,7 @@ const columns = [
           columns={columns}
           dataSource={history}
           pagination={false}
+          scroll={{ x: "max-content" }}
           rowKey={(r) =>
             r.userplatformanalyticid || r.contractcontentlinkid
           }
