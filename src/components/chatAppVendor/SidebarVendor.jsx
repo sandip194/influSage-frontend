@@ -324,10 +324,14 @@ export default function SidebarVendor({ onSelectChat }) {
                       )
                     );
 
-                    const cid = inf.conversationid;
-                    if (socket) {
-                      socket.emit("joinRoom", String(cid));
-                    } 
+                    setInfluencers((prev) =>
+                      prev.map((i) =>
+                        i.conversationid === inf.conversationid
+                          ? { ...i, readbyvendor: true }
+                          : i
+                      )
+                    );
+
                     onSelectChat({
                       ...inf,
                       campaign: selectedCampaign,

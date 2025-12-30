@@ -35,13 +35,13 @@ const SavedLayout = () => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const buttons = [
-    { id: "browse", label: "Browse Campaign", path: "/dashboard/browse" },
+    { id: "browse", label: "Discover", path: "/dashboard/browse" },
     {
       id: "applied",
-      label: "Applied Campaign",
+      label: "Applied",
       path: "/dashboard/browse/applied",
     },
-    { id: "saved", label: "Saved Campaign", path: "/dashboard/browse/saved" },
+    { id: "saved", label: "Saved", path: "/dashboard/browse/saved" },
   ];
 
   const selectedButton = useMemo(

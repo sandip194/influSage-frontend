@@ -25,7 +25,7 @@ const chatSlice = createSlice({
                     content: content || state.messages[index].content,
                     file: fileUrl || state.messages[index].file,
                     status: "sent",
-                    isLocal: false,
+                    // isLocal: false,
                 };
             }
         },

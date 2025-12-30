@@ -18,7 +18,6 @@ import { toast } from "react-toastify";
 import { Tooltip } from "antd";
 import useSocketRegister from "../../sockets/useSocketRegister";
 
-
 const ChatWindow = ({ activeSubject, onCloseSuccess, onBack  }) => {
     useSocketRegister();
   const dispatch = useDispatch();
@@ -75,41 +74,29 @@ useEffect(() => {
   if (!socket) return;
 
   const handleReceiveMessage = (msg) => {
-  const file = msg.filePath || msg.filepath || msg.file || null;
-
-  let filetype = null;
-  if (file) {
-    const ext = file.split(".").pop().toLowerCase();
-    if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
-    else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
-    else filetype = "file";
-  }
-
-  setMessages((prev) => {
-    const replyId = Number(msg.replyId || msg.replyid) || null;
-
-    const replyData =
-      msg.replyData ||
-      (replyId ? prev.find((m) => m.id === replyId) : null);
+    const file = msg.filePath || msg.filepath || msg.file || null;
+    let filetype = null;
+    if (file) {
+      const ext = file.split(".").pop().toLowerCase();
+      if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
+      else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
+      else filetype = "file";
+    }
 
     const formattedMsg = {
       id: msg.usersupportticketmessagesid,
       message: msg.message,
       filepath: file,
       filetype,
-      replyId,
-      replyData,
+      replyId: Number(msg.replyId || msg.replyid) || null,
+      replyData: msg.replyData || null,
       sender: msg.senderId == userId ? "user" : "admin",
       time: msg.createddate || new Date().toISOString(),
     };
 
-    dispatch(addMessage(formattedMsg));
-    return [...prev, formattedMsg];
-  });
-
-  scrollToBottom();
-};
-
+    setMessages(prev => [...prev, formattedMsg]);
+    scrollToBottom();
+  };
 
   socket.off("receiveSupportMessage");
   socket.on("receiveSupportMessage", handleReceiveMessage);
@@ -121,6 +108,7 @@ const handleSend = async () => {
   if (!message.trim() && !attachedFile) return;
 
   try {
+    // 1️⃣ Send message
     const formData = new FormData();
     formData.append("p_usersupportticketid", activeSubject.id);
     formData.append("p_messages", message || "");
@@ -128,43 +116,67 @@ const handleSend = async () => {
 
     if (attachedFile) formData.append("file", attachedFile);
 
-    const res = await axios.post(
+    await axios.post(
       "/chat/support/user-admin/send-message",
       formData,
-      { headers: { Authorization: `Bearer ${token}` } }
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
     );
 
-    const msgData = res.data?.data;
-
-    if (socket) {
-      socket.emit("sendSupportMessage", {
-  ticketId: activeSubject.id,
-  senderId: userId,
-  message: msgData?.message,
-  filePath: msgData?.filePath || null,
-  replyid: msgData?.replyid || null,
-
-  replyData: replyToMessage
-    ? {
-        id: replyToMessage.id,
-        message: replyToMessage.message,
-        filepath: replyToMessage.filepath,
-        filetype: replyToMessage.filetype,
-        sender: replyToMessage.sender,
+    // 2️⃣ Fetch latest messages
+    const resp = await axios.get(
+      `/chat/support/user-admin/open-chat/${activeSubject.id}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { p_limit: 200, p_offset: 0 },
       }
-    : null,
+    );
 
-  time: msgData?.createdDate,
-});
+    const records = resp.data?.data?.records || [];
 
-    }
+    // 3️⃣ Sort messages
+    const sorted = records.sort(
+      (a, b) => new Date(a.createddate) - new Date(b.createddate)
+    );
 
+    // 4️⃣ Format messages
+    const formatted = sorted.map((m) => {
+      let filetype = null;
 
+      if (m.filepath) {
+        const ext = m.filepath.split(".").pop().toLowerCase();
+        if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
+        else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
+        else filetype = "file";
+      }
+
+      const isSystemMsg = m.message?.includes(
+        "Your support request has been submitted. Our team will review it shortly."
+      );
+
+      return {
+        id: m.usersupportticketmessagesid,
+        replyId: m.replyid || null,
+        message: m.message,
+        filepath: m.filepath || null,
+        filetype,
+        sender: isSystemMsg ? "admin" : (m.roleid === 4 ? "admin" : "user"),
+        time: m.createddate,
+      };
+    });
+
+    // 5️⃣ Update UI
+    setMessages(formatted);
+
+    // 6️⃣ Reset input
     setMessage("");
     setAttachedFile(null);
     setAttachedPreview(null);
     setReplyToMessage(null);
+
   } catch (err) {
+    console.error("Send message error", err);
     toast.error("Message not sent");
   }
 };
@@ -223,7 +235,6 @@ const handleFileUpload = (e) => {
     toast.error(errorMessage);
   }
 };
-
 useEffect(() => {
   const status = activeSubject?.status?.toLowerCase();
   setIsClosed(status === "open" || status === "closed");

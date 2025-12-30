@@ -114,31 +114,31 @@ export default function ChatMessages({
   }, [messages]);
 
   const handleDeleteMessage = async (messageId) => {
-    dispatch(deleteMessage(messageId)); // <-- ADD THIS
+    dispatch(deleteMessage(messageId));
     socket.emit("deleteMessage", {
       messageId,
       conversationId: chat.id,
     });
-
     try {
       const res = await axios.put(
-        `/chat/undodeletemessage`,
-        { p_messageid: messageId, p_roleid: role, p_action: "delete" },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      `/chat/undodeletemessage`,
+      {
+        p_messageid: messageId,
+        p_roleid: role,
+        p_action: "delete",
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
       if (res.data?.p_status) {
         toast.success(res.data.message);
-        setDeletedMessage((prev) => ({
-          ...prev,
-          [messageId]: Date.now(),
-        }));
+        setDeletedMessage((prev) => ({ ...prev, [messageId]: Date.now() }));
       } else {
         toast.error(res.data.message || "Failed to delete message");
       }
     } catch (err) {
       console.error("Delete error:", err);
-      toast.error("Something went wrong while deleting.");
+      // toast.error(res.data.message);
     }
   };
 

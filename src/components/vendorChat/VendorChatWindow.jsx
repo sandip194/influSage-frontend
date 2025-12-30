@@ -96,7 +96,6 @@ useEffect(() => {
 
     setMessages(prev => [...prev, formattedMsg]);
     scrollToBottom();
-    dispatch(addMessage(formattedMsg));
   };
 
   socket.off("receiveSupportMessage");
@@ -109,6 +108,7 @@ const handleSend = async () => {
   if (!message.trim() && !attachedFile) return;
 
   try {
+    // 1️⃣ Send message
     const formData = new FormData();
     formData.append("p_usersupportticketid", activeSubject.id);
     formData.append("p_messages", message || "");
@@ -116,43 +116,64 @@ const handleSend = async () => {
 
     if (attachedFile) formData.append("file", attachedFile);
 
-    const res = await axios.post(
+    await axios.post(
       "/chat/support/user-admin/send-message",
       formData,
-      { headers: { Authorization: `Bearer ${token}` } }
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
     );
 
-    const msgData = res.data?.data;
+    // 2️⃣ Fetch latest messages
+    const resp = await axios.get(
+      `/chat/support/user-admin/open-chat/${activeSubject.id}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { p_limit: 200, p_offset: 0 },
+      }
+    );
 
-    if (socket) {
-      socket.emit("sendSupportMessage", {
-      ticketId: activeSubject.id,
-      senderId: userId,
-      message: msgData?.message,
-      filePath: msgData?.filePath || null,
-      replyid: msgData?.replyid || null,
+    const records = resp.data?.data?.records || [];
 
-      replyData: replyToMessage
-        ? {
-            id: replyToMessage.id,
-            message: replyToMessage.message,
-            filepath: replyToMessage.filepath,
-            filetype: replyToMessage.filetype,
-            sender: replyToMessage.sender,
-          }
-        : null,
+    // 3️⃣ Sort messages
+    const sorted = records.sort(
+      (a, b) => new Date(a.createddate) - new Date(b.createddate)
+    );
 
-      time: msgData?.createdDate,
+    // 4️⃣ Format messages
+    const formatted = sorted.map((m) => {
+      let filetype = null;
+
+      if (m.filepath) {
+        const ext = m.filepath.split(".").pop().toLowerCase();
+        if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
+        else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
+        else filetype = "file";
+      }
+
+      const isSystemMsg = m.message?.includes(
+        "Your support request has been submitted. Our team will review it shortly."
+      );
+
+      return {
+        id: m.usersupportticketmessagesid,
+        replyId: m.replyid || null,
+        message: m.message,
+        filepath: m.filepath || null,
+        filetype,
+        sender: isSystemMsg ? "admin" : (m.roleid === 4 ? "admin" : "user"),
+        time: m.createddate,
+      };
     });
-
-    }
-
+    setMessages(formatted);
 
     setMessage("");
     setAttachedFile(null);
     setAttachedPreview(null);
     setReplyToMessage(null);
+
   } catch (err) {
+    console.error("Send message error", err);
     toast.error("Message not sent");
   }
 };

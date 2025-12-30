@@ -376,12 +376,12 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
                 }
 
                 // Allow letters, numbers, spaces, comma, period, hyphen
-                const pattern = /^[a-zA-Z0-9\s,.\-]+$/;
-                if (!pattern.test(trimmedValue)) {
-                  return Promise.reject(
-                    new Error('Address contains invalid characters')
-                  );
-                }
+                // const pattern = /^[a-zA-Z0-9\s,.\-]+$/;
+                // if (!pattern.test(trimmedValue)) {
+                //   return Promise.reject(
+                //     new Error('Address contains invalid characters')
+                //   );
+                // }
 
                 return Promise.resolve();
               },

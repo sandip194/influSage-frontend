@@ -11,7 +11,7 @@ export default function useSocketRegister() {
     if (!socket || !token || !userId) return;
     if (!socket.connected) return;
 
-    console.log("🔐 Socket registered via hook:", userId);
+    // console.log("🔐 Socket registered via hook:", userId);
     socket.emit("register", userId);
   }, [socket, token, userId]);
 }
