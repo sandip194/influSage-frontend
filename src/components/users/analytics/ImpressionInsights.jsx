@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -9,8 +10,7 @@ import {
 } from "chart.js";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { useEffect, useState, useMemo } from "react";
-import { Select, Skeleton, Empty } from "antd";
+import { Select, Spin } from "antd";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 const { Option } = Select;
@@ -24,13 +24,11 @@ const ImpressionInsights = () => {
   const fetchImpressionInsights = async () => {
     if (!token) return;
     setLoading(true);
-
     try {
       const res = await axios.get("/user/analytics/impression", {
         params: { p_filtertype: sortBy },
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = res?.data?.data || [];
       setImpressionData(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -46,7 +44,20 @@ const ImpressionInsights = () => {
   }, [sortBy, token]);
 
   const chartData = useMemo(() => {
-    if (!impressionData.length) return { labels: [], datasets: [] };
+    if (!impressionData.length) {
+      return {
+        labels: [],
+        datasets: [
+          {
+            label: "Impressions",
+            data: [],
+            backgroundColor: ["#E5E7EB"], // light gray bar
+            borderRadius: 10,
+            barThickness: 20,
+          },
+        ],
+      };
+    }
 
     return {
       labels: impressionData.map((item) => item?.providername || "Unknown"),
@@ -77,7 +88,10 @@ const ImpressionInsights = () => {
           titleFont: { size: 12 },
           bodyFont: { size: 12 },
           callbacks: {
-            label: (ctx) => `${ctx.raw.toLocaleString()} impressions`,
+            label: (ctx) =>
+              ctx.label === "No Data"
+                ? "No impression data"
+                : `${ctx.raw.toLocaleString()} impressions`,
           },
         },
       },
@@ -103,33 +117,29 @@ const ImpressionInsights = () => {
     []
   );
 
-  // Dynamic height: only apply when loading or data exists
-  const chartContainerHeight = loading || impressionData.length ? "h-[250px] sm:h-[200px] md:h-[250px] lg:h-[300px]" : "h-auto";
-
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold text-gray-900">Impression Insights</h2>
-
-        <Select
-          value={sortBy}
-          onChange={setSortBy}
-          size="middle"
-          style={{ width: 120 }}
-        >
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Impression Insights</h2>
+        <Select value={sortBy} onChange={setSortBy} size="middle" style={{ width: 120 }}>
           <Option value="year">Year</Option>
           <Option value="month">Month</Option>
           <Option value="week">Week</Option>
         </Select>
       </div>
 
-      <div className={`relative w-full ${chartContainerHeight}`}>
+      <div className="relative w-full h-48 md:h-64 flex flex-col items-center justify-center">
         {loading ? (
-          <Skeleton active paragraph={{ rows: 10 }} />
-        ) : impressionData.length ? (
-          <Bar data={chartData} options={options} />
+          <Spin size="large" />
         ) : (
-          <Empty description="No data available" className="mt-10" />
+          <>
+            <Bar data={chartData} options={options} />
+            {!impressionData.length && !loading && (
+              <p className="text-sm text-gray-400 my-3 text-center">
+                No impression data available
+              </p>
+            )}
+          </>
         )}
       </div>
     </>

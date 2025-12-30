@@ -166,7 +166,7 @@ const Campaign = () => {
       {/* ===================== My Campaigns =================== */}
       <div className="bg-white p-5 rounded-2xl border border-gray-100 mt-3">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold text-lg">My Campaign</h2>
+          <h2 className="text-xl font-bold text-gray-900">My Campaign</h2>
           <button
             onClick={() => navigate("/vendor-dashboard/vendor-campaign")}
             className="text-[#0D132D] text-sm sm:text-base font-medium hover:underline"
@@ -280,7 +280,7 @@ const Campaign = () => {
       {/* ===================== Browse Influencers ===================== */}
       <div className="bg-white p-5 rounded-2xl border border-gray-100">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold text-lg">Browse Influencers</h2>
+          <h2 className="text-xl font-bold text-gray-900">Browse Influencers</h2>
           <button
             onClick={() => navigate("/vendor-dashboard/browse-influencers")}
             className="text-[#0D132D] text-sm sm:text-base font-medium hover:underline"
@@ -295,7 +295,10 @@ const Campaign = () => {
             ))}
           </div>
         ) : influencers.length === 0 ? (
-          <Empty description="No influencers found" />
+          <Empty
+            description="No influencers found"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
         ) : (
           <Swiper
             spaceBetween={15}

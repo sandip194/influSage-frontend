@@ -15,7 +15,7 @@ const TodoListCard = () => {
   const [selectedTodo, setSelectedTodo] = useState(null);
   const [formData, setFormData] = useState({ description: "", duedate: null });
   const [confirmModal, setConfirmModal] = useState({ visible: false, title: "", onOk: null });
-  const [errors, setErrors] = useState({ description: "", duedate: ""});
+  const [errors, setErrors] = useState({ description: "", duedate: "" });
 
   const { token, user } = useSelector((state) => state.auth);
 
@@ -38,7 +38,7 @@ const TodoListCard = () => {
     getTodoList();
   }, []);
 
-   const handleTodoAction = async ({ id, description, duedate, isCompleted = null, isDeleted = false }) => {
+  const handleTodoAction = async ({ id, description, duedate, isCompleted = null, isDeleted = false }) => {
     try {
       setLoading(true);
       const body = {
@@ -176,19 +176,18 @@ const TodoListCard = () => {
               </p>
               {dueInDays !== null && !isCompleted && (
                 <p
-                  className={`text-xs ${
-                    dueInDays < 0
-                      ? "text-red-500 font-semibold"
-                      : dueInDays === 0
+                  className={`text-xs ${dueInDays < 0
+                    ? "text-red-500 font-semibold"
+                    : dueInDays === 0
                       ? "text-orange-500 font-semibold"
                       : "text-gray-500"
-                  }`}
+                    }`}
                 >
                   {dueInDays < 0
                     ? `Overdue by ${Math.abs(dueInDays)} day${Math.abs(dueInDays) !== 1 ? "s" : ""}`
                     : dueInDays === 0
-                    ? "Due today"
-                    : `Due in ${dueInDays} day${dueInDays !== 1 ? "s" : ""}`}
+                      ? "Due today"
+                      : `Due in ${dueInDays} day${dueInDays !== 1 ? "s" : ""}`}
                 </p>
               )}
             </div>
@@ -208,7 +207,7 @@ const TodoListCard = () => {
     <div className="bg-white p-6 rounded-2xl w-full h-full">
       {/* Header */}
       <div className="flex justify-between items-center mb-5">
-        <h2 className="text-lg font-semibold">To-do List</h2>
+        <h2 className="text-xl font-bold text-gray-900">To-do List</h2>
         <Button type="default" icon={<RiAddLine />} onClick={() => openModal()}>
           Add
         </Button>
@@ -218,7 +217,10 @@ const TodoListCard = () => {
       {loading ? (
         <Skeleton active paragraph={{ rows: 3 }} />
       ) : todos.length === 0 ? (
-        <Empty description="No todos yet." />
+        <Empty
+          description="No todos yet."
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
       ) : (
         <div className="space-y-4">{todoItems}</div>
       )}
@@ -226,11 +228,15 @@ const TodoListCard = () => {
       {/* Add/Edit Modal */}
       <Modal
         open={showModal}
-        title={selectedTodo ? "Edit Todo" : "Add Todo"}
+        title={
+          <span className="text-xl font-bold text-gray-900">
+            {selectedTodo ? "Edit Todo" : "Add Todo"}
+          </span>
+        }
         onCancel={() => setShowModal(false)}
         footer={null}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div>
             <label className="block text-sm font-medium mb-1">Description</label>
             <Input

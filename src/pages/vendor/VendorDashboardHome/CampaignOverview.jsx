@@ -112,13 +112,14 @@ const CampaignOverview = () => {
     if (!chartData) {
         return (
             <div className="bg-white p-6 rounded-2xl w-full mt-4">
-                <h2 className="text-lg font-bold text-gray-900 mb-6">
+                <h2 className="text-xl font-bold text-gray-900">
                     Campaign Overview
                 </h2>
 
                 <div className="flex justify-center items-center py-16">
                     <Empty
                         description="No campaign data available"
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
                     />
                 </div>
             </div>
@@ -129,7 +130,7 @@ const CampaignOverview = () => {
     return (
         <div className="bg-white p-6 rounded-2xl w-full overflow-x-auto mt-4">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-bold text-gray-900">Campaign Overview</h2>
+                <h2 className="text-xl font-bold text-gray-900">Campaign Overview</h2>
             </div>
 
             <div className="flex-1 flex items-center justify-center">

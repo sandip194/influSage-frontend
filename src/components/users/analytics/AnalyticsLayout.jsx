@@ -16,7 +16,7 @@ import CampaignAnalytics from "./CampaignAnalytics";
 import Audience from "./Audience";
 import Table from "./Table";
 import { PlatformBreakdown } from "./PlatformBreakdown";
-import  CampaignContribution  from "./CampaignContribution";
+import CampaignContribution from "./CampaignContribution";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
@@ -111,54 +111,54 @@ const AnalyticsLayout = () => {
     fetchRecentPostedContent();
   }, [fetchRecentPostedContent]);
 
- const globalStats = useMemo(() => {
-  if (!summary) return [];
+  const globalStats = useMemo(() => {
+    if (!summary) return [];
 
-  return [
-    {
-      label: "Total Views",
-      value: safeNumber(summary.totalviews),
-      change: "0.0 %",
-      isPositive: true,
-      icon: <RiEyeLine size={20} />,
-    },
-    {
-      label: "Total Likes",
-      value: safeNumber(summary.totallikes),
-      change: "0.0 %",
-      isPositive: true,
-      icon: <RiThumbUpLine size={20} />,
-    },
-    {
-      label: "Total Comments",
-      value: safeNumber(summary.totalcomments),
-      change: "0.0 %",
-      isPositive: true,
-      icon: <RiChat3Line size={20} />,
-    },
-    {
-      label: "Total Shares",
-      value: safeNumber(summary.totalshares),
-      change: "0.0 %",
-      isPositive: true,
-      icon: <RiShareForwardLine size={20} />,
-    },
-    {
-      label: "Content Pieces",
-      value: safeNumber(summary.totalcontentpiecescount),
-      change: "0.0 %",
-      isPositive: true,
-      icon: <RiFileList3Line size={20} />,
-    },
-    {
-      label: "Avg Engagement Rate",
-      value: `${safeNumber(summary.avgengagementrate)}%`,
-      change: "0.0 %",
-      isPositive: true,
-      icon: <RiBarChartLine size={20} />,
-    },
-  ];
-}, [summary]);
+    return [
+      {
+        label: "Total Views",
+        value: safeNumber(summary.totalviews),
+        change: "0.0 %",
+        isPositive: true,
+        icon: <RiEyeLine size={24} />,
+      },
+      {
+        label: "Total Likes",
+        value: safeNumber(summary.totallikes),
+        change: "0.0 %",
+        isPositive: true,
+        icon: <RiThumbUpLine size={24} />,
+      },
+      {
+        label: "Total Comments",
+        value: safeNumber(summary.totalcomments),
+        change: "0.0 %",
+        isPositive: true,
+        icon: <RiChat3Line size={24} />,
+      },
+      {
+        label: "Total Shares",
+        value: safeNumber(summary.totalshares),
+        change: "0.0 %",
+        isPositive: true,
+        icon: <RiShareForwardLine size={24} />,
+      },
+      {
+        label: "Content Pieces",
+        value: safeNumber(summary.totalcontentpiecescount),
+        change: "0.0 %",
+        isPositive: true,
+        icon: <RiFileList3Line size={24} />,
+      },
+      {
+        label: "Avg Engagement Rate",
+        value: `${safeNumber(summary.avgengagementrate)}%`,
+        change: "0.0 %",
+        isPositive: true,
+        icon: <RiBarChartLine size={24} />,
+      },
+    ];
+  }, [summary]);
 
 
 
@@ -204,10 +204,10 @@ const AnalyticsLayout = () => {
               </div>
 
               <div className="flex flex-col">
-                <p className="text-xs text-gray-500">{label}</p>
+                <p className="text-gray-500 font-semibold">{label}</p>
 
                 <div className="flex items-center space-x-2">
-                  <p className="text-lg font-bold text-[#0D132D]">{value}</p>
+                  <p className="text-xl font-bold text-[#0D132D]">{value}</p>
                   <span
                     className={`flex items-center text-xs font-medium ${isPositive ? "text-green-500" : "text-red-500"
                       }`}
@@ -239,7 +239,7 @@ const AnalyticsLayout = () => {
         </div>
 
         {/* Gauge Card */}
-        <div className="bg-white rounded-2xl  flex  justify-center">
+        <div className="bg-white rounded-2xl flex  justify-center">
           <CampaignContribution />
         </div>
       </div>
@@ -259,7 +259,7 @@ const AnalyticsLayout = () => {
       {/* 🎯 CAMPAIGN INSIGHTS */}
       <div className="bg-white rounded-2xl p-5 w-full  mt-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-bold text-gray-900">Campaign Insights</h2>
+          <h2 className="text-xl font-bold text-gray-900">Campaign Insights</h2>
 
           <Select
             className="w-64"
@@ -284,7 +284,7 @@ const AnalyticsLayout = () => {
 
       {/* 🎯 RECENT CONTENTS */}
       <div className="bg-white rounded-2xl p-5 mt-6">
-        <h2 className="text-lg font-bold mb-4">Recent Content</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Content</h2>
 
         {/* 🔄 Loading */}
         {contentLoading && <ContentSkeleton />}
@@ -293,6 +293,7 @@ const AnalyticsLayout = () => {
         {!contentLoading && contentList.length === 0 && (
           <Empty
             description="No recent content available"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
         )}
 
@@ -301,8 +302,9 @@ const AnalyticsLayout = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {contentList.map((c) => (
               <div
+                onClick={() => c.link && window.open(c.link, "_blank")}
                 key={c.userplatformanalyticid}
-                className="group bg-gray-200 rounded-2xl p-4 hover:shadow-md transition-shadow duration-200 flex flex-col"
+                className="group bg-gray-200 rounded-2xl cursor-pointer p-4 hover:shadow-md transition-shadow duration-200 flex flex-col"
               >
                 {/* Top row: Provider + Date */}
                 <div className="flex items-center justify-between mb-2">

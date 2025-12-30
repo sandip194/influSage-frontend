@@ -137,7 +137,7 @@ const PendingContentList = () => {
     return (
         <div className="bg-white p-6 rounded-2xl w-full overflow-x-auto mt-4">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-bold text-gray-900">
+                <h2 className="text-xl font-bold text-gray-900">
                     Pending Content List
                 </h2>
             </div>
@@ -145,7 +145,10 @@ const PendingContentList = () => {
             {loading ? (
                 <Skeleton active paragraph={{ rows: 5 }} />
             ) : pendingList.length === 0 ? (
-                <Empty description="No Pending Content Found" />
+                <Empty
+                    description="No Pending Content Found"
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                />
             ) : (
                 <Table
                     dataSource={pendingList}

@@ -146,7 +146,7 @@ const PerformanceCard = () => {
     <div className="bg-white p-6 rounded-2xl w-full h-full">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-bold text-gray-900">Performance</h2>
+        <h2 className="text-xl font-bold text-gray-900">Performance</h2>
       </div>
 
       {/* Donut */}
@@ -181,10 +181,10 @@ const MetricRow = ({ color, label, value, highlighted }) => (
     }`}
   >
     <div className="flex items-center gap-2">
-      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-      <span className="text-gray-800 text-xs">{label}</span>
+      <span className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />
+      <span className="text-gray-800 text-sm">{label}</span>
     </div>
-    <span className="font-semibold text-gray-900 text-xs">{value ?? 0}</span>
+    <span className="font-semibold text-gray-900 text-sm">{value ?? 0}</span>
   </div>
 );
 
