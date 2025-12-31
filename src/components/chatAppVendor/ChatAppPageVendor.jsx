@@ -131,7 +131,7 @@ export default function ChatAppPageVendor() {
             fileUrl: res.data.filepath || null,
           })
         );
-        setRefreshKey((prev) => prev + 1);
+        setRefreshKey(prev => prev + 1);
       }
     } catch (err) {
       console.error("Sending failed", err);
@@ -170,13 +170,49 @@ export default function ChatAppPageVendor() {
         socket.emit("editMessage", updatedMessage);
         dispatch(updateMessage(updatedMessage));
         setEditingMessage(null);
-        // setRefreshKey((prev) => prev + 1);
+        setRefreshKey(prev => prev + 1);
       }
     } catch (err) {
       console.error("Edit failed", err);
     }
   };
 
+  const fetchMessages = async () => {
+    if (!activeChat?.conversationid) return;
+    try {
+      const res = await axios.get(`/chat/messages/${activeChat.conversationid}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data?.messages) {
+        res.data.messages.forEach((msg) => dispatch(addMessage(msg)));
+        setRefreshKey((prev) => prev + 1);
+      }
+    } catch (err) {
+      console.error("Failed to fetch messages", err);
+    }
+  };
+
+
+  useEffect(() => {
+    if (location.state?.influencerId) {
+      const { influencerId, influencerName, influencerPhoto, conversationId } = location.state;
+
+      const chatData = {
+        id: conversationId || influencerId,
+        conversationid: conversationId,
+        name: influencerName,
+        img: influencerPhoto,
+        vendorId: userId,
+        influencerId,
+      };
+
+      dispatch(setActiveChat(chatData));
+
+      if (conversationId) {
+        fetchMessages();
+      }
+    }
+  }, [location.state, dispatch, userId]);
 
   return (
     <div className="h-[85vh] flex overflow-hidden">
