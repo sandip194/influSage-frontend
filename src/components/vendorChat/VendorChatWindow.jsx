@@ -441,9 +441,9 @@ useEffect(() => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                    className={`relative flex transition-all duration-300 ${
-                    msg.sender === "user" ? "justify-end" : "justify-start"
-                  } ${highlightMsgId === msg.id ? "flash-highlight" : ""}`}
-                >
+                              msg.sender === "user" ? "justify-end" : "justify-start"
+                            } ${highlightMsgId === msg.id ? "bg-blue-100 rounded-xl p-1" : ""}`}
+                    >
                   <div className="flex flex-col max-w-[78%] sm:max-w-[65%]">
                     <div
                       className={`px-4 py-2 rounded-2xl shadow-md text-sm break-words whitespace-pre-wrap ${

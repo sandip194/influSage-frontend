@@ -463,13 +463,11 @@ useEffect(() => {
             >
               {/* Message bubble */}
               <div
-                className={`px-3 py-1 rounded-lg 
-                  max-w-[90%] sm:max-w-xs md:max-w-sm 
-                  break-all overflow-hidden whitespace-pre-wrap 
-                  ${isMe
-                    ? "bg-[#0D132D] text-white"
-                    : "bg-gray-200 text-gray-900"
-                  }`}
+                className={`px-3 py-2 rounded-xl 
+                  max-w-[90%] sm:max-w-xs md:max-w-sm
+                  overflow-hidden whitespace-pre-wrap break-words
+                  ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}
+                `}
               >
                 {/* FILE PREVIEW */}
                 {!msg.deleted && msg.file && (
@@ -532,11 +530,9 @@ useEffect(() => {
                               className="flex flex-col items-center gap-2"
                             >
                               <Image
-                                key={idx}
                                 src={fileUrl}
-                                alt={fileName}
-                                className="max-w-[200px] max-h-[200px] rounded-md object-cover"
                                 preview
+                                className="w-full max-w-[240px] rounded-lg object-cover"
                               />
                               <button
                                 onClick={handleDownload}

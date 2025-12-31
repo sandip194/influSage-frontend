@@ -17,7 +17,7 @@ import {
 export default function ChatAppPage() {
   useSocketRegister();
   const dispatch = useDispatch();
-  const { token, userId, role } = useSelector((state) => state.auth);
+  const { token, id: userId, role } = useSelector((state) => state.auth);
   const socket = getSocket();
 
   const activeChat = useSelector((state) => state.chat.activeChat);
@@ -75,6 +75,7 @@ export default function ChatAppPage() {
   // ✉️ Handle sending messages
   const handleSendMessage = async ({ text, file, replyId }) => {
     if (!activeChat) return;
+    // console.log("Active Chat:", activeChat); 
 
     const newMsg = {
       id: Date.now(),
