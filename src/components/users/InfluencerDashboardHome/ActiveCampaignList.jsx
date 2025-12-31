@@ -101,13 +101,16 @@ const ActiveCampaignList = () => {
     return (
         <div className="bg-white p-6 rounded-2xl w-full overflow-x-auto h-full">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-bold text-gray-900">Active Campaign List</h2>
+                <h2 className="text-xl font-bold text-gray-900">Active Campaign List</h2>
             </div>
 
             {loading ? (
                 <Skeleton active paragraph={{ rows: 5 }} />
             ) : campaignList.length === 0 ? (
-                <Empty description="No Active Campaigns" />
+                <Empty
+                    description="No Active Campaigns"
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                />
             ) : (
                 <Table
                     dataSource={campaignList}

@@ -69,17 +69,17 @@ const ProfileComplation = () => {
 
         {/* CENTER TEXT */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-2xl font-bold text-gray-900">
+          <p className="text-xl font-bold text-gray-900">
             {completion}%
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs text-gray-500">
             Complete
           </p>
         </div>
       </div>
 
       <div className="flex-1 text-center sm:text-left">
-        <h3 className="text-base font-semibold text-gray-900">
+        <h3 className="text-xl font-semibold text-gray-900">
           Profile Completion
         </h3>
 

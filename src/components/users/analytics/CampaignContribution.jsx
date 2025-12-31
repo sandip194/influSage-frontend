@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { Select, Spin, Empty } from "antd";
+import { Select, Spin } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
@@ -19,6 +19,18 @@ const ENDPOINT_BY_ROLE = {
 const toNumber = (v) => {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
+};
+
+// Fallback chart for empty data
+const EMPTY_PIE_DATA = {
+  labels: ["No Data"],
+  datasets: [
+    {
+      data: [100],
+      backgroundColor: ["#E5E7EB"], // light gray
+      borderWidth: 0,
+    },
+  ],
 };
 
 const CampaignContribution = () => {
@@ -57,8 +69,13 @@ const CampaignContribution = () => {
     fetchData();
   }, [fetchData]);
 
+  // Check if there is valid contribution data
+  const hasValidData =
+    data.length > 0 && data.some((d) => toNumber(d.contributionpercentage) > 0);
+
+  // Prepare chart data
   const chartData = useMemo(() => {
-    if (!data.length) return null;
+    if (!hasValidData) return EMPTY_PIE_DATA;
 
     return {
       labels: data.map((d) => d.campaignname ?? "Unknown"),
@@ -70,8 +87,9 @@ const CampaignContribution = () => {
         },
       ],
     };
-  }, [data]);
+  }, [data, hasValidData]);
 
+  // Chart options
   const options = useMemo(
     () => ({
       responsive: true,
@@ -81,13 +99,19 @@ const CampaignContribution = () => {
           position: "bottom",
           labels: {
             usePointStyle: true,
-            padding: 16,
-            boxWidth: 10,
+            padding: 8,       // smaller padding
+            boxWidth: 8,      // smaller box
+            font: { size: 12 }, // smaller font for legend
+            filter: (item) => item.text !== "No Data",
           },
         },
+
         tooltip: {
           callbacks: {
-            label: (ctx) => `${ctx.label} – ${ctx.raw}%`,
+            label: (ctx) =>
+              ctx.label === "No Data"
+                ? "No campaign contribution data"
+                : `${ctx.label} – ${ctx.raw}%`,
           },
         },
       },
@@ -95,15 +119,11 @@ const CampaignContribution = () => {
     []
   );
 
-  const isEmpty = !loading && (!chartData || !chartData.labels.length);
-
   return (
-    <div className="bg-white rounded-2xl  p-5 w-full">
+    <div className="bg-white rounded-2xl p-5 w-full">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold text-gray-900">
-          Campaign Contribution
-        </h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Campaign Contribution</h2>
 
         <Select value={filter} onChange={setFilter} style={{ width: 120 }}>
           <Option value="week">Week</Option>
@@ -112,20 +132,19 @@ const CampaignContribution = () => {
         </Select>
       </div>
 
-      {/* Chart */}
-      <div className="relative w-full h-80 md:h-94">
-        {loading && (
-          <div className="flex justify-center items-center h-full">
-            <Spin />
-          </div>
-        )}
-
-        {!loading && isEmpty && (
-          <Empty description="No campaign contribution data" />
-        )}
-
-        {!loading && !isEmpty && (
-          <Pie data={chartData} options={options} />
+      {/* Chart Container */}
+      <div className="relative w-full h-48 md:h-64 flex flex-col items-center justify-center">
+        {loading ? (
+          <Spin size="large" />
+        ) : (
+          <>
+            <Pie data={chartData} options={options} />
+            {!hasValidData && !loading && (
+              <p className="text-sm text-gray-400 mt-4 text-center">
+                No campaign contribution data available
+              </p>
+            )}
+          </>
         )}
       </div>
     </div>

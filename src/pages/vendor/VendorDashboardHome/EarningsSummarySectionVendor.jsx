@@ -12,7 +12,7 @@ const EarningsSummarySectionVendor = ({ balance = 22765, thisMonth = 2765 }) => 
       {/* Balance Section */}
       <div className="bg-white p-6 rounded-2xl flex flex-col justify-between">
         <div>
-          <h2 className="text-[18px] font-medium text-[#1A1A1A] mb-1">Available Balance</h2>
+          <h2 className="text-xl font-bold text-gray-900">Available Balance</h2>
           <p className="text-[32px] font-bold text-[#0C1220] mb-6">{balance.toLocaleString()}</p>
 
           <div className="space-y-3">
@@ -27,7 +27,7 @@ const EarningsSummarySectionVendor = ({ balance = 22765, thisMonth = 2765 }) => 
           </div>
         </div>
 
-        <button className="bg-[#121A3F] mt-3 text-white cursor-pointer inset-shadow-sm inset-shadow-gray-500 px-8 py-3 rounded-full hover:bg-[#0D132D] w-48">
+        <button className="mt-4 bg-[#0D132D] text-white text-sm px-6 py-2 rounded-full hover:bg-[#121A3F] transition">
           Withdraw
         </button>
       </div>

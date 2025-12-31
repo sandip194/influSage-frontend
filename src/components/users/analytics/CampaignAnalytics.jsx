@@ -224,7 +224,7 @@ const StatCard = ({ label, value, iconKey }) => {
   return (
     <div className="bg-white px-4 py-3 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-3">
       <div
-        className={`w-10 h-10 flex items-center justify-center rounded-full ${config?.bgColor || "bg-gray-100"
+        className={`w-12 h-12 flex items-center justify-center rounded-full ${config?.bgColor || "bg-gray-100"
           }`}
       >
         {Icon && (
@@ -236,7 +236,7 @@ const StatCard = ({ label, value, iconKey }) => {
       </div>
 
       <div>
-        <p className="text-gray-500">{label}</p>
+        <p className="text-gray-500 font-semibold">{label}</p>
         <p className="text-xl font-bold text-[#0D132D]">
           {value.toLocaleString()}
         </p>

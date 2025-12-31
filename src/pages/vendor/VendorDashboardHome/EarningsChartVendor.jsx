@@ -78,7 +78,7 @@ const EarningsChartVendor = ({ data }) => {
   return (
     <div className="bg-white p-4 sm:p-6 rounded-2xl w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
-        <h2 className="text-lg sm:text-xl font-semibold">Earning Summary</h2>
+        <h2 className="text-xl font-bold text-gray-900">Earning Summary</h2>
         <select className="text-sm sm:text-base text-gray-600 border rounded-full px-4 py-1 shadow-sm flex gap-2">
           <option value="yearly">Yearly</option>
           <option value="monthly">Monthly</option>

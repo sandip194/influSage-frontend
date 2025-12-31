@@ -102,7 +102,7 @@ export const PlatformBreakdown = () => {
     <div className="bg-white rounded-2xl p-4 sm:p-5 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-        <h2 className="text-base sm:text-lg font-bold text-gray-900">
+        <h2 className="text-xl font-bold text-gray-900">
           Platform Breakdown
         </h2>
 

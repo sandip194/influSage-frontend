@@ -188,13 +188,13 @@ const BrandAnalyticsDashboard = () => {
             {/* ------------------------- */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {kpis.map((kpi, idx) => (
-                    <div key={idx} className="bg-white rounded-2xl  p-4 flex items-center gap-4">
-                        <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#0B132B]">
+                    <div key={idx} className="bg-white rounded-2xl p-4 flex items-center gap-4">
+                        <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#0B132B]">
                             <div className="text-white">{kpi.icon}</div>
                         </div>
 
                         <div>
-                            <p className="text-gray-500">{kpi.label}</p>
+                            <p className="text-gray-500 font-semibold">{kpi.label}</p>
                             <p className="text-[#0D132D] font-bold text-xl">
                                 {typeof kpi.value === "number"
                                     ? kpi.value.toLocaleString()

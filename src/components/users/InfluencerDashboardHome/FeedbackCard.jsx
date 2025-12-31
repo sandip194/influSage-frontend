@@ -73,9 +73,8 @@ const FeedbackCard = () => {
         {[...Array(5)].map((_, i) => (
           <i
             key={i}
-            className={`ri-star-${i < fb.rating ? "fill" : "line"} text-2xl ${
-              i < fb.rating ? "text-yellow-500" : "text-gray-400"
-            }`}
+            className={`ri-star-${i < fb.rating ? "fill" : "line"} text-2xl ${i < fb.rating ? "text-yellow-500" : "text-gray-400"
+              }`}
             style={{ textShadow: "0 0 1px black", stroke: "#000", strokeWidth: 0.6 }}
           />
         ))}
@@ -98,7 +97,7 @@ const FeedbackCard = () => {
     <div className="bg-white p-4 sm:p-6 rounded-2xl w-full">
       {/* Header - Always Visible */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
-        <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+        <h2 className="text-xl font-bold text-gray-900">
           Recent Feedbacks From Brands
         </h2>
 
@@ -116,7 +115,10 @@ const FeedbackCard = () => {
       {loading ? (
         <Skeleton active paragraph={{ rows: 4 }} />
       ) : feedbacks.length === 0 ? (
-        <Empty description="No feedback available" />
+        <Empty
+          description="No feedback available"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
       ) : (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {feedbackCards}
