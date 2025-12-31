@@ -222,12 +222,18 @@ const AnalyticsLayout = () => {
       )}
 
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-        <PlatformBreakdown />
-        <div className="p-4 bg-white rounded-2xl w-full">
-          <EngagementGauge />
+      
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-5">
+        {/* PlatformBreakdown Line Chart */}
+        <div className="col-span-1 md:col-span-2 bg-white rounded-2xl">
+          <PlatformBreakdown />
         </div>
 
+        {/* Gauge Card */}
+        <div className="bg-white rounded-2xl flex  justify-center">
+          <EngagementGauge />
+        </div>
       </div>
 
 

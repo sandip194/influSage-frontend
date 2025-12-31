@@ -15,12 +15,11 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave }) => {
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [form] = Form.useForm();
   const [preview, setPreview] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
   const [profileError, setProfileError] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('');
-  const [selectedState, setSelectedState] = useState('');
   const [countries, setCountries] = useState([]);
   const [gender, setGender] = useState([]);
   const [states, setStates] = useState([]);
@@ -67,39 +66,45 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
 
   const loadStates = async (countryName) => {
     try {
-      setLoading((p) => ({ ...p, states: true }));
+      setLoading(p => ({ ...p, states: true }));
 
-      const countryObj = countries.find((c) => c.name === countryName);
-      if (!countryObj) return setStates([]);
+      const countryObj = countries.find(c => c.name === countryName);
+      if (!countryObj) {
+        setStates([]);
+        return;
+      }
 
       const res = await axios.get(`/states/${countryObj.id}`);
-
       setStates(Array.isArray(res?.data?.states) ? res.data.states : []);
     } catch (err) {
       console.error(err);
       setStates([]);
     } finally {
-      setLoading((p) => ({ ...p, states: false }));
+      setLoading(p => ({ ...p, states: false }));
     }
   };
 
+
   const loadCities = async (stateName) => {
     try {
-      setLoading((p) => ({ ...p, cities: true }));
+      setLoading(p => ({ ...p, cities: true }));
 
-      const stateObj = states.find((s) => s.name === stateName);
-      if (!stateObj) return setCities([]);
+      const stateObj = states.find(s => s.name === stateName);
+      if (!stateObj) {
+        setCities([]);
+        return;
+      }
 
       const res = await axios.get(`/cities/${stateObj.id}`);
-
       setCities(Array.isArray(res?.data?.cities) ? res.data.cities : []);
     } catch (err) {
       console.error(err);
       setCities([]);
     } finally {
-      setLoading((p) => ({ ...p, cities: false }));
+      setLoading(p => ({ ...p, cities: false }));
     }
   };
+
 
 
   useEffect(() => {
@@ -128,28 +133,18 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
       bio: safe(data.bio),
     });
 
-    // Country → State → City cascade fix
     if (data.countryname) {
-      const countryObj = countries.find(c => c.id === data.countryid);
-      if (countryObj) {
-        setSelectedCountry(countryObj.id);
-        loadStates(countryObj.id);
-
-        if (data.statename) {
-          const stateObj = states.find(s => s.id === data.stateid);
-          if (stateObj) {
-            setSelectedState(stateObj.id);
-            loadCities(stateObj.id);
-          }
-        }
-      }
+      loadStates(data.countryname);
     }
 
+    if (data.statename) {
+      loadCities(data.statename);
+    }
 
     if (data.photopath) {
       const fullUrl = data.photopath.startsWith('http')
         ? data.photopath
-        : `http://localhost:3001/${data.photopath.replace(/^\/+/, '')}`;
+        : `${BASE_URL}${data.photopath.replace(/^\/+/, '')}`;
       setPreview(fullUrl);
       setExistingPhotoPath(data.photopath);
     }
@@ -204,14 +199,30 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
     setIsFormChanged(true);
   };
 
+  useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith('blob:')) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
+
+  useEffect(() => {
+    if (data?.statename && states.length) {
+      loadCities(data.statename);
+    }
+  }, [states]);
+
+
 
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
-      if (!profileImage && !preview) {
+      if (!profileImage && !existingPhotoPath) {
         setProfileError('Please select profile image! Profile image is required.');
         return;
       }
+
 
       const values = await form.validateFields();
 
@@ -248,7 +259,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
         setIsFormChanged(false);
         if (onNext) onNext();
         if (onSave) onSave(profilePayload);
-      }else {
+      } else {
         message.error('Failed to submit form, please try again.');
       }
     } catch (errorInfo) {
@@ -339,12 +350,18 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
             { required: true, message: 'Please enter your phone number' },
             {
               validator: (_, value) => {
-                if (!value || value.trim() === '') return Promise.resolve();
-                return value.length >= 12
-                  ? Promise.resolve()
-                  : Promise.reject(new Error('Enter a valid phone number (at least 10 digits)'));
-              },
-            },
+                if (!value) return Promise.resolve();
+
+                const digits = value.replace(/\D/g, '');
+                if (digits.length < 10 || digits.length > 15) {
+                  return Promise.reject(
+                    new Error('Enter a valid phone number')
+                  );
+                }
+                return Promise.resolve();
+              }
+            }
+            ,
           ]}
         >
           <PhoneInput
@@ -420,7 +437,6 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
               }
               onChange={(name) => {
                 form.setFieldsValue({ state: undefined, city: undefined });
-                setSelectedCountry(name);
                 loadStates(name);
               }}
             >
@@ -451,7 +467,6 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
               }
               onChange={(name) => {
                 form.setFieldsValue({ city: undefined });
-                setSelectedState(name);
                 loadCities(name);
               }}
             >
@@ -465,12 +480,16 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
 
 
           {/* City */}
-          <Form.Item label={<b>City</b>} name="city">
+          <Form.Item
+            label={<b>City</b>}
+            name="city"
+            // rules={[{ required: true, message: "Please select a City" }]}
+          >
             <Select
               showSearch
               size="large"
               placeholder="Select City"
-              disabled={!cities.length}
+              disabled={!cities.length && !form.getFieldValue('city')}
               loading={loading.cities}
               optionFilterProp="children"
               filterOption={(input, option) =>
@@ -495,15 +514,20 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
             { required: true, message: 'Please enter your ZIP or PIN Code' },
             ({ getFieldValue }) => ({
               validator(_, value) {
-                const iso = countries.find(c => c.name === getFieldValue('countryname'))?.iso2;
-                const regex = getRegexForCountry(iso);
                 if (!value) return Promise.resolve();
+
+                const countryName = getFieldValue('country');
+                const iso = countries.find(c => c.name === countryName)?.iso2;
+                const regex = getRegexForCountry(iso);
+
                 if (regex && !regex.test(value.trim())) {
                   return Promise.reject(new Error('Invalid ZIP/PIN code'));
                 }
+
                 return Promise.resolve();
               }
             })
+
           ]}
           className="md:col-span-3"
         >

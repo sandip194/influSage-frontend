@@ -154,7 +154,7 @@ export const ProfileStepper = () => {
     }
   ], [profileData, updateProfileSection, markStepComplete, isEditable]);
 
-  const getUserProfileCompationData = async () => {
+  const getUserProfileCompationData =  useCallback(async () => {
     try {
       const res = await axios.get(`user/profile/${userId}`, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -260,13 +260,13 @@ export const ProfileStepper = () => {
     } catch (error) {
       console.error("❌ Error fetching profile data:", error);
     }
-  };
+  }, [token, userId, dispatch, name, role]);
 
 
 
   useEffect(() => {
     getUserProfileCompationData();
-  }, [lastCompletedStep]);
+  }, [getUserProfileCompationData, lastCompletedStep]);
 
   const handleStepChange = (step) => {
     // Non-editable users cannot change steps

@@ -35,7 +35,7 @@ const statusStyles = {
   blocked: "bg-gray-100 text-gray-700",
   pending: "bg-orange-100 text-orange-700",
   rejected: "bg-pink-100 text-pink-700",
-  accepted: "bg-emerald-100 text-emerald-700", // ✅ added
+  accepted: "bg-blue-100 text-blue-700",
 };
 
 const statusLabels = {
