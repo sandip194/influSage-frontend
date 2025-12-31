@@ -14,6 +14,8 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
     const [offerDetails, setOfferDetails] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState(null);
 
 
     const fetchOffer = async () => {
@@ -112,8 +114,29 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                             <img
                                 src={offerDetails.photopath}
                                 alt="influencer"
-                                className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 mx-auto sm:mx-0"
+                                className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 mx-auto sm:mx-0 cursor-pointer hover:opacity-80 transition"
+                                onClick={() => setIsPreviewOpen(true)}
                             />
+                            {isPreviewOpen && (
+                                <div
+                                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
+                                    onClick={() => setIsPreviewOpen(false)}
+                                >
+                                    <button
+                                    onClick={() => setIsPreviewOpen(false)}
+                                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                                    >
+                                    &times;
+                                    </button>
+
+                                    <img
+                                    src={offerDetails.photopath}
+                                    alt="Preview"
+                                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                    onClick={(e) => e.stopPropagation()}
+                                    />
+                                </div>
+                                )}
                             <div>
                                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 capitalize">
                                     {offerDetails.firstname} {offerDetails.lastname}
@@ -210,32 +233,53 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                             const url = file.filepath;
                                             const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
                                             return (
-                                                <div
-                                                    key={i}
-                                                    className="rounded-lg overflow-hidden bg-gray-100 border border-gray-200 hover:shadow-md transition"
+                                            <div
+                                                key={i}
+                                                className="rounded-lg overflow-hidden bg-gray-100 border border-gray-200 hover:shadow-md transition"
+                                            >
+                                                {isImage ? (
+                                                <img
+                                                    src={url}
+                                                    alt="portfolio"
+                                                    className="w-full h-28 object-cover cursor-pointer hover:opacity-80 transition"
+                                                    onClick={() => setPreviewImage(url)}
+                                                />
+                                                ) : (
+                                                <a
+                                                    href={url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex flex-col items-center justify-center h-28 text-xs text-gray-500 hover:text-gray-700"
                                                 >
-                                                    {isImage ? (
-                                                        <img
-                                                            src={url}
-                                                            alt="portfolio"
-                                                            className="w-full h-28 object-cover"
-                                                        />
-                                                    ) : (
-                                                        <a
-                                                            href={url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="flex flex-col items-center justify-center h-28 text-xs text-gray-500"
-                                                        >
-                                                            Download File
-                                                        </a>
-                                                    )}
-                                                </div>
+                                                    Download File
+                                                </a>
+                                                )}
+                                            </div>
                                             );
                                         })}
                                     </div>
                                 ) : (
                                     <p className="text-sm text-gray-500">No sample work uploaded.</p>
+                                )}
+                                {previewImage && (
+                                    <div
+                                        className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
+                                        onClick={() => setPreviewImage(null)}
+                                    >
+                                        <button
+                                        onClick={() => setPreviewImage(null)}
+                                        className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
+                                        >
+                                        &times;
+                                        </button>
+
+                                        <img
+                                        src={previewImage}
+                                        alt="Preview"
+                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                        onClick={(e) => e.stopPropagation()}
+                                        />
+                                    </div>
                                 )}
                             </div>
                         </div>

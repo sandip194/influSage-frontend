@@ -403,14 +403,14 @@ const Details = () => {
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
               <p>
-                {campaign?.requirements?.campaignstartdate} — {campaign?.requirements?.campaignenddate}
+                {campaign?.requirements?.campaignstartdate} <b>{"To"}{" "}</b> {campaign?.requirements?.campaignenddate}
               </p>
             </div>
 
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Application Window</p>
               <p>
-                {campaign?.applicationstartdate} — {campaign?.applicationenddate}
+                {campaign?.applicationstartdate} <b>{"To"}{" "}</b> {campaign?.applicationenddate}
               </p>
             </div>
 

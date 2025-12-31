@@ -272,7 +272,7 @@ const DescriptionLayout = () => {
                     <span className="text-gray-800 whitespace-nowrap">
                       {campaignDetails?.requirements?.applicationstartdate ||
                         "N/A"}{" "}
-                      {"->"}{" "}
+                    <b>{"To"}{" "}</b>
                       {campaignDetails?.requirements?.applicationenddate ||
                         "N/A"}
                     </span>

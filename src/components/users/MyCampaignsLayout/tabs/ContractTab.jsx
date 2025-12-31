@@ -184,14 +184,14 @@ const ContractTab = ({ campaignId, token }) => {
             <div>
               <p className="text-gray-500 text-sm">Contract Duration</p>
               <p className="text-gray-900 font-semibold">
-                {contract.contractStart} → {contract.contractEnd}
+                {contract.contractStart} <b>{"To"}{" "}</b> {contract.contractEnd}
               </p>
             </div>
 
             <div>
               <p className="text-gray-500 text-sm">Campaign Window</p>
               <p className="text-gray-900 font-semibold">
-                {contract.campaignStart} → {contract.campaignEnd}
+                {contract.campaignStart} <b>{"To"}{" "}</b> {contract.campaignEnd}
               </p>
             </div>
           </div>

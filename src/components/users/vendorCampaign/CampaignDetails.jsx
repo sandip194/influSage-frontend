@@ -595,14 +595,14 @@ const CampaignDetails = () => {
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
               <p>
-                {campaignDetails?.requirements.campaignstartdate} — {campaignDetails?.requirements.campaignenddate}
+                {campaignDetails?.requirements.campaignstartdate} <b>{"To"}{" "}</b> {campaignDetails?.requirements.campaignenddate}
               </p>
             </div>
 
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Application Window</p>
               <p>
-                {campaignDetails?.applicationstartdate} — {campaignDetails?.applicationenddate}
+                {campaignDetails?.applicationstartdate} <b>{"To"}{" "}</b> {campaignDetails?.applicationenddate}
               </p>
             </div>
 

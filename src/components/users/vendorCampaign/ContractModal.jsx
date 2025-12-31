@@ -138,10 +138,9 @@ export default function ContractModal({
 
     useEffect(() => {
         if (editData && platforms.length > 0) {
-            console.log(editData)
             const paymentNumber = Number(editData.payment.replace(/[^\d]/g, ""));
             form.setFieldsValue({
-                influencers: editData.influencerSelectId,
+                // influencers: editData.campaignapplicationid,
                 payment: paymentNumber,
                 contractStart: dayjs(editData.contractStart, "DD-MM-YYYY"),
                 contractEnd: dayjs(editData.contractEnd, "DD-MM-YYYY"),

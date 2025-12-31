@@ -344,7 +344,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                     <div>
                       <p className="font-medium text-gray-800">Contract Duration</p>
                       <p className="text-xs sm:text-sm">
-                        {contract.contractStart} → {contract.contractEnd}
+                        {contract.contractStart} <b>{"To"}{" "}</b> {contract.contractEnd}
                       </p>
                     </div>
 
@@ -352,7 +352,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                     <div>
                       <p className="font-medium text-gray-800">Campaign Dates</p>
                       <p className="text-xs sm:text-sm">
-                        {contract.campaignStart} → {contract.campaignEnd}
+                        {contract.campaignStart} <b>{"To"}{" "}</b> {contract.campaignEnd}
                       </p>
                     </div>
 

@@ -253,7 +253,7 @@ const EditLayout = () => {
                       </span>
 
                       <span className="text-gray-800 whitespace-nowrap">
-                        {campaignDetails?.requirements?.applicationstartdate || "N/A"} {'->'} {campaignDetails?.requirements?.applicationenddate || "N/A"}
+                        {campaignDetails?.requirements?.applicationstartdate || "N/A"} <b>{"To"}{" "}</b> {campaignDetails?.requirements?.applicationenddate || "N/A"}
                       </span>
                     </p>           
 

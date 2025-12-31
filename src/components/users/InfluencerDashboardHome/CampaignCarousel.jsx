@@ -1,132 +1,135 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { FreeMode, Navigation, Autoplay } from "swiper/modules";
-import 'swiper/css';
-import 'swiper/css/navigation';
+import { FreeMode, Navigation, Autoplay, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
 import { useSelector } from "react-redux";
 import { Skeleton, Empty } from "antd";
+import { RiCalendar2Line, RiImageLine, RiArrowLeftSLine, RiArrowRightSLine, } from "@remixicon/react";
+import 'swiper/css/pagination';
 
 
-
-// ---------- Helper: Parse DD-MM-YYYY ----------
-const parseDDMMYYYY = (dateStr) => {
-  if (!dateStr) return null;
+const formatDate = (dateStr) => {
+  if (!dateStr) return "";
   const [day, month, year] = dateStr.split("-");
-  return new Date(`${year}-${month}-${day}`);
+  if (!day || !month || !year) return "";
+  return `${day}/${month}/${year}`;
 };
+
 
 // ---------- Skeleton Card ----------
 const SkeletonCard = () => (
   <div className="w-[260px] h-[300px] bg-gray-200 rounded-2xl animate-pulse"></div>
 );
 
-// ---------- Campaign Card ----------  
+// ---------- Campaign Card ----------
 const CampaignCard = ({ campaign }) => {
-
-
   return (
     <Link
       to={`/dashboard/browse/description/${campaign.id}`}
       className="block h-full"
     >
+      {/* ===== Card Wrapper ===== */}
       <div
         className="
-        bg-[#e6eff9] border border-gray-200 rounded-2xl
-        overflow-hidden shadow-sm
-        flex flex-col
-        cursor-pointer hover:shadow-md transition-shadow duration-300
-        relative
         w-[300px]
+        rounded-2xl
+        overflow-hidden
+        bg-[#335CFF0D]
+        border border-[#335CFF26]
+        flex flex-col hover:shadow-md transition w-[300px]
       "
       >
-        {/* ===== Banner ===== */}
-        <div className="relative h-32 shrink-0">
+        {/* ===== Image Section ===== */}
+        <div className="h-36 w-full overflow-hidden">
           <img
             src={campaign.photopath || "/placeholder.jpg"}
             alt={campaign.name}
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
           />
-
-          {/* Apply Dates Badge */}
-          {campaign.applicationstartdate && campaign.applicationenddate && (
-            <div
-              className="
-              absolute top-3 right-3 px-3 py-1 text-xs font-semibold
-              rounded-full shadow-md
-              bg-white
-              text-[#0D132D] whitespace-nowrap
-            "
-            >
-              Apply:{" "}
-              {parseDDMMYYYY(
-                campaign.applicationstartdate
-              ).toLocaleDateString("en-GB")}{" "}
-              -{" "}
-              {parseDDMMYYYY(
-                campaign.applicationenddate
-              ).toLocaleDateString("en-GB")}
-            </div>
-          )}
         </div>
 
-        {/* ===== Info Section ===== */}
-        <div className="p-3 flex flex-col flex-1">
-          {/* Campaign Name */}
-          <h3 className="text-base font-semibold text-gray-900 truncate">
+        {/* ===== Content Section ===== */}
+        <div className="p-4 flex flex-col gap-3 flex-1">
+          {/* ===== Title ===== */}
+          <h3 className="text-[15px] font-semibold text-[#0D132D] truncate h-[22px]">
             {campaign.name}
           </h3>
 
-          {/* Description */}
-          {campaign.description && (
-            <p className="text-xs text-gray-700 mt-1 line-clamp-2 h-9">
-              {campaign.description}
-            </p>
-          )}
+          {/* ===== Description ===== */}
+          <p className="text-sm text-gray-500 line-clamp-2 h-[40px]">
+            {campaign.description || ""}
+          </p>
 
-          {/* Categories */}
-          <div className="flex flex-wrap gap-1 mt-2">
-            {campaign.campaigncategories?.slice(0, 3).map((tag, i) => (
+          {/* ===== Apply Date ===== */}
+         <div className="flex items-center gap-2 text-sm text-[#335CFF] h-[20px]">
+            {campaign.applicationstartdate && campaign.applicationenddate && (
+              <>
+                <RiCalendar2Line size={16} className="shrink-0" />Apply :
+                <span className="truncate">
+                  {formatDate(campaign.applicationstartdate)}
+                  <span className="mx-1 font-medium">-</span>
+                  {formatDate(campaign.applicationenddate)}
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* ===== Categories ===== */}
+           <div className="flex flex-wrap gap-2 overflow-hidden">
+            {campaign.campaigncategories?.slice(0, 2).map((cat, i) => (
               <span
                 key={i}
-                className="px-2 py-1 bg-blue-200 rounded-full text-xs text-black"
+                className="
+                  px-2 py-1
+                  rounded-full
+                  text-xs font-medium
+                  border border-[#0D132D26]
+                  whitespace-nowrap
+                "
               >
-                {tag.categoryname}
+                {cat.categoryname}
               </span>
             ))}
-          </div>
-          <hr className="my-2" />
 
-          {/* Budget */}
-          <div className="mt-auto pt-1">
+            {campaign.campaigncategories?.length > 2 && (
+              <span
+                className="
+                  px-2 py-1
+                  rounded-full
+                  text-xs font-medium
+                  border border-[#0D132D26] bg-gray-300
+                  whitespace-nowrap
+                "
+              >
+                +{campaign.campaigncategories.length - 2}
+              </span>
+            )}
+          </div>
+
+          {/* ===== Budget Section ===== */}
+          <div className="mt-auto">
             {campaign.estimatedbudget && (
               <div
                 className="
-                flex items-center justify-between
                 bg-white
-                border border-blue-100
+                border border-[#0D132D26]
                 rounded-xl
-                px-4 py-3
-                cursor-default
-                select-none
-                min-w-[180px]
+                px-2 py-3
+                flex items-center gap-3
               "
               >
-                {/* Text */}
-                <div>
-                  <div className="text-base font-semibold text-[#0D132D] leading-tight">
-                    ₹{campaign.estimatedbudget.toLocaleString()}
-                  </div>
-                  <div className="text-[11px] uppercase tracking-wide text-gray-400">
-                    Estimated Budget
-                  </div>
-                </div>
+              <div className="flex items-center gap-1 text-sm">
+                <span className="text-xs text-gray-400">
+                  Estimated Budget:
+                </span>
+                <span className="font-semibold text-[#0D132D]">
+                  ₹ {campaign.estimatedbudget.toLocaleString("en-IN")}
+                </span>
+              </div>
 
-                {/* Icon */}
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
-                  ₹
-                </div>
               </div>
             )}
           </div>
@@ -134,15 +137,14 @@ const CampaignCard = ({ campaign }) => {
       </div>
     </Link>
   );
-
 };
-
 
 // ---------- Campaign Carousel ----------
 const CampaignCarousel = () => {
   const { token } = useSelector((state) => state.auth);
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const getLimitedCampaigns = useCallback(async () => {
     try {
@@ -166,7 +168,16 @@ const CampaignCarousel = () => {
 
   return (
     <div className="my-3 bg-white p-4 rounded-2xl">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Browse Campaign</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold text-gray-900">Browse Campaign</h2>
+
+        <button
+          onClick={() => navigate("/dashboard/browse")}
+          className="cursor-pointer text-[#0D132D] text-sm sm:text-base font-medium hover:underline"
+        >
+          View All
+        </button>
+      </div>
 
       {loading ? (
         <div className="flex gap-4 overflow-x-auto">
@@ -183,23 +194,23 @@ const CampaignCarousel = () => {
         <Swiper
           spaceBetween={12}
           slidesPerView="auto"
-          freeMode={true}
-          grabCursor={true}
-          modules={[FreeMode, Autoplay]}
+          freeMode
+          grabCursor
+          modules={[FreeMode, Autoplay, Navigation, Pagination]}
           autoplay={{ delay: 3000, disableOnInteraction: true }}
           className="pb-6"
+           pagination={{
+          clickable: true,
+        }}
           breakpoints={{
-            640: { slidesPerView: 1.2 },
+            640: { slidesPerView: 1 },
             768: { slidesPerView: 2 },
             1024: { slidesPerView: 2.5 },
             1280: { slidesPerView: 3 },
           }}
         >
           {campaigns.map((c) => (
-            <SwiperSlide
-              key={c.id}
-              className="!w-[300px]"
-            >
+            <SwiperSlide key={c.id} className="!w-[300px]">
               <CampaignCard campaign={c} />
             </SwiperSlide>
           ))}
