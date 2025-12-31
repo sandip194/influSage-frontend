@@ -60,8 +60,22 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
 
   // Initialize from props `data`
   useEffect(() => {
+    // 🔥 RESET FIRST
+    setPortfolioUrl("");
+    setSelectedLanguages([]);
+    setPortfolioError("");
+    setLanguageError("");
+    setHasSubmitted(false);
+
+    // also reset file hook state
+    setExistingFiles([]);
+
     if (!data) return;
-    if (data.portfoliourl) setPortfolioUrl(data.portfoliourl);
+
+    // ✅ RESTORE FROM DATA
+    if (data.portfoliourl) {
+      setPortfolioUrl(data.portfoliourl);
+    }
 
     if (Array.isArray(data.filepaths)) {
       const filesFromBackend = data.filepaths
@@ -74,15 +88,23 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
         }));
       setExistingFiles(filesFromBackend);
     }
+  }, [data, setExistingFiles]);
+
+  useEffect(() => {
+    if (!data || !languages.length) return;
 
     const langs = data.languages ?? data.contentlanguages ?? [];
+
     if (Array.isArray(langs)) {
       const selectedIds = langs
         .map(l => l.languageid)
         .filter(id => languages.some(lang => lang.id === id));
+
       setSelectedLanguages(selectedIds);
     }
-  }, [data, languages, setExistingFiles]);
+  }, [data, languages]);
+
+
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
@@ -175,7 +197,15 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
         setIsFormChanged(false);
 
         onSave?.(formData);
-        onNext?.();
+        onNext?.({
+          portfoliourl: portfolioUrl,
+          filepaths: [
+            ...existingFiles.map(f => ({ filepath: f.url })),
+            ...fileList.map(f => ({ filepath: f.name }))
+          ],
+          languages: selectedLanguages.map(id => ({ languageid: id }))
+        });
+
       } else {
         message.error("Something went wrong while saving.");
       }

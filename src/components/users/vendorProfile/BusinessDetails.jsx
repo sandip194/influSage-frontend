@@ -12,12 +12,13 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, onSave }) => {
+
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
     const [form] = Form.useForm();
     const [preview, setPreview] = useState(null);
     const [profileImage, setProfileImage] = useState(null);
     const [profileError, setProfileError] = useState('');
-    const [selectedCountry, setSelectedCountry] = useState('');
-    const [selectedState, setSelectedState] = useState('');
     const [countries, setCountries] = useState([]);
     const [states, setStates] = useState([]);
     const [cities, setCities] = useState([]);
@@ -35,7 +36,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
     const fileInputRef = useRef();
 
     const getRegexForCountry = (iso) => {
-        const entry = postalRegexList.find(e => e.ISO === iso);
+        const entry = postalRegexList.find((e) => e.ISO === iso);
         return entry?.Regex ? new RegExp(entry.Regex) : null;
     };
 
@@ -85,7 +86,10 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
             setLoading(p => ({ ...p, cities: true }));
 
             const stateObj = states.find(s => s.name === stateName);
-            if (!stateObj) return setCities([]);
+            if (!stateObj) {
+                setCities([]);
+                return;
+            }
 
             const res = await axios.get(`/cities/${stateObj.id}`);
             setCities(Array.isArray(res?.data?.cities) ? res.data.cities : []);
@@ -105,52 +109,48 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
         return num.toString();
     };
 
+    useEffect(() => {
+        loadCountries();
+    }, []);
+
     // Initialize form and load countries
     useEffect(() => {
         fetchCompanySizes();
-        loadCountries();
+        if (!data || Object.keys(data).length === 0 || countries.length === 0) return;
 
-        if (data) {
-            form.setFieldsValue({
-                businessname: data.businessname,
-                companysizeid: data.companysizeid,
-                phone: data.phonenumber,
-                address1: data.address1,
-                countryname: data.countryname,
-                statename: data.statename,
-                bio: data.bio,
-                zipCode: data.zip,
-                city: data.city,
-            });
+        const safe = (val) => (val !== null && val !== undefined ? val : undefined);
 
-            if (data.countryname) {
-                const c = countries.find(x => x.name === data.countryname);
-                if (c) {
-                    setSelectedCountry(c.name);
-                    loadStates(c.name);
+        form.setFieldsValue({
+            businessname: safe(data.businessname),
+            companysizeid: safe(data.companysizeid),
+            phone: safe(data.phonenumber),
+            address1: safe(data.address1),
+            countryname: safe(data.countryname),
+            statename: safe(data.statename),
+            bio: safe(data.bio),
+            zipCode: safe(data.zip),
+            city: safe(data.city),
+        });
 
-                    if (data.statename) {
-                        const s = states.find(x => x.name === data.statename);
-                        if (s) {
-                            setSelectedState(s.name);
-                            loadCities(s.name);
-                        }
-                    }
-                }
-            }
-
-
-            if (data.photopath) {
-                const fullUrl = data.photopath.startsWith('http')
-                    ? data.photopath
-                    : `http://localhost:3001/${data.photopath.replace(/^\/+/, '')}`;
-
-                setPreview(fullUrl);
-                setExistingPhotoPath(data.photopath)
-            }
-
+        if (data.countryname) {
+            loadStates(data.countryname);
         }
-    }, [data]);
+
+        if (data.statename) {
+            loadCities(data.statename);
+        }
+
+
+        if (data.photopath) {
+            const fullUrl = data.photopath.startsWith('http')
+                ? data.photopath
+                : `${BASE_URL}/${data.photopath.replace(/^\/+/, '')}`;
+
+            setPreview(fullUrl);
+            setExistingPhotoPath(data.photopath)
+        }
+
+    }, [data, form, countries]);
 
 
     const handleImageChange = (e) => {
@@ -183,10 +183,24 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
         setIsFormChanged(true);
     };
 
+    useEffect(() => {
+        return () => {
+            if (preview && preview.startsWith('blob:')) {
+                URL.revokeObjectURL(preview);
+            }
+        };
+    }, [preview]);
+
+    useEffect(() => {
+        if (data?.statename && states.length) {
+            loadCities(data.statename);
+        }
+    }, [states]);
+
     const handleSubmit = async () => {
         await form.validateFields();
         if (!profileImage && !existingPhotoPath) {
-            setProfileError("Profile image is required");
+            setProfileError("Please select profile image! Profile image is required.");
             return;
         } else {
             setProfileError("");
@@ -309,11 +323,16 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                             {
                                 validator: (_, value) => {
                                     if (!value) return Promise.resolve();
-                                    return value.replace(/\D/g, "").length >= 12
-                                        ? Promise.resolve()
-                                        : Promise.reject("Enter a valid phone number");
-                                },
-                            },
+
+                                    const digits = value.replace(/\D/g, '');
+                                    if (digits.length < 10 || digits.length > 15) {
+                                        return Promise.reject(
+                                            new Error('Enter a valid phone number')
+                                        );
+                                    }
+                                    return Promise.resolve();
+                                }
+                            }
                         ]}
                     >
                         <PhoneInput
@@ -393,14 +412,13 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                     <Form.Item
                         label={<b>Country</b>}
                         name="countryname"
-                        rules={[{ required: true, message: 'Please select a country' }]}
+                        rules={[{ required: true, message: 'Please select a Country' }]}
                     >
                         <Select
                             showSearch
                             size="large"
                             placeholder="Select Country"
                             onChange={(val) => {
-                                setSelectedCountry(val);
                                 form.setFieldsValue({ statename: undefined, city: undefined });
                                 loadStates(val);
                             }}
@@ -412,7 +430,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                             }
                         >
                             {countries.map((country) => (
-                                <Option key={country.name} value={country.name}>
+                                <Option key={country.id} value={country.name}>
                                     {country.name}
                                 </Option>
                             ))}
@@ -422,35 +440,46 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                     <Form.Item
                         label={<b>State</b>}
                         name="statename"
-                        rules={[{ required: true, message: 'Please select a state' }]}
+                        rules={[{ required: true, message: 'Please select a State' }]}
                     >
                         <Select
                             showSearch
                             size="large"
                             placeholder="Select State"
                             onChange={(val) => {
-                                setSelectedState(val);
+
                                 form.setFieldsValue({ city: undefined });
                                 loadCities(val);
                             }}
-                            disabled={!selectedCountry}
+                            disabled={!states.length}
                             loading={loading.states}
+                            filterOption={(input, option) =>
+                                option.children.toLowerCase().includes(input.toLowerCase())
+                            }
                         >
                             {states.map((state) => (
-                                <Option key={state.name} value={state.name}>
+                                <Option key={state.id} value={state.name}>
                                     {state.name}
                                 </Option>
                             ))}
                         </Select>
                     </Form.Item>
 
-                    <Form.Item name="city" label={<b>City</b>}>
+                    <Form.Item
+                        name="city"
+                        label={<b>City</b>}
+                        // rules={[{ required: true, message: 'Please select a City' }]}
+                    >
                         <Select
                             showSearch
                             size="large"
                             placeholder="Select City"
-                            disabled={!selectedState}
+                            disabled={!cities.length && !form.getFieldValue('city')}
                             loading={loading.cities}
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                                option.children.toLowerCase().includes(input.toLowerCase())
+                            }
                         >
                             {cities.map((city) => (
                                 <Option key={city.id} value={city.name}>
@@ -470,16 +499,22 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                         { required: true, message: 'Please enter your ZIP or PIN Code' },
                         ({ getFieldValue }) => ({
                             validator(_, value) {
-                                const iso = countries.find(c => c.name === getFieldValue('countryname'))?.iso2;
-                                const regex = getRegexForCountry(iso);
                                 if (!value) return Promise.resolve();
+
+                                const countryName = getFieldValue('countryname');
+                                const iso = countries.find(c => c.name === countryName)?.iso2;
+                                const regex = getRegexForCountry(iso);
+
                                 if (regex && !regex.test(value.trim())) {
                                     return Promise.reject(new Error('Invalid ZIP/PIN code'));
                                 }
+
                                 return Promise.resolve();
                             }
                         })
-                    ]}>
+                    ]}
+                    className="md:col-span-3"
+                >
                     <Input size="large" placeholder="Enter ZIP or PIN" className="rounded-xl" />
                 </Form.Item>
 
