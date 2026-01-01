@@ -275,7 +275,7 @@ const InfluencerCampaigns = () => {
         <div className="flex gap-3 overflow-x-auto whitespace-nowrap scrollbar-hide">
           <button
             onClick={() => handleStatusFilter(null)}
-            className={`px-4 py-2 rounded-lg border flex-shrink-0 ${filters.statusId === null
+            className={`px-4 cursor-pointer py-2 rounded-lg border flex-shrink-0 ${filters.statusId === null
               ? "bg-[#0f122f] text-white"
               : "bg-white text-gray-700"
               }`}
@@ -348,7 +348,7 @@ const InfluencerCampaigns = () => {
                   setTempFilters(filters);
                   setShowFilter(true);
                 }}
-                className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition flex-1 sm:w-auto"
+                className="flex items-center cursor-pointer justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition flex-1 sm:w-auto"
               >
                 Filter
                 <RiEqualizerFill size={16} />
@@ -467,7 +467,7 @@ const InfluencerCampaigns = () => {
                 <Tooltip title="Clear Filters">
                   <button
                     onClick={clearFilters}
-                    className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
+                    className="p-2 cursor-pointer rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
                   >
                     <RiEraserLine size={18} />
                   </button>
@@ -476,7 +476,7 @@ const InfluencerCampaigns = () => {
                 <Tooltip title="Apply Filters">
                   <button
                     onClick={applyFilters}
-                    className="p-2 rounded-full bg-[#141843] text-white hover:bg-[#1d214f] transition"
+                    className="p-2 rounded-full cursor-pointer bg-[#141843] text-white hover:bg-[#1d214f] transition"
                   >
                     <RiFilterLine size={18} />
                   </button>
@@ -485,7 +485,7 @@ const InfluencerCampaigns = () => {
                 <Tooltip title="Close">
                   <button
                     onClick={() => setShowFilter(false)}
-                    className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition"
+                    className="p-2 rounded-full cursor-pointer text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition"
                   >
                     <RiCloseFill size={20} />
                   </button>

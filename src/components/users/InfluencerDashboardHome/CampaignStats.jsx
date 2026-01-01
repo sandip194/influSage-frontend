@@ -25,7 +25,7 @@ const CampaignStats = () => {
           icon: <RiLoopLeftLine className="text-white text-xl" />,
         },
         {
-          label: "Total Campaigns Participated",
+          label: "Total Participated",
           value: data.totalcampaignsparticipated ?? 0,
           icon: <RiGroupLine className="text-white text-xl" />,
         },

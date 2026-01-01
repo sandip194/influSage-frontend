@@ -120,7 +120,7 @@ const ChangePassword = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`bg-[#121A3F] text-white px-8 py-3 rounded-full 
+            className={`bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full 
               ${loading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#0D132D]"}`}
           >
             {loading ? "Saving..." : "Save Changes"}

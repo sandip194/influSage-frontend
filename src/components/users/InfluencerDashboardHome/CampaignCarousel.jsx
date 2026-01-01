@@ -117,7 +117,7 @@ const CampaignCard = ({ campaign }) => {
                 bg-white
                 border border-[#0D132D26]
                 rounded-xl
-                px-2 py-3
+                px-2 py-2
                 flex items-center gap-3
               "
               >

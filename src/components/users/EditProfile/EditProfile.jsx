@@ -112,7 +112,7 @@ const EditProfile = () => {
               <li key={index}>
                 <button
                   onClick={() => setCurrentStep(index)}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition ${currentStep === index
+                  className={`w-full text-left cursor-pointer px-3 py-2 rounded-lg transition ${currentStep === index
                     ? "bg-gray-100 font-medium text-gray-900"
                     : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
                     }`}

@@ -1,200 +1,284 @@
 import React, { useState } from "react";
 import { Tooltip, Skeleton, Empty } from "antd";
-import { RiBookmarkLine, RiBookmarkFill } from "@remixicon/react";
-import { Link } from "react-router-dom";
+import {
+  RiBookmarkLine,
+  RiBookmarkFill,
+  RiCalendar2Line,
+} from "@remixicon/react";
 import ApplyNowModal from "./ApplyNowModal";
 
-/* --- Individual Card (Reusable & Memoized) --- */
+/* --- Individual Card --- */
 const CampaignCard = React.memo(
   ({ campaign, handleCardClick, handleSave, onApply, variant }) => {
     const today = new Date();
     const start =
       variant === "browse" && campaign.applicationstartdate
-        ? new Date(
-          campaign.applicationstartdate.split("-").reverse().join("-")
-        )
+        ? new Date(campaign.applicationstartdate.split("-").reverse().join("-"))
         : null;
-
+        const formatDateDDMMYY = (dateStr) => {
+          if (!dateStr) return "";
+          const [dd, mm, yyyy] = dateStr.split("-");
+          return `${dd}/${mm}/${yyyy}`;
+        };
 
     return (
       <div
         onClick={() => handleCardClick(campaign.id)}
-        className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-transform duration-200 flex flex-col justify-between cursor-pointer relative"
+        className="
+          w-full
+          max-w-full
+          bg-[#335CFF0D]
+          border border-[#335CFF26]
+          rounded-2xl
+          p-4
+          flex flex-col
+          gap-2
+          cursor-pointer
+          hover:shadow-md
+          transition
+          relative
+        "
       >
-        {/* --- Top Section --- */}
-        <div className="flex justify-between items-start mb-3 pb-2">
-          <p className="text-xs text-gray-500 font-medium">
-            {variant === "saved"
-              ? `Created on ${campaign.campaigncreatedate}`
-              : today < start
-                ? `Application Starts On ${campaign.applicationstartdate}`
-                : `Apply Till ${campaign.applicationenddate}`}
-          </p>
-
-
-          {/* Save Button */}
-          <div className="absolute top-3 right-3 z-10">
-            <Tooltip
-              title={
-                campaign.campaigsaved ? "Unsave Campaign" : "Save Campaign"
-              }
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSave(campaign.id);
-                }}
-                className={`flex items-center gap-1 px-2 py-1 border rounded-lg text-sm font-medium transition 
-                ${campaign.campaigsaved
-                    ? "border-gray-300 bg-gray-50 text-gray-800 hover:bg-gray-100"
-                    : "border-gray-200 text-gray-600 bg-gray-200 hover:bg-gray-50"
-                  }`}
-              >
-                {campaign.campaigsaved ? (
-                  <>
-                    <span>Saved</span>
-                    <RiBookmarkFill size={16} className="text-green-600" />
-                  </>
-                ) : (
-                  <>
-                    <span>Save</span>
-                    <RiBookmarkLine size={16} />
-                  </>
-                )}
-              </button>
-            </Tooltip>
-          </div>
-        </div>
-
-        {/* --- Header --- */}
-        <div className="flex items-center gap-3 mb-3">
+        {/* ===== Header ===== */}
+        <div className="flex items-center gap-2">
           <img
-            loading="lazy"
             src={campaign.photopath}
             alt={campaign.name}
             className="w-12 h-12 rounded-full object-cover"
           />
-          <Link
-            to={`/dashboard/browse/description/${campaign.id}`}
-            onClick={(e) => e.stopPropagation()}
-            className="block text-lg font-bold text-gray-900 hover:underline hover:text-blue-900"
-          >
-            {campaign.name}
-          </Link>
-        </div>
 
-        {/* --- Tags --- */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {campaign.providercontenttype?.map((provider, idx) => (
-            <div
-              key={idx}
-              className="flex items-center gap-2 px-2 py-1 bg-gray-50 rounded-full text-xs"
-            >
-              {provider.iconpath && (
-                <img
-                  src={provider.iconpath}
-                  alt={provider.providername}
-                  className="w-5 h-5"
-                />
-              )}
-              <span>
-                {provider.contenttypes
-                  ?.map((ct) => ct.contenttypename)
-                  .filter(Boolean)
-                  .join(", ")}
+          <div className="min-w-0 flex flex-col">
+            {/* Title */}
+            <h3 className="text-base font-semibold text-[#0D132D] truncate">
+              {campaign.name}
+            </h3>
+
+            {/* Date Row */}
+            <div className="flex items-center gap-1 text-xs text-gray-600 mt-1">
+              <RiCalendar2Line size={14} className="shrink-0 text-gray-500" />
+
+              <span className="truncate">
+                {variant === "saved"
+                  ? `Created on ${formatDateDDMMYY(campaign.campaigncreatedate)}`
+                  : today < start
+                  ? `Application Starts On ${formatDateDDMMYY(campaign.applicationstartdate)}`
+                  : `Apply Till: ${formatDateDDMMYY(campaign.applicationenddate)}`}
               </span>
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* --- Description --- */}
-        {campaign.description && (
-          <p
-            className="text-sm mb-4 text-justify h-14"
-            style={{
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
-          >
-            {campaign.description}
-          </p>
-        )}
+        {/* ===== Platform Pills ===== */}
+        <div className="flex gap-1 mt-2 flex-nowrap overflow-visible min-w-0">
+          {campaign.providercontenttype?.slice(0, 2).map((provider, idx) => {
+            const contentNames =
+              provider.contenttypes?.map((ct) => ct.contenttypename) || [];
 
-        {/* --- Categories --- */}
-        <div className="flex flex-wrap gap-1 mb-1">
-          {campaign.campaigncategories?.map((tag, idx) => (
-            <span
-              key={idx}
-              className="px-3 py-1 bg-gray-50 text-gray-900 rounded-lg text-xs font-semibold"
-            >
-              {tag.categoryname}
-            </span>
-          ))}
-        </div>
+            const isSinglePill = campaign.providercontenttype.length === 1;
 
-        {/* --- Applied Count --- */}
-        {campaign.appliedinfluencercount > 0 && (
-          <div className="mb-1">
-            <span className="px-3 py-1 bg-gray-200 w-44 rounded-full text-xs font-semibold flex items-center gap-2">
-              <span className="w-5 h-5 bg-[#004eff30] text-gray-900 rounded-full flex items-center justify-center text-xs">
-                {campaign.appliedinfluencercount}
+            const visibleContents = isSinglePill
+              ? contentNames
+              : contentNames.slice(0, 2);
+
+            const remainingCount = contentNames.length - visibleContents.length;
+
+            return (
+              <span
+                key={idx}
+                className="
+                  flex items-center gap-1
+                  px-2 py-[3px]
+                  border border-[#0D132D26]
+                  rounded-full
+                  text-xs font-medium
+                  whitespace-nowrap
+                  overflow-hidden
+                  text-ellipsis
+                  min-w-0
+                  flex-shrink
+                  max-w-full
+                "
+                title={contentNames.join(", ")}
+              >
+                {provider.iconpath && (
+                  <img
+                    src={provider.iconpath}
+                    alt={provider.providername}
+                    className="w-4 h-4 shrink-0"
+                  />
+                )}
+
+                <span className="overflow-hidden text-ellipsis min-w-0">
+                  {visibleContents.join(", ")}
+                  {!isSinglePill && remainingCount > 0 && " …"}
+                </span>
               </span>
-              {campaign.appliedinfluencercount === 1
-                ? "influencer applied"
-                : "influencers applied"}
+            );
+          })}
+
+          {campaign.providercontenttype?.length > 2 && (
+            <span
+              className="
+                flex items-center
+                px-2 py-[3px]
+                rounded-full
+                text-xs font-medium
+                border border-[#0D132D26]
+                bg-gray-300
+                whitespace-nowrap
+                flex-shrink-0
+              "
+              title={campaign.providercontenttype
+                .slice(2)
+                .map((p) => p.providername)
+                .join(", ")}
+            >
+              +{campaign.providercontenttype.length - 2}
             </span>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* --- Footer --- */}
-        <div className="mt-auto flex justify-between items-center border-t border-black pt-4">
-          <div>
-            <p className="text-lg font-bold">
-              ₹{campaign.estimatedbudget.toLocaleString()}
-            </p>
-            <p className="text-xs text-gray-500">Estimated Budget</p>
+        {/* ===== Description ===== */}
+        <p className="text-xs text-gray-500 line-clamp-2 leading-snug min-h-[32px] mt-2">
+          {campaign.description || ""}
+        </p>
+
+        {/* ===== Categories ===== */}
+        <div className="flex flex-wrap gap-2 overflow-hidden mt-2">
+          {campaign.campaigncategories?.slice(0, 2).map((cat, i) => (
+            <span
+              key={i}
+              className="
+                  px-2 py-1
+                  rounded-full
+                  text-xs font-medium
+                  border border-[#0D132D26]
+                  whitespace-nowrap
+                "
+            >
+              {cat.categoryname}
+            </span>
+          ))}
+
+          {campaign.campaigncategories?.length > 2 && (
+            <span
+              className="
+                  px-2 py-1
+                  rounded-full
+                  text-xs font-medium
+                  border border-[#0D132D26] bg-gray-300
+                  whitespace-nowrap
+                "
+            >
+              +{campaign.campaigncategories.length - 2}
+            </span>
+          )}
+        </div>
+        <div className="mt-auto">
+          <hr className="my-3 border-[#0D132D1A] mt-2" />
+
+          <div className="min-h-[28px] mb-2">
+            {campaign.appliedinfluencercount > 0 && (
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <span className="w-5 h-5 rounded-full text-white bg-black flex items-center justify-center text-xs font-medium">
+                  {campaign.appliedinfluencercount}
+                </span>
+                Influencer Applied
+              </div>
+            )}
+          </div>
+          <div className="min-h-[44px] mb-3">
+            {campaign.estimatedbudget && (
+              <div
+                className="
+                  bg-white
+                  border border-[#0D132D26]
+                  rounded-xl
+                  px-3 py-2
+                  flex items-center
+                "
+              >
+                <span className="text-xs text-gray-400 mr-1">
+                  Estimated Budget:
+                </span>
+                <span className="text-sm font-semibold text-[#0D132D]">
+                  ₹ {campaign.estimatedbudget.toLocaleString("en-IN")}
+                </span>
+              </div>
+            )}
           </div>
 
-          {variant === "saved" ? (
-            campaign.isapplied ? (
-              <button disabled className="px-5 py-2 bg-gray-400 text-white rounded-full">
-                Applied
-              </button>
+          {/* ===== Actions ===== */}
+          <div className="flex items-center gap-2">
+            {/* Apply Button */}
+            {variant === "saved" ? (
+              campaign.isapplied ? (
+                <button
+                  disabled
+                  className="flex-1 py-2 rounded-full text-sm font-semibold bg-gray-400 text-white"
+                >
+                  Applied
+                </button>
+              ) : campaign.campaignapplied ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onApply(campaign.id);
+                  }}
+                  className="flex-1 py-2 rounded-full text-sm font-semibold bg-black text-white"
+                >
+                  Apply Now
+                </button>
+              ) : (
+                <button
+                  disabled
+                  className="flex-1 py-2 rounded-full text-sm font-semibold bg-gray-400 text-white"
+                >
+                  Not Apply
+                </button>
+              )
             ) : campaign.campaignapplied ? (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onApply(campaign.id);
                 }}
-                className="px-5 py-2 bg-black text-white rounded-full"
+                className="flex-1 py-2 rounded-full text-sm font-semibold bg-black text-white"
               >
                 Apply Now
               </button>
             ) : (
-              <button disabled className="px-5 py-2 bg-gray-400 text-white rounded-full">
-                Not Apply
-              </button>
-            )
-          ) : (
-            campaign.campaignapplied ? (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onApply(campaign.id);
-                }}
-                className="px-5 py-2 bg-black text-white rounded-full"
+                disabled
+                className="flex-1 py-2 rounded-full text-sm font-semibold bg-gray-400 text-white"
               >
-                Apply now
+                Apply Now
               </button>
-            ) : (
-              <button disabled className="px-5 py-2 bg-gray-400 text-white rounded-full">
-                Apply now
-              </button>
-            )
-          )}
+            )}
 
+            {/* Save Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSave(campaign.id);
+              }}
+              className="
+                w-9 h-9
+                shrink-0
+                rounded-full
+                bg-white
+                border border-[#0D132D26]
+                flex items-center justify-center
+                hover:bg-gray-50
+              "
+            >
+              {campaign.campaigsaved ? (
+                <RiBookmarkFill size={18} className="text-[#0D132D]" />
+              ) : (
+                <RiBookmarkLine size={18} className="text-gray-600" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -214,7 +298,7 @@ const CampaignCardGrid = React.memo(
 
     return (
       <>
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {loading ? (
             Array.from({ length: 6 }).map((_, idx) => (
               <div
@@ -254,14 +338,6 @@ const CampaignCardGrid = React.memo(
 );
 
 export default CampaignCardGrid;
-
-
-
-
-
-
-
-
 
 // import React from "react";
 // import { Tooltip, Skeleton, Empty } from "antd";
@@ -428,9 +504,6 @@ export default CampaignCardGrid;
 // };
 
 // export default CampaignCardGrid;
-
-
-
 
 // import React from "react";
 // import { Tooltip, Skeleton, Empty } from "antd";

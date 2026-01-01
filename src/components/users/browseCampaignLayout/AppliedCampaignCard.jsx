@@ -1,7 +1,19 @@
 import React from "react";
 import { Tooltip, Skeleton, Empty } from "antd";
 import { Link } from "react-router-dom";
-import { RiDeleteBinLine } from "@remixicon/react";
+import {
+  RiDeleteBinLine,
+  RiCalendar2Line,
+} from "@remixicon/react";
+
+const formatDateDDMMYYYY = (dateStr) => {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d)) return "";
+  return `${String(d.getDate()).padStart(2, "0")}/${String(
+    d.getMonth() + 1
+  ).padStart(2, "0")}/${d.getFullYear()}`;
+};
 
 const AppliedCampaignCard = ({
   campaigns,
@@ -13,12 +25,14 @@ const AppliedCampaignCard = ({
   openEditModal,
 }) => {
   return (
-    <div className="grid gap-6 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {loading ? (
         Array.from({ length: 6 }).map((_, idx) => (
-          <div key={idx} className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm">
-            <Skeleton.Avatar active size="large" shape="circle" className="mb-4" />
-            <Skeleton active paragraph={{ rows: 3 }} title={{ width: "70%" }} />
+          <div
+            key={idx}
+            className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm"
+          >
+            <Skeleton active avatar paragraph={{ rows: 3 }} />
           </div>
         ))
       ) : campaigns.length === 0 ? (
@@ -30,84 +44,131 @@ const AppliedCampaignCard = ({
           <div
             key={campaign.id}
             onClick={() => handleCardClick(campaign.id)}
-            className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-lg transition-all duration-300 flex flex-col justify-between cursor-pointer relative"
+            className="
+              w-full
+              rounded-2xl
+              bg-[#335CFF0D]
+              border border-[#335CFF26]
+              hover:shadow-md
+              transition
+              flex flex-col
+              cursor-pointer
+              relative
+            "
           >
-            {/* Top Bar */}
-            <div className="flex justify-between items-start mb-3 pb-1">
-              <p className="text-xs text-gray-500">
-                Applied on {new Date(campaign.createddate).toLocaleDateString()}
-              </p>
+            {/* Withdraw */}
+            {campaign.canwithdraw && (
+              <div className="absolute top-3 right-3 z-10">
+                <Tooltip title="Withdraw Application">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedApplicationId(
+                        campaign.campaignapplicationid
+                      );
+                      setWithdrawModalOpen(true);
+                    }}
+                    className="
+                      w-9 h-9
+                      rounded-full
+                      border border-red-300
+                      flex items-center justify-center
+                      text-red-500
+                      hover:bg-red-50
+                    "
+                  >
+                    <RiDeleteBinLine size={16} />
+                  </button>
+                </Tooltip>
+              </div>
+            )}
 
-              {campaign.canwithdraw === true && (
-                <div className="absolute top-3 right-3 z-10">
-                  <Tooltip title="Withdraw Application">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedApplicationId(campaign.campaignapplicationid);
-                        setWithdrawModalOpen(true);
-                      }}
-                      className="flex items-center gap-1 px-2 py-1 border border-red-300 bg-white text-red-600 rounded-lg text-sm hover:bg-red-50 hover:border-red-500"
-                    >
-                      <span>Withdraw</span>
-                      <RiDeleteBinLine size={16} className="text-red-500" />
-                    </button>
-                  </Tooltip>
+            {/* Content */}
+            <div className="p-4 flex flex-col gap-3 flex-1">
+              {/* Header */}
+              <div className="flex items-center gap-3">
+                <img
+                  src={campaign.photopath}
+                  alt={campaign.name}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+
+                <div className="min-w-0">
+                  <Link
+                    to={`/dashboard/browse/applied-campaign-details/${campaign.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-sm font-semibold text-[#0D132D] truncate block"
+                  >
+                    {campaign.name}
+                  </Link>
+
+                  <div className="flex items-center gap-1 text-xs text-gray-600 mt-0.5">
+                    <RiCalendar2Line size={14} className="text-gray-500" />
+                    <span>
+                      Applied on{" "}
+                      {formatDateDDMMYYYY(campaign.createddate)}
+                    </span>
+                  </div>
                 </div>
-              )}
-
-            </div>
-
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-3">
-              <img src={campaign.photopath} className="w-12 h-12 rounded-full object-cover border border-gray-300" />
-              <Link
-                to={`/dashboard/browse/applied-campaign-details/${campaign.id}`}
-                onClick={(e) => e.stopPropagation()}
-                className="text-base font-bold hover:underline text-gray-900"
-              >
-                {campaign.name}
-              </Link>
-            </div>
-
-            {/* Description */}
-            <p
-              className="text-gray-700 text-sm mb-4 text-justify overflow-hidden"
-              style={{
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-              }}
-            >
-              {campaign.description}
-            </p>
-
-            {/* Bottom Section */}
-            <div className="mt-auto border-t border-black pt-4 flex justify-between items-center">
-              <div>
-                <p className="text-sm font-semibold text-gray-900">
-                  ₹{campaign.estimatedbudget}
-                </p>
-                <p className="text-xs text-gray-500">Estimated Budget</p>
               </div>
 
-              {campaign.iseditable ? (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedApplicationId(campaign.campaignapplicationid);
-                    setSelectedCampaignId(campaign.id);  // Add this
-                    openEditModal();
-                  }}
-                  className="px-5 py-2 text-sm bg-black text-white rounded-full font-semibold hover:bg-gray-900"
-                >
-                  Edit Application
-                </button>
-              ) : (
-                <button className="px-5 py-2 text-sm bg-gray-400 text-white rounded-full" disabled>
-                  Edit Application
-                </button>
-              )}
+              {/* Description */}
+              <p className="text-xs text-gray-600 line-clamp-2">
+                {campaign.description}
+              </p>
+
+              {/* Budget */}
+              <div className="border border-[#0D132D26] bg-white rounded-xl px-3 py-2 text-xs">
+                <span className="text-gray-500">
+                  Estimated Budget:{" "}
+                </span>
+                <span className="font-semibold text-black">
+                  ₹ {campaign.estimatedbudget}
+                </span>
+              </div>
+
+              {/* Footer */}
+              <div className="mt-auto flex items-center gap-2 pt-2">
+                {campaign.iseditable ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedApplicationId(
+                        campaign.campaignapplicationid
+                      );
+                      setSelectedCampaignId(campaign.id);
+                      openEditModal();
+                    }}
+                    className="
+                      flex-1
+                      bg-black
+                      text-white
+                      rounded-full
+                      py-2
+                      text-sm
+                      font-semibold
+                      hover:bg-gray-900
+                    "
+                  >
+                    Edit Application
+                  </button>
+                ) : (
+                  <button
+                    disabled
+                    className="
+                      flex-1
+                      bg-gray-300
+                      text-white
+                      rounded-full
+                      py-2
+                      text-sm
+                      font-semibold
+                    "
+                  >
+                    Edit Application
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))

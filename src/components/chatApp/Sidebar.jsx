@@ -76,7 +76,7 @@ const hasUnreadMessage = (vendor) => {
           <Tooltip title="Search Campaign">
             <button
               onClick={() => navigate("/dashboard/browse")}
-              className="w-10 h-10 bg-[#0D132D] text-white rounded-full text-xl flex items-center justify-center hover:bg-[#1a1f3f] transition"
+              className="w-10 cursor-pointer h-10 cursor-pointer bg-[#0D132D] text-white rounded-full text-xl flex items-center justify-center hover:bg-[#1a1f3f] transition"
             >
               <RiAddLine />
             </button>

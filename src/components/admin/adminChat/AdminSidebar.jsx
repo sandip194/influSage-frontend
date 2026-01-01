@@ -209,7 +209,7 @@ useEffect(() => {
               setActiveTab(tab.name);
               setTicketModalData(null);
             }}
-          className={`px-4 py-2 rounded-full text-sm border transition ${
+          className={`px-4 py-2 cursor-pointer rounded-full text-sm border transition ${
             activeTab === tab.name
               ? "bg-[#0D132D] text-white border-[#0D132D]"
               : "bg-white text-gray-600 border-gray-300"

@@ -220,7 +220,7 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
       {activeTab === "Open" && (
         <button
           onClick={() => setOpenModal(true)}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-[#0D132D] hover:bg-[#1A234B] text-white"
+          className="w-9 h-9 cursor-pointer flex items-center justify-center rounded-full bg-[#0D132D] hover:bg-[#1A234B] text-white"
         >
           <RiAddLine size={22} />
         </button>
@@ -235,7 +235,7 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
         <button
           key={tab.id}
           onClick={() => handleTabChange(tab)}
-          className={`px-4 py-2 rounded-full text-sm border transition ${
+          className={`px-4 cursor-pointer py-2 rounded-full text-sm border transition ${
             activeTab === tab.name
               ? "bg-[#0D132D] text-white border-[#0D132D]"
               : "bg-white text-gray-600 border-gray-300"
