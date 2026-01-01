@@ -179,9 +179,13 @@ const CampaignWizard = () => {
   // ---------------------------
   // BACK Navigation
   // ---------------------------
-  const goBack = (prevIndex) => {
+  const goBack = async (prevIndex) => {
+     
+    getCampaignData()
+
     setCurrentStep(prevIndex);
   };
+
 
 
 

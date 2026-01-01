@@ -267,7 +267,10 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const modalContent = useMemo(
     () =>
       dropdownNotifications.length === 0 ? (
-        <Empty description="No Notifications" />
+        <Empty
+          description="No Notifications"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
       ) : (
         <List
           dataSource={dropdownNotifications}

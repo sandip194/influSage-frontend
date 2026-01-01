@@ -225,8 +225,11 @@ const ViewAllOffers = ({ campaignData }) => {
             )
               : applications.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-10">
-                    <Empty description="No Applications found." />
+                  <td colSpan="5" className="text-center py-4">
+                    <Empty
+                      description="No Applications found."
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    />
                   </td>
                 </tr>
               ) : (
@@ -332,7 +335,7 @@ const ViewAllOffers = ({ campaignData }) => {
           setSelectedOfferId(null);
         }}
         onStatusChange={refreshApplications}
-         hasSelectedApplication={hasSelectedApplication} 
+        hasSelectedApplication={hasSelectedApplication}
       />
 
     </div>

@@ -8,7 +8,7 @@ import {
   RiYoutubeFill,
   RiStarLine,
 } from '@remixicon/react';
-import { Modal, Input, Tabs, DatePicker, Skeleton, ConfigProvider } from 'antd';
+import { Modal, Input, Tabs, DatePicker, Skeleton, ConfigProvider, Empty } from 'antd';
 import VendorCampaignOverview from './VendorCampaignOverview';
 import VendorActivity from './VendorActivity';
 import VendorMessage from './VendorMessage';
@@ -29,6 +29,21 @@ import VendorContentLinksTab from './VendorContentLinksTab';
 import FeedbackForm from "./FeedbackForm";
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
+
+
+const formatFollowers = (num) => {
+  if (!num) return "0";
+
+  if (num >= 1_000_000) {
+    return `${(num / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  }
+
+  if (num >= 1_000) {
+    return `${(num / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
+  }
+
+  return num.toString();
+};
 
 
 const CampaignDetails = () => {
@@ -224,37 +239,37 @@ const CampaignDetails = () => {
 
 
   const handleSaveDates = async () => {
-  if (!validateDates()) return;
+    if (!validateDates()) return;
 
-  const payload = {
-    campaignId: Number(campaignId),
-    isFinalSubmit: true,
-    p_campaignjson: {
-      campaignstartdate: formData.startDate?.format("DD-MM-YYYY"),
-      campaignenddate: formData.endDate?.format("DD-MM-YYYY"),
+    const payload = {
+      campaignId: Number(campaignId),
+      isFinalSubmit: true,
+      p_campaignjson: {
+        campaignstartdate: formData.startDate?.format("DD-MM-YYYY"),
+        campaignenddate: formData.endDate?.format("DD-MM-YYYY"),
+      }
+    };
+
+    try {
+      setLoading(true);
+      const res = await axios.post(`/vendor/update-campaign`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data?.status) {
+        toast.success("Campaign dates updated successfully!");
+        setIsDateModalOpen(false);
+        getCampaignDetails();
+      } else {
+        toast.error(res.data?.message || "Update failed");
+      }
+    } catch (err) {
+      console.error("API Error:", err);
+      toast.error("Failed to update dates");
+    } finally {
+      setLoading(false);
     }
   };
-
-  try {
-    setLoading(true);
-    const res = await axios.post(`/vendor/update-campaign`, payload, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (res.data?.status) {
-      toast.success("Campaign dates updated successfully!");
-      setIsDateModalOpen(false);
-      getCampaignDetails();
-    } else {
-      toast.error(res.data?.message || "Update failed");
-    }
-  } catch (err) {
-    console.error("API Error:", err);
-    toast.error("Failed to update dates");
-  } finally {
-    setLoading(false);
-  }
-};
 
 
   if (loading || redirecting) {
@@ -359,7 +374,7 @@ const CampaignDetails = () => {
       {/* Back */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-gray-600 mb-2"
+        className="flex items-center cursor-pointer gap-2 text-gray-600 mb-2"
       >
         <RiArrowLeftLine /> Back
       </button>
@@ -378,30 +393,30 @@ const CampaignDetails = () => {
               {/* Left Section */}
               <div className="flex items-start gap-4">
                 <img
-                    src={campaignDetails?.photopath}
-                    alt="Profile"
-                    onClick={() => setIsPreviewOpen(true)}
-                    className="w-16 h-16 rounded-full object-cover cursor-pointer hover:opacity-90 transition"
-                  />
-                  {isPreviewOpen && (
-                    <div
-                      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                  src={campaignDetails?.photopath}
+                  alt="Profile"
+                  onClick={() => setIsPreviewOpen(true)}
+                  className="w-16 h-16 rounded-full object-cover cursor-pointer hover:opacity-90 transition"
+                />
+                {isPreviewOpen && (
+                  <div
+                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                    onClick={() => setIsPreviewOpen(false)}
+                  >
+                    <button
                       onClick={() => setIsPreviewOpen(false)}
+                      className="absolute cursor-pointer top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
                     >
-                      <button
-                        onClick={() => setIsPreviewOpen(false)}
-                        className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                      >
-                        ×
-                      </button>
-                      <img
-                        src={campaignDetails?.photopath}
-                        alt="Preview"
-                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-                  )}
+                      ×
+                    </button>
+                    <img
+                      src={campaignDetails?.photopath}
+                      alt="Preview"
+                      className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                )}
 
                 <div>
                   <h2 className="font-semibold text-lg text-gray-900">
@@ -419,7 +434,7 @@ const CampaignDetails = () => {
                 {campaignDetails?.iseditable !== "Not editable" && (
                   <button
                     onClick={handleEditClick}
-                    className="bg-[#0f122f] text-white px-6 py-2 rounded-full border border-[#0f122f] font-semibold hover:bg-[#1a1d4f] transition w-full sm:w-auto"
+                    className="bg-[#0f122f] cursor-pointer text-white px-6 py-2 rounded-full border border-[#0f122f] font-semibold hover:bg-[#1a1d4f] transition w-full sm:w-auto"
                   >
                     Edit Campaign
                   </button>
@@ -431,7 +446,7 @@ const CampaignDetails = () => {
                   className={`px-6 py-2 rounded-full border font-semibold transition w-full sm:w-auto
           ${campaignDetails?.iseditable === "Not editable"
                       ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
-                      : "border-red-400 text-red-900 hover:bg-gray-50"
+                      : "border-red-400 cursor-pointer text-red-900 hover:bg-gray-50"
                     }`}
                 >
                   Cancel Campaign
@@ -584,7 +599,7 @@ const CampaignDetails = () => {
             [&>*]:w-full">
           {/* Campaign Info Card */}
           <div className="bg-white p-4 rounded-2xl">
-            <h3 className="font-semibold text-lg">Campaign Details</h3>
+            <h3 className="text-xl font-bold">Campaign Details</h3>
 
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Campaign Number</p>
@@ -624,27 +639,41 @@ const CampaignDetails = () => {
                     key={platform.providerid}
                     className="pb-3 border-b border-gray-100 last:border-0"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-start justify-between gap-3">
 
-                      <span className="text-gray-800 font-medium">
-                        {platform.providername}
-                      </span>
+                      {/* Left: Icon + Platform Name */}
+                      <div className="flex items-center gap-2">
+                        {platform.iconpath && (
+                          <img
+                            src={platform.iconpath}
+                            alt={platform.providername}
+                            className="w-5 h-5 object-contain shrink-0"
+                          />
+                        )}
 
-                      <span className="text-gray-500 text-sm">
+                        <span className="text-gray-800 font-medium">
+                          {platform.providername}
+                        </span>
+                      </div>
+
+                      {/* Right: Content Types */}
+                      <span className="text-gray-500 text-sm text-right">
                         {platform.contenttypes
                           ?.map((c) => c.contenttypename)
                           ?.join(", ")}
                       </span>
                     </div>
 
+                    {/* Caption */}
                     {platform.caption && (
-                      <p className="text-gray-600 italic text-xs border-l-2 border-gray-200 pl-3">
+                      <p className="mt-2 text-gray-600 italic text-xs border-l-2 border-gray-200 pl-3">
                         {platform.caption}
                       </p>
                     )}
                   </div>
                 ))}
               </div>
+
             </div>
 
 
@@ -680,7 +709,8 @@ const CampaignDetails = () => {
                               alt={provider.providername}
                               className="w-4 h-4"
                             />
-                            <span>{provider.nooffollowers.toLocaleString()}</span>
+                            <span>{formatFollowers(provider.nooffollowers)}</span>
+
                           </div>
                         ))}
                       </div>
@@ -695,7 +725,11 @@ const CampaignDetails = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500">No influencers found.</p>
+                <Empty
+                  description="No influencers found"
+                  className="py-0"
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                />
               )}
             </div>
 

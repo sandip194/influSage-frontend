@@ -87,29 +87,34 @@ const EngagementCard = ({ campaignId }) => {
 
   return (
     <div className="relative w-full rounded-2xl overflow-hidden bg-white p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+        <h2 className="text-xl font-bold text-gray-900">
           {campaignId ? "Campaign Engagement" : "Engagement Score"}
         </h2>
-        <Select
-          value={sortBy}
-          onChange={setSortBy}
-          size="middle"
-          style={{ width: 100 }}
-          className="bg-white text-black rounded"
-        >
-          <Option value="year">Year</Option>
-          <Option value="month">Month</Option>
-          <Option value="week">Week</Option>
-        </Select>
+
+        <div className="flex justify-end w-full sm:w-auto">
+          <Select
+            value={sortBy}
+            onChange={setSortBy}
+            size="middle"
+            style={{ width: 100 }}
+            className="bg-white text-black rounded"
+          >
+            <Option value="year">Year</Option>
+            <Option value="month">Month</Option>
+            <Option value="week">Week</Option>
+          </Select>
+        </div>
+
       </div>
+
 
       {loading ? (
         <Skeleton active paragraph={{ rows: 2 }} />
       ) : (
         <div className="flex flex-col items-center justify-center py-1">
           <div className="relative w-24 h-24 flex items-center justify-center rounded-full bg-green-100">
-           
+
             <p className="text-2xl text-green-900 font-bold z-10">{formatNumber(animatedScore)}</p>
           </div>
           <p className="mt-2 text-sm opacity-90">Total Engagement Score</p>

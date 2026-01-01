@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import {
@@ -7,7 +7,7 @@ import {
   RiEraserLine, RiFilterLine,
 } from "@remixicon/react";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
-import { Input, Pagination, Empty, Skeleton, Tooltip } from "antd";
+import { Input, Pagination, Empty, Skeleton, Tooltip, Checkbox } from "antd";
 import { toast } from "react-toastify";
 import { useNavigate, useLocation } from "react-router-dom";
 import InviteModal from "./InviteModal";
@@ -61,6 +61,14 @@ const BrowseInfluencersLayout = () => {
   const { token, userId } = useSelector(state => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+  const handleAntCheckboxChange = (category, checkedValues) => {
+    setDraftFilters(prev => ({
+      ...prev,
+      [category]: checkedValues,
+    }));
+  };
+
+
   const getAllInfluencers = async () => {
     const params = {
       p_userid: userId,
@@ -101,7 +109,7 @@ const BrowseInfluencersLayout = () => {
   };
 
   const handleLike = async (influencerId) => {
-    
+
     try {
       const response = await axios.post(
         "/vendor/addfavourite/influencer",
@@ -179,15 +187,15 @@ const BrowseInfluencersLayout = () => {
     }
   };
 
-  const handleCheckboxChange = useCallback((category, id) => {
-    setDraftFilters(prev => {
-      const updated = prev[category].includes(id)
-        ? prev[category].filter(v => v !== id)
-        : [...prev[category], id];
+  // const handleCheckboxChange = useCallback((category, id) => {
+  //   setDraftFilters(prev => {
+  //     const updated = prev[category].includes(id)
+  //       ? prev[category].filter(v => v !== id)
+  //       : [...prev[category], id];
 
-      return { ...prev, [category]: updated };
-    });
-  }, []);
+  //     return { ...prev, [category]: updated };
+  //   });
+  // }, []);
 
 
   useEffect(() => {
@@ -204,19 +212,19 @@ const BrowseInfluencersLayout = () => {
     searchTerm,
   ]);
 
-useEffect(() => {
-  getAllInfluencers();
-}, [location.pathname]);
+  useEffect(() => {
+    getAllInfluencers();
+  }, [location.pathname]);
 
   // for invite
   const handleInvite = (influencerId) => {
-    
+
     setSelectedInfluencer(influencerId);
     setIsInviteModalVisible(true);
   };
 
   return (
-        <div className="w-full text-sm pb-24 sm:pb-0">
+    <div className="w-full text-sm pb-24 sm:pb-0">
 
       {/* Header */}
       <div className="header mb-4">
@@ -238,7 +246,7 @@ useEffect(() => {
                 setActiveTab(id);
                 navigate(path);
               }}
-              className={`px-3 sm:px-4 py-2 rounded-lg border transition font-medium
+              className={`px-3 sm:px-4 py-2 rounded-lg cursor-pointer border transition font-medium
                 ${activeTab === id
                   ? "bg-[#141843] text-white border-[#141843]"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
@@ -299,30 +307,30 @@ useEffect(() => {
             }
           />
 
-         {/* Desktop view */}
-        <div className="hidden sm:flex gap-2 w-full sm:w-auto justify-end">
-          <button
-            type="button"
-            onClick={() => setShowFilter(true)}
-            className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white hover:bg-gray-100"
-          >
-            Filter
-            <RiEqualizerFill size={16} />
-          </button>
-        </div>
-
-        {/* Mobile view: fixed at bottom */}
-        {!showFilter && (
-          <div className="sm:hidden fixed bottom-0 left-0 w-full z-30 bg-white p-3 flex justify-end shadow-md">
+          {/* Desktop view */}
+          <div className="hidden sm:flex gap-2 w-full sm:w-auto justify-end">
             <button
+              type="button"
               onClick={() => setShowFilter(true)}
-              className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white hover:bg-gray-100 w-full max-w-xs mx-auto"
+              className="flex items-center cursor-pointer justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white hover:bg-gray-100"
             >
               Filter
               <RiEqualizerFill size={16} />
             </button>
           </div>
-        )}
+
+          {/* Mobile view: fixed at bottom */}
+          {!showFilter && (
+            <div className="sm:hidden fixed bottom-0 left-0 w-full z-30 bg-white p-3 flex justify-end shadow-md">
+              <button
+                onClick={() => setShowFilter(true)}
+                className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white hover:bg-gray-100 w-full max-w-xs mx-auto"
+              >
+                Filter
+                <RiEqualizerFill size={16} />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Influencers List */}
@@ -398,7 +406,7 @@ useEffect(() => {
                       setFilters(cleared);
                       setShowFilter(false);
                     }}
-                    className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
+                    className="p-2 rounded-full cursor-pointer bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
                   >
                     <RiEraserLine size={18} />
                   </button>
@@ -410,7 +418,7 @@ useEffect(() => {
                       setFilters(draftFilters);
                       setShowFilter(false);
                     }}
-                    className="p-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
+                    className="p-2 rounded-full cursor-pointer bg-[#0f122f] text-white hover:bg-[#23265a] transition"
                   >
                     <RiFilterLine size={18} />
                   </button>
@@ -419,7 +427,7 @@ useEffect(() => {
                 <Tooltip title="Close">
                   <button
                     onClick={() => setShowFilter(false)}
-                    className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition"
+                    className="p-2 rounded-full cursor-pointer text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition"
                   >
                     <RiCloseFill size={20} />
                   </button>
@@ -442,77 +450,74 @@ useEffect(() => {
 
             <div>
               <h4 className="font-semibold mb-2">Platforms</h4>
-              {platforms?.map((platform) => (
-                <label key={platform.id} className="flex items-center mb-2">
-                  <input
-                    type="checkbox"
-                    className="mr-2"
-                    checked={draftFilters.providers.includes(platform.id)}
-                    onChange={() =>
-                      handleCheckboxChange("providers", platform.id)
-                    }
-                  />
-                  <span className="text-sm">{platform.name}</span>
-                </label>
-              ))}
+              <Checkbox.Group
+                className="flex flex-col gap-2"
+                value={draftFilters.providers}
+                onChange={(values) => handleAntCheckboxChange("providers", values)}
+              >
+                {platforms?.map(platform => (
+                  <Checkbox key={platform.id} value={platform.id}>
+                    {platform.name}
+                  </Checkbox>
+                ))}
+              </Checkbox.Group>
             </div>
 
             <hr className="my-4 border-gray-200" />
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Followers</h4>
-              {contentTypes?.map((type) => (
-                <label key={type.id} className="flex items-center mb-2">
-                  <input
-                    type="checkbox"
-                    className="mr-2"
-                    checked={draftFilters.influencertiers?.includes(type.id)}
-                    onChange={() =>
-                      handleCheckboxChange("influencertiers", type.id)
-                    }
-                  />
-                  <span className="text-sm">
+              <Checkbox.Group
+                className="flex flex-col gap-2"
+                value={draftFilters.influencertiers}
+                onChange={(values) => handleAntCheckboxChange("influencertiers", values)}
+              >
+                {contentTypes?.map(type => (
+                  <Checkbox key={type.id} value={type.id}>
                     {type.name}{" "}
-                    <span>
+                    <span className="text-gray-400 text-xs">
                       (
                       {type.maxfollowers
-                        ? `${type.minfollowers} - ${type.maxfollowers} followers`
-                        : `Over ${type.minfollowers} followers`}
+                        ? `${type.minfollowers} - ${type.maxfollowers}`
+                        : `Over ${type.minfollowers}`} followers
                       )
                     </span>
-                  </span>
-                </label>
-              ))}
+                  </Checkbox>
+                ))}
+              </Checkbox.Group>
+
             </div>
 
             <hr className="my-4 border-gray-200" />
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Languages</h4>
-              {languages?.map((lang) => (
-                <label key={lang.id} className="flex items-center mb-2">
-                  <input
-                    type="checkbox"
-                    className="mr-2"
-                    checked={draftFilters.languages.includes(lang.id)}
-                    onChange={() => handleCheckboxChange("languages", lang.id)}
-                  />
-                  <span className="text-sm">{lang.name}</span>
-                </label>
-              ))}
+              <Checkbox.Group
+                className="flex flex-col gap-2"
+                value={draftFilters.languages}
+                onChange={(values) => handleAntCheckboxChange("languages", values)}
+              >
+                {languages?.map(lang => (
+                  <Checkbox key={lang.id} value={lang.id}>
+                    {lang.name}
+                  </Checkbox>
+                ))}
+              </Checkbox.Group>
+
             </div>
             <hr className="my-4 border-gray-200" />
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Gender</h4>
-              {genderOptions?.map((g) => (
-                <label key={g.id} className="flex items-center mb-2">
-                  <input
-                    type="checkbox"
-                    className="mr-2"
-                    checked={draftFilters.gender.includes(g.id)}
-                    onChange={() => handleCheckboxChange("gender", g.id)}
-                  />
-                  <span className="text-sm">{g.name}</span>
-                </label>
-              ))}
+              <Checkbox.Group
+                className="flex flex-col gap-2"
+                value={draftFilters.gender}
+                onChange={(values) => handleAntCheckboxChange("gender", values)}
+              >
+                {genderOptions?.map(g => (
+                  <Checkbox key={g.id} value={g.id}>
+                    {g.name}
+                  </Checkbox>
+                ))}
+              </Checkbox.Group>
+
             </div>
             <hr className="my-4 border-gray-200" />
           </div>

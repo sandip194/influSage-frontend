@@ -119,16 +119,19 @@ const ImpressionInsights = () => {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Impression Insights</h2>
-        <Select value={sortBy} onChange={setSortBy} size="middle" style={{ width: 120 }}>
-          <Option value="year">Year</Option>
-          <Option value="month">Month</Option>
-          <Option value="week">Week</Option>
-        </Select>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+        <h2 className="text-xl font-bold text-gray-900 ">Impression Insights</h2>
+        <div className="flex justify-end w-full sm:w-auto">
+          <Select value={sortBy} onChange={setSortBy} size="middle" style={{ width: 120 }}>
+            <Option value="year">Year</Option>
+            <Option value="month">Month</Option>
+            <Option value="week">Week</Option>
+          </Select>
+        </div>
+
       </div>
 
-      <div className="relative w-full h-48 md:h-64 flex flex-col items-center justify-center">
+      <div className="relative w-full h-48 md:h-64 flex flex-col items-center justify-center py-4 mt-4">
         {loading ? (
           <Spin size="large" />
         ) : (

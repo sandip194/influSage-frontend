@@ -18,7 +18,9 @@ import {
   RiTranslate,
   RiCloseLine,
   RiCheckLine,
+  RiCalendarLine 
 } from "react-icons/ri";
+
 
 const CampaignReviewStep = ({ onEdit }) => {
   const { token, userId } = useSelector((state) => state.auth) || {};
@@ -110,10 +112,7 @@ const CampaignReviewStep = ({ onEdit }) => {
   const p_campaignfilejson = campaignData?.p_campaignfilejson || [];
   const p_contenttypejson = campaignData?.p_contenttypejson || [];
 
-  const platforms =
-    p_contenttypejson.flatMap((p) =>
-      p.contenttypes?.map((ct) => `${p.providername} - ${ct.contenttypename}`)
-    ) || [];
+ 
 
   const languages =
     p_vendorinfojson.campaignlanguages?.map((l) => l.languagename) || [];
@@ -190,7 +189,7 @@ const CampaignReviewStep = ({ onEdit }) => {
           {/* Banner */}
           <div className="bg-white rounded-2xl overflow-hidden">
             <div className="relative h-40">
-               <img
+              <img
                 src={influencer}
                 alt="Banner"
                 className="w-full h-28 object-cover rounded-lg cursor-pointer"
@@ -238,10 +237,10 @@ const CampaignReviewStep = ({ onEdit }) => {
 
               {/* Info Card */}
               <div className="
-                grid grid-cols-2 
+                grid grid-cols-1
                 sm:grid-cols-2 
                 md:grid-cols-4 
-                gap-6 
+                gap-4
                 mt-3 
                 border border-gray-200 
                 rounded-2xl 
@@ -310,22 +309,22 @@ const CampaignReviewStep = ({ onEdit }) => {
                     <span>Platform</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                      {p_contenttypejson?.length > 0 ? (
-                        p_contenttypejson.map((p) => (
-                          <span
-                            key={p.providerid}
-                            className="rounded-md bg-blue-100 text-blue-800 px-3 py-1 text-xs font-medium"
-                          >
-                            {p.providername} - {" "}
-                            {p.contenttypes
-                              ?.map((ct) => ct.contenttypename)
-                              .join(", ")}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </div>
+                    {p_contenttypejson?.length > 0 ? (
+                      p_contenttypejson.map((p) => (
+                        <span
+                          key={p.providerid}
+                          className="rounded-md bg-blue-100 text-blue-800 px-3 py-1 text-sm font-medium"
+                        >
+                          {p.providername} - {" "}
+                          {p.contenttypes
+                            ?.map((ct) => ct.contenttypename)
+                            .join(", ")}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -343,7 +342,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                   campaignData.p_campaigncategoyjson[0].categories.slice(0, 5).map((subcat) => (
                     <span
                       key={subcat.categoryid}
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
+                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium"
                     >
                       {subcat.categoryname}
                     </span>
@@ -416,7 +415,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                     ? tags.map((tag, i) => (
                       <span
                         key={tag + i}
-                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
+                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium"
                       >
                         {tag}
                       </span>
@@ -485,7 +484,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                                 href={fileUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mt-2 text-blue-500 underline text-xs font-medium hover:text-blue-700"
+                                className="mt-2 text-blue-500 underline text-sm font-medium hover:text-blue-700"
                               >
                                 View PDF
                               </a>
@@ -502,7 +501,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                                 href={fileUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mt-2 text-blue-500 underline text-xs font-medium hover:text-blue-700"
+                                className="mt-2 text-blue-500 underline text-sm font-medium hover:text-blue-700"
                               >
                                 View DOC
                               </a>
@@ -562,34 +561,40 @@ const CampaignReviewStep = ({ onEdit }) => {
               </p>
               <p className='text-gray-500'>{p_campaignjson.branddetail || "—"}</p>
             </div> */}
-            <div className="py-2 border-b border-gray-200">
-              <p className="text-sm mb-1 font-semibold">Campaign Dates</p>
-              <div className="flex justify-between">
-                <div>
-                  <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
-                  <p className='text-gray-500'>{p_campaignjson.campaignstartdate || "—"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold mb-1 my-2">End Date</p>
-                  <p className='text-gray-500'>{p_campaignjson.campaignenddate || "—"}</p>
-                </div>
+            <div className="py-2 border-b border-gray-100">
+
+              {/* Campaign Dates */}
+              <p className="text-md mb-2 font-semibold text-gray-600">Campaign Dates</p>
+
+              <div className="flex items-center gap-3 text-blue-400 text-sm">
+                <RiCalendarLine className=" text-base shrink-0" />
+                <span className=''>
+                  {p_campaignjson.campaignstartdate || "-"}{" "}
+                  <span className="mx-1">-</span>{" "}
+                  {p_campaignjson.campaignenddate || "-"}
+                </span>
               </div>
-              <hr className="my-4 border-gray-200" />
-              <p className="text-sm mb-1 mt-4 font-semibold">Application Dates</p>
-              <div className="flex justify-between">
-                <div>
-                  <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
-                  <p className='text-gray-500'>{p_campaignjson.applicationstartdate || "—"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold mb-1 my-2">End Date</p>
-                  <p className='text-gray-500'>{p_campaignjson.applicationenddate || "—"}</p>
-                </div>
+
+              <hr className="my-4 border-gray-100" />
+
+              {/* Application Dates */}
+              <p className="text-md mb-2 font-semibold text-gray-600">Application Dates</p>
+
+              <div className="flex items-center gap-3 text-blue-400 text-sm">
+                <RiCalendarLine  className=" text-base shrink-0" />
+                <span className=''>
+                  {p_campaignjson.applicationstartdate || "—"}{" "}
+                  <span className="mx-1">-</span>{" "}
+                  {p_campaignjson.applicationenddate || "—"}
+                </span>
               </div>
+
             </div>
 
+
+
             <div className="pt-4 pb-2">
-              <p className="text-sm font-semibold mb-1">Total Budget</p>
+              <p className="text-sm font-semibold mb-1 text-gray-600">Total Budget</p>
               <p className='text-gray-500'>₹{p_campaignjson.estimatedbudget || "0"}</p>
             </div>
           </div>
@@ -607,7 +612,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                       <h4 className="font-semibold text-sm ">
                         Milestone {index + 1}
                       </h4>
-                      <span className="text-xs text-gray-500">{milestone.enddate}</span>
+                      <span className="text-sm text-gray-500">{milestone.enddate}</span>
                     </div>
                     <p className="text-sm mb-1">
                       <span className="font-semibold">Description :</span> {milestone.description || "—"}
@@ -637,8 +642,8 @@ const CampaignReviewStep = ({ onEdit }) => {
                           {p.providername}
                         </span>
                         <p className="text-gray-600 italic text-sm mt-2 border-l-2 border-gray-200 pl-3">
-                            {p.caption}
-                          </p>
+                          {p.caption}
+                        </p>
                       </div>
                       <span className="text-gray-500 text-sm">
                         {p.contenttypes && p.contenttypes.length > 0
@@ -662,48 +667,52 @@ const CampaignReviewStep = ({ onEdit }) => {
       </div>
 
       {/* Buttons */}
-      <div className="flex flex-row max-sm:flex-col w-full max-w-sm gap-3 mt-3">
+      <div className="flex flex-col sm:flex-row w-full max-w-lg gap-3 mt-3">
 
-          <button
-            className="flex-1 bg-white border border-gray-300 text-gray-800 py-3 rounded-full disabled:opacity-60"
-            onClick={onEdit}
-            type="button"
-            disabled={loadingDraft || loadingSend}
-          >
-            Edit Campaign
-          </button>
+        {/* Edit Campaign */}
+        <button
+          className="flex-1 bg-white cursor-pointer border border-gray-300 text-gray-800 py-3 rounded-full disabled:opacity-60 transition-colors duration-200 hover:text-white hover:bg-gray-800"
+          onClick={onEdit}
+          type="button"
+          disabled={loadingDraft || loadingSend}
+        >
+          Edit Campaign
+        </button>
 
-          <button
-            className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full disabled:opacity-60 flex items-center justify-center gap-2"
-            onClick={() => handleCreateCampaign("Draft")}
-            type="button"
-            disabled={loadingDraft || loadingSend}
-          >
-            {loadingDraft ? (
-              <>
-                <Spin size="small" /> <span>Saving...</span>
-              </>
-            ) : (
-              "Save Draft"
-            )}
-          </button>
+        {/* Save Draft */}
+        <button
+          className="flex-1 bg-gray-900 cursor-pointer text-white py-3 rounded-full disabled:opacity-60 flex items-center justify-center gap-2 transition-colors duration-200 hover:bg-gray-800"
+          onClick={() => handleCreateCampaign("Draft")}
+          type="button"
+          disabled={loadingDraft || loadingSend}
+        >
+          {loadingDraft ? (
+            <>
+              <Spin size="small" /> <span>Saving...</span>
+            </>
+          ) : (
+            "Save Draft"
+          )}
+        </button>
 
-          <button
-            className="flex-1 bg-gray-900 text-white py-3 hover:bg-gray-800 rounded-full disabled:opacity-60 flex items-center justify-center gap-2"
-            onClick={() => handleCreateCampaign("ApprovalPending")}
-            type="button"
-            disabled={loadingDraft || loadingSend}
-          >
-            {loadingSend ? (
-              <>
-                <Spin size="small" /> <span>Sending...</span>
-              </>
-            ) : (
-              "Send For Approcval"
-            )}
-          </button>
+        {/* Send For Approval */}
+        <button
+          className="flex-1 bg-gray-900 cursor-pointer text-white py-3 rounded-full disabled:opacity-60 flex items-center justify-center gap-2 transition-colors duration-200 hover:bg-gray-800"
+          onClick={() => handleCreateCampaign("ApprovalPending")}
+          type="button"
+          disabled={loadingDraft || loadingSend}
+        >
+          {loadingSend ? (
+            <>
+              <Spin size="small" /> <span>Sending...</span>
+            </>
+          ) : (
+            "Send For Approval"
+          )}
+        </button>
 
-        </div>
+      </div>
+
 
     </div>
   );

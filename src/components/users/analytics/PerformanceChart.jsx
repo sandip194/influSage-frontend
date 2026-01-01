@@ -27,7 +27,7 @@ ChartJS.register(
 const { Option } = Select;
 const MemoLine = memo(Line);
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const currentYear = new Date().getFullYear();
 const YEARS = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 const WEEKS = Array.from({ length: 52 }, (_, i) => `Week ${i + 1}`);
@@ -165,7 +165,7 @@ const PerformanceChart = ({ campaignId }) => {
         position: "bottom",
         labels: {
           usePointStyle: true,
-         
+
           font: {
             size: 12,
             weight: "500",
@@ -192,17 +192,20 @@ const PerformanceChart = ({ campaignId }) => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
         <h2 className="text-xl font-bold text-gray-900">
           {campaignId ? "Campaign Performance" : "Performance"}
         </h2>
-
-        <Select value={filter} onChange={setFilter} style={{ width: 120 }}>
-          <Option value="week">Week</Option>
-          <Option value="month">Month</Option>
-          <Option value="year">Year</Option>
-        </Select>
+        <div className="flex justify-end w-full sm:w-auto">
+          <Select value={filter} onChange={setFilter} style={{ width: 120 }}>
+            <Option value="week">Week</Option>
+            <Option value="month">Month</Option>
+            <Option value="year">Year</Option>
+          </Select>
+        </div>
       </div>
+
+
 
       <div ref={wrapperRef} className="relative w-full h-64 sm:h-48 md:h-64 lg:h-72">
         {loading && <Spin />}

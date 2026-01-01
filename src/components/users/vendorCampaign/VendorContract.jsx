@@ -58,7 +58,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         contractEnd: c.contractenddate,
         campaignStart: safeText(campaignStart),
         campaignEnd: safeText(campaignEnd),
-        productLink: safeText(c.productlink, "N/A"),
+        productLink: c.productlink,
         vendorAddress: safeText(c.vendoraddress, "N/A"),
         deliverables: safeArray(c.providercontenttype).map((p) => ({
           icon: safeText(p.iconpath),
@@ -211,7 +211,9 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
   return (
     <div className="bg-white rounded-2xl p-0">
       <div className="flex justify-between items-center mb-4">
-        <Title level={4}>Contracts</Title>
+        <h2 className=" text-xl font-bold">
+          Contracts
+        </h2>
         <Button
           icon={<RiAddLine size={20} />}
           onClick={() => {

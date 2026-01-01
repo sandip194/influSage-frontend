@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { Skeleton } from "antd";
 
 const ProfileComplation = () => {
   const [completion, setCompletion] = useState(0);
@@ -11,13 +12,17 @@ const ProfileComplation = () => {
   useEffect(() => {
     const fetchCompletion = async () => {
       try {
+        setLoading(true)
         const authToken = token || localStorage.getItem("token");
 
-        const response = await axios.get(`vendor/dashboard/profile-completion-perctange`, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
+        const response = await axios.get(
+          `vendor/dashboard/profile-completion-perctange`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
 
         const percentage = response.data?.percentage || 0;
         setCompletion(percentage);
@@ -33,8 +38,22 @@ const ProfileComplation = () => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl p-6 text-center">
-        Loading...
+      <div className="bg-white rounded-2xl p-6 flex flex-col sm:flex-row gap-6 items-center h-full">
+        {/* Circle skeleton */}
+        <Skeleton.Avatar
+          active
+          size={110}
+          shape="circle"
+          className="shrink-0"
+        />
+
+        {/* Text skeletons */}
+        <div className="flex-1 space-y-2">
+          <Skeleton.Input active size="default" style={{ width: 100 }} />
+          <Skeleton.Input active size="small" style={{ width: 150 }} />
+          <Skeleton paragraph={{ rows: 1, width: ["100%", "90%", "95%"] }} active />
+          <Skeleton.Button active size="small" style={{ width: 160, borderRadius: 9999 }} />
+        </div>
       </div>
     );
   }
@@ -46,7 +65,6 @@ const ProfileComplation = () => {
 
   return (
     <div className="relative bg-white rounded-2xl p-6 flex flex-col sm:flex-row gap-6 items-center h-full">
-
       {/* CIRCULAR PROGRESS */}
       <div className="relative w-36 h-36 shrink-0">
         <svg className="w-full h-full rotate-[-90deg]">
@@ -73,12 +91,8 @@ const ProfileComplation = () => {
 
         {/* CENTER TEXT */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-xl font-bold text-gray-900">
-            {completion}%
-          </p>
-          <p className="text-xs text-gray-500">
-            Complete
-          </p>
+          <p className="text-xl font-bold text-gray-900">{completion}%</p>
+          <p className="text-xs text-gray-500">Complete</p>
         </div>
       </div>
 
@@ -93,7 +107,7 @@ const ProfileComplation = () => {
         </p>
 
         <Link to="/vendor-dashboard/my-profile">
-          <button className="mt-4 bg-[#0D132D] text-white text-sm px-6 py-2 rounded-full hover:bg-[#121A3F] transition">
+          <button className="mt-4 bg-[#0D132D] cursor-pointer text-white text-sm px-6 py-2 rounded-full hover:bg-[#121A3F] transition">
             Complete Your Profile →
           </button>
         </Link>

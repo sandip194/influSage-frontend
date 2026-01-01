@@ -168,7 +168,13 @@ const AnalyticsLayout = () => {
       const res = await axios.get("/user/analytics/campaign-list", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setCampaignList(res?.data?.data || []);
+      const campaigns = res?.data?.data || [];
+      setCampaignList(campaigns);
+
+      // ✅ Set default selected campaign
+      if (campaigns.length > 0 && !selectedCampaignId) {
+        setSelectedCampaignId(campaigns[0].campaignid);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -222,7 +228,7 @@ const AnalyticsLayout = () => {
       )}
 
 
-      
+
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-5">
         {/* PlatformBreakdown Line Chart */}
@@ -264,21 +270,23 @@ const AnalyticsLayout = () => {
 
       {/* 🎯 CAMPAIGN INSIGHTS */}
       <div className="bg-white rounded-2xl p-5 w-full  mt-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
           <h2 className="text-xl font-bold text-gray-900">Campaign Insights</h2>
+          <div className="flex justify-end w-full sm:w-auto">
+            <Select
+              className="w-64"
+              placeholder="Select Campaign"
+              value={selectedCampaignId}
+              onChange={(value) => setSelectedCampaignId(value)}
+            >
+              {campaignList.map((campaign) => (
+                <Option key={campaign.campaignid} value={campaign.campaignid}>
+                  {campaign.campaignname}
+                </Option>
+              ))}
+            </Select>
+          </div>
 
-          <Select
-            className="w-64"
-            placeholder="Select Campaign"
-            value={selectedCampaignId}
-            onChange={(value) => setSelectedCampaignId(value)}
-          >
-            {campaignList.map((campaign) => (
-              <Option key={campaign.campaignid} value={campaign.campaignid}>
-                {campaign.campaignname}
-              </Option>
-            ))}
-          </Select>
         </div>
 
         <div className="mt-5">

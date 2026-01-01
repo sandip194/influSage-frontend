@@ -466,6 +466,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
           min={1}
           placeholder="0.00"
           value={formData.budgetAmount}
+           prefix={formData.currency}
           onChange={(e) => {
             const value = e.target.value;
 
@@ -497,7 +498,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
           }}
 
         />
-        <span>{formData.currency}</span>
+        
       </div>
       {errors.budgetAmount && (
         <p className="text-red-500 text-sm mt-1">Budget is required and must be greater than 0 and cannot exceed 7 digits.</p>
