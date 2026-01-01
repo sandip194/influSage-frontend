@@ -20,33 +20,33 @@ const VenderDashboardPage = () => {
 
                 {/* Top cards */}
                 <div className="flex flex-col lg:flex-row gap-4 mb-6">
-                {/* Left */}
+                    {/* Left */}
                     <div className="w-full lg:w-2/2 order-1">
-                    <CampaignCards />
+                        <CampaignCards />
                     </div>
 
                     {/* Right */}
                     <div className="w-full lg:w-2/3 order-2">
-                    <ProfileComplationVendor />
+                        <ProfileComplationVendor />
                     </div>
                 </div>
                 <Campaign />
                 <div className="flex flex-col md:flex-row gap-4 mb-6 items-stretch">
 
-  {/* Smaller */}
-  <div className="w-full md:flex-[2] flex">
-    <CampaignOverview />
-  </div>
+                    {/* Smaller */}
+                    <div className="w-full md:flex-[2] flex">
+                        <CampaignOverview />
+                    </div>
 
-  {/* Wider */}
-  <div className="w-full md:flex-[4] flex">
-    <PendingContentList />
-  </div>
+                    {/* Wider */}
+                    <div className="w-full md:flex-[4] flex">
+                        <PendingContentList />
+                    </div>
 
-</div>
+                </div>
 
-                
-                
+
+
                 <EarningsSummarySectionVendor />
                 <ActiveCampaign />
 

@@ -316,7 +316,7 @@ const VendorCampaignsLayout = () => {
           onClick={() =>
             navigate("/vendor-dashboard/vendor-campaign/my-campaigns")
           }
-          className="flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-[#141843] text-white font-medium hover:bg-[#1d214f] transition-all duration-200"
+          className="flex cursor-pointer items-center justify-center gap-2 px-5 py-2 rounded-full bg-[#141843] text-white font-medium hover:bg-[#1d214f] transition-all duration-200"
         >
           <RiAddFill />
           Add Campaign
@@ -436,7 +436,7 @@ const VendorCampaignsLayout = () => {
                   setTempFilters(filters);
                   setShowFilter(true);
                 }}
-                className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition flex-1 sm:w-auto"
+                className="flex cursor-pointer items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition flex-1 sm:w-auto"
               >
                 Filter
                 <RiEqualizerFill size={16} />
@@ -534,7 +534,7 @@ const VendorCampaignsLayout = () => {
       {showFilter && (
         <>
           <div
-            className="fixed inset-0 bg-black/30 z-40"
+            className="fixed inset-0 bg-black/30 z-40 cursor-pointer"
             onClick={() => setShowFilter(false)}
           />
           <div className="fixed top-0 right-0 w-80 h-full bg-white p-4 z-50 shadow-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
@@ -544,7 +544,7 @@ const VendorCampaignsLayout = () => {
                 <Tooltip title="Clear Filters">
                   <button
                     onClick={clearFilters}
-                    className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
+                    className="p-2 cursor-pointer rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
                   >
                     <RiEraserLine size={18} />
                   </button>
@@ -553,7 +553,7 @@ const VendorCampaignsLayout = () => {
                 <Tooltip title="Apply Filters">
                   <button
                     onClick={applyFilters}
-                    className="p-2 rounded-full bg-[#141843] text-white hover:bg-[#1d214f] transition"
+                    className="p-2 cursor-pointer rounded-full bg-[#141843] text-white hover:bg-[#1d214f] transition"
                   >
                     <RiFilterLine size={18} />
                   </button>
@@ -562,7 +562,7 @@ const VendorCampaignsLayout = () => {
                 <Tooltip title="Close">
                   <button
                     onClick={() => setShowFilter(false)}
-                    className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition"
+                    className="p-2 cursor-pointer rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition"
                   >
                     <RiCloseFill size={20} />
                   </button>

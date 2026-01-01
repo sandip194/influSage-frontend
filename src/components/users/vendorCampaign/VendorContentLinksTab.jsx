@@ -22,33 +22,33 @@ export default function VendorContentLinksTab({ campaignId }) {
   };
 
   // Normalize/group content links by provider
- const groupByProvider = (contentlinks) => {
-  const grouped = {};
+  const groupByProvider = (contentlinks) => {
+    const grouped = {};
 
-  safeArray(contentlinks).forEach((item) => {
-    const provider = safeText(item.providername);
+    safeArray(contentlinks).forEach((item) => {
+      const provider = safeText(item.providername);
 
-    if (!grouped[provider]) {
-      grouped[provider] = {
-        providerid: item.providerid,
-        providername: item.providername,
-        iconpath: item.iconpath,
-        contenttypes: [],
-      };
-    }
+      if (!grouped[provider]) {
+        grouped[provider] = {
+          providerid: item.providerid,
+          providername: item.providername,
+          iconpath: item.iconpath,
+          contenttypes: [],
+        };
+      }
 
-    // Take content type name from first link (all links in this contentlink have same type)
-    const contentTypeName = safeArray(item.links)[0]?.contentypename || "Unknown";
+      // Take content type name from first link (all links in this contentlink have same type)
+      const contentTypeName = safeArray(item.links)[0]?.contentypename || "Unknown";
 
-    grouped[provider].contenttypes.push({
-      contractcontenttypeid: item.contractcontenttypeid,
-      contentypename: contentTypeName,
-      links: safeArray(item.links),
+      grouped[provider].contenttypes.push({
+        contractcontenttypeid: item.contractcontenttypeid,
+        contentypename: contentTypeName,
+        links: safeArray(item.links),
+      });
     });
-  });
 
-  return Object.values(grouped);
-};
+    return Object.values(grouped);
+  };
 
 
   // Fetch all links
@@ -94,13 +94,17 @@ export default function VendorContentLinksTab({ campaignId }) {
   if (safeArray(influencers).length === 0)
     return (
       <div className="flex flex-col items-center justify-center py-16">
-        <Empty description="No content links available yet." />
+        <Empty
+          description="No content links available yet."
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+
       </div>
     );
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-semibold tracking-tight mb-6">
+      <h2 className="text-xl font-bold tracking-tight mb-6">
         Influencer Content Links
       </h2>
 
@@ -128,8 +132,11 @@ export default function VendorContentLinksTab({ campaignId }) {
 
               {/* Check if there are platforms */}
               {platforms.length === 0 ? (
-                <div className="py-4">
-                  <Empty description="No content links Uploaded yet." />
+                <div className="py-2">
+                  <Empty
+                    description="No content links Uploaded yet."
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  />
                 </div>
               ) : (
                 <>
@@ -144,11 +151,10 @@ export default function VendorContentLinksTab({ campaignId }) {
                             [inf.influencerid]: safeText(platform.providername),
                           }))
                         }
-                        className={`pb-1 font-medium text-sm ${
-                          active === safeText(platform.providername)
-                            ? "border-b-2 border-black"
-                            : "text-gray-500"
-                        }`}
+                        className={`pb-1 font-medium text-sm ${active === safeText(platform.providername)
+                          ? "border-b-2 border-black"
+                          : "text-gray-500"
+                          }`}
                       >
                         <span className="flex items-center gap-1">
                           <img
@@ -182,11 +188,10 @@ export default function VendorContentLinksTab({ campaignId }) {
                                 onClick={() =>
                                   copyToClipboard(item.contractcontentlinkid, item.link)
                                 }
-                                className={`w-52 px-3 py-0 rounded-xl border cursor-pointer transition flex items-center justify-between shadow-sm ${
-                                  copiedId === item.contractcontentlinkid
-                                    ? "bg-green-100 border-green-400"
-                                    : "bg-white border-gray-200 hover:bg-gray-50"
-                                }`}
+                                className={`w-52 px-3 py-0 rounded-xl border cursor-pointer transition flex items-center justify-between shadow-sm ${copiedId === item.contractcontentlinkid
+                                  ? "bg-green-100 border-green-400"
+                                  : "bg-white border-gray-200 hover:bg-gray-50"
+                                  }`}
                               >
                                 <span className="text-gray-700 text-sm truncate">
                                   {safeText(item.link, "No Link")}

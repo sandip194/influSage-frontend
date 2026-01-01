@@ -180,7 +180,7 @@ const CampaignAnalytics = ({ selectedCampaignId }) => {
   return (
     <div className="w-full space-y-6">
       {/* ---------------- KPI CARDS ---------------- */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((kpi) => (
           <StatCard
             key={kpi.key}
@@ -192,19 +192,19 @@ const CampaignAnalytics = ({ selectedCampaignId }) => {
       </div>
 
       {/* ---------------- PERFORMANCE CHART ---------------- */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm">
-        <div className="w-full h-64 sm:h-72 md:h-80">
+      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div className="w-full h-64 sm:h-72 md:h-80 mb-12">
           <PerformanceChart campaignId={selectedCampaignId} />
         </div>
       </div>
 
       {/* ---------------- ENGAGEMENT + TOP CONTENT ---------------- */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
+        <div className="bg-white rounded-2xl p-0 shadow-sm border border-gray-100">
           <EngagementGauge campaignId={selectedCampaignId} />
         </div>
 
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <TopContentChart campaignId={selectedCampaignId} />
         </div>
       </div>

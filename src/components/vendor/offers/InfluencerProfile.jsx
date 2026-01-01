@@ -1,4 +1,4 @@
-import { RiArrowLeftLine, RiFile3Line, RiHeartFill, RiHeart3Line, RiMessage2Line, RiStarFill  } from "@remixicon/react";
+import { RiArrowLeftLine, RiFile3Line, RiHeartFill, RiHeart3Line, RiMessage2Line, RiStarFill } from "@remixicon/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Tooltip, Skeleton } from "antd";
 import InviteModal from "../../users/browseInfluencers/InviteModal";
 import { toast } from "react-toastify";
+import { RiUserAddLine } from "react-icons/ri";
 
 //  const formatDOB = (dob) => {
 //         const date = new Date(dob);
@@ -34,13 +35,13 @@ const InfluencerProfile = () => {
 
 
     const timeAgo = (date) => {
-    const diff = Math.floor((Date.now() - new Date(date)) / 1000);
-    const days = Math.floor(diff / 86400);
-    if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-    const hours = Math.floor(diff / 3600);
-    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    const mins = Math.floor(diff / 60);
-    return `${mins} min ago`;
+        const diff = Math.floor((Date.now() - new Date(date)) / 1000);
+        const days = Math.floor(diff / 86400);
+        if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
+        const hours = Math.floor(diff / 3600);
+        if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+        const mins = Math.floor(diff / 60);
+        return `${mins} min ago`;
     };
 
 
@@ -136,7 +137,7 @@ const InfluencerProfile = () => {
         <div className="">
             <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-gray-600 mb-2"
+                className="flex items-center cursor-pointer gap-2 text-gray-600 mb-2"
             >
                 <RiArrowLeftLine /> Back
             </button>
@@ -206,7 +207,7 @@ const InfluencerProfile = () => {
                                         e.stopPropagation();
                                         handleLike();
                                     }}
-                                    className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border border-[#0e102b]"
+                                    className="w-10 h-10 cursor-pointer flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border border-[#0e102b]"
                                 >
                                     {influDetails?.savedinfluencer ? (
                                         <RiHeartFill size={18} className="text-red-500" />
@@ -250,10 +251,10 @@ const InfluencerProfile = () => {
                         <div className="flex-1 w-full">
                             {/* Header Section */}
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center relative">
-                               
+
                                 {/* Influencer Info */}
                                 <div className="w-full text-center sm:text-left break-words">
-                                    <h2 
+                                    <h2
                                         className="text-2xl sm:text-3xl font-semibold capitalize text-gray-900 leading-tight break-words"
                                     >
                                         {influDetails?.firstname} {influDetails?.lastname}
@@ -324,19 +325,23 @@ const InfluencerProfile = () => {
                                         <Tooltip title="Message">
                                             <button
                                                 onClick={handleMessageClick}
-                                                className="flex items-center justify-center gap-2 bg-[#0f122f] text-white px-4 py-2 rounded-3xl hover:bg-[#23265a]"
+                                                className="flex items-center cursor-pointer justify-center gap-2 bg-[#0f122f] text-white px-4 py-2 rounded-3xl hover:bg-[#23265a]"
                                             >
-                                                <RiMessage2Line size={18} /> Send Message 
+                                                <RiMessage2Line size={18} /> Send Message
                                             </button>
                                         </Tooltip>
                                     )}
 
                                     <button
                                         onClick={handleInvite}
-                                        className="border border-gray-300 text-gray-900 px-5 py-2 rounded-full hover:bg-gray-100 transition w-full sm:w-auto"
+                                        className="border border-gray-300 cursor-pointer text-gray-900 px-5 py-2 rounded-full 
+             hover:bg-gray-100 transition w-full sm:w-auto 
+             flex items-center justify-center gap-2"
                                     >
-                                        Invite
+                                        <RiUserAddLine size={18} />
+                                        <span>Invite</span>
                                     </button>
+
 
                                     {/* Desktop Like Button (hidden on mobile) */}
                                     <Tooltip title={influDetails?.savedinfluencer ? "Unfavorite" : "Favorite"}>
@@ -345,12 +350,12 @@ const InfluencerProfile = () => {
                                                 e.stopPropagation();
                                                 handleLike();
                                             }}
-                                            className="hidden sm:flex w-10 h-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border border-[#0e102b]"
+                                            className="hidden sm:flex cursor-pointer w-10 h-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200"
                                         >
                                             {influDetails?.savedinfluencer ? (
-                                                <RiHeartFill size={18} className="text-red-500" />
+                                                <RiHeartFill size={24} className="text-red-500" />
                                             ) : (
-                                                <RiHeart3Line size={18} />
+                                                <RiHeart3Line size={24} />
                                             )}
                                         </button>
                                     </Tooltip>
@@ -492,119 +497,119 @@ const InfluencerProfile = () => {
                             <p className="text-sm text-gray-500">No portfolio file uploaded.</p>
                         )}
                     </div>
-                        {previewOpen && (
-                            <div
-                                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                            >
+                    {previewOpen && (
+                        <div
+                            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                        >
 
-                                <button
+                            <button
                                 className="absolute top-5 right-6 text-white text-3xl font-bold"
                                 onClick={() => setPreviewOpen(false)}
-                                >
+                            >
                                 &times;
-                                </button>
+                            </button>
 
-                                <div
+                            <div
                                 className="relative"
                                 onClick={(e) => e.stopPropagation()}
-                                >
+                            >
 
                                 {previewType === "video" && (
                                     <video
-                                    controls
-                                    autoPlay
-                                    playsInline
-                                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain bg-black"
+                                        controls
+                                        autoPlay
+                                        playsInline
+                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain bg-black"
                                     >
-                                    <source src={previewUrl} type="video/mp4" />
+                                        <source src={previewUrl} type="video/mp4" />
                                     </video>
                                 )}
 
                                 {previewType === "image" && (
                                     <img
-                                    src={previewUrl}
-                                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                        src={previewUrl}
+                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                                     />
                                 )}
 
                                 {previewType === "pdf" && (
                                     <iframe
-                                    src={previewUrl}
-                                    className="w-[90vw] h-[90vh] rounded-xl bg-white"
+                                        src={previewUrl}
+                                        className="w-[90vw] h-[90vh] rounded-xl bg-white"
                                     />
                                 )}
 
                                 {previewType === "doc" && (
                                     <iframe
-                                    src={`https://docs.google.com/viewer?url=${previewUrl}&embedded=true`}
-                                    className="w-[90vw] h-[90vh] rounded-xl bg-white"
+                                        src={`https://docs.google.com/viewer?url=${previewUrl}&embedded=true`}
+                                        className="w-[90vw] h-[90vh] rounded-xl bg-white"
                                     />
                                 )}
 
-                                </div>
-
                             </div>
-                            )}
+
+                        </div>
+                    )}
 
                     {/* Feedbacks */}
                     {influDetails?.feedbacks?.length > 0 && (
-                    <div className="bg-white rounded-2xl p-6 mt-4">
-                        
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-5">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                            Feedbacks
-                        </h3>
-                        <button className="text-sm hover:underline">
-                            View All
-                        </button>
-                        </div>
+                        <div className="bg-white rounded-2xl p-6 mt-4">
 
-                        {/* Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {influDetails.feedbacks.map((fb) => (
-                            <div
-                            key={fb.feedbackid}
-                            className="bg-white rounded-xl p-4 border border-gray-200 shadow hover:shadow-md transition"
-                            >
-                            {/* Stars */}
-                            <div className="flex items-center gap-1 mb-3">
-                                {[1, 2, 3, 4, 5].map((i) => (
-                                <RiStarFill
-                                    key={i}
-                                    size={14}
-                                    className={i <= fb.rating ? "text-yellow-400" : "text-gray-300"}
-                                    style={{ stroke: "#000", strokeWidth: 0.6 }}
-                                />
+                            {/* Header */}
+                            <div className="flex items-center justify-between mb-5">
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                    Feedbacks
+                                </h3>
+                                <button className="text-sm hover:underline">
+                                    View All
+                                </button>
+                            </div>
+
+                            {/* Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                                {influDetails.feedbacks.map((fb) => (
+                                    <div
+                                        key={fb.feedbackid}
+                                        className="bg-white rounded-xl p-4 border border-gray-200 shadow hover:shadow-md transition"
+                                    >
+                                        {/* Stars */}
+                                        <div className="flex items-center gap-1 mb-3">
+                                            {[1, 2, 3, 4, 5].map((i) => (
+                                                <RiStarFill
+                                                    key={i}
+                                                    size={14}
+                                                    className={i <= fb.rating ? "text-yellow-400" : "text-gray-300"}
+                                                    style={{ stroke: "#000", strokeWidth: 0.6 }}
+                                                />
+                                            ))}
+                                        </div>
+
+                                        {/* Feedback text */}
+                                        <p className="text-sm text-gray-800 mb-4 line-clamp-2">
+                                            {fb.text}
+                                        </p>
+
+                                        {/* Campaign row */}
+                                        <div className="flex items-center gap-3">
+                                            <img
+                                                src={fb.campaignpohoto}
+                                                alt={fb.campaignname}
+                                                className="w-9 h-9 rounded-full object-cover border"
+                                            />
+
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900 truncate">
+                                                    {fb.campaignname}
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    {timeAgo(fb.createddate)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
-
-                            {/* Feedback text */}
-                            <p className="text-sm text-gray-800 mb-4 line-clamp-2">
-                                {fb.text}
-                            </p>
-
-                            {/* Campaign row */}
-                            <div className="flex items-center gap-3">
-                                <img
-                                src={fb.campaignpohoto}
-                                alt={fb.campaignname}
-                                className="w-9 h-9 rounded-full object-cover border"
-                                />
-
-                                <div>
-                                <p className="text-sm font-semibold text-gray-900 truncate">
-                                    {fb.campaignname}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                    {timeAgo(fb.createddate)}
-                                </p>
-                                </div>
-                            </div>
-                            </div>
-                        ))}
                         </div>
-                    </div>
                     )}
                 </>
             )}

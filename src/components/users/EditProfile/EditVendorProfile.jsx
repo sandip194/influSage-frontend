@@ -97,7 +97,7 @@ const EditVendorProfile = () => {
         <div className="w-full text-sm">
             <button
                 onClick={() => window.history.back()}
-                className="text-gray-600 flex items-center gap-2 hover:text-gray-900 transition mb-2"
+                className="text-gray-600 cursor-pointer flex items-center gap-2 hover:text-gray-900 transition mb-2"
             >
                 <RiArrowLeftSLine /> Back
             </button>
@@ -113,7 +113,7 @@ const EditVendorProfile = () => {
                             <li key={index}>
                                 <button
                                     onClick={() => setCurrentStep(index)}
-                                    className={`w-full text-left px-3 py-2 rounded-lg transition ${currentStep === index
+                                    className={`w-full cursor-pointer text-left px-3 py-2 rounded-lg transition ${currentStep === index
                                         ? "bg-gray-100 font-medium text-gray-900"
                                         : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
                                         }`}

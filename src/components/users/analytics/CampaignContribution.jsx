@@ -122,25 +122,28 @@ const CampaignContribution = () => {
   return (
     <div className="bg-white rounded-2xl p-5 w-full">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Campaign Contribution</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+        <h2 className="text-xl font-bold text-gray-900 ">Campaign Contribution</h2>
 
-        <Select value={filter} onChange={setFilter} style={{ width: 120 }}>
-          <Option value="week">Week</Option>
-          <Option value="month">Month</Option>
-          <Option value="year">Year</Option>
-        </Select>
+        <div className="flex justify-end w-full sm:w-auto">
+          <Select value={filter} onChange={setFilter} style={{ width: 120 }}>
+            <Option value="week">Week</Option>
+            <Option value="month">Month</Option>
+            <Option value="year">Year</Option>
+          </Select>
+        </div>
+
       </div>
 
       {/* Chart Container */}
-      <div className="relative w-full h-48 md:h-64 flex flex-col items-center justify-center">
+      <div className="relative w-full h-48 md:h-64 flex flex-col items-center justify-center py-4">
         {loading ? (
           <Spin size="large" />
         ) : (
           <>
             <Pie data={chartData} options={options} />
             {!hasValidData && !loading && (
-              <p className="text-sm text-gray-400 mt-4 text-center">
+              <p className="text-sm text-gray-400 mt-2 text-center">
                 No campaign contribution data available
               </p>
             )}

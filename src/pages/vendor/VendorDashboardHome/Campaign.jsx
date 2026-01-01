@@ -169,7 +169,7 @@ const Campaign = () => {
           <h2 className="text-xl font-bold text-gray-900">My Campaign</h2>
           <button
             onClick={() => navigate("/vendor-dashboard/vendor-campaign")}
-            className="text-[#0D132D] text-sm sm:text-base font-medium hover:underline"
+            className="text-[#0D132D] cursor-pointer text-sm sm:text-base font-medium hover:underline"
           >
             View All
           </button>
@@ -283,7 +283,7 @@ const Campaign = () => {
           <h2 className="text-xl font-bold text-gray-900">Browse Influencers</h2>
           <button
             onClick={() => navigate("/vendor-dashboard/browse-influencers")}
-            className="text-[#0D132D] text-sm sm:text-base font-medium hover:underline"
+            className="text-[#0D132D] cursor-pointer text-sm sm:text-base font-medium hover:underline"
           >
             View All
           </button>

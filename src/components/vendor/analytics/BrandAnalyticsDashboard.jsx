@@ -158,7 +158,13 @@ const BrandAnalyticsDashboard = () => {
             const res = await axios.get("/vendor/analytics/campaign-list", {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setCampaignList(res?.data?.data || []);
+            const campaigns = res?.data?.data || [];
+            setCampaignList(campaigns);
+
+            // ✅ Auto-select first campaign if none selected
+            if (campaigns.length > 0 && !selectedCampaignId) {
+                setSelectedCampaignId(campaigns[0].campaignid);
+            }
         } catch (error) {
             console.log(error);
         }
@@ -207,16 +213,24 @@ const BrandAnalyticsDashboard = () => {
             {/* ------------------------- */}
             {/* Campaign Table */}
             {/* ------------------------- */}
-            <div className="bg-white rounded-2xl p-5  overflow-x-auto">
-                <div className="flex items-center justify-between mb-4">
+            <div className="bg-white rounded-2xl p-5  overflow-x-auto ">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2 w-full">
+                    {/* Heading */}
                     <h2 className="text-xl font-bold">Campaign Overview</h2>
 
-                    <Select value={campaignFilter} onChange={setCampaignFilter} style={{ width: 120 }}>
-                        <Option value="week">Week</Option>
-                        <Option value="month">Month</Option>
-                        <Option value="year">Year</Option>
-                    </Select>
+                    {/* Filter */}
+                    <div className="flex justify-end w-full sm:w-auto">
+                        <Select value={campaignFilter} onChange={setCampaignFilter} style={{ width: 120 }}>
+                            <Option value="week">Week</Option>
+                            <Option value="month">Month</Option>
+                            <Option value="year">Year</Option>
+                        </Select>
+                    </div>
                 </div>
+
+
+
+
                 <table className="min-w-full text-left">
                     <thead>
                         <tr className="border-b border-gray-300">
@@ -330,15 +344,15 @@ const BrandAnalyticsDashboard = () => {
             <div className="bg-white rounded-2xl p-5 ">
 
                 {/* HEADER ROW */}
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
                     <h2 className="text-lg font-bold">Platform Breakdown</h2>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex justify-end gap-2 w-full sm:w-auto">
                         {/* Month Dropdown */}
                         <Select
                             value={selectedMonth}
                             onChange={setSelectedMonth}
-                            className="w-[120px]"
+                            className="w-32"
                             size="large"
                         >
                             <Option value={1}>January</Option>
@@ -359,7 +373,7 @@ const BrandAnalyticsDashboard = () => {
                         <Select
                             value={selectedYear}
                             onChange={setSelectedYear}
-                            className="w-[100px]"
+                            className="w-24"
                             size="large"
                         >
                             {yearOptions.map((y) => (
@@ -409,7 +423,10 @@ const BrandAnalyticsDashboard = () => {
                                 </p>
 
                                 {/* Bar */}
-                                <div className="flex-1 bg-gray-200 h-3 rounded-full relative">
+                                <div
+                                    className={`flex-1 h-3 rounded-full relative ${hasPlatformData ? "bg-transparent" : "bg-gray-200"
+                                        }`}
+                                >
                                     <Tooltip
                                         placement="top"
                                         title={
@@ -449,22 +466,27 @@ const BrandAnalyticsDashboard = () => {
             {/* Campaign Wise Analytics */}
             {/* ------------------------- */}
             <div className="bg-white rounded-2xl p-5 w-full  mt-6">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+                    {/* Heading */}
                     <h2 className="text-lg font-bold text-gray-900">Campaign Insights</h2>
 
-                    <Select
-                        className="w-64"
-                        placeholder="Select Campaign"
-                        value={selectedCampaignId}
-                        onChange={(value) => setSelectedCampaignId(value)}
-                    >
-                        {campaignList.map((campaign) => (
-                            <Option key={campaign.campaignid} value={campaign.campaignid}>
-                                {campaign.campaignname}
-                            </Option>
-                        ))}
-                    </Select>
+                    {/* Select */}
+                    <div className="flex justify-end w-full sm:w-auto">
+                        <Select
+                            className="w-64"
+                            placeholder="Select Campaign"
+                            value={selectedCampaignId}
+                            onChange={(value) => setSelectedCampaignId(value)}
+                        >
+                            {campaignList.map((campaign) => (
+                                <Option key={campaign.campaignid} value={campaign.campaignid}>
+                                    {campaign.campaignname}
+                                </Option>
+                            ))}
+                        </Select>
+                    </div>
                 </div>
+
 
                 <div className="mt-5">
                     <CampaignAnalytics selectedCampaignId={selectedCampaignId} />

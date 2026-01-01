@@ -117,11 +117,7 @@ const Invited = () => {
     }
   }, [filters.pagenumber, filters.pagesize, searchTerm, activeTab]);
 
-  const handleTabClick = (id, path) => {
-    setActiveTab(id);
-    setFilters((prev) => ({ ...prev, pagenumber: 1 }));
-    navigate(path);
-  };
+
 
   return (
       <div className="w-full text-sm pb-24 sm:pb-0">
@@ -146,7 +142,7 @@ const Invited = () => {
                 setActiveTab(id);
                 navigate(path);
               }}
-              className={`px-3 sm:px-4 py-2 rounded-lg border transition font-medium
+              className={`px-3 sm:px-4 cursor-pointer py-2 rounded-lg border transition font-medium
                 ${activeTab === id
                   ? "bg-[#141843] text-white border-[#141843]"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"

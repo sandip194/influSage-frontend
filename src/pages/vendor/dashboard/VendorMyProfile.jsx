@@ -174,7 +174,7 @@ const VendorMyProfile = () => {
                         <div className="px-6 pb-6">
                             <button
                                 onClick={() => navigate("/vendor-dashboard/edit-profile")}
-                                className="bg-[#0f122f] text-white px-5 py-2 rounded-full font-medium hover:bg-[#23265a] transition inline-block"
+                                className="bg-[#0f122f] cursor-pointer text-white px-5 py-2 rounded-full font-medium hover:bg-[#23265a] transition inline-block"
                             >
                                 Edit Profile
                             </button>

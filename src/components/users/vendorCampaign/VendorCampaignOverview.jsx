@@ -1,4 +1,5 @@
 import { RiCheckboxCircleFill, RiDeleteBin6Line } from '@remixicon/react';
+import { Empty } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { RiCheckLine } from 'react-icons/ri';
 
@@ -69,7 +70,7 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
     <div>
       {/* Description */}
       <div className="border-b border-gray-200 pb-4 mb-4">
-        <h3 className="font-semibold text-lg mb-2">
+        <h3 className="text-xl font-bold mb-2">
           Campaign Description
         </h3>
         <p className="text-gray-700 leading-relaxed">
@@ -78,23 +79,23 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
       </div>
 
 
-      <h3 className="text-lg font-semibold mb-3">Categories</h3>
-        {categories.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3 mb-6">
-            {categories.map((tag, idx) => (
-              <span
-                key={idx}
-                className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
+      <h3 className="text-xl font-bold mb-3">Categories</h3>
+      {categories.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-3 mb-6">
+          {categories.map((tag, idx) => (
+            <span
+              key={idx}
+              className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Requirements */}
       <div className="pb-4 border-b border-gray-200">
-        <h3 className="font-semibold text-lg sm:text-xl mb-4">Requirements</h3>
+        <h3 className="text-xl font-bold mb-4">Requirements</h3>
         <ul className="space-y-3 text-gray-700 text-sm sm:text-base">
           {Requirements.map((item, index) => (
             <li key={index} className="flex items-center gap-3">
@@ -109,7 +110,7 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
         {/* Hashtags - Conditionally render if hashtags exist */}
         {Array.isArray(campaignData?.hashtags) && campaignData.hashtags.length > 0 && (
           <>
-            <h3 className="text-lg font-semibold mb-3mb-4 my-4">Hashtags</h3>
+            <h3 className="text-xl font-bold mb-3 my-4">Hashtags</h3>
             <div className="flex flex-wrap gap-2 mt-3 mb-6">
               {campaignData.hashtags.map((item, idx) => (
                 <span
@@ -122,7 +123,7 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
             </div>
           </>
         )}
-        <h2 className="text-lg font-semibold mb-3">References</h2>
+        <h2 className="text-xl font-bold mb-3">References</h2>
         <div className="flex gap-4 flex-wrap">
           {images.length > 0 ? (
             images.map((file, i) => {
@@ -187,7 +188,11 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
               );
             })
           ) : (
-            <p className="text-gray-500 text-sm">No references available.</p>
+            <Empty
+              description="No references available."
+              className="py-0"
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
           )}
         </div>
         {previewOpen && (

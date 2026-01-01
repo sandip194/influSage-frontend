@@ -94,14 +94,13 @@ const TopContentChart = ({ campaignId }) => {
 
     const labels = hasData
       ? dataList.map(
-          (item) =>
-            `${item.contenttypename || "Unknown"} • ${
-              item.campaignname ||
-              item.contenttitle ||
-              item.contentcaption ||
-              "N/A"
-            }`
-        )
+        (item) =>
+          `${item.contenttypename || "Unknown"} • ${item.campaignname ||
+          item.contenttitle ||
+          item.contentcaption ||
+          "N/A"
+          }`
+      )
       : EMPTY_LABELS;
 
     const values = hasData
@@ -156,21 +155,23 @@ const TopContentChart = ({ campaignId }) => {
 
   return (
     <div className="bg-white rounded-2xl">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
         <h2 className="text-xl font-bold text-gray-900">
           {campaignId ? "Campaign Top Content" : "Top Performing Content"}
         </h2>
+        <div className="flex justify-end w-full sm:w-auto">
+          <Select
+            value={filterType}
+            onChange={setFilterType}
+            style={{ width: 120 }}
+            size="middle"
+          >
+            <Option value="week">Week</Option>
+            <Option value="month">Month</Option>
+            <Option value="year">Year</Option>
+          </Select>
+        </div>
 
-        <Select
-          value={filterType}
-          onChange={setFilterType}
-          style={{ width: 120 }}
-          size="middle"
-        >
-          <Option value="week">Week</Option>
-          <Option value="month">Month</Option>
-          <Option value="year">Year</Option>
-        </Select>
       </div>
 
       <div className="relative w-full min-h-[250px]">

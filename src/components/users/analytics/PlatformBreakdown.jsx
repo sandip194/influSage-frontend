@@ -106,7 +106,7 @@ export const PlatformBreakdown = () => {
           Platform Breakdown
         </h2>
 
-        <div className="flex gap-2">
+        <div className="flex justify-end w-full sm:w-auto">
           <Select value={month} onChange={setMonth} className="w-[100px]">
             {monthList.map((m) => (
               <Option key={m.value} value={m.value}>
@@ -158,15 +158,19 @@ export const PlatformBreakdown = () => {
 
               {/* Progress Bar */}
               <div className="flex-1">
-                <div className="relative bg-gray-200 h-3 sm:h-2.5 rounded-full">
+                <div
+                  className={`relative h-3 sm:h-2.5 rounded-full ${item.percentage > 0 ? "bg-transparent" : "bg-gray-200"
+                    }`}
+                >
                   <div
                     className="absolute left-0 top-0 h-full rounded-full transition-all"
                     style={{
                       width: `${item.percentage}%`,
-                      backgroundColor: "#0D132D",
+                      backgroundColor: item.percentage > 0 ? "#0D132D" : "transparent",
                     }}
                   />
                 </div>
+
               </div>
 
               {/* Percentage */}
