@@ -50,7 +50,7 @@ const SettingLayout = () => {
               <li key={index}>
                 <button
                   onClick={() => setActiveStep(index)}
-                  className={`flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg transition ${
+                  className={`flex items-center cursor-pointer gap-2 w-full text-left px-3 py-2 rounded-lg transition ${
                     activeStep === index
                       ? "bg-gray-100 font-medium text-gray-900"
                       : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"

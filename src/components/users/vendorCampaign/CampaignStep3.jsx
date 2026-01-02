@@ -283,6 +283,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       <TextArea
         size="large"
         rows={4}
+        showCount
         maxLength={500}
         placeholder="Enter Campaign Description"
         value={formData.description}
@@ -551,6 +552,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       <TextArea
         size="large"
         rows={3}
+        showCount
         maxLength={250}
         placeholder="About Brand"
         value={formData.aboutBrand}

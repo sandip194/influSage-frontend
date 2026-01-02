@@ -28,6 +28,23 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
   });
 
 
+const formatToDDMMYYYY = (dateStr) => {
+  if (!dateStr) return "—";
+
+  if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+    const [dd, mm, yyyy] = dateStr.split("-");
+    return `${dd}/${mm}/${yyyy}`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [yyyy, mm, dd] = dateStr.split("-");
+    return `${dd}/${mm}/${yyyy}`;
+  }
+
+  const d = new Date(dateStr);
+  if (isNaN(d)) return "—";
+
+  return d.toLocaleDateString("en-GB");
+};
 
 
   // Fetch contracts from API
@@ -354,20 +371,22 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
 
                     {/* Contract Dates */}
                     <div>
-                      <p className="font-medium text-gray-800">Contract Duration</p>
-                      <p className="text-xs sm:text-sm">
-                        {contract.contractStart} <b>{"To"}{" "}</b> {contract.contractEnd}
+                      <p className="text-gray-500 text-sm">Contract Duration</p>
+                      <p className="text-gray-900 font-semibold">
+                        {formatToDDMMYYYY(contract?.contractStart)}
+                        <span className="mx-1 font-medium">{" "}{"-"}{" "}</span>
+                        {formatToDDMMYYYY(contract?.contractEnd)}
                       </p>
                     </div>
 
-                    {/* Campaign Dates */}
                     <div>
-                      <p className="font-medium text-gray-800">Campaign Dates</p>
-                      <p className="text-xs sm:text-sm">
-                        {contract.campaignStart} <b>{"To"}{" "}</b> {contract.campaignEnd}
+                      <p className="text-gray-500 text-sm">Campaign Window</p>
+                      <p className="text-gray-900 font-semibold">
+                        {formatToDDMMYYYY(contract?.campaignStart)}
+                        <span className="mx-1 font-medium">{" "}{"-"}{" "}</span>
+                        {formatToDDMMYYYY(contract?.campaignEnd)}
                       </p>
                     </div>
-
                     {/* Product + Address */}
                     <div className="sm:col-span-2 space-y-1">
                       {contract.productLink && (

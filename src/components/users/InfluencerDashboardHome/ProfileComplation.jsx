@@ -89,7 +89,7 @@ const ProfileComplation = () => {
         </p>
 
         <Link to="/dashboard/my-profile">
-          <button className="mt-4 bg-[#0D132D] text-white text-sm px-6 py-2 rounded-full hover:bg-[#121A3F] transition">
+          <button className="mt-4 bg-[#0D132D] cursor-pointer text-white text-sm px-6 py-2 rounded-full hover:bg-[#121A3F] transition">
             Complete Your Profile →
           </button>
         </Link>

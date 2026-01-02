@@ -1,11 +1,21 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { Modal, Button, Select } from "antd";
+import { Modal, Button, Select, Skeleton } from "antd";
 import { getSocket } from "../../sockets/socket";
 import useSocketRegister from "../../sockets/useSocketRegister";
 
 import { RiBook2Line, RiAddLine } from "@remixicon/react";
+
+const TicketSkeleton = () => (
+  <div className="flex items-center gap-3 p-3">
+    <Skeleton.Avatar active size="default" shape="circle" />
+    <div className="flex-1">
+      <Skeleton.Input active size="small" style={{ width: "80%", marginBottom: 6 }} />
+      <Skeleton.Input active size="small" style={{ width: "50%" }} />
+    </div>
+  </div>
+);
 
 const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
   const initialByTab = {
@@ -26,6 +36,7 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
   const [loadingAdd, setLoadingAdd] = useState(false);
   const [showError, setShowError] = useState(false);
   const [statusList, setStatusList] = useState([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
 
   useEffect(() => {
   if (!socket || !userId) return;
@@ -113,7 +124,7 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
 
  const handleTabChange = async (tab) => {
   setActiveTab(tab.name);
-
+  setLoadingTickets(true);
   try {
     const res = await axios.get("/chat/support/user-admin/all-tickets", {
       headers: { Authorization: `Bearer ${token}` },
@@ -140,6 +151,9 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
   }));
   } catch (error) {
     console.error("Error fetching tickets:", error);
+  }
+  finally {
+    setLoadingTickets(false);
   }
 };
   useImperativeHandle(ref, () => ({
@@ -220,7 +234,7 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
       {activeTab === "Open" && (
         <button
           onClick={() => setOpenModal(true)}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-[#0D132D] hover:bg-[#1A234B] text-white"
+          className="w-9 h-9 cursor-pointer flex items-center justify-center rounded-full bg-[#0D132D] hover:bg-[#1A234B] text-white"
         >
           <RiAddLine size={22} />
         </button>
@@ -235,7 +249,7 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
         <button
           key={tab.id}
           onClick={() => handleTabChange(tab)}
-          className={`px-4 py-2 rounded-full text-sm border transition ${
+          className={`px-4 cursor-pointer py-2 rounded-full text-sm border transition ${
             activeTab === tab.name
               ? "bg-[#0D132D] text-white border-[#0D132D]"
               : "bg-white text-gray-600 border-gray-300"
@@ -247,34 +261,41 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
     </div>
 
     <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-      {subjects.length === 0 && (
-        <p className="text-gray-400 text-sm text-center">No tickets found</p>
-      )}
-
-      {subjects.map((s) => (
-        <div
-          key={s.id}
-          onClick={() => handleSubjectClick(s)}
-          className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition ${
-            activeSubjectId === s.id
-              ? "bg-[#0D132D] text-white shadow-md"
-              : s.unread
-              ? "bg-blue-100 text-black shadow"
-              : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-          }`}
-        >
-          {s.icon}
-          <div className="flex flex-col flex-1 min-w-0">
-            <span className="font-medium truncate">{s.name}</span>
-            <span className="text-xs opacity-70">
-              {new Date(s.created).toLocaleDateString("en-GB")}
-            </span>
-          </div>
-          {s.unread && (
-            <div className="w-2.5 h-2.5 rounded-full bg-blue-600 ml-2 shrink-0" />
-          )}
+      {loadingTickets ? (
+        Array.from({ length: 6 }).map((_, i) => (
+          <TicketSkeleton key={i} />
+        ))
+      ) : subjects.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-32 text-gray-500">
+          <RiBook2Line size={32} className="mb-2 opacity-50" />
+          <p>No tickets found</p>
         </div>
-      ))}
+      ) : (
+        subjects.map((s) => (
+          <div
+            key={s.id}
+            onClick={() => handleSubjectClick(s)}
+            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition ${
+              activeSubjectId === s.id
+                ? "bg-[#0D132D] text-white shadow-md"
+                : s.unread
+                ? "bg-blue-100 text-black shadow"
+                : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+            }`}
+          >
+            {s.icon}
+            <div className="flex flex-col flex-1 min-w-0">
+              <span className="font-medium truncate">{s.name}</span>
+              <span className="text-xs opacity-70">
+                {new Date(s.created).toLocaleDateString("en-GB")}
+              </span>
+            </div>
+            {s.unread && (
+              <div className="w-2.5 h-2.5 rounded-full bg-blue-600 ml-2 shrink-0" />
+            )}
+          </div>
+        ))
+      )}
     </div>
 
       <Modal

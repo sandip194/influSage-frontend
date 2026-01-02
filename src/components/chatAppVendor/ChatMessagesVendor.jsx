@@ -583,10 +583,16 @@ useEffect(() => {
                               ? "You"
                               : chat?.name || "Unknown"}
                           </span>
-                          {/* Quoted text */}
-                          {repliedMsg.content && (
-                            <span className="truncate">{repliedMsg.content}</span>
-                          )}
+                          {/* Quoted Text */}
+                            {repliedMsg.ishtml ? (
+                              <span className="italic text-white text-[11px]">
+                                Campaign Invitation
+                              </span>
+                            ) : repliedMsg.content ? (
+                              <span className="truncate max-w-[230px]">
+                                {repliedMsg.content}
+                              </span>
+                            ) : null}
 
                           {/* Quoted file attachment */}
                           {repliedMsg.file && (() => {

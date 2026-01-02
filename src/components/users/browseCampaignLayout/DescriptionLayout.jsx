@@ -32,6 +32,20 @@ const DescriptionLayout = () => {
   const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
 
   const [previewFile, setPreviewFile] = useState(null);
+  const formatDateDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "N/A";
+
+    if (typeof dateStr === "string" && dateStr.includes("-")) {
+      const [dd, mm, yyyy] = dateStr.split("-");
+      return `${dd}/${mm}/${yyyy}`;
+    }
+    const d = new Date(dateStr);
+    if (isNaN(d)) return "N/A";
+
+    return `${String(d.getDate()).padStart(2, "0")}/${String(
+      d.getMonth() + 1
+    ).padStart(2, "0")}/${d.getFullYear()}`;
+  };
 
   const fetchCampaignDetails = useCallback(async () => {
     if (!campaignId || !token) return;
@@ -269,12 +283,14 @@ const DescriptionLayout = () => {
                       Application Window:
                     </span>
 
-                    <span className="text-gray-800 whitespace-nowrap">
-                      {campaignDetails?.requirements?.applicationstartdate ||
-                        "N/A"}{" "}
-                    <b>{"To"}{" "}</b>
-                      {campaignDetails?.requirements?.applicationenddate ||
-                        "N/A"}
+                   <span className="text-gray-800 whitespace-nowrap">
+                      {formatDateDDMMYYYY(
+                        campaignDetails?.requirements?.applicationstartdate
+                      )}
+                      {" "}<b>-</b>{" "}
+                      {formatDateDDMMYYYY(
+                        campaignDetails?.requirements?.applicationenddate
+                      )}
                     </span>
                   </p>
 
@@ -293,7 +309,7 @@ const DescriptionLayout = () => {
               {/* Right Side Buttons */}
               <div className="flex gap-2 items-start">
                 {campaignDetails?.isapplied ? (
-                  <button className="px-4 py-1.5 bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed">
+                  <button className="px-4 py-1.5 cursor-pointer bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed">
                     Applied
                   </button>
                 ) : campaignDetails?.campaignapplied ? (
@@ -303,12 +319,12 @@ const DescriptionLayout = () => {
                       setSelectedCampaignId(campaignId); // you already have this in props
                       setEditModalOpen(true);
                     }}
-                    className="px-6 py-2 bg-[#0F122F] text-white rounded-full font-medium hover:bg-gray-800 transition"
+                    className="px-6 py-2 bg-[#0F122F] cursor-pointer text-white rounded-full font-medium hover:bg-gray-800 transition"
                   >
                     Apply Now
                   </button>
                 ) : (
-                  <button className="px-4 py-1.5 bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed">
+                  <button className="px-4 py-1.5 bg-gray-400 cursor-pointer text-white rounded-lg font-medium cursor-not-allowed">
                     Not Eligible
                   </button>
                 )}
@@ -626,16 +642,16 @@ const DescriptionLayout = () => {
                   {campaignDetails.branddetails?.aboutbrand || "N/A"}
                 </p>
 
-                {campaignDetails.branddetails?.aboutbrand &&
-                  campaignDetails.branddetails.aboutbrand.length > 100 && (
-                    <button
-                      onClick={() => setShowFullBrandDesc((prev) => !prev)}
-                      className="text-blue-600 text-xs font-semibold mt-1 hover:underline"
-                    >
-                      {showFullBrandDesc ? "View Less" : "View More"}
-                    </button>
-                  )}
-              </div>
+                    {campaignDetails.branddetails?.aboutbrand &&
+                      campaignDetails.branddetails.aboutbrand.length > 100 && (
+                      <button
+                        onClick={() => setShowFullBrandDesc((prev) => !prev)}
+                        className="text-blue-600 text-xs font-semibold mt-1 hover:underline cursor-pointer"
+                      >
+                        {showFullBrandDesc ? "View Less" : "View More"}
+                      </button>
+                      )}
+                    </div>
 
               <hr className="border-gray-200" />
 
@@ -666,18 +682,16 @@ const DescriptionLayout = () => {
 
                 <div className="flex justify-between text-sm">
                   <div>
-                    <p className="text-sm font-semibold mb-1 my-2">
-                      Start Date
-                    </p>
-                    <p className="flex items-center gap-1 text-gray-700">
-                      {campaignDetails?.requirements.campaignstartdate || "N/A"}
+                    <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
+                    <p className="text-gray-700">
+                      {formatDateDDMMYYYY(campaignDetails?.requirements?.campaignstartdate)}
                     </p>
                   </div>
 
                   <div className="text-right">
                     <p className="text-sm font-semibold mb-1 my-2">End Date</p>
-                    <p className="flex items-center gap-1 text-gray-700">
-                      {campaignDetails?.requirements.campaignenddate || "N/A"}
+                    <p className="text-gray-700">
+                      {formatDateDDMMYYYY(campaignDetails?.requirements?.campaignenddate) || "N/A"}
                     </p>
                   </div>
                 </div>
@@ -691,45 +705,49 @@ const DescriptionLayout = () => {
             </h3>
 
             <div className="space-y-4">
-              {campaignDetails?.providercontenttype?.length > 0 ? (
-                campaignDetails.providercontenttype.map((platform) => (
-                  <div
-                    key={platform.providercontenttypeid}
-                    className="border-b border-gray-100 pb-3 last:border-none"
-                  >
-                    {/* header row */}
-                    <div className="flex items-center justify-between">
+                {campaignDetails?.providercontenttype?.length > 0 ? (
+                  campaignDetails.providercontenttype.map((platform) => (
+                    <div
+                      key={platform.providercontenttypeid}
+                      className="border-b border-gray-100 pb-3 last:border-none"
+                    >
+                      {/* header row */}
+                      <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
+                        {platform.iconpath && (
+                        <img
+                          src={platform.iconpath}
+                          alt={platform.providername}
+                          className="w-5 h-5 object-contain"
+                        />
+                        )}
                         <span className="text-gray-900 font-medium">
-                          {platform.providername}
+                        {platform.providername}
                         </span>
                       </div>
 
-                      {/* Content Types at end */}
-                      <span className="text-gray-500 text-sm text-right">
-                        {platform.contenttypes &&
-                        platform.contenttypes.length > 0
-                          ? platform.contenttypes
-                              .map((ct) => ct.contenttypename)
-                              .join(", ")
-                          : "No types"}
-                      </span>
-                    </div>
+                        {/* Content Types at end */}
+                        <span className="text-gray-500 text-sm text-right">
+                          {platform.contenttypes && platform.contenttypes.length > 0
+                            ? platform.contenttypes
+                                .map((ct) => ct.contenttypename)
+                                .join(", ")
+                            : "No types"}
+                        </span>
+                      </div>
 
-                    {/* Caption */}
-                    {platform.caption && (
-                      <p className="text-gray-600 italic mt-2 border-l-2 border-gray-200 pl-3">
-                        {platform.caption}
-                      </p>
-                    )}
+                      {/* Caption */}
+                      {platform.caption && (
+                        <p className="text-gray-600 italic mt-2 border-l-2 border-gray-200 pl-3">
+                          {platform.caption}
+                        </p>
+                      )}
+                    </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No platform content types available.</p>
+                  )}
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-500">
-                  No platform content types available.
-                </p>
-              )}
-            </div>
           </div>
         </aside>
       </div>

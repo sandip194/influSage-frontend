@@ -26,6 +26,24 @@ const NoContractOffered = () => (
   </div>
 );
 
+const formatToDDMMYYYY = (dateStr) => {
+  if (!dateStr) return "—";
+
+  if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+    const [dd, mm, yyyy] = dateStr.split("-");
+    return `${dd}/${mm}/${yyyy}`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [yyyy, mm, dd] = dateStr.split("-");
+    return `${dd}/${mm}/${yyyy}`;
+  }
+
+  const d = new Date(dateStr);
+  if (isNaN(d)) return "—";
+
+  return d.toLocaleDateString("en-GB");
+};
+
 const ContractTab = ({ campaignId, token }) => {
 
   const [contract, setContract] = useState(null);
@@ -184,14 +202,18 @@ const ContractTab = ({ campaignId, token }) => {
             <div>
               <p className="text-gray-500 text-sm">Contract Duration</p>
               <p className="text-gray-900 font-semibold">
-                {contract.contractStart} <b>{"To"}{" "}</b> {contract.contractEnd}
+                {formatToDDMMYYYY(contract?.contractStart)}
+                <span className="mx-1 font-medium">{" "}{"-"}{" "}</span>
+                {formatToDDMMYYYY(contract?.contractEnd)}
               </p>
             </div>
 
             <div>
               <p className="text-gray-500 text-sm">Campaign Window</p>
               <p className="text-gray-900 font-semibold">
-                {contract.campaignStart} <b>{"To"}{" "}</b> {contract.campaignEnd}
+                {formatToDDMMYYYY(contract?.campaignStart)}{" "}
+                <span className="mx-1 font-medium">{" "}{"-"}{" "}</span>{" "}
+                {formatToDDMMYYYY(contract?.campaignEnd)}
               </p>
             </div>
           </div>
@@ -238,14 +260,20 @@ const ContractTab = ({ campaignId, token }) => {
 
             <div>
               <p className="text-gray-500 text-sm">Product Link</p>
-              <a
-                href={contract.productLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline font-medium break-all"
-              >
-                {contract.productLink}
-              </a>
+
+              {contract?.productLink ? (
+                <a
+                  href={contract.productLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline font-medium break-all"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {contract.productLink}
+                </a>
+              ) : (
+                <span className="text-gray-400 text-sm">N/A</span>
+              )}
             </div>
           </div>
         </div>

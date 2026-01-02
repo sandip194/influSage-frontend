@@ -192,7 +192,7 @@ const Browse = () => {
           <button
             key={id}
             onClick={() => navigate(path)}
-            className={`whitespace-nowrap flex-shrink-0 px-4 py-2 rounded-md border transition text-sm ${selectedButton === id
+            className={`whitespace-nowrap cursor-pointer flex-shrink-0 px-4 py-2 rounded-md border transition text-sm ${selectedButton === id
                 ? "bg-[#0f122f] text-white border-[#0f122f]"
                 : "bg-white text-[#141843] border-gray-300 hover:bg-gray-100"
               }`}
@@ -256,7 +256,7 @@ const Browse = () => {
 
             <button
               onClick={() => setShowFilter(true)}
-              className="flex items-center justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition"
+              className="flex items-center cursor-pointer justify-center gap-2 border border-gray-200 rounded-md px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition"
             >
               Filter
               <RiEqualizerFill size={16} />
@@ -335,7 +335,7 @@ const Browse = () => {
                 <Tooltip title="Clear Filters">
                   <button
                     onClick={handleClearFilters}
-                    className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
+                    className="p-2 rounded-full cursor-pointer bg-gray-100 hover:bg-gray-200 transition"
                   >
                     <RiEraserLine size={18} />
                   </button>
@@ -344,7 +344,7 @@ const Browse = () => {
                 <Tooltip title="Apply Filters">
                   <button
                     onClick={handleApplyFilters}
-                    className="p-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] transition"
+                    className="p-2 rounded-full cursor-pointer bg-[#0f122f] text-white hover:bg-[#23265a] transition"
                   >
                     <RiFilterLine size={18} />
                   </button>
@@ -353,7 +353,7 @@ const Browse = () => {
                 <Tooltip title="Close">
                   <button
                     onClick={() => setShowFilter(false)}
-                    className="p-2 rounded-full text-gray-500 hover:bg-gray-100"
+                    className="p-2 rounded-full cursor-pointer text-gray-500 hover:bg-gray-100"
                   >
                     <RiCloseFill size={20} />
                   </button>
@@ -365,7 +365,7 @@ const Browse = () => {
             <div>
               <h4 className="font-semibold mb-2">Platforms</h4>
               {platforms.map((p) => (
-                <label key={p.id} className="flex items-center mb-2">
+                <label key={p.id} className="flex cursor-pointer items-center mb-2">
                   <input
                     type="checkbox"
                     className="mr-2"

@@ -1,83 +1,66 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   RiHeartLine,
   RiHeartFill,
   RiUserAddLine,
-  RiStarFill,
+  RiGlobalLine,
+  RiStarFill, 
+  RiStarLine
 } from "@remixicon/react";
-import { Tooltip } from "antd";
-// import "./heartAnimation.css";
 
 const InfluencerCard = ({ influencer, onLike, onInvite }) => {
   const navigate = useNavigate();
+  const formatNumber = (num) => {
+    if (!num && num !== 0) return "0";
 
-  const handleCardClick = () => {
-    navigate(
-      `/vendor-dashboard/browse-influencers/influencer-details/${influencer?.id}`
-    );
+    if (num >= 1_000_000) {
+      return (num / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+    }
+
+    if (num >= 1_000) {
+      return (num / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+    }
+
+    return num.toString();
   };
 
   return (
     <div
-      onClick={handleCardClick}
-      className="bg-[#ebf1f7] hover:bg-[#d6e4f6] border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-lg transition-all duration-300 flex flex-col justify-between cursor-pointer relative"
+      onClick={() =>
+        navigate(
+          `/vendor-dashboard/browse-influencers/influencer-details/${influencer?.id}`
+        )
+      }
+      className="
+        bg-[#f4f7ff]
+        border border-[#cdd8ff]
+        rounded-2xl
+        p-5
+        shadow-sm
+        hover:shadow-md
+        transition
+        cursor-pointer
+        flex flex-col
+        h-full
+      "
     >
-
-      <div className="absolute top-3 right-3 z-10">
-        <Tooltip title={influencer?.savedinfluencer ? "Unfavorite" : "Favorite"}>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onLike(influencer?.id);
-            }}
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition relative overflow-visible"
-          >
-            {influencer?.savedinfluencer ? (
-              <RiHeartFill
-                key={`heart-${influencer?.id}-fill`}
-                size={22}
-                className="text-red-500 animate-like"
-              />
-            ) : (
-              <RiHeartLine
-                key={`heart-${influencer?.id}-line`}
-                size={22}
-                className="text-gray-600 animate-dislike"
-              />
-            )}
-          </button>
-        </Tooltip>
-      </div>
-
-      {/* --- Top Section: Image + Actions --- */}
-      <div className="flex justify-between items-start mb-4 relative">
+      {/* ===== Header ===== */}
+      <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <img
-            src={
-              influencer?.photopath
-                ? influencer.photopath
-                : "https://via.placeholder.com/150"
-            }
-            alt="Profile"
-            loading="lazy"
-            className="w-14 h-14 rounded-full object-cover border border-gray-200"
+            src={influencer?.photopath || "/placeholder.jpg"}
+            alt="profile"
+            className="w-12 h-12 rounded-full object-cover"
           />
           <div>
-            <Link
-              to={`/vendor-dashboard/browse-influencers/influencer-details/${influencer?.id}`}
-              onClick={(e) => e.stopPropagation()}
-              className="block text-base font-semibold text-gray-900 hover:underline hover:text-blue-900 transition-colors duration-150"
-            >
+            <p className="text-sm font-semibold text-gray-900">
               {influencer?.firstname} {influencer?.lastname}
-            </Link>
+            </p>
             <p className="text-xs text-gray-500">
               {influencer?.statename}, {influencer?.countryname}
             </p>
-
-            <div className="flex items-center gap-1 text-xs">
+              <div className="flex items-center gap-1 text-xs">
               {Number(influencer?.ratingcount) > 0 && (
                 <div className="flex items-center gap-1 mt-1">
                   {Array.from({ length: Math.round(influencer.ratingcount) }).map((_, i) => (
@@ -93,93 +76,140 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
             </div>
           </div>
         </div>
-
-
       </div>
 
-      {/* --- Languages --- */}
-      {influencer?.contentlanguages?.length > 0 && (
-        <div className="text-xs text-gray-500 mb-3">
-          {influencer.contentlanguages
-            .map((lang) => lang.languagename)
-            .join(", ")}
-        </div>
-      )}
-
-      {/* --- Categories --- */}
-      {influencer?.categories?.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {influencer.categories.map((cat, idx) => (
-            <span
-              key={idx}
-              className="px-2 py-1 bg-blue-200 rounded-xl text-xs text-black"
-            >
-              {cat.categoryname}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* --- Bio --- */}
-      {influencer?.bio && (
-        <div className="text-sm text-gray-700 mb-4 line-clamp-2">
-          {influencer.bio}
-        </div>
-      )}
-
-      {/* --- Followers --- */}
-      {influencer?.providers?.some((p) => p.nooffollowers > 0) && (
-        <div className="flex flex-wrap gap-3 mb-4 text-sm text-gray-700">
-          {influencer.providers
-            .filter((p) => p.nooffollowers > 0)
-            .map((p) => {
-              const formatFollowers = (num) => {
-                if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-                if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-                return num;
-              };
-
-              return (
-                <div key={p.providerid} className="flex items-center gap-2">
-                  <img
-                    src={p.iconpath}
-                    alt={p.providername}
-                    className="w-5 h-5 object-contain"
-                  />
-                  <span>{formatFollowers(p.nooffollowers)}</span>
-                </div>
-              );
-            })}
-        </div>
-      )}
-
-      {influencer?.completedcampaigncount > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          <span className="px-3 py-1.5 border-2 border-gray-300 bg-gray-100 rounded-lg text-xs text-gray-900 flex items-center gap-2 font-semibold">
-            <span className="inline-flex items-center justify-center w-5 h-5 bg-gray-500 text-white rounded-full text-xs">
-              {influencer.completedcampaigncount}
-            </span>
-            <span className="whitespace-nowrap">
-              {influencer.completedcampaigncount === 1 ? "completed campaign" : "completed campaigns"}
-            </span>
-          </span>
-        </div>
-      )}
-
-      {/* --- Action Buttons --- */}
-      <div className="mt-auto border-t border-black pt-4 flex justify-end items-center">
-        <Tooltip title="Invite">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onInvite(influencer?.id);
-            }}
-            className="flex items-center justify-center gap-2 text-sm text-white font-semibold px-5 py-2 rounded-full bg-[#0f122f] hover:bg-[#23265a] transition"
+      {/* ===== Categories ===== */}
+      <div className="flex gap-2 flex-nowrap overflow-visible min-w-0">
+        {influencer?.categories?.slice(0, 2).map((cat, i) => (
+          <span
+            key={i}
+            className="
+                        px-2 py-1
+                        rounded-full
+                        text-xs font-medium
+                        border border-[#0D132D26]
+                        whitespace-nowrap
+                        overflow-hidden
+                        text-ellipsis
+                        min-w-0
+                        max-w-full
+                    "
+            title={cat.categoryname}
           >
-            <RiUserAddLine size={16} />
-            Invite
-          </button>
-        </Tooltip>
+            {cat.categoryname}
+          </span>
+        ))}
+
+        {/* + more */}
+        {influencer?.categories?.length > 2 && (
+          <span
+            className="
+                        px-2 py-1
+                        rounded-full
+                        text-xs font-medium
+                        border border-[#0D132D26]
+                        bg-gray-300
+                        whitespace-nowrap
+                        flex-shrink-0
+                    "
+            title={influencer.categories
+              .slice(2)
+              .map((c) => c.categoryname)
+              .join(", ")}
+          >
+            +{influencer.categories.length - 2}
+          </span>
+        )}
+      </div>
+
+      {/* ===== Bio ===== */}
+      <p className="text-sm text-gray-500 line-clamp-2 h-[40px] mt-3">
+        {influencer?.bio || "No bio available"}
+      </p>
+
+      {/* ===== Languages ===== */}
+      {influencer?.contentlanguages?.length > 0 && (
+        <div className="flex items-center gap-2 mt-2">
+          {/* Icon box */}
+          <span className="w-5 h-5 flex items-center justify-center">
+            <RiGlobalLine size={14} className="text-[#0D132D]" />
+          </span>
+
+          {/* Text */}
+          <p className="text-sm text-gray-700 font-medium truncate">
+            {(influencer.contentlanguages || [])
+              .map((l) => l.languagename)
+              .join(", ")}
+          </p>
+        </div>
+      )}
+
+      <div className="border-t border border-[#0D132D26] my-3" />
+
+      {/* ===== Social Stats ===== */}
+      <div className="flex items-center gap-5 mb-3">
+        {(influencer?.providers || [])
+          .filter((p) => p.nooffollowers > 0)
+          .slice(0, 4)
+          .map((p) => (
+            <div
+              key={p.providerid}
+              className="flex items-center gap-1 text-sm font-medium text-gray-700"
+            >
+              <img src={p.iconpath} alt="" className="w-5 h-5" />
+              {formatNumber(p.nooffollowers)}
+            </div>
+          ))}
+      </div>
+
+      {/* ===== Completed Campaigns ===== */}
+      {influencer?.completedcampaigncount > 0 && (
+        <div className="flex items-center gap-2 text-sm mb-4">
+          <span className="w-5 h-5 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs">
+            {influencer.completedcampaigncount}
+          </span>
+          <span className="text-gray-800">Completed Campaigns</span>
+        </div>
+      )}
+
+      {/* ===== Actions ===== */}
+      <div className="mt-auto flex items-center gap-3">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onInvite(influencer?.id);
+          }}
+          className="
+            flex-1
+            bg-[#0f122f]
+            text-white
+            py-2
+            rounded-full
+            text-sm
+            font-semibold
+            hover:bg-[#1f2357]
+            transition
+            flex items-center justify-center gap-2
+          "
+        >
+          <RiUserAddLine size={16} />
+          Invite
+        </button>
+
+        {/* Heart */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onLike(influencer?.id);
+          }}
+          className="w-10 h-10 bg-white border border-[#0D132D26] rounded-full flex items-center justify-center"
+        >
+          {influencer?.savedinfluencer ? (
+            <RiHeartFill className="text-red-500" size={20} />
+          ) : (
+            <RiHeartLine className="text-gray-600" size={20} />
+          )}
+        </button>
       </div>
     </div>
   );

@@ -46,6 +46,22 @@ const Details = () => {
   const { token } = useSelector((state) => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   // const [isLogoPreviewOpen, setIsLogoPreviewOpen] = useState(false);
+  const formatDateDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "N/A";
+
+    // Backend sends DD-MM-YYYY
+    if (typeof dateStr === "string" && dateStr.includes("-")) {
+      const [dd, mm, yyyy] = dateStr.split("-");
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    const d = new Date(dateStr);
+    if (isNaN(d)) return "N/A";
+
+    return `${String(d.getDate()).padStart(2, "0")}/${String(
+      d.getMonth() + 1
+    ).padStart(2, "0")}/${d.getFullYear()}`;
+  };
 
   // Complete action (adapted from vendor)
   const handleComplete = () => {
@@ -403,37 +419,58 @@ const Details = () => {
             <div className="py-4 border-b border-gray-200">
               <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
               <p>
-                {campaign?.requirements?.campaignstartdate} <b>{"To"}{" "}</b> {campaign?.requirements?.campaignenddate}
+                {formatDateDDMMYYYY(
+                  campaign?.campaignstartdate ||
+                  campaign?.requirements?.campaignstartdate
+                )}
+                {" "}
+                {"-"}
+                {" "}
+                {formatDateDDMMYYYY(
+                  campaign?.campaignenddate ||
+                  campaign?.requirements?.campaignenddate
+                )}
               </p>
             </div>
-
-            <div className="py-4 border-b border-gray-200">
-              <p className="text-sm font-bold text-gray-900">Application Window</p>
-              <p>
-                {campaign?.applicationstartdate} <b>{"To"}{" "}</b> {campaign?.applicationenddate}
-              </p>
-            </div>
-
 
             <div className="py-4">
-              <p className="text-sm font-bold text-gray-900">Total Price</p>
-              <p>₹{campaign?.estimatedbudget}</p>
+              <p className="text-sm font-bold text-gray-900">Application Window</p>
+             <p>
+              {formatDateDDMMYYYY(
+                campaign?.applicationstartdate
+              )}
+              {" "}
+              {"-"}
+              {" "}
+              {formatDateDDMMYYYY(
+                campaign?.applicationenddate
+              )}
+            </p>
             </div>
           </div>
 
           <div className="space-y-4 w-full max-w-xs">
-            {/* Platform Card */}
-            <div className="bg-white p-4 rounded-2xl">
-              <h3 className="font-semibold text-lg py-3">Platform</h3>
-              <div className="space-y-4">
-                {campaign?.providercontenttype?.map((platform) => (
-                  <div key={platform.providercontenttypeid}>
-                    
-                    {/* Top Row */}
-                    <div className="flex items-center justify-between pb-1">
-                      <span className="text-gray-800 font-medium">
-                        {platform.providername}
-                      </span>
+           { /* Platform Card */}
+                  <div className="bg-white p-4 rounded-2xl">
+                    <h3 className="font-semibold text-lg py-3">Platform</h3>
+                    <div className="space-y-4">
+                    {campaign?.providercontenttype?.map((platform) => (
+                      <div key={platform.providercontenttypeid}>
+                      
+                      {/* Top Row */}
+                      <div className="flex items-center justify-between pb-1">
+                        <div className="flex items-center gap-2">
+                        {platform.iconpath && (
+                          <img 
+                          src={platform.iconpath} 
+                          alt={platform.providername}
+                          className="w-5 h-5 object-contain"
+                          />
+                        )}
+                        <span className="text-gray-800 font-medium">
+                          {platform.providername}
+                        </span>
+                        </div>
 
                       <span className="text-gray-500 text-sm text-right">
                         {platform.contenttypes && platform.contenttypes.length > 0
@@ -446,13 +483,13 @@ const Details = () => {
                     {platform.caption && (
                       <p className="text-gray-600 italic text-xs border-l-2 border-gray-200 pl-3">
                         {platform.caption}
-                      </p>
-                    )}
+                        </p>
+                      )}
 
+                      </div>
+                    ))}
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
 
             {/* Influencers List - REMOVED as per requirement */}
 
@@ -481,10 +518,19 @@ const Details = () => {
               <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
 
               <div className="relative">
-                {[
-                  { name: "Campaign Created", date: campaign?.trackcampaign?.createddate },
-                  { name: "Campaign Started", date: campaign?.trackcampaign?.campaignstartdate },
-                  { name: "Campaign Ended", date: campaign?.trackcampaign?.campaignenddate },
+                {[    
+                {
+                  name: "Campaign Created",
+                  date: formatDateDDMMYYYY(campaign?.trackcampaign?.createddate),
+                },
+                {
+                  name: "Campaign Started",
+                  date: formatDateDDMMYYYY(campaign?.trackcampaign?.campaignstartdate),
+                },
+                {
+                  name: "Campaign Ended",
+                  date: formatDateDDMMYYYY(campaign?.trackcampaign?.campaignenddate),
+                },
                 ].map((step, idx, arr) => {
                   const stepDate = dayjs(step.date, "DD-MM-YYYY HH:mm");
                   const now = dayjs();

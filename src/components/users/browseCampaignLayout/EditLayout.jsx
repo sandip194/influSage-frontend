@@ -43,6 +43,21 @@ const EditLayout = () => {
   const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
   const { campaignId } = useParams();
 
+    const formatDateDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "N/A";
+
+    if (typeof dateStr === "string" && dateStr.includes("-")) {
+      const [dd, mm, yyyy] = dateStr.split("-");
+      return `${dd}/${mm}/${yyyy}`;
+    }
+    const d = new Date(dateStr);
+    if (isNaN(d)) return "N/A";
+
+    return `${String(d.getDate()).padStart(2, "0")}/${String(
+      d.getMonth() + 1
+    ).padStart(2, "0")}/${d.getFullYear()}`;
+  };
+
   const requirements = useMemo(() => {
     if (!campaignDetails) return [];
     return [
@@ -253,7 +268,15 @@ const EditLayout = () => {
                       </span>
 
                       <span className="text-gray-800 whitespace-nowrap">
-                        {campaignDetails?.requirements?.applicationstartdate || "N/A"} <b>{"To"}{" "}</b> {campaignDetails?.requirements?.applicationenddate || "N/A"}
+                        {formatDateDDMMYYYY(
+                          campaignDetails?.requirements?.applicationstartdate
+                        )}
+                        {" "}
+                        <b>-</b>
+                        {" "}
+                        {formatDateDDMMYYYY(
+                          campaignDetails?.requirements?.applicationenddate
+                        )}
                       </span>
                     </p>           
 
@@ -834,7 +857,7 @@ const EditLayout = () => {
                     campaignDetails.branddetails.aboutbrand.length > 100 && (
                       <button
                         onClick={() => setShowFullBrandDesc((prev) => !prev)}
-                        className="text-blue-600 text-xs font-semibold mt-1 hover:underline"
+                        className="text-blue-600 cursor-pointer text-xs font-semibold mt-1 hover:underline"
                       >
                         {showFullBrandDesc ? "View Less" : "View More"}
                       </button>
@@ -874,14 +897,14 @@ const EditLayout = () => {
                     <div>
                       <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
                       <p className="flex items-center gap-1 text-gray-700">
-                        {campaignDetails?.requirements.campaignstartdate || "N/A"}
+                        {formatDateDDMMYYYY(campaignDetails?.requirements?.campaignstartdate)}
                       </p>
                     </div>
 
                     <div className="text-right">
                       <p className="text-sm font-semibold mb-1 my-2">End Date</p>
                       <p className="flex items-center gap-1 text-gray-700">
-                        {campaignDetails?.requirements.campaignenddate || "N/A"}
+                        {formatDateDDMMYYYY(campaignDetails?.requirements?.applicationenddate)}
                       </p>
                     </div>
                   </div>
@@ -905,11 +928,18 @@ const EditLayout = () => {
                     >
                       {/* header row */}
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-900 font-medium">
-                            {platform.providername}
-                          </span>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        {platform.iconpath && (
+                        <img
+                          src={platform.iconpath}
+                          alt={platform.providername}
+                          className="w-5 h-5 object-contain"
+                        />
+                        )}
+                        <span className="text-gray-900 font-medium">
+                        {platform.providername}
+                        </span>
+                      </div>
 
                         {/* Content Types at end */}
                         <span className="text-gray-500 text-sm text-right">
@@ -928,14 +958,14 @@ const EditLayout = () => {
                         </p>
                       )}
                     </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">No platform content types available.</p>
-                )}
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No platform content types available.</p>
+                  )}
+                  </div>
+                </div>
               </div>
-            </div>
-        </div>
-      </div>
+              </div>
 
 
       {/* Withdraw Modal */}

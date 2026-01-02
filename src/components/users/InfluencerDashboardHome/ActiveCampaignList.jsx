@@ -10,6 +10,23 @@ const ActiveCampaignList = () => {
 
     const [campaignList, setCampaignList] = useState([]);
     const [loading, setLoading] = useState(false);
+    const formatDateDDMMYYYY = (dateStr) => {
+        if (!dateStr) return "N/A";
+
+        if (typeof dateStr === "string" && dateStr.includes("-")) {
+            const parts = dateStr.split("-");
+            if (parts.length === 3) {
+            const [dd, mm, yyyy] = parts;
+            return `${dd}/${mm}/${yyyy}`;
+            }
+        }
+        const d = new Date(dateStr);
+        if (isNaN(d)) return "N/A";
+
+        return `${String(d.getDate()).padStart(2, "0")}/${String(
+            d.getMonth() + 1
+        ).padStart(2, "0")}/${d.getFullYear()}`;
+    };
 
     // Fetch campaigns
     const getActiveCampaignList = useCallback(async () => {
@@ -85,16 +102,16 @@ const ActiveCampaignList = () => {
             },
         },
         {
-            title: 'Start Date',
-            dataIndex: 'campaignstartdate',
-            key: 'campaignstartdate',
-            render: (date) => date || 'N/A',
-        },
-        {
-            title: 'End Date',
-            dataIndex: 'campaignenddate',
-            key: 'campaignenddate',
-            render: (date) => date || 'N/A',
+            title: "Start Date",
+            dataIndex: "campaignstartdate",
+            key: "campaignstartdate",
+            render: (date) => formatDateDDMMYYYY(date),
+            },
+            {
+            title: "End Date",
+            dataIndex: "campaignenddate",
+            key: "campaignenddate",
+            render: (date) => formatDateDDMMYYYY(date),
         },
     ];
 
