@@ -44,16 +44,27 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         id: safeNumber(c.contractid),
         influencerId: safeNumber(c.influencerid),
         influencerSelectId: safeNumber(c.campaignapplicationid),
-        influencer: c.influencerphoto ? (
-          <div className="flex items-center gap-2">
-            <img
-              src={safeText(c.influencerphoto)}
-              alt="Influencer"
-              className="w-12 h-12 object-cover rounded-full"
-            />
-            <span>{safeText(c.fullname)}</span> {/* show fullname */}
-          </div>
-        ) : safeText(c.fullname, `Influencer ${safeNumber(c.influencerid)}`),
+        influencer: {
+          // React element for display in the list
+          display: c.influencerphoto ? (
+            <div className="flex items-center gap-2">
+              <img
+                src={safeText(c.influencerphoto)}
+                alt="Influencer"
+                className="w-12 h-12 object-cover rounded-full"
+              />
+              <span>{safeText(c.fullname)}</span>
+            </div>
+          ) : (
+            <span>{safeText(c.fullname, `Influencer ${safeNumber(c.influencerid)}`)}</span>
+          ),
+          // Plain object for modal / Select value
+          value: {
+            id: safeNumber(c.campaignapplicationid),
+            name: safeText(c.fullname),
+            photo: safeText(c.influencerphoto) || null,
+          },
+        },
         contractStart: c.contractstartdate,
         contractEnd: c.contractenddate,
         campaignStart: safeText(campaignStart),
@@ -87,7 +98,11 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
 
   // Open modal to edit
   const handleEdit = (contract) => {
-    setEditingContract(contract);
+    // Pass the plain object for modal
+    setEditingContract({
+      ...contract,
+      influencer: contract.influencer.value, // plain {id, name, photo}
+    });
     setIsModalOpen(true);
   };
 
@@ -135,7 +150,6 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
     }
   };
 
-
   // VALIDATE FEEDBACK
   const validateFeedback = () => {
     const newErrors = {};
@@ -158,19 +172,15 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-
   const handleSkipClose = () => {
     setErrors({});
     handleCloseContract();
   };
 
-
   const handleSubmitClose = () => {
     if (!validateFeedback()) return;
     handleCloseContract();
   };
-
-
 
   const handleCloseContract = async () => {
     try {
@@ -269,7 +279,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
               <div className="flex sm:hidden justify-between items-start mb-3">
                 {/* Influencer */}
                 <div className="flex items-center gap-2">
-                  {contract.influencer}
+                  {contract.influencer.display}
                 </div>
 
                 {/* Status + Payment */}
@@ -307,7 +317,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
 
                   {/* Influencer (desktop only) */}
                   <h3 className="hidden sm:flex text-lg font-semibold text-gray-900 items-center gap-2">
-                    {contract.influencer}
+                    {contract.influencer.display}
                   </h3>
 
                   {/* 📱 MOBILE ACTION BUTTONS */}

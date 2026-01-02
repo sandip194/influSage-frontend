@@ -181,7 +181,7 @@ const InfluencerDetailView = () => {
                                 src={safeText(influDetails?.photopath)}
                                 alt="Profile"
                                 onClick={() => setPreviewImage(influDetails.photopath)}
-                                onError={(e) => (e.target.src = "/fallback-avatar.png")}
+                                onError={(e) => (e.target.src = "/default.jpg")}
                                 className="absolute left-6 -bottom-10 w-20 h-20 rounded-full border-4 border-white shadow cursor-pointer object-cover bg-gray-200"
                             />
 

@@ -19,6 +19,12 @@ import { useSelector } from "react-redux";
 const { TextArea } = Input;
 const { Panel } = Collapse;
 
+const safeDayjs = (date) => {
+    if (!date) return null;
+    const d = dayjs(date, "DD-MM-YYYY");
+    return d.isValid() ? d : null;
+};
+
 export default function ContractModal({
     isOpen,
     onClose,
@@ -30,6 +36,12 @@ export default function ContractModal({
 }) {
     const [form] = Form.useForm();
     const { token } = useSelector((state) => state.auth);
+
+    const campaignStartLimit = safeDayjs(existingCampaignStart);
+    const campaignEndLimit = safeDayjs(existingCampaignEnd);
+
+    const [startPickerMonth, setStartPickerMonth] = useState(campaignStartLimit || dayjs());
+    const [endPickerMonth, setEndPickerMonth] = useState(campaignEndLimit || dayjs());
 
     const [platforms, setPlatforms] = useState([]);
     const [contentTypesByPlatform, setContentTypesByPlatform] = useState({});
@@ -83,7 +95,7 @@ export default function ContractModal({
         };
 
         fetchInfluencers();
-    }, [campaignId, token]);
+    }, [campaignId]);
 
     // Fetch platforms & content types (unchanged, but kept for completeness)
     useEffect(() => {
@@ -137,30 +149,43 @@ export default function ContractModal({
     }, [isOpen, token]);
 
     useEffect(() => {
-        if (editData && platforms.length > 0) {
-            const paymentNumber = Number(editData.payment.replace(/[^\d]/g, ""));
-            form.setFieldsValue({
-                // influencers: editData.campaignapplicationid,
-                payment: paymentNumber,
-                contractStart: dayjs(editData.contractStart, "DD-MM-YYYY"),
-                contractEnd: dayjs(editData.contractEnd, "DD-MM-YYYY"),
-                notes: editData.notes || "",
-                productLink: editData.productLink || "",
-                vendorAddress: editData.vendorAddress || "",
-            });
+        if (!editData) return;
+        console.log(editData)
+        const paymentNumber = Number(editData.payment.replace(/[^\d]/g, ""));
 
-            const mappedPlatforms = (editData.deliverables || []).map((p) => ({
-                providerid: platforms.find(pl => pl.providername === p.provider)?.providerid || null,
-                providername: p.provider,
-                contenttypes: p.contenttypes.map((ct) => ({
-                    providercontenttypeid: ct.providercontenttypeid,
-                    contenttypename: ct.contenttypename
-                }))
-            }));
-            setSelectedPlatforms(mappedPlatforms);
-            form.setFieldsValue({ deliverables: mappedPlatforms });
-        }
+        const editInfluencer = {
+            id: editData.influencer.id,
+            name: editData.influencer?.name || `Influencer ${editData.influencerSelectId}`,
+            photo: editData.influencer?.photo || null,
+        };
+        setInfluencers([editInfluencer]);
+
+        // Map deliverables
+        const mappedPlatforms = (editData.deliverables || []).map((p) => ({
+            providerid: platforms.find(pl => pl.providername === p.provider)?.providerid || null,
+            providername: p.provider,
+            contenttypes: p.contenttypes.map((ct) => ({
+                providercontenttypeid: ct.providercontenttypeid,
+                contenttypename: ct.contenttypename
+            }))
+        }));
+        setSelectedPlatforms(mappedPlatforms);
+
+        // Set all form values in one place
+        form.setFieldsValue({
+            influencers: editInfluencer.id,
+            payment: paymentNumber,
+            contractStart: dayjs(editData.contractStart, "DD-MM-YYYY"),
+            contractEnd: dayjs(editData.contractEnd, "DD-MM-YYYY"),
+            notes: editData.notes || "",
+            productLink: editData.productLink || "",
+            vendorAddress: editData.vendorAddress || "",
+            deliverables: mappedPlatforms,
+        });
+
     }, [editData, platforms, form]);
+
+
 
     // New: Permanent validation check (silent, doesn't show errors until submit)
     const isFormValid = useCallback(async () => {
@@ -184,16 +209,6 @@ export default function ContractModal({
         resetState();
         onClose();
     };
-
-    const safeDayjs = (date) => {
-        if (!date) return null;
-        const d = dayjs(date, "DD-MM-YYYY");
-        return d.isValid() ? d : null;
-    };
-
-
-    const campaignStartLimit = safeDayjs(existingCampaignStart);
-    const campaignEndLimit = safeDayjs(existingCampaignEnd);
 
 
     const handleFinish = async (values) => {
@@ -279,7 +294,7 @@ export default function ContractModal({
                                     filterOption={(input, option) =>
                                         option.children.toLowerCase().includes(input.toLowerCase())
                                     }
-                                    disabled={loadingInfluencers}
+                                    disabled={loadingInfluencers || !!editData}
                                     notFoundContent={
                                         loadingInfluencers
                                             ? "Loading..."
@@ -298,7 +313,7 @@ export default function ContractModal({
                                                     size="small"
                                                     src={inf.photo}
                                                 >
-                                                    {!inf.photo && inf.name.charAt(0)}
+                                                    {!inf.photo && inf.name?.charAt(0)}
                                                 </Avatar>
                                                 <span >{inf.name}</span>
                                             </div>
@@ -395,17 +410,21 @@ export default function ContractModal({
                                     placeholder="Start Date"
                                     format="DD-MM-YYYY"
                                     size="large"
-                                    onChange={() => form.validateFields(["contractStart"])}
+                                    value={form.getFieldValue("contractStart")}
+                                    onChange={(date) => {
+                                        form.setFieldsValue({ contractStart: date });
+                                        setStartPickerMonth(date || campaignStartLimit);
+                                    }}
                                     disabledDate={(current) => {
                                         if (!current) return false;
                                         return (
-                                            (campaignStartLimit && current < campaignStartLimit.startOf("day")) ||
-                                            (campaignEndLimit && current > campaignEndLimit.endOf("day"))
+                                            (campaignStartLimit && current.isBefore(campaignStartLimit, "day")) ||
+                                            (campaignEndLimit && current.isAfter(campaignEndLimit, "day"))
                                         );
                                     }}
-
+                                    pickerValue={startPickerMonth} // <-- controls which month opens
+                                    onPanelChange={(date) => setStartPickerMonth(date)} // update if user changes month manually
                                     style={{ width: "100%" }}
-                                    className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark"
                                 />
                             </Form.Item>
                         </div>
@@ -457,21 +476,25 @@ export default function ContractModal({
                                     placeholder="End Date"
                                     format="DD-MM-YYYY"
                                     size="large"
-                                    onChange={() => form.validateFields(["contractEnd"])}
-                                    style={{ width: "100%" }}
+                                    value={form.getFieldValue("contractEnd")}
+                                    onChange={(date) => {
+                                        form.setFieldsValue({ contractEnd: date });
+                                        setEndPickerMonth(date || campaignStartLimit);
+                                    }}
                                     disabledDate={(current) => {
                                         if (!current) return false;
                                         const start = form.getFieldValue("contractStart");
-
                                         return (
-                                            (start && current < start.startOf("day")) ||
-                                            (campaignStartLimit && current < campaignStartLimit.startOf("day")) ||
-                                            (campaignEndLimit && current > campaignEndLimit.endOf("day"))
+                                            (start && current.isBefore(start.startOf("day"))) ||
+                                            (campaignStartLimit && current.isBefore(campaignStartLimit.startOf("day"))) ||
+                                            (campaignEndLimit && current.isAfter(campaignEndLimit.endOf("day")))
                                         );
                                     }}
-
-                                    className="w-full rounded-md border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark"
+                                    pickerValue={endPickerMonth} // <-- controls which month opens
+                                    onPanelChange={(date) => setEndPickerMonth(date)}
+                                    style={{ width: "100%" }}
                                 />
+
                             </Form.Item>
                         </div>
 

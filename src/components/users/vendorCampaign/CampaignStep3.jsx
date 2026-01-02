@@ -19,6 +19,11 @@ dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
   const token = useSelector((state) => state.auth.token);
 
+  const [appEndPickerMonth, setAppEndPickerMonth] = useState(undefined);
+  const [campStartPickerMonth, setCampStartPickerMonth] = useState(undefined);
+  const [campEndPickerMonth, setCampEndPickerMonth] = useState(undefined);
+
+
   const [formData, setFormData] = useState({});
   const [profileImage, setProfileImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -352,7 +357,14 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
               }
               return currentDay.isBefore(today);
             }}
-            onChange={(date) => handleChange("applicationstartdate", date)}
+            onChange={(date) => {
+              handleChange("applicationstartdate", date);
+
+              // ✅ NEW (does not affect disable logic)
+              if (date) {
+                setAppEndPickerMonth(date);
+              }
+            }}
           />
           {errors.applicationstartdate && (
             <p className="text-red-500 text-sm mt-1">Please select an application start date</p>
@@ -367,6 +379,10 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
             format="DD-MM-YYYY"
             placeholder="Application End Date"
             value={formData.applicationenddate}
+            {...(dayjs.isDayjs(appEndPickerMonth) && {
+              pickerValue: appEndPickerMonth,
+              onPanelChange: (value) => setAppEndPickerMonth(value),
+            })}
             disabledDate={(current) => {
               const today = dayjs().startOf("day");
               const appStart = formData.applicationstartdate;
@@ -388,7 +404,14 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
 
               return currentDay.isBefore(today);
             }}
-            onChange={(date) => handleChange("applicationenddate", date)}
+            onChange={(date) => {
+              handleChange("applicationenddate", date);
+
+              // ✅ NEW
+              if (date) {
+                setCampStartPickerMonth(date);
+              }
+            }}
           />
           {errors.applicationenddate && (
             <p className="text-red-500 text-sm mt-1">Please select a valid application end date</p>
@@ -416,6 +439,10 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
             format="DD-MM-YYYY"
             placeholder="Start Date"
             value={formData.startDate}
+            {...(dayjs.isDayjs(campStartPickerMonth) && {
+              pickerValue: campStartPickerMonth,
+              onPanelChange: (value) => setCampStartPickerMonth(value),
+            })}
             disabledDate={(current) => {
               if (!current) return false;
               const today = dayjs().startOf("day");
@@ -424,7 +451,14 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
               if (appEnd && !current.isAfter(appEnd, "day")) return true;
               return false;
             }}
-            onChange={(date) => handleChange("startDate", date)}
+            onChange={(date) => {
+              handleChange("startDate", date);
+
+              // ✅ NEW
+              if (date) {
+                setCampEndPickerMonth(date);
+              }
+            }}
           />
           {errors.startDate && (
             <p className="text-red-500 text-sm mt-1">Please select a valid campaign start date</p>
@@ -439,6 +473,10 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
             format="DD-MM-YYYY"
             placeholder="End Date"
             value={formData.endDate}
+            {...(dayjs.isDayjs(campEndPickerMonth) && {
+              pickerValue: campEndPickerMonth,
+              onPanelChange: (value) => setCampEndPickerMonth(value),
+            })}
             disabledDate={(current) =>
               current &&
               (current < dayjs().startOf("day") ||
@@ -466,7 +504,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
           min={1}
           placeholder="0.00"
           value={formData.budgetAmount}
-           prefix={formData.currency}
+          prefix={formData.currency}
           onChange={(e) => {
             const value = e.target.value;
 
@@ -498,7 +536,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
           }}
 
         />
-        
+
       </div>
       {errors.budgetAmount && (
         <p className="text-red-500 text-sm mt-1">Budget is required and must be greater than 0 and cannot exceed 7 digits.</p>

@@ -3,6 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import PerformanceChart from "../../users/analytics/PerformanceChart";
 import TopContentChart from "../../users/analytics/TopContentChart";
+import CampaignAnalytics from "../../users/analytics/CampaignAnalytics";
 import { Tooltip, Select, Skeleton, Empty } from "antd";
 
 import {
@@ -14,9 +15,16 @@ import {
     RiStarLine,
     RiHeart3Line,
     RiChat3Line,
-    RiShareForwardLine
+    RiShareForwardLine,
+    RiCalendar2Line
 } from "@remixicon/react";
-import CampaignAnalytics from "../../users/analytics/CampaignAnalytics";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/pagination";
+
+
 
 const { Option } = Select;
 
@@ -507,56 +515,101 @@ const BrandAnalyticsDashboard = () => {
                         />
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                        {recentContent.map((c, idx) => (
-                            <div
-                                key={idx}
-                                onClick={() => c.link && window.open(c.link, "_blank")}
-                                className="relative group bg-gray-100 rounded-2xl p-4 hover:shadow-lg hover:scale-105 transition-transform duration-200 cursor-pointer flex flex-col"
-                            >
-                                {/* Top row */}
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-xs font-semibold px-2 py-1 rounded-full bg-gray-200 text-gray-700">
-                                        {c.providername}
-                                    </span>
-                                    <span className="text-xs text-gray-400">{c.postdate}</span>
-                                </div>
 
-                                {/* Content type */}
-                                <span className="text-xs text-center px-2 py-1 w-12 rounded-full bg-blue-100 text-blue-700 mb-2 inline-block">
-                                    {c.contenttypname}
-                                </span>
+                    <Swiper
+                        modules={[Autoplay, Pagination]}
+                        spaceBetween={20}
+                        autoplay={{
+                            delay: 3000,
+                            disableOnInteraction: false,
+                            pauseOnMouseEnter: true,
+                        }}
+                        pagination={{
+                            clickable: true,
+                        }}
+                        style={{
+                            paddingBottom: "32px",                 // space for bullets
+                            "--swiper-pagination-bottom": "0px",   // push bullets down
+                        }}
+                        breakpoints={{
+                            320: {
+                                slidesPerView: 1,
+                            },
+                            640: {
+                                slidesPerView: 2,
+                            },
+                            1024: {
+                                slidesPerView: 3,
+                            },
+                            1280: {
+                                slidesPerView: 4,
+                            },
+                        }}
+                    >
+                        {recentContent.map((c) => (
+                            <SwiperSlide key={c.userplatformanalyticid}>
+                                <div
+                                    role={c.link ? "button" : undefined}
+                                    tabIndex={c.link ? 0 : -1}
+                                    onClick={() =>
+                                        c.link && window.open(c.link, "_blank", "noopener,noreferrer")
+                                    }
+                                    onKeyDown={(e) => {
+                                        if (c.link && (e.key === "Enter" || e.key === " ")) {
+                                            window.open(c.link, "_blank", "noopener,noreferrer");
+                                        }
+                                    }}
+                                    className={`group bg-[#335CFF0D] border border-[#335CFF26] rounded-2xl p-4 flex flex-col h-full transition-shadow duration-200
+          ${c.link ? "cursor-pointer hover:shadow-md" : "cursor-default"}`}
+                                >
+                                    {/* Top row */}
+                                    <div className="flex items-center justify-between mb-2 gap-2">
+                                        <span className="text-xs font-semibold px-2 py-1 rounded-full border border-gray-300 whitespace-nowrap truncate max-w-[70%]">
+                                            {c.providername ?? "Unknown"} / {c.contenttypname ?? "-"}
+                                        </span>
 
-                                {/* Title / Caption */}
-                                {(c.title || c.caption) && (
-                                    <p className="text-sm font-semibold text-gray-800 mb-3 line-clamp-2 min-h-[2.5rem]">
-                                        {c.title || c.caption}
+                                        <span className="flex items-center gap-1 text-xs text-[#335CFF] whitespace-nowrap">
+                                            <RiCalendar2Line size={14} />
+                                            {c.postdate ?? "-"}
+                                        </span>
+                                    </div>
+
+                                    {/* Title */}
+                                    <p className="text-sm text-gray-800 my-3 line-clamp-2 min-h-[3rem]">
+                                        {c.title || c.caption || "No caption available"}
                                     </p>
-                                )}
 
-                                {/* Metrics */}
-                                <div className="mt-auto space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <RiEyeLine size={18} />
-                                        <span className="text-lg font-bold">{c.views.toLocaleString()}</span>
-                                        <span className="text-xs text-gray-500">views</span>
-                                    </div>
+                                    <div className="mt-auto">
+                                        {/* Views */}
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <RiEyeLine className="text-gray-700" size={18} />
+                                            <span className="text-lg font-bold text-gray-900">
+                                                {(c.views ?? 0).toLocaleString()}
+                                            </span>
+                                            <span className="text-sm text-gray-500">views</span>
+                                        </div>
 
-                                    <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
-                                        <div className="flex items-center gap-1">
-                                            <RiHeart3Line className="text-red-500" size={14} /> {c.likes}
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <RiChat3Line className="text-blue-500" size={14} /> {c.comments}
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <RiShareForwardLine className="text-green-500" size={14} /> {c.shares}
+                                        {/* Engagement */}
+                                        <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
+                                            <div className="flex items-center gap-1">
+                                                <RiHeart3Line className="text-red-500" size={14} />
+                                                {(c.likes ?? 0).toLocaleString()}
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <RiChat3Line className="text-blue-500" size={14} />
+                                                {(c.comments ?? 0).toLocaleString()}
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <RiShareForwardLine className="text-green-500" size={14} />
+                                                {(c.shares ?? 0).toLocaleString()}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </SwiperSlide>
                         ))}
-                    </div>
+                    </Swiper>
+
                 )}
             </div>
 
