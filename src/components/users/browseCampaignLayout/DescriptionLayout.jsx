@@ -705,45 +705,49 @@ const DescriptionLayout = () => {
             </h3>
 
             <div className="space-y-4">
-              {campaignDetails?.providercontenttype?.length > 0 ? (
-                campaignDetails.providercontenttype.map((platform) => (
-                  <div
-                    key={platform.providercontenttypeid}
-                    className="border-b border-gray-100 pb-3 last:border-none"
-                  >
-                    {/* header row */}
-                    <div className="flex items-center justify-between">
+                {campaignDetails?.providercontenttype?.length > 0 ? (
+                  campaignDetails.providercontenttype.map((platform) => (
+                    <div
+                      key={platform.providercontenttypeid}
+                      className="border-b border-gray-100 pb-3 last:border-none"
+                    >
+                      {/* header row */}
+                      <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
+                        {platform.iconpath && (
+                        <img
+                          src={platform.iconpath}
+                          alt={platform.providername}
+                          className="w-5 h-5 object-contain"
+                        />
+                        )}
                         <span className="text-gray-900 font-medium">
-                          {platform.providername}
+                        {platform.providername}
                         </span>
                       </div>
 
-                      {/* Content Types at end */}
-                      <span className="text-gray-500 text-sm text-right">
-                        {platform.contenttypes &&
-                        platform.contenttypes.length > 0
-                          ? platform.contenttypes
-                              .map((ct) => ct.contenttypename)
-                              .join(", ")
-                          : "No types"}
-                      </span>
-                    </div>
+                        {/* Content Types at end */}
+                        <span className="text-gray-500 text-sm text-right">
+                          {platform.contenttypes && platform.contenttypes.length > 0
+                            ? platform.contenttypes
+                                .map((ct) => ct.contenttypename)
+                                .join(", ")
+                            : "No types"}
+                        </span>
+                      </div>
 
-                    {/* Caption */}
-                    {platform.caption && (
-                      <p className="text-gray-600 italic mt-2 border-l-2 border-gray-200 pl-3">
-                        {platform.caption}
-                      </p>
-                    )}
+                      {/* Caption */}
+                      {platform.caption && (
+                        <p className="text-gray-600 italic mt-2 border-l-2 border-gray-200 pl-3">
+                          {platform.caption}
+                        </p>
+                      )}
+                    </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No platform content types available.</p>
+                  )}
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-500">
-                  No platform content types available.
-                </p>
-              )}
-            </div>
           </div>
         </aside>
       </div>

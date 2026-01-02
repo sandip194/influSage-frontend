@@ -646,11 +646,15 @@ useEffect(() => {
                           </span>
 
                           {/* Quoted Text */}
-                          {repliedMsg.content && (
-                            <span className="truncate max-w-[230px]">
-                              {repliedMsg.content}
-                            </span>
-                          )}
+                            {repliedMsg.ishtml ? (
+                              <span className="italic text-white text-[11px]">
+                                Campaign Invitation
+                              </span>
+                            ) : repliedMsg.content ? (
+                              <span className="truncate max-w-[230px]">
+                                {repliedMsg.content}
+                              </span>
+                            ) : null}
 
                           {/* Quoted File */}
                           {repliedMsg.file && (() => {

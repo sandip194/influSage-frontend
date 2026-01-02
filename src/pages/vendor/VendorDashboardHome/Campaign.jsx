@@ -1,20 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import {
-  RiMoreFill,
-  RiTiktokFill,
-  RiInstagramFill,
-  RiYoutubeFill,
-  RiMapPin2Line,
-  RiMessage3Line,
-  RiUser3Line,
-} from "@remixicon/react";
+import { RiCalendar2Line } from "@remixicon/react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, FreeMode, Autoplay } from "swiper/modules";
+import { Navigation, FreeMode, Autoplay, Pagination } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/free-mode";
+import 'swiper/css/pagination';
 
 // import { RiArrowLeftSLine, RiArrowRightSLine } from "@remixicon/react";
 
@@ -200,73 +193,146 @@ const Campaign = () => {
               nextEl: ".swiper-button-next-custom",
               prevEl: ".swiper-button-prev-custom",
             }}
-            modules={[FreeMode, Navigation, Autoplay]}
+            modules={[FreeMode, Navigation, Autoplay, Pagination]}
+            pagination={{
+          clickable: true,
+        }}
             className="mySwiper pb-5"
           >
             {campaigns.map((item) => (
               <SwiperSlide key={item.id} className="pb-4">
                 <div
-                  onClick={() => navigate(`/vendor-dashboard/vendor-campaign/campaignDetails/${item.id}`)}
-                  className="cursor-pointer  bg-[#e6eff9] border border-gray-200 
-      rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col overflow-hidden"
+                  onClick={() =>
+                    navigate(`/vendor-dashboard/vendor-campaign/campaignDetails/${item.id}`)
+                  }
+                  className="
+                    rounded-2xl
+                    overflow-hidden
+                    bg-[#335CFF0D]
+                    border border-[#335CFF26]
+                    flex flex-col
+                    hover:shadow-md
+                    transition
+                    cursor-pointer
+                  "
                 >
-                  {/* ======= Campaign Banner + Status ======= */}
-                  <div className="relative h-30">
+                  {/* ===== Image Section ===== */}
+                  <div className="relative h-36 w-full overflow-hidden">
                     <img
-                      src={item.photopath || "/placeholder.jpg"} // fallback image
+                      src={item.photopath || '/placeholder.jpg'}
                       alt={item.name}
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover"
                     />
-                    <span
-                      className={`absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full shadow-md
-    ${statusStyles[item.status?.toLowerCase()] || "bg-gray-100 text-gray-700"}`}
-                    >
-                      {item.status}
-                    </span>
+
+                    {/* Status Badge */}
+                    {item.status && (
+                      <span
+                        className={`absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full shadow-md
+                          ${
+                            statusStyles[item.status?.toLowerCase()] ||
+                            'bg-gray-100 text-gray-700'
+                          }`}
+                      >
+                        {item.status}
+                      </span>
+                    )}
                   </div>
 
-                  {/* ======= Campaign Info ======= */}
-                  <div className="p-4 flex flex-col flex-1">
-                    {/* Campaign Name */}
-                    <h3 className="text-lg font-bold text-gray-900 truncate">{item.name}</h3>
+                  {/* ===== Content Section ===== */}
+                  <div className="p-4 flex flex-col gap-3 flex-1">
+                    {/* Title */}
+                    <h3 className="text-[15px] font-semibold text-[#0D132D] truncate h-[22px]">
+                      {item.name}
+                    </h3>
 
                     {/* Dates */}
                     {item.campaignstartdate && item.campaignenddate ? (
-                      <div className="mt-2 flex flex-col gap-1 text-xs text-gray-500">
-                        <p>
-                          <span className="font-semibold text-gray-700">Campaign Start:</span>{" "}
-                          <span className="text-gray-900 font-medium">
-                            {parseDDMMYYYY(item.campaignstartdate).toLocaleDateString("en-GB")}
-                          </span>
-                        </p>
-                        <p>
-                          <span className="font-semibold text-gray-700">Campaign End:</span>{" "}
-                          <span className="text-gray-900 font-medium">
-                            {parseDDMMYYYY(item.campaignenddate).toLocaleDateString("en-GB")}
-                          </span>
-                        </p>
+                      <div className="flex items-center gap-2 text-sm text-[#335CFF] h-[20px]">
+                        <RiCalendar2Line size={15} className="shrink-0" /> Date :
+                        <span className="truncate">
+                          {parseDDMMYYYY(item.campaignstartdate).toLocaleDateString("en-GB")}
+                          <span className="mx-1 font-medium">-</span>
+                          {parseDDMMYYYY(item.campaignenddate).toLocaleDateString("en-GB")}
+                        </span>
                       </div>
                     ) : (
-                      <p className="text-xs text-gray-500 mt-1">Campaign dates not available</p>
+                      <p className="text-xs text-gray-500">Campaign dates not available</p>
                     )}
 
+                    {/* Categories */}
+                    {item.campaigncategories?.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {item.campaigncategories.slice(0, 2).map((cat, i) => (
+                          <span
+                            key={i}
+                            className="
+                              px-2 py-1
+                              rounded-full
+                              text-xs font-medium
+                              border border-[#0D132D26]
+                              bg-white
+                              whitespace-nowrap
+                            "
+                          >
+                            {cat.categoryname}
+                          </span>
+                        ))}
 
+                        {item.campaigncategories.length > 2 && (
+                          <span
+                            className="
+                              px-2 py-1
+                              rounded-full
+                              text-xs font-medium
+                              border border-[#0D132D26]
+                              bg-gray-200
+                            "
+                          >
+                            +{item.campaigncategories.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    )}
 
-
-                    {/* Budget */}
+                    {/* ===== Budget Section ===== */}
                     {item.estimatedbudget && (
-                      <span className="inline-block bg-[#0D132D] text-white
-          font-semibold px-3 py-1 rounded-full mt-3 text-sm shadow-sm w-max">
-                        Budget: ₹{item.estimatedbudget?.toLocaleString()}
-                      </span>
-                    )}
+                      <div className="mt-auto">
+                        <div
+                          className="
+                            bg-white
+                            border border-[#0D132D26]
+                            rounded-xl
+                            px-3 py-2
+                            flex items-center gap-3
+                          "
+                        >
+                          {/* Currency Icon */}
+                          <div
+                            className="
+                              w-9 h-9
+                              rounded-full
+                              bg-[#0D132D]
+                              text-white
+                              flex items-center justify-center
+                              text-sm font-semibold
+                              shrink-0
+                            "
+                          >
+                            ₹
+                          </div>
 
-                    {/* Platform Icons */}
-                    <div className="flex gap-2 mt-2">
-                      {item.platforms?.includes("TikTok") && <RiTiktokFill className="text-2xl text-gray-600" />}
-                      {item.platforms?.includes("Instagram") && <RiInstagramFill className="text-2xl text-pink-500" />}
-                      {item.platforms?.includes("YouTube") && <RiYoutubeFill className="text-2xl text-red-600" />}
-                    </div>
+                          {/* Amount */}
+                          <div className="flex flex-col leading-tight">
+                            <span className="text-sm font-semibold text-[#0D132D]">
+                              {item.estimatedbudget.toLocaleString("en-IN")}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              Estimated Budget
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </SwiperSlide>
@@ -316,7 +382,10 @@ const Campaign = () => {
               nextEl: ".influencer-button-next",
               prevEl: ".influencer-button-prev",
             }}
-            modules={[FreeMode, Navigation, Autoplay]}
+            pagination={{
+              clickable: true,
+            }}
+            modules={[FreeMode, Navigation, Autoplay, Pagination]}
             className="pb-5"
           >
             {

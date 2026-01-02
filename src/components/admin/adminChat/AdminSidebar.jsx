@@ -1,10 +1,25 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { Modal } from "antd";
+import { Modal, Skeleton } from "antd";
 import axios from "axios";
 import { RiBook2Line, RiTicket2Line } from "@remixicon/react";
 import { useSelector } from "react-redux";
 import { getSocket } from "../../../sockets/socket";
 import useSocketRegister from "../../../sockets/useSocketRegister";
+
+const TicketSkeleton = () => (
+  <div className="flex items-center gap-3 p-3">
+    <Skeleton.Avatar active size="default" shape="circle" />
+    <div className="flex-1">
+      <Skeleton.Input
+        active
+        size="small"
+        style={{ width: "85%", marginBottom: 6 }}
+      />
+      <Skeleton.Input active size="small" style={{ width: "50%" }} />
+    </div>
+  </div>
+);
+
 
 const AdminSidebar = forwardRef (({ setActiveSubject }, ref) => {
   useSocketRegister();
@@ -223,11 +238,18 @@ useEffect(() => {
       {/* Ticket List */}
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
         {loading && (
-          <p className="text-gray-400 text-sm text-center">Loading...</p>
+          <>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <TicketSkeleton key={i} />
+            ))}
+          </>
         )}
 
         {!loading && subjects.length === 0 && (
-          <p className="text-gray-400 text-sm text-center">No tickets found</p>
+          <div className="flex flex-col items-center justify-center h-32 text-gray-500">
+          <RiBook2Line size={32} className="mb-2 opacity-50" />
+          <p>No tickets found</p>
+        </div>
         )}
 
         {!loading &&

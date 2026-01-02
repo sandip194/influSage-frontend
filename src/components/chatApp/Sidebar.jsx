@@ -3,10 +3,23 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { RiAddLine } from "react-icons/ri";
 import { CloseCircleFilled } from "@ant-design/icons";
-import { Tooltip } from "antd";
+import { Tooltip, Skeleton  } from "antd";
 import { useNavigate } from "react-router-dom";
 import { getSocket } from "../../sockets/socket";
 
+const SidebarSkeleton = () => (
+    <div className="px-4 py-3 flex items-center gap-3">
+      <Skeleton.Avatar active size="large" shape="circle" />
+      <div className="flex-1">
+        <Skeleton.Input
+          active
+          size="small"
+          style={{ width: "70%", marginBottom: 6 }}
+        />
+        <Skeleton.Input active size="small" style={{ width: "40%" }} />
+      </div>
+    </div>  
+);
 export default function Sidebar({ onSelectChat }) {
   const socket = getSocket();
   const { token } = useSelector((state) => state.auth);
@@ -15,6 +28,9 @@ export default function Sidebar({ onSelectChat }) {
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [unreadMessages, setUnreadMessages] = useState([]);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   // Fetch campaign list
@@ -22,6 +38,8 @@ export default function Sidebar({ onSelectChat }) {
     if (!token) return;
 
     try {
+      setLoading(true);
+
       const response = await axios.get(`/chat/conversationsdetails`, {
         params: { p_search: search.trim() || "" },
         headers: { Authorization: `Bearer ${token}` },
@@ -30,13 +48,15 @@ export default function Sidebar({ onSelectChat }) {
       if (response.status === 200) {
         const formatted = (response.data.data || []).map((c) => ({
           ...c,
-          campaignphoto: c.campaignphoto ? c.campaignphoto : null,
+          campaignphoto: c.campaignphoto ?? null,
         }));
         setCampaigns(formatted);
       }
     } catch (error) {
       console.error("Error fetching campaigns:", error);
       setCampaigns([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,7 +136,13 @@ const hasUnreadMessage = (vendor) => {
 
       {/* Campaign List */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        {campaigns?.length > 0 ? (
+        {loading ? (
+          <>
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <SidebarSkeleton key={idx} />
+            ))}
+          </>
+        ) : campaigns?.length > 0 ? (
           campaigns.map((campaign) => {
             const vendor = campaign.vendors?.[0];
             if (!vendor?.conversationid) return null;

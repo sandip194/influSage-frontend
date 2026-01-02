@@ -34,6 +34,17 @@ const CampaignReviewStep = ({ onEdit }) => {
   const [loadingSend, setLoadingSend] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
 
+  const formatDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "—";
+    const parts = dateStr.includes("-") ? dateStr.split("-") : [];
+    if (parts.length !== 3) return dateStr;
+    if (parts[0].length === 4) {
+      const [yyyy, mm, dd] = parts;
+      return `${dd}/${mm}/${yyyy}`;
+    }
+    const [dd, mm, yyyy] = parts;
+    return `${dd}/${mm}/${yyyy}`;
+  };
 
 
   useEffect(() => {
@@ -563,34 +574,39 @@ const CampaignReviewStep = ({ onEdit }) => {
             </div> */}
             <div className="py-2 border-b border-gray-100">
 
-              {/* Campaign Dates */}
-              <p className="text-md mb-2 font-semibold text-gray-600">Campaign Dates</p>
+              {/* ===== Campaign Dates ===== */}
+              <p className="text-md mb-2 font-semibold text-gray-600">
+                Campaign Dates
+              </p>
 
-              <div className="flex items-center gap-3 text-blue-400 text-sm">
-                <RiCalendarLine className=" text-base shrink-0" />
-                <span className=''>
-                  {p_campaignjson.campaignstartdate || "-"}{" "}
-                  <span className="mx-1">-</span>{" "}
-                  {p_campaignjson.campaignenddate || "-"}
+              <div className="flex items-center text-gray-500 gap-2 text-sm">
+                <span className="font-medium">
+                  {formatDDMMYYYY(p_campaignjson?.campaignstartdate)}
+                </span>
+                <span className="text-gray-400">–</span>
+                <span className="font-medium">
+                  {formatDDMMYYYY(p_campaignjson?.campaignenddate)}
                 </span>
               </div>
 
               <hr className="my-4 border-gray-100" />
 
-              {/* Application Dates */}
-              <p className="text-md mb-2 font-semibold text-gray-600">Application Dates</p>
+              {/* ===== Application Dates ===== */}
+              <p className="text-md mb-2 font-semibold text-gray-600">
+                Application Dates
+              </p>
 
-              <div className="flex items-center gap-3 text-blue-400 text-sm">
-                <RiCalendarLine  className=" text-base shrink-0" />
-                <span className=''>
-                  {p_campaignjson.applicationstartdate || "—"}{" "}
-                  <span className="mx-1">-</span>{" "}
-                  {p_campaignjson.applicationenddate || "—"}
+              <div className="flex items-center text-gray-500 gap-2 text-sm">
+                <span className="font-medium">
+                  {formatDDMMYYYY(p_campaignjson?.applicationstartdate)}
+                </span>
+                <span className="text-gray-400">–</span>
+                <span className="font-medium">
+                  {formatDDMMYYYY(p_campaignjson?.applicationenddate)}
                 </span>
               </div>
 
             </div>
-
 
 
             <div className="pt-4 pb-2">

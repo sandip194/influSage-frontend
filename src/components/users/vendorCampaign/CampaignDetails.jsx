@@ -45,6 +45,22 @@ const formatFollowers = (num) => {
   return num.toString();
 };
 
+const formatToDDMMYYYY = (dateStr) => {
+  if (!dateStr) return "";
+  const parts = dateStr.includes("-") ? dateStr.split("-") : [];
+  // If already DD-MM-YYYY
+  if (parts.length === 3 && parts[0].length === 2) {
+    return `${parts[0]}/${parts[1]}/${parts[2]}`;
+  }
+  if (parts.length === 3 && parts[0].length === 4) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  const d = new Date(dateStr);
+  if (isNaN(d)) return "";
+
+  return d.toLocaleDateString("en-GB");
+};
+
 
 const CampaignDetails = () => {
   //  const [isModalOpen, setIsModalOpen] = useState(false);
@@ -607,24 +623,24 @@ const CampaignDetails = () => {
             </div>
 
 
-            <div className="py-4 border-b border-gray-200">
-              <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
-              <p>
-                {campaignDetails?.requirements.campaignstartdate} <b>{"To"}{" "}</b> {campaignDetails?.requirements.campaignenddate}
-              </p>
-            </div>
+           <div className="py-4 border-b border-gray-200">
+            <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
+            <p className="text-gray-700 text-sm">
+              {formatToDDMMYYYY(campaignDetails?.requirements?.campaignstartdate)}
+              {" "}{"-"}{" "}
+              {formatToDDMMYYYY(campaignDetails?.requirements?.campaignenddate)}
+            </p>
+          </div>
 
-            <div className="py-4 border-b border-gray-200">
-              <p className="text-sm font-bold text-gray-900">Application Window</p>
-              <p>
-                {campaignDetails?.applicationstartdate} <b>{"To"}{" "}</b> {campaignDetails?.applicationenddate}
-              </p>
-            </div>
+          <div className="py-4">
+            <p className="text-sm font-bold text-gray-900">Application Window</p>
+            <p className="text-gray-700 text-sm">
+              {formatToDDMMYYYY(campaignDetails?.applicationstartdate)}
+              {" "}{"-"}{" "}
+              {formatToDDMMYYYY(campaignDetails?.applicationenddate)}
+            </p>
+          </div>
 
-            <div className="py-4">
-              <p className="text-sm font-bold text-gray-900">Total Price</p>
-              <p>₹{campaignDetails?.estimatedbudget}</p>
-            </div>
           </div>
 
 
@@ -738,9 +754,18 @@ const CampaignDetails = () => {
               <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
               <div className="relative">
                 {[
-                  { name: "Campaign Created", date: campaignDetails?.trackcampaign?.createddate },
-                  { name: "Campaign Started", date: campaignDetails?.trackcampaign?.campaignstartdate },
-                  { name: "Campaign Ended", date: campaignDetails?.trackcampaign?.campaignenddate },
+                   {
+                    name: "Campaign Created",
+                    date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.createddate),
+                  },
+                  {
+                    name: "Campaign Started",
+                    date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.campaignstartdate),
+                  },
+                  {
+                    name: "Campaign Ended",
+                    date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.campaignenddate),
+                  },
                 ].map((step, idx, arr) => {
                   const stepDate = dayjs(step.date, "DD-MM-YYYY HH:mm");
                   const now = dayjs();

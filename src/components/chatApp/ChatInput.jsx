@@ -130,11 +130,30 @@ export default function ChatInput({
 
       {/* Reply Preview */}
       {replyTo && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-gray-100 border-l-4 border-[#0D132D] text-sm text-gray-700 px-4 py-2 rounded-md space-y-2 sm:space-y-0">
-          <div className="flex-1 truncate">
+        <div className="flex items-start justify-between bg-gray-100 border-l-4 border-[#0D132D] text-sm text-gray-700 px-4 py-2 rounded-md">
+          <div className="flex-1 truncate pr-2">
             <span className="font-semibold">Replying to: </span>
-            <span className="truncate">{replyTo.content || "Attachment"}</span>
+
+            {replyTo.ishtml ? (
+              <span className="italic text-gray-600">
+                Campaign Invitation
+              </span>
+            ) : (
+              <span className="truncate">
+                {replyTo.content || "Attachment"}
+              </span>
+            )}
           </div>
+
+          {/* Close button */}
+          <button
+            type="button"
+            onClick={onCancelReply}
+            className="text-gray-500 hover:text-gray-700 flex-shrink-0"
+            aria-label="Cancel reply"
+          >
+            <RiCloseLine size={16} />
+          </button>
         </div>
       )}
 

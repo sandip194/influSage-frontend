@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { Modal, Skeleton, Empty } from "antd";
 import { useSelector } from "react-redux";
+import { RiStarFill, RiChatQuoteLine } from "@remixicon/react";
 
 const FeedbackCard = () => {
   const [feedbacks, setFeedbacks] = useState([]);
@@ -48,40 +49,61 @@ const FeedbackCard = () => {
   }, [token]);
 
   const renderFeedbackCard = (fb) => (
-    <div
-      key={fb.feedbackid}
-      className="rounded-2xl p-4 flex flex-col justify-between h-full bg-white 
-                 shadow-md hover:shadow-lg transition-shadow duration-300"
-    >
-
-      <div className="flex items-center gap-3 mt-auto">
+  <div
+    key={fb.feedbackid}
+    className="
+      bg-[#335CFF0D]
+      border border-[#335CFF26]
+      rounded-2xl
+      p-5
+      shadow-sm
+      hover:shadow-md transition
+      flex flex-col
+      h-full
+    "
+  >
+    {/* ===== Header ===== */}
+    <div className="flex items-start justify-between mb-3">
+      <div className="flex items-center gap-3 min-w-0">
         <img
-          src={fb.campaignpohoto || "https://via.placeholder.com/40"}
+          src={fb.campaignpohoto || "https://via.placeholder.com/48"}
           alt={fb.campaignname || "Brand"}
-          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+          className="w-12 h-12 rounded-full object-cover border border-gray-200"
         />
-        <div>
-          <p className="text-sm sm:text-base font-bold text-gray-800">
+
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-gray-900 truncate">
             {fb.campaignname || "Unknown Brand"}
           </p>
-          <p className="text-xs sm:text-sm text-gray-500">
+          <p className="text-xs text-gray-500">
             {formatTime(fb.createddate)}
           </p>
         </div>
       </div>
-      <div className="flex mb-3 gap-1">
-        {[...Array(5)].map((_, i) => (
-          <i
-            key={i}
-            className={`ri-star-${i < fb.rating ? "fill" : "line"} text-2xl ${i < fb.rating ? "text-yellow-500" : "text-gray-400"
-              }`}
-            style={{ textShadow: "0 0 1px black", stroke: "#000", strokeWidth: 0.6 }}
-          />
-        ))}
-      </div>
-      <p className="text-sm text-gray-700 mb-4 text-justify">{fb.text || "No feedback"}</p>
     </div>
-  );
+<div className="flex mb-3 gap-1">
+        {fb.rating > 0 && (
+        <div className="flex items-center gap-1 shrink-0">
+          {Array.from({ length: fb.rating }).map((_, i) => (
+            <RiStarFill
+              key={i}
+              size={20}
+              className="text-yellow-400"
+              style={{ stroke: "black", strokeWidth: 0.6 }}
+            />
+          ))}
+        </div>
+      )}
+      </div>
+    {/* ===== Feedback Text ===== */}
+    <div className="flex gap-2 text-sm text-gray-700">
+      <RiChatQuoteLine className="shrink-0 text-gray-400 mt-0.5" />
+      <p className="line-clamp-3 text-justify">
+        {fb.text || "No feedback provided."}
+      </p>
+    </div>
+  </div>
+);
 
   const feedbackCards = useMemo(
     () => feedbacks.slice(0, 3).map(renderFeedbackCard),

@@ -56,32 +56,6 @@ const AppliedCampaignCard = ({
               relative
             "
           >
-            {/* Withdraw */}
-            {campaign.canwithdraw && (
-              <div className="absolute top-3 right-3 z-10">
-                <Tooltip title="Withdraw Application">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedApplicationId(
-                        campaign.campaignapplicationid
-                      );
-                      setWithdrawModalOpen(true);
-                    }}
-                    className="
-                      w-9 h-9
-                      rounded-full
-                      border border-red-300
-                      flex items-center justify-center
-                      text-red-500
-                      hover:bg-red-50
-                    "
-                  >
-                    <RiDeleteBinLine size={16} />
-                  </button>
-                </Tooltip>
-              </div>
-            )}
 
             {/* Content */}
             <div className="p-4 flex flex-col gap-3 flex-1">
@@ -113,7 +87,7 @@ const AppliedCampaignCard = ({
               </div>
 
               {/* Description */}
-              <p className="text-xs text-gray-600 line-clamp-2">
+              <p className="text-sm text-gray-600 line-clamp-2">
                 {campaign.description}
               </p>
 
@@ -129,13 +103,12 @@ const AppliedCampaignCard = ({
 
               {/* Footer */}
               <div className="mt-auto flex items-center gap-2 pt-2">
+                {/* Edit Application */}
                 {campaign.iseditable ? (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedApplicationId(
-                        campaign.campaignapplicationid
-                      );
+                      setSelectedApplicationId(campaign.campaignapplicationid);
                       setSelectedCampaignId(campaign.id);
                       openEditModal();
                     }}
@@ -163,10 +136,35 @@ const AppliedCampaignCard = ({
                       py-2
                       text-sm
                       font-semibold
+                      cursor-not-allowed
                     "
                   >
                     Edit Application
                   </button>
+                )}
+
+                {/* Withdraw */}
+                {campaign.canwithdraw && (
+                  <Tooltip title="Withdraw Application">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedApplicationId(campaign.campaignapplicationid);
+                        setWithdrawModalOpen(true);
+                      }}
+                      className="
+                        w-10 h-10
+                        rounded-full
+                        border border-red-300
+                        flex items-center justify-center
+                        text-red-500
+                        hover:bg-red-50
+                        shrink-0
+                      "
+                    >
+                      <RiDeleteBinLine size={16} />
+                    </button>
+                  </Tooltip>
                 )}
               </div>
             </div>

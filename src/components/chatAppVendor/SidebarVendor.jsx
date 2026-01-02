@@ -4,9 +4,19 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CloseCircleFilled } from "@ant-design/icons";
-import { Tooltip } from "antd";
+import { Tooltip, Skeleton } from "antd";
 import { getSocket } from "../../sockets/socket";
 import useSocketRegister from "../../sockets/useSocketRegister";
+
+const SidebarSkeleton = () => (
+  <div className="px-4 py-3 flex items-center gap-3">
+    <Skeleton.Avatar active size="large" shape="circle" />
+    <div className="flex-1">
+      <Skeleton.Input active size="small" style={{ width: "70%", marginBottom: 6 }} />
+      <Skeleton.Input active size="small" style={{ width: "40%" }} />
+    </div>
+  </div>
+);
 
 export default function SidebarVendor({ onSelectChat }) {
     useSocketRegister();
@@ -23,12 +33,17 @@ export default function SidebarVendor({ onSelectChat }) {
   const [unreadMessages, setUnreadMessages] = useState([]);
   const [loadingUnread, setLoadingUnread] = useState(false);
   const selectChatFromOutside = location.state?.selectChatFromOutside || null;
+  const [loadingCampaigns, setLoadingCampaigns] = useState(false);
+  const [loadingInfluencers, setLoadingInfluencers] = useState(false);
+
 
   // ✅ useCallback to memoize function references
   const fetchCampaigns = useCallback(async () => {
     if (!token) return;
 
     try {
+    setLoadingCampaigns(true);
+
       const response = await axios.get(`/chat/conversationsdetails`, {
         params: { p_search: search.trim() || "" },
         headers: { Authorization: `Bearer ${token}` },
@@ -72,7 +87,9 @@ export default function SidebarVendor({ onSelectChat }) {
       }
     } catch (err) {
       console.error("Error fetching campaigns:", err);
-    }
+    }finally {
+    setLoadingCampaigns(false);
+  }
   }, [token, search]);
 
   const fetchUnreadMessages = useCallback(async () => {
@@ -159,6 +176,16 @@ export default function SidebarVendor({ onSelectChat }) {
     }
   }, [selectChatFromOutside, campaigns]);
 
+  useEffect(() => {
+  if (selectedCampaign) {
+    const timer = setTimeout(() => {
+      setLoadingInfluencers(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }
+}, [selectedCampaign]);
+
   return (
     <div className="h-full flex flex-col md:flex-row gap-4">
       {/* --- Campaigns Panel --- */}
@@ -208,21 +235,26 @@ export default function SidebarVendor({ onSelectChat }) {
 
         {/* Campaign List */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
-          {campaigns?.map((campaign) => {
-            const isSelected =
-              selectedCampaign?.campaignid === campaign.campaignid;
-            const hasUnread = campaign.influencers?.some(
-              (inf) =>
-                inf.lastmessage &&
-                inf.readbyvendor === false
-            );
+          {loadingCampaigns ? (
+            Array.from({ length: 6 }).map((_, idx) => (
+              <SidebarSkeleton key={idx} />
+            ))
+          ) : campaigns.length > 0 ? (
+            campaigns.map((campaign) => {
+              const isSelected =
+                selectedCampaign?.campaignid === campaign.campaignid;
 
-            return (
+              const hasUnread = campaign.influencers?.some(
+                (inf) => inf.lastmessage && inf.readbyvendor === false
+              );
+
+              return (
               <div
                 key={campaign?.campaignid}
                 onClick={() => {
                   setSelectedCampaign(campaign);
                   setSelectedInfluencer(null);
+                  setLoadingInfluencers(true);
                 }}
                 className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-300
                   ${
@@ -263,7 +295,10 @@ export default function SidebarVendor({ onSelectChat }) {
                 )}
               </div>
             );
-          })}
+          })
+        ) : (
+          <div className="p-4 text-sm text-gray-400">No campaigns found</div>
+        )}
         </div>
       </div>
 
@@ -289,7 +324,7 @@ export default function SidebarVendor({ onSelectChat }) {
           <Tooltip title="Search Influencers">
             <button
               onClick={() => navigate("/vendor-dashboard/browse-influencers")}
-              className="w-9 h-9 bg-[#0D132D] text-white rounded-full flex items-center justify-center hover:bg-[#0a0e1f] transition"
+              className="w-9 h-9 bg-[#0D132D] cursor-pointer text-white rounded-full flex items-center justify-center hover:bg-[#0a0e1f] transition"
             >
               <RiAddLine />
             </button>
@@ -297,12 +332,14 @@ export default function SidebarVendor({ onSelectChat }) {
         </div>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
-          {filteredInfluencers?.length > 0 ? (
+          {loadingInfluencers ? (
+            Array.from({ length: 6 }).map((_, idx) => (
+              <SidebarSkeleton key={idx} />
+            ))
+          ) : filteredInfluencers.length > 0 ? (
             filteredInfluencers.map((inf) => {
               const isSelected = selectedInfluencer === inf.influencerid;
-              const unread =
-                inf.lastmessage &&
-                inf.readbyvendor === false;
+              const unread = inf.lastmessage && inf.readbyvendor === false;
 
               return (
                 <div

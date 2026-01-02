@@ -433,7 +433,7 @@ const Details = () => {
               </p>
             </div>
 
-            <div className="py-4 border-b border-gray-200">
+            <div className="py-4">
               <p className="text-sm font-bold text-gray-900">Application Window</p>
              <p>
               {formatDateDDMMYYYY(
@@ -446,12 +446,6 @@ const Details = () => {
                 campaign?.applicationenddate
               )}
             </p>
-            </div>
-
-
-            <div className="py-4">
-              <p className="text-sm font-bold text-gray-900">Total Price</p>
-              <p>₹{campaign?.estimatedbudget}</p>
             </div>
           </div>
 
