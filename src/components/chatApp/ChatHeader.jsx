@@ -125,7 +125,12 @@ export default function ChatHeader({ chat, onBack, onOnlineStatusChange }) {
       <div className="relative w-10 h-10">
         <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center text-white font-semibold text-lg overflow-hidden">
           {chat?.img ? (
-            <img src={chat.img} alt={chat.name} className="w-full h-full object-cover rounded-full" />
+            <img
+              src={chat.img}
+              alt={chat.name}
+              className="w-full h-full object-cover rounded-full"
+              onError={(e) => (e.target.src = "/defualt.jpg")}
+            />
           ) : (
             <span>{initial}</span>
           )}

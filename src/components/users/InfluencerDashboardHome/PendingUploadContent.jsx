@@ -78,6 +78,7 @@ const PendingUploadContent = () => {
                             <img
                                 src={record.campaignphoto}
                                 alt="Campaign"
+                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                         ) : (

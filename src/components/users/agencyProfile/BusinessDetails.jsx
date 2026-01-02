@@ -93,7 +93,7 @@ export const BusinessDetails = ({ onNext }) => {
         const saved = localStorage.getItem('businessDetails');
         if (saved) {
             const parsed = JSON.parse(saved);
-           // console.log(parsed);
+            // console.log(parsed);
 
             setProfileImage(parsed.profileImage || null);
             setPreview(parsed.preview || null);
@@ -157,12 +157,12 @@ export const BusinessDetails = ({ onNext }) => {
 
             localStorage.setItem('businessDetails', JSON.stringify(fullData));
 
-           // console.log('✅ Submitted data:', fullData);
+            // console.log('✅ Submitted data:', fullData);
             message.success('Form submitted successfully!');
             onNext();
         } catch (errorInfo) {
             console.error('❌ Validation Failed:', errorInfo);
-        }finally {
+        } finally {
             setIsSubmitting(false);
         }
     };
@@ -200,7 +200,12 @@ export const BusinessDetails = ({ onNext }) => {
                 <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
                     <div className="relative m-auto w-30 h-30 rounded-full overflow-hidden bg-[#0D132D0D] hover:opacity-90 cursor-pointer border border-gray-100 group">
                         {preview ? (
-                            <img src={preview} alt="Profile preview" className="object-cover w-full h-full" />
+                            <img
+                                src={preview}
+                                alt="Profile preview"
+                                className="object-cover w-full h-full"
+                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                            />
                         ) : (
                             <div className="flex items-center justify-center w-full h-full text-gray-800 opacity-50">
                                 <RiImageAddLine className="w-8 h-8" />
@@ -380,11 +385,11 @@ export const BusinessDetails = ({ onNext }) => {
                 </Form.Item>
 
                 {/* Submit Button */}
-               <button
+                <button
                     onClick={handleSubmit}
                     disabled={isSubmitting}
                     className="bg-[#121A3F] cursor-pointer text-white px-8 py-3 rounded-full hover:bg-[#0D132D] disabled:opacity-60"
-                    >
+                >
                     {isSubmitting ? "Saving..." : "Continue"}
                 </button>
             </Form>

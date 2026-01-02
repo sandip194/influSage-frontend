@@ -420,7 +420,12 @@ const BrandAnalyticsDashboard = () => {
 
                                 {/* Icon */}
                                 {p.icon ? (
-                                    <img src={p.icon} alt={p.platform} className="w-6 h-6" />
+                                    <img
+                                        src={p.icon}
+                                        alt={p.platform}
+                                        className="w-6 h-6"
+                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                                    />
                                 ) : (
                                     <div className="w-6 h-6 bg-gray-300 rounded-full" />
                                 )}

@@ -38,7 +38,7 @@ export const LoginForm = () => {
           localStorage.setItem('rememberedEmail', data.email);
           localStorage.setItem("rememberedPassword", data.password);
         }
-        toast.success(res.data.message || "Login successful!" , { position: "top-right", });
+        toast.success(res.data.message || "Login successful!", { position: "top-right", });
         // redirect to dashboard, etc.
       }
     } catch (error) {
@@ -76,7 +76,12 @@ export const LoginForm = () => {
       <div className="login-card h-90vh">
         <div className="login-card-left">
           <div className="branding">
-            <img src="/influSage-logo.png" alt="Logo" className="h-8 w-auto" />
+            <img
+              src="/influSage-logo.png"
+              alt="Logo"
+              className="h-8 w-auto"
+              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+            />
             <p>Built for Creators.<br />Backed by Brands.</p>
           </div>
         </div>
@@ -113,7 +118,7 @@ export const LoginForm = () => {
             <span className='text-for-error'>{errors.password?.message}</span>
 
             <div className="form-options">
-              <label><input type="checkbox" {...register('rememberMe')}/> Remember Me</label>
+              <label><input type="checkbox" {...register('rememberMe')} /> Remember Me</label>
               <Link to="/forgot-password" className="forgot-password-link">
                 Forgot Password?
               </Link>
@@ -125,13 +130,28 @@ export const LoginForm = () => {
 
             <div className="social-buttons">
               <div className="social-btn">
-                <img className='social-icon' src={googleIcon} alt="Google" />
+                <img
+                  className='social-icon'
+                  src={googleIcon}
+                  alt="Google"
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                />
               </div>
               <div className="social-btn">
-                <img className='social-icon' src={facebookIcon} alt="Facebook" />
+                <img
+                  className='social-icon'
+                  src={facebookIcon}
+                  alt="Facebook"
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                />
               </div>
               <div className="social-btn">
-                <img className='social-icon' src={appleIcon} alt="Apple" />
+                <img
+                  className='social-icon'
+                  src={appleIcon}
+                  alt="Apple"
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                />
               </div>
             </div>
 

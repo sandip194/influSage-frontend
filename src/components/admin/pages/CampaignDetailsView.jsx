@@ -228,6 +228,7 @@ const CampaignDetailsView = () => {
                                 src={cmapignDetails?.photopath}
                                 alt="Logo"
                                 onClick={() => setIsPreviewOpen(true)}
+                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                 className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover cursor-pointer"
                             />
                             {isPreviewOpen && (
@@ -243,6 +244,7 @@ const CampaignDetailsView = () => {
                                     </button>
                                     <img
                                         src={cmapignDetails?.photopath}
+                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                         alt="Logo Preview"
                                         className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                                         onClick={(e) => e.stopPropagation()}
@@ -525,6 +527,7 @@ const CampaignDetailsView = () => {
                                                     <img
                                                         src={file}
                                                         alt="portfolio"
+                                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                                         className="w-full h-40 object-cover cursor-pointer"
                                                         onClick={() => openImageModal(file)}
                                                     />
@@ -542,6 +545,7 @@ const CampaignDetailsView = () => {
                                                         </button>
                                                         <img
                                                             src={previewImage}
+                                                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                                             alt="Preview"
                                                             className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                                                             onClick={(e) => e.stopPropagation()}
@@ -644,6 +648,7 @@ const CampaignDetailsView = () => {
                             <img
                                 src={cmapignDetails?.vendorphoto}
                                 alt={cmapignDetails?.name || "Vendor"}
+                                onError={(e) => (e.target.src = "/defualt.jpg")}
                                 className="w-12 h-12 rounded-full object-cover border border-gray-100"
                             />
                             <div>

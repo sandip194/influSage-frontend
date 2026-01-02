@@ -94,6 +94,7 @@ export const RoleDefault = () => {
                   src={role.iconpath}
                   alt={role.name}
                   className="w-16 h-16 rounded-full bg-gray-100 object-contain mb-2"
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                 />
                 <p className="font-medium text-gray-900 text-sm">{role.name}</p>
               </div>

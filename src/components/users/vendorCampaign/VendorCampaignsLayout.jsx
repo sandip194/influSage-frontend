@@ -484,6 +484,7 @@ const VendorCampaignsLayout = () => {
                       <img
                         src={getImageUrl(row.photopath)}
                         alt={row.name}
+                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                         className="w-9 h-9 rounded-full object-cover"
                       />
                       <span>{row.name}</span>

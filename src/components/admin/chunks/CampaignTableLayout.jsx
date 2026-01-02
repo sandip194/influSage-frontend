@@ -578,6 +578,7 @@ const CampaignTableLayout = () => {
                         <img
                           src={c.photopath}
                           alt={safeText(c.name)}
+                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           className="w-12 h-12 object-cover rounded-full border border-gray-200"
                         />
                       ) : (

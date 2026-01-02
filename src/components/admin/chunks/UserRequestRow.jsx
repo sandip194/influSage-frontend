@@ -26,6 +26,7 @@ const UserRequestRow = ({ user, email, role, date, status, avatar }) => {
       <td className="px-4 py-3 flex items-center space-x-3">
         <img
           src={avatar}
+          onError={(e) => (e.target.src = "/default.jpg")}
           alt={user}
           className="w-10 h-10 rounded-full object-cover"
         />

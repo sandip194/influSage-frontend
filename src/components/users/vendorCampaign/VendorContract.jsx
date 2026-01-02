@@ -69,6 +69,7 @@ const formatToDDMMYYYY = (dateStr) => {
                 src={safeText(c.influencerphoto)}
                 alt="Influencer"
                 className="w-12 h-12 object-cover rounded-full"
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
               />
               <span>{safeText(c.fullname)}</span>
             </div>
@@ -421,6 +422,7 @@ const formatToDDMMYYYY = (dateStr) => {
                               src={platform.icon}
                               alt={platform.provider}
                               className="w-4 h-4 mt-1 rounded-full"
+                              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                             />
                             <div className="flex flex-wrap gap-1">
                               {safeArray(platform.contenttypes).map((ct, ctIdx) => (

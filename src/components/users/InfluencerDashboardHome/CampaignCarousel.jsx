@@ -45,8 +45,9 @@ const CampaignCard = ({ campaign }) => {
         {/* ===== Image Section ===== */}
         <div className="h-36 w-full overflow-hidden">
           <img
-            src={campaign.photopath || "/placeholder.jpg"}
+            src={campaign.photopath || "/Brocken-Defualt-Img.jpg"}
             alt={campaign.name}
+             onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
             className="h-full w-full object-cover"
           />
         </div>

@@ -48,6 +48,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
             src={provider.iconpath}
             alt={provider.name}
             className="w-[24px]"
+            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
           />
         ),
         field,

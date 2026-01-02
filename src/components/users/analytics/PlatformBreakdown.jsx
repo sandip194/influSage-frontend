@@ -149,6 +149,7 @@ export const PlatformBreakdown = () => {
                 <img
                   src={item.providericonpath}
                   alt={item.providername}
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   className="w-6 h-6"
                 />
                 <p className="text-sm font-medium text-gray-700 truncate">

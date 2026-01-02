@@ -123,6 +123,7 @@ export default function VendorContentLinksTab({ campaignId }) {
                 <img
                   src={inf?.influencerphoto}
                   alt="profile"
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   className="w-12 h-12 rounded-full object-cover bg-gray-200"
                 />
                 <p className="text-xl font-semibold">
@@ -161,7 +162,7 @@ export default function VendorContentLinksTab({ campaignId }) {
                             src={safeText(platform.iconpath)}
                             className="w-4 h-4 object-contain"
                             alt=""
-                            onError={(e) => (e.target.src = "/placeholder-icon.png")}
+                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           />
                           {safeText(platform.providername)} (
                           {platform.contenttypes.reduce(

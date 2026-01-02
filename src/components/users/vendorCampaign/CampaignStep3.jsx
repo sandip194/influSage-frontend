@@ -225,6 +225,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
             <img
               src={preview}
               alt="Profile preview"
+              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
               className="object-cover w-full h-full"
             />
           ) : (

@@ -259,6 +259,7 @@ const DescriptionLayout = () => {
                 <img
                   src={campaignDetails?.photopath}
                   alt="Campaign"
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   className="w-16 h-16 rounded-full object-cover cursor-pointer shadow"
                   onClick={() => setIsCampaignPreviewOpen(true)}
                 />
@@ -393,6 +394,7 @@ const DescriptionLayout = () => {
                       {p.iconpath && (
                         <img
                           src={p.iconpath}
+                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           className="w-5 h-5 object-contain"
                         />
                       )}
@@ -417,6 +419,7 @@ const DescriptionLayout = () => {
               >
                 <img
                   src={campaignDetails?.photopath}
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg"
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -514,6 +517,7 @@ const DescriptionLayout = () => {
                               <img
                                 src={fileUrl}
                                 alt=""
+                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                 className="w-full h-full object-cover"
                               />
                             </div>
@@ -602,6 +606,7 @@ const DescriptionLayout = () => {
                 {/\.(png|jpe?g|gif|svg)$/i.test(previewFile) && (
                   <img
                     src={previewFile}
+                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                     className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                     onClick={(e) => e.stopPropagation()}
                   />
@@ -717,6 +722,7 @@ const DescriptionLayout = () => {
                         {platform.iconpath && (
                         <img
                           src={platform.iconpath}
+                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           alt={platform.providername}
                           className="w-5 h-5 object-contain"
                         />

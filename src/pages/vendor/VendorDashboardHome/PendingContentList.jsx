@@ -89,6 +89,7 @@ const PendingContentList = () => {
                                     height: '100%',
                                     objectFit: 'cover',
                                 }}
+                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                             />
                         ) : (
                             <div

@@ -194,6 +194,7 @@ const InfluencerDetailView = () => {
                                     <img
                                         src={previewImage}
                                         alt="Preview"
+                                        onError={(e) => (e.target.src = "/default.jpg")}
                                         className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                                         onClick={(e) => e.stopPropagation()}
                                     />
@@ -344,7 +345,7 @@ const InfluencerDetailView = () => {
                                                         src={file}
                                                         className="w-full h-40 object-cover cursor-pointer"
                                                         onClick={() => setPreviewImage(file)}
-                                                        onError={(e) => (e.target.src = "/fallback-image.png")}
+                                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                                     />
                                                 )}
 
@@ -412,6 +413,7 @@ const InfluencerDetailView = () => {
                                 >
                                     <img
                                         src={safeText(item.iconpath, "/fallback-icon.png")}
+                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                         className="w-8 h-8 rounded-full object-cover"
                                     />
 

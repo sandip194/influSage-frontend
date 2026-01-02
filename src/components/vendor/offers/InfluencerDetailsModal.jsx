@@ -108,6 +108,7 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                 src={influDetails?.photopath}
                 alt="Profile"
                 onClick={() => setIsPreviewOpen(true)}
+                onError={(e) => (e.target.src = "/defualt.jpg")}
                 className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-gray-100 shadow-sm cursor-pointer hover:opacity-90"
               />
               {isPreviewOpen && (
@@ -127,6 +128,7 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                     alt="Preview"
                     className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                     onClick={(e) => e.stopPropagation()}
+                    onError={(e) => (e.target.src = "/defualt.jpg")}
                   />
                 </div>
               )}
@@ -236,6 +238,7 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                                   src={provider.iconpath}
                                   alt={`${provider.providername} icon`}
                                   className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
+                                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                 />
                               )}
                               <div>
@@ -281,6 +284,7 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                               onClick={() => setPreviewPortfolioImage(url)}
                               alt="portfolio"
                               className="w-full h-28 object-cover"
+                              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                             />
                           ) : isVideo ? (
                             <video
@@ -319,6 +323,7 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                     src={previewPortfolioImage}
                     className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                     onClick={(e) => e.stopPropagation()}
+                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   />
                 </div>
               )}

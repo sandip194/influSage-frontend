@@ -238,6 +238,7 @@ const Details = () => {
                 {/* Profile */}
                 <img
                   src={campaign?.photopath}
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   alt="Profile"
                   className="w-16 h-16 rounded-full object-cover cursor-pointer"
                   onClick={() => {
@@ -261,6 +262,7 @@ const Details = () => {
                     {previewType === "image" && (
                       <img
                         src={previewUrl}
+                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                         className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                         onClick={(e) => e.stopPropagation()}
                       />
@@ -464,6 +466,7 @@ const Details = () => {
                           <img 
                           src={platform.iconpath} 
                           alt={platform.providername}
+                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           className="w-5 h-5 object-contain"
                           />
                         )}

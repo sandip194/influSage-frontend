@@ -169,6 +169,7 @@ export default function ChatInput({
               >
                 <img
                   src={previewUrl.url}
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   alt="preview"
                   className="w-full h-full object-cover"
                 />

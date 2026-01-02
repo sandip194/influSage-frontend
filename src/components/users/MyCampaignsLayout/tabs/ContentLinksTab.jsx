@@ -627,8 +627,8 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
             const res = await axios.post(
                 "/user/upload/content-link",
                 {
-                p_contractid: contractId,
-                p_contentlinkjson: payload,
+                    p_contractid: contractId,
+                    p_contentlinkjson: payload,
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -637,15 +637,15 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
                 "Links saved successfully!"
             );
 
-            } catch (err) {
+        } catch (err) {
             console.error(err);
             toast.error(
                 err?.response?.data?.message ||
                 "Failed to save links."
             );
-            } finally {
+        } finally {
             setSaving(false);
-            }
+        }
     };
 
     return (
@@ -668,7 +668,11 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
                     className="border border-gray-200 rounded-xl p-3 bg-white mb-6"
                 >
                     <div className="flex items-center gap-3 mb-4">
-                        <img src={provider.iconpath} className="w-6 h-6" />
+                        <img
+                            src={provider.iconpath}
+                            className="w-6 h-6"
+                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                        />
                         <h3 className="text-lg font-semibold">
                             {provider.providername}
                         </h3>

@@ -242,6 +242,7 @@ const EditLayout = () => {
               <div className="flex items-start gap-4">
                   <img
                     src={campaignDetails?.photopath}
+                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                     alt="Campaign"
                     className="w-16 h-16 rounded-full object-cover cursor-pointer shadow"
                     onClick={() => setIsCampaignPreviewOpen(true)}
@@ -386,7 +387,12 @@ const EditLayout = () => {
                   campaignDetails.providercontenttype.map((p, i) => (
                     <div key={i} className="flex items-center gap-2 mb-1">
                       {p.iconpath && (
-                        <img src={p.iconpath} className="w-5 h-5 object-contain" alt="platform" />
+                        <img 
+                        src={p.iconpath}
+                         className="w-5 h-5 object-contain" 
+                         alt="platform" 
+                         onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                         />
                       )}
                       <span className="text-sm text-gray-800 font-medium">
                         {p.contenttypes?.map((c) => c.contenttypename).join(", ")}
@@ -408,6 +414,7 @@ const EditLayout = () => {
                 <img
                   src={campaignDetails?.photopath}
                   alt="Campaign Preview"
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -531,6 +538,7 @@ const EditLayout = () => {
                                     <img
                                       src={fileUrl}
                                       alt={`Campaign file ${i + 1}`}
+                                      onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                       className="w-full h-full object-cover"
                                       loading="lazy"
                                     />
@@ -620,6 +628,7 @@ const EditLayout = () => {
 
                           <img
                             src={filePreviewUrl}
+                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                             className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
                             onClick={(e) => e.stopPropagation()}
                           />
@@ -726,6 +735,7 @@ const EditLayout = () => {
                             >
                               <img
                                 src={fileUrl}
+                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                 className="w-full h-full object-cover"
                                 alt="file"
                               />
@@ -800,6 +810,7 @@ const EditLayout = () => {
                     {filePreviewType === "image" && (
                       <img
                         src={filePreviewUrl}
+                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                         className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
                       />
                     )}
@@ -933,6 +944,7 @@ const EditLayout = () => {
                         <img
                           src={platform.iconpath}
                           alt={platform.providername}
+                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           className="w-5 h-5 object-contain"
                         />
                         )}

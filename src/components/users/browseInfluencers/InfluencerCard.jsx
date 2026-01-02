@@ -5,7 +5,7 @@ import {
   RiHeartFill,
   RiUserAddLine,
   RiGlobalLine,
-  RiStarFill, 
+  RiStarFill,
   RiStarLine
 } from "@remixicon/react";
 
@@ -49,8 +49,9 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <img
-            src={influencer?.photopath || "/placeholder.jpg"}
+            src={influencer?.photopath || "/default.jpg"}
             alt="profile"
+            onError={(e) => (e.target.src = "/defualt.jpg")}
             className="w-12 h-12 rounded-full object-cover"
           />
           <div>
@@ -60,7 +61,7 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
             <p className="text-xs text-gray-500">
               {influencer?.statename}, {influencer?.countryname}
             </p>
-              <div className="flex items-center gap-1 text-xs">
+            <div className="flex items-center gap-1 text-xs">
               {Number(influencer?.ratingcount) > 0 && (
                 <div className="flex items-center gap-1 mt-1">
                   {Array.from({ length: Math.round(influencer.ratingcount) }).map((_, i) => (
@@ -156,7 +157,12 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
               key={p.providerid}
               className="flex items-center gap-1 text-sm font-medium text-gray-700"
             >
-              <img src={p.iconpath} alt="" className="w-5 h-5" />
+              <img
+                src={p.iconpath}
+                alt=""
+                className="w-5 h-5"
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+              />
               {formatNumber(p.nooffollowers)}
             </div>
           ))}

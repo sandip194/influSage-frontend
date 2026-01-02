@@ -54,6 +54,7 @@ const TopContent = () => {
           >
             <img
               src={item.img}
+              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
               alt="content"
               className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
             />

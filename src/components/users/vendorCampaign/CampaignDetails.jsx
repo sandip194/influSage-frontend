@@ -410,6 +410,7 @@ const CampaignDetails = () => {
               <div className="flex items-start gap-4">
                 <img
                   src={campaignDetails?.photopath}
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   alt="Profile"
                   onClick={() => setIsPreviewOpen(true)}
                   className="w-16 h-16 rounded-full object-cover cursor-pointer hover:opacity-90 transition"
@@ -428,6 +429,7 @@ const CampaignDetails = () => {
                     <img
                       src={campaignDetails?.photopath}
                       alt="Preview"
+                      onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                       className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                       onClick={(e) => e.stopPropagation()}
                     />
@@ -663,6 +665,7 @@ const CampaignDetails = () => {
                           <img
                             src={platform.iconpath}
                             alt={platform.providername}
+                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                             className="w-5 h-5 object-contain shrink-0"
                           />
                         )}
@@ -707,6 +710,7 @@ const CampaignDetails = () => {
                   >
                     <img
                       src={influencer.userphoto}
+                      onError={(e) => (e.target.src = "/defualt.jpg")}
                       alt={`${influencer.firstname} ${influencer.lastname}`}
                       className="w-12 h-12 rounded-full object-cover"
                     />
@@ -723,6 +727,7 @@ const CampaignDetails = () => {
                             <img
                               src={provider.iconpath}
                               alt={provider.providername}
+                              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                               className="w-4 h-4"
                             />
                             <span>{formatFollowers(provider.nooffollowers)}</span>
