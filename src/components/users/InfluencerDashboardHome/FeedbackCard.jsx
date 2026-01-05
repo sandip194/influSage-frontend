@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
-import { Modal, Skeleton, Empty } from "antd";
+import { Skeleton, Empty } from "antd";
 import { useSelector } from "react-redux";
-import { RiStarFill, RiChatQuoteLine } from "@remixicon/react";
+import { RiStarFill } from "@remixicon/react";
+import { useNavigate } from "react-router-dom";
 
 const FeedbackCard = () => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   const { token } = useSelector((state) => state.auth);
 
@@ -51,13 +52,14 @@ const FeedbackCard = () => {
   const renderFeedbackCard = (fb) => (
   <div
     key={fb.feedbackid}
-    className="
+   className="
       bg-[#335CFF0D]
       border border-[#335CFF26]
       rounded-2xl
       p-5
       shadow-sm
-      hover:shadow-md transition
+      hover:shadow-md
+      transition
       flex flex-col
       h-full
     "
@@ -81,7 +83,7 @@ const FeedbackCard = () => {
         </div>
       </div>
     </div>
-<div className="flex mb-3 gap-1">
+    <div className="flex mb-3 gap-1">
         {fb.rating > 0 && (
         <div className="flex items-center gap-1 shrink-0">
           {Array.from({ length: fb.rating }).map((_, i) => (
@@ -97,7 +99,6 @@ const FeedbackCard = () => {
       </div>
     {/* ===== Feedback Text ===== */}
     <div className="flex gap-2 text-sm text-gray-700">
-      <RiChatQuoteLine className="shrink-0 text-gray-400 mt-0.5" />
       <p className="line-clamp-3 text-justify">
         {fb.text || "No feedback provided."}
       </p>
@@ -105,61 +106,35 @@ const FeedbackCard = () => {
   </div>
 );
 
-  const feedbackCards = useMemo(
-    () => feedbacks.slice(0, 3).map(renderFeedbackCard),
-    [feedbacks]
-  );
-
-  const allFeedbackCards = useMemo(
-    () => feedbacks.map(renderFeedbackCard),
-    [feedbacks]
-  );
 
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-2xl w-full">
-      {/* Header - Always Visible */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
-        <h2 className="text-xl font-bold text-gray-900">
-          Recent Feedbacks From Brands
-        </h2>
+  <div className="bg-white p-4 sm:p-6 rounded-2xl w-full">
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="text-xl font-bold text-gray-900">
+        Recent Feedbacks From Brands
+      </h2>
 
-        {feedbacks.length > 0 && (
-          <button
-            onClick={() => setShowModal(true)}
-            className="text-sm cursor-pointer text-gray-700 hover:underline"
-          >
-            View All
-          </button>
-        )}
-      </div>
-
-      {/* Content */}
-      {loading ? (
-        <Skeleton active paragraph={{ rows: 4 }} />
-      ) : feedbacks.length === 0 ? (
-        <Empty
-          description="No feedback available"
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-        />
-      ) : (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {feedbackCards}
-        </div>
+      {feedbacks.length > 0 && (
+        <button
+          onClick={() => navigate("/dashboard/feedbacks")}
+          className="cursor-pointer text-[#0D132D] text-sm font-medium hover:underline"
+        >
+          View All
+        </button>
       )}
-
-      <Modal
-        open={showModal}
-        onCancel={() => setShowModal(false)}
-        footer={null}
-        centered
-        width={800}
-        bodyStyle={{ maxHeight: "70vh", overflowY: "auto", padding: "10px" }}
-      >
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">All Feedbacks</h2>
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">{allFeedbackCards}</div>
-      </Modal>
     </div>
-  );
+
+    {loading ? (
+      <Skeleton active paragraph={{ rows: 4 }} />
+    ) : feedbacks.length === 0 ? (
+      <Empty description="No feedback available" />
+    ) : (
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {feedbacks.slice(0, 3).map(renderFeedbackCard)}
+      </div>
+    )}
+  </div>
+);
 };
 
 export default FeedbackCard;

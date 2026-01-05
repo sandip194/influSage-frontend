@@ -71,6 +71,7 @@ import AdminMessagePage from './components/admin/adminChat/AdminConversationPage
 import VendorConversationPage  from './components/vendorChat/VendorConversationPage';
 import BrandAnalyticsDashboard from './components/vendor/analytics/BrandAnalyticsDashboard';
 import AdminContentLinks from './components/admin/pages/AdminContentLinks';
+import FeedbacksPage from "./components/users/InfluencerDashboardHome/FeedbacksPage";
 
 
 const App = () => {
@@ -149,6 +150,8 @@ const App = () => {
                                                                 <Route path='messagepage' element={<InfluencerMessagePage />} />
 
                                                                 <Route path="referrals" element={<ComingSoon />} />
+
+                                                                <Route path="feedbacks" element={<FeedbacksPage />} />
 
                                                         </Route>
                                                 </Route>

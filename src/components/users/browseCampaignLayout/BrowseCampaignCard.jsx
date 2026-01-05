@@ -233,7 +233,7 @@ const CampaignCard = React.memo(
                   disabled
                   className="flex-1 py-2 rounded-full text-sm font-semibold bg-gray-400 text-white"
                 >
-                  Not Apply
+                  Not Eligible
                 </button>
               )
             ) : campaign.campaignapplied ? (

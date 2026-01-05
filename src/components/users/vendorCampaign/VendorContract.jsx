@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Button, Typography, Modal, Spin, Empty, Skeleton } from "antd";
+import { Button, Typography, Modal, Spin, Empty, Skeleton, Input } from "antd";
+const { TextArea } = Input;
 import { RiAddLine, RiStarFill, RiStarLine } from "@remixicon/react";
 import ContractModal from "./ContractModal";
 import axios from "axios";
@@ -540,9 +541,16 @@ const formatToDDMMYYYY = (dateStr) => {
                 className="cursor-pointer transition-transform active:scale-95"
               >
                 {star <= rating ? (
-                  <RiStarFill size={26} className="text-yellow-400" />
+                  <RiStarFill
+                    size={26}
+                    className="text-yellow-400"
+                    style={{ stroke: "black", strokeWidth: 0.6 }}
+                  />
                 ) : (
-                  <RiStarLine size={26} className="text-yellow-400" />
+                  <RiStarLine
+                    size={26}
+                    className="text-yellow-400"
+                  />
                 )}
               </span>
             ))}
@@ -556,21 +564,37 @@ const formatToDDMMYYYY = (dateStr) => {
 
         {/* ✍️ FEEDBACK */}
         <p className="font-medium text-gray-800 mb-2">Feedback</p>
-        <textarea
-          rows={4}
-          value={feedback}
-          onChange={(e) => {
-            setFeedback(e.target.value);
-            setErrors((prev) => ({ ...prev, feedback: "" }));
-          }}
-          placeholder="Write something about the influencer (10-100 chars if rating given)"
-          className="w-full border rounded-lg p-3 text-sm 
-       focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
 
-        {errors.feedback && (
-          <p className="text-red-500 text-xs mt-1">{errors.feedback}</p>
-        )}
+<TextArea
+  rows={4}
+  maxLength={100}
+  value={feedback}
+  onChange={(e) => {
+    setFeedback(e.target.value);
+    setErrors((prev) => ({ ...prev, feedback: "" }));
+  }}
+  placeholder="Write something about the influencer (10–100 chars if rating given)"
+  className="w-full border rounded-lg text-sm"
+  style={{
+    resize: "none",
+  }}
+/>
+
+{/* Custom 10/100 validation hint */}
+<div className="flex justify-end mt-1">
+  <span
+    className={`text-xs ${
+      feedback.length < 10 ? "text-red-500" : "text-gray-500"
+    }`}
+  >
+    {feedback.length}/100
+  </span>
+</div>
+
+{errors.feedback && (
+  <p className="text-red-500 text-xs mt-1">{errors.feedback}</p>
+)}
+
 
 
       </Modal>
