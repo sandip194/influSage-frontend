@@ -129,7 +129,7 @@ export default function ChatHeader({ chat, onBack, onOnlineStatusChange }) {
               src={chat.img}
               alt={chat.name}
               className="w-full h-full object-cover rounded-full"
-              onError={(e) => (e.target.src = "/defualt.jpg")}
+              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
             />
           ) : (
             <span>{initial}</span>

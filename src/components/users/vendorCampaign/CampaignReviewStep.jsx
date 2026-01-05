@@ -203,7 +203,7 @@ const CampaignReviewStep = ({ onEdit }) => {
               <img
                 src={influencer}
                 alt="Banner"
-                onError={(e) => (e.target.src = "/defualt.jpg")}
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                 className="w-full h-28 object-cover rounded-lg cursor-pointer"
                 onClick={() => setPreviewImage(influencer)}
               />

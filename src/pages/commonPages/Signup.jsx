@@ -73,14 +73,11 @@ const Signup = () => {
     return trimmed.replace(/\b\w/g, (char) => char.toUpperCase()); // capitalize
   };
 
-
-
   // 🔹 Helper: prevent special chars in names
   const handleNameChange = (e, field) => {
     const formatted = formatName(e.target.value);
     setValue(field, formatted, { shouldValidate: true });
   };
-
 
   const handleGoogleLogin = useCallback(() => {
     const storedRole = localStorage.getItem("selected_role");
@@ -225,7 +222,7 @@ const Signup = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700"
+                  className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 text-gray-700"
                 >
                   {showPassword ? (
                     <RiEyeOffLine className="w-5 h-5" />
@@ -249,7 +246,7 @@ const Signup = () => {
                   {...register("terms", {
                     required: "Please accept terms & conditions",
                   })}
-                  className="h-4 w-4"
+                  className="h-4 w-4 cursor-pointer"
                 />
                 <span>
                   I agree to the{" "}
@@ -270,7 +267,7 @@ const Signup = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 bg-[#0e1532] text-white font-semibold rounded-full hover:bg-gray-800 transition"
+              className="w-full py-2 bg-[#0e1532] cursor-pointer text-white font-semibold rounded-full hover:bg-gray-800 transition"
             >
               {loading ? "Signing Up..." : "Sign Up"}
             </button>
@@ -279,7 +276,7 @@ const Signup = () => {
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-11 h-11 rounded-full border border-gray-300 bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+                className="w-11 h-11 cursor-pointer rounded-full border border-gray-300 bg-gray-100 flex items-center justify-center hover:bg-gray-200"
               >
                 <img
                   src={googleIcon}
@@ -291,7 +288,7 @@ const Signup = () => {
               <button
                 type="button"
                 onClick={handleFacebookLogin}
-                className="w-11 h-11 rounded-full border border-gray-300 bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+                className="w-11 h-11 cursor-pointer rounded-full border border-gray-300 bg-gray-100 flex items-center justify-center hover:bg-gray-200"
               >
                 <img
                   src={facebookIcon}

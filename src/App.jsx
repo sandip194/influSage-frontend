@@ -66,12 +66,17 @@ import CampaignDetailsView from './components/admin/pages/CampaignDetailsView';
 import BlockedUserPage from './pages/commonPages/BlockedUserPage';
 // import MessagePage from './components/adminChat/ConversationPage';
 import ComingSoon from './pages/commonPages/ComingSoon';
-import InfluencerMessagePage  from './components/influencerChat/ConversationPage';
+import InfluencerMessagePage from './components/influencerChat/ConversationPage';
 import AdminMessagePage from './components/admin/adminChat/AdminConversationPage';
-import VendorConversationPage  from './components/vendorChat/VendorConversationPage';
+import VendorConversationPage from './components/vendorChat/VendorConversationPage';
 import BrandAnalyticsDashboard from './components/vendor/analytics/BrandAnalyticsDashboard';
 import AdminContentLinks from './components/admin/pages/AdminContentLinks';
 import FeedbacksPage from "./components/users/InfluencerDashboardHome/FeedbacksPage";
+import Maintenance from './pages/commonPages/Maintenance';
+
+
+import MaintenanceProvider from './routes/MaintenanceProvider';
+import MaintenanceGuard from './routes/MaintenanceGuard';
 
 
 const App = () => {
@@ -80,112 +85,120 @@ const App = () => {
         axios.defaults.baseURL = BASE_URL
         return (
                 <Router>
-                        {/* <h1 className="text-3xl font-bold text-green-500">Tailwind is Working ✅</h1> */}
-                        <ToastContainer
-                                position="top-right"  // Keep as is, or change to "top-center" for centering
-                                autoClose={4000}
-                                hideProgressBar={false}
-                                newestOnTop={false}
-                                closeOnClick
-                                pauseOnFocusLoss
-                                draggable
-                                pauseOnHover
-                                theme="light"
-                                style={{ top: '80px' }}  // ✅ Add this: Moves the toast container 60px down from the top (adjust as needed, e.g., 40px or 80px)
-                        />
 
-                        <SocketProvider>
+                        <MaintenanceProvider>
+                                <MaintenanceGuard>
 
 
-                                <Routes>
-                                        <Route path='/' element={<HomePage />} />
-                                        <Route path='/admin' element={<DashboardHomePage />} />
-                                        <Route path='/signup' element={<Signup />} />
-                                        <Route path='/role' element={<Role />} />
-                                        <Route path='/roledefault' element={<RoleDefault />} />
-                                        <Route path='/setPassword' element={<SetPassword />} />
-                                        <Route path='/login' element={<LoginForm />} />
-                                        <Route path='/forgot-password' element={<ForgotPassword />} />
-                                        <Route path='/verify-email-or-mobile' element={<VerifyEmailOrMobile />} />
-                                        <Route path='/reset-password' element={<ResetPassword />} />
-                                        <Route path='/unauthorized' element={<Unauthorized />} />
-                                        <Route path='/User' element={<BlockedUserPage />} />
+                                        {/* <h1 className="text-3xl font-bold text-green-500">Tailwind is Working ✅</h1> */}
+                                        <ToastContainer
+                                                position="top-right"  // Keep as is, or change to "top-center" for centering
+                                                autoClose={4000}
+                                                hideProgressBar={false}
+                                                newestOnTop={false}
+                                                closeOnClick
+                                                pauseOnFocusLoss
+                                                draggable
+                                                pauseOnHover
+                                                theme="light"
+                                                style={{ top: '80px' }}  // ✅ Add this: Moves the toast container 60px down from the top (adjust as needed, e.g., 40px or 80px)
+                                        />
+
+                                        <SocketProvider>
+
+
+                                                <Routes>
+                                                        <Route path='/' element={<HomePage />} />
+
+                                                        <Route path="/maintenance" element={<Maintenance />} />
+
+
+                                                        <Route path='/signup' element={<Signup />} />
+                                                        <Route path='/role' element={<Role />} />
+                                                        <Route path='/roledefault' element={<RoleDefault />} />
+                                                        <Route path='/setPassword' element={<SetPassword />} />
+                                                        <Route path='/login' element={<LoginForm />} />
+                                                        <Route path='/forgot-password' element={<ForgotPassword />} />
+                                                        <Route path='/verify-email-or-mobile' element={<VerifyEmailOrMobile />} />
+                                                        <Route path='/reset-password' element={<ResetPassword />} />
+                                                        <Route path='/unauthorized' element={<Unauthorized />} />
+                                                        <Route path='/User' element={<BlockedUserPage />} />
 
 
 
-                                        {/* Influencer Dashboard*/}
-                                        <Route element={<PrivateRoute allowedRoles={[1]} />}>
+                                                        {/* Influencer Dashboard*/}
+                                                        <Route element={<PrivateRoute allowedRoles={[1]} />}>
 
-                                                <Route element={<DashboardGuard />}>
-                                                        <Route path='/dashboard' element={<DashboardLayout />}>
+                                                                <Route element={<DashboardGuard />}>
+                                                                        <Route path='/dashboard' element={<DashboardLayout />}>
 
-                                                                <Route path='' element={<DashboardPage />} />
-                                                                <Route path='browse' element={<BrowseCampaign />} />
-                                                                <Route path='browse/applied' element={<AppliedLayout />} />
-                                                                <Route path='browse/saved' element={<SavedLayout />} />
-                                                                <Route path='browse/description/:campaignId' element={<DescriptionLayout />} />
+                                                                                <Route path='' element={<DashboardPage />} />
+                                                                                <Route path='browse' element={<BrowseCampaign />} />
+                                                                                <Route path='browse/applied' element={<AppliedLayout />} />
+                                                                                <Route path='browse/saved' element={<SavedLayout />} />
+                                                                                <Route path='browse/description/:campaignId' element={<DescriptionLayout />} />
 
-                                                                <Route path='browse/applied-campaign-details/:campaignId' element={<EditLayout />} />
-                                                                <Route path='browse/apply-now/:campaignId' element={<ApplyNow />} />
+                                                                                <Route path='browse/applied-campaign-details/:campaignId' element={<EditLayout />} />
+                                                                                <Route path='browse/apply-now/:campaignId' element={<ApplyNow />} />
 
-                                                                <Route path='my-campaigns' element={<CampaignsLayout />} />
-                                                                <Route path='my-campaigns/details/:campaignId' element={<Details />} />
+                                                                                <Route path='my-campaigns' element={<CampaignsLayout />} />
+                                                                                <Route path='my-campaigns/details/:campaignId' element={<Details />} />
 
-                                                                <Route path='my-campaigns/activity' element={<Activity />} />
-                                                                <Route path='my-campaigns/message' element={<Message />} />
-                                                                <Route path='my-campaigns/filesmedia' element={<FilesMedia />} />
+                                                                                <Route path='my-campaigns/activity' element={<Activity />} />
+                                                                                <Route path='my-campaigns/message' element={<Message />} />
+                                                                                <Route path='my-campaigns/filesmedia' element={<FilesMedia />} />
 
-                                                                <Route path='payment' element={<Payment />} />
+                                                                                <Route path='payment' element={<Payment />} />
 
-                                                                <Route path='analytics' element={<Analytics />} />
+                                                                                <Route path='analytics' element={<Analytics />} />
 
-                                                                <Route path='messages' element={<ChatAppPage />} />
+                                                                                <Route path='messages' element={<ChatAppPage />} />
 
-                                                                <Route path='my-profile' element={<Profile />} />
+                                                                                <Route path='my-profile' element={<Profile />} />
 
-                                                                <Route path='editProfile' element={<EditProfile />} />
+                                                                                <Route path='editProfile' element={<EditProfile />} />
 
-                                                                <Route path='setting' element={<Settings />} />
+                                                                                <Route path='setting' element={<Settings />} />
 
-                                                                <Route path='messagepage' element={<InfluencerMessagePage />} />
+                                                                                <Route path='messagepage' element={<InfluencerMessagePage />} />
 
-                                                                <Route path="referrals" element={<ComingSoon />} />
+                                                                                <Route path="referrals" element={<ComingSoon />} />
 
-                                                                <Route path="feedbacks" element={<FeedbacksPage />} />
+                                                                                <Route path="feedbacks" element={<FeedbacksPage />} />
 
+                                                                        </Route>
+                                                                </Route>
+                                                                <Route path='/dashboard/browse' element={<BrowseCampaign />} />
+                                                                <Route path='/complate-profile' element={<ProfileStepper />} />
                                                         </Route>
-                                                </Route>
-                                                <Route path='/dashboard/browse' element={<BrowseCampaign />} />
-                                                <Route path='/complate-profile' element={<ProfileStepper />} />
-                                        </Route>
 
 
-                                        {/* Vendor Deshboard */}
-                                        <Route element={<PrivateRoute allowedRoles={[2]} />}>
+                                                        {/* Vendor Deshboard */}
+                                                        <Route element={<PrivateRoute allowedRoles={[2]} />}>
 
-                                                <Route element={<DashboardGuard />}>
-                                                        <Route path='/vendor-dashboard' element={<VenderDashboardLayout />}>
-                                                                <Route path='' element={<VenderDashboardPage />} />
-                                                                <Route path='browse-influencers' element={<BrowseInfluencerPage />} />
+                                                                <Route element={<DashboardGuard />}>
+                                                                        <Route path='/vendor-dashboard' element={<VenderDashboardLayout />}>
+                                                                                <Route path='' element={<VenderDashboardPage />} />
+                                                                                <Route path='browse-influencers' element={<BrowseInfluencerPage />} />
 
-                                                                <Route path='browse-influencers/favorites' element={<FavoritesLayout />} />
-                                                                <Route path='browse-influencers/invited' element={<Invited />} />
-                                                                <Route path='browse-influencers/influencer-details/:userId' element={<InfluencerProfile />} />
+                                                                                <Route path='browse-influencers/favorites' element={<FavoritesLayout />} />
+                                                                                <Route path='browse-influencers/invited' element={<Invited />} />
+                                                                                <Route path='browse-influencers/influencer-details/:userId' element={<InfluencerProfile />} />
 
-                                                                <Route path='vendor-campaign/my-campaigns' element={<CreateCampaign />} />
-                                                                <Route path='vendor-campaign/create-campaign' element={<CampaignWizard />} />
-                                                                <Route path='vendor-campaign/edit-campaign/:campaignId' element={<CampaignWizard />} />
+                                                                                <Route path='vendor-campaign/my-campaigns' element={<CreateCampaign />} />
+                                                                                <Route path='vendor-campaign/create-campaign' element={<CampaignWizard />} />
+                                                                                <Route path='vendor-campaign/edit-campaign/:campaignId' element={<CampaignWizard />} />
 
-                                                                <Route path='vendor-campaign' element={<VendorCampaign />} />
-                                                                <Route path='vendor-campaign/campaignDetails/:campaignId' element={<CampaignDetails />} />
-
-
-                                                                <Route path='messages' element={<ChatAppPageVendor />} />
-
-                                                                <Route path='analytics' element={<BrandAnalyticsDashboard />} />
+                                                                                <Route path='vendor-campaign' element={<VendorCampaign />} />
+                                                                                <Route path='vendor-campaign/campaignDetails/:campaignId' element={<CampaignDetails />} />
 
 
-                                                                {/*  -- Removed From Sidebar bcs We Replace this things in Campaign Details Page
+                                                                                <Route path='messages' element={<ChatAppPageVendor />} />
+
+                                                                                <Route path='analytics' element={<BrandAnalyticsDashboard />} />
+
+
+                                                                                {/*  -- Removed From Sidebar bcs We Replace this things in Campaign Details Page
                                                                 
                                                                 <Route path='applications' element={<OffersLayout />} />
                                                                 <Route path='applications/view-all-offers/:id' element={<ViewAllOffers />} />
@@ -196,39 +209,42 @@ const App = () => {
                                                                 */}
 
 
-                                                                <Route path='edit-profile' element={<EditVendorProfile />} />
-                                                                <Route path='my-profile' element={<VendorMyProfile />} />
+                                                                                <Route path='edit-profile' element={<EditVendorProfile />} />
+                                                                                <Route path='my-profile' element={<VendorMyProfile />} />
 
 
 
-                                                                <Route path="payment" element={<ComingSoon />} />
-                                                                <Route path="setting" element={<Settings />} />
+                                                                                <Route path="payment" element={<ComingSoon />} />
+                                                                                <Route path="setting" element={<Settings />} />
 
 
-                                                                <Route path='vendorMessagepage' element={<VendorConversationPage />} />
+                                                                                <Route path='vendorMessagepage' element={<VendorConversationPage />} />
+                                                                        </Route>
+                                                                </Route>
+                                                                <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
                                                         </Route>
-                                                </Route>
-                                                <Route path='/complate-vendor-profile' element={<VendorProfileStepper />} />
-                                        </Route>
 
 
-                                        {/* Admin Dashboard */}
-                                        <Route element={<PrivateRoute allowedRoles={[4]} />}>
-                                                <Route path='/admin-dashboard' element={<AdminDashboardLayout />}>
-                                                        <Route path='' element={<DashboardHomePage />} />
-                                                        <Route path='influencers' element={<InfluencersRequests />} />
-                                                        <Route path='influencers/details/:userId' element={<InfluencerDetailView />} />
-                                                        <Route path='campaigns' element={<CampaignRequests />} />
-                                                        <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView />} />
-                                                        <Route path='analytics' element={<AdminContentLinks />} />
-                                                        <Route path="settings" element={<ComingSoon />} />
-                                                        <Route path='support' element={<AdminMessagePage />} />
-                                                </Route>
-                                        </Route>
+                                                        {/* Admin Dashboard */}
+                                                        <Route element={<PrivateRoute allowedRoles={[4]} />}>
+                                                                <Route path='/admin-dashboard' element={<AdminDashboardLayout />}>
+                                                                        <Route path='' element={<DashboardHomePage />} />
+                                                                        <Route path='influencers' element={<InfluencersRequests />} />
+                                                                        <Route path='influencers/details/:userId' element={<InfluencerDetailView />} />
+                                                                        <Route path='campaigns' element={<CampaignRequests />} />
+                                                                        <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView />} />
+                                                                        <Route path='analytics' element={<AdminContentLinks />} />
+                                                                        <Route path="settings" element={<ComingSoon />} />
+                                                                        <Route path='support' element={<AdminMessagePage />} />
+                                                                </Route>
+                                                        </Route>
 
-                                </Routes>
+                                                </Routes>
 
-                        </SocketProvider>
+                                        </SocketProvider>
+                                </MaintenanceGuard>
+                        </MaintenanceProvider>
+
                 </Router>
         );
 };

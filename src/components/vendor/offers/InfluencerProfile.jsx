@@ -225,7 +225,7 @@ const InfluencerProfile = () => {
                                 alt="Profile"
                                 onClick={() => setIsPreviewOpen(true)}
                                 className="w-28 h-28 rounded-full object-cover border-4 border-gray-200 cursor-pointer"
-                                onError={(e) => (e.target.src = "/defualt.jpg")}
+                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                             />
 
                             {isPreviewOpen && (
@@ -244,7 +244,7 @@ const InfluencerProfile = () => {
                                         alt="Profile Preview"
                                         className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                                         onClick={(e) => e.stopPropagation()}
-                                        onError={(e) => (e.target.src = "/defualt.jpg")}
+                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                     />
                                 </div>
                             )}

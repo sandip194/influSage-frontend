@@ -648,7 +648,7 @@ const CampaignDetailsView = () => {
                             <img
                                 src={cmapignDetails?.vendorphoto}
                                 alt={cmapignDetails?.name || "Vendor"}
-                                onError={(e) => (e.target.src = "/defualt.jpg")}
+                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                 className="w-12 h-12 rounded-full object-cover border border-gray-100"
                             />
                             <div>

@@ -595,9 +595,6 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
         );
     };
 
-    const hasGlobalErrors = Object.values(errors).some((ct) =>
-        Object.values(ct).some((e) => e)
-    );
 
     // ---------------- Save All ----------------
     const saveAll = async () => {
@@ -650,30 +647,20 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
 
     return (
         <div>
-            <h2 className="text-xl font-semibold mb-6">Upload Content Links</h2>
-
-            {hasGlobalErrors && (
-                <Alert
-                    message="Validation Errors"
-                    type="error"
-                    description="Please fix highlighted fields below."
-                    showIcon
-                    className="mb-4"
-                />
-            )}
-
+            <h2 className="text-lg font-semibold mb-6">Upload Content Links</h2>
+        
             {providers.map((provider, pIndex) => (
                 <div
                     key={provider.providerid}
                     className="border border-gray-200 rounded-xl p-3 bg-white mb-6"
                 >
-                    <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-2 mb-4">
                         <img
                             src={provider.iconpath}
                             className="w-6 h-6"
                             onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                         />
-                        <h3 className="text-lg font-semibold">
+                        <h3 className="text-lg">
                             {provider.providername}
                         </h3>
                     </div>

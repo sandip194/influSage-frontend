@@ -95,7 +95,7 @@ export const Role = () => {
             {/* Continue Button */}
             <button
               onClick={handleContinue}
-              className="w-full mt-2 py-2 bg-[#0e1532] text-white font-semibold rounded-full hover:bg-gray-800 transition"
+              className="w-full mt-2 py-2 bg-[#0e1532] cursor-pointer text-white font-semibold rounded-full hover:bg-gray-800 transition"
             >
               Continue
             </button>

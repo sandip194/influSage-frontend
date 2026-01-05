@@ -144,7 +144,7 @@ const Profile = () => {
               <img
                 src={p_profile?.photopath}
                 alt="Profile"
-                onError={(e) => (e.target.src = "/defualt.jpg")}
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                 onClick={() => setIsPreviewOpen(true)}
                 className="absolute left-6 -bottom-10 w-20 h-20  object-cover rounded-full border-4 border-white shadow cursor-pointer"
               />
@@ -162,7 +162,7 @@ const Profile = () => {
 
                   <img
                     src={p_profile?.photopath}
-                    onError={(e) => (e.target.src = "/defualt.jpg")}
+                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                     alt="Preview"
                     className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                     onClick={(e) => e.stopPropagation()}

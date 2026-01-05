@@ -168,14 +168,14 @@ const ContractTab = ({ campaignId, token }) => {
     <div className="flex flex-col items-center">
       <div
         className="w-full bg-white/70 backdrop-blur-xl 
-        border border-gray-200 rounded-2xl shadow-lg p-8 
+        border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-6
         transition-all duration-300"
       >
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <RiFileList3Line className="text-[#0f122f]" />
-            Contract #{contract?.id}
+            Contract 
           </h2>
 
           {contractStatus !== "pending" && (

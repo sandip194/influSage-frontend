@@ -51,7 +51,7 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
           <img
             src={influencer?.photopath || "/default.jpg"}
             alt="profile"
-            onError={(e) => (e.target.src = "/defualt.jpg")}
+            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
             className="w-12 h-12 rounded-full object-cover"
           />
           <div>

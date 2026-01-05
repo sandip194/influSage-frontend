@@ -195,34 +195,6 @@ const CampaignDetails = () => {
     }
   };
 
-  // Function to pause the campaign
-
-  // const handlePauseCampaign = async () => {
-  //   if (!campaignDetails?.id) {
-  //     toast.error("Campaign ID not found");
-  //     return;
-  //   }
-
-  //   try {
-  //     const res = await axios.post(
-  //       `/vendor/pause-campaign/${campaignDetails.id}`,
-  //       null,
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-
-  //     if (res.status === 200) {
-  //       toast.success(res.data?.message);
-  //       setIsPauseModalOpen(false);
-  //       // getCampaignDetails();
-  //     } else {
-  //       toast.error(res.data?.message);
-  //     }
-  //   } catch (error) {
-  //     console.error("Pause campaign error:", error);
-  //     toast.error(error);
-  //   }
-  // };
-
   const handleEditClick = () => {
     if (campaignDetails?.iseditable === true || campaignDetails?.iseditable === "Is editable") {
       navigate(`/vendor-dashboard/vendor-campaign/edit-campaign/${campaignDetails?.id}`);
@@ -540,8 +512,6 @@ const CampaignDetails = () => {
           </div>
 
 
-
-
           {/* Tabs + Content */}
           <div className="bg-white p-5 rounded-2xl">
 
@@ -710,7 +680,7 @@ const CampaignDetails = () => {
                   >
                     <img
                       src={influencer.userphoto}
-                      onError={(e) => (e.target.src = "/defualt.jpg")}
+                      onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                       alt={`${influencer.firstname} ${influencer.lastname}`}
                       className="w-12 h-12 rounded-full object-cover"
                     />
@@ -805,37 +775,6 @@ const CampaignDetails = () => {
           </div>
         </div>
       </div>
-
-      {/* Pause Campaign Modal */}
-      {/* <Modal
-        open={isPauseModalOpen}
-        onCancel={() => setIsPauseModalOpen(false)}
-        centered
-        footer={null}
-      >
-        <h2 className="text-xl font-semibold mb-2">Pause Campaign</h2>
-        <p className="text-gray-600">
-          Are you sure you want to pause this campaign? You can resume it later.
-        </p>
-
-        <div className="flex justify-end gap-3 mt-4">
-          <button
-            onClick={() => setIsPauseModalOpen(true)}
-            className="px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-100"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handlePauseCampaign}
-            className="px-6 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a]"
-          >
-            Pause
-          </button>
-        </div>
-      </Modal> */}
-
-
-
 
       {/* Cancel Campaign Modal */}
       <Modal

@@ -141,7 +141,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                             )}
                             <div>
                                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 capitalize">
-                                    {offerDetails.firstname} {offerDetails.lastname}
+                                    {offerDetails.influencername}
                                 </h2>
                                 <p className="text-gray-600 text-sm mt-1">
                                     {offerDetails.statename}, {offerDetails.countryname}
@@ -182,7 +182,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                 <Tooltip title="Message">
                                     <button
                                         onClick={handleMessageClick}
-                                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] text-sm w-full sm:w-auto justify-center"
+                                        className="flex items-center cursor-pointer gap-2 px-4 py-2 rounded-full bg-[#0f122f] text-white hover:bg-[#23265a] text-sm w-full sm:w-auto justify-center"
                                     >
                                         <RiMessage2Line size={16} /> Message
                                     </button>
@@ -192,45 +192,29 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                     </div>
 
                     {/* Desktop layout flex */}
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        {/* Left Column: 75% width */}
-                        <div className="sm:w-3/4 flex flex-col gap-4">
-                            {/* Proposed Budget */}
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <p className="text-gray-600 text-sm font-medium mb-1">Proposed Budget</p>
-                                <p className="text-2xl font-bold text-gray-900">
-                                    ₹{Number(offerDetails.budget || 0).toLocaleString("en-IN")}
-                                </p>
-                            </div>
+                    <div className="">
+                        <div className="flex flex-col gap-4">
+                          
 
                             {/* Campaign Description */}
                             <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="font-semibold text-gray-900 mb-2">Campaign Description</h3>
+
+                                <h3 className="text-sm font-semibold mb-1">Proposed Budget</h3>
+                                <p className="text-lg text-gray-900">
+                                    ₹{Number(offerDetails.budget || 0).toLocaleString("en-IN")}
+                                </p>
+
+                                <h3 className="text-lg font-semibold my-2">Campaign Description</h3>
                                 <p className="text-gray-700 text-sm leading-relaxed">
                                     {offerDetails.description || "No campaign description provided."}
                                 </p>
                             </div>
 
-                            {/* Buttons */}
-                            <div className="flex justify-start gap-3 mt-4">
-                                {!offerDetails?.ismessaged && (
-                                    <button
-                                        onClick={() => setIsAcceptModalOpen(true)}
-                                        className="bg-[#0D132D] text-white font-medium py-2 px-6 min-w-48 rounded-lg hover:bg-[#0D132Ded] transition"
-                                    >
-                                        Accept Application
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Right Column: 25% width */}
-                        <div className="sm:w-1/4 flex flex-col gap-4">
-                            {/* Sample Work / Portfolio */}
+                             {/* Sample Work / Portfolio */}
                             <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="font-semibold text-gray-900 mb-3">Sample Work</h3>
+                                <h3 className="text-lg font-semibold mb-2">Sample Work</h3>
                                 {offerDetails.filepaths?.length ? (
-                                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-1">
+                                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
                                         {offerDetails.filepaths.map((file, i) => {
                                             const url = file.filepath;
                                             const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
@@ -279,14 +263,27 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                         <img
                                             src={previewImage}
                                             alt="Preview"
-                                            className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                            className="max-w-48 max-h-48 rounded-xl shadow-lg object-contain"
                                             onClick={(e) => e.stopPropagation()}
                                             onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                         />
                                     </div>
                                 )}
                             </div>
+
+                            {/* Buttons */}
+                            <div className="flex justify-start gap-3 mt-4">
+                                {!offerDetails?.ismessaged && (
+                                    <button
+                                        onClick={() => setIsAcceptModalOpen(true)}
+                                        className="bg-[#0D132D] cursor-pointer text-white font-medium py-2 px-6 min-w-48 rounded-lg hover:bg-[#0D132Ded] transition"
+                                    >
+                                        Accept Application
+                                    </button>
+                                )}
+                            </div>
                         </div>
+
                     </div>
 
 

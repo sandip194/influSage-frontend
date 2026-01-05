@@ -268,12 +268,12 @@ const formatToDDMMYYYY = (dateStr) => {
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description={
               <span className="text-gray-500">
-                You haven't created any contracts for this campaign yet. Start by adding one below.
+                You haven't created any contracts for this campaign yet.
               </span>
             }
 
           />
-          <button
+          {/* <button
             onClick={() => {
               setEditingContract(null);
               setIsModalOpen(true);
@@ -282,7 +282,7 @@ const formatToDDMMYYYY = (dateStr) => {
           >
             <RiAddLine size={20} />
             Create Contract
-          </button>
+          </button> */}
 
         </div>
       ) : (

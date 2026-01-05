@@ -47,13 +47,13 @@ const Unauthorized = () => {
         <div className="flex flex-col sm:flex-row justify-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="px-6 py-2 rounded-full bg-gray-800 text-white hover:bg-gray-900 transition font-semibold"
+            className="px-6 py-2 rounded-full cursor-pointer bg-gray-800 text-white hover:bg-gray-900 transition font-semibold"
           >
             Go Back
           </button>
           <button
             onClick={() => navigate("/login")}
-            className="px-6 py-2 rounded-full bg-white/60 text-gray-900 font-semibold border border-gray-300 hover:bg-white transition"
+            className="px-6 py-2 rounded-full cursor-pointer bg-white/60 text-gray-900 font-semibold border border-gray-300 hover:bg-white transition"
           >
             Go to Login
           </button>

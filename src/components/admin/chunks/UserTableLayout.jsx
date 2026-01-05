@@ -453,7 +453,7 @@ const UserTableLayout = () => {
                                                                 <img
                                                                  src={user?.photopath}
                                                                  alt={safeText(user?.firstname, "User")}
-                                                                 onError={(e) => (e.target.src = "/defualt.jpg")}
+                                                                 onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                                                   className="w-10 h-10 rounded-full object-cover" />
                                                                 <span className="font-medium">{safeText(user?.firstname)} {safeText(user?.lastname)}</span>
                                                             </div>

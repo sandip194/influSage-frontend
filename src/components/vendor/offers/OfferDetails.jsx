@@ -178,7 +178,7 @@ const handleConfirmAccept = () => {
                                 alt={influencerName}
                                 loading="lazy"
                                 className="w-12 h-12 rounded-full object-cover"
-                                onError={(e) => (e.target.src = "/defualt.jpg")}
+                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                             />
                             <div>
                                 <div className="font-semibold text-gray-900">

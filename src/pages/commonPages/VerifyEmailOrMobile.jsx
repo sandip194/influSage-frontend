@@ -197,7 +197,7 @@ export const VerifyEmailOrMobile = () => {
               className={`w-full py-2 rounded-full font-semibold transition ${
                 timer === 0
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-[#0e1532] text-white hover:bg-gray-800"
+                  : "bg-[#0e1532] cursor-pointer text-white hover:bg-gray-800"
               }`}
             >
               Verify OTP

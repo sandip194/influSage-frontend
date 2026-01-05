@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Tooltip, Skeleton } from "antd";
+import { Modal, Tooltip, Skeleton, Empty } from "antd";
 import { RiHeart3Line, RiHeart3Fill, RiFile3Line } from "@remixicon/react";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -108,7 +108,7 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                 src={influDetails?.photopath}
                 alt="Profile"
                 onClick={() => setIsPreviewOpen(true)}
-                onError={(e) => (e.target.src = "/defualt.jpg")}
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                 className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-gray-100 shadow-sm cursor-pointer hover:opacity-90"
               />
               {isPreviewOpen && (
@@ -128,13 +128,13 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                     alt="Preview"
                     className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                     onClick={(e) => e.stopPropagation()}
-                    onError={(e) => (e.target.src = "/defualt.jpg")}
+                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   />
                 </div>
               )}
               <div>
                 <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 capitalize">
-                  {influDetails?.firstname} {influDetails?.lastname}
+                  {influDetails?.influencername}
                 </h2>
                 <p className="text-gray-600 text-sm mt-1">
                   {influDetails?.statename}, {influDetails?.countryname}
@@ -142,6 +142,43 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                 <p className="text-gray-400 text-xs mt-1">
                   Total Campaigns: {influDetails?.totalcampaign ?? 0}
                 </p>
+
+                {/* Social Media (Header) */}
+                {influDetails?.providers?.length > 0 && (
+                  <div className="flex gap-2 mt-3 flex-wrap justify-center sm:justify-start">
+                    {influDetails.providers.map((provider, idx) => {
+                      const followers = provider.nooffollowers || 0;
+
+                      const formatFollowers = (num) => {
+                        if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+                        if (num >= 1_000) return (num / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+                        return num;
+                      };
+
+                      return (
+                        <Tooltip key={idx} title={provider.providername}>
+                          <a
+                            href={provider.handleslink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 rounded-full hover:shadow-sm transition"
+                          >
+                            <img
+                              src={provider.iconpath}
+                              alt={provider.providername}
+                              className="w-6 h-6 rounded-full"
+                              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                            />
+                            <span className="text-xs font-medium text-gray-700">
+                              {formatFollowers(followers)}
+                            </span>
+                          </a>
+                        </Tooltip>
+                      );
+                    })}
+                  </div>
+                )}
+
               </div>
             </div>
 
@@ -150,7 +187,7 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
             >
               <button
                 onClick={handleLike}
-                className={`relative flex items-center justify-center sm:justify-start gap-2 px-4 py-1 rounded-full text-sm font-medium border transition ${influDetails?.savedinfluencer
+                className={`relative cursor-pointer flex items-center justify-center sm:justify-start gap-2 px-4 py-1 rounded-full text-sm font-medium border transition ${influDetails?.savedinfluencer
                   ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
                   : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
                   }`}
@@ -190,18 +227,17 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
           </div>
 
           {/* Main Content */}
-          <div className="flex flex-col lg:flex-row gap-3 mt-3">
-            {/* LEFT SIDE - 75% */}
-            <div className="lg:w-3/4 flex flex-col gap-3">
+          <div className=" mt-3">
+            <div className="bg-gray-50 p-4 rounded-lg">
               {/* Bio */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-gray-900 font-semibold mb-2">Bio</h3>
+              <div className="border-b border-gray-200 pb-3">
+                <h3 className="text-gray-900 text-lg font-semibold mb-2">Bio</h3>
                 <p className="text-gray-600 text-sm">{influDetails?.bio || "No bio available."}</p>
               </div>
 
               {/* Categories */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-gray-900 font-semibold mb-2">Categories</h3>
+              <div className="border-b border-gray-200 py-3">
+                <h3 className="text-gray-900 text-lg font-semibold mb-2">Categories</h3>
                 <div className="flex flex-wrap gap-2">
                   {influDetails?.categories?.map((cat) => (
                     <span
@@ -215,8 +251,8 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
               </div>
 
               {/* Social Media */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-gray-900 font-semibold mb-2">Social Media</h3>
+              {/* <div className="border-b border-gray-200 py-3">
+                <h3 className="text-gray-900 text-lg font-semibold mb-2">Social Media</h3>
                 {influDetails?.providers?.length > 0 ? (
                   <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
                     {influDetails.providers.map((provider, idx) => {
@@ -256,100 +292,119 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                 ) : (
                   <p className="text-sm text-gray-500">No social media profiles available.</p>
                 )}
-              </div>
+              </div> */}
+
+
+
             </div>
 
-            {/* RIGHT SIDE - 25% */}
-            <div className="lg:w-1/4 flex flex-col gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-gray-900 font-semibold mb-2">Portfolio</h3>
+            <div className="p-4 rounded-lg">
+              <h3 className="text-gray-900 text-lg font-semibold mb-2">Portfolio</h3>
 
-                {validPortfolioFiles.length > 0 ? (
-                  <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
-                    {validPortfolioFiles.slice(0, 6).map((file, i) => {
-                      const url = file.filepath;
-                      const ext = url.split(".").pop().toLowerCase();
+              {influDetails?.portfoliourl && (
+                <div className="mb-3">
+                  <a
+                    href={influDetails.portfoliourl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-blue-600 !bg-blue-50  text-sm font-medium rounded-lg hover:bg-blue-100 transition"
+                  >
+                    <RiFile3Line size={18} />
+                    View Full Portfolio
+                  </a>
+                </div>
+              )}
 
-                      const isImage = ["jpg", "jpeg", "png", "gif", "webp"].includes(ext);
-                      const isVideo = ["mp4", "mov", "webm", "ogg"].includes(ext);
+              {validPortfolioFiles.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                  {validPortfolioFiles.slice(0, 6).map((file, i) => {
+                    const url = file.filepath;
+                    const ext = url.split(".").pop().toLowerCase();
 
-                      return (
-                        <div
-                          key={i}
-                          className="rounded-lg overflow-hidden bg-gray-100 border border-gray-200 hover:shadow-md transition cursor-pointer"
-                        >
-                          {isImage ? (
-                            <img
-                              src={url}
-                              onClick={() => setPreviewPortfolioImage(url)}
-                              alt="portfolio"
-                              className="w-full h-28 object-cover"
-                              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                            />
-                          ) : isVideo ? (
-                            <video
-                              src={url}
-                              onClick={() => setPreviewPortfolioVideo(url)}
-                              className="w-full h-28 object-cover"
-                            />
-                          ) : (
-                            <div className="flex flex-col items-center justify-center h-28 text-xs text-gray-500">
-                              <RiFile3Line className="text-gray-400 text-3xl mb-1" />
-                              Unsupported
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">No portfolio files uploaded.</p>
-                )}
+                    const isImage = ["jpg", "jpeg", "png", "gif", "webp"].includes(ext);
+                    const isVideo = ["mp4", "mov", "webm", "ogg"].includes(ext);
 
-              </div>
-              {previewPortfolioImage && (
-                <div
-                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
+                    return (
+                      <div
+                        key={i}
+                        className="rounded-lg overflow-hidden bg-gray-100 border border-gray-200 hover:shadow-md transition cursor-pointer"
+                      >
+                        {isImage ? (
+                          <img
+                            src={url}
+                            onClick={() => setPreviewPortfolioImage(url)}
+                            alt="portfolio"
+                            className="w-full h-28 object-cover"
+                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                          />
+                        ) : isVideo ? (
+                          <video
+                            src={url}
+                            onClick={() => setPreviewPortfolioVideo(url)}
+                            className="w-full h-28 object-cover"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-28 text-xs text-gray-500">
+                            <RiFile3Line className="text-gray-400 text-3xl mb-1" />
+                            Unsupported
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description="No portfolio files uploaded"
+                />
+
+              )}
+
+            </div>
+
+            {previewPortfolioImage && (
+              <div
+                className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
+                onClick={() => setPreviewPortfolioImage(null)}
+              >
+                <button
                   onClick={() => setPreviewPortfolioImage(null)}
+                  className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
                 >
-                  <button
-                    onClick={() => setPreviewPortfolioImage(null)}
-                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                  >
-                    ×
-                  </button>
+                  ×
+                </button>
 
-                  <img
-                    src={previewPortfolioImage}
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                  />
-                </div>
-              )}
+                <img
+                  src={previewPortfolioImage}
+                  className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                  onClick={(e) => e.stopPropagation()}
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                />
+              </div>
+            )}
 
-              {previewPortfolioVideo && (
-                <div
-                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
+            {previewPortfolioVideo && (
+              <div
+                className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
+                onClick={() => setPreviewPortfolioVideo(null)}
+              >
+                <button
                   onClick={() => setPreviewPortfolioVideo(null)}
+                  className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
                 >
-                  <button
-                    onClick={() => setPreviewPortfolioVideo(null)}
-                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                  >
-                    ×
-                  </button>
+                  ×
+                </button>
 
-                  <video
-                    src={previewPortfolioVideo}
-                    controls
-                    autoPlay
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              )}
-            </div>
+                <video
+                  src={previewPortfolioVideo}
+                  controls
+                  autoPlay
+                  className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            )}
           </div>
         </div>
       ) : (

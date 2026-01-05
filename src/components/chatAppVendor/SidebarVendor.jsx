@@ -268,7 +268,7 @@ export default function SidebarVendor({ onSelectChat }) {
                   <img
                     src={campaign.campaignphoto}
                     alt={campaign.campaignname}
-                    onError={(e) => (e.target.src = "/defualt.jpg")}
+                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div className="overflow-hidden max-w-[140px] min-w-0">
