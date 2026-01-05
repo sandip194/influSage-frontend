@@ -259,7 +259,7 @@ const InfluencerProfile = () => {
                                     <h2
                                         className="text-2xl sm:text-3xl font-semibold capitalize text-gray-900 leading-tight break-words"
                                     >
-                                        {influDetails?.firstname} {influDetails?.lastname}
+                                        {influDetails?.influencername}
                                     </h2>
 
                                     <p className="text-sm text-gray-900 mt-1 break-all">

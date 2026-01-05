@@ -105,22 +105,51 @@ export const CategorySelector = ({ onBack, onNext }) => {
                 {/* Right: Child Categories */}
                 <div className="col-span-1 md:col-span-2 lg:col-span-3">
                     <h3 className="font-semibold mb-3 text-gray-700">Subcategories</h3>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {currentParent?.categories.map((child) => (
+                    {currentParent?.categories.map((child) => {
+                        const isSelected = selectedChildren.includes(child.id);
+
+                        return (
+                        <div
+                            key={child.id}
+                            onClick={() => toggleChildSelection(child.id)}
+                            className={`
+                            flex justify-between items-center gap-3
+                            w-full px-4 py-3 text-sm rounded-xl border
+                            cursor-pointer transition-all
+                            ${
+                                isSelected
+                                ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                                : "bg-white text-black border-gray-300 hover:border-[#141843]"
+                            }
+                            `}
+                        >
+                            {/* Category Name */}
+                            <span
+                            className="text-sm leading-snug break-words flex-1"
+                            dangerouslySetInnerHTML={{
+                                __html: child.name.replaceAll("/", "/<wbr>"),
+                            }}
+                            />
+
+                            {/* Check Icon */}
                             <div
-                                key={child.id}
-                                onClick={() => toggleChildSelection(child.id)}
-                                className={`relative wrap-anywhere cursor-pointer rounded-lg px-3 py-2 text-sm border transition-all ${selectedChildren.includes(child.id)
-                                    ? 'bg-[#121A3F] text-white border-[#121A3F]'
-                                    : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100'
-                                    }`}
+                            className={`
+                                w-5 h-5 shrink-0 flex items-center justify-center
+                                rounded-full border transition-all
+                                ${
+                                isSelected
+                                    ? "bg-[#141843] border-[#141843] text-white"
+                                    : "bg-transparent border-gray-400 text-transparent"
+                                }
+                            `}
                             >
-                                {child.name}
-                                {selectedChildren.includes(child.id) && (
-                                    <CheckOutlined className="absolute top-2 right-2 text-white bg-green-600 rounded-full p-1 w-5" />
-                                )}
+                            {isSelected && <RiCheckLine size={12} />}
                             </div>
-                        ))}
+                        </div>
+                        );
+                    })}
                     </div>
                 </div>
             </div>

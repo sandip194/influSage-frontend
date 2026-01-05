@@ -41,6 +41,7 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const shouldAutoScroll = useRef(true);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 const formatTime = (timestamp) => {
   const date = new Date(timestamp);
@@ -114,6 +115,10 @@ useEffect(() => {
 
   const handleSend = async () => {
     if (!activeSubject) return;
+    if (isMobile && (!activeSubject || isResolved)) {
+    handleBlockedAction();
+    return;
+  }
     if (!message.trim() && !attachedFile) return;
 
     try {
@@ -179,7 +184,12 @@ useEffect(() => {
     }
   };
 
-  const handleKeyPress = (e) => e.key === "Enter" && handleSend();
+    const handleKeyPress = (e) => {
+      if (!isMobile && e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -195,7 +205,7 @@ useEffect(() => {
     setAttachedPreview(URL.createObjectURL(file));
   };
 
-  const handleResolve = async () => {
+  const handleResolve = async () => {a
     if (!activeSubject || isResolved) return;
     try {
   setIsResolved(true);
@@ -672,51 +682,52 @@ useEffect(() => {
           ${!activeSubject ? "opacity-60" : "opacity-100"}
         `}
         >
-          <input
-            type="text"
-            placeholder={
-              !activeSubject
-                ? "Select a subject to start chat..."
-                : isResolved
-                ? "Ticket is resolved"
-                : "Type your message..."
-            }
-            disabled={!activeSubject || isResolved}
-            value={message}
-            onChange={(e) => !isResolved && setMessage(e.target.value)}
-            onKeyDown={(e) => !isResolved && handleKeyPress(e)}
-            className={`flex-1 min-w-[40px] bg-transparent outline-none text-sm sm:text-base
-              ${isResolved ? "text-gray-500 cursor-not-allowed" : "text-gray-700"}`}
-          />
-
-          <div className="flex items-center gap-2 sm:gap-3 text-gray-600 shrink-0">
-            <RiEmojiStickerLine
-              className={`text-lg sm:text-xl ${
-                !activeSubject || isResolved ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
-              }`}
-              onClick={() =>
-                activeSubject && !isResolved && setShowEmojiPicker(!showEmojiPicker)
-              }
-            />
-
-            <RiImageLine
-              className={`text-lg sm:text-xl ${
-                !activeSubject || isResolved ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
-              }`}
-              onClick={() =>
-                activeSubject && !isResolved && imageInputRef.current.click()
-              }
-            />
-
-            <RiAttachment2
-              className={`text-lg sm:text-xl ${
-                !activeSubject || isResolved ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
-              }`}
-              onClick={() =>
-                activeSubject && !isResolved && fileInputRef.current.click()
-              }
-          />
-          </div>
+          <textarea
+                      disabled={
+                        !activeSubject ||
+                        activeSubject.status?.toLowerCase() === "open" ||
+                        activeSubject.status?.toLowerCase() === "closed"
+                      }
+                      placeholder="Type your message..."
+                      value={message}
+                      onKeyDown={handleKeyPress}
+                      onChange={(e) => setMessage(e.target.value)}
+                      rows={1}
+                      className="flex-1 bg-transparent outline-none resize-none py-2 min-h-[40px] text-gray-600 placeholder-gray-500 text-sm sm:text-base rounded-full px-4 leading-normal max-h-20 overflow-y-auto no-scrollbar"
+                    />
+          
+                    {/* Icons */}
+                    <div className="flex items-center gap-2 sm:gap-3 text-gray-600 shrink-0">
+                      <RiEmojiStickerLine
+                        className={`text-lg sm:text-xl ${isMobile && 
+                          !activeSubject || isResolved ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+                        }`}
+                        onClick={() => {
+                          if (!activeSubject || isResolved) return;
+                          setShowEmojiPicker(!showEmojiPicker);
+                        }}
+                      />
+          
+                      <RiImageLine
+                        className={`text-lg sm:text-xl ${isMobile && 
+                          !activeSubject || isResolved ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+                        }`}
+                        onClick={() => {
+                          if (!activeSubject || isResolved) return;
+                          imageInputRef.current.click();
+                        }}
+                      />
+          
+                      <RiAttachment2
+                        className={`text-lg sm:text-xl ${isMobile && 
+                          !activeSubject || isResolved ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+                        }`}
+                        onClick={() => {
+                          if (!activeSubject || isResolved) return;
+                          fileInputRef.current.click();
+                        }}
+                      />
+                    </div>
 
           <motion.button
             whileTap={{ scale: 0.9 }}

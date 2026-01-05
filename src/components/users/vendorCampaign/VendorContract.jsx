@@ -182,8 +182,8 @@ const formatToDDMMYYYY = (dateStr) => {
     if (rating) {
       if (!feedback || feedback.trim().length < 10) {
         newErrors.feedback = "Please write at least 10 characters about the influencer.";
-      } else if (feedback.trim().length > 100) {
-        newErrors.feedback = "Feedback cannot exceed 100 characters.";
+      } else if (feedback.trim().length > 250) {
+        newErrors.feedback = "Feedback cannot exceed 250 characters.";
       }
     }
 
@@ -579,8 +579,9 @@ const formatToDDMMYYYY = (dateStr) => {
 
 <TextArea
   rows={4}
-  maxLength={100}
+  maxLength={250}
   value={feedback}
+  showCount
   onChange={(e) => {
     setFeedback(e.target.value);
     setErrors((prev) => ({ ...prev, feedback: "" }));
@@ -591,17 +592,6 @@ const formatToDDMMYYYY = (dateStr) => {
     resize: "none",
   }}
 />
-
-{/* Custom 10/100 validation hint */}
-<div className="flex justify-end mt-1">
-  <span
-    className={`text-xs ${
-      feedback.length < 10 ? "text-red-500" : "text-gray-500"
-    }`}
-  >
-    {feedback.length}/100
-  </span>
-</div>
 
 {errors.feedback && (
   <p className="text-red-500 text-xs mt-1">{errors.feedback}</p>

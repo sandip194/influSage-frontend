@@ -79,7 +79,7 @@ export default function ContractModal({
                 // 🔥 Case 2: Normal case — array of influencers
                 const converted = (data || []).map((inf) => ({
                     id: inf.campaignapplicationid,
-                    name: `${inf.firstname} ${inf.lastname}`,
+                    name: `${inf.influencername}`,
                     photo: inf.userphotopath,
                     platform: null,
                 }));

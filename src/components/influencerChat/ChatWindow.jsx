@@ -43,7 +43,7 @@ const ChatWindow = ({ activeSubject, onCloseSuccess, onBack  }) => {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const chatRef = useRef(null);
-
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   const formatTime = (timestamp) => {
   const date = new Date(timestamp);
@@ -105,6 +105,10 @@ useEffect(() => {
 
 const handleSend = async () => {
   if (!activeSubject) return;
+   if (isMobile && (!activeSubject || isClosed)) {
+    handleBlockedAction();
+    return;
+  }
   if (!message.trim() && !attachedFile) return;
 
   try {
@@ -182,7 +186,10 @@ const handleSend = async () => {
 };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") handleSend();
+    if (!isMobile && e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   const handleImageUpload = (e) => {
@@ -692,40 +699,24 @@ useEffect(() => {
             ${!activeSubject ? "opacity-60" : "opacity-100"}
           `}
         >
-          <input
-            type="text"
+          <textarea
             disabled={
               !activeSubject ||
               activeSubject.status?.toLowerCase() === "open" ||
               activeSubject.status?.toLowerCase() === "closed"
             }
-            placeholder={
-              !activeSubject
-                ? "Select a subject to start chat..."
-                : activeSubject.status?.toLowerCase() === "open"
-                  ? "Ticket is not claimed by admin"
-                  : activeSubject.status?.toLowerCase() === "closed"
-                    ? "Ticket is closed"
-                    : "Type your message..."
-            }
+            placeholder="Type your message..."
             value={message}
-            onKeyDown={(e) => handleKeyPress(e)}
+            onKeyDown={handleKeyPress}
             onChange={(e) => setMessage(e.target.value)}
-            className={`flex-1 min-w-[40px] bg-transparent outline-none
-              text-sm sm:text-base
-              ${
-                activeSubject?.status?.toLowerCase() === "open" ||
-                activeSubject?.status?.toLowerCase() === "closed"
-                  ? "text-gray-500 cursor-not-allowed"
-                  : "text-gray-700"
-              }
-            `}
+            rows={1}
+            className="flex-1 bg-transparent outline-none resize-none py-2 min-h-[40px] text-gray-600 placeholder-gray-500 text-sm sm:text-base rounded-full px-4 leading-normal max-h-20 overflow-y-auto no-scrollbar"
           />
 
           {/* Icons */}
           <div className="flex items-center gap-2 sm:gap-3 text-gray-600 shrink-0">
             <RiEmojiStickerLine
-              className={`text-lg sm:text-xl ${
+              className={`text-lg sm:text-xl ${isMobile && 
                 !activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
               onClick={() => {
@@ -735,7 +726,7 @@ useEffect(() => {
             />
 
             <RiImageLine
-              className={`text-lg sm:text-xl ${
+              className={`text-lg sm:text-xl ${isMobile && 
                 !activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
               onClick={() => {
@@ -745,7 +736,7 @@ useEffect(() => {
             />
 
             <RiAttachment2
-              className={`text-lg sm:text-xl ${
+              className={`text-lg sm:text-xl ${isMobile && 
                 !activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
               onClick={() => {
