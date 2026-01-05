@@ -219,8 +219,9 @@ const Campaign = () => {
                   {/* ===== Image Section ===== */}
                   <div className="relative h-36 w-full overflow-hidden">
                     <img
-                      src={item.photopath || '/placeholder.jpg'}
+                      src={item.photopath || '/Brocken-Defualt-Img.jpg'}
                       alt={item.name}
+                      onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                       className="h-full w-full object-cover"
                     />
 

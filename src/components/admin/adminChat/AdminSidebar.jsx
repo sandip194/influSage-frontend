@@ -24,16 +24,16 @@ const TicketSkeleton = () => (
 const AdminSidebar = forwardRef (({ setActiveSubject }, ref) => {
   useSocketRegister();
   const refresh = async () => {
-  const active = statusList.find(x => x.name === activeTab);
-  if (active) {
-    await fetchTickets(active);
-  }
-};
+    const active = statusList.find(x => x.name === activeTab);
+    if (active) {
+      await fetchTickets(active);
+    }
+  };
 
-useImperativeHandle(ref, () => ({
-  refresh,
-}));
-  const { token , userId } = useSelector((state) => state.auth);
+  useImperativeHandle(ref, () => ({
+    refresh,
+  }));
+  const { token, userId } = useSelector((state) => state.auth);
   const socket = getSocket();
   const [activeTab, setActiveTab] = useState("");
   const [statusList, setStatusList] = useState([]);
@@ -42,41 +42,41 @@ useImperativeHandle(ref, () => ({
   const [ticketModalData, setTicketModalData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-useEffect(() => {
-  if (!socket || !userId) return;
-  socket.emit("registerUser", { userId });
-
-  socket.on("connect", () => {
+  useEffect(() => {
+    if (!socket || !userId) return;
     socket.emit("registerUser", { userId });
-  });
 
-  return () => socket.off("connect");
-}, [socket, userId]);
+    socket.on("connect", () => {
+      socket.emit("registerUser", { userId });
+    });
 
-useEffect(() => {
-  if (!socket) return;
+    return () => socket.off("connect");
+  }, [socket, userId]);
 
-  const handler = ({ ticketId, readbyadmin }) => {
-    setSubjectsByTab(prev =>
-      Object.fromEntries(
-        Object.entries(prev).map(([tab, tickets]) => [
-          tab,
-          tickets.map(t =>
-            String(t.id) === String(ticketId)
-              ? {
+  useEffect(() => {
+    if (!socket) return;
+
+    const handler = ({ ticketId, readbyadmin }) => {
+      setSubjectsByTab(prev =>
+        Object.fromEntries(
+          Object.entries(prev).map(([tab, tickets]) => [
+            tab,
+            tickets.map(t =>
+              String(t.id) === String(ticketId)
+                ? {
                   ...t,
                   unread: !readbyadmin && String(ticketId) !== String(activeSubjectId)
                 }
-              : t
-          ),
-        ])
-      )
-    );
-  };
+                : t
+            ),
+          ])
+        )
+      );
+    };
 
-  socket.on("sidebarTicketUpdate", handler);
-  return () => socket.off("sidebarTicketUpdate", handler);
-}, [socket, activeSubjectId]);
+    socket.on("sidebarTicketUpdate", handler);
+    return () => socket.off("sidebarTicketUpdate", handler);
+  }, [socket, activeSubjectId]);
 
   useEffect(() => {
     const fetchTicketStatus = async () => {
@@ -121,24 +121,24 @@ useEffect(() => {
         : [];
 
       const mapped = tickets.map((t) => {
-      return {
-        id: t.usersupportticketid,
-        name: t.subjectname,
-        status: t.statusname,
-        createddate: t.createddate,
-        userfullname: t.userfullname,
-        userphoto: t.userphoto,
-        userrole: t.userrole,
-        adminfullname: t.adminfullname,
-        adminphoto: t.adminphoto,
-        unread:
-          t.statusname !== "Open" && 
-          t.statusname !== "Closed" && 
-          !t.readbyadmin,
-        icon: <RiBook2Line className="text-xl" />,
-        ...t,
-      };
-    });
+        return {
+          id: t.usersupportticketid,
+          name: t.subjectname,
+          status: t.statusname,
+          createddate: t.createddate,
+          userfullname: t.userfullname,
+          userphoto: t.userphoto,
+          userrole: t.userrole,
+          adminfullname: t.adminfullname,
+          adminphoto: t.adminphoto,
+          unread:
+            t.statusname !== "Open" &&
+            t.statusname !== "Closed" &&
+            !t.readbyadmin,
+          icon: <RiBook2Line className="text-xl" />,
+          ...t,
+        };
+      });
 
       setSubjectsByTab((prev) => ({ ...prev, [tab.name]: mapped }));
     } catch (error) {
@@ -149,47 +149,47 @@ useEffect(() => {
   };
 
   const handleSubjectClick = async (ticket) => {
-  try {
-    const wasAlreadyInprogress = activeTab === "Inprogress";
+    try {
+      const wasAlreadyInprogress = activeTab === "Inprogress";
 
-    setActiveSubject(ticket);
-    setActiveSubjectId(ticket.id);
+      setActiveSubject(ticket);
+      setActiveSubjectId(ticket.id);
 
-    await axios.post(
-      "/chat/support/ticket/create-or-update-status",
-      {
-        p_usersupportticketid: ticket.id,
-        p_objectiveid: null,
-        p_statusname: "Inprogress",
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setSubjectsByTab((prev) => {
-      const updated = { ...prev };
+      await axios.post(
+        "/chat/support/ticket/create-or-update-status",
+        {
+          p_usersupportticketid: ticket.id,
+          p_objectiveid: null,
+          p_statusname: "Inprogress",
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSubjectsByTab((prev) => {
+        const updated = { ...prev };
 
-      Object.keys(updated).forEach((tab) => {
-        updated[tab] = updated[tab].map((t) =>
-          t.id === ticket.id
-            ? {
+        Object.keys(updated).forEach((tab) => {
+          updated[tab] = updated[tab].map((t) =>
+            t.id === ticket.id
+              ? {
                 ...t,
                 statusname: "Inprogress",
                 unread: false,
                 isclaimedbyadmin: true,
               }
-            : t
-        );
+              : t
+          );
+        });
+
+        return updated;
       });
+      if (!wasAlreadyInprogress) {
+        setActiveTab("Inprogress");
+      }
 
-      return updated;
-    });
-    if (!wasAlreadyInprogress) {
-      setActiveTab("Inprogress");
+    } catch (err) {
+      console.error("Error updating ticket status:", err);
     }
-
-  } catch (err) {
-    console.error("Error updating ticket status:", err);
-  }
-};
+  };
 
   const subjects = subjectsByTab[activeTab] || [];
 
@@ -200,7 +200,7 @@ useEffect(() => {
   };
 
   return (
-     <div className="
+    <div className="
           h-screen md:h-full w-full
           bg-white flex flex-col
           p-3 sm:p-4
@@ -217,9 +217,9 @@ useEffect(() => {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-5 my-2 overflow-x-auto whitespace-nowrap">
-      {statusList.map((tab) => (
-        <button
-           key={tab.id}
+        {statusList.map((tab) => (
+          <button
+            key={tab.id}
             onClick={() => {
               setActiveTab(tab.name);
               setTicketModalData(null);
@@ -228,12 +228,12 @@ useEffect(() => {
             activeTab === tab.name
               ? "bg-[#0D132D] text-white border-[#0D132D]"
               : "bg-white text-gray-600 border-gray-300"
-          }`}
-        >
-          {tab.name}
-        </button>
-      ))}
-    </div>
+              }`}
+          >
+            {tab.name}
+          </button>
+        ))}
+      </div>
 
       {/* Ticket List */}
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
@@ -258,10 +258,9 @@ useEffect(() => {
               key={s.id}
               onClick={() => setTicketModalData(s)}
               className={`p-3 rounded-lg cursor-pointer transition flex flex-col gap-1
-                ${
-                  activeSubjectId === s.id
-                    ? "bg-[#0D132D] text-white shadow-md"
-                    : s.unread
+                ${activeSubjectId === s.id
+                  ? "bg-[#0D132D] text-white shadow-md"
+                  : s.unread
                     ? "bg-blue-100 text-black shadow"
                     : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                 }
@@ -321,16 +320,16 @@ useEffect(() => {
                       (s.statusname !== "Open" && s.isclaimedbyadmin === true) ||
                       s.statusname === "Resolved"
                     ) && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openChat(s);
-                        }}
-                        className="text-[11px] px-2 py-1 rounded bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition"
-                      >
-                        Chat
-                      </button>
-                    )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openChat(s);
+                          }}
+                          className="text-[11px] px-2 py-1 rounded bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition"
+                        >
+                          Chat
+                        </button>
+                      )}
                   </div>
                 </div>
               </div>
@@ -405,8 +404,11 @@ useEffect(() => {
                   </p>
                   <div className="flex items-center gap-2">
                     <img
-                      src={ticketModalData.userphoto}
+                      src={ticketModalData.userphoto || "/default.jpg"}
                       alt="user"
+                      onError={(e) => {
+                        e.currentTarget.src = "/default.jpg";
+                      }}
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
@@ -429,6 +431,9 @@ useEffect(() => {
                       <img
                         src={ticketModalData.adminphoto || "/default.jpg"}
                         alt="admin"
+                        onError={(e) => {
+                          e.currentTarget.src = "/default.jpg";
+                        }}
                         className="w-10 h-10 rounded-full object-cover"
                       />
                       <p className="font-medium">{ticketModalData.adminfullname}</p>

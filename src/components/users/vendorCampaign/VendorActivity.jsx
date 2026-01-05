@@ -77,6 +77,7 @@ const VendorActivity = () => {
                 <img
                   src={item.avatar}
                   alt={item.user}
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   className="w-10 h-10 rounded-full object-cover"
                 />
                 {/* Content */}

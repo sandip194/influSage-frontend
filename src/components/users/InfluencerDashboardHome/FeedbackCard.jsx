@@ -68,8 +68,9 @@ const FeedbackCard = () => {
     <div className="flex items-start justify-between mb-3">
       <div className="flex items-center gap-3 min-w-0">
         <img
-          src={fb.campaignpohoto || "https://via.placeholder.com/48"}
+          src={fb.campaignpohoto || "/Brocken-Defualt-Img.jpg"}
           alt={fb.campaignname || "Brand"}
+          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
           className="w-12 h-12 rounded-full object-cover border border-gray-200"
         />
 

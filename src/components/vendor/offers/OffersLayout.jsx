@@ -217,6 +217,7 @@ const OffersLayout = () => {
                                                 src={offer?.photopath}
                                                 alt={offer.name}
                                                 className="w-9 h-9 rounded-full object-cover"
+                                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                             />
                                             <span>{offer.name}</span>
                                         </td>

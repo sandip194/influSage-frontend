@@ -39,6 +39,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
           <img
             src={provider.iconpath}
             alt={provider.name}
+            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
             className="w-[24px]"
           />
         ),

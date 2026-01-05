@@ -298,6 +298,7 @@ const Activity = () => {
                       <img
                         src={item.avatar}
                         alt={item.user}
+                        onError={(e) => (e.target.src = "/defualt.jpg")}
                         className="w-10 h-10 rounded-full object-cover"
                       />
                       {/* Content */}

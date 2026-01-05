@@ -450,7 +450,11 @@ const UserTableLayout = () => {
                                                     return (
                                                         <td key="User" className="px-4">
                                                             <div className="flex items-center space-x-3">
-                                                                <img src={user?.photopath} alt={safeText(user?.firstname, "User")} className="w-10 h-10 rounded-full object-cover" />
+                                                                <img
+                                                                 src={user?.photopath}
+                                                                 alt={safeText(user?.firstname, "User")}
+                                                                 onError={(e) => (e.target.src = "/defualt.jpg")}
+                                                                  className="w-10 h-10 rounded-full object-cover" />
                                                                 <span className="font-medium">{safeText(user?.firstname)} {safeText(user?.lastname)}</span>
                                                             </div>
                                                         </td>

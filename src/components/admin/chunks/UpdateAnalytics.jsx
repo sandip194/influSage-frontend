@@ -7,15 +7,7 @@ import AnalyticsFormModal from "./AnalyticsFormModal";
 
 const { Option } = Select;
 
-const SAFE_IMG = "https://placehold.co/80x80?text=No+Img";
-
-const STATUS_COLORS = {
-    DUE: "bg-red-50 text-red-600 border-red-200",
-    COMPLETED: "bg-green-50 text-green-600 border-green-200",
-    UPDATED: "bg-green-50 text-green-600 border-green-200",
-};
-
-
+const SAFE_IMG = "Brocken-Default-Img.jpg";
 
 const CustomEmpty = () => (
     <Empty

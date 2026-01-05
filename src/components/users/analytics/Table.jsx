@@ -110,6 +110,7 @@ const Table = () => {
                   <td className="p-4">
                     <img
                       src={row.img}
+                      onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                       alt="preview"
                       className="w-12 h-12 rounded-lg object-cover"
                     />

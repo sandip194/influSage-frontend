@@ -266,7 +266,12 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                 <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
                     <div className="relative m-auto w-30 h-30 rounded-full overflow-hidden bg-[#0D132D0D] hover:opacity-90 cursor-pointer border border-gray-100 group">
                         {preview ? (
-                            <img src={preview} alt="Profile preview" className="object-cover w-full h-full" />
+                            <img
+                                src={preview}
+                                alt="Profile preview"
+                                className="object-cover w-full h-full"
+                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                            />
                         ) : (
                             <div className="flex items-center justify-center w-full h-full text-gray-800 opacity-50">
                                 <RiImageAddLine className="w-8 h-8" />
@@ -468,7 +473,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                     <Form.Item
                         name="city"
                         label={<b>City</b>}
-                        // rules={[{ required: true, message: 'Please select a City' }]}
+                    // rules={[{ required: true, message: 'Please select a City' }]}
                     >
                         <Select
                             showSearch

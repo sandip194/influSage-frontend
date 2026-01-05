@@ -121,6 +121,7 @@ const VendorMyProfile = () => {
                                 src={profileData?.p_profile?.photopath}
                                 alt="Profile"
                                 onClick={() => setIsPreviewOpen(true)}
+                                onError={(e) => (e.target.src = "/defualt.jpg")}
                                 className="absolute left-6 -bottom-10 w-20 h-20 object-cover rounded-full border-4 border-white shadow cursor-pointer"
                             />
 
@@ -138,6 +139,7 @@ const VendorMyProfile = () => {
                                     <img
                                         src={profileData?.p_profile?.photopath}
                                         alt="Profile Preview"
+                                        onError={(e) => (e.target.src = "/defualt.jpg")}
                                         className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                                         onClick={(e) => e.stopPropagation()}
                                     />
@@ -203,7 +205,7 @@ const VendorMyProfile = () => {
                                 ).flatMap(p =>
                                     p.categories.map(cat => (
                                         <span
-                                        
+
                                             key={cat.categoryid}
                                             className="px-4 py-1.5 text-sm bg-gray-100 rounded-full text-gray-700"
                                         >
@@ -253,6 +255,7 @@ const VendorMyProfile = () => {
                                             <img
                                                 src={item.avatar}
                                                 alt={item.user}
+                                                onError={(e) => (e.target.src = "/defualt.jpg")}
                                                 className="w-8 h-8 rounded-full object-cover"
                                             />
                                             <span className="text-sm font-medium text-gray-700">
@@ -349,6 +352,7 @@ const VendorMyProfile = () => {
                                             <img
                                                 src={provider.iconpath}
                                                 alt={provider.name}
+                                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                                 className="w-10 h-10 object-contain rounded-full"
                                             />
                                         ) : (

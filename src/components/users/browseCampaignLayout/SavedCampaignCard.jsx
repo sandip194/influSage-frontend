@@ -95,6 +95,7 @@ const SavedCampaignCard = ({
               <img
                 src={campaign.photopath}
                 alt={campaign.name}
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                 className="w-12 h-12 rounded-full object-cover border border-gray-200"
               />
               <div>
@@ -123,6 +124,7 @@ const SavedCampaignCard = ({
               loading="lazy"
               src={provider.iconpath}
               alt={provider.providername}
+               onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
               className="w-6 h-6 object-contain"
             />
           )}

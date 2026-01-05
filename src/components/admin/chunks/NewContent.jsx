@@ -8,7 +8,7 @@ import AnalyticsFormModal from "./AnalyticsFormModal";
 const { Option } = Select;
 
 const SAFE_IMG =
-    "https://placehold.co/80x80?text=No+Img"; // fallback image
+    "Brocken-Default-Img.jpg"; // fallback image
 
 
 const CustomEmpty = () => (

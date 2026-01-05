@@ -80,6 +80,7 @@ export const Role = () => {
                     src={role.iconpath}
                     alt={role.name}
                     className="w-20 h-20 object-contain rounded-full bg-gray-50"
+                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   />
                   <p className="mt-3 text-lg font-semibold text-gray-800">{role.name}</p>
                 </div>

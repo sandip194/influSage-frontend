@@ -260,6 +260,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
                     <img
                       src={previewUrl}
                       alt="preview"
+                      onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                       className="w-full h-full object-cover rounded-lg cursor-pointer"
                     />
                   </PhotoView>

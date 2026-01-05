@@ -203,6 +203,7 @@ const CampaignReviewStep = ({ onEdit }) => {
               <img
                 src={influencer}
                 alt="Banner"
+                onError={(e) => (e.target.src = "/defualt.jpg")}
                 className="w-full h-28 object-cover rounded-lg cursor-pointer"
                 onClick={() => setPreviewImage(influencer)}
               />
@@ -211,6 +212,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                 <img
                   src={camp_profile}
                   alt="Campaign"
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   className="absolute object-cover rounded-full top-18 left-4 w-22 h-22 cursor-pointer"
                   onClick={() => setPreviewImage(camp_profile)}
                 />
@@ -230,6 +232,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                   <img
                     src={previewImage}
                     alt="Preview"
+                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                     className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                     onClick={(e) => e.stopPropagation()}
                   />
@@ -462,6 +465,7 @@ const CampaignReviewStep = ({ onEdit }) => {
                               <img
                                 src={fileUrl}
                                 alt="Reference"
+                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                 className="w-full h-full object-cover rounded-2xl cursor-pointer"
                               />
                             </PhotoView>

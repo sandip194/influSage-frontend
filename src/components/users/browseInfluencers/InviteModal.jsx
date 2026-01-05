@@ -119,6 +119,7 @@ const InviteModal = ({
                     <img
                       src={campaign.photopath}
                       alt={campaign.name}
+                       onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   )}

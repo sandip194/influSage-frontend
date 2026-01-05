@@ -495,6 +495,7 @@ useEffect(() => {
                               src={repliedMsg.filepath}
                               className="w-11 h-11 rounded-md object-cover flex-shrink-0"
                               alt=""
+                              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                             />
                           )}
 
@@ -541,6 +542,7 @@ useEffect(() => {
                           src={msg.filepath}
                           className="w-full max-w-[220px] rounded-lg mt-2 cursor-pointer hover:opacity-90 transition"
                           onClick={() => setPreviewImage(msg.filepath)}
+                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                         />
                       )}
 
@@ -628,6 +630,7 @@ useEffect(() => {
                 src={replyToMessage.filepath}
                 className="w-12 h-12 rounded-md object-cover"
                 alt=""
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
               />
             )}
 
@@ -658,6 +661,7 @@ useEffect(() => {
                 src={attachedPreview}
                 className="w-20 h-20 rounded-md object-cover cursor-pointer"
                 onClick={() => setPreviewImage(attachedPreview)}
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
               />
             ) : (
               <div className="flex-1 text-sm font-medium truncate">
@@ -789,6 +793,7 @@ useEffect(() => {
             src={previewImage}
             className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
             onClick={(e) => e.stopPropagation()}
+            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
           />
         </div>
       )}

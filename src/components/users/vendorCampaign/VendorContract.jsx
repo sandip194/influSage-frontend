@@ -62,16 +62,28 @@ const formatToDDMMYYYY = (dateStr) => {
         id: safeNumber(c.contractid),
         influencerId: safeNumber(c.influencerid),
         influencerSelectId: safeNumber(c.campaignapplicationid),
-        influencer: c.influencerphoto ? (
-          <div className="flex items-center gap-2">
-            <img
-              src={safeText(c.influencerphoto)}
-              alt="Influencer"
-              className="w-12 h-12 object-cover rounded-full"
-            />
-            <span>{safeText(c.fullname)}</span> {/* show fullname */}
-          </div>
-        ) : safeText(c.fullname, `Influencer ${safeNumber(c.influencerid)}`),
+        influencer: {
+          // React element for display in the list
+          display: c.influencerphoto ? (
+            <div className="flex items-center gap-2">
+              <img
+                src={safeText(c.influencerphoto)}
+                alt="Influencer"
+                className="w-12 h-12 object-cover rounded-full"
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+              />
+              <span>{safeText(c.fullname)}</span>
+            </div>
+          ) : (
+            <span>{safeText(c.fullname, `Influencer ${safeNumber(c.influencerid)}`)}</span>
+          ),
+          // Plain object for modal / Select value
+          value: {
+            id: safeNumber(c.campaignapplicationid),
+            name: safeText(c.fullname),
+            photo: safeText(c.influencerphoto) || null,
+          },
+        },
         contractStart: c.contractstartdate,
         contractEnd: c.contractenddate,
         campaignStart: safeText(campaignStart),
@@ -105,7 +117,11 @@ const formatToDDMMYYYY = (dateStr) => {
 
   // Open modal to edit
   const handleEdit = (contract) => {
-    setEditingContract(contract);
+    // Pass the plain object for modal
+    setEditingContract({
+      ...contract,
+      influencer: contract.influencer.value, // plain {id, name, photo}
+    });
     setIsModalOpen(true);
   };
 
@@ -153,7 +169,6 @@ const formatToDDMMYYYY = (dateStr) => {
     }
   };
 
-
   // VALIDATE FEEDBACK
   const validateFeedback = () => {
     const newErrors = {};
@@ -176,19 +191,15 @@ const formatToDDMMYYYY = (dateStr) => {
     return Object.keys(newErrors).length === 0;
   };
 
-
   const handleSkipClose = () => {
     setErrors({});
     handleCloseContract();
   };
 
-
   const handleSubmitClose = () => {
     if (!validateFeedback()) return;
     handleCloseContract();
   };
-
-
 
   const handleCloseContract = async () => {
     try {
@@ -287,7 +298,7 @@ const formatToDDMMYYYY = (dateStr) => {
               <div className="flex sm:hidden justify-between items-start mb-3">
                 {/* Influencer */}
                 <div className="flex items-center gap-2">
-                  {contract.influencer}
+                  {contract.influencer.display}
                 </div>
 
                 {/* Status + Payment */}
@@ -325,7 +336,7 @@ const formatToDDMMYYYY = (dateStr) => {
 
                   {/* Influencer (desktop only) */}
                   <h3 className="hidden sm:flex text-lg font-semibold text-gray-900 items-center gap-2">
-                    {contract.influencer}
+                    {contract.influencer.display}
                   </h3>
 
                   {/* 📱 MOBILE ACTION BUTTONS */}
@@ -412,6 +423,7 @@ const formatToDDMMYYYY = (dateStr) => {
                               src={platform.icon}
                               alt={platform.provider}
                               className="w-4 h-4 mt-1 rounded-full"
+                              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                             />
                             <div className="flex flex-wrap gap-1">
                               {safeArray(platform.contenttypes).map((ct, ctIdx) => (

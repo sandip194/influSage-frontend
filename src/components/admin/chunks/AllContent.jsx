@@ -5,7 +5,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 const { Option } = Select;
 
-const SAFE_IMG = "https://placehold.co/80x80?text=No+Img";
+const SAFE_IMG = "/default.jpg";
 
 const CustomEmpty = () => (
   <Empty

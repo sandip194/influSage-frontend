@@ -47,6 +47,7 @@ const FilePreview = ({ files = [], onRemove }) => {
                   <img
                     src={displayUrl}
                     alt="preview"
+                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                     className="object-cover w-full h-full cursor-pointer"
                   />
                 </PhotoView>

@@ -46,6 +46,7 @@ const SideImageSlider = () => {
       <img
         src={image}
         alt="Slide"
+        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
         className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000"
       />  
 

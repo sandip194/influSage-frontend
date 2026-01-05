@@ -178,6 +178,7 @@ const handleConfirmAccept = () => {
                                 alt={influencerName}
                                 loading="lazy"
                                 className="w-12 h-12 rounded-full object-cover"
+                                onError={(e) => (e.target.src = "/defualt.jpg")}
                             />
                             <div>
                                 <div className="font-semibold text-gray-900">
@@ -309,6 +310,7 @@ const handleConfirmAccept = () => {
                                                 src={fileUrl}
                                                 alt={`portfolio-${idx}`}
                                                 className="rounded-xl w-full h-28 object-cover"
+                                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                             />
                                         ) : (
                                             <a

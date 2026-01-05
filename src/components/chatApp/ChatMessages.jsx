@@ -449,6 +449,7 @@ useEffect(() => {
                   <img
                     src={chat.img}
                     alt={chat.name}
+                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                     className="w-full h-full object-cover rounded-full"
                   />
                 ) : (

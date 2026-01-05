@@ -245,6 +245,7 @@ const ViewAllOffers = ({ campaignData }) => {
                         src={offer.photopath}
                         alt={offer.name}
                         className="w-10 h-10 rounded-full object-cover"
+                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                       />
                       <div>
                         <p className="font-medium">{offer.firstname} {offer.lastname}</p>

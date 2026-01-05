@@ -144,6 +144,7 @@ const Profile = () => {
               <img
                 src={p_profile?.photopath}
                 alt="Profile"
+                onError={(e) => (e.target.src = "/defualt.jpg")}
                 onClick={() => setIsPreviewOpen(true)}
                 className="absolute left-6 -bottom-10 w-20 h-20  object-cover rounded-full border-4 border-white shadow cursor-pointer"
               />
@@ -161,6 +162,7 @@ const Profile = () => {
 
                   <img
                     src={p_profile?.photopath}
+                    onError={(e) => (e.target.src = "/defualt.jpg")}
                     alt="Preview"
                     className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                     onClick={(e) => e.stopPropagation()}
@@ -273,6 +275,7 @@ const Profile = () => {
                       {isImage && (
                         <img
                           src={item.filepath}
+                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           alt="portfolio"
                           className="w-full h-40 object-cover"
                         />
@@ -323,6 +326,7 @@ const Profile = () => {
               {portfolioPreviewType === "image" && (
                 <img
                   src={portfolioPreviewUrl}
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -405,6 +409,7 @@ const Profile = () => {
                       {item?.iconpath ? (
                         <img
                           src={item.iconpath}
+                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           alt={item.name}
                           className="w-10 h-10 rounded-full object-cover border border-gray-100"
                         />

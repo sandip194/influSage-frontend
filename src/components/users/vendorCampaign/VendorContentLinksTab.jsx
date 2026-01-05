@@ -116,13 +116,14 @@ export default function VendorContentLinksTab({ campaignId }) {
           return (
             <div
               key={safeText(inf?.contractid)}
-              className="bg-gray-100 shadow-sm rounded-2xl p-4 space-y-4 border border-gray-100"
+              className="bg-[#335CFF0D] shadow-sm rounded-2xl p-4 space-y-4 border border-[#335CFF26]"
             >
               {/* Influencer Header */}
               <div className="flex items-center gap-3">
                 <img
                   src={inf?.influencerphoto}
                   alt="profile"
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   className="w-12 h-12 rounded-full object-cover bg-gray-200"
                 />
                 <p className="text-xl font-semibold">
@@ -151,7 +152,7 @@ export default function VendorContentLinksTab({ campaignId }) {
                             [inf.influencerid]: safeText(platform.providername),
                           }))
                         }
-                        className={`pb-1 font-medium text-sm ${active === safeText(platform.providername)
+                        className={`pb-1 cursor-pointer font-medium text-sm ${active === safeText(platform.providername)
                           ? "border-b-2 border-black"
                           : "text-gray-500"
                           }`}
@@ -161,7 +162,7 @@ export default function VendorContentLinksTab({ campaignId }) {
                             src={safeText(platform.iconpath)}
                             className="w-4 h-4 object-contain"
                             alt=""
-                            onError={(e) => (e.target.src = "/placeholder-icon.png")}
+                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           />
                           {safeText(platform.providername)} (
                           {platform.contenttypes.reduce(
@@ -188,9 +189,9 @@ export default function VendorContentLinksTab({ campaignId }) {
                                 onClick={() =>
                                   copyToClipboard(item.contractcontentlinkid, item.link)
                                 }
-                                className={`w-52 px-3 py-0 rounded-xl border cursor-pointer transition flex items-center justify-between shadow-sm ${copiedId === item.contractcontentlinkid
+                                className={`w-52 px-3 py-0 rounded-xl border  cursor-pointer transition flex items-center justify-between shadow-sm ${copiedId === item.contractcontentlinkid
                                   ? "bg-green-100 border-green-400"
-                                  : "bg-white border-gray-200 hover:bg-gray-50"
+                                  : "bg-white border-[#335CFF26] hover:bg-gray-50"
                                   }`}
                               >
                                 <span className="text-gray-700 text-sm truncate">

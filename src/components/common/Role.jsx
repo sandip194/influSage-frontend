@@ -36,31 +36,37 @@ const Role = () => {
           </div>
         </div>
 
-      <div className="login-right">
-        <div className="form-box">
-          <h2>Select Your Role</h2>
-          <p>Select your role based on your requirements</p>
+        <div className="login-right">
+          <div className="form-box">
+            <h2>Select Your Role</h2>
+            <p>Select your role based on your requirements</p>
 
-          <div className="role-options">
-            {roles.map((role) => (
-              <div
-                key={role.id}
-                className={`role-box flex-col items-center justify-items-center ${selectedRole === role.id ? 'selected' : ''}`}
-                onClick={() => setSelectedRole(role.id)}
-              >
-                  <img src={role.icon} alt={role.label} className="role-icon bg-gray-100 rounded-full" width="100px" />
-                <p>{role.label}</p>
-              </div>
-            ))}
+            <div className="role-options">
+              {roles.map((role) => (
+                <div
+                  key={role.id}
+                  className={`role-box flex-col items-center justify-items-center ${selectedRole === role.id ? 'selected' : ''}`}
+                  onClick={() => setSelectedRole(role.id)}
+                >
+                  <img
+                    src={role.icon}
+                    alt={role.label}
+                    className="role-icon bg-gray-100 rounded-full"
+                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                    width="100px"
+                  />
+                  <p>{role.label}</p>
+                </div>
+              ))}
+            </div>
+            {showError && <p className="error-text">Please select a role</p>}
+            <button onClick={handleContinue} className="login-btn">Continue</button>
+
+            <p className="signup-link" style={{ marginTop: '20px' }}>
+              Back to <span onClick={() => navigate('/login')} style={{ fontWeight: 'bold', cursor: 'pointer' }}>Login</span>
+            </p>
           </div>
-          {showError && <p className="error-text">Please select a role</p>}
-          <button onClick={handleContinue} className="login-btn">Continue</button>
-
-          <p className="signup-link" style={{ marginTop: '20px' }}>
-            Back to <span onClick={() => navigate('/login')} style={{ fontWeight: 'bold', cursor: 'pointer' }}>Login</span>
-          </p>
         </div>
-      </div>
       </div>
     </div>
   );

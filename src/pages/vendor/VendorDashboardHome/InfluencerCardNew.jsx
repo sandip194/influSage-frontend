@@ -67,8 +67,9 @@ const InfluencerCardNew = ({ influencer, onLike }) => {
             {/* ===== Profile Header ===== */}
             <div className="flex items-center gap-3">
             <img
-                src={influencer?.photopath || "/placeholder.jpg"}
+                src={influencer?.photopath || "/Brocken-Defualt-Img.jpg"}
                 alt="profile"
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                 className="w-12 h-12 rounded-full object-cover border border-gray-200"
             />
 

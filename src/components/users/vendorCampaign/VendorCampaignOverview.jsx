@@ -157,6 +157,7 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
                     <img
                       src={fileUrl}
                       alt=""
+                      onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                       className="w-full h-full object-cover"
                     />
                   )}
@@ -210,6 +211,7 @@ const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Ren
             {previewType === "image" && (
               <img
                 src={previewUrl}
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                 className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                 onClick={(e) => e.stopPropagation()}
               />

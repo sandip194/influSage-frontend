@@ -392,6 +392,7 @@ const InfluencerCampaigns = () => {
                         <img
                           src={getImageUrl(row.photopath)}
                           alt={row.businessname}
+                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           className="w-9 h-9 rounded-full object-cover border border-gray-200 flex-shrink-0"
                         />
 

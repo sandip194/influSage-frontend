@@ -85,6 +85,7 @@ const MessageDropdown = React.memo(({ messages = [], loading }) => {
             <div key={msg.messageid || msg.id} className="flex items-start gap-3 py-3">
               <img
                 src={msg.photopath}
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                 className="w-10 h-10 rounded-full object-cover"
                 alt="User"
               />

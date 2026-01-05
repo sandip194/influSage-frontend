@@ -281,14 +281,24 @@ const Signup = () => {
                 onClick={handleGoogleLogin}
                 className="w-11 h-11 rounded-full border border-gray-300 bg-gray-100 flex items-center justify-center hover:bg-gray-200"
               >
-                <img src={googleIcon} alt="Google" className="w-6 h-6" />
+                <img
+                  src={googleIcon}
+                  alt="Google"
+                  className="w-6 h-6"
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                />
               </button>
               <button
                 type="button"
                 onClick={handleFacebookLogin}
                 className="w-11 h-11 rounded-full border border-gray-300 bg-gray-100 flex items-center justify-center hover:bg-gray-200"
               >
-                <img src={facebookIcon} alt="Facebook" className="w-6 h-6" />
+                <img
+                  src={facebookIcon}
+                  alt="Facebook"
+                  className="w-6 h-6"
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                />
               </button>
             </div>
             {/* Login link */}
