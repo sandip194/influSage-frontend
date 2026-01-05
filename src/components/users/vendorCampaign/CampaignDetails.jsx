@@ -716,7 +716,7 @@ const CampaignDetails = () => {
                     />
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-800">
-                        {influencer.firstname} {influencer.lastname}
+                        {influencer.influencername}
                       </h4>
                       <p className="text-sm text-gray-500">
                         {influencer.statename}, {influencer.countryname}

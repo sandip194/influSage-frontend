@@ -75,7 +75,7 @@ const FeedbackCard = () => {
         />
 
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-gray-900 truncate">
+          <p className="text-sm font-semibold text-gray-900 truncate ">
             {fb.campaignname || "Unknown Brand"}
           </p>
           <p className="text-xs text-gray-500">
@@ -100,7 +100,7 @@ const FeedbackCard = () => {
       </div>
     {/* ===== Feedback Text ===== */}
     <div className="flex gap-2 text-sm text-gray-700">
-      <p className="line-clamp-3 text-justify">
+      <p className="text-justify line-clamp-2">
         {fb.text || "No feedback provided."}
       </p>
     </div>

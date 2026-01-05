@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Skeleton, Empty } from "antd";
 import { useSelector } from "react-redux";
-import { RiStarFill } from "@remixicon/react";
+import { RiStarFill, RiArrowLeftLine } from "@remixicon/react";
+import { useNavigate } from 'react-router-dom';
 
 const FeedbacksPage = () => {
+  const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState(null);
 
   const formatTime = (dateString) => {
     if (!dateString) return "";
@@ -15,12 +18,13 @@ const FeedbacksPage = () => {
     const now = new Date();
     const diff = (now - date) / 1000;
 
-    if (diff < 3600) return "Just now";
-    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    if (diff < 60) return "Just now";
+    if (diff < 3600) return Math.floor(diff / 60) + " mins ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + " hours ago";
 
     const days = Math.floor(diff / 86400);
     if (days === 1) return "Yesterday";
-    if (days < 7) return `${days} days ago`;
+    if (days < 7) return days + " days ago";
 
     return date.toLocaleDateString("en-IN", {
       day: "numeric",
@@ -44,10 +48,19 @@ const FeedbacksPage = () => {
   }, [token]);
 
   return (
-    <div className="bg-white p-6 rounded-2xl w-full">
-      <h1 className="text-2xl font-bold text-[#0D132D] mb-6">
-        All Feedbacks
-      </h1>
+    <div className="w-full text-sm overflow-x-hidden">
+      {/* Back */}
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center cursor-pointer gap-2 text-gray-600 mb-2"
+            >
+              <RiArrowLeftLine /> Back
+            </button>
+      
+      
+            <h1 className="text-2xl font-semibold mb-4">All Feedbacks</h1>
+    <div className="bg-white p-4 rounded-lg">
+       
 
       {loading ? (
         <Skeleton active paragraph={{ rows: 6 }} />
@@ -74,44 +87,68 @@ const FeedbacksPage = () => {
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <img
-                    src={fb.campaignpohoto || "/placeholder.jpg"}
-                    className="w-10 h-10 rounded-full object-cover border"
+                    src={fb.campaignpohoto}
+                    className="w-10 h-10 rounded-full object-cover"
                     alt=""
                   />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-[#0D132D] truncate">
-                      {fb.campaignname || "Unknown Brand"}
+                      {fb.campaignname}
                     </p>
                     <p className="text-xs text-gray-500">
                       {formatTime(fb.createddate)}
                     </p>
                   </div>
-                </div>
-
-                {/* Rating */}
+                </div>            
+              </div>
+              {/* Rating */}
                 <div className="flex gap-0.5 shrink-0">
                   {[...Array(5)].map((_, i) => (
                     <RiStarFill
                       key={i}
-                      size={14}
+                      size={17}
                       className={
                         i < fb.rating
                           ? "text-yellow-400"
                           : "text-gray-300"
                       }
+                      style={{ stroke: "black", strokeWidth: 0.6 }}
                     />
                   ))}
                 </div>
-              </div>
 
               {/* ===== Feedback ===== */}
-              <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 flex-1">
-                {fb.text || "No feedback provided."}
-              </p>
+              <div className="mt-2 flex flex-col flex-1">
+                <p
+                  className={`text-sm text-gray-600 leading-relaxed transition-all ${
+                    expandedId === fb.feedbackid ? "" : "line-clamp-2"
+                  }`}
+                >
+                  {fb.text || "No feedback provided."}
+                </p>
+
+                {/* Read More / Less */}
+                {fb.text && fb.text.length > 120 && (
+                  <div className="flex items-center justify-between mt-3 text-xs">
+                    <button
+                      onClick={() =>
+                        setExpandedId(
+                          expandedId === fb.feedbackid ? null : fb.feedbackid
+                        )
+                      }
+                      className="text-[#335CFF] font-medium hover:underline"
+                    >
+                      {expandedId === fb.feedbackid ? "Read Less" : "Read More →"}
+                    </button>
+                  </div>
+                )}
+              </div>
+              
             </div>
           ))}
         </div>
       )}
+    </div>
     </div>
   );
 };

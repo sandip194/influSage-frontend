@@ -7,27 +7,39 @@ import {
 } from "react-icons/ri";
 import EmojiPicker from "emoji-picker-react";
 import { toast } from "react-toastify";
+import useSocketRegister from "../../sockets/useSocketRegister";
 
 export default function ChatInput({
-  canstartchat = true, 
+  
+  canstartchat = true, // 👈 new prop (default true)
   onSend,
   replyTo,
   onCancelReply,
   editingMessage,
   onEditComplete,
 }) {
+    useSocketRegister();
   const [text, setText] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
 
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  // Block input actions when chat not allowed
+  const toastBlockedRef = useRef(false);
+
   const handleBlockedAction = () => {
-    toast.warning("You cannot send messages for this campaign yet.");
+    if (!toastBlockedRef.current) {
+      toast.warning("You cannot send messages for this campaign yet.");
+      toastBlockedRef.current = true;
+      setTimeout(() => (toastBlockedRef.current = false), 2000); // 2 sec throttle
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+
+  const handleSubmit = () => {
     if (!canstartchat) {
       handleBlockedAction();
       return;
@@ -57,9 +69,9 @@ export default function ChatInput({
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (!isMobile && e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e);
+      handleSubmit();
     }
   };
 
@@ -72,12 +84,13 @@ export default function ChatInput({
   };
 
   const handleFileChange = (e) => {
-    if (!canstartchat) {
-      handleBlockedAction();
-      return;
-    }
+    if (!canstartchat) { handleBlockedAction(); return; }
 
     const selectedFile = e.target.files[0];
+
+    // Revoke old URL if exists
+    if (previewUrl?.url) URL.revokeObjectURL(previewUrl.url);
+
     setFile(selectedFile);
 
     if (!selectedFile) {
@@ -95,13 +108,18 @@ export default function ChatInput({
     } else {
       setPreviewUrl({ type: "file", name: selectedFile.name });
     }
+
+    // Reset input to allow re-upload of same file
+    fileInputRef.current.value = "";
   };
 
+
   const removeFile = () => {
-    if (previewUrl?.url) URL.revokeObjectURL(previewUrl.url);
+    if (previewUrl?.url?.startsWith("blob:")) URL.revokeObjectURL(previewUrl.url);
     setFile(null);
     setPreviewUrl(null);
   };
+
 
   useEffect(() => {
     if (editingMessage?.file) {
@@ -116,15 +134,17 @@ export default function ChatInput({
 
   return (
     <form
-      onSubmit={handleSubmit}
-      className={`p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative ${
-        !canstartchat ? "opacity-70 cursor-not-allowed" : ""
-      }`}
+      className={`p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative ${!canstartchat ? "opacity-70 cursor-not-allowed" : ""
+        }`}
     >
       {/* Emoji Picker */}
       {showEmojiPicker && canstartchat && (
-        <div className="absolute bottom-20 left-2 sm:left-4 z-10 bg-white shadow-lg rounded-lg">
-          <EmojiPicker onEmojiClick={handleEmojiClick} height={370} width={300} />
+        <div className="absolute bottom-20 left-4 z-10 bg-white shadow-lg rounded-lg">
+          <EmojiPicker
+            onEmojiClick={handleEmojiClick}
+            height={370}
+            width={300}
+          />
         </div>
       )}
 
@@ -157,7 +177,7 @@ export default function ChatInput({
         </div>
       )}
 
-      {/* File/Image Preview */}
+      {/* File Preview */}
       {file && previewUrl && (
         <div className="relative w-full max-w-xs">
           {previewUrl.type === "image" && (
@@ -169,8 +189,8 @@ export default function ChatInput({
               >
                 <img
                   src={previewUrl.url}
-                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   alt="preview"
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -202,13 +222,15 @@ export default function ChatInput({
           {previewUrl.type === "file" && (
             <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg shadow">
               <RiFileTextLine />
-              <span className="truncate max-w-[120px] text-sm">{previewUrl.name}</span>
+              <span className="truncate max-w-[120px] text-sm">
+                {previewUrl.name}
+              </span>
             </div>
           )}
         </div>
       )}
 
-      {/* Input + Actions */}
+      {/* Input */}
       <div className="flex items-center space-x-2 w-full">
         <div className="flex space-x-2">
           <button
@@ -240,12 +262,16 @@ export default function ChatInput({
           />
         </div>
 
-        <input
-          type="text"
-          className="flex-1 border border-gray-300 bg-gray-100 rounded-full px-4 sm:px-6 py-2 sm:py-3 outline-none text-sm w-full"
+        <textarea
+          className="flex-1 border border-gray-300 bg-gray-100 rounded-2xl
+            px-4 sm:px-6 py-2 sm:py-3 outline-none text-sm w-full
+            resize-none overflow-hidden"
           placeholder={canstartchat ? "Write your message" : "You can’t send messages right now"}
           disabled={!canstartchat}
           value={text}
+          rows={1}
+          style={{ maxHeight: "100px" }}
+          enterKeyHint="enter"
           onClick={() => {
             if (!canstartchat) handleBlockedAction();
           }}
@@ -254,18 +280,29 @@ export default function ChatInput({
               handleBlockedAction();
               return;
             }
+
             setText(e.target.value);
+
+            e.target.style.height = "auto";
+            const maxHeight = 100;
+
+            if (e.target.scrollHeight > maxHeight) {
+              e.target.style.height = `${maxHeight}px`;
+              e.target.style.overflowY = "auto";
+            } else {
+              e.target.style.height = `${e.target.scrollHeight}px`;
+              e.target.style.overflowY = "hidden";
+            }
           }}
           onKeyDown={handleKeyDown}
         />
-
         <button
-          type="submit"
+          type="button"
           disabled={!canstartchat}
-          className={`${
-            canstartchat
-              ? "bg-[#0D132D] hover:bg-indigo-700"
-              : "bg-gray-400 cursor-not-allowed"
+          onClick={handleSubmit}
+          className={`${canstartchat
+            ? "bg-[#0D132D] hover:bg-indigo-700"
+            : "bg-gray-400 cursor-not-allowed"
           } text-white p-3 rounded-full shadow-md transition flex-shrink-0`}
         >
           <RiSendPlane2Fill />

@@ -141,7 +141,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                             )}
                             <div>
                                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 capitalize">
-                                    {offerDetails.firstname} {offerDetails.lastname}
+                                    {offerDetails.influencername}
                                 </h2>
                                 <p className="text-gray-600 text-sm mt-1">
                                     {offerDetails.statename}, {offerDetails.countryname}

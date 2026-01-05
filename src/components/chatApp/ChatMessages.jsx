@@ -464,9 +464,10 @@ useEffect(() => {
             >
               {/* Message bubble */}
               <div
-                className={`px-3 py-2 rounded-xl 
-                  max-w-[90%] sm:max-w-xs md:max-w-sm
-                  overflow-hidden whitespace-pre-wrap break-words
+                className={`px-3 py-1 rounded-lg
+                  max-w-[280px] sm:max-w-xs md:max-w-sm
+                  break-words whitespace-pre-wrap
+                  overflow-hidden
                   ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}
                 `}
               >

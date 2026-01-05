@@ -216,32 +216,33 @@ export const CategorySelector = ({
             <ul className="space-y-2 wrap-anywhere">
               {categoryTree.map((cat) => (
                 <li
-                  key={cat.parentcategoryid}
-                  onClick={() => setSelectedParentId(cat.parentcategoryid)}
-                  className={`
-                    cursor-pointer px-3 py-2 text-sm rounded-md flex justify-between items-center
-                    ${
-                      selectedParentId === cat.parentcategoryid
-                        ? "bg-[#121A3F] text-white font-semibold"
-                        : getSelectedCount(cat) > 0
-                        ? "bg-[#E8ECF7] text-[#121A3F] font-medium border border-[#CED3E0]"
-                        : "text-gray-800 hover:text-black hover:bg-gray-100"
-                    }
-                  `}
-                >
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: cat.name.replaceAll("/", "/<wbr>")
-                    }}
-                    className="text-sm"
-                  ></span>
+                key={cat.parentcategoryid}
+                onClick={() => setSelectedParentId(cat.parentcategoryid)}
+                className={`
+                  cursor-pointer px-3 py-2 text-sm rounded-md
+                  flex items-start gap-2
+                  ${
+                    selectedParentId === cat.parentcategoryid
+                      ? "bg-[#121A3F] text-white font-semibold"
+                      : getSelectedCount(cat) > 0
+                      ? "bg-[#E8ECF7] text-[#121A3F] font-medium border border-[#CED3E0]"
+                      : "text-gray-800 hover:text-black hover:bg-gray-100"
+                  }
+                `}
+              >
+                <span
+                  className="text-sm whitespace-normal break-words min-w-0 flex-1 leading-snug"
+                  dangerouslySetInnerHTML={{
+                    __html: cat.name.replaceAll("/", "/<wbr>"),
+                  }}
+                />
 
-                  {getSelectedCount(cat) > 0 && (
-                    <span className="text-xs bg-[#121A3F] text-white px-2 py-1 rounded-full ml-2">
-                      {getSelectedCount(cat)}
-                    </span>
-                  )}
-                </li>
+                {getSelectedCount(cat) > 0 && (
+                  <span className="shrink-0 text-xs bg-[#121A3F] text-white px-2 py-1 rounded-full">
+                    {getSelectedCount(cat)}
+                  </span>
+                )}
+              </li>
               ))}
             </ul>
           </div>
@@ -249,31 +250,51 @@ export const CategorySelector = ({
           {/* CHILD CATEGORY LIST */}
           <div className="col-span-1 md:col-span-2 lg:col-span-3">
             <h3 className="font-semibold mb-3 text-gray-700">Subcategories</h3>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {currentParent?.categories.map((child) => (
-                <div
-                  key={child.id}
-                  onClick={() => toggleChildSelection(child.id)}
-                  className={`flex justify-between items-center w-full px-4 py-3 text-sm rounded-xl border cursor-pointer transition-all ${
-                    selectedChildren.includes(child.id)
-                      ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                      : "bg-white text-black border-gray-300 hover:border-[#141843]"
-                  }`}
-                >
-                  <span className="wrap-anywhere">{child.name}</span>
+              {currentParent?.categories.map((child) => {
+                const isSelected = selectedChildren.includes(child.id);
+
+                return (
                   <div
-                    className={`w-5 h-5 flex items-center justify-center rounded-full border transition-all ${
-                      selectedChildren.includes(child.id)
-                        ? "bg-[#141843] border-[#0D132D26] text-white"
-                        : "bg-transparent border-gray-400 text-transparent"
-                    }`}
+                    key={child.id}
+                    onClick={() => toggleChildSelection(child.id)}
+                    className={`
+                      flex justify-between items-center gap-3
+                      w-full px-4 py-3 text-sm rounded-xl border
+                      cursor-pointer transition-all
+                      ${
+                        isSelected
+                          ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                          : "bg-white text-black border-gray-300 hover:border-[#141843]"
+                      }
+                    `}
                   >
-                    {selectedChildren.includes(child.id) && (
-                      <RiCheckLine size={12} />
-                    )}
+                    {/* Category Name */}
+                    <span
+                      className="text-sm leading-snug break-words flex-1"
+                      dangerouslySetInnerHTML={{
+                        __html: child.name.replaceAll("/", "/<wbr>"),
+                      }}
+                    />
+
+                    {/* Check Icon */}
+                    <div
+                      className={`
+                        w-5 h-5 shrink-0 flex items-center justify-center
+                        rounded-full border transition-all
+                        ${
+                          isSelected
+                            ? "bg-[#141843] border-[#141843] text-white"
+                            : "bg-transparent border-gray-400 text-transparent"
+                        }
+                      `}
+                    >
+                      {isSelected && <RiCheckLine size={12} />}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

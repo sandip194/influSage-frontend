@@ -426,13 +426,15 @@ useEffect(() => {
               </div>
             )}
 
-            <div
-              className={`relative flex flex-col ${isMe ? "items-end" : "items-start"}`}
-            >
-              <div className={`px-3 py-1 rounded-lg 
-                max-w-[90%] sm:max-w-xs md:max-w-sm 
-                break-all overflow-hidden whitespace-pre-wrap 
-                ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}`} >
+            <div className={`relative flex flex-col ${isMe ? "items-end" : "items-start"}`} >
+              <div
+                className={`px-3 py-1 rounded-lg
+                  max-w-[280px] sm:max-w-xs md:max-w-sm
+                  break-words whitespace-pre-wrap
+                  overflow-hidden
+                  ${isMe ? "bg-[#0D132D] text-white" : "bg-gray-200 text-gray-900"}
+                `}
+              >
 
                 {/* File attachments */}
                 {!msg.deleted && msg.file && (

@@ -75,7 +75,7 @@ const InfluencerCardNew = ({ influencer, onLike }) => {
 
             <div className="min-w-0">
                 <p className="text-sm font-semibold text-gray-900 truncate">
-                {influencer?.firstname} {influencer?.lastname}
+                {influencer?.influencername}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
                 {influencer?.statename}, {influencer?.countryname}

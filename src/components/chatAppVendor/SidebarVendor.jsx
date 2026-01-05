@@ -406,7 +406,7 @@ export default function SidebarVendor({ onSelectChat }) {
 
                     <div className="min-w-0">
                       <div className="font-medium text-gray-900 truncate max-w-[160px]">
-                        {inf.name}
+                        {inf.fullname}
                       </div>
                       <div
                         className={`text-sm truncate max-w-[180px] ${

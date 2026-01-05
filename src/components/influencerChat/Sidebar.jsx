@@ -181,9 +181,8 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
       );
 
       if (res.data?.p_status) {
-      await handleTabChange(statusList.find((x) => x.name === "Open"));
-        setOpenModal(false);
-        setNewSubject(null);
+       setOpenModal(false);
+       setNewSubject(null);
       }
     } catch (error) {
       console.error("Error creating ticket:", error);

@@ -25,6 +25,8 @@ export default function ChatInputVendor({
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
 
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
   // Block input actions when chat not allowed
   const toastBlockedRef = useRef(false);
 
@@ -37,8 +39,7 @@ export default function ChatInputVendor({
   };
 
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if (!canstartchat) {
       handleBlockedAction();
       return;
@@ -68,9 +69,9 @@ export default function ChatInputVendor({
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+    if (!isMobile && e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e);
+      handleSubmit();
     }
   };
 
@@ -134,7 +135,6 @@ export default function ChatInputVendor({
 
   return (
     <form
-      onSubmit={handleSubmit}
       className={`p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative ${!canstartchat ? "opacity-70 cursor-not-allowed" : ""
         }`}
     >
@@ -263,12 +263,16 @@ export default function ChatInputVendor({
           />
         </div>
 
-        <input
-          type="text"
-          className="flex-1 border border-gray-300 bg-gray-100 rounded-full px-4 sm:px-6 py-2 sm:py-3 outline-none text-sm w-full"
+        <textarea
+          className="flex-1 border border-gray-300 bg-gray-100 rounded-2xl
+            px-4 sm:px-6 py-2 sm:py-3 outline-none text-sm w-full
+            resize-none overflow-hidden"
           placeholder={canstartchat ? "Write your message" : "You can’t send messages right now"}
           disabled={!canstartchat}
           value={text}
+          rows={1}
+          style={{ maxHeight: "100px" }}
+          enterKeyHint="enter"
           onClick={() => {
             if (!canstartchat) handleBlockedAction();
           }}
@@ -277,17 +281,30 @@ export default function ChatInputVendor({
               handleBlockedAction();
               return;
             }
+
             setText(e.target.value);
+
+            e.target.style.height = "auto";
+            const maxHeight = 100;
+
+            if (e.target.scrollHeight > maxHeight) {
+              e.target.style.height = `${maxHeight}px`;
+              e.target.style.overflowY = "auto";
+            } else {
+              e.target.style.height = `${e.target.scrollHeight}px`;
+              e.target.style.overflowY = "hidden";
+            }
           }}
           onKeyDown={handleKeyDown}
         />
         <button
-          type="submit"
+          type="button"
           disabled={!canstartchat}
+          onClick={handleSubmit}
           className={`${canstartchat
             ? "bg-[#0D132D] hover:bg-indigo-700"
             : "bg-gray-400 cursor-not-allowed"
-            } text-white p-3 rounded-full shadow-md transition flex-shrink-0`}
+          } text-white p-3 rounded-full shadow-md transition flex-shrink-0`}
         >
           <RiSendPlane2Fill />
         </button>
