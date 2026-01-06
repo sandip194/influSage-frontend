@@ -48,7 +48,7 @@ const sortOptions = [
 ];
 
 const CAMPAIGN_COLUMNS_BY_STATUS = {
-  ApprovalPending: [
+  "Approval Pending": [
     "Campaign",
     "Vendor",
     "Categories",
@@ -56,34 +56,37 @@ const CAMPAIGN_COLUMNS_BY_STATUS = {
     "Budget",
     "StartDate",
     "EndDate",
+    "Status",
     "Actions",
   ],
 
-  Approved: [
+  "Approved": [
     "Campaign",
     "Vendor",
     "ApprovedBy",
     "ApprovedOn",
+    "Status",
     "Actions",
   ],
 
-  Rejected: [
+  "Rejected": [
     "Campaign",
     "Vendor",
     "RejectedBy",
     "RejectedOn",
+    "Status",
     "Actions",
   ],
 
-  Blocked: [
+  "Blocked": [
     "Campaign",
     "Vendor",
     "BlockedBy",
     "BlockedOn",
+    "Status",
     "Actions",
   ],
 };
-
 
 const formatDate = (date, fallback = "—") => {
   if (!date) return fallback;
@@ -503,7 +506,7 @@ const CampaignTableLayout = () => {
             ))}
           </div>
         ) : campaignList?.length > 0 ? (
-          <table className="min-w-[1100px] w-full text-left text-sm">
+          <table className="min-w-[900px] w-full text-left text-sm">
             {/* Table Header */}
             <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
               <tr>
@@ -662,14 +665,15 @@ const CampaignTableLayout = () => {
                   {activeColumns.includes("Status") && (
                     <td className="p-4">
                       <span
-                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${c.status === "Approved"
-                          ? "bg-green-50 text-green-700 border border-green-100"
-                          : c.status === "Rejected"
+                        className={`text-xs font-medium px-2 py-0.5 rounded-full
+                          ${c.campaignstatus === "Approved"
+                            ? "bg-green-50 text-green-700 border border-green-100"
+                            : c.campaignstatus === "Rejected"
                             ? "bg-red-50 text-red-700 border border-red-100"
                             : "bg-yellow-50 text-yellow-700 border border-yellow-100"
                           }`}
                       >
-                        {safeText(c.status)}
+                        {safeText(c.campaignstatus)}
                       </span>
                     </td>
                   )}
@@ -677,13 +681,13 @@ const CampaignTableLayout = () => {
 
                   {activeColumns.includes("ApprovedBy") && (
                     <td className="p-4">
-                      {safeText(c.approvedby, "—")}
+                      {c.approvedby ? safeText(c.approvedby) : "—"}
                     </td>
                   )}
 
                   {activeColumns.includes("ApprovedOn") && (
                     <td className="p-4">
-                      {formatDate(c.approveddate)}
+                      {c.approveddate ? formatDate(c.approveddate) : "—"}
                     </td>
                   )}
 
@@ -721,7 +725,7 @@ const CampaignTableLayout = () => {
                     >
 
                       {/* Conditional buttons based on activeStatusName */}
-                      {activeStatusName === "ApprovalPending" && (
+                      {activeStatusName === "Approval Pending" && (
                         <>
                           <Tooltip title="Approve">
                             <button

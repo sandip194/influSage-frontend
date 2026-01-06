@@ -28,6 +28,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { safeText, safeArray, safeNumber, safeDate } from "../../../App/safeAccess";
 
 
+const normalizeStatus = (status = "") =>
+status.replace(/\s+/g, "");
 
 const columnsByStatus = {
     ApprovalPending: ["User", "Email", "Followers", "Category", "Location", "AppliedOn", "Actions"],
@@ -306,7 +308,10 @@ const UserTableLayout = () => {
         }
     }, [location.search, statusList]);
 
-    const activeStatusName = statusList.find(s => s.id === activeStatusId)?.name || "";
+    const activeStatusName = normalizeStatus(
+        statusList.find(s => s.id === activeStatusId)?.name
+    );
+
     const activeColumns = columnsByStatus[activeStatusName] || [];
 
 
@@ -517,49 +522,48 @@ const UserTableLayout = () => {
                                                                 className="flex justify-right items-center gap-1"
                                                                 onClick={(e) => e.stopPropagation()}
                                                             >
-                                                                {user?.status === "ApprovalPending" && (
+                                                                    {normalizeStatus(user?.status) === "ApprovalPending" && (
                                                                     <>
                                                                         <Tooltip title="Approve">
-                                                                            <button
-                                                                                onClick={() => openConfirmationModal(user, "Approved")}
-                                                                                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
-                                                                            >
-                                                                                <RiCheckLine size={18} />
-                                                                            </button>
-                                                                        </Tooltip>
-
-                                                                        <Tooltip title="Reject">
-                                                                            <button
-                                                                                onClick={() => openConfirmationModal(user, "Rejected")}
-                                                                                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
-                                                                            >
-                                                                                <RiCloseLine size={18} />
-                                                                            </button>
-                                                                        </Tooltip>
-                                                                    </>
-                                                                )}
-
-                                                                {user?.status === "Approved" && (
-                                                                    <Tooltip title="Block">
-                                                                        <button
-                                                                            onClick={() => openConfirmationModal(user, "Blocked")}
-                                                                            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
-                                                                        >
-                                                                            <RiProhibitedLine size={18} />
-                                                                        </button>
-                                                                    </Tooltip>
-                                                                )}
-
-                                                                {user?.status === "Rejected" && (
-                                                                    <Tooltip title="Approve">
                                                                         <button
                                                                             onClick={() => openConfirmationModal(user, "Approved")}
                                                                             className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
                                                                         >
                                                                             <RiCheckLine size={18} />
                                                                         </button>
+                                                                        </Tooltip>
+
+                                                                        <Tooltip title="Reject">
+                                                                        <button
+                                                                            onClick={() => openConfirmationModal(user, "Rejected")}
+                                                                            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
+                                                                        >
+                                                                            <RiCloseLine size={18} />
+                                                                        </button>
+                                                                        </Tooltip>
+                                                                    </>
+                                                                    )}
+                                                                    {normalizeStatus(user?.status) === "Approved" && (
+                                                                    <Tooltip title="Block">
+                                                                        <button
+                                                                        onClick={() => openConfirmationModal(user, "Blocked")}
+                                                                        className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
+                                                                        >
+                                                                        <RiProhibitedLine size={18} />
+                                                                        </button>
                                                                     </Tooltip>
-                                                                )}
+                                                                    )}
+
+                                                                    {normalizeStatus(user?.status) === "Rejected" && (
+                                                                    <Tooltip title="Approve">
+                                                                        <button
+                                                                        onClick={() => openConfirmationModal(user, "Approved")}
+                                                                        className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
+                                                                        >
+                                                                        <RiCheckLine size={18} />
+                                                                        </button>
+                                                                    </Tooltip>
+                                                                    )}
                                                             </div>
                                                         </td>
                                                     );
