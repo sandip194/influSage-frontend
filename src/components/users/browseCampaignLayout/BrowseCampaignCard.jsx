@@ -55,8 +55,8 @@ const CampaignCard = React.memo(
             </h3>
 
             {/* Date Row */}
-            <div className="flex items-center gap-1 text-xs text-gray-600 mt-1">
-              <RiCalendar2Line size={14} className="shrink-0 text-gray-500" />
+            <div className="flex items-center gap-1 text-xs text-[#335CFF] mt-1">
+              <RiCalendar2Line size={14} className="shrink-0 text-[#335CFF]" />
 
               <span className="truncate">
                 {variant === "saved"
@@ -180,31 +180,35 @@ const CampaignCard = React.memo(
           <hr className="my-3 border-[#0D132D1A] mt-1" />
 
           <div className="min-h-[23px] mb-2">
-            {campaign.appliedinfluencercount > 0 && (
-              <div className="flex items-center gap-2 text-xs text-gray-600">
-                <span className="w-5 h-5 rounded-full text-white bg-black flex items-center justify-center text-xs font-medium">
-                  {campaign.appliedinfluencercount}
-                </span>
-                Influencer Applied
-              </div>
-            )}
+            <div className="flex items-center gap-2 text-xs text-gray-600">
+              <span className="w-5 h-5 rounded-full text-white bg-black flex items-center justify-center text-xs font-medium">
+                {campaign.appliedinfluencercount || 0}
+              </span>
+              Influencer Applied
+            </div>
           </div>
+          {/* ===== Budget Section ===== */}
           <div className="min-h-[44px] mb-3">
             {campaign.estimatedbudget && (
-              <div className="mt-auto">
-                <div className="flex items-center gap-3 px-4 py-2 bg-white border border-gray-200 rounded-xl">
-                  <div className="w-10 h-10 rounded-full bg-[#0D132D] flex items-center justify-center text-white font-semibold">
-                    ₹
-                  </div>
-                  <div className="flex flex-col leading-tight">
-                    <span className="text-base font-semibold text-[#0D132D]">
-                      {campaign.estimatedbudget.toLocaleString("en-IN")}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      Estimated Budget
-                    </span>
-                  </div>
-                </div>
+              <div
+                className="
+                bg-white
+                border border-[#0D132D26]
+                rounded-xl
+                px-2 py-2
+                flex items-center gap-3
+              "
+              >
+              <div className="flex items-center w-full text-sm">
+                <span className="text-xs text-gray-400">
+                  Estimated Budget:
+                </span>
+
+                <span className="ml-auto font-semibold text-[#0D132D]">
+                  ₹ {campaign.estimatedbudget.toLocaleString("en-IN")}
+                </span>
+              </div>
+
               </div>
             )}
           </div>

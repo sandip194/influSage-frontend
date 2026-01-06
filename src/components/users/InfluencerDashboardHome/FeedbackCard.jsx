@@ -85,19 +85,16 @@ const FeedbackCard = () => {
       </div>
     </div>
     <div className="flex mb-3 gap-1">
-        {fb.rating > 0 && (
-        <div className="flex items-center gap-1 shrink-0">
-          {Array.from({ length: fb.rating }).map((_, i) => (
-            <RiStarFill
-              key={i}
-              size={20}
-              className="text-yellow-400"
-              style={{ stroke: "black", strokeWidth: 0.6 }}
-            />
-          ))}
-        </div>
-      )}
-      </div>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <RiStarFill
+          key={i}
+          size={20}
+          className={i <= (fb.rating || 0) ? "text-yellow-400" : "text-white"}
+          style={{ stroke: "black", strokeWidth: 0.6 }}
+        />
+      ))}
+    </div>
+
     {/* ===== Feedback Text ===== */}
     <div className="flex gap-2 text-sm text-gray-700">
       <p className="text-justify line-clamp-2">

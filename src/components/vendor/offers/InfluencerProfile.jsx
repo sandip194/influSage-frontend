@@ -34,15 +34,26 @@ const InfluencerProfile = () => {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
 
-    const timeAgo = (date) => {
-        const diff = Math.floor((Date.now() - new Date(date)) / 1000);
-        const days = Math.floor(diff / 86400);
-        if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-        const hours = Math.floor(diff / 3600);
-        if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-        const mins = Math.floor(diff / 60);
-        return `${mins} min ago`;
-    };
+const formatTime = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = (now - date) / 1000;
+
+    if (diff < 60) return "Just now";
+    if (diff < 3600) return Math.floor(diff / 60) + " mins ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + " hours ago";
+
+    const days = Math.floor(diff / 86400);
+    if (days === 1) return "Yesterday";
+    if (days < 7) return days + " days ago";
+
+    return date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
 
     const getInfluencerDetails = async () => {
@@ -574,47 +585,59 @@ const InfluencerProfile = () => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                                 {influDetails.feedbacks.map((fb) => (
                                     <div
-                                        key={fb.feedbackid}
-                                        className="bg-white rounded-xl p-4 border border-gray-200 shadow hover:shadow-md transition"
+                                    key={fb.feedbackid}
+                                    className="
+                                        bg-[#335CFF0D]
+                                        border border-[#335CFF26]
+                                        rounded-2xl
+                                        p-5
+                                        shadow-sm
+                                        hover:shadow-md
+                                        transition
+                                        flex flex-col
+                                        h-full
+                                    "
                                     >
-                                        {/* Stars */}
-                                        <div className="flex items-center gap-1 mb-3">
-                                            {[1, 2, 3, 4, 5].map((i) => (
-                                                <RiStarFill
-                                                    key={i}
-                                                    size={14}
-                                                    className={i <= fb.rating ? "text-yellow-400" : "text-gray-300"}
-                                                    style={{ stroke: "#000", strokeWidth: 0.6 }}
-                                                />
-                                            ))}
-                                        </div>
+                                    {/* ===== Header ===== */}
+                                    <div className="flex items-center gap-3">
+                                        <img
+                                        src={fb.campaignpohoto}
+                                        alt={fb.campaignname}
+                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                                        className="w-12 h-12 rounded-full object-cover"
+                                        />
 
-                                        {/* Feedback text */}
-                                        <p className="text-sm text-gray-800 mb-4 line-clamp-2">
-                                            {fb.text}
+                                        <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-gray-900 truncate">
+                                            {fb.campaignname}
                                         </p>
-
-                                        {/* Campaign row */}
-                                        <div className="flex items-center gap-3">
-                                            <img
-                                                src={fb.campaignpohoto}
-                                                alt={fb.campaignname}
-                                                className="w-9 h-9 rounded-full object-cover border"
-                                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                                            />
-
-                                            <div>
-                                                <p className="text-sm font-semibold text-gray-900 truncate">
-                                                    {fb.campaignname}
-                                                </p>
-                                                <p className="text-xs text-gray-500">
-                                                    {timeAgo(fb.createddate)}
-                                                </p>
-                                            </div>
+                                        <p className="text-xs text-gray-500">
+                                            {formatTime(fb.createddate)}
+                                        </p>
                                         </div>
                                     </div>
+
+                                    {/* ===== Stars ===== */}
+                                    <div className="flex items-center gap-1 mt-3">
+                                        {[1, 2, 3, 4, 5].map((i) => (
+                                        <RiStarFill
+                                            key={i}
+                                            size={20}
+                                            className={i <= fb.rating ? "text-yellow-400" : "text-gray-300"}
+                                            style={{ stroke: "black", strokeWidth: 0.6 }}
+                                        />
+                                        ))}
+                                    </div>
+
+                                    {/* ===== Feedback Text ===== */}
+                                    <div className="flex gap-2 text-sm text-gray-700">
+                                        <p className="text-justify line-clamp-2 mt-3">
+                                            {influDetails?.text || "No feedback provided."}
+                                        </p>
+                                    </div>
+                                    </div>
                                 ))}
-                            </div>
+                                </div>
                         </div>
                     )}
                 </>
