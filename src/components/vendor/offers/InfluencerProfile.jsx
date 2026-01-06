@@ -1,4 +1,4 @@
-import { RiArrowLeftLine, RiFile3Line, RiHeartFill, RiHeart3Line, RiMessage2Line, RiStarFill } from "@remixicon/react";
+import { RiArrowLeftLine, RiFile3Line, RiHeartFill, RiHeart3Line, RiMessage2Line} from "@remixicon/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Tooltip, Skeleton } from "antd";
 import InviteModal from "../../users/browseInfluencers/InviteModal";
 import { toast } from "react-toastify";
-import { RiUserAddLine } from "react-icons/ri";
+import { RiUserAddLine, RiStarFill, RiStarHalfFill, RiStarLine } from "react-icons/ri";
 
 //  const formatDOB = (dob) => {
 //         const date = new Date(dob);
@@ -33,27 +33,32 @@ const InfluencerProfile = () => {
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
+    const rawRating = Number(influDetails?.ratingcount || 0);
+    const displayRating = rawRating.toFixed(1);
 
-const formatTime = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = (now - date) / 1000;
+    const fullStars = Math.trunc(rawRating);
+    const hasHalfStar = rawRating % 1 !== 0;
 
-    if (diff < 60) return "Just now";
-    if (diff < 3600) return Math.floor(diff / 60) + " mins ago";
-    if (diff < 86400) return Math.floor(diff / 3600) + " hours ago";
+    const formatTime = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const now = new Date();
+        const diff = (now - date) / 1000;
 
-    const days = Math.floor(diff / 86400);
-    if (days === 1) return "Yesterday";
-    if (days < 7) return days + " days ago";
+        if (diff < 60) return "Just now";
+        if (diff < 3600) return Math.floor(diff / 60) + " mins ago";
+        if (diff < 86400) return Math.floor(diff / 3600) + " hours ago";
 
-    return date.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  };
+        const days = Math.floor(diff / 86400);
+        if (days === 1) return "Yesterday";
+        if (days < 7) return days + " days ago";
+
+        return date.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        });
+    };
 
 
     const getInfluencerDetails = async () => {
@@ -283,27 +288,55 @@ const formatTime = (dateString) => {
 
                                     <p className="text-sm text-gray-900 mt-1">
                                         {influDetails?.statename}, {influDetails?.countryname}
-                                    </p>
-
-                                    {Number(influDetails?.ratingcount) > 0 && (
-                                        <div className="flex items-center justify-center sm:justify-start gap-1 mt-2">
-                                            {Array.from({ length: Math.round(influDetails.ratingcount) }).map((_, i) => (
+                                    </p>   
+                                                                                                 
+                                    {rawRating > 0 && (
+                                        <div className="flex items-center mt-2">
+                                            {Array.from({ length: 5 }).map((_, i) => {
+                                            if (i < fullStars) {
+                                                return (
                                                 <RiStarFill
                                                     key={i}
                                                     size={16}
-                                                    className="text-yellow-400"
                                                     style={{
-                                                        stroke: "black",
-                                                        strokeWidth: 1,
+                                                    fill: "#facc15",
+                                                    stroke: "black",
+                                                    strokeWidth: 1,
                                                     }}
                                                 />
-                                            ))}
+                                                );
+                                            }
+                                            if (i === fullStars && hasHalfStar) {
+                                                return (
+                                                <RiStarHalfFill
+                                                    key={i}
+                                                    size={16}
+                                                    style={{
+                                                    fill: "#facc15",
+                                                    stroke: "black",
+                                                    strokeWidth: 1,
+                                                    }}
+                                                />
+                                                );
+                                            }
+                                            return (
+                                                <RiStarFill
+                                                key={i}
+                                                size={16}
+                                                style={{
+                                                    fill: "white",
+                                                    stroke: "black",
+                                                    strokeWidth: 1,
+                                                }}
+                                                />
+                                            );
+                                            })}
 
-                                            <span className="ml-1 text-sm font-semibold text-gray-800">
-                                                {Number(influDetails.ratingcount).toFixed(1)}
+                                            <span className="ml-2 text-sm font-medium text-gray-700">
+                                            {displayRating}
                                             </span>
                                         </div>
-                                    )}
+                                        )}
                                 </div>
 
                                 {/* Total Campaign (desktop alignment) */}
@@ -619,14 +652,22 @@ const formatTime = (dateString) => {
 
                                     {/* ===== Stars ===== */}
                                     <div className="flex items-center gap-1 mt-3">
-                                        {[1, 2, 3, 4, 5].map((i) => (
-                                        <RiStarFill
-                                            key={i}
-                                            size={20}
-                                            className={i <= fb.rating ? "text-yellow-400" : "text-gray-300"}
-                                            style={{ stroke: "black", strokeWidth: 0.6 }}
-                                        />
-                                        ))}
+                                        {Number(fb?.rating) > 0 && (
+                                            <div className="flex items-center gap-1 mt-3">
+                                                {[1, 2, 3, 4, 5].map((i) => (
+                                                <RiStarFill
+                                                    key={i}
+                                                    size={20}
+                                                    className={i <= fb.rating ? "text-yellow-400" : "text-white"}
+                                                    style={{
+                                                    stroke: "black",
+                                                    strokeWidth: 0.6,
+                                                    fill: i <= fb.rating ? "#facc15" : "white",
+                                                    }}
+                                                />
+                                                ))}
+                                            </div>
+                                            )}
                                     </div>
 
                                     {/* ===== Feedback Text ===== */}

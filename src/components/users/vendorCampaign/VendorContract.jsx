@@ -89,7 +89,7 @@ const formatToDDMMYYYY = (dateStr) => {
         campaignStart: safeText(campaignStart),
         campaignEnd: safeText(campaignEnd),
         productLink: c.productlink,
-        vendorAddress: safeText(c.vendoraddress, "N/A"),
+        vendorAddress: safeText(c.vendoraddress),
         deliverables: safeArray(c.providercontenttype).map((p) => ({
           icon: safeText(p.iconpath),
           provider: safeText(p.providername),
@@ -391,19 +391,26 @@ const formatToDDMMYYYY = (dateStr) => {
                     </div>
                     {/* Product + Address */}
                     <div className="sm:col-span-2 space-y-1">
-                      {contract.productLink && (
-                        <p className="break-all">
-                          <span className="font-medium">Product: </span>
+                      <p className="break-all">
+                        <span className="font-medium">Product: </span>
+
+                        {contract?.productLink && contract.productLink.trim() !== "" ? (
                           <a
-                            href={contract.productLink}
+                            href={
+                              contract.productLink.startsWith("http")
+                                ? contract.productLink
+                                : `https://${contract.productLink}`
+                            }
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 underline"
                           >
                             View Link
                           </a>
-                        </p>
-                      )}
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </p>
 
                       {contract.vendorAddress && (
                         <p>
@@ -467,17 +474,28 @@ const formatToDDMMYYYY = (dateStr) => {
                     </button>
                   )}
                   {contract.status === "Completed" && (
-                    <button
-                      onClick={() => {
-                        setClosingContract(contract);
-                        setIsFeedbackOpen(true);
-                      }}
-                      className="px-4 py-2 text-sm cursor-pointer font-medium bg-red-600 text-white 
-               rounded-lg hover:bg-red-700 transition"
-                    >
-                      Close Contract
-                    </button>
-                  )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setClosingContract(contract);
+                          setIsFeedbackOpen(true);
+                        }}
+                        className="
+                          px-5 py-2
+                          text-sm font-semibold
+                          rounded-full
+                          cursor-pointer
+                          bg-red-600 text-white
+                          hover:bg-red-700
+                          transition
+                          whitespace-nowrap
+                          w-auto
+                          inline-flex items-center justify-center
+                        "
+                      >
+                        Close Contract
+                      </button>
+                    )}
 
                 </div>
               </div>

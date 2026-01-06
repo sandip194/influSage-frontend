@@ -534,7 +534,7 @@ const CampaignDetails = () => {
                 },
               }}
             >
-              <Tabs type="card" defaultActiveKey="overview">
+              <Tabs type="card" defaultActiveKey="contract">
                 <Tabs.TabPane tab="Overview" key="overview">
                   {campaignDetails && (
                     <VendorCampaignOverview campaignData={campaignDetails} />

@@ -91,7 +91,7 @@ const BrandAnalyticsDashboard = () => {
             { label: "Estimated Engagement Score", value: data.engagementscore, icon: <RiHeartLine size={24} /> },
             { label: "Total Content Pieces", value: data.totalcontentpieces, icon: <RiImage2Line size={24} /> },
             { label: "Avg Engagement / Influencer", value: Math.round(data.averageengagementperinfluencer), icon: <RiStarLine size={24} /> },
-        ]);
+        ].filter(kpi => Number(kpi.value) > 0));
 
         setRecentContent(data.recentcontents || []);
     };

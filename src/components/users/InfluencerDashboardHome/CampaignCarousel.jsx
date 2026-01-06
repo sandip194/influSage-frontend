@@ -7,9 +7,13 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { useSelector } from "react-redux";
 import { Skeleton, Empty } from "antd";
-import { RiCalendar2Line, RiImageLine, RiArrowLeftSLine, RiArrowRightSLine, } from "@remixicon/react";
-import 'swiper/css/pagination';
-
+import {
+  RiCalendar2Line,
+  RiImageLine,
+  RiArrowLeftSLine,
+  RiArrowRightSLine,
+} from "@remixicon/react";
+import "swiper/css/pagination";
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
@@ -17,7 +21,6 @@ const formatDate = (dateStr) => {
   if (!day || !month || !year) return "";
   return `${day}/${month}/${year}`;
 };
-
 
 // ---------- Skeleton Card ----------
 const SkeletonCard = () => (
@@ -47,7 +50,7 @@ const CampaignCard = ({ campaign }) => {
           <img
             src={campaign.photopath || "/Brocken-Defualt-Img.jpg"}
             alt={campaign.name}
-             onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
             className="h-full w-full object-cover"
           />
         </div>
@@ -65,10 +68,11 @@ const CampaignCard = ({ campaign }) => {
           </p>
 
           {/* ===== Apply Date ===== */}
-         <div className="flex items-center gap-2 text-sm text-[#335CFF] h-[20px]">
+          <div className="flex items-center gap-2 text-sm text-[#335CFF] h-[20px]">
             {campaign.applicationstartdate && campaign.applicationenddate && (
               <>
-                <RiCalendar2Line size={16} className="shrink-0" />Apply :
+                <RiCalendar2Line size={16} className="shrink-0" />
+                Apply :
                 <span className="truncate">
                   {formatDate(campaign.applicationstartdate)}
                   <span className="mx-1 font-medium">-</span>
@@ -79,7 +83,7 @@ const CampaignCard = ({ campaign }) => {
           </div>
 
           {/* ===== Categories ===== */}
-           <div className="flex flex-wrap gap-2 overflow-hidden">
+          <div className="flex flex-wrap gap-2 overflow-hidden">
             {campaign.campaigncategories?.slice(0, 2).map((cat, i) => (
               <span
                 key={i}
@@ -122,16 +126,15 @@ const CampaignCard = ({ campaign }) => {
                 flex items-center gap-3
               "
               >
-              <div className="flex items-center w-full text-sm">
-                <span className="text-xs text-gray-400">
-                  Estimated Budget:
-                </span>
+                <div className="flex items-center w-full text-sm">
+                  <span className="text-xs text-gray-400">
+                    Estimated Budget:
+                  </span>
 
-                <span className="ml-auto font-semibold text-[#0D132D]">
-                  ₹ {campaign.estimatedbudget.toLocaleString("en-IN")}
-                </span>
-              </div>
-
+                  <span className="ml-auto font-semibold text-[#0D132D]">
+                    ₹ {campaign.estimatedbudget.toLocaleString("en-IN")}
+                  </span>
+                </div>
               </div>
             )}
           </div>
@@ -194,22 +197,20 @@ const CampaignCarousel = () => {
         />
       ) : (
         <Swiper
-          spaceBetween={12}
-          slidesPerView="auto"
-          freeMode
-          grabCursor
-          modules={[FreeMode, Autoplay, Navigation, Pagination]}
-          autoplay={{ delay: 3000, disableOnInteraction: true }}
-          className="pb-6"
-           pagination={{
-          clickable: true,
-        }}
+          spaceBetween={15}
+          slidesPerView={1} // mobile default
           breakpoints={{
-            640: { slidesPerView: 1 },
+            640: { slidesPerView: 1.2 },
             768: { slidesPerView: 2 },
-            1024: { slidesPerView: 2.5 },
-            1280: { slidesPerView: 3 },
+            1024: { slidesPerView: 3 },
+            1280: { slidesPerView: 4 },
           }}
+          freeMode={true}
+          autoplay={{ delay: 3000, disableOnInteraction: true }}
+          grabCursor={true}
+          navigation={true}
+          modules={[FreeMode, Navigation, Autoplay, Pagination]}
+          className="mySwiper pb-5"
         >
           {campaigns.map((c) => (
             <SwiperSlide key={c.id} className="!w-[300px]">

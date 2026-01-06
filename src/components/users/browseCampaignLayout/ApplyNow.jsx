@@ -268,7 +268,8 @@ const ApplyNow = () => {
                   Proposal Amount <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="numeric" 
                   addonBefore="₹"
                   placeholder="0.00"
                   value={amount}
@@ -288,6 +289,15 @@ const ApplyNow = () => {
                     setAmount(value);
                     setErrors(prev => ({ ...prev, amount: "" }));
                   }}
+                   onKeyDown={(e) => {
+                      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                        e.preventDefault();
+                      }
+                    }}
+                     onWheelCapture={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
                   status={errors.amount ? "error" : ""}
                 />
                 {errors.amount && (

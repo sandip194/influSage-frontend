@@ -497,7 +497,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
 
       {/* Budget */}
       <label className="font-semibold block mb-2">
-        Budget <span>(Approx Price)</span>
+        Budget <span>(Approx Price)</span> <span className="text-red-500">*</span>
       </label>
       <div className="flex gap-4 mb-1">
         <Input

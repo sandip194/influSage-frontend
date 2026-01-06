@@ -396,6 +396,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
                 label={<b>Phone Number</b>}
                 name="phone"
                 rules={[
+                  { required: true, message: 'Mobile number is required' },
                   {
                     validator: (_, value) => {
                       if (!value || value.replace(/\D/g, '').length === 0) {

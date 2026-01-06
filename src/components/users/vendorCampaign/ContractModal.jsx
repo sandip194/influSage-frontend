@@ -339,6 +339,7 @@ export default function ContractModal({
                             >
                                 <InputNumber
                                     size="large"
+                                    addonBefore="₹"
                                     style={{ width: "100%" }}
                                     min={0}
                                     maxLength={13}
@@ -346,9 +347,9 @@ export default function ContractModal({
                                     placeholder="₹ 0"
                                     controls={false} // hides the up/down arrows
                                     formatter={(value) => {
-                                        if (!value) return "₹ 0";
+                                        // if (!value) return "₹ 0";
                                         const num = Number(String(value).replace(/[^\d]/g, ""));
-                                        return "₹ " + num.toLocaleString("en-IN");
+                                        return  + num.toLocaleString("en-IN");
                                     }}
                                     parser={(value) => {
                                         // Remove anything that is not a digit
@@ -621,123 +622,49 @@ export default function ContractModal({
    ============================== */}
                         <div className="md:col-span-2">
 
-                            {/* Mobile layout */}
-                            <div className="md:hidden space-y-2">
-                                <Form.Item
-                                    label="Product Link"
-                                    name="productLink"
-                                    dependencies={["vendorAddress"]}
-                                    rules={[
-                                        { type: "url", message: "Enter a valid URL" },
-                                        ({ getFieldValue }) => ({
-                                            validator(_, value) {
-                                                if (value || getFieldValue("vendorAddress")) {
-                                                    return Promise.resolve();
-                                                }
-                                                return Promise.reject(
-                                                    new Error("Fill Product Link or Vendor Address")
-                                                );
-                                            },
-                                        }),
-                                    ]}
-                                >
-                                    <Input
-                                        size="large"
-                                        placeholder="Enter product link"
-                                        onChange={() => form.validateFields(["vendorAddress"])}
-                                    />
+                        {/* One-line layout */}
+                        <Form.Item
+                            label="Product Link / Vendor Address"
+                            name="productOrAddress"
+                            dependencies={["productLink", "vendorAddress"]}
+                            rules={[
+                                () => ({
+                                validator(_, __) {
+                                    const link = form.getFieldValue("productLink");
+                                    const address = form.getFieldValue("vendorAddress");
+
+                                    if (link || address) {
+                                    return Promise.resolve();
+                                    }
+
+                                    return Promise.reject(
+                                    "Please fill Product Link OR Vendor Address"
+                                    );
+                                },
+                                }),
+                            ]}
+                            style={{ marginBottom: 4 }}
+                            >
+                            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-end">
+
+                                {/* Product Link */}
+                                <Form.Item name="productLink" noStyle>
+                                <Input size="large" placeholder="Enter product link" />
                                 </Form.Item>
 
-                                {/* OR inline (no extra block spacing) */}
-                                <div className="text-center text-xs font-semibold text-subtext-light dark:text-subtext-dark -mt-1">
-                                    OR
+                                {/* OR */}
+                                <div className="flex justify-center items-center text-sm font-semibold text-subtext-light">
+                                OR
                                 </div>
 
-                                <Form.Item
-                                    label="Vendor Address"
-                                    name="vendorAddress"
-                                    dependencies={["productLink"]}
-                                    rules={[
-                                        ({ getFieldValue }) => ({
-                                            validator(_, value) {
-                                                if (value || getFieldValue("productLink")) {
-                                                    return Promise.resolve();
-                                                }
-                                                return Promise.reject(
-                                                    new Error("Fill Vendor Address or Product Link")
-                                                );
-                                            },
-                                        }),
-                                    ]}
-                                >
-                                    <Input
-                                        size="large"
-                                        placeholder="Enter vendor address"
-                                        onChange={() => form.validateFields(["productLink"])}
-                                    />
+                                {/* Vendor Address */}
+                                <Form.Item name="vendorAddress" noStyle>
+                                <Input size="large" placeholder="Enter vendor address" />
                                 </Form.Item>
+
                             </div>
-
-                            {/* Desktop layout */}
-                            <div className="hidden md:grid md:grid-cols-[1fr_auto_1fr] gap-6 items-center">
-                                <Form.Item
-                                    label="Product Link"
-                                    name="productLink"
-                                    dependencies={["vendorAddress"]}
-                                    rules={[
-                                        { type: "url", message: "Enter a valid URL" },
-                                        ({ getFieldValue }) => ({
-                                            validator(_, value) {
-                                                if (value || getFieldValue("vendorAddress")) {
-                                                    return Promise.resolve();
-                                                }
-                                                return Promise.reject(
-                                                    new Error("Fill Product Link or Vendor Address")
-                                                );
-                                            },
-                                        }),
-                                    ]}
-                                >
-                                    <Input
-                                        size="large"
-                                        placeholder="Enter product link"
-                                        onChange={() => form.validateFields(["vendorAddress"])}
-                                    />
-                                </Form.Item>
-
-                                <div className="flex items-center justify-center">
-                                    <span className="text-sm font-semibold text-subtext-light dark:text-subtext-dark">
-                                        OR
-                                    </span>
-                                </div>
-
-                                <Form.Item
-                                    label="Vendor Address"
-                                    name="vendorAddress"
-                                    dependencies={["productLink"]}
-                                    rules={[
-                                        ({ getFieldValue }) => ({
-                                            validator(_, value) {
-                                                if (value || getFieldValue("productLink")) {
-                                                    return Promise.resolve();
-                                                }
-                                                return Promise.reject(
-                                                    new Error("Fill Vendor Address or Product Link")
-                                                );
-                                            },
-                                        }),
-                                    ]}
-                                >
-                                    <Input
-                                        size="large"
-                                        placeholder="Enter vendor address"
-                                        onChange={() => form.validateFields(["productLink"])}
-                                    />
-                                </Form.Item>
+                            </Form.Item>
                             </div>
-
-                        </div>
-
 
 
 

@@ -189,14 +189,8 @@ const Campaign = () => {
             freeMode={true}
             autoplay={{ delay: 3000, disableOnInteraction: true }}
             grabCursor={true}
-            navigation={{
-              nextEl: ".swiper-button-next-custom",
-              prevEl: ".swiper-button-prev-custom",
-            }}
+            navigation={true}
             modules={[FreeMode, Navigation, Autoplay, Pagination]}
-            pagination={{
-          clickable: true,
-        }}
             className="mySwiper pb-5"
           >
             {campaigns.map((item) => (
@@ -296,44 +290,30 @@ const Campaign = () => {
                     )}
 
                     {/* ===== Budget Section ===== */}
-                    {item.estimatedbudget && (
-                      <div className="mt-auto">
+                    <div className="mb-3">
+                      {item.estimatedbudget  && (
                         <div
                           className="
-                            bg-white
-                            border border-[#0D132D26]
-                            rounded-xl
-                            px-3 py-2
-                            flex items-center gap-3
-                          "
+                          bg-white
+                          border border-[#0D132D26]
+                          rounded-xl
+                          px-2 py-2
+                          flex items-center gap-3
+                        "
                         >
-                          {/* Currency Icon */}
-                          <div
-                            className="
-                              w-9 h-9
-                              rounded-full
-                              bg-[#0D132D]
-                              text-white
-                              flex items-center justify-center
-                              text-sm font-semibold
-                              shrink-0
-                            "
-                          >
-                            ₹
-                          </div>
+                        <div className="flex items-center w-full text-sm">
+                          <span className="text-xs text-gray-400">
+                            Estimated Budget:
+                          </span>
 
-                          {/* Amount */}
-                          <div className="flex flex-col leading-tight">
-                            <span className="text-sm font-semibold text-[#0D132D]">
-                              {item.estimatedbudget.toLocaleString("en-IN")}
-                            </span>
-                            <span className="text-xs text-gray-400">
-                              Estimated Budget
-                            </span>
-                          </div>
+                          <span className="ml-auto font-semibold text-[#0D132D]">
+                            ₹ {item.estimatedbudget .toLocaleString("en-IN")}
+                          </span>
                         </div>
-                      </div>
-                    )}
+
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </SwiperSlide>
@@ -379,13 +359,7 @@ const Campaign = () => {
             freeMode={true}
             autoplay={{ delay: 3000, disableOnInteraction: true }}
             grabCursor={true}
-            navigation={{
-              nextEl: ".influencer-button-next",
-              prevEl: ".influencer-button-prev",
-            }}
-            pagination={{
-              clickable: true,
-            }}
+            navigation={true}
             modules={[FreeMode, Navigation, Autoplay, Pagination]}
             className="pb-5"
           >

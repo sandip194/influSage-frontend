@@ -262,27 +262,32 @@ const CampaignCard = React.memo(
             )}
 
             {/* Save Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSave(campaign.id);
-              }}
-              className="
-                w-9 h-9
-                shrink-0
-                rounded-full
-                bg-white
-                border border-[#0D132D26]
-                flex items-center justify-center
-                hover:bg-gray-50
-              "
+            <Tooltip
+              title={campaign.campaigsaved ? "Unsave" : "Save"}
+              placement="top"
             >
-              {campaign.campaigsaved ? (
-                <RiBookmarkFill size={18} className="text-[#0D132D]" />
-              ) : (
-                <RiBookmarkLine size={18} className="text-gray-600" />
-              )}
-            </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSave(campaign.id);
+                }}
+                className="
+                  w-9 h-9
+                  shrink-0
+                  rounded-full
+                  bg-white
+                  border border-[#0D132D26]
+                  flex items-center justify-center
+                  hover:bg-gray-50
+                "
+              >
+                {campaign.campaigsaved ? (
+                  <RiBookmarkFill size={18} className="text-[#0D132D]" />
+                ) : (
+                  <RiBookmarkLine size={18} className="text-gray-600" />
+                )}
+              </button>
+            </Tooltip>
           </div>
         </div>
       </div>

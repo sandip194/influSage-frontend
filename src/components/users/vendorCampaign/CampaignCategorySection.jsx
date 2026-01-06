@@ -155,7 +155,7 @@ const CampaignCategorySection = ({ data, onNext, onBack, campaignId }) => {
 
                 {/* Subcategory Multi Select */}
                 <div>
-                    <label className="block mb-2 font-semibold text-gray-700">Subcategories</label>
+                    <label className="block mb-2 font-semibold text-gray-700">Subcategories <span className="text-red-500">*</span></label>
                     <Select
                         disabled={!selectedParentId}
                         size="large"

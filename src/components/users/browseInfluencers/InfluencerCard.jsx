@@ -8,6 +8,7 @@ import {
   RiStarFill,
   RiStarLine
 } from "@remixicon/react";
+import { Tooltip } from "antd";
 
 const InfluencerCard = ({ influencer, onLike, onInvite }) => {
   const navigate = useNavigate();
@@ -63,17 +64,26 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
             </p>
             <div className="flex items-center gap-1 text-xs">
               {Number(influencer?.ratingcount) > 0 && (
-                <div className="flex items-center gap-1 mt-1">
-                  {Array.from({ length: Math.round(influencer.ratingcount) }).map((_, i) => (
-                    <RiStarFill
-                      key={i}
-                      size={12}
-                      className="text-yellow-400"
-                      style={{ stroke: "black", strokeWidth: 1 }}
-                    />
-                  ))}
+                <div className="flex items-center gap-1 text-xs mt-1">
+                  {Array.from({ length: 5 }).map((_, i) => {
+                    const rating = Math.round(Number(influencer.ratingcount));
+
+                    return (
+                      <RiStarFill
+                        key={i}
+                        size={12}
+                        className={i < rating ? "text-yellow-400" : "text-white"}
+                        style={{
+                          stroke: "black",
+                          strokeWidth: 1,
+                          fill: i < rating ? "#facc15" : "white",
+                        }}
+                      />
+                    );
+                  })}
                 </div>
               )}
+
             </div>
           </div>
         </div>
@@ -169,10 +179,10 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
       </div>
 
       {/* ===== Completed Campaigns ===== */}
-      {influencer?.completedcampaigncount > 0 && (
+      {influencer && (
         <div className="flex items-center gap-2 text-sm mb-4">
           <span className="w-5 h-5 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs">
-            {influencer.completedcampaigncount}
+            {influencer.completedcampaigncount ?? 0}
           </span>
           <span className="text-gray-800">Completed Campaigns</span>
         </div>
@@ -202,20 +212,25 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
           Invite
         </button>
 
-        {/* Heart */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onLike(influencer?.id);
-          }}
-          className="w-10 h-10 bg-white border border-[#0D132D26] rounded-full flex items-center justify-center"
+        {/* Heart */}  
+        <Tooltip
+          title={influencer?.savedinfluencer ? "Unfavourite" : "Favourite"}
+          placement="top"
         >
-          {influencer?.savedinfluencer ? (
-            <RiHeartFill className="text-red-500" size={20} />
-          ) : (
-            <RiHeartLine className="text-gray-600" size={20} />
-          )}
-        </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onLike(influencer?.id);
+            }}
+            className="w-10 h-10 bg-white border border-[#0D132D26] rounded-full flex items-center justify-center"
+          >
+            {influencer?.savedinfluencer ? (
+              <RiHeartFill className="text-red-500" size={20} />
+            ) : (
+              <RiHeartLine className="text-gray-600" size={20} />
+            )}
+          </button>
+        </Tooltip>
       </div>
     </div>
   );

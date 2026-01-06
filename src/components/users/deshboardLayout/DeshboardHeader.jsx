@@ -285,7 +285,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
                 title={<Text strong>{item.name}</Text>}
                 description={
                   <>
-                    <p className="text-sm mb-1">{item.message}</p>
+                    <p className="text-sm mb-1 text-gray-900">{item.message}</p>
                     <Text type="secondary" className="text-xs">
                       {formatRelativeTime(item.time)}
                     </Text>
