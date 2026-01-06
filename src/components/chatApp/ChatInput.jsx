@@ -150,26 +150,40 @@ export default function ChatInput({
 
       {/* Reply Preview */}
       {replyTo && (
-        <div className="flex items-start justify-between bg-gray-100 border-l-4 border-[#0D132D] text-sm text-gray-700 px-4 py-2 rounded-md">
-          <div className="flex-1 truncate pr-2">
-            <span className="font-semibold">Replying to: </span>
+        <div className="mb-2 px-3 py-2 rounded-lg border-l-4 border-[#0D132D] bg-gray-100 flex items-center gap-3">
 
-            {replyTo.ishtml ? (
-              <span className="italic text-gray-600">
-                Campaign Invitation
-              </span>
-            ) : (
-              <span className="truncate">
-                {replyTo.content || "Attachment"}
-              </span>
-            )}
+          {/* LEFT → TEXT */}
+          <div className="flex flex-col flex-1 min-w-0">
+            <span className="text-xs text-gray-500 font-medium">
+              Replying to
+            </span>
+
+            <span className="text-sm font-medium text-gray-800 truncate">
+              {replyTo.ishtml
+                ? "Campaign Invitation"
+                : replyTo.content
+                ? replyTo.content
+                : replyTo.file
+                ? "📎 Attachment"
+                : "Message"}
+            </span>
           </div>
 
-          {/* Close button */}
+          {/* RIGHT → IMAGE THUMBNAIL (if exists) */}
+          {replyTo.file && /\.(jpg|jpeg|png|gif|webp)$/i.test(replyTo.file) && (
+            <img
+              src={replyTo.file}
+              alt="reply preview"
+              className="w-12 h-12 rounded-md object-cover flex-shrink-0"
+              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+            />
+          )}
+
+          {/* CLOSE */}
           <button
             type="button"
             onClick={onCancelReply}
-            className="text-gray-500 hover:text-gray-700 flex-shrink-0"
+            className="text-gray-500 hover:text-gray-700 text-lg flex-shrink-0"
             aria-label="Cancel reply"
           >
             <RiCloseLine size={16} />
@@ -180,6 +194,14 @@ export default function ChatInput({
       {/* File Preview */}
       {file && previewUrl && (
         <div className="relative w-full max-w-xs">
+          <button
+            type="button"
+            onClick={removeFile}
+            className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow hover:bg-red-100 z-10"
+            aria-label="Remove attachment"
+          >
+            <RiCloseLine size={14} />
+          </button>
           {previewUrl.type === "image" && (
             <div className="relative inline-block">
               {/* Image */}

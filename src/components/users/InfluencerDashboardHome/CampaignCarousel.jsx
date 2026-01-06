@@ -122,11 +122,12 @@ const CampaignCard = ({ campaign }) => {
                 flex items-center gap-3
               "
               >
-              <div className="flex items-center gap-1 text-sm">
+              <div className="flex items-center w-full text-sm">
                 <span className="text-xs text-gray-400">
                   Estimated Budget:
                 </span>
-                <span className="font-semibold text-[#0D132D]">
+
+                <span className="ml-auto font-semibold text-[#0D132D]">
                   ₹ {campaign.estimatedbudget.toLocaleString("en-IN")}
                 </span>
               </div>

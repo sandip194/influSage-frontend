@@ -241,7 +241,7 @@ const DescriptionLayout = () => {
     <div className="w-full text-sm overflow-x-hidden">
       <button
         onClick={handleBack}
-        className="text-gray-900 flex items-center gap-2 hover:text-gray-900 transition mb-4"
+        className="text-gray-900 flex cursor-pointer items-center gap-2 hover:text-gray-900 transition mb-4"
         aria-label="Go back"
       >
         <RiArrowLeftSLine size={20} /> Back

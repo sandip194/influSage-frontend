@@ -77,8 +77,8 @@ const AppliedCampaignCard = ({
                     {campaign.name}
                   </Link>
 
-                  <div className="flex items-center gap-1 text-xs text-gray-600 mt-0.5">
-                    <RiCalendar2Line size={14} className="text-gray-500" />
+                  <div className="flex items-center gap-1 text-xs text-[#335CFF] mt-0.5">
+                    <RiCalendar2Line size={14} className="text-[#335CFF]" />
                     <span>
                       Applied on{" "}
                       {formatDateDDMMYYYY(campaign.createddate)}
@@ -88,8 +88,8 @@ const AppliedCampaignCard = ({
               </div>
 
               {/* Description */}
-              <p className="text-sm text-gray-600 line-clamp-2">
-                {campaign.description}
+              <p className="text-xs text-gray-500 line-clamp-2 leading-snug min-h-[32px] mt-2">
+                {campaign.description || ""}
               </p>
 
               {/* Budget */}

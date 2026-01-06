@@ -110,7 +110,7 @@ const FeedbacksPage = () => {
                       className={
                         i < fb.rating
                           ? "text-yellow-400"
-                          : "text-gray-300"
+                          : "text-white"
                       }
                       style={{ stroke: "black", strokeWidth: 0.6 }}
                     />
