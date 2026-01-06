@@ -10,7 +10,7 @@ import FilePreview from "../../common/FilePreview";
 
 const { TextArea } = Input;
 
-const ApplyNowModal = ({ open, onClose, campaignId }) => {
+const ApplyNowModal = ({ open, onClose, campaignId, onSuccess }) => {
     const [amount, setAmount] = useState("");
     const [proposal, setProposal] = useState("");
     const [errors, setErrors] = useState({});
@@ -42,8 +42,6 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-
-
 
     // ===== RESET FORM =====
     const resetForm = () => {
@@ -84,7 +82,7 @@ const ApplyNowModal = ({ open, onClose, campaignId }) => {
             const res = await axios.post(`user/apply-for-campaign/${campaignId}`, formData, { headers: { Authorization: `Bearer ${token}` } });
             toast.success(res.data.message);
             resetForm();
-            onClose();
+            onSuccess();
         } catch (err) {
             toast.error(err);
         } finally {

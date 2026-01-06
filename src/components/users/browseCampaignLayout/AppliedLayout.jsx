@@ -17,7 +17,7 @@ import AppliedCampaignCard from "./AppliedCampaignCard";
 const AppliedLayout = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [pagenumber, setPageNumber] = useState(1);
-  const [pagesize, setPageSize] = useState(10);
+  const [pagesize, setPageSize] = useState(12);
   const [totalCampaigns, setTotalCampaigns] = useState(0);
 
   const [sortby, setSortBy] = useState("createddate");
@@ -262,6 +262,7 @@ const AppliedLayout = () => {
             setPageSize(pageSize);
           }}
           showSizeChanger
+          pageSizeOptions={['12', '24', '36', '48']}
         />
       </div>
 
@@ -300,9 +301,9 @@ const AppliedLayout = () => {
       {/* Edit Application Modal */}
       <ApplyNowModal
         open={isEditModalOpen}
-        onClose={() => setEditModalOpen(false)}
         applicationId={selectedApplicationId}
         campaignId={selectedCampaignId}
+        onSuccess={() =>setEditModalOpen(false)}
       />
     </div>
   );

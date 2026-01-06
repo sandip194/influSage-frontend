@@ -32,7 +32,8 @@ const AppliedCampaignCard = ({
             key={idx}
             className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm"
           >
-            <Skeleton active avatar paragraph={{ rows: 3 }} />
+            <Skeleton.Avatar active size="large" />
+            <Skeleton active paragraph={{ rows: 3 }} />
           </div>
         ))
       ) : campaigns.length === 0 ? (

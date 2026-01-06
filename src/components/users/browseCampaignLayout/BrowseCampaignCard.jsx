@@ -15,11 +15,11 @@ const CampaignCard = React.memo(
       variant === "browse" && campaign.applicationstartdate
         ? new Date(campaign.applicationstartdate.split("-").reverse().join("-"))
         : null;
-        const formatDateDDMMYY = (dateStr) => {
-          if (!dateStr) return "";
-          const [dd, mm, yyyy] = dateStr.split("-");
-          return `${dd}/${mm}/${yyyy}`;
-        };
+    const formatDateDDMMYY = (dateStr) => {
+      if (!dateStr) return "";
+      const [dd, mm, yyyy] = dateStr.split("-");
+      return `${dd}/${mm}/${yyyy}`;
+    };
 
     return (
       <div
@@ -62,8 +62,8 @@ const CampaignCard = React.memo(
                 {variant === "saved"
                   ? `Created on ${formatDateDDMMYY(campaign.campaigncreatedate)}`
                   : today < start
-                  ? `Application Starts On ${formatDateDDMMYY(campaign.applicationstartdate)}`
-                  : `Apply Till: ${formatDateDDMMYY(campaign.applicationenddate)}`}
+                    ? `Application Starts On ${formatDateDDMMYY(campaign.applicationstartdate)}`
+                    : `Apply Till: ${formatDateDDMMYY(campaign.applicationenddate)}`}
               </span>
             </div>
           </div>
@@ -199,15 +199,15 @@ const CampaignCard = React.memo(
                 flex items-center gap-3
               "
               >
-              <div className="flex items-center w-full text-sm">
-                <span className="text-xs text-gray-400">
-                  Estimated Budget:
-                </span>
+                <div className="flex items-center w-full text-sm">
+                  <span className="text-xs text-gray-400">
+                    Estimated Budget:
+                  </span>
 
-                <span className="ml-auto font-semibold text-[#0D132D]">
-                  ₹ {campaign.estimatedbudget.toLocaleString("en-IN")}
-                </span>
-              </div>
+                  <span className="ml-auto font-semibold text-[#0D132D]">
+                    ₹ {campaign.estimatedbudget.toLocaleString("en-IN")}
+                  </span>
+                </div>
 
               </div>
             )}
@@ -297,7 +297,7 @@ const CampaignCard = React.memo(
 
 /* --- Grid Component --- */
 const CampaignCardGrid = React.memo(
-  ({ campaigns, loading, handleCardClick, handleSave, variant }) => {
+  ({ campaigns, loading, handleCardClick, handleSave, variant, onCampaignApplied }) => {
     const [openApply, setOpenApply] = useState(false);
     const [selectedCampaignId, setSelectedCampaignId] = useState(null);
 
@@ -339,8 +339,11 @@ const CampaignCardGrid = React.memo(
 
         <ApplyNowModal
           open={openApply}
-          onClose={() => setOpenApply(false)}
           campaignId={selectedCampaignId}
+          onSuccess={() => {
+            setOpenApply(false);
+            onCampaignApplied(); // 🔥 REFRESH LIST
+          }}
         />
       </>
     );
