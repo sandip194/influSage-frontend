@@ -4,14 +4,10 @@ import {
   RiMoneyRupeeCircleLine,
   RiTranslate,
   RiCheckboxBlankCircleLine,
-  RiInstagramFill,
-  RiYoutubeFill,
-  RiStarLine,
 } from '@remixicon/react';
-import { Modal, Input, Tabs, DatePicker, Skeleton, ConfigProvider, Empty } from 'antd';
+import { Modal,  Tabs, DatePicker, Skeleton, ConfigProvider, Empty } from 'antd';
 import VendorCampaignOverview from './VendorCampaignOverview';
 import VendorActivity from './VendorActivity';
-import VendorMessage from './VendorMessage';
 import VendorFilesMedia from './VendorFilesMedia';
 import VendorPayment from './VendorPayment';
 import axios from 'axios';
@@ -26,7 +22,6 @@ import dayjs from 'dayjs';
 import VendorContract from './VendorContract';
 import ViewAllOffers from '../../vendor/offers/ViewAllOffers';
 import VendorContentLinksTab from './VendorContentLinksTab';
-import FeedbackForm from "./FeedbackForm";
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
@@ -61,7 +56,6 @@ const formatToDDMMYYYY = (dateStr) => {
   return d.toLocaleDateString("en-GB");
 };
 
-
 const CampaignDetails = () => {
   //  const [isModalOpen, setIsModalOpen] = useState(false);
   //  const [proposal, setProposal] = useState("");
@@ -85,9 +79,7 @@ const CampaignDetails = () => {
   const { campaignId } = useParams()
   const { token } = useSelector((state) => state.auth);
   // const [isModalVisible, setIsModalVisible] = useState(false);
-  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   // const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
-  // const [feedbackModal, setFeedbackModal] = useState(false);
   // const [selectedInfluencer, setSelectedInfluencer] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
@@ -225,7 +217,6 @@ const CampaignDetails = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-
   const handleSaveDates = async () => {
     if (!validateDates()) return;
 
@@ -258,7 +249,6 @@ const CampaignDetails = () => {
       setLoading(false);
     }
   };
-
 
   if (loading || redirecting) {
     return (
@@ -911,14 +901,6 @@ const CampaignDetails = () => {
         </div>
       </Modal>
 
-      {/* {feedbackModal && (
-            <FeedbackForm
-              campaignId={campaignId}
-              vendorId={campaignDetails?.vendorid}
-              influencer={selectedInfluencer}
-              onClose={() => setFeedbackModal(false)}
-            />
-          )} */}
     </div>
   );
 };

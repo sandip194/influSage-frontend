@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Input, message } from 'antd';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { RiCheckLine } from '@remixicon/react';
 
 const { TextArea } = Input;
+
+const CAPTION_MAX_LENGTH = 250;
+
 
 const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
   const { token } = useSelector((state) => state.auth) || {};
@@ -13,6 +16,37 @@ const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [globalError, setGlobalError] = useState("");
+
+  const fieldRefs = useRef({});
+
+  const FIELD_ORDER = ["__global__", ...Object.keys(platforms)];
+
+
+  const scrollToFirstError = (errors, globalError) => {
+    // Global error has highest priority
+    if (globalError && fieldRefs.current.__global__) {
+      fieldRefs.current.__global__.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      return;
+    }
+
+    const firstPlatform = FIELD_ORDER.find(
+      (key) => key !== "__global__" && errors[key]
+    );
+
+    if (!firstPlatform) return;
+
+    const el = fieldRefs.current[firstPlatform];
+    if (el) {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  };
+
 
   useEffect(() => {
     const fetchPlatforms = async () => {
@@ -23,7 +57,7 @@ const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
 
         const apiPlatforms = res.data.providorType || [];
 
-        
+
         const grouped = apiPlatforms.reduce((acc, item, index) => {
           if (!acc[item.providername]) {
             acc[item.providername] = [];
@@ -87,12 +121,32 @@ const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
       };
     });
   };
+
   const handleCaptionChange = (platform, value) => {
+    // Trim to max length immediately
+    const trimmedValue = value.slice(0, CAPTION_MAX_LENGTH);
+
     setFormState((prev) => ({
       ...prev,
-      [platform]: { ...prev[platform], caption: value },
+      [platform]: { ...prev[platform], caption: trimmedValue },
     }));
+
+    // Clear errors for this platform
+    setErrors((prev) => {
+      if (!prev[platform]) return prev;
+
+      return {
+        ...prev,
+        [platform]: {
+          ...prev[platform],
+          caption: false,
+          captionLength: false,
+        },
+      };
+    });
   };
+
+
 
   const handleContinue = async () => {
     const newErrors = {};
@@ -110,13 +164,21 @@ const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
         }
 
         // If partially filled → error
-        if (!typeObjs.length || !data.caption.trim()) {
+        const captionText = data.caption.trim();
+
+        if (
+          !typeObjs.length ||
+          !captionText ||
+          captionText.length > CAPTION_MAX_LENGTH
+        ) {
           newErrors[platform] = {
             type: !typeObjs.length,
-            caption: !data.caption.trim(),
+            caption: !captionText,
+            captionLength: captionText.length > CAPTION_MAX_LENGTH,
           };
           return null;
         }
+
 
         validPlatforms.push(platform);
 
@@ -137,17 +199,23 @@ const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
     // 🔹 Global error if no platform is fully valid
     if (!contenttypejson.length) {
       setGlobalError("Please select at least one platform (type + caption).");
+      scrollToFirstError(newErrors, true);
       return;
     } else {
       setGlobalError("");
     }
 
+    // ✅ ADD (when platform-level errors exist)
+    if (Object.keys(newErrors).length) {
+      scrollToFirstError(newErrors, false);
+      return;
+    }
     try {
       setLoading(true);
-      
+
       await axios.post(
         "/vendor/update-campaign",
-        { p_contenttypejson: contenttypejson, campaignId : campaignId ? campaignId : null },
+        { p_contenttypejson: contenttypejson, campaignId: campaignId ? campaignId : null },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -171,7 +239,11 @@ const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
 
 
         return (
-          <div key={platform} className="mb-5">
+          <div
+            key={platform} className="mb-5"
+            ref={(el) => (fieldRefs.current[platform] = el)}
+            tabIndex={-1}
+          >
             <p className="font-semibold mb-2">{platform}</p>
 
             <div className="flex gap-2 mb-3 flex-wrap">
@@ -193,12 +265,12 @@ const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
                     {label}
 
                     {/* Checkmark inside button */}
-                  <div
-                    className={`w-5 h-5 flex-shrink-0 flex items-center justify-center rounded-md border transition-all
+                    <div
+                      className={`w-5 h-5 flex-shrink-0 flex items-center justify-center rounded-md border transition-all
                       ${isSelected
-                        ? "bg-[#141843] border-[#0D132D26] text-white"
-                        : "bg-transparent border-gray-400 text-transparent"
-                      }`}
+                          ? "bg-[#141843] border-[#0D132D26] text-white"
+                          : "bg-transparent border-gray-400 text-transparent"
+                        }`}
 
                     >
                       <RiCheckLine size={14} />
@@ -218,24 +290,41 @@ const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
               placeholder="Caption"
               size="large"
               value={caption}
+              maxLength={CAPTION_MAX_LENGTH} // still good for UI
+              showCount
               onChange={(e) => handleCaptionChange(platform, e.target.value)}
               rows={2}
               className="rounded-2xl p-2"
             />
 
+
             {platformErrors.caption && (
               <p className="text-red-500 text-sm mt-1">Caption is required</p>
             )}
 
-            <hr className="mt-5 border-gray-200" />
+            {platformErrors.captionLength && (
+              <p className="text-red-500 text-sm mt-1">
+                Caption cannot exceed {CAPTION_MAX_LENGTH} characters
+              </p>
+            )}
+
+
+            <hr className="mt-8 border-gray-200" />
           </div>
         );
       })}
 
       {/* 🔹 Global error */}
       {globalError && (
-        <p className="text-red-500 text-sm mb-4">{globalError}</p>
+        <p
+          ref={(el) => (fieldRefs.current.__global__ = el)}
+          tabIndex={-1}
+          className="text-red-500 text-sm mb-4"
+        >
+          {globalError}
+        </p>
       )}
+
 
       <div className="flex gap-4 mt-6">
         <button

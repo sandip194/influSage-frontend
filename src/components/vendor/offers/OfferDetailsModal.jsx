@@ -102,8 +102,42 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
             title={`Application Details`}
         >
             {loading ? (
-                <div className="p-8">
-                    <Skeleton active avatar paragraph={{ rows: 6 }} />
+                <div className="p-6 space-y-4">
+                    {/* Header: Avatar + Name + Rating */}
+                    <div className="flex items-center gap-4">
+                        <Skeleton.Avatar size={80} active shape="circle" />
+                        <div className="flex-1 space-y-2">
+                            <Skeleton.Input style={{ width: 200 }} active size="small" />
+                            <Skeleton.Input style={{ width: 120 }} active size="small" />
+                            <div className="flex gap-1">
+                                {[...Array(3)].map((_, i) => (
+                                    <Skeleton.Input key={i} style={{ width: 60 }} active size="small" />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Budget */}
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <Skeleton.Input style={{ width: 100 }} active size="default" />
+                        <Skeleton paragraph={{ rows: 2, width: ['100%', '90%'] }} active />
+                    </div>
+
+                    {/* Sample Work */}
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <Skeleton paragraph={{ rows: 1 }} active />
+                        <div className="grid grid-cols-3 gap-3 mt-2">
+                            {[...Array(6)].map((_, i) => (
+                                <Skeleton key={i} active className="w-full h-28 rounded-lg" />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex gap-3 mt-4">
+                        <Skeleton.Button active size="large" />
+                        <Skeleton.Button active size="large" />
+                    </div>
                 </div>
             ) : offerDetails ? (
                 < div className="bg-white py-4 px-2 rounded-2xl relative overflow-hidden">
@@ -194,7 +228,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                     {/* Desktop layout flex */}
                     <div className="">
                         <div className="flex flex-col gap-4">
-                          
+
 
                             {/* Campaign Description */}
                             <div className="bg-gray-50 p-4 rounded-lg">
@@ -210,7 +244,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                 </p>
                             </div>
 
-                             {/* Sample Work / Portfolio */}
+                            {/* Sample Work / Portfolio */}
                             <div className="bg-gray-50 p-4 rounded-lg">
                                 <h3 className="text-lg font-semibold mb-2">Sample Work</h3>
                                 {offerDetails.filepaths?.length ? (
@@ -263,7 +297,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                         <img
                                             src={previewImage}
                                             alt="Preview"
-                                            className="max-w-48 max-h-48 rounded-xl shadow-lg object-contain"
+                                            className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                                             onClick={(e) => e.stopPropagation()}
                                             onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                         />

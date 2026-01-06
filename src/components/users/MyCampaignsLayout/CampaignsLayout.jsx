@@ -27,7 +27,7 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const statusStyles = {
-  inprogress: "bg-yellow-100 text-yellow-700",
+  "in progress": "bg-yellow-100 text-yellow-700",
   completed: "bg-green-100 text-green-700",
   cancelled: "bg-red-100 text-red-700",
 
@@ -55,8 +55,8 @@ const statusLabels = {
 const sortOptions = [
   { value: "createddate_desc", label: "Newest" },
   { value: "createddate_asc", label: "Oldest" },
-  { value: "estimatedbudget_desc", label: "Budget: High to Low" },
-  { value: "estimatedbudget_asc", label: "Budget: Low to High" },
+  { value: "paymentamount_desc", label: "Budget: High to Low" },
+  { value: "paymentamount_asc", label: "Budget: Low to High" },
 ];
 
 const getImageUrl = (path) => path || "/placeholder.jpg";
@@ -128,7 +128,7 @@ const InfluencerCampaigns = () => {
           Object.entries(params).filter(([, v]) => v != null && v !== "")
         );
 
-        const res = await axios.get("/user/influencer-campaigns", {
+        const res = await axios.get("/user/influencer-contract", {
           params: cleanParams,
           signal,
           headers: { Authorization: `Bearer ${token}` },
@@ -164,7 +164,7 @@ const InfluencerCampaigns = () => {
       setClients(r?.data?.data ?? [])
     );
     axios
-      .get("user/influencer-campaign-status", { headers })
+      .get("user/contract/status", { headers })
       .then((r) => setStatuses(r?.data?.data ?? []));
   }, [token]);
 
@@ -192,9 +192,7 @@ const InfluencerCampaigns = () => {
     setFilters((p) => ({ ...p, statusId, pagenumber: 1 }));
   };
 
-
   // TEMP FILTER HANDLERS (DO NOT TRIGGER API)
-
   const handleProviderChange = (id) => {
     setTempFilters((prev) => ({
       ...prev,
@@ -266,8 +264,7 @@ const InfluencerCampaigns = () => {
     <div className="w-full text-sm  pb-16 sm:pb-0">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-900">My Campaigns</h2>
-
+        <h2 className="text-2xl font-bold text-gray-900">My Contracts</h2>
       </div>
 
       {/* Status Tabs */}
@@ -275,7 +272,7 @@ const InfluencerCampaigns = () => {
         <div className="flex gap-3 overflow-x-auto whitespace-nowrap scrollbar-hide">
           <button
             onClick={() => handleStatusFilter(null)}
-            className={`px-4 cursor-pointer py-2 rounded-lg border flex-shrink-0 ${filters.statusId === null
+            className={`px-4 cursor-pointer py-2 rounded-lg border border-gray-200 flex-shrink-0 ${filters.statusId === null
               ? "bg-[#0f122f] text-white"
               : "bg-white text-gray-700"
               }`}
@@ -297,7 +294,6 @@ const InfluencerCampaigns = () => {
           ))}
         </div>
       </div>
-
 
 
       {/* Search, Sort, and Filter Header */}
@@ -361,37 +357,53 @@ const InfluencerCampaigns = () => {
       {/* Table */}
       <div className="bg-white rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left min-w-[800px]">
+          <table className="w-full text-left min-w-[900px]">
             <thead className="bg-white text-gray-700 text-sm tracking-wide">
               <tr>
                 <th className="p-4">Campaign</th>
-                <th className="p-4 w-[160px]">Budget</th>
-                <th className="p-4 w-[160px]">Campaign Start</th>
-                <th className="p-4 w-[180px]">Campaign Status</th>
+                <th className="p-4 w-[160px]">Payment Amount</th>
+                <th className="p-4 w-[160px]">Contract Start</th>
+                <th className="p-4 w-[160px]">Contract End</th>
                 <th className="p-4 w-[180px]">Contract Status</th>
+                <th className="p-4 w-[180px]">Campaign Status</th>
               </tr>
             </thead>
             <tbody className="text-sm text-gray-700">
               {loading ? (
                 [...Array(5)].map((_, idx) => (
                   <tr key={idx} className="border-t border-gray-200">
-                    <td colSpan="6" className="p-4">
-                      <Skeleton active paragraph={{ rows: 1 }} />
+                    <td className="p-4">
+                      <Skeleton.Input active size="small" style={{ width: 100 }} />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton.Input active size="small" style={{ width: 60 }} />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton.Input active size="small" style={{ width: 80 }} />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton.Input active size="small" style={{ width: 80 }} />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton.Input active size="small" style={{ width: 100 }} />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton.Input active size="small" style={{ width: 100 }} />
                     </td>
                   </tr>
                 ))
               ) : campaigns.length > 0 ? (
                 campaigns.map((row) => (
                   <tr
-                    key={row.id}
-                    onClick={() => navigate(`/dashboard/my-campaigns/details/${row.id}`)}
+                    key={row.contractid}
+                    onClick={() => navigate(`/dashboard/my-contract/details/${row.campaignid}`)}
                     className="border-t border-gray-200 hover:bg-gray-200 transition cursor-pointer"
                   >
                     <td className="p-4">
                       <div className="flex items-center gap-3 max-w-[260px]">
                         <img
                           src={getImageUrl(row.photopath)}
-                          alt={row.businessname}
+                          alt={row.name}
                           onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           className="w-9 h-9 rounded-full object-cover border border-gray-200 flex-shrink-0"
                         />
@@ -405,24 +417,25 @@ const InfluencerCampaigns = () => {
                       </div>
 
                     </td>
-                    <td className="p-4 font-medium">₹ {row.estimatedbudget}</td>
-                    <td className="p-4">{row.campaignstartdate}</td>
+                    <td className="p-4 font-medium">₹ {row.paymentamount}</td>
+                    <td className="p-4">{row.contractstartdate}</td>
+                    <td className="p-4">{row.contractenddate}</td>
                     <td className="p-4">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[row.status.toLowerCase()] ||
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[row.contractstatus.toLowerCase()] ||
                           "bg-gray-100 text-gray-600"
                           }`}
                       >
-                        {statusLabels[row.status.toLowerCase()] || row.status}
+                        {statusLabels[row.contractstatus.toLowerCase()] || row.contractstatus}
                       </span>
                     </td>
                     <td className="p-4">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[row.contract_status.toLowerCase()] ||
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[row.campaignstatus.toLowerCase()] ||
                           "bg-gray-100 text-gray-600"
                           }`}
                       >
-                        {statusLabels[row.contract_status.toLowerCase()] || row.contract_status}
+                        {statusLabels[row.campaignstatus.toLowerCase()] || row.campaignstatus}
                       </span></td>
                   </tr>
                 ))
@@ -592,4 +605,3 @@ const InfluencerCampaigns = () => {
 };
 
 export default InfluencerCampaigns;
-

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Tabs, Dropdown, Menu, Pagination, Input, Select, Empty, Skeleton } from "antd";
+import {  Dropdown, Menu, Pagination, Input, Select, Empty, Skeleton } from "antd";
 import {
   RiMore2Fill,
-  RiEyeLine,
   RiUserLine,
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
@@ -151,7 +150,6 @@ const ViewAllOffers = ({ campaignData }) => {
         <h2 className="text-xl font-bold">All Applications</h2>
 
       </div>
-
 
       {/* Search */}
       <div className="mb-4 p-3 bg-white rounded-t-2xl flex flex-col sm:flex-row justify-between">

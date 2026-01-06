@@ -141,12 +141,12 @@ const App = () => {
                                                                                 <Route path='browse/applied-campaign-details/:campaignId' element={<EditLayout />} />
                                                                                 <Route path='browse/apply-now/:campaignId' element={<ApplyNow />} />
 
-                                                                                <Route path='my-campaigns' element={<CampaignsLayout />} />
-                                                                                <Route path='my-campaigns/details/:campaignId' element={<Details />} />
+                                                                                <Route path='my-contract' element={<CampaignsLayout />} />
+                                                                                <Route path='my-contract/details/:campaignId' element={<Details />} />
 
-                                                                                <Route path='my-campaigns/activity' element={<Activity />} />
+                                                                                {/* <Route path='my-campaigns/activity' element={<Activity />} />
                                                                                 <Route path='my-campaigns/message' element={<Message />} />
-                                                                                <Route path='my-campaigns/filesmedia' element={<FilesMedia />} />
+                                                                                <Route path='my-campaigns/filesmedia' element={<FilesMedia />} /> */}
 
                                                                                 <Route path='payment' element={<Payment />} />
 
@@ -174,7 +174,7 @@ const App = () => {
 
 
                                                         {/* Vendor Deshboard */}
-                                                        <Route element={<PrivateRoute allowedRoles={[2]} />}>
+                                                        <Route element={<PrivateRoute allowedRoles={[2]} />}>   
 
                                                                 <Route element={<DashboardGuard />}>
                                                                         <Route path='/vendor-dashboard' element={<VenderDashboardLayout />}>
