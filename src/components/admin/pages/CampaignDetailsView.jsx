@@ -264,7 +264,7 @@ const CampaignDetailsView = () => {
 
                                 {/* Action Buttons */}
                                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                                    {cmapignDetails?.statusname === "ApprovalPending" && (
+                                    {cmapignDetails?.statusname === "Approval Pending" && (
                                         <>
                                             {/* ✅ Approve Button */}
                                             <Button
@@ -321,7 +321,7 @@ const CampaignDetailsView = () => {
 
                                     {cmapignDetails?.statusname === "Blocked" && null}
 
-                                    {cmapignDetails?.statusname !== "ApprovalPending" &&
+                                    {cmapignDetails?.statusname !== "Approval Pending" &&
                                         cmapignDetails?.statusname !== "Rejected" &&
                                         cmapignDetails?.statusname !== "Blocked" && (
                                             <>

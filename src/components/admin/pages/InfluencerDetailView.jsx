@@ -214,7 +214,7 @@ const InfluencerDetailView = () => {
 
                         {/* Action Buttons */}
                         <div className="px-6 pb-6 flex flex-wrap gap-3">
-                            {influDetails?.userstatusname === "ApprovalPending" && (
+                            {influDetails?.userstatusname === "Approval Pending" && (
                                 <>
                                     <Button
                                         icon={<CheckOutlined />}
