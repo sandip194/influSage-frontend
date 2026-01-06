@@ -16,6 +16,20 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
+const FIELD_ORDER = [
+  "profileImage",
+  "title",
+  "description",
+  "hashtags",
+  "applicationstartdate",
+  "applicationenddate",
+  "startDate",
+  "endDate",
+  "budgetAmount",
+  "aboutBrand",
+];
+
+
 const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
   const token = useSelector((state) => state.auth.token);
 
@@ -32,6 +46,20 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
   const [loading, setLoading] = useState(false);
 
   const fileInputRef = useRef();
+  const fieldRefs = useRef({});
+
+  const scrollToFirstError = (errors) => {
+    const firstErrorKey = FIELD_ORDER.find((key) => errors[key]);
+    if (!firstErrorKey) return;
+
+    const el = fieldRefs.current[firstErrorKey];
+    if (el) {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  };
 
   useEffect(() => {
     if (!data) return;
@@ -100,7 +128,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
     setPreview(URL.createObjectURL(file));
   };
 
-
   const validateFields = (formData, profileImage) => {
     const budgetAmount = Number(formData.budgetAmount) || 0;
 
@@ -131,7 +158,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
 
     return errors;
   };
-
 
   const buildPayload = (formData, profileImage) => {
     return {
@@ -174,6 +200,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
 
     if (hasFieldErrors) {
       setErrors({ ...fieldErrors });
+      scrollToFirstError(fieldErrors);
       // toast.error("Please fill all required fields before continuing."); 
       return;
     }
@@ -219,7 +246,10 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
   return (
     <div className="bg-white p-6 rounded-2xl">
       {/* Profile Image Upload */}
-      <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
+      <div
+        className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6"
+        ref={(el) => (fieldRefs.current.profileImage = el)} tabIndex={-1}
+      >
         <div className="relative m-auto w-30 h-30 rounded-full overflow-hidden bg-[#0D132D0D] hover:opacity-90 cursor-pointer border border-gray-100 group">
           {preview ? (
             <img
@@ -250,86 +280,98 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       )}
 
       {/* Campaign Title */}
-      <label className="font-semibold block mb-2">
-        Campaign Title <span className="text-red-500">*</span>
-      </label>
-      <Input
-        size="large"
-        placeholder="Enter Campaign Title"
-        value={formData.title}
-        maxLength={100}
-        onChange={(e) => {
-          let value = e.target.value.trimStart(); // remove leading spaces
+      <div ref={(el) => (fieldRefs.current.title = el)} tabIndex={-1}>
 
-          // Allow only letters, numbers, spaces, hyphens, underscores
-          value = value.replace(/[^a-zA-Z0-9\s-_]/g, "");
+        <label className="font-semibold block mb-2">
+          Campaign Title <span className="text-red-500">*</span>
+        </label>
+        <Input
+          size="large"
+          placeholder="Enter Campaign Title"
+          value={formData.title}
+          maxLength={100}
+          onChange={(e) => {
+            let value = e.target.value.trimStart(); // remove leading spaces
 
-          // Hard limit
-          if (value.length > 100) return;
+            // Allow only letters, numbers, spaces, hyphens, underscores
+            value = value.replace(/[^a-zA-Z0-9\s-_]/g, "");
 
-          setFormData(prev => ({ ...prev, title: value }));
-          setErrors(prev => ({ ...prev, title: "" }));
-        }}
-      />
-      {errors.title && (
-        <p className="text-red-500 text-sm mt-1">Please enter a title</p>
-      )}
+            // Hard limit
+            if (value.length > 100) return;
+
+            setFormData(prev => ({ ...prev, title: value }));
+            setErrors(prev => ({ ...prev, title: "" }));
+          }}
+        />
+        {errors.title && (
+          <p className="text-red-500 text-sm mt-1">Please enter a title</p>
+        )}
+      </div>
 
       <hr className="my-4 border-gray-200" />
 
       {/* Description */}
-      <label className="font-semibold block mb-2">
-        Description <span className="text-red-500">*</span>
-      </label>
-      <TextArea
-        size="large"
-        rows={4}
-        showCount
-        maxLength={500}
-        placeholder="Enter Campaign Description"
-        value={formData.description}
-        onChange={(e) => {
-          const value = e.target.value;
+      <div ref={(el) => (fieldRefs.current.description = el)} tabIndex={-1} className="mb-6">
 
-          if (value.length > 500) return;
+        <label className="font-semibold block mb-2">
+          Description <span className="text-red-500">*</span>
+        </label>
+        <TextArea
+          size="large"
+          rows={4}
+          showCount
+          maxLength={500}
+          placeholder="Enter Campaign Description"
+          value={formData.description}
+          onChange={(e) => {
+            const value = e.target.value;
 
-          setFormData(prev => ({ ...prev, description: value }));
-          setErrors(prev => ({ ...prev, description: "" }));
-        }}
-      />
-      {errors.description && (
-        <p className="text-red-500 text-sm mt-1">Please enter a description</p>
-      )}
+            if (value.length > 500) return;
+
+            setFormData(prev => ({ ...prev, description: value }));
+            setErrors(prev => ({ ...prev, description: "" }));
+          }}
+        />
+        {errors.description && (
+          <p className="text-red-500 text-sm mt-1">Please enter a description</p>
+        )}
+
+      </div>
+
 
       <hr className="my-4 border-gray-200" />
 
       {/* Hashtags */}
-      <label className="font-semibold block mb-2">Hashtags <span className="text-red-500">*</span></label>
-      <Select
-        mode="tags"
-        style={{ width: "100%" }}
-        size="large"
-        placeholder="Search Hashtags"
-        value={formData.hashtags}
-        onChange={(value) => {
-          // Split any entries that contain spaces
-          const processed = value.flatMap((tag) =>
-            tag.includes(" ") ? tag.split(" ").filter(Boolean) : tag
-          );
+      <div ref={(el) => (fieldRefs.current.hashtags = el)} tabIndex={-1}>
+        <label className="font-semibold block mb-2">Hashtags <span className="text-red-500">*</span></label>
+        <Select
+          mode="tags"
+          style={{ width: "100%" }}
+          size="large"
+          placeholder="Search Hashtags"
+          value={formData.hashtags}
+          onChange={(value) => {
+            // Split any entries that contain spaces
+            const processed = value.flatMap((tag) =>
+              tag.includes(" ") ? tag.split(" ").filter(Boolean) : tag
+            );
 
-          // Remove duplicates
-          const uniqueTags = Array.from(new Set(processed));
+            // Remove duplicates
+            const uniqueTags = Array.from(new Set(processed));
 
-          handleChange("hashtags", uniqueTags);
-        }}
-      />
+            handleChange("hashtags", uniqueTags);
+          }}
+        />
 
-      {errors.hashtags && (
-        <p className="text-red-500 text-sm mt-1">Please enter hashtages</p>
-      )}
+        {errors.hashtags && (
+          <p className="text-red-500 text-sm mt-1">Please enter hashtages</p>
+        )}
+
+      </div>
 
       <hr className="my-4 border-gray-200" />
 
+      {/* Application Duration (Application start and End Date) */}
       <label className="font-semibold block mb-2 flex items-center gap-2 mt-6">
         Application Duration <span className="text-red-500">*</span>
         <div className="relative group">
@@ -342,7 +384,10 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
 
       <div className="flex gap-4">
         {/* Application Start Date */}
-        <div className="w-full">
+        <div
+          className="w-full"
+          ref={(el) => (fieldRefs.current.applicationstartdate = el)} tabIndex={-1}
+        >
           <DatePicker
             size="large"
             style={{ width: "100%" }}
@@ -374,7 +419,10 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
         </div>
 
         {/* Application End Date */}
-        <div className="w-full">
+        <div
+          className="w-full"
+          ref={(el) => (fieldRefs.current.applicationenddate = el)} tabIndex={-1}
+        >
           <DatePicker
             size="large"
             style={{ width: "100%" }}
@@ -422,6 +470,8 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       </div>
 
       <hr className="my-4 border-gray-200" />
+
+      {/* Campaign Duration (Campaign start and End Date) */}
       <label className="font-semibold block mb-2 flex items-center gap-2 mt-6">
         Campaign Duration <span className="text-red-500">*</span>
         <div className="relative group">
@@ -434,7 +484,10 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
 
       <div className="flex gap-4">
         {/* Campaign Start Date */}
-        <div className="w-full">
+        <div
+          className="w-full"
+          ref={(el) => (fieldRefs.current.startDate = el)} tabIndex={-1}
+        >
           <DatePicker
             size="large"
             style={{ width: "100%" }}
@@ -468,7 +521,10 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
         </div>
 
         {/* Campaign End Date */}
-        <div className="w-full">
+        <div
+          className="w-full"
+          ref={(el) => (fieldRefs.current.endDate = el)} tabIndex={-1}
+        >
           <DatePicker
             size="large"
             style={{ width: "100%" }}
@@ -496,79 +552,85 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       <hr className="my-4 border-gray-200" />
 
       {/* Budget */}
-      <label className="font-semibold block mb-2">
-        Budget <span>(Approx Price)</span>
-      </label>
-      <div className="flex gap-4 mb-1">
-        <Input
-          size="large"
-          type="number"
-          min={1}
-          placeholder="0.00"
-          value={formData.budgetAmount}
-          prefix={formData.currency}
-          onChange={(e) => {
-            const value = e.target.value;
+      <div ref={(el) => (fieldRefs.current.budgetAmount = el)} tabIndex={-1}>
+        <label className="font-semibold block mb-2">
+          Budget <span>(Approx Price)</span>
+        </label>
+        <div className="flex gap-4 mb-1">
+          <Input
+            size="large"
+            type="number"
+            min={1}
+            placeholder="0.00"
+            value={formData.budgetAmount}
+            prefix={formData.currency}
+            onChange={(e) => {
+              const value = e.target.value;
 
-            // Allow only digits
-            if (!/^\d*$/.test(value)) return;
+              // Allow only digits
+              if (!/^\d*$/.test(value)) return;
 
-            // Max 7 digits
-            if (value.length > 7) {
-              setErrors((prev) => ({
-                ...prev,
-                budgetAmount: "Budget cannot exceed 7 digits."
-              }));
-              return;
-            }
+              // Max 7 digits
+              if (value.length > 7) {
+                setErrors((prev) => ({
+                  ...prev,
+                  budgetAmount: "Budget cannot exceed 7 digits."
+                }));
+                return;
+              }
 
-            handleChange("budgetAmount", value);
+              handleChange("budgetAmount", value);
 
-            if (!value || Number(value) <= 0) {
-              setErrors((prev) => ({
-                ...prev,
-                budgetAmount: "Budget is required and must be greater than 0 and cannot exceed 7 digits.",
-              }));
-            } else {
-              setErrors((prev) => ({
-                ...prev,
-                budgetAmount: "",
-              }));
-            }
-          }}
+              if (!value || Number(value) <= 0) {
+                setErrors((prev) => ({
+                  ...prev,
+                  budgetAmount: "Budget is required and must be greater than 0 and cannot exceed 7 digits.",
+                }));
+              } else {
+                setErrors((prev) => ({
+                  ...prev,
+                  budgetAmount: "",
+                }));
+              }
+            }}
 
-        />
+          />
+
+        </div>
+        {errors.budgetAmount && (
+          <p className="text-red-500 text-sm mt-1">Budget is required and must be greater than 0 and cannot exceed 7 digits.</p>
+        )}
 
       </div>
-      {errors.budgetAmount && (
-        <p className="text-red-500 text-sm mt-1">Budget is required and must be greater than 0 and cannot exceed 7 digits.</p>
-      )}
 
       <hr className="my-4 border-gray-200" />
 
       {/* About Brand */}
-      <label className="font-semibold block mb-2">
-        About Brand <span className="text-red-500">*</span>
-      </label>
-      <TextArea
-        size="large"
-        rows={3}
-        showCount
-        maxLength={250}
-        placeholder="About Brand"
-        value={formData.aboutBrand}
-        onChange={(e) => {
-          const value = e.target.value;
+      <div ref={(el) => (fieldRefs.current.budgetAmount = el)} tabIndex={-1}>
+        <label className="font-semibold block mb-2">
+          About Brand <span className="text-red-500">*</span>
+        </label>
+        <TextArea
+          size="large"
+          rows={3}
+          showCount
+          maxLength={250}
+          placeholder="About Brand"
+          value={formData.aboutBrand}
+          onChange={(e) => {
+            const value = e.target.value;
 
-          if (value.length > 250) return;
+            if (value.length > 250) return;
 
-          setFormData(prev => ({ ...prev, aboutBrand: value }));
-          setErrors(prev => ({ ...prev, aboutBrand: "" }));
-        }}
-      />
-      {errors.aboutBrand && (
-        <p className="text-red-500 text-sm mt-1">Please describe your brand</p>
-      )}
+            setFormData(prev => ({ ...prev, aboutBrand: value }));
+            setErrors(prev => ({ ...prev, aboutBrand: "" }));
+          }}
+        />
+        {errors.aboutBrand && (
+          <p className="text-red-500 text-sm mt-1">Please describe your brand</p>
+        )}
+      </div>
+
 
       {/* Navigation Buttons */}
       <div className="flex gap-4 mt-8">

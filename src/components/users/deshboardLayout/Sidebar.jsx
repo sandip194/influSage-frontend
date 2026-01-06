@@ -64,7 +64,7 @@ const Sidebar = forwardRef((props, ref) => {
     const generalItems = [
         { icon: <RiGalleryView2 className="w-5" />, label: "Dashboard", to: "/dashboard", end: true },
         { icon: <RiSearch2Line className="w-5" />, label: "Browse Campaign", to: "/dashboard/browse" },
-        { icon: <RiStackLine className="w-5" />, label: "My Campaign", to: "/dashboard/my-campaigns" },
+        { icon: <RiStackLine className="w-5" />, label: "My Contract", to: "/dashboard/my-contract" },
         { icon: <RiMessage3Line className="w-5" />, label: "Messages", to: "/dashboard/messages" },
     ];
 
