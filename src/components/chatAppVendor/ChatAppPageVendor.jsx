@@ -70,7 +70,7 @@ export default function ChatAppPageVendor() {
   // if (Number(msg.userid) === Number(userId)) return;
 
   dispatch(addMessage(msg));
-  setRefreshKey(prev => prev + 1);
+  // setRefreshKey(prev => prev + 1);
 };
 
     socket.on("receiveMessage", handleReceiveMessage);
@@ -174,21 +174,6 @@ export default function ChatAppPageVendor() {
       }
     } catch (err) {
       console.error("Edit failed", err);
-    }
-  };
-
-  const fetchMessages = async () => {
-    if (!activeChat?.conversationid) return;
-    try {
-      const res = await axios.get(`/chat/messages/${activeChat.conversationid}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.data?.messages) {
-        res.data.messages.forEach((msg) => dispatch(addMessage(msg)));
-        setRefreshKey((prev) => prev + 1);
-      }
-    } catch (err) {
-      console.error("Failed to fetch messages", err);
     }
   };
 

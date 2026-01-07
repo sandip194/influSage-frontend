@@ -122,7 +122,7 @@ export default function ChatHeaderVendor({ chat, onBack, onOnlineStatusChange })
       </div>
 
       <div>
-        <div className="font-semibold">{chat?.name || "Chat"}</div>
+        <div className="font-semibold">{chat?.fullname || "Chat"}</div>
         <div className="text-sm text-gray-400">
           {isOnline ? "Online" : formatLastSeen(lastSeen)}
         </div>

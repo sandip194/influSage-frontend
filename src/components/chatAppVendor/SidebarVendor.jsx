@@ -21,7 +21,7 @@ const SidebarSkeleton = () => (
 export default function SidebarVendor({ onSelectChat }) {
     useSocketRegister();
   const socket = getSocket();
-  const { token } = useSelector((state) => state.auth);
+  const { token, role } = useSelector((state) => state.auth);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -419,7 +419,9 @@ export default function SidebarVendor({ onSelectChat }) {
                           unread
                             ? "New message"
                             : inf.ishtml
-                              ? "Campaign invitation received"
+                              ? role === 2
+                                ? "Campaign invitation sent"
+                                : "Campaign invitation received"
                               : inf.lastmessage || "No messages yet"
                         }
                       </div>

@@ -42,6 +42,8 @@ const EditLayout = () => {
   const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
   const { campaignId } = useParams();
 
+  const [showFullAboutBrand, setShowFullAboutBrand] = useState(false);
+
   const formatDateDDMMYYYY = (dateStr) => {
     if (!dateStr) return "N/A";
 
@@ -77,6 +79,18 @@ const EditLayout = () => {
         value: campaignDetails.requirements?.isincludevendorprofilelink
           ? "Yes"
           : "No",
+      },
+      {
+        label: "Start Date: ",
+        value: `${formatDateDDMMYYYY(
+          campaignDetails?.requirements?.campaignstartdate
+        )}`,
+      },
+      {
+        label: "End Date: ",
+        value: `${formatDateDDMMYYYY(
+          campaignDetails?.requirements?.campaignenddate
+        )}`,
       },
       // {
       //   label: "Campaign Start Date: ",
@@ -826,75 +840,75 @@ const EditLayout = () => {
 
         {/* Right Side */}
         <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
-          <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
-            <div className="bg-white rounded-2xl p-4 w-full text-sm">
+          <div className="bg-white rounded-2xl p-4 w-full text-sm">
+            <h3 className="font-semibold text-sm text-gray-700 mb-4">
+              About Vendor
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <p className="text-gray-900 font-semibold text-base whitespace-pre-line">
+                  {campaignDetails.vendordetails?.businessname || "N/A"}
+                </p>
+              </div>
 
-              {/* Brand Description */}
-              <div className="space-y-4">
+              <hr className="border-gray-200" />
+
+              {/* About Brand */}
+              <div>
+                <p
+                  className={`text-gray-800 whitespace-pre-line ${
+                    showFullAboutBrand ? "" : "line-clamp-2"
+                  }`}
+                >
+                  {campaignDetails.vendordetails?.aboutbrand || "N/A"}
+                </p>
+
+                {campaignDetails.vendordetails?.aboutbrand &&
+                  campaignDetails.vendordetails.aboutbrand.length > 100 && (
+                    <button
+                      onClick={() => setShowFullAboutBrand((prev) => !prev)}
+                      className="text-blue-600 text-xs font-semibold mt-1 hover:underline cursor-pointer"
+                    >
+                      {showFullAboutBrand ? "View Less" : "View More"}
+                    </button>
+                  )}
+              </div>
+
+              <hr className="border-gray-200" />
+
+              {/* Location + Industry */}
+              <div className="flex items-center justify-between gap-6 text-sm">
+                <div className="flex items-center gap-1 text-gray-700">
+                  <RiMapPinLine className="w-4 h-4" />
+                  <span className="truncate">
+                    {campaignDetails.vendordetails?.location || "N/A"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1 text-gray-700">
+                  <RiAppsLine className="w-4 h-4" />
+                  <span className="truncate">
+                    {campaignDetails.vendordetails?.parentcategory || "N/A"}
+                  </span>
+                </div>
+              </div>
+
+              <hr className="border-gray-200" />
+
+              {/* Company Size + Joining Date */}
+              <div className="flex items-center justify-between gap-6 text-sm text-gray-700">
+                <div>
+                  <span className="font-medium">Company Size:</span>{" "}
+                  {campaignDetails.vendordetails?.companysizename || "N/A"}
+                </div>
 
                 <div>
-                  <p
-                    className={`text-gray-800 whitespace-pre-line ${showFullBrandDesc ? "" : "line-clamp-2"
-                      }`}
-                  >
-                    {campaignDetails.branddetails?.aboutbrand || "N/A"}
-                  </p>
-
-                  {campaignDetails.branddetails?.aboutbrand &&
-                    campaignDetails.branddetails.aboutbrand.length > 100 && (
-                      <button
-                        onClick={() => setShowFullBrandDesc((prev) => !prev)}
-                        className="text-blue-600 cursor-pointer text-xs font-semibold mt-1 hover:underline"
-                      >
-                        {showFullBrandDesc ? "View Less" : "View More"}
-                      </button>
-                    )}
-                </div>
-
-                <hr className="border-gray-200" />
-
-                {/* Location + Industry (Same Row) */}
-                <div className="flex items-center justify-between gap-6 text-sm">
-
-                  {/* Location */}
-                  <div className="flex items-center gap-1 text-gray-700">
-                    <RiMapPinLine className="w-4 h-4 text-gray-700" />
-                    <span className="truncate">
-                      {campaignDetails.branddetails?.location || "N/A"}
-                    </span>
-                  </div>
-
-                  {/* Category */}
-                  <div className="flex items-center gap-1 text-gray-700">
-                    <RiAppsLine className="w-4 h-4 text-gray-700" />
-                    <span className="truncate">
-                      {campaignDetails.branddetails?.Industry || "N/A"}
-                    </span>
-                  </div>
-
-                </div>
-                <hr className="border-gray-200" />
-                {/* Campaign Dates */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-[#0D132D]">
-                    Campaign Dates
-                  </h3>
-
-                  <div className="flex justify-between text-sm">
-                    <div>
-                      <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
-                      <p className="flex items-center gap-1 text-gray-700">
-                        {formatDateDDMMYYYY(campaignDetails?.requirements?.campaignstartdate)}
-                      </p>
-                    </div>
-
-                    <div className="text-right">
-                      <p className="text-sm font-semibold mb-1 my-2">End Date</p>
-                      <p className="flex items-center gap-1 text-gray-700">
-                        {formatDateDDMMYYYY(campaignDetails?.requirements?.applicationenddate)}
-                      </p>
-                    </div>
-                  </div>
+                  <span className="font-medium">Joined:</span>{" "}
+                  {campaignDetails.vendordetails?.joiningdate
+                    ? new Date(
+                        campaignDetails.vendordetails.joiningdate
+                      ).toLocaleDateString("en-GB")
+                    : "N/A"}
                 </div>
               </div>
             </div>

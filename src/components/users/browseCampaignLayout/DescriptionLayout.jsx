@@ -8,15 +8,16 @@ import {
   RiAppsLine,
   RiMapPinLine,
   RiBriefcase4Line,
+  RiArrowDownSLine,
+  RiLoader4Line
 } from "@remixicon/react";
 import axios from "axios";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
-import { Skeleton, Spin  } from "antd";
+import { Skeleton, Spin } from "antd";
 import ApplyNowModal from "./ApplyNowModal";
-import {RiStarFill } from "react-icons/ri";
-import { useRef } from "react";
+import { RiStarFill } from "react-icons/ri";
 
 const DescriptionLayout = () => {
   const [showFullBrandDesc, setShowFullBrandDesc] = useState(false);
@@ -39,7 +40,12 @@ const DescriptionLayout = () => {
   const limit = 2;
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const loadMoreRef = useRef(null);
+
+  const rawRating = Number(item.rating);
+  const fullStars = Math.floor(rawRating);
+  const hasHalfStar = rawRating - fullStars >= 0.5;
+  const displayRating = rawRating.toFixed(1);
+
 
   const [previewFile, setPreviewFile] = useState(null);
   const formatDateDDMMYYYY = (dateStr) => {
@@ -123,66 +129,53 @@ const DescriptionLayout = () => {
   }, [campaignDetails]);
 
   const fetchVendorFeedbacks = async (pageToLoad = 0) => {
-  if (loadingFeedbacks || !hasMore) return;
+    if (loadingFeedbacks || !hasMore) return;
 
-  try {
-    setLoadingFeedbacks(true);
+    try {
+      setLoadingFeedbacks(true);
 
-    const res = await axios.get("/user/vendor-feedback-list", {
-      headers: { Authorization: `Bearer ${token}` },
-      params: {
-        p_campaignid: campaignId,
-        p_limit: limit,
-        p_offset: pageToLoad * limit + 1,
-      },
-    });
+      const res = await axios.get("/user/vendor-feedback-list", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          p_campaignid: campaignId,
+          p_limit: limit,
+          p_offset: pageToLoad * limit + 1,
+        },
+      });
 
-    const records = res?.data?.data?.records || [];
-    const total = res?.data?.data?.totalcount || 0;
+      const records = res?.data?.data?.records || [];
+      const total = res?.data?.data?.totalcount || 0;
 
-    setFeedbacks((prev) =>
-      pageToLoad === 0 ? records : [...prev, ...records]
-    );
+      setFeedbacks((prev) =>
+        pageToLoad === 0 ? records : [...prev, ...records]
+      );
 
-    const loadedCount = (pageToLoad + 1) * limit;
-    setHasMore(loadedCount < total);
-  } catch (e) {
-    console.error("Feedback fetch error", e);
-  } finally {
-    setLoadingFeedbacks(false);
-  }
-};
-
-useEffect(() => {
-  if (!campaignId) return;
-
-  setPage(0);
-  setHasMore(true);
-  fetchVendorFeedbacks(0);
-}, [campaignId]);
-
-useEffect(() => {
-  if (!loadMoreRef.current || !hasMore) return;
-
-  const observer = new IntersectionObserver(
-    ([entry]) => {
-      if (entry.isIntersecting && !loadingFeedbacks) {
-        const nextPage = page + 1;
-        setPage(nextPage);
-        fetchVendorFeedbacks(nextPage);
-      }
-    },
-    {
-      root: null,
-      rootMargin: "120px",
-      threshold: 0,
+      const loadedCount = (pageToLoad + 1) * limit;
+      setHasMore(loadedCount < total);
+    } catch (e) {
+      console.error("Feedback fetch error", e);
+    } finally {
+      setLoadingFeedbacks(false);
     }
-  );
+  };
 
-  observer.observe(loadMoreRef.current);
+  const handleViewMore = () => {
+    if (loadingFeedbacks || !hasMore) return;
+    setPage((prev) => prev + 1);
+  };
 
-  return () => observer.disconnect();
-}, [page, hasMore, loadingFeedbacks]);
+  useEffect(() => {
+    if (page === 0) return;
+    fetchVendorFeedbacks(page);
+  }, [page]);
+
+  useEffect(() => {
+    if (!campaignId) return;
+
+    setPage(0);
+    setHasMore(true);
+    fetchVendorFeedbacks(0);
+  }, [campaignId]);
 
   if (loading) {
     return (
@@ -724,7 +717,7 @@ useEffect(() => {
         {/* Right Side */}
         <aside className="w-full md:w-[300px] space-y-6 flex-shrink-0">
           <div className="bg-white rounded-2xl p-4 w-full text-sm">
-            <h3 className="font-semibold text-lg text-gray-900 mb-4">
+            <h3 className="font-semibold text-sm text-gray-700 mb-4">
               About Vendor
             </h3>
             <div className="space-y-4">
@@ -854,86 +847,135 @@ useEffect(() => {
             </div>
           </div>
           <div className="bg-white p-6 rounded-2xl">
-  <h3 className="font-semibold text-lg text-gray-900 mb-4">
-    Past History
-  </h3>
+            <h3 className="font-semibold text-lg text-gray-900 mb-4">
+              Past History
+            </h3>
 
-  {/* FIRST LOAD → Skeleton */}
-  {loadingFeedbacks && page === 0 ? (
-    <div className="space-y-4">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl"
-        >
-          <Skeleton.Avatar active size="small" shape="square" />
+            {loadingFeedbacks && page === 0 ? (
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl"
+                  >
+                    <Skeleton.Avatar active size="small" shape="square" />
 
-          <div className="flex-1">
-            <Skeleton.Input active size="small" style={{ width: "70%" }} />
-            <Skeleton.Input
-              active
-              size="small"
-              style={{ width: "40%", marginTop: 6 }}
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  ) : feedbacks.length === 0 ? (
-    <p className="text-sm text-gray-400">No feedback found.</p>
-  ) : (
-    <>
-      {/* Feedback List */}
-      <div className="space-y-4">
-        {feedbacks.map((item) => (
-          <div
-            key={item.campaignid}
-            className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl"
-          >
-            <img
-              src={item.campaignpohoto}
-              alt={item.campaignname}
-              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-              className="w-12 h-12 rounded-full object-cover"
-            />
+                    <div className="flex-1">
+                      <Skeleton.Input
+                        active
+                        size="small"
+                        style={{ width: "70%" }}
+                      />
+                      <Skeleton.Input
+                        active
+                        size="small"
+                        style={{ width: "40%", marginTop: 6 }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : feedbacks.length === 0 ? (
+              <p className="text-sm text-gray-400">No feedback found.</p>
+            ) : (
+              <>
+                {/* Feedback List */}
+                <div className="space-y-4">
+                  {feedbacks.map((item) => (
+                    <div
+                      key={item.campaignid}
+                      className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl"
+                    >
+                      <img
+                        src={item.campaignpohoto}
+                        alt={item.campaignname}
+                        onError={(e) =>
+                          (e.target.src = "/Brocken-Defualt-Img.jpg")
+                        }
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
 
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-900 truncate">
-                {item.campaignname}
-              </p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 truncate">
+                          {item.campaignname}
+                        </p>
 
-              {Number(item.rating) > 0 && (
-                <div className="flex items-center mt-2">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <RiStarFill
-                      key={i}
-                      size={16}
-                      style={{
-                        fill: i < item.rating ? "#facc15" : "white",
-                        stroke: "black",
-                        strokeWidth: 1,
-                      }}
-                    />
+                        {rawRating > 0 && (
+                          <div className="flex items-center mt-2">
+                            {Array.from({ length: 5 }).map((_, i) => {
+                              if (i < fullStars) {
+                                return (
+                                  <RiStarFill
+                                    key={i}
+                                    size={16}
+                                    style={{
+                                      fill: "#facc15",
+                                      stroke: "black",
+                                      strokeWidth: 1,
+                                    }}
+                                  />
+                                );
+                              }
+
+                              if (i === fullStars && hasHalfStar) {
+                                return (
+                                  <RiStarHalfFill
+                                    key={i}
+                                    size={16}
+                                    style={{
+                                      fill: "#facc15",
+                                      stroke: "black",
+                                      strokeWidth: 1,
+                                    }}
+                                  />
+                                );
+                              }
+
+                              return (
+                                <RiStarFill
+                                  key={i}
+                                  size={16}
+                                  style={{
+                                    fill: "white",
+                                    stroke: "black",
+                                    strokeWidth: 1,
+                                  }}
+                                />
+                              );
+                            })}
+
+                            <span className="ml-2 text-sm font-medium text-gray-700">
+                              {displayRating}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   ))}
-                  <span className="ml-2 text-sm font-medium text-gray-700">
-                    {Number(item.rating).toFixed(1)}
-                  </span>
                 </div>
-              )}
-            </div>
+                {hasMore && (
+                  <div className="flex justify-center mt-4">
+                    <button
+                      onClick={handleViewMore}
+                      disabled={loadingFeedbacks}
+                      className="flex items-center gap-1 cursor-pointer text-sm font-medium text-black hover:underline disabled:opacity-50"
+                    >
+                      {loadingFeedbacks ? (
+                        <>
+                          <RiLoader4Line className="animate-spin" />
+                        </>
+                      ) : (
+                        <>
+                          View More
+                          <RiArrowDownSLine size={18} />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        ))}
-      </div>
-     <div ref={loadMoreRef} className="h-2" />
-    {/* Loader */}
-    {loadingFeedbacks && (
-      <div className="flex justify-center mt-3">
-        <Spin size="small" />
-      </div>
-    )}
-    </>
-  )}
-</div>
         </aside>
       </div>
 

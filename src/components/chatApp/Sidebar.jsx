@@ -22,7 +22,7 @@ const SidebarSkeleton = () => (
 );
 export default function Sidebar({ onSelectChat }) {
   const socket = getSocket();
-  const { token } = useSelector((state) => state.auth);
+  const { token, role } = useSelector((state) => state.auth);
   const [campaigns, setCampaigns] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
@@ -218,13 +218,15 @@ const hasUnreadMessage = (vendor) => {
                       className={`text-sm truncate max-w-[180px] ${unread ? "text-gray-900 font-semibold" : "text-gray-500"
                         }`}
                     >
-                      {
-                        unread
-                          ? "New message"
-                          : vendor.ishtml
-                            ? "Campaign invitation received"
-                            : vendor.lastmessage || "No messages yet"
-                      }
+                     {
+                          unread
+                            ? "New message"
+                            : vendor.ishtml
+                              ? role === 2
+                                ? "Campaign invitation sent"
+                                : "Campaign invitation received"
+                              : vendor.lastmessage || "No messages yet"
+                        }
                     </div>
                   </div>
                 </div>
