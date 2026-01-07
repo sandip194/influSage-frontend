@@ -13,11 +13,14 @@ import axios from "axios";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
-import { Skeleton } from "antd";
+import { Skeleton, Spin  } from "antd";
 import ApplyNowModal from "./ApplyNowModal";
+import {RiStarFill } from "react-icons/ri";
+import { useRef } from "react";
 
 const DescriptionLayout = () => {
   const [showFullBrandDesc, setShowFullBrandDesc] = useState(false);
+  const [showFullAboutBrand, setShowFullAboutBrand] = useState(false);
   const [campaignDetails, setCampaignDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -30,6 +33,13 @@ const DescriptionLayout = () => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { campaignId } = useParams();
   const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
+
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
+  const limit = 2;
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const loadMoreRef = useRef(null);
 
   const [previewFile, setPreviewFile] = useState(null);
   const formatDateDDMMYYYY = (dateStr) => {
@@ -97,8 +107,82 @@ const DescriptionLayout = () => {
           ? "Yes"
           : "No",
       },
+      {
+        label: "Start Date: ",
+        value: `${formatDateDDMMYYYY(
+          campaignDetails?.requirements?.campaignstartdate
+        )}`,
+      },
+      {
+        label: "End Date: ",
+        value: `${formatDateDDMMYYYY(
+          campaignDetails?.requirements?.campaignenddate
+        )}`,
+      },
     ];
   }, [campaignDetails]);
+
+  const fetchVendorFeedbacks = async (pageToLoad = 0) => {
+  if (loadingFeedbacks || !hasMore) return;
+
+  try {
+    setLoadingFeedbacks(true);
+
+    const res = await axios.get("/user/vendor-feedback-list", {
+      headers: { Authorization: `Bearer ${token}` },
+      params: {
+        p_campaignid: campaignId,
+        p_limit: limit,
+        p_offset: pageToLoad * limit + 1,
+      },
+    });
+
+    const records = res?.data?.data?.records || [];
+    const total = res?.data?.data?.totalcount || 0;
+
+    setFeedbacks((prev) =>
+      pageToLoad === 0 ? records : [...prev, ...records]
+    );
+
+    const loadedCount = (pageToLoad + 1) * limit;
+    setHasMore(loadedCount < total);
+  } catch (e) {
+    console.error("Feedback fetch error", e);
+  } finally {
+    setLoadingFeedbacks(false);
+  }
+};
+
+useEffect(() => {
+  if (!campaignId) return;
+
+  setPage(0);
+  setHasMore(true);
+  fetchVendorFeedbacks(0);
+}, [campaignId]);
+
+useEffect(() => {
+  if (!loadMoreRef.current || !hasMore) return;
+
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting && !loadingFeedbacks) {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchVendorFeedbacks(nextPage);
+      }
+    },
+    {
+      root: null,
+      rootMargin: "120px",
+      threshold: 0,
+    }
+  );
+
+  observer.observe(loadMoreRef.current);
+
+  return () => observer.disconnect();
+}, [page, hasMore, loadingFeedbacks]);
 
   if (loading) {
     return (
@@ -284,11 +368,11 @@ const DescriptionLayout = () => {
                       Application Window:
                     </span>
 
-                   <span className="text-gray-800 whitespace-nowrap">
+                    <span className="text-gray-800 whitespace-nowrap">
                       {formatDateDDMMYYYY(
                         campaignDetails?.requirements?.applicationstartdate
-                      )}
-                      {" "}<b>-</b>{" "}
+                      )}{" "}
+                      <b>-</b>{" "}
                       {formatDateDDMMYYYY(
                         campaignDetails?.requirements?.applicationenddate
                       )}
@@ -394,7 +478,9 @@ const DescriptionLayout = () => {
                       {p.iconpath && (
                         <img
                           src={p.iconpath}
-                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                          onError={(e) =>
+                            (e.target.src = "/Brocken-Defualt-Img.jpg")
+                          }
                           className="w-5 h-5 object-contain"
                         />
                       )}
@@ -517,7 +603,9 @@ const DescriptionLayout = () => {
                               <img
                                 src={fileUrl}
                                 alt=""
-                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                                onError={(e) =>
+                                  (e.target.src = "/Brocken-Defualt-Img.jpg")
+                                }
                                 className="w-full h-full object-cover"
                               />
                             </div>
@@ -636,72 +724,77 @@ const DescriptionLayout = () => {
         {/* Right Side */}
         <aside className="w-full md:w-[300px] space-y-6 flex-shrink-0">
           <div className="bg-white rounded-2xl p-4 w-full text-sm">
-            {/* Brand Description */}
+            <h3 className="font-semibold text-lg text-gray-900 mb-4">
+              About Vendor
+            </h3>
             <div className="space-y-4">
+              <div>
+                <p className="text-gray-900 font-semibold text-base whitespace-pre-line">
+                  {campaignDetails.vendordetails?.businessname || "N/A"}
+                </p>
+              </div>
+
+              <hr className="border-gray-200" />
+
+              {/* About Brand */}
               <div>
                 <p
                   className={`text-gray-800 whitespace-pre-line ${
-                    showFullBrandDesc ? "" : "line-clamp-2"
+                    showFullAboutBrand ? "" : "line-clamp-2"
                   }`}
                 >
-                  {campaignDetails.branddetails?.aboutbrand || "N/A"}
+                  {campaignDetails.vendordetails?.aboutbrand || "N/A"}
                 </p>
 
-                    {campaignDetails.branddetails?.aboutbrand &&
-                      campaignDetails.branddetails.aboutbrand.length > 100 && (
-                      <button
-                        onClick={() => setShowFullBrandDesc((prev) => !prev)}
-                        className="text-blue-600 text-xs font-semibold mt-1 hover:underline cursor-pointer"
-                      >
-                        {showFullBrandDesc ? "View Less" : "View More"}
-                      </button>
-                      )}
-                    </div>
+                {campaignDetails.vendordetails?.aboutbrand &&
+                  campaignDetails.vendordetails.aboutbrand.length > 100 && (
+                    <button
+                      onClick={() => setShowFullAboutBrand((prev) => !prev)}
+                      className="text-blue-600 text-xs font-semibold mt-1 hover:underline cursor-pointer"
+                    >
+                      {showFullAboutBrand ? "View Less" : "View More"}
+                    </button>
+                  )}
+              </div>
 
               <hr className="border-gray-200" />
 
-              {/* Location + Industry (Same Row) */}
+              {/* Location + Industry */}
               <div className="flex items-center justify-between gap-6 text-sm">
-                {/* Location */}
                 <div className="flex items-center gap-1 text-gray-700">
-                  <RiMapPinLine className="w-4 h-4 text-gray-700" />
+                  <RiMapPinLine className="w-4 h-4" />
                   <span className="truncate">
-                    {campaignDetails.branddetails?.location || "N/A"}
+                    {campaignDetails.vendordetails?.location || "N/A"}
                   </span>
                 </div>
 
-                {/* Category */}
                 <div className="flex items-center gap-1 text-gray-700">
-                  <RiAppsLine className="w-4 h-4 text-gray-700" />
+                  <RiAppsLine className="w-4 h-4" />
                   <span className="truncate">
-                    {campaignDetails.branddetails?.Industry || "N/A"}
+                    {campaignDetails.vendordetails?.parentcategory || "N/A"}
                   </span>
                 </div>
               </div>
+
               <hr className="border-gray-200" />
-              {/* Campaign Dates */}
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-[#0D132D]">
-                  Campaign Dates
-                </h3>
 
-                <div className="flex justify-between text-sm">
-                  <div>
-                    <p className="text-sm font-semibold mb-1 my-2">Start Date</p>
-                    <p className="text-gray-700">
-                      {formatDateDDMMYYYY(campaignDetails?.requirements?.campaignstartdate)}
-                    </p>
-                  </div>
+              {/* Company Size + Joining Date */}
+              <div className="flex items-center justify-between gap-6 text-sm text-gray-700">
+                <div>
+                  <span className="font-medium">Company Size:</span>{" "}
+                  {campaignDetails.vendordetails?.companysizename || "N/A"}
+                </div>
 
-                  <div className="text-right">
-                    <p className="text-sm font-semibold mb-1 my-2">End Date</p>
-                    <p className="text-gray-700">
-                      {formatDateDDMMYYYY(campaignDetails?.requirements?.campaignenddate) || "N/A"}
-                    </p>
-                  </div>
+                <div>
+                  <span className="font-medium">Joined:</span>{" "}
+                  {campaignDetails.vendordetails?.joiningdate
+                    ? new Date(
+                        campaignDetails.vendordetails.joiningdate
+                      ).toLocaleDateString("en-GB")
+                    : "N/A"}
                 </div>
               </div>
-            </div>  
+            </div>
           </div>
           {/* Provider Content Types with optional captions */}
           <div className="bg-white p-6 rounded-2xl">
@@ -710,51 +803,137 @@ const DescriptionLayout = () => {
             </h3>
 
             <div className="space-y-4">
-                {campaignDetails?.providercontenttype?.length > 0 ? (
-                  campaignDetails.providercontenttype.map((platform) => (
-                    <div
-                      key={platform.providercontenttypeid}
-                      className="border-b border-gray-100 pb-3 last:border-none"
-                    >
-                      {/* header row */}
-                      <div className="flex items-center justify-between">
+              {campaignDetails?.providercontenttype?.length > 0 ? (
+                campaignDetails.providercontenttype.map((platform) => (
+                  <div
+                    key={platform.providercontenttypeid}
+                    className="border-b border-gray-100 pb-3 last:border-none"
+                  >
+                    {/* header row */}
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         {platform.iconpath && (
-                        <img
-                          src={platform.iconpath}
-                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                          alt={platform.providername}
-                          className="w-5 h-5 object-contain"
-                        />
+                          <img
+                            src={platform.iconpath}
+                            onError={(e) =>
+                              (e.target.src = "/Brocken-Defualt-Img.jpg")
+                            }
+                            alt={platform.providername}
+                            className="w-5 h-5 object-contain"
+                          />
                         )}
                         <span className="text-gray-900 font-medium">
-                        {platform.providername}
+                          {platform.providername}
                         </span>
                       </div>
 
-                        {/* Content Types at end */}
-                        <span className="text-gray-500 text-sm text-right">
-                          {platform.contenttypes && platform.contenttypes.length > 0
-                            ? platform.contenttypes
-                                .map((ct) => ct.contenttypename)
-                                .join(", ")
-                            : "No types"}
-                        </span>
-                      </div>
-
-                      {/* Caption */}
-                      {platform.caption && (
-                        <p className="text-gray-600 italic mt-2 border-l-2 border-gray-200 pl-3">
-                          {platform.caption}
-                        </p>
-                      )}
+                      {/* Content Types at end */}
+                      <span className="text-gray-500 text-sm text-right">
+                        {platform.contenttypes &&
+                        platform.contenttypes.length > 0
+                          ? platform.contenttypes
+                              .map((ct) => ct.contenttypename)
+                              .join(", ")
+                          : "No types"}
+                      </span>
                     </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-500">No platform content types available.</p>
-                  )}
+
+                    {/* Caption */}
+                    {platform.caption && (
+                      <p className="text-gray-600 italic mt-2 border-l-2 border-gray-200 pl-3">
+                        {platform.caption}
+                      </p>
+                    )}
                   </div>
+                ))
+              ) : (
+                <p className="text-gray-500">
+                  No platform content types available.
+                </p>
+              )}
+            </div>
           </div>
+          <div className="bg-white p-6 rounded-2xl">
+  <h3 className="font-semibold text-lg text-gray-900 mb-4">
+    Past History
+  </h3>
+
+  {/* FIRST LOAD → Skeleton */}
+  {loadingFeedbacks && page === 0 ? (
+    <div className="space-y-4">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl"
+        >
+          <Skeleton.Avatar active size="small" shape="square" />
+
+          <div className="flex-1">
+            <Skeleton.Input active size="small" style={{ width: "70%" }} />
+            <Skeleton.Input
+              active
+              size="small"
+              style={{ width: "40%", marginTop: 6 }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : feedbacks.length === 0 ? (
+    <p className="text-sm text-gray-400">No feedback found.</p>
+  ) : (
+    <>
+      {/* Feedback List */}
+      <div className="space-y-4">
+        {feedbacks.map((item) => (
+          <div
+            key={item.campaignid}
+            className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl"
+          >
+            <img
+              src={item.campaignpohoto}
+              alt={item.campaignname}
+              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+              className="w-12 h-12 rounded-full object-cover"
+            />
+
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-gray-900 truncate">
+                {item.campaignname}
+              </p>
+
+              {Number(item.rating) > 0 && (
+                <div className="flex items-center mt-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <RiStarFill
+                      key={i}
+                      size={16}
+                      style={{
+                        fill: i < item.rating ? "#facc15" : "white",
+                        stroke: "black",
+                        strokeWidth: 1,
+                      }}
+                    />
+                  ))}
+                  <span className="ml-2 text-sm font-medium text-gray-700">
+                    {Number(item.rating).toFixed(1)}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+     <div ref={loadMoreRef} className="h-2" />
+    {/* Loader */}
+    {loadingFeedbacks && (
+      <div className="flex justify-center mt-3">
+        <Spin size="small" />
+      </div>
+    )}
+    </>
+  )}
+</div>
         </aside>
       </div>
 

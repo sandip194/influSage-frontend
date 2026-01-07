@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Tooltip, Skeleton } from "antd";
 import InviteModal from "../../users/browseInfluencers/InviteModal";
 import { toast } from "react-toastify";
-import { RiUserAddLine, RiStarFill, RiStarHalfFill, RiStarLine } from "react-icons/ri";
+import { RiUserAddLine, RiStarFill, RiStarHalfFill, RiStarLine, RiArrowDownSLine, RiArrowUpSLine } from "react-icons/ri";
 
 //  const formatDOB = (dob) => {
 //         const date = new Date(dob);
@@ -38,6 +38,13 @@ const InfluencerProfile = () => {
 
     const fullStars = Math.trunc(rawRating);
     const hasHalfStar = rawRating % 1 !== 0;
+
+    const [feedbacks, setFeedbacks] = useState([]);
+    const [page, setPage] = useState(0);
+    const limit = 3
+    const [hasMore, setHasMore] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [totalCount, setTotalCount] = useState(0);
 
     const formatTime = (dateString) => {
         if (!dateString) return "";
@@ -148,6 +155,55 @@ const InfluencerProfile = () => {
             console.error(err)
             toast.error("Something went wrong");
         }
+    };
+
+    const fetchInfluencerFeedbacks = async (pageToLoad = 0, append = false) => {
+        try {
+            setLoadingMore(true);
+
+            const res = await axios.get("/vendor/influencer/feedback-list", {
+            headers: { Authorization: `Bearer ${token}` },
+            params: {
+                p_influencerid: influDetails?.id,
+                p_limit: limit,
+                p_offset: pageToLoad * limit + 1,
+            },
+            });
+
+            const records = res.data?.data?.records || [];
+            const total = res.data?.data?.totalcount || 0;
+
+            setTotalCount(total);
+
+            setFeedbacks((prev) =>
+            append ? [...prev, ...records] : records
+            );
+
+            setHasMore(total > limit && (pageToLoad + 1) * limit < total);
+
+        } catch (error) {
+            console.error("Feedback fetch error:", error);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
+    useEffect(() => {
+        if (influDetails?.id) {
+            setPage(0);
+            fetchInfluencerFeedbacks(0, false);
+        }
+    }, [influDetails?.id]);
+
+    const handleViewMore = () => {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchInfluencerFeedbacks(nextPage, true);
+        };
+
+        const handleViewLess = () => {
+        setPage(0);
+        fetchInfluencerFeedbacks(0, false);
     };
     return (
         <div className="">
@@ -336,7 +392,7 @@ const InfluencerProfile = () => {
                                             {displayRating}
                                             </span>
                                         </div>
-                                        )}
+                                    )}
                                 </div>
 
                                 {/* Total Campaign (desktop alignment) */}
@@ -601,86 +657,91 @@ const InfluencerProfile = () => {
                     )}
 
                     {/* Feedbacks */}
-                    {influDetails?.feedbacks?.length > 0 && (
-                        <div className="bg-white rounded-2xl p-6 mt-4">
+                    {feedbacks?.length > 0 && (
+                <div className="bg-white rounded-2xl p-6 mt-4">
 
-                            {/* Header */}
-                            <div className="flex items-center justify-between mb-5">
-                                <h3 className="text-lg font-semibold text-gray-900">
-                                    Feedbacks
-                                </h3>
-                                <button className="text-sm hover:underline">
-                                    View All
-                                </button>
+                    {/* Header */}
+                    <h3 className="text-lg font-semibold text-gray-900 mb-5">
+                    Feedbacks
+                    </h3>
+
+                    {/* Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {feedbacks.map((fb) => (
+                        <div
+                        key={fb.feedbackid}
+                        className="bg-[#335CFF0D] border border-[#335CFF26] rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col h-full"
+                        >
+                        {/* Header */}
+                        <div className="flex items-center gap-3">
+                            <img
+                            src={fb.campaignpohoto}
+                            alt={fb.campaignname}
+                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                            className="w-12 h-12 rounded-full object-cover"
+                            />
+
+                            <div className="min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                                {fb.campaignname}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                                {formatTime(fb.createddate)}
+                            </p>
                             </div>
-
-                            {/* Grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                                {influDetails.feedbacks.map((fb) => (
-                                    <div
-                                    key={fb.feedbackid}
-                                    className="
-                                        bg-[#335CFF0D]
-                                        border border-[#335CFF26]
-                                        rounded-2xl
-                                        p-5
-                                        shadow-sm
-                                        hover:shadow-md
-                                        transition
-                                        flex flex-col
-                                        h-full
-                                    "
-                                    >
-                                    {/* ===== Header ===== */}
-                                    <div className="flex items-center gap-3">
-                                        <img
-                                        src={fb.campaignpohoto}
-                                        alt={fb.campaignname}
-                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                                        className="w-12 h-12 rounded-full object-cover"
-                                        />
-
-                                        <div className="min-w-0">
-                                        <p className="text-sm font-semibold text-gray-900 truncate">
-                                            {fb.campaignname}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            {formatTime(fb.createddate)}
-                                        </p>
-                                        </div>
-                                    </div>
-
-                                    {/* ===== Stars ===== */}
-                                    <div className="flex items-center gap-1 mt-3">
-                                        {Number(fb?.rating) > 0 && (
-                                            <div className="flex items-center gap-1 mt-3">
-                                                {[1, 2, 3, 4, 5].map((i) => (
-                                                <RiStarFill
-                                                    key={i}
-                                                    size={20}
-                                                    className={i <= fb.rating ? "text-yellow-400" : "text-white"}
-                                                    style={{
-                                                    stroke: "black",
-                                                    strokeWidth: 0.6,
-                                                    fill: i <= fb.rating ? "#facc15" : "white",
-                                                    }}
-                                                />
-                                                ))}
-                                            </div>
-                                            )}
-                                    </div>
-
-                                    {/* ===== Feedback Text ===== */}
-                                    <div className="flex gap-2 text-sm text-gray-700">
-                                        <p className="text-justify line-clamp-2 mt-3">
-                                            {influDetails?.text || "No feedback provided."}
-                                        </p>
-                                    </div>
-                                    </div>
-                                ))}
-                                </div>
                         </div>
+
+                        {/* Stars */}
+                        {Number(fb.rating) > 0 && (
+                            <div className="flex items-center gap-1 mt-3">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                                <RiStarFill
+                                key={i}
+                                size={20}
+                                style={{
+                                    stroke: "black",
+                                    strokeWidth: 0.6,
+                                    fill: i <= fb.rating ? "#facc15" : "white",
+                                }}
+                                />
+                            ))}
+                            </div>
+                        )}
+
+                        {/* Text */}
+                        <p className="text-sm text-gray-700 mt-3 line-clamp-2">
+                            {fb.text || "No feedback provided."}
+                        </p>
+                        </div>
+                    ))}
+                    </div>
+
+                    {/* Pagination Buttons */}
+                    <div className="flex justify-center gap-4 mt-6">
+                    {totalCount > limit && hasMore && (
+                        <button
+                        onClick={handleViewMore}
+                        disabled={loadingMore}
+                        className="flex items-center cursor-pointer gap-1 text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline"
+                        >
+                        View More
+                        <RiArrowDownSLine />
+                        </button>
                     )}
+
+                    {page > 0 && (
+                        <button
+                        onClick={handleViewLess}
+                        className="flex items-center cursor-pointer gap-1 text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline"
+                        >
+                        View Less
+                        <RiArrowUpSLine />
+                        </button>
+                    )}
+                    </div>
+
+                </div>
+                )}
                 </>
             )}
 

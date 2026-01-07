@@ -373,7 +373,7 @@ const Details = () => {
                 },
               }}
             >
-              <Tabs type="card" defaultActiveKey="overview">
+              <Tabs type="card" defaultActiveKey="contract">
                 <Tabs.TabPane tab="Overview" key="overview">
                   {campaign && (
                     <VendorCampaignOverview campaignData={campaign} isEditable={false} />
