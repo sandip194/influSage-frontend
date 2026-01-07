@@ -984,6 +984,7 @@ const DescriptionLayout = () => {
         onClose={() => setEditModalOpen(false)}
         applicationId={selectedApplicationId}
         campaignId={selectedCampaignId}
+        onSuccess ={() => setEditModalOpen(false)}
       />
     </div>
   );

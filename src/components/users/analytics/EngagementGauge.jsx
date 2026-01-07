@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Skeleton, Select } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { FiTrendingUp } from "react-icons/fi";
 
 const { Option } = Select;
 
@@ -86,7 +85,7 @@ const EngagementCard = ({ campaignId }) => {
   }, [score, loading]);
 
   return (
-    <div className="relative w-full rounded-2xl overflow-hidden bg-white p-4">
+    <div className="relative w-full rounded-2xl min-h-[220px] overflow-hidden bg-white p-4 flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
         <h2 className="text-xl font-bold text-gray-900">
           {campaignId ? "Campaign Engagement" : "Engagement Score"}
@@ -108,22 +107,26 @@ const EngagementCard = ({ campaignId }) => {
 
       </div>
 
-
-      {loading ? (
-        <Skeleton active paragraph={{ rows: 2 }} />
-      ) : (
-        <div className="flex flex-col items-center justify-center py-1">
-          <div className="relative w-24 h-24 flex items-center justify-center rounded-full bg-green-100">
-
-            <p className="text-2xl text-green-900 font-bold z-10">{formatNumber(animatedScore)}</p>
+        {loading ? (
+          <Skeleton
+            active
+            title={{ width: "60%" }}
+            paragraph={false}
+          />
+        ) : (
+          <div className="flex-1 grid place-items-center text-center">
+            <div>
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-none">
+                {formatNumber(animatedScore)}
+              </p>
+              <p className="mt-1 text-xs sm:text-sm text-gray-500">
+                Total Engagement Score
+              </p>
+            </div>
           </div>
-          <p className="mt-2 text-sm opacity-90">Total Engagement Score</p>
-        </div>
-      )}
 
-      {/* Optional decorative circles */}
-      <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/20 -z-10" />
-      <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-white/5 -z-10" />
+        )}
+
     </div>
   );
 };

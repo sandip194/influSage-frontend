@@ -342,14 +342,14 @@ export default function ContractModal({
                                     addonBefore="₹"
                                     style={{ width: "100%" }}
                                     min={0}
-                                    maxLength={13}
+                                    maxLength={10}
                                     onChange={() => form.validateFields(["payment"])}
-                                    placeholder="₹ 0"
+                                    placeholder="0"
                                     controls={false} // hides the up/down arrows
                                     formatter={(value) => {
-                                        // if (!value) return "₹ 0";
+                                         if (!value) return ;
                                         const num = Number(String(value).replace(/[^\d]/g, ""));
-                                        return  + num.toLocaleString("en-IN");
+                                       return   num.toLocaleString("en-IN");
                                     }}
                                     parser={(value) => {
                                         // Remove anything that is not a digit

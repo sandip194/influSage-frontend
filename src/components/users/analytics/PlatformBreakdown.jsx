@@ -136,6 +136,8 @@ export const PlatformBreakdown = () => {
         <Empty
           description="No data available for this period"
           className="py-10"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+
         />
       ) : (
         <div className="space-y-5">

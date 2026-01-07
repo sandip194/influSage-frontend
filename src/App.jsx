@@ -77,6 +77,7 @@ import Maintenance from './pages/commonPages/Maintenance';
 
 import MaintenanceProvider from './routes/MaintenanceProvider';
 import MaintenanceGuard from './routes/MaintenanceGuard';
+import AdminImproperMsg from './components/admin/pages/AdminImproperMsg';
 
 
 const App = () => {
@@ -234,6 +235,7 @@ const App = () => {
                                                                         <Route path='campaigns' element={<CampaignRequests />} />
                                                                         <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView />} />
                                                                         <Route path='analytics' element={<AdminContentLinks />} />
+                                                                        <Route path='improper-massages' element={<AdminImproperMsg />} />
                                                                         <Route path="settings" element={<ComingSoon />} />
                                                                         <Route path='support' element={<AdminMessagePage />} />
                                                                 </Route>

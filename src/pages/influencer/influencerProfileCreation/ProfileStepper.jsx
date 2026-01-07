@@ -189,7 +189,7 @@ export const ProfileStepper = () => {
       // -------------------------
       // Update Redux only if APPROVALPENDING
       // -------------------------
-      if (mappedStatus === "APPROVALPENDING") {
+      if (mappedStatus === "APPROVAL PENDING") {
         console.log("dispatch")
         dispatch(
           setCredentials({
@@ -217,7 +217,7 @@ export const ProfileStepper = () => {
       // Handle each status
       // -------------------------
 
-      if (mappedStatus === "APPROVALPENDING") {
+      if (mappedStatus === "APPROVAL PENDING") {
         const allCompleted = [true, true, true, true, true];
         setCompletedSteps(allCompleted);
         setCurrentStep(steps.length); // Set to steps.length to indicate completion
@@ -262,8 +262,6 @@ export const ProfileStepper = () => {
     }
   }, [token, userId, dispatch, name, role]);
 
-
-
   useEffect(() => {
     getUserProfileCompationData();
   }, [getUserProfileCompationData, lastCompletedStep]);
@@ -283,8 +281,6 @@ export const ProfileStepper = () => {
     }
 
   };
-
-
 
   return (
     <>

@@ -23,8 +23,7 @@ const AdminContentLinks = () => {
     const openAnalyticsModal = (data) => setAnalyticsModal({ visible: true, data });
     const closeAnalyticsModal = () => setAnalyticsModal({ visible: false, data: null });
 
-    const openHistoryModal = (history) => setHistoryModal({ visible: true, data: history });
-    const closeHistoryModal = () => setHistoryModal({ visible: false, data: null });
+
 
     const handleSaveAnalytics = (formData) => {
         console.log("Saved analytics:", formData);

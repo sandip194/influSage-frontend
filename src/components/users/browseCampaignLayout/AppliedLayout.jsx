@@ -301,9 +301,10 @@ const AppliedLayout = () => {
       {/* Edit Application Modal */}
       <ApplyNowModal
         open={isEditModalOpen}
+        onClose={() => setEditModalOpen(false)}
         applicationId={selectedApplicationId}
         campaignId={selectedCampaignId}
-        onSuccess={() =>setEditModalOpen(false)}
+        onSuccess={() => setEditModalOpen(false)}
       />
     </div>
   );

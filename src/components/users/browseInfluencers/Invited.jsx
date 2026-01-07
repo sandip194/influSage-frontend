@@ -35,7 +35,7 @@ const Invited = () => {
 
   const [filters, setFilters] = useState({
     pagenumber: 1,
-    pagesize: 15,
+    pagesize: 12,
     sortby: "createddate",
     sortorder: "desc",
   });
@@ -172,7 +172,7 @@ const Invited = () => {
               if ((e.key === "Enter" || e.key === " ") && trimmedInput !== "") {
                 setFilters((prev) => ({
                   ...prev,
-                  pagesize: window.innerWidth < 640 ? 10 : 15,
+                  pagesize: 12,
                   pagenumber: 1,
                 }));
                 setSearchTerm(trimmedInput);
@@ -183,7 +183,7 @@ const Invited = () => {
                 setSearchTerm("");
                 setFilters((prev) => ({
                   ...prev,
-                  pagesize: window.innerWidth < 640 ? 10 : 15,
+                  pagesize: 12,
                   pagenumber: 1,
                 }));
               }
@@ -231,6 +231,7 @@ const Invited = () => {
                 pagesize: pageSize,
               }))
             }
+            pageSizeOptions={["12", "24", "36", "48"]}
           />
         </div>
       </div>

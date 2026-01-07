@@ -27,7 +27,7 @@ const AppliedCampaignCard = ({
   return (
     <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {loading ? (
-        Array.from({ length: 6 }).map((_, idx) => (
+        Array.from({ length: 4 }).map((_, idx) => (
           <div
             key={idx}
             className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm"
@@ -57,9 +57,23 @@ const AppliedCampaignCard = ({
               relative
             "
           >
-
+            {campaign.campaignapplicationstatus && (
+              <div
+                className={`absolute top-1 right-1 text-xs px-2 py-1 rounded-full font-semibold 
+                  ${campaign.campaignapplicationstatus === "Selected"
+                  ? "bg-green-100 text-green-600"
+                  : campaign.campaignapplicationstatus === "Viewed"
+                    ? "bg-purple-100 text-purple  -600"
+                    : campaign.campaignapplicationstatus === "Applied"
+                      ? "bg-indigo-100 text-indigo-600"
+                      : "bg-gray-200 text-gray-800"
+                  }`}
+              >
+                {campaign.campaignapplicationstatus}
+              </div>
+            )}
             {/* Content */}
-            <div className="p-4 flex flex-col gap-3 flex-1">
+            <div className="p-4 flex flex-col gap-3 flex-1 mt-3">
               {/* Header */}
               <div className="flex items-center gap-3">
                 <img
@@ -95,20 +109,20 @@ const AppliedCampaignCard = ({
 
               {/* Budget */}
               <div className="min-h-[44px]">
-            {campaign.estimatedbudget && (
-              <div className=" border border-[#0D132D26] bg-white rounded-xl px-3 py-2 text-xs" >
-              <div className="flex items-center w-full text-sm">
-                <span className="text-xs text-gray-400">
-                  Estimated Budget:
-                </span>
+                {campaign.estimatedbudget && (
+                  <div className=" border border-[#0D132D26] bg-white rounded-xl px-3 py-2 text-xs" >
+                    <div className="flex items-center w-full text-sm">
+                      <span className="text-xs text-gray-400">
+                        Estimated Budget:
+                      </span>
 
-                <span className="ml-auto font-semibold text-[#0D132D]">
-                  ₹ {campaign.estimatedbudget.toLocaleString("en-IN")}
-                </span>
+                      <span className="ml-auto font-semibold text-[#0D132D]">
+                        ₹ {campaign.estimatedbudget.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-              </div>
-            )}
-          </div>
 
               {/* Footer */}
               <div className="flex items-center gap-2 pt-2">

@@ -9,7 +9,14 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const { Option } = Select;
 
-const COLORS = ["#335CFF", "#4C6FFF", "#0D132D", "#6B7CFF", "#1A3E5C"];
+const COLORS = [
+  "#335CFF", // primary blue
+  "#0D132D", // brand base
+  "#1F2A5A", // dark blue-gray
+  "#5E7BFF", // lighter blue
+  "#8FA2FF"  // pastel highlight
+];
+
 
 const ENDPOINT_BY_ROLE = {
   1: "/user/analytics/campaign-Contribution",

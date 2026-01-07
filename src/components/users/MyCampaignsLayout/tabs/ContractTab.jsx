@@ -91,7 +91,7 @@ const ContractTab = ({ campaignId, token }) => {
         payment: `₹${safeNumber(api.paymentamount, 0)}`,
         deliverables: safeText(api.providercontenttype, "N/A"),
         notes: safeText(api.note),
-        productLink: safeText(api.productlink),
+        productLink: api.productlink,
         vendorAddress: safeText(api.vendoraddress),
         status: safeText(api.statusname)?.toLowerCase(),   // "Pending" → "pending"
       };
@@ -357,7 +357,7 @@ const handleCloseModal = () => {
                   {contract.productLink}
                 </a>
               ) : (
-                <span className="text-gray-400 text-sm">N/A</span>
+                <span className="text-gray-400 text-sm">-</span>
               )}
             </div>
           </div>
