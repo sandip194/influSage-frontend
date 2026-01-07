@@ -110,7 +110,6 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
     formData.append('paymentjson', JSON.stringify(payload));
 
     try {
-
       // for Influencer 
       if (role === 1) {
         const res = await axios.post(
@@ -396,13 +395,13 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
                 label={<b>Phone Number</b>}
                 name="phone"
                 rules={[
-                  { required: true, message: 'Mobile number is required' },
+              
                   {
                     validator: (_, value) => {
                       if (!value || value.replace(/\D/g, '').length === 0) {
                         return Promise.reject(new Error("Mobile number is required"));
                       }
-                      if (value.replace(/\D/g, '').length < 10) {
+                      if (value.replace(/\D/g, '').length < 12) {
                         return Promise.reject(new Error("Enter a valid mobile number"));
                       }
                       return Promise.resolve();

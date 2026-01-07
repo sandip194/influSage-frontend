@@ -144,7 +144,7 @@ const ActiveCampaignList = () => {
                     onRow={(record) => ({
                         onClick: () => {
                             // Redirect to campaign detail page
-                            navigate(`/dashboard/my-campaigns/details/${record.campaignid}`);
+                            navigate(`/dashboard/my-contract/details/${record.campaignid}`);
                         },
                         style: { cursor: 'pointer' }, // show pointer on hover
                     })}

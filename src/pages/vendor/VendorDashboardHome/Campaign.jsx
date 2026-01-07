@@ -175,7 +175,10 @@ const Campaign = () => {
             ))}
           </div>
         ) : campaigns.length === 0 ? (
-          <Empty description="No campaigns found" />
+          <Empty
+            description="No campaigns found"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
         ) : (
           <Swiper
             spaceBetween={15}
@@ -223,9 +226,8 @@ const Campaign = () => {
                     {item.status && (
                       <span
                         className={`absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full shadow-md
-                          ${
-                            statusStyles[item.status?.toLowerCase()] ||
-                            'bg-gray-100 text-gray-700'
+                          ${statusStyles[item.status?.toLowerCase()] ||
+                          'bg-gray-100 text-gray-700'
                           }`}
                       >
                         {item.status}
@@ -291,7 +293,7 @@ const Campaign = () => {
 
                     {/* ===== Budget Section ===== */}
                     <div className="mb-3">
-                      {item.estimatedbudget  && (
+                      {item.estimatedbudget && (
                         <div
                           className="
                           bg-white
@@ -301,15 +303,15 @@ const Campaign = () => {
                           flex items-center gap-3
                         "
                         >
-                        <div className="flex items-center w-full text-sm">
-                          <span className="text-xs text-gray-400">
-                            Estimated Budget:
-                          </span>
+                          <div className="flex items-center w-full text-sm">
+                            <span className="text-xs text-gray-400">
+                              Estimated Budget:
+                            </span>
 
-                          <span className="ml-auto font-semibold text-[#0D132D]">
-                            ₹ {item.estimatedbudget .toLocaleString("en-IN")}
-                          </span>
-                        </div>
+                            <span className="ml-auto font-semibold text-[#0D132D]">
+                              ₹ {item.estimatedbudget.toLocaleString("en-IN")}
+                            </span>
+                          </div>
 
                         </div>
                       )}
