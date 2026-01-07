@@ -47,7 +47,7 @@ const Browse = () => {
     sortby: "createddate",
     sortorder: "desc",
     pagenumber: 1,
-    pagesize: 15,
+    pagesize: 12,
   });
 
   const [pendingFilters, setPendingFilters] = useState(filters);
@@ -301,6 +301,7 @@ const Browse = () => {
             handleCardClick={(id) => navigate(`/dashboard/browse/description/${id}`)}
             handleSave={handleSave}
             variant="browse"
+            onCampaignApplied={getAllCampaigns}
           />
 
           <div className="mt-6 flex justify-center">
@@ -312,7 +313,7 @@ const Browse = () => {
                 setFilters((prev) => ({ ...prev, pagenumber: page, pagesize: pageSize }))
               }
               showSizeChanger
-              pageSizeOptions={["10", "15", "25", "50"]}
+              pageSizeOptions={["12", "24", "36", "48"]}
             />
           </div>
         </div>

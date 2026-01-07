@@ -1,25 +1,21 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation} from 'react-router-dom';
 import {
-  RiFileCopyFill,
-  RiExchangeDollarLine,
   RiArrowDownSLine,
-  RiEyeLine
 
 } from "@remixicon/react";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
-import { Empty, Input, Pagination, Select, Tooltip, Modal, Skeleton } from "antd";
+import {  Input, Pagination, Select, Tooltip } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import SavedCampaignCard from "./SavedCampaignCard";
 import CampaignCardGrid from './BrowseCampaignCard';
 
 
 const SavedLayout = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [pagenumber, setPageNumber] = useState(1);
-  const [pagesize, setPageSize] = useState(10); // or any default
+  const [pagesize, setPageSize] = useState(12); // or any default
 
   const [totalCampaigns, setTotalCampaigns] = useState(0);
   const [sortby, setSortBy] = useState("createddate");
@@ -32,7 +28,6 @@ const SavedLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = useSelector((state) => state.auth);
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const buttons = [
     { id: "browse", label: "Discover", path: "/dashboard/browse" },
@@ -240,6 +235,7 @@ const SavedLayout = () => {
             handleCardClick={handleCardClick}
             handleSave={handleSave}
             variant="saved"
+            onCampaignApplied={getAllSavedCampaigns}
           />
         </div>
       </div>
@@ -255,7 +251,7 @@ const SavedLayout = () => {
             setPageSize(pageSize);
           }}
           showSizeChanger
-          pageSizeOptions={['10', '15', '25', '50']}
+          pageSizeOptions={['12', '24', '36', '48']}
         />
       </div>
     </div>
