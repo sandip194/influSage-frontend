@@ -267,7 +267,7 @@ const ViewAllOffers = ({ campaignData }) => {
                       </div>
                     </td>
 
-                    <td className="p-4">{offer.amount}</td>
+                    <td className="p-4">₹ {offer.amount}</td>
 
                     <td className="p-4">
                       {(() => {

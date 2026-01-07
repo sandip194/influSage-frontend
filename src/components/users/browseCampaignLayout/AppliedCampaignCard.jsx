@@ -94,17 +94,24 @@ const AppliedCampaignCard = ({
               </p>
 
               {/* Budget */}
-              <div className="border border-[#0D132D26] bg-white rounded-xl px-3 py-2 text-xs">
-                <span className="text-gray-500">
-                  Estimated Budget:{" "}
+              <div className="min-h-[44px]">
+            {campaign.estimatedbudget && (
+              <div className=" border border-[#0D132D26] bg-white rounded-xl px-3 py-2 text-xs" >
+              <div className="flex items-center w-full text-sm">
+                <span className="text-xs text-gray-400">
+                  Estimated Budget:
                 </span>
-                <span className="font-semibold text-black">
-                  ₹ {campaign.estimatedbudget}
+
+                <span className="ml-auto font-semibold text-[#0D132D]">
+                  ₹ {campaign.estimatedbudget.toLocaleString("en-IN")}
                 </span>
               </div>
+              </div>
+            )}
+          </div>
 
               {/* Footer */}
-              <div className="mt-auto flex items-center gap-2 pt-2">
+              <div className="flex items-center gap-2 pt-2">
                 {/* Edit Application */}
                 {campaign.iseditable ? (
                   <button

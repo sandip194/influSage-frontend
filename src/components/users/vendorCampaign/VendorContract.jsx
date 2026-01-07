@@ -533,25 +533,7 @@ const formatToDDMMYYYY = (dateStr) => {
           setFeedback("");
           setRating(0);
         }}
-        footer={[
-          <Button
-            key="skip"
-            onClick={handleSkipClose}
-            loading={closingLoading}
-          >
-            Skip & Close
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-
-            onClick={handleSubmitClose}
-            loading={closingLoading}
-          >
-            Submit & Close
-          </Button>
-
-        ]}
+        footer= {null}
       >
         <p className="text-gray-600 mb-3 text-sm">
           Optional: Share your experience for this contract.
@@ -615,7 +597,24 @@ const formatToDDMMYYYY = (dateStr) => {
   <p className="text-red-500 text-xs mt-1">{errors.feedback}</p>
 )}
 
+<div className="flex justify-end gap-3 mt-6">
+          <Button
+            key="skip"
+            onClick={handleSkipClose}
+            loading={closingLoading}
+          >
+            Skip & Close
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
 
+            onClick={handleSubmitClose}
+            loading={closingLoading}
+          >
+            Submit & Close
+          </Button>
+</div>
 
       </Modal>
 

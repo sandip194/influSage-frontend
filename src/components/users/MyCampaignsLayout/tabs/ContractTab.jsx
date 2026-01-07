@@ -5,10 +5,13 @@ import {
   RiCheckLine,
   RiCloseLine,
   RiEdit2Line,
+  RiStarLine,
+  RiStarFill,
 } from "react-icons/ri";
 import { safeNumber, safeText } from "../../../../App/safeAccess";
-import { Modal } from "antd";
+import { Modal, Button, Input } from "antd";
 import { toast } from "react-toastify";
+const { TextArea } = Input;
 
 // Shown when no contract exists
 const NoContractOffered = () => (
@@ -53,6 +56,13 @@ const ContractTab = ({ campaignId, token }) => {
   const [pendingAction, setPendingAction] = useState(null); // "accept" | "reject"
   const [actionLoading, setActionLoading] = useState(false);
 
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [rating, setRating] = useState(0);
+  const [closingLoading, setClosingLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const [closingContract, setClosingContract] = useState(null);
 
   const fetchContractDetails = async () => {
     try {
@@ -161,6 +171,67 @@ const ContractTab = ({ campaignId, token }) => {
     }
   };
 
+  const validateFeedback = () => {
+    const newErrors = {};
+
+    if (!rating || rating < 1) {
+      newErrors.rating = "Please select at least one star";
+    }
+    if (feedback && feedback.length < 10) {
+      newErrors.feedback = "Feedback must be at least 10 characters";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+
+  const addFeedback  = async () => {
+
+  if (feedback && feedback.length < 10) {
+    setErrors({ feedback: "Feedback must be at least 10 characters" });
+    return;
+  }
+  try {
+    setClosingLoading(true);
+
+    await axios.post(
+      "/user/add-feedback",
+      {
+        p_contractid: contract.id,
+        p_rating: rating,
+        p_text: feedback || null,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    toast.success("Feedback submitted successfully");
+    setIsFeedbackOpen(false);
+    setFeedback("");
+    setRating(0);
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message || "Failed to submit feedback"
+    );
+  } finally {
+    setClosingLoading(false);
+  }
+};
+
+const handleSubmitClose = () => {
+  if (!validateFeedback()) return;
+  addFeedback();
+};
+
+const handleCloseModal = () => {
+  setIsFeedbackOpen(false);
+  setFeedback("");
+  setRating(0);
+  setErrors({});
+};
+
+
   if (!contractStatus) return <NoContractOffered />;
 
   // MODERN CONTRACT CARD UI
@@ -173,25 +244,39 @@ const ContractTab = ({ campaignId, token }) => {
       >
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
+          {/* Left title */}
           <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <RiFileList3Line className="text-[#0f122f]" />
-            Contract 
+            Contract
           </h2>
 
-          {contractStatus !== "pending" && (
-            <span
-              className={`px-4 py-1.5 rounded-full text-sm font-semibold
-                ${contractStatus === "accepted"
-                  ? "bg-green-100 text-green-700"
-                  : contractStatus === "rejected"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-blue-100 text-blue-700"
-                }`}
-            >
-              {contractStatus?.charAt(0).toUpperCase() + contractStatus.slice(1)}
-            </span>
-          )}
+          {/* Right actions */}
+          <div className="flex items-center gap-3">
+            {/* Feedback button only when closed */}
+              {contract?.cansendfeedback && (
+                <button
+                  onClick={() => setIsFeedbackOpen(true)}
+                  className="px-4 py-2 text-sm rounded-full cursor-pointer font-medium text-white bg-[#0f122f] hover:bg-[#1c1f4a] transition"
+                >
+                  Give Feedback
+                </button>
+              )}
+
+            {contractStatus !== "pending" && (
+              <span
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold
+                  ${contractStatus === "accepted"
+                    ? "bg-green-100 text-green-700"
+                    : contractStatus === "rejected"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-blue-100 text-blue-700"
+                  }`}
+              >
+                {contractStatus?.charAt(0).toUpperCase() + contractStatus.slice(1)}
+              </span>
+            )}
         </div>
+      </div>
 
         {/* MAIN GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -345,6 +430,88 @@ const ContractTab = ({ campaignId, token }) => {
             ? "Are you sure you want to accept this contract?"
             : "Are you sure you want to reject this contract?"}
         </p>
+      </Modal>
+
+      <Modal
+        open={isFeedbackOpen}
+        title="Add Feedback"
+        footer = {null}
+        onCancel={() => {
+          setIsFeedbackOpen(false);
+          setClosingContract(null);
+          setFeedback("");
+          setRating(0);
+          setErrors({});
+        }}
+      >
+        <p className="text-gray-600 mb-3 text-sm">
+          Share your experience for this contract.
+        </p>
+
+        {/* ⭐ Rating */}
+        <p className="font-medium text-gray-800 mb-2">Overall Rating <span className="text-red-500">*</span></p>
+        <div className="mb-4">
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span
+                key={star}
+                onClick={() => {
+                  setRating(star);
+                  setErrors((prev) => ({ ...prev, rating: "" }));
+                }}
+                style={{ stroke: "black", strokeWidth: 0.6 }}
+                className="cursor-pointer transition-transform active:scale-95"
+              >
+                {star <= rating ? (
+                  <RiStarFill
+                    size={26}
+                    className="text-yellow-400"
+                    style={{ stroke: "black", strokeWidth: 0.6 }}
+                  />
+                ) : (
+                  <RiStarLine
+                    size={26}
+                    className="text-yellow-400"
+                  />
+                )}
+              </span>
+            ))}
+          </div>
+           {errors.rating && (
+              <p className="text-red-500 text-xs mt-1">{errors.rating}</p>
+            )}
+        </div>
+
+        <p className="font-medium text-gray-800 mb-2">Feedback</p>
+
+        <TextArea
+          rows={4}
+          maxLength={250}
+          showCount
+          value={feedback}
+          onChange={(e) => {
+            setFeedback(e.target.value);
+            setErrors((prev) => ({ ...prev, feedback: "" }));
+          }}
+          placeholder="Write something about the influencer (10–100 chars if rating given)"
+          className={`feedback-textarea ${
+            errors.feedback ? "feedback-error" : ""
+          }`}
+          style={{ resize: "none" }}
+        />
+        <div className="flex justify-end gap-3 mt-6">
+    <Button onClick={handleCloseModal}>
+      Close
+    </Button>
+
+    <Button
+      type="primary"
+      loading={closingLoading}
+      onClick={handleSubmitClose}
+    >
+      Submit
+    </Button>
+  </div>
       </Modal>
     </div>
 
