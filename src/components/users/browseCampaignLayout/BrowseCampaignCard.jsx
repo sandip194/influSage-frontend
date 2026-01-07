@@ -7,6 +7,48 @@ import {
 } from "@remixicon/react";
 import ApplyNowModal from "./ApplyNowModal";
 
+const CampaignCategories = ({ categories }) => {
+  const containerRef = React.useRef(null);
+  const [canShowTwo, setCanShowTwo] = React.useState(true);
+
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const el = containerRef.current;
+    setCanShowTwo(el.scrollWidth <= el.clientWidth);
+  }, [categories]);
+
+  if (!categories || categories.length === 0) return null;
+
+  const total = categories.length;
+  const showCount = total > 2 || (total === 2 && !canShowTwo);
+
+  return (
+    <div
+      ref={containerRef}
+      className="flex gap-2 overflow-hidden whitespace-nowrap"
+    >
+      {/* First category */}
+      <span className="px-2 py-1 rounded-full text-xs font-medium border border-[#0D132D26] whitespace-nowrap flex-shrink-0">
+        {categories[0].categoryname}
+      </span>
+
+      {/* Second category only if it fits */}
+      {categories[1] && canShowTwo && (
+        <span className="px-2 py-1 rounded-full text-xs font-medium border border-[#0D132D26] whitespace-nowrap flex-shrink-0">
+          {categories[1].categoryname}
+        </span>
+      )}
+
+      {/* Count pill */}
+      {showCount && (
+        <span className="px-2 py-1 rounded-full text-xs font-medium border border-[#0D132D26] bg-gray-300 whitespace-nowrap flex-shrink-0">
+          +{canShowTwo ? total - 2 : total - 1}
+        </span>
+      )}
+    </div>
+  );
+};
+
 /* --- Individual Card --- */
 const CampaignCard = React.memo(
   ({ campaign, handleCardClick, handleSave, onApply, variant }) => {
@@ -146,42 +188,15 @@ const CampaignCard = React.memo(
         </p>
 
         {/* ===== Categories ===== */}
-        <div className="flex flex-wrap gap-2 overflow-hidden mt-2">
-          {campaign.campaigncategories?.slice(0, 2).map((cat, i) => (
-            <span
-              key={i}
-              className="
-                  px-2 py-1
-                  rounded-full
-                  text-xs font-medium
-                  border border-[#0D132D26]
-                  whitespace-nowrap
-                "
-            >
-              {cat.categoryname}
-            </span>
-          ))}
+        <CampaignCategories categories={campaign.campaigncategories} />
 
-          {campaign.campaigncategories?.length > 2 && (
-            <span
-              className="
-                  px-2 py-1
-                  rounded-full
-                  text-xs font-medium
-                  border border-[#0D132D26] bg-gray-300
-                  whitespace-nowrap
-                "
-            >
-              +{campaign.campaigncategories.length - 2}
-            </span>
-          )}
-        </div>
+
         <div className="mt-auto">
           <hr className="my-3 border-[#0D132D1A] mt-1" />
 
           <div className="min-h-[23px] mb-2">
-            <div className="flex items-center gap-2 text-xs text-gray-600">
-              <span className="w-5 h-5 rounded-full text-white bg-black flex items-center justify-center text-xs font-medium">
+            <div className="flex items-center gap-1 text-xs text-gray-600">
+              <span className="font-bold text-gray-700">
                 {campaign.appliedinfluencercount || 0}
               </span>
               Influencer Applied
@@ -339,6 +354,7 @@ const CampaignCardGrid = React.memo(
 
         <ApplyNowModal
           open={openApply}
+          onClose={() => setOpenApply(false)}
           campaignId={selectedCampaignId}
           onSuccess={() => {
             setOpenApply(false);

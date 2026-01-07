@@ -36,7 +36,7 @@ const FavoritesLayout = () => {
 
   const [filters, setFilters] = useState({
     pagenumber: 1,
-    pagesize: 15,
+    pagesize: 12,
     sortby: "createddate",
     sortorder: "desc",
   });
@@ -232,6 +232,7 @@ const FavoritesLayout = () => {
                 pagesize: pageSize,
               }))
             }
+            pageSizeOptions={["12", "24", "36", "48"]}
           />
         </div>
       </div>

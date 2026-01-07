@@ -27,6 +27,51 @@ const SkeletonCard = () => (
   <div className="w-[260px] h-[300px] bg-gray-200 rounded-2xl animate-pulse"></div>
 );
 
+const CampaignCategories = ({ categories }) => {
+  const containerRef = React.useRef(null);
+  const [canShowTwo, setCanShowTwo] = React.useState(true);
+
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const el = containerRef.current;
+    setCanShowTwo(el.scrollWidth <= el.clientWidth);
+  }, [categories]);
+
+  if (!categories || categories.length === 0) return null;
+
+  const total = categories.length;
+  const showCount = total > 2 || (total === 2 && !canShowTwo);
+
+  return (
+    <div
+      ref={containerRef}
+      className="flex gap-2 overflow-hidden whitespace-nowrap"
+    >
+      {/* First category */}
+      <span className="px-2 py-1 rounded-full text-xs font-medium border border-[#0D132D26] whitespace-nowrap flex-shrink-0">
+        {categories[0].categoryname}
+      </span>
+
+      {/* Second category only if it fits */}
+      {categories[1] && canShowTwo && (
+        <span className="px-2 py-1 rounded-full text-xs font-medium border border-[#0D132D26] whitespace-nowrap flex-shrink-0">
+          {categories[1].categoryname}
+        </span>
+      )}
+
+      {/* Count pill */}
+      {showCount && (
+        <span className="px-2 py-1 rounded-full text-xs font-medium border border-[#0D132D26] bg-gray-300 whitespace-nowrap flex-shrink-0">
+          +{canShowTwo ? total - 2 : total - 1}
+        </span>
+      )}
+    </div>
+  );
+};
+
+
+
+
 // ---------- Campaign Card ----------
 const CampaignCard = ({ campaign }) => {
   return (
@@ -37,12 +82,11 @@ const CampaignCard = ({ campaign }) => {
       {/* ===== Card Wrapper ===== */}
       <div
         className="
-        w-[300px]
         rounded-2xl
         overflow-hidden
         bg-[#335CFF0D]
         border border-[#335CFF26]
-        flex flex-col hover:shadow-md transition w-[300px]
+        flex flex-col hover:shadow-md transition 
       "
       >
         {/* ===== Image Section ===== */}
@@ -68,12 +112,13 @@ const CampaignCard = ({ campaign }) => {
           </p>
 
           {/* ===== Apply Date ===== */}
-          <div className="flex items-center gap-2 text-sm text-[#335CFF] h-[20px]">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1  text-sm max-[340px]:text-xs text-[#335CFF]">
             {campaign.applicationstartdate && campaign.applicationenddate && (
               <>
                 <RiCalendar2Line size={16} className="shrink-0" />
-                Apply :
-                <span className="truncate">
+                <span className="whitespace-nowrap">Apply:</span>
+
+                <span className="break-words">
                   {formatDate(campaign.applicationstartdate)}
                   <span className="mx-1 font-medium">-</span>
                   {formatDate(campaign.applicationenddate)}
@@ -82,37 +127,10 @@ const CampaignCard = ({ campaign }) => {
             )}
           </div>
 
-          {/* ===== Categories ===== */}
-          <div className="flex flex-wrap gap-2 overflow-hidden">
-            {campaign.campaigncategories?.slice(0, 2).map((cat, i) => (
-              <span
-                key={i}
-                className="
-                  px-2 py-1
-                  rounded-full
-                  text-xs font-medium
-                  border border-[#0D132D26]
-                  whitespace-nowrap
-                "
-              >
-                {cat.categoryname}
-              </span>
-            ))}
 
-            {campaign.campaigncategories?.length > 2 && (
-              <span
-                className="
-                  px-2 py-1
-                  rounded-full
-                  text-xs font-medium
-                  border border-[#0D132D26] bg-gray-300
-                  whitespace-nowrap
-                "
-              >
-                +{campaign.campaigncategories.length - 2}
-              </span>
-            )}
-          </div>
+          {/* ===== Categories ===== */}
+          <CampaignCategories categories={campaign.campaigncategories} />
+
 
           {/* ===== Budget Section ===== */}
           <div className="mt-auto">
@@ -200,7 +218,7 @@ const CampaignCarousel = () => {
           spaceBetween={15}
           slidesPerView={1} // mobile default
           breakpoints={{
-            640: { slidesPerView: 1.2 },
+            640: { slidesPerView: 1 },
             768: { slidesPerView: 2 },
             1024: { slidesPerView: 3 },
             1280: { slidesPerView: 4 },
@@ -213,7 +231,7 @@ const CampaignCarousel = () => {
           className="mySwiper pb-5"
         >
           {campaigns.map((c) => (
-            <SwiperSlide key={c.id} className="!w-[300px]">
+            <SwiperSlide key={c.id} className="">
               <CampaignCard campaign={c} />
             </SwiperSlide>
           ))}

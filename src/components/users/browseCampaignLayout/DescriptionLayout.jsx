@@ -939,6 +939,7 @@ useEffect(() => {
 
       <ApplyNowModal
         open={isEditModalOpen}
+        onClose={() => setEditModalOpen(false)}
         applicationId={selectedApplicationId}
         campaignId={selectedCampaignId}
         onSuccess ={() => setEditModalOpen(false)}

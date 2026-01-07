@@ -123,7 +123,7 @@ const AdminImproperMsg = () => {
     );
     return (
         <div className="my-2">
-            <h1 className="text-lg my-4">Improper Massage List</h1>
+            <h1 className="text-lg my-4">Unauthorized Contact Messages</h1>
 
             <div className="flex flex-col sm:flex-row flex-wrap gap-3 mb-4 sm:items-center">
                 {/* Search */}

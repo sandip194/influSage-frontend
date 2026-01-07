@@ -51,7 +51,7 @@ const BrowseInfluencersLayout = () => {
     sortby: "createddate",
     sortorder: "desc",
     pagenumber: 1,
-    pagesize: 15,
+    pagesize: 12,
     gender: [],
     location: ""
   });
@@ -373,6 +373,7 @@ const BrowseInfluencersLayout = () => {
                 pagesize: pageSize,
               }))
             }
+            pageSizeOptions={["12", "24", "36", "48"]}
           />
         </div>
       </div>
