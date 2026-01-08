@@ -9,4 +9,7 @@ export default defineConfig({
     tailwindcss(),
     react()
   ],
+  optimizeDeps: {
+    include: ['react-pdf'],  // Pre-bundle react-pdf to avoid resolution issues
+  },
 })

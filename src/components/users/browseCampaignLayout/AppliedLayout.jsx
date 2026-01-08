@@ -5,7 +5,7 @@ import {
 } from "@remixicon/react";
 import { Modal } from "antd";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
-import { Empty, Input, Pagination, Select, Tooltip } from "antd";
+import {  Input, Pagination, Select, Tooltip } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -74,7 +74,7 @@ const AppliedLayout = () => {
           p_sortorder: sortorder,
           p_pagenumber: pagenumber,
           p_pagesize: pagesize,
-          p_search: searchTerm.trim(),
+          p_search: searchTerm.trim() || null,
           p_statusid: statusId || null,
         },
         headers: {
@@ -82,9 +82,16 @@ const AppliedLayout = () => {
         },
       });
 
-      const { records, totalcount } = res.data.data;
-      setCampaigns(records);
-      setTotalCampaigns(totalcount);
+      const data = res?.data?.data || {};
+      setCampaigns(Array.isArray(data.records) ? data.records : []);
+      setTotalCampaigns(Number(data.totalcount) || 0);
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error?.response?.data?.message || "Failed to fetch campaigns"
+      );
+      setCampaigns([]);
+      setTotalCampaigns(0);
     } finally {
       setLoading(false);
     }
@@ -99,17 +106,19 @@ const AppliedLayout = () => {
   const getAllStatus = useCallback(async () => {
     try {
       const res = await axios.get('/user/Campaign-ApplicationStatus', { headers: { Authorization: `Bearer ${token}` } })
-      setAllStatus(res?.data?.data)
+     setAllStatus(Array.isArray(res?.data?.data) ? res.data.data : []);
     } catch (error) {
       console.error(error)
+      setAllStatus([]);
     }
-  }, [])
+  }, [token])
 
   useEffect(() => {
     getAllStatus()
   }, [getAllStatus])
 
   const handleWithdraw = async (campaignapplicationid) => {
+    if (!campaignapplicationid) return;
     try {
       const res = await axios.post(
         "/user/withdraw-application",

@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { Modal } from "antd";
 import googleIcon from "../../assets/icons/google-logo.png";
 import facebookIcon from "../../assets/icons/facebook-logo.png";
+import TermsAndCondition from "../../components/common/TermsAndCondition";
 
 const SideImageSlider = React.lazy(() =>
   import("../../components/common/SideImageSlider")
@@ -320,27 +321,10 @@ const Signup = () => {
           onCancel={() => setShowModal(false)}
           footer={null}
           centered
-          width={700}
-          bodyStyle={{ maxHeight: "60vh", overflowY: "auto" }}
+          width={800}
+          bodyStyle={{ maxHeight: "70vh", }}
         >
-          <p>
-            By using this platform, you agree to comply with our policies and
-            guidelines.
-            <br />
-            <br />
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-            facilisis nulla in orci porttitor, at placerat risus dapibus. Morbi
-            blandit suscipit sapien non tincidunt. Proin lacinia diam nec turpis
-            posuere, eget vehicula est gravida. Pellentesque habitant morbi
-            tristique senectus et netus et malesuada fames ac turpis egestas...
-            <br />
-            <br />
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-            facilisis nulla in orci porttitor, at placerat risus dapibus. Morbi
-            blandit suscipit sapien non tincidunt. Proin lacinia diam nec turpis
-            posuere, eget vehicula est gravida. Pellentesque habitant morbi
-            tristique senectus et netus et malesuada fames ac turpis egestas...
-          </p>
+          <TermsAndCondition/>
         </Modal>
       )}
     </div>

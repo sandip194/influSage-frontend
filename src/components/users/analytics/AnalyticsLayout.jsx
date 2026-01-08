@@ -170,7 +170,6 @@ const AnalyticsLayout = () => {
 
 
 
-
   const fetchCampaignList = async () => {
     try {
       const res = await axios.get("/user/analytics/campaign-list", {
@@ -380,7 +379,7 @@ const AnalyticsLayout = () => {
                   </div>
 
                   {/* Title */}
-                  <p className="text-sm text-gray-800 my-3 line-clamp-2 min-h-[3rem]">
+                  <p className="text-sm text-gray-800 my-3 line-clamp-2 break-words overflow-hidden min-h-[2.5rem]">
                     {c.title || c.caption || "No caption available"}
                   </p>
 
