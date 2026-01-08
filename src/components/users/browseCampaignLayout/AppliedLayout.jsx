@@ -29,10 +29,14 @@ const AppliedLayout = () => {
   // Withdraw modal
   const [isWithdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState(null);
-  const [selectedCampaignId,setSelectedCampaignId] = useState(null)
+  const [selectedCampaignId, setSelectedCampaignId] = useState(null)
 
   // EDIT modal (Apply Now)
   const [isEditModalOpen, setEditModalOpen] = useState(false);
+
+  const [allStatus, setAllStatus] = useState([])
+  const [statusId, setStatusId] = useState(null);
+
 
   const [loading, setLoading] = useState(false);
   const { token } = useSelector((state) => state.auth);
@@ -71,6 +75,7 @@ const AppliedLayout = () => {
           p_pagenumber: pagenumber,
           p_pagesize: pagesize,
           p_search: searchTerm.trim(),
+          p_statusid: statusId || null,
         },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -83,11 +88,26 @@ const AppliedLayout = () => {
     } finally {
       setLoading(false);
     }
-  }, [sortby, sortorder, pagenumber, pagesize, token, searchTerm]);
+  }, [sortby, sortorder, pagenumber, pagesize, token, searchTerm, statusId]);
 
   useEffect(() => {
     getAllAppliedCampaigns();
   }, [getAllAppliedCampaigns]);
+
+
+
+  const getAllStatus = useCallback(async () => {
+    try {
+      const res = await axios.get('/user/Campaign-ApplicationStatus', { headers: { Authorization: `Bearer ${token}` } })
+      setAllStatus(res?.data?.data)
+    } catch (error) {
+      console.error(error)
+    }
+  }, [])
+
+  useEffect(() => {
+    getAllStatus()
+  }, [getAllStatus])
 
   const handleWithdraw = async (campaignapplicationid) => {
     try {
@@ -134,11 +154,10 @@ const AppliedLayout = () => {
           <button
             key={id}
             onClick={() => navigate(path)}
-            className={`whitespace-nowrap cursor-pointer flex-shrink-0 px-4 py-2 rounded-md border transition text-sm ${
-              selectedButton === id
-                ? "bg-[#0f122f] text-white border-[#0f122f]"
-                : "bg-white text-[#141843] border-gray-300 hover:bg-gray-100"
-            }`}
+            className={`whitespace-nowrap cursor-pointer flex-shrink-0 px-4 py-2 rounded-md border transition text-sm ${selectedButton === id
+              ? "bg-[#0f122f] text-white border-[#0f122f]"
+              : "bg-white text-[#141843] border-gray-300 hover:bg-gray-100"
+              }`}
           >
             {label}
           </button>
@@ -184,12 +203,27 @@ const AppliedLayout = () => {
             }
           />
 
-
-
           <div className="flex gap-2 w-full sm:w-auto justify-end">
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-end">
               {/* Desktop view */}
-              <div className="hidden sm:block w-full sm:w-auto">
+              <div className="hidden sm:flex w-full sm:w-auto gap-3">
+                <Select
+                  size="large"
+                  allowClear
+                  placeholder="Filter by Status"
+                  value={statusId ?? "All"}
+                  onChange={(value) => {
+                    setStatusId(value === "All" ? null : value);
+                    setPageNumber(1);
+                  }}
+                  className="w-48"
+                >
+                  {allStatus.map((status) => (
+                    <Select.Option key={status.id} value={status.id}>
+                      {status.name}
+                    </Select.Option>
+                  ))}
+                </Select>
                 <Select
                   size="large"
                   value={`${sortby}_${sortorder}`}
@@ -209,10 +243,29 @@ const AppliedLayout = () => {
                     </Select.Option>
                   ))}
                 </Select>
+
               </div>
 
               {/* Mobile view: fixed at bottom */}
-              <div className="sm:hidden fixed bottom-0 left-0 w-full z-30 bg-white p-4 shadow-md">
+              <div className="sm:hidden fixed bottom-0 left-0 w-full z-30 bg-white p-4 shadow-md flex gap-3">
+
+                <Select
+                  size="large"
+                  allowClear
+                  placeholder="Filter by Status"
+                  value={statusId ?? "All"}
+                  onChange={(value) => {
+                    setStatusId(value === "All" ? null : value);
+                    setPageNumber(1);
+                  }}
+                  className="w-full"
+                >
+                  {allStatus.map((status) => (
+                    <Select.Option key={status.id} value={status.id}>
+                      {status.name}
+                    </Select.Option>
+                  ))}
+                </Select>
                 <Select
                   size="large"
                   value={`${sortby}_${sortorder}`}
@@ -238,7 +291,7 @@ const AppliedLayout = () => {
         </div>
 
         {/* Cards */}
-        <div className="flex flex-col lg:flex-row gap-6 mt-6">
+        <div className="mt-6">
           <AppliedCampaignCard
             campaigns={campaigns}
             loading={loading}
@@ -294,7 +347,7 @@ const AppliedLayout = () => {
             className="px-6 py-2 rounded-full bg-[#0f122f] text-white"
           >
             Withdraw
-          </button> 
+          </button>
         </div>
       </Modal>
 

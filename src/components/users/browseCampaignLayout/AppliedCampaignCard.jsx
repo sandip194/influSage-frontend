@@ -24,6 +24,9 @@ const AppliedCampaignCard = ({
   setWithdrawModalOpen,
   openEditModal,
 }) => {
+
+
+  
   return (
     <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {loading ? (
@@ -37,7 +40,7 @@ const AppliedCampaignCard = ({
           </div>
         ))
       ) : campaigns.length === 0 ? (
-        <div className="col-span-full py-10">
+        <div className="col-span-full flex items-center justify-center py-16 w-full">
           <Empty description="No campaigns found." />
         </div>
       ) : (
