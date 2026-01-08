@@ -50,7 +50,7 @@
           );
 
           if (!exists) {
-            console.log(notification)
+            // console.log(notification)
             dispatch(addNotification(notification));
             if (!notification.isRead) {
               dispatch(incrementUnread());
