@@ -41,11 +41,6 @@ const DescriptionLayout = () => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
-  const rawRating = Number(item.rating);
-  const fullStars = Math.floor(rawRating);
-  const hasHalfStar = rawRating - fullStars >= 0.5;
-  const displayRating = rawRating.toFixed(1);
-
 
   const [previewFile, setPreviewFile] = useState(null);
   const formatDateDDMMYYYY = (dateStr) => {
@@ -848,7 +843,7 @@ const DescriptionLayout = () => {
           </div>
           <div className="bg-white p-6 rounded-2xl">
             <h3 className="font-semibold text-lg text-gray-900 mb-4">
-              Past History
+              Vendor's Recent History
             </h3>
 
             {loadingFeedbacks && page === 0 ? (
@@ -881,77 +876,70 @@ const DescriptionLayout = () => {
               <>
                 {/* Feedback List */}
                 <div className="space-y-4">
-                  {feedbacks.map((item) => (
-                    <div
-                      key={item.campaignid}
-                      className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl"
-                    >
-                      <img
-                        src={item.campaignpohoto}
-                        alt={item.campaignname}
-                        onError={(e) =>
-                          (e.target.src = "/Brocken-Defualt-Img.jpg")
-                        }
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
+                  {feedbacks.map((item) => {
+                    const rawRating = Number(item.rating || 0);
+                    const fullStars = Math.floor(rawRating);
+                    const hasHalfStar = rawRating - fullStars >= 0.5;
+                    const displayRating = rawRating.toFixed(1);
 
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">
-                          {item.campaignname}
-                        </p>
+                    return (
+                      <div
+                        key={item.campaignid}
+                        className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl"
+                      >
+                        <img
+                          src={item.campaignpohoto}
+                          alt={item.campaignname}
+                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
 
-                        {rawRating > 0 && (
-                          <div className="flex items-center mt-2">
-                            {Array.from({ length: 5 }).map((_, i) => {
-                              if (i < fullStars) {
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 truncate">
+                            {item.campaignname}
+                          </p>
+
+                          {rawRating > 0 && (
+                            <div className="flex items-center mt-2">
+                              {Array.from({ length: 5 }).map((_, i) => {
+                                if (i < fullStars) {
+                                  return (
+                                    <RiStarFill
+                                      key={i}
+                                      size={16}
+                                      style={{ fill: "#facc15", stroke: "black", strokeWidth: 1 }}
+                                    />
+                                  );
+                                }
+
+                                if (i === fullStars && hasHalfStar) {
+                                  return (
+                                    <RiStarHalfFill
+                                      key={i}
+                                      size={16}
+                                      style={{ fill: "#facc15", stroke: "black", strokeWidth: 1 }}
+                                    />
+                                  );
+                                }
+
                                 return (
                                   <RiStarFill
                                     key={i}
                                     size={16}
-                                    style={{
-                                      fill: "#facc15",
-                                      stroke: "black",
-                                      strokeWidth: 1,
-                                    }}
+                                    style={{ fill: "white", stroke: "black", strokeWidth: 1 }}
                                   />
                                 );
-                              }
+                              })}
 
-                              if (i === fullStars && hasHalfStar) {
-                                return (
-                                  <RiStarHalfFill
-                                    key={i}
-                                    size={16}
-                                    style={{
-                                      fill: "#facc15",
-                                      stroke: "black",
-                                      strokeWidth: 1,
-                                    }}
-                                  />
-                                );
-                              }
-
-                              return (
-                                <RiStarFill
-                                  key={i}
-                                  size={16}
-                                  style={{
-                                    fill: "white",
-                                    stroke: "black",
-                                    strokeWidth: 1,
-                                  }}
-                                />
-                              );
-                            })}
-
-                            <span className="ml-2 text-sm font-medium text-gray-700">
-                              {displayRating}
-                            </span>
-                          </div>
-                        )}
+                              <span className="ml-2 text-sm font-medium text-gray-700">
+                                {displayRating}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 {hasMore && (
                   <div className="flex justify-center mt-4">

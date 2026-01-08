@@ -645,12 +645,12 @@ const CampaignDetailsView = () => {
 
                         {/* Profile Section */}
                         <div className="flex items-center gap-3 mb-4">
-                            <img
+                            {/* <img
                                 src={cmapignDetails?.vendorphoto}
                                 alt={cmapignDetails?.name || "Vendor"}
                                 onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                 className="w-12 h-12 rounded-full object-cover border border-gray-100"
-                            />
+                            /> */}
                             <div>
                                 <p className="text-base font-semibold">{safeText(cmapignDetails?.businessname)}</p>
                                 <p className="text-sm text-gray-500">{safeText(cmapignDetails?.fullname)}</p>

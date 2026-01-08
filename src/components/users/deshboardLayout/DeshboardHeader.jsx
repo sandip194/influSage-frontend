@@ -116,64 +116,89 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
 
   useEffect(() => {
-    if (!socket) return;
+  if (!socket) {
+    console.log("❌ No socket in receiveMessage listener");
+    return;
+  }
 
-    const messageHandler = (rawPayload) => {
-      if (rawPayload.is_deleted) return;
+  const messageHandler = (payload) => {
+    console.log("📥 SOCKET EVENT → receiveMessage:", payload);
 
-      const conversationid =
-        rawPayload.conversationid ?? rawPayload.conversationId;
+    if (!payload) {
+      console.log("⚠️ Empty payload received");
+      return;
+    }
 
-      if (!conversationid) return;
-      if (String(rawPayload.userid) === String(userId)) return;
+    const conversationid =
+      payload.conversationid ?? payload.conversationId;
 
-      setUnreadMessages((prev) => {
-        if (prev.some(m => String(m.conversationid) === String(conversationid))) {
-          return prev;
-        }
-        return [{ ...rawPayload, conversationid }, ...prev];
-      });
-    };
+    console.log("📥 conversationid:", conversationid);
+    console.log("📥 sender userid:", payload.userid);
+    console.log("📥 my userid:", userId);
 
-    socket.on("receiveMessage", messageHandler);
-    return () => socket.off("receiveMessage", messageHandler);
-  }, [socket, userId]);
+    if (String(payload.userid) === String(userId)) {
+      console.log("⏭️ Ignored (own message)");
+      return;
+    }
+
+    setUnreadMessages((prev) => {
+      console.log("📦 unreadMessages BEFORE:", prev);
+
+      if (prev.some(m => String(m.conversationid) === String(conversationid))) {
+        console.log("⏭️ Conversation already exists");
+        return prev;
+      }
+
+      const updated = [{ ...payload, conversationid }, ...prev];
+      console.log("📦 unreadMessages AFTER:", updated);
+
+      return updated;
+    });
+  };
+
+  socket.on("receiveMessage", messageHandler);
+
+  return () => {
+    socket.off("receiveMessage", messageHandler);
+  };
+}, [socket, userId]);
+
 
 
   useEffect(() => {
-    if (!socket) return;
+  if (!socket) return;
 
-    const statusHandler = ({
-      conversationId,
-      readbyvendor,
-      readbyinfluencer,
-    }) => {
-      console.log("📡 updateMessageStatus", {
-        conversationId,
-        readbyvendor,
-        readbyinfluencer,
-        role,
-      });
+  const statusHandler = (payload) => {
+    console.log("📡 SOCKET EVENT → updateMessageStatus:", payload);
 
-      const shouldRemove =
-        (String(role) === "2" && readbyvendor === true) ||
-        (String(role) === "1" && readbyinfluencer === true);
+    const { conversationId, readbyvendor, readbyinfluencer } = payload;
 
-      if (!shouldRemove) return;
+    const shouldRemove =
+      (String(role) === "2" && readbyvendor === true) ||
+      (String(role) === "1" && readbyinfluencer === true);
 
-      setUnreadMessages((prev) =>
-        prev.filter(
-          (msg) =>
-            String(msg.conversationid) !==
-            String(conversationId)
-        )
+    console.log("📡 shouldRemove?", shouldRemove);
+
+    if (!shouldRemove) return;
+
+    setUnreadMessages((prev) => {
+      console.log("📦 BEFORE remove:", prev);
+
+      const updated = prev.filter(
+        msg => String(msg.conversationid) !== String(conversationId)
       );
-    };
 
-    socket.on("updateMessageStatus", statusHandler);
-    return () =>
-      socket.off("updateMessageStatus", statusHandler);
-  }, [socket, role]);
+      console.log("📦 AFTER remove:", updated);
+      return updated;
+    });
+  };
+
+  socket.on("updateMessageStatus", statusHandler);
+
+  return () => {
+    socket.off("updateMessageStatus", statusHandler);
+  };
+}, [socket, role]);
 
   useEffect(() => {
     if (!socket) return;
@@ -221,6 +246,13 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     };
     fetchProfileData();
   }, [token]);
+useEffect(() => {
+  if (!socket) {
+    console.log("❌ HEADER socket not available");
+  } else {
+    console.log("🧠 HEADER socket connected:", socket.id);
+  }
+}, [socket]);
 
   // ======================================================
   // NOTIFICATION MODAL FETCH
