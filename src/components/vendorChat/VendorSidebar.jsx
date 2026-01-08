@@ -165,9 +165,10 @@ const VendorSidebar = forwardRef(({ setActiveSubject }, ref) => {
       setShowError(true);
       return;
     }
-    setShowError(false);
 
+    setShowError(false);
     setLoadingAdd(true);
+
     try {
       const res = await axios.post(
         "/chat/support/ticket/create-or-update-status",
@@ -175,14 +176,12 @@ const VendorSidebar = forwardRef(({ setActiveSubject }, ref) => {
           p_objectiveid: newSubject,
           p_statusname: "Open",
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      if (res.data?.p_status) {
-       setOpenModal(false);
-       setNewSubject(null);
+      if (res.data) {
+        setOpenModal(false);
+        setNewSubject(null);
+        await handleTabChange(statusList.find(x => x.name === "Open"));
       }
     } catch (error) {
       console.error("Error creating ticket:", error);
