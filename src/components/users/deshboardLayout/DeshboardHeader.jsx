@@ -29,10 +29,12 @@ import { getSocket, resetSocket } from "../../../sockets/socket";
 import NotificationDropdown from "./NotificationDropdown";
 import MessageDropdown from "./MessageDropdown";
 import { clearNotifications } from "../../../features/socket/notificationSlice";
+import useSocketRegister from "../../../sockets/useSocketRegister";
 
 const { Text } = Typography;
 
 const DeshboardHeader = ({ toggleSidebar }) => {
+  useSocketRegister();
   const deletedConversationsRef = React.useRef(new Set());
 
   const socket = getSocket();
@@ -146,12 +148,12 @@ const DeshboardHeader = ({ toggleSidebar }) => {
       readbyvendor,
       readbyinfluencer,
     }) => {
-      // console.log("📡 updateMessageStatus", {
-      //   conversationId,
-      //   readbyvendor,
-      //   readbyinfluencer,
-      //   role,
-      // });
+      console.log("📡 updateMessageStatus", {
+        conversationId,
+        readbyvendor,
+        readbyinfluencer,
+        role,
+      });
 
       const shouldRemove =
         (String(role) === "2" && readbyvendor === true) ||

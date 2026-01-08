@@ -99,7 +99,7 @@ const formatToDDMMYYYY = (dateStr) => {
           })),
         })),
         payment: `₹${safeNumber(c.paymentamount).toLocaleString()}`,
-        notes: safeText(c.note),
+        notes: c.note ?? null,
         status: safeText(c.statusname, "Pending"),
       }));
 

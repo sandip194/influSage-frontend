@@ -94,6 +94,7 @@ const ContractTab = ({ campaignId, token }) => {
         productLink: api.productlink,
         vendorAddress: safeText(api.vendoraddress),
         status: safeText(api.statusname)?.toLowerCase(),   // "Pending" → "pending"
+        cansendfeedback: Boolean(api.cansendfeedback),
       };
 
       setContract(mapped);
@@ -252,15 +253,15 @@ const handleCloseModal = () => {
 
           {/* Right actions */}
           <div className="flex items-center gap-3">
-            {/* Feedback button only when closed */}
-              {contract?.cansendfeedback && (
-                <button
-                  onClick={() => setIsFeedbackOpen(true)}
-                  className="px-4 py-2 text-sm rounded-full cursor-pointer font-medium text-white bg-[#0f122f] hover:bg-[#1c1f4a] transition"
-                >
-                  Give Feedback
-                </button>
-              )}
+            {/* Feedback button only when closed */}            
+                {contract?.cansendfeedback && (
+                  <button
+                    onClick={() => setIsFeedbackOpen(true)}
+                    className="px-4 py-2 text-sm rounded-full cursor-pointer font-medium text-white bg-[#0f122f] hover:bg-[#1c1f4a] transition"
+                  >
+                    Give Feedback
+                  </button>
+                )}  
 
             {contractStatus !== "pending" && (
               <span
