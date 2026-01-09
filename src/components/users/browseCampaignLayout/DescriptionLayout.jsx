@@ -20,7 +20,7 @@ import ApplyNowModal from "./ApplyNowModal";
 import { RiStarFill } from "react-icons/ri";
 
 const DescriptionLayout = () => {
-  const [showFullBrandDesc, setShowFullBrandDesc] = useState(false);
+ // const [showFullBrandDesc, setShowFullBrandDesc] = useState(false);   i commented it bcs never used
   const [showFullAboutBrand, setShowFullAboutBrand] = useState(false);
   const [campaignDetails, setCampaignDetails] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -43,6 +43,7 @@ const DescriptionLayout = () => {
 
 
   const [previewFile, setPreviewFile] = useState(null);
+
   const formatDateDDMMYYYY = (dateStr) => {
     if (!dateStr) return "N/A";
 
@@ -972,6 +973,7 @@ const DescriptionLayout = () => {
         onClose={() => setEditModalOpen(false)}
         applicationId={selectedApplicationId}
         campaignId={selectedCampaignId}
+        campaignBudget={campaignDetails.estimatedbudget} 
         onSuccess ={() => setEditModalOpen(false)}
       />
     </div>

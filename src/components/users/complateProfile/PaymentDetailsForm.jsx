@@ -221,7 +221,11 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
       confirmAccountNumber: decodeHexAccountNumber(payment.accountnumber) || null,
       ifscCode: payment.bankcode || null,
       address: payment.branchaddress || null,
-      phone: payment.contactnumber || null,
+
+      ...(payment.contactnumber
+        ? { phone: payment.contactnumber }
+        : {}),
+
       email: payment.email || null,
       currency: payment.preferredcurrency || null,
       taxId: payment.taxidentificationnumber || null,
@@ -231,6 +235,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
       otherDetails: paymentMethod === "other" ? methodObj.paymentdetails : null,
       agree: payment.agreedToTerms || false,
     };
+
   };
 
   // safe one-time form population

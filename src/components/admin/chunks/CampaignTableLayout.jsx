@@ -235,8 +235,6 @@ const CampaignTableLayout = () => {
   };
 
 
-
-
   const handleSubmit = async (id, statusName) => {
     try {
       const res = await axios.post('/admin/dashboard/approved-or-rejected', { p_campaignid: id, p_statusname: statusName }, {
@@ -289,9 +287,6 @@ const CampaignTableLayout = () => {
     fetchCampaigns();
   }, [activeStatusId, page, pageSize, search, appliedFilters]);
 
-
-
-
   // 🔍 Search Handler
   const handleSearch = (e) => {
     if (e.key === "Enter") {
@@ -315,8 +310,6 @@ const CampaignTableLayout = () => {
     setPage(1);
   };
 
-
-
   const openConfirmationModal = (campaign, type) => {
     setCurrentCampaign(campaign);
     setCurrentCampaignId(campaign.id);
@@ -331,12 +324,9 @@ const CampaignTableLayout = () => {
     }
   };
 
-
-
   const activeStatusName = statusList.find(s => String(s.id) === String(activeStatusId))?.name;
   const activeColumns =
     CAMPAIGN_COLUMNS_BY_STATUS[activeStatusName] || [];
-
 
 
   // New function for reject with reason
@@ -400,7 +390,6 @@ const CampaignTableLayout = () => {
       setActionLoading(false);
     }
   };
-
 
 
   // 🧱 UI
@@ -681,37 +670,37 @@ const CampaignTableLayout = () => {
 
                   {activeColumns.includes("ApprovedBy") && (
                     <td className="p-4">
-                      {c.approvedby ? safeText(c.approvedby) : "—"}
+                      {c["Approved By"] ? safeText(c["Approved By"]) : "—"}
                     </td>
                   )}
 
                   {activeColumns.includes("ApprovedOn") && (
                     <td className="p-4">
-                      {c.approveddate ? formatDate(c.approveddate) : "—"}
+                      {c["Approved On"] ? formatDate(c["Approved On"]) : "—"}
                     </td>
                   )}
 
                   {activeColumns.includes("RejectedBy") && (
                     <td className="p-4">
-                      {safeText(c.rejectedby, "—")}
+                      {safeText(c["Rejected By"], "—")}
                     </td>
                   )}
 
                   {activeColumns.includes("RejectedOn") && (
                     <td className="p-4">
-                      {formatDate(c.rejecteddate)}
+                      {formatDate(c["Rejected On"])}
                     </td>
                   )}
 
                   {activeColumns.includes("BlockedBy") && (
                     <td className="p-4">
-                      {safeText(c.blockedby, "—")}
+                      {safeText(c["Blocked On"], "—")}
                     </td>
                   )}
 
                   {activeColumns.includes("BlockedOn") && (
                     <td className="p-4">
-                      {formatDate(c.blockeddate)}
+                      {formatDate(c["Blocked On"])}
                     </td>
                   )}
 

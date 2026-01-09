@@ -29,13 +29,13 @@ import { safeText, safeArray, safeNumber, safeDate } from "../../../App/safeAcce
 
 
 const normalizeStatus = (status = "") =>
-status.replace(/\s+/g, "");
+    status.replace(/\s+/g, "");
 
 const columnsByStatus = {
-    ApprovalPending: ["User", "Email", "Followers", "Category", "Location", "AppliedOn", "Actions"],
-    Approved: ["User", "Email",  "ApprovedBy", "ApprovedOn", "Actions"],
-    Rejected: ["User", "Email",  "RejectedBy", "RejectedOn", "Actions"],
-    Blocked: ["User", "Email",  "BlockedBy", "BlockedOn", "Actions"],
+    ApprovalPending: ["Influencer", "Email", "Followers", "Category", "Location", "AppliedOn", "Actions"],
+    Approved: ["Influencer", "Email", "Approved By", "Approved On", "Actions"],
+    Rejected: ["Influencer", "Email", "Rejected By", "Rejected On", "Actions"],
+    Blocked: ["Influencer", "Email", "Blocked By", "Blocked On", "Actions"],
 };
 
 
@@ -238,7 +238,6 @@ const UserTableLayout = () => {
         }
     };
 
-
     const handleBlockSubmit = async () => {
         if (!selectedReason) {
             toast.error("Please select a reason to block this user.");
@@ -319,10 +318,10 @@ const UserTableLayout = () => {
         <div className="w-full">
             <div className="mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                    User Management
+                    Influencer Management
                 </h2>
                 <p className="text-gray-600 text-sm">
-                    Manage users by their current status
+                    Manage Influencers by their current status
                 </p>
             </div>
 
@@ -357,7 +356,7 @@ const UserTableLayout = () => {
                 <Input
                     prefix={<SearchOutlined />}
                     size="large"
-                    placeholder="Search users..."
+                    placeholder="Search Influencers..."
                     className="w-full sm:w-72"
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
@@ -390,7 +389,7 @@ const UserTableLayout = () => {
                         <table className="w-full text-left border-collapse text-sm sm:text-base min-w-[700px] md:min-w-full">
                             <thead className="bg-gray-100 text-gray-700 text-xs sm:text-sm uppercase tracking-wide">
                                 <tr>
-                                    <th className="p-4">User</th>
+                                    <th className="p-4">Influencer</th>
                                     <th className="p-4">Email</th>
                                     <th className="p-4">Followers</th>
                                     <th className="p-4">Category</th>
@@ -451,15 +450,15 @@ const UserTableLayout = () => {
                                     >
                                         {activeColumns.map((col) => {
                                             switch (col) {
-                                                case "User":
+                                                case "Influencer":
                                                     return (
-                                                        <td key="User" className="px-4">
+                                                        <td key="Influencer" className="px-4">
                                                             <div className="flex items-center space-x-3">
                                                                 <img
-                                                                 src={user?.photopath}
-                                                                 alt={safeText(user?.firstname, "User")}
-                                                                 onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                                                                  className="w-10 h-10 rounded-full object-cover" />
+                                                                    src={user?.photopath}
+                                                                    alt={safeText(user?.firstname, "Influencer")}
+                                                                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                                                                    className="w-10 h-10 rounded-full object-cover" />
                                                                 <span className="font-medium">{safeText(user?.firstname)} {safeText(user?.lastname)}</span>
                                                             </div>
                                                         </td>
@@ -495,25 +494,50 @@ const UserTableLayout = () => {
                                                     return <td key="Location" className="p-4">{safeText(user?.statename)}</td>;
 
                                                 case "AppliedOn":
-                                                    return <td key="AppliedOn" className="p-4">{safeDate(user?.createddate)}</td>;
+                                                    return <td key="Applied On" className="p-4">{safeDate(user?.createddate)}</td>;
 
-                                                case "ApprovedBy":
-                                                    return <td key="ApprovedBy" className="p-4">{safeText(user?.approvedby, "—")}</td>;
+                                                case "Approved By":
+                                                    return (
+                                                        <td key="Approved By" className="p-4">
+                                                            {safeText(user?.["Approved By"], "—")}
+                                                        </td>
+                                                    );
 
-                                                case "ApprovedOn":
-                                                    return <td key="ApprovedOn" className="p-4">{safeDate(user?.approveddate)}</td>;
+                                                case "Approved On":
+                                                    return (
+                                                        <td key="Approved On" className="p-4">
+                                                            {safeDate(user?.["Approved On"])}
+                                                        </td>
+                                                    );
 
-                                                case "RejectedBy":
-                                                    return <td key="RejectedBy" className="p-4">{safeText(user?.rejectedby, "—")}</td>;
+                                                case "Rejected By":
+                                                    return (
+                                                        <td key="Rejected By" className="p-4">
+                                                            {safeText(user?.["Rejected By"], "—")}
+                                                        </td>
+                                                    );
 
-                                                case "RejectedOn":
-                                                    return <td key="RejectedOn" className="p-4">{safeDate(user?.rejecteddate)}</td>;
+                                                case "Rejected On":
+                                                    return (
+                                                        <td key="Rejected On" className="p-4">
+                                                            {safeDate(user?.["Rejected On"])}
+                                                        </td>
+                                                    );
 
-                                                case "BlockedBy":
-                                                    return <td key="BlockedBy" className="p-4">{safeText(user?.blockedby, "—")}</td>;
+                                                case "Blocked By":
+                                                    return (
+                                                        <td key="Blocked By" className="p-4">
+                                                            {safeText(user?.["Blocked By"], "—")}
+                                                        </td>
+                                                    );
 
-                                                case "BlockedOn":
-                                                    return <td key="BlockedOn" className="p-4">{safeDate(user?.blockeddate)}</td>;
+                                                case "Blocked On":
+                                                    return (
+                                                        <td key="Blocked On" className="p-4">
+                                                            {safeDate(user?.["Blocked On"])}
+                                                        </td>
+                                                    );
+
 
                                                 case "Actions":
                                                     return (
@@ -522,48 +546,48 @@ const UserTableLayout = () => {
                                                                 className="flex justify-right items-center gap-1"
                                                                 onClick={(e) => e.stopPropagation()}
                                                             >
-                                                                    {normalizeStatus(user?.status) === "ApprovalPending" && (
+                                                                {normalizeStatus(user?.status) === "ApprovalPending" && (
                                                                     <>
                                                                         <Tooltip title="Approve">
+                                                                            <button
+                                                                                onClick={() => openConfirmationModal(user, "Approved")}
+                                                                                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
+                                                                            >
+                                                                                <RiCheckLine size={18} />
+                                                                            </button>
+                                                                        </Tooltip>
+
+                                                                        <Tooltip title="Reject">
+                                                                            <button
+                                                                                onClick={() => openConfirmationModal(user, "Rejected")}
+                                                                                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
+                                                                            >
+                                                                                <RiCloseLine size={18} />
+                                                                            </button>
+                                                                        </Tooltip>
+                                                                    </>
+                                                                )}
+                                                                {normalizeStatus(user?.status) === "Approved" && (
+                                                                    <Tooltip title="Block">
+                                                                        <button
+                                                                            onClick={() => openConfirmationModal(user, "Blocked")}
+                                                                            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
+                                                                        >
+                                                                            <RiProhibitedLine size={18} />
+                                                                        </button>
+                                                                    </Tooltip>
+                                                                )}
+
+                                                                {normalizeStatus(user?.status) === "Rejected" && (
+                                                                    <Tooltip title="Approve">
                                                                         <button
                                                                             onClick={() => openConfirmationModal(user, "Approved")}
                                                                             className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
                                                                         >
                                                                             <RiCheckLine size={18} />
                                                                         </button>
-                                                                        </Tooltip>
-
-                                                                        <Tooltip title="Reject">
-                                                                        <button
-                                                                            onClick={() => openConfirmationModal(user, "Rejected")}
-                                                                            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
-                                                                        >
-                                                                            <RiCloseLine size={18} />
-                                                                        </button>
-                                                                        </Tooltip>
-                                                                    </>
-                                                                    )}
-                                                                    {normalizeStatus(user?.status) === "Approved" && (
-                                                                    <Tooltip title="Block">
-                                                                        <button
-                                                                        onClick={() => openConfirmationModal(user, "Blocked")}
-                                                                        className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600 hover:text-red-700 transition"
-                                                                        >
-                                                                        <RiProhibitedLine size={18} />
-                                                                        </button>
                                                                     </Tooltip>
-                                                                    )}
-
-                                                                    {normalizeStatus(user?.status) === "Rejected" && (
-                                                                    <Tooltip title="Approve">
-                                                                        <button
-                                                                        onClick={() => openConfirmationModal(user, "Approved")}
-                                                                        className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-green-50 text-green-600 hover:text-green-700 transition"
-                                                                        >
-                                                                        <RiCheckLine size={18} />
-                                                                        </button>
-                                                                    </Tooltip>
-                                                                    )}
+                                                                )}
                                                             </div>
                                                         </td>
                                                     );

@@ -14,6 +14,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { safeText, safeArray, safeNumber } from "../../../App/safeAccess";
+import { RiArrowDownSLine, RiArrowUpSLine } from "@remixicon/react";
 
 
 const CampaignDetailsView = () => {
@@ -24,7 +25,7 @@ const CampaignDetailsView = () => {
 
     const [cmapignDetails, setCampaignDetails] = useState(null)
     const [actionLoading, setActionLoading] = useState(false);
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    // const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState(null);
     const openImageModal = (img) => setPreviewImage(img);
     const closeImageModal = () => setPreviewImage(null);
@@ -32,6 +33,8 @@ const CampaignDetailsView = () => {
     const [blockReasons, setBlockReasons] = useState([]);
     const [selectedBlockReason, setSelectedBlockReason] = useState(null);
     const [blockLoading, setBlockLoading] = useState(false);
+
+    const [showHistory, setShowHistory] = useState(false);
 
 
     // For approval
@@ -161,14 +164,14 @@ const CampaignDetailsView = () => {
         try {
             setActionLoading(true);
 
-    const res = await axios.post(
-      "admin/dashboard/profile-campaign-block",
-      {
-        p_campaignid: campaignId,
-        p_objective: selectedBlockReason,
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+            const res = await axios.post(
+                "admin/dashboard/profile-campaign-block",
+                {
+                    p_campaignid: campaignId,
+                    p_objective: selectedBlockReason,
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
             if (res.status === 200) {
                 toast.success(res.data?.message || "Campaign blocked successfully");
                 setIsBlockModalOpen(false);
@@ -221,31 +224,58 @@ const CampaignDetailsView = () => {
                 {/* LEFT SIDE */}
                 <div className="flex-1 space-y-4">
                     {/* Campaign Header */}
-                    <div className="bg-white rounded-2xl overflow-hidden">
+                    <div className="bg-white rounded-2xl overflow-hidden p-4">
                         {/* Banner placeholder */}
-                        <div className="relative h-40 bg-gray-200">
+                        <div className="grid grid-cols-2 sm:grid-cols-[auto_1fr_auto] gap-4 items-start ">
+
+                            {/* Campaign Image */}
                             <img
                                 src={cmapignDetails?.photopath}
                                 alt="Logo"
-                                onClick={() => setIsPreviewOpen(true)}
+                                onClick={() => setPreviewImage(cmapignDetails?.photopath)}
                                 onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                                className="absolute rounded-full top-14 left-4 w-20 h-20 border-4 border-white object-cover cursor-pointer"
+                                className="
+            w-20 h-20 rounded-full border-2 border-gray-200 object-cover cursor-pointer
+            row-span-1 sm:row-span-1
+        "
                             />
-                            {isPreviewOpen && (
+
+                            {/* Status Pill */}
+                            <div
+                                className={`
+            justify-self-end px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap border border-gray-200
+            order-2 sm:order-3
+            col-span-1 sm:col-span-1
+            ${cmapignDetails?.statusname === "Approved" ? "bg-green-50 text-green-700 border-green-200" : ""}
+            ${cmapignDetails?.statusname === "Rejected" ? "bg-red-50 text-red-700 border-red-200" : ""}
+            ${cmapignDetails?.statusname === "Blocked" ? "bg-gray-100 text-gray-700 border-gray-300" : ""}
+            ${cmapignDetails?.statusname === "Approval Pending" ? "bg-yellow-50 text-yellow-700 border-yellow-200" : ""}
+        `}
+                            >
+                                {cmapignDetails?.statusname}
+                            </div>
+
+                            {/* Campaign Name + Business */}
+                            <div className="col-span-2 sm:col-span-1 sm:col-start-2 order-3 sm:order-2 min-w-0">
+                                <h2 className="font-semibold text-lg truncate">
+                                    {safeText(cmapignDetails?.name, "No Campaign Name")}
+                                </h2>
+                                <p className="text-gray-500 text-sm">
+                                    {safeText(cmapignDetails?.businessname, "No Business Name")}
+                                </p>
+                            </div>
+
+
+                            {/* Image Preview Modal */}
+                            {previewImage && (
                                 <div
                                     className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                                    onClick={() => setIsPreviewOpen(false)}
+                                    onClick={() => setPreviewImage(null)}
                                 >
-                                    <button
-                                        onClick={() => setIsPreviewOpen(false)}
-                                        className="absolute top-6 right-8 text-white text-3xl font-bold hover:text-gray-300"
-                                    >
-                                        ×
-                                    </button>
                                     <img
-                                        src={cmapignDetails?.photopath}
-                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                                        alt="Logo Preview"
+                                        src={previewImage}
+                                        alt="Preview"
+                                        onError={(e) => (e.target.src = "/default.jpg")}
                                         className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
                                         onClick={(e) => e.stopPropagation()}
                                     />
@@ -253,158 +283,216 @@ const CampaignDetailsView = () => {
                             )}
                         </div>
 
-                        <div className="p-4">
-                            {/* Title + Buttons Row */}
-                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
-                                <div>
-                                    {/* Campaign Name and Business */}
-                                    <h2 className="font-semibold text-lg">{safeText(cmapignDetails?.name, "no CampaignName")}</h2>
-                                    <p className="text-gray-500 text-sm">{safeText(cmapignDetails?.businessname, "no businessName")}</p>
-                                </div>
 
-                                {/* Action Buttons */}
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                                    {cmapignDetails?.statusname === "Approval Pending" && (
+                        <div className="mt-4">
+                            {/* Action Buttons */}
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                                {cmapignDetails?.statusname === "Approval Pending" && (
+                                    <>
+                                        {/* ✅ Approve Button */}
+                                        <Button
+                                            type="text"
+                                            icon={<CheckOutlined />}
+                                            disabled={actionLoading}
+                                            onClick={() => openConfirmationModal("Approved")}
+                                            className="!border !border-green-600 !text-green-600 !bg-transparent hover:!bg-green-600 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
+                                        >
+                                            Approve
+                                        </Button>
+
+                                        {/* ❌ Reject Button */}
+                                        <Button
+                                            type="text"
+                                            icon={<CloseOutlined />}
+                                            disabled={actionLoading}
+                                            onClick={() => openConfirmationModal("Rejected")}
+                                            className="!border !border-red-600 !text-red-600 !bg-transparent hover:!bg-red-600 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
+                                        >
+                                            Reject
+                                        </Button>
+
+                                        {/* 🚫 Block Button */}
+                                        <Button
+                                            type="text"
+                                            icon={<StopOutlined />}
+                                            disabled={actionLoading}
+                                            onClick={() => {
+                                                setIsBlockModalOpen(true);
+                                                fetchBlockReasons();
+                                            }}
+                                            className="!border !border-gray-600 !text-gray-700 !bg-transparent hover:!bg-gray-800 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
+                                        >
+                                            Block
+                                        </Button>
+                                    </>
+                                )}
+
+                                {cmapignDetails?.statusname === "Rejected" && (
+                                    <>
+                                        {/* ✅ Approve Button */}
+                                        <Button
+                                            type="text"
+                                            icon={<CheckOutlined />}
+                                            disabled={actionLoading}
+                                            onClick={() => openConfirmationModal("Approved")}
+                                            className="!border !border-green-600 !text-green-600 !bg-transparent hover:!bg-green-600 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
+                                        >
+                                            Approve
+                                        </Button>
+                                    </>
+                                )}
+
+                                {cmapignDetails?.statusname === "Blocked" && null}
+
+                                {cmapignDetails?.statusname !== "Approval Pending" &&
+                                    cmapignDetails?.statusname !== "Rejected" &&
+                                    cmapignDetails?.statusname !== "Blocked" && (
                                         <>
-                                            {/* ✅ Approve Button */}
+                                            {/* 🚫 Block Button */}
                                             <Button
                                                 type="text"
-                                                icon={<CheckOutlined />}
+                                                icon={<StopOutlined />}
                                                 disabled={actionLoading}
-                                                onClick={() => openConfirmationModal("Approved")}
-                                                className="!border !border-green-600 !text-green-600 !bg-transparent hover:!bg-green-600 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
+                                                onClick={() => {
+                                                    setIsBlockModalOpen(true);
+                                                    fetchBlockReasons();
+                                                }}
+                                                className="!border !border-gray-600 !text-gray-700 !bg-transparent hover:!bg-gray-800 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
                                             >
-                                                Approve
+                                                Block
                                             </Button>
-
-                                            {/* ❌ Reject Button */}
-                                            <Button
-                                                type="text"
-                                                icon={<CloseOutlined />}
-                                                disabled={actionLoading}
-                                                onClick={() => openConfirmationModal("Rejected")}
-                                                className="!border !border-red-600 !text-red-600 !bg-transparent hover:!bg-red-600 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
-                                            >
-                                                Reject
-                                            </Button>
-
-                                             {/* 🚫 Block Button */}
-                                                <Button
-                                                    type="text"
-                                                    icon={<StopOutlined />}
-                                                    disabled={actionLoading}
-                                                    onClick={() => {
-                                                        setIsBlockModalOpen(true);
-                                                        fetchBlockReasons();
-                                                    }}
-                                                    className="!border !border-gray-600 !text-gray-700 !bg-transparent hover:!bg-gray-800 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
-                                                >
-                                                    Block
-                                                </Button>
                                         </>
                                     )}
 
-                                    {cmapignDetails?.statusname === "Rejected" && (
-                                        <>
-                                            {/* ✅ Approve Button */}
-                                            <Button
-                                                type="text"
-                                                icon={<CheckOutlined />}
-                                                disabled={actionLoading}
-                                                onClick={() => openConfirmationModal("Approved")}
-                                                className="!border !border-green-600 !text-green-600 !bg-transparent hover:!bg-green-600 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
-                                            >
-                                                Approve
-                                            </Button>
-                                        </>
-                                    )}
-
-                                    {cmapignDetails?.statusname === "Blocked" && null}
-
-                                    {cmapignDetails?.statusname !== "Approval Pending" &&
-                                        cmapignDetails?.statusname !== "Rejected" &&
-                                        cmapignDetails?.statusname !== "Blocked" && (
-                                            <>
-                                                {/* 🚫 Block Button */}
-                                                <Button
-                                                    type="text"
-                                                    icon={<StopOutlined />}
-                                                    disabled={actionLoading}
-                                                    onClick={() => {
-                                                        setIsBlockModalOpen(true);
-                                                        fetchBlockReasons();
-                                                    }}
-                                                    className="!border !border-gray-600 !text-gray-700 !bg-transparent hover:!bg-gray-800 hover:!text-white font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2"
-                                                >
-                                                    Block
-                                                </Button>
-                                            </>
-                                        )}
-
-                                </div>
                             </div>
 
                             {/* Campaign Info Grid */}
-                            <div className="flex flex-wrap justify-between gap-6 border border-gray-200 rounded-2xl p-4">
+                            <div className="flex flex-wrap justify-between gap-6 border border-gray-200 rounded-2xl p-4 my-4">
                                 <div className="min-w-[140px]">
                                     <div className="flex items-center gap-2 text-gray-400 mb-2">
-                                    <RiMoneyRupeeCircleLine className="w-5 h-5" />
-                                    <span className="text-sm">Budget</span>
+                                        <RiMoneyRupeeCircleLine className="w-5 h-5" />
+                                        <span className="text-sm">Budget</span>
                                     </div>
                                     <p className="text-[#0D132D] font-bold text-xl">
-                                    ₹{safeNumber(cmapignDetails?.estimatedbudget, 0).toLocaleString()}
+                                        ₹{safeNumber(cmapignDetails?.estimatedbudget, 0).toLocaleString()}
                                     </p>
                                 </div>
 
                                 {/* Languages */}
                                 <div className="min-w-[180px]">
                                     <div className="flex items-center gap-2 text-gray-400 mb-2">
-                                    <RiTranslate className="w-5 h-5" />
-                                    <span className="text-sm">Language</span>
+                                        <RiTranslate className="w-5 h-5" />
+                                        <span className="text-sm">Language</span>
                                     </div>
 
                                     <div className="flex flex-wrap gap-2">
-                                    {safeArray(cmapignDetails?.campaignlanguages).length > 0 ? (
-                                        cmapignDetails.campaignlanguages.map((lang) => (
-                                        <span
-                                            key={lang.languageid}
-                                            className="px-3 py-1 text-sm rounded-lg bg-indigo-100 text-indigo-700 font-medium"
-                                        >
-                                            {safeText(lang.languagename)}
-                                        </span>
-                                        ))
-                                    ) : (
-                                        <span className="text-gray-400">-</span>
-                                    )}
+                                        {safeArray(cmapignDetails?.campaignlanguages).length > 0 ? (
+                                            cmapignDetails.campaignlanguages.map((lang) => (
+                                                <span
+                                                    key={lang.languageid}
+                                                    className="px-3 py-1 text-sm rounded-lg bg-indigo-100 text-indigo-700 font-medium"
+                                                >
+                                                    {safeText(lang.languagename)}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="text-gray-400">-</span>
+                                        )}
                                     </div>
                                 </div>
 
                                 {/* Gender */}
                                 <div className="min-w-[140px]">
                                     <div className="flex items-center gap-2 text-gray-400 mb-2">
-                                    <RiMenLine className="w-5 h-5" />
-                                    <span className="text-sm">Gender</span>
+                                        <RiMenLine className="w-5 h-5" />
+                                        <span className="text-sm">Gender</span>
                                     </div>
 
                                     <div className="flex flex-wrap gap-2">
-                                    {safeArray(cmapignDetails?.campaigngenders).length > 0 ? (
-                                        cmapignDetails.campaigngenders.map((gender) => (
-                                        <span
-                                            key={gender.genderid}
-                                            className="px-3 py-1 text-sm rounded-lg bg-pink-100 text-pink-700 font-medium"
-                                        >
-                                            {safeText(gender.gendername)}
-                                        </span>
-                                        ))
-                                    ) : (
-                                        <span className="text-gray-400">-</span>
-                                    )}
+                                        {safeArray(cmapignDetails?.campaigngenders).length > 0 ? (
+                                            cmapignDetails.campaigngenders.map((gender) => (
+                                                <span
+                                                    key={gender.genderid}
+                                                    className="px-3 py-1 text-sm rounded-lg bg-pink-100 text-pink-700 font-medium"
+                                                >
+                                                    {safeText(gender.gendername)}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="text-gray-400">-</span>
+                                        )}
                                     </div>
                                 </div>
 
 
                             </div>
                         </div>
+
+                        {/* Show/Hide History */}
+                        {(
+                            cmapignDetails["Approved On"] ||
+                            cmapignDetails["Rejected On"] ||
+                            cmapignDetails["Blocked On"]
+                        ) && (
+                                <button
+                                    onClick={() => setShowHistory(!showHistory)}
+                                    className="inline-flex items-center w-30 rounded-sm bg-blue-50 text-blue-600 font-medium text-sm gap-1 mt-1 cursor-pointer"
+                                >
+                                    {showHistory ? <RiArrowUpSLine /> : <RiArrowDownSLine />}
+                                    {showHistory ? "Hide History" : "Show History"}
+                                </button>
+
+                            )}
+
+                        {/* History Timeline */}
+                        {showHistory && (
+                            <div className="border-l-2 border-gray-200 pl-4 ml-2 flex flex-col gap-2 mt-2">
+                                {cmapignDetails["Approved On"] && (
+                                    <div className="flex flex-col">
+                                        <span className="inline-flex items-center gap-1 py-1 text-sm text-green-600 font-medium"><RiCheckLine /> Approved</span>
+                                        <span className="text-gray-500 text-sm">
+                                            by {safeText(cmapignDetails["Approved By"])} —{" "}
+                                            {new Date(cmapignDetails["Approved On"]).toLocaleString("en-GB", {
+                                                dateStyle: "medium",
+                                                timeStyle: "short",
+                                            })}
+                                        </span>
+                                    </div>
+                                )}
+                                {cmapignDetails["Rejected On"] && (
+                                    <div className="flex flex-col">
+                                        <span className="inline-flex items-center gap-1 py-1 text-sm text-red-600 font-medium"><RiCloseLine /> Rejected</span>
+                                        <span className="text-gray-500 text-sm">
+                                            by {safeText(cmapignDetails["Rejected By"])} —{" "}
+                                            {new Date(cmapignDetails["Rejected On"]).toLocaleString("en-GB", {
+                                                dateStyle: "medium",
+                                                timeStyle: "short",
+                                            })}
+                                        </span>
+                                        <span className="text-gray-600 text-sm font-semibold">
+                                            Reason: {safeText(cmapignDetails["Reject Reason"], "N/A")}
+                                        </span>
+                                    </div>
+                                )}
+                                {cmapignDetails["Blocked On"] && (
+                                    <div className="flex flex-col">
+                                        <span className="inline-flex items-center gap-1 py-1 text-sm text-gray-600 font-medium"><RiForbidLine /> Blocked</span>
+                                        <span className="text-gray-500 text-sm">
+                                            by {safeText(cmapignDetails["Blocked By"])} —{" "}
+                                            {new Date(cmapignDetails["Blocked On"]).toLocaleString("en-GB", {
+                                                dateStyle: "medium",
+                                                timeStyle: "short",
+                                            })}
+                                        </span>
+                                        <span className="text-gray-600 text-sm font-semibold">
+                                            Reason: {safeText(cmapignDetails["Block Reason"], "N/A")}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+
                     </div>
 
                     {/* Description + Requirements */}
@@ -588,7 +676,7 @@ const CampaignDetailsView = () => {
 
                     {/* Campaign Info */}
                     <div className="bg-white p-4 rounded-2xl">
-                         <h3 className="font-semibold text-lg">Campaign Details</h3>
+                        <h3 className="font-semibold text-lg">Campaign Details</h3>
                         <hr className="my-2 border-gray-200" />
                         <div className="py-2 border-b border-gray-200">
                             <p className="text-sm mb-1 font-semibold">Campaign Number</p>
@@ -630,16 +718,11 @@ const CampaignDetailsView = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="pt-4 pb-2">
-                            <p className="text-sm font-semibold mb-1">Total Budget</p>
-                            <p className="text-gray-500">
-                                ₹{cmapignDetails?.estimatedbudget?.toLocaleString() || "-"}
-                            </p>
-                        </div>
+
                     </div>
 
                     {/* Vendor Info Card */}
-                    <div className="bg-white p-4 rounded-2xl shadow-sm">
+                    <div className="bg-white p-4 rounded-2xl ">
                         <h3 className="font-semibold text-lg">Vendor Details</h3>
                         <hr className="my-2 border-gray-200" />
 
@@ -684,29 +767,61 @@ const CampaignDetailsView = () => {
 
                     <div className="bg-white p-4 rounded-2xl">
                         <h3 className="font-semibold text-lg mb-4">Platform Content Types</h3>
+
                         <div className="space-y-4">
                             {cmapignDetails?.providercontenttype?.length > 0 ? (
                                 cmapignDetails.providercontenttype.map((platform) => (
                                     <div
-                                        key={platform.providercontenttypeid}
+                                        key={platform.providerid}
                                         className="border-b border-gray-100 pb-3 last:border-none"
                                     >
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-gray-900 font-medium">{platform.providername}</span>
-                                            <span className="text-gray-600 text-sm">{platform.contenttypename}</span>
+                                        {/* Provider Header */}
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-1">
+                                                {/* Provider Icon */}
+                                                {platform.iconpath && (
+                                                    <img
+                                                        src={platform.iconpath}
+                                                        alt={platform.providername}
+                                                        className="w-6 h-6 rounded-full object-contain"
+                                                    />
+                                                )}
+
+                                                {/* Provider Name */}
+                                                <span className="text-gray-900 font-medium">
+                                                    {platform.providername}
+                                                </span>
+                                            </div>
+
+                                            {/* Content Types */}
+                                            <div className="flex flex-wrap gap-1">
+                                                {platform.contenttypes?.map((type) => (
+                                                    <span
+                                                        key={type.providercontenttypeid}
+                                                        className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full border border-gray-200"
+                                                    >
+                                                        {type.contenttypename}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
+
+                                        {/* Caption */}
                                         {platform.caption && (
-                                            <p className="text-gray-600 italic text-sm mt-2 border-l-2 border-gray-200 pl-3">
+                                            <p className="text-gray-600 italic text-sm mt-2 border-l-2 border-gray-200 pl-3 ">
                                                 {platform.caption}
                                             </p>
                                         )}
                                     </div>
                                 ))
                             ) : (
-                                <p className="text-gray-500 text-sm">No platform content types available.</p>
+                                <p className="text-gray-500 text-sm">
+                                    No platform content types available.
+                                </p>
                             )}
                         </div>
                     </div>
+
                 </div>
 
             </div>

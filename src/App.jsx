@@ -148,7 +148,7 @@ const App = () => {
                                                                                 <Route path='my-campaigns/message' element={<Message />} />
                                                                                 <Route path='my-campaigns/filesmedia' element={<FilesMedia />} /> */}
 
-                                                                                <Route path='payment' element={<Payment />} />
+                                                                                <Route path='payment' element={<ComingSoon />} />
 
                                                                                 <Route path='analytics' element={<Analytics />} />
 

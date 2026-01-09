@@ -99,7 +99,7 @@ const ActiveCampaignList = () => {
             dataIndex: 'estimatedbudget',
             key: 'estimatedbudget',
             render: (budget) => {
-                return budget != null ? `${budget.toLocaleString()}` : 'N/A';
+                return budget != null ? `₹ ${budget.toLocaleString()}` : 'N/A';
             },
         },
         {
