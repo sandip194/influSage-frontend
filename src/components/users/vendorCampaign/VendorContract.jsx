@@ -27,10 +27,11 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
   const [feedback, setFeedback] = useState("");
   const [closingLoading, setClosingLoading] = useState(false);
   const [rating, setRating] = useState(0);
-  const [errors, setErrors] = useState({
-    rating: "",
-    feedback: "",
-  });
+  const [errors, setErrors] = useState({ rating: "", feedback: ""});
+
+  const [isViewFeedbackOpen, setIsViewFeedbackOpen] = useState(false);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [contractFeedback, setContractFeedback] = useState(null);
 
   const formatToDDMMYYYY = (dateStr) => {
     if (!dateStr) return "—";
@@ -94,6 +95,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         campaignEnd: safeText(campaignEnd),
         productLink: c.productlink,
         vendorAddress: safeText(c.vendoraddress),
+        canviewfeedback: Boolean(c.canviewfeedback ?? c.isfeedback),
         deliverables: safeArray(c.providercontenttype).map((p) => ({
           icon: safeText(p.iconpath),
           provider: safeText(p.providername),
@@ -239,6 +241,36 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
     }
   };
 
+  const fetchVendorContractFeedback = async (contract) => {
+    try {
+      setFeedbackLoading(true);
+      setContractFeedback(null);
+
+      const res = await axios.get(
+        "/vendor/contract-feedback",
+        {
+          params: {
+            p_contractid: contract.id,
+            p_influencerid: contract.influencerId,
+          },
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res?.status === 200) {
+        setContractFeedback(res.data.data || []);
+      }
+    } catch (error) {
+      console.error("Fetch Vendor Contract Feedback Error:", error);
+      toast.error(
+        error?.response?.data?.Message || "Failed to fetch feedback"
+      );
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+const feedbackItem = safeArray(contractFeedback)[0];
+
   return (
     <div className="bg-white rounded-2xl p-0">
       <div className="flex justify-between items-center mb-4">
@@ -272,16 +304,6 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
               </span>
             }
           />
-          {/* <button
-            onClick={() => {
-              setEditingContract(null);
-              setIsModalOpen(true);
-            }}
-            className="bg-[#0D132D] text-white text-md py-2 px-4 rounded flex items-center gap-2"
-          >
-            <RiAddLine size={20} />
-            Create Contract
-          </button> */}
         </div>
       ) : (
         <div className="space-y-4 mb-4">
@@ -292,47 +314,38 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
       rounded-xl p-4 sm:p-5 shadow-md hover:shadow-xl 
       transition-all duration-300"
             >
-              {/* 🔹 MOBILE HEADER: Influencer + Status + Payment */}
-              <div className="flex sm:hidden justify-between items-start mb-3">
-                {/* Influencer */}
-                <div className="flex items-center gap-2">
-                  {contract.influencer.display}
-                </div>
-
-                {/* Status + Payment */}
-                <div className="flex flex-col items-end">
-                  <p className="text-lg font-bold text-gray-900 leading-none mt-5">
-                    {contract.payment}
-                  </p>
-                </div>
-              </div>
-
               {/* STATUS + ACTION RIBBON */}
-              <div className="absolute top-0 right-0 flex ">
-                {/* Status */}
+              <div className="absolute top-0 right-0">
                 <span
                   className={`
-      px-4 py-1
-      text-xs font-semibold
-      text-white
-      rounded-bl-xl
-      ${
-        contract.status === "Accepted"
-          ? "bg-green-600"
-          : contract.status === "Completed"
-          ? "bg-emerald-600"
-          : contract.status === "Closed"
-          ? "bg-gray-700"
-          : contract.status === "Rejected"
-          ? "bg-red-600"
-          : "bg-yellow-500"
-      }
-    `}
+                    px-4 py-1
+                    text-xs font-semibold
+                    text-white
+                    rounded-bl-xl
+                    ${contract.status === "Accepted"
+                      ? "bg-green-600"
+                      : contract.status === "Completed"
+                      ? "bg-emerald-600"
+                      : contract.status === "Closed"
+                      ? "bg-gray-700"
+                      : contract.status === "Rejected"
+                      ? "bg-red-600"
+                      : "bg-yellow-500"}
+                  `}
                 >
                   {contract.status}
                 </span>
               </div>
 
+              {/* PAYMENT */}
+              <div className="absolute top-10 right-4 text-right">
+                <p className="text-[11px] uppercase tracking-wide text-gray-500 font-medium">
+                  Payment
+                </p>
+                <p className="text-lg font-bold text-gray-900 leading-tight">
+                  {contract.payment}
+                </p>
+              </div>
               {/* MAIN LAYOUT */}
               <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
                 {/* LEFT CONTENT */}
@@ -342,8 +355,21 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                     {contract.influencer.display}
                   </h3>
 
+                  {/* Influencer */}
+                  <div className="flex sm:hidden items-center gap-3 mb-3">
+                    <img
+                      src={contract?.influencer?.value?.photo || "/Brocken-Defualt-Img.jpg"}
+                      alt={contract?.influencer?.value?.name}
+                      className="w-10 h-10 rounded-full object-cover"
+                      onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                    />
+                    <p className="text-base font-semibold text-gray-900">
+                      {contract?.influencer?.value?.name}
+                    </p>
+                  </div>
+
                   {/* DETAILS GRID */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600 mt-3">
                     {/* Contract Dates */}
                     <div className="sm:col-span-2 w-full bg-gray-50 border border-gray-200 rounded-lg p-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -499,6 +525,27 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                         </button>
                       )}
 
+                      {contract.canviewfeedback === true && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setClosingContract(contract);
+                            setIsViewFeedbackOpen(true);
+                            fetchVendorContractFeedback(contract);
+                          }}
+                          className="
+                            px-4 py-2
+                            text-xs font-medium
+                            bg-emerald-600 text-white
+                            rounded-lg
+                            hover:bg-emerald-700
+                            transition
+                            cursor-pointer
+                          "
+                        >
+                          View Feedback
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -598,7 +645,6 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
           <Button key="skip" onClick={handleSkipClose} loading={closingLoading}>
             Skip & Close
           </Button>
-          ,
           <Button
             key="submit"
             type="primary"
@@ -608,6 +654,80 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
             Submit & Close
           </Button>
         </div>
+      </Modal>
+
+      <Modal
+        open={isViewFeedbackOpen}
+          title={
+          <span className="text-lg font-semibold">
+            Contract Feedback
+          </span>
+        }
+        footer={null}
+        centered
+        onCancel={() => {
+          setIsViewFeedbackOpen(false);
+          setContractFeedback(null);
+          setClosingContract(null);
+        }}
+      >
+        {feedbackItem ? (
+          <div className="flex flex-col gap-6">
+            
+            {/* Rating */}
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Rating:
+              </p>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) =>
+                  star <= feedbackItem.rating ? (
+                    <RiStarFill
+                      key={star}
+                      size={22}
+                      className="text-yellow-400"
+                      style={{ stroke: "black", strokeWidth: 1 }}
+                    />
+                  ) : (
+                    <RiStarLine
+                      key={star}
+                      size={22}
+                      className=""
+                    />
+                  )
+                )}
+              </div>
+            </div>
+
+            {/* Feedback box */}
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Feedback:
+              </p>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+                <p className="text-sm text-gray-700 italic">
+                  “{feedbackItem.text || "—"}”
+                </p>
+              </div>
+            </div>
+
+            {/* Done button */}
+            <div className="flex justify-end">
+              <Button
+                type="primary"
+                onClick={() => {
+                  setIsViewFeedbackOpen(false);
+                  setContractFeedback(null);
+                }}
+              >
+                Done
+              </Button>
+            </div>
+
+          </div>
+        ) : (
+          <Empty description="No feedback available" />
+        )}
       </Modal>
     </div>
   );

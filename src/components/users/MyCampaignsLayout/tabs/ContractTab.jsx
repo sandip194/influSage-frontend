@@ -7,6 +7,7 @@ import {
   RiEdit2Line,
   RiStarLine,
   RiStarFill,
+  RiCalendar2Line,
 } from "react-icons/ri";
 import { safeNumber, safeText } from "../../../../App/safeAccess";
 import { Modal, Button, Input } from "antd";
@@ -48,7 +49,6 @@ const formatToDDMMYYYY = (dateStr) => {
 };
 
 const ContractTab = ({ campaignId, token }) => {
-
   const [contract, setContract] = useState(null);
   const [contractStatus, setContractStatus] = useState(null);
 
@@ -64,10 +64,12 @@ const ContractTab = ({ campaignId, token }) => {
 
   const [closingContract, setClosingContract] = useState(null);
 
+  const [isViewFeedbackOpen, setIsViewFeedbackOpen] = useState(false);
+
   const fetchContractDetails = async () => {
     try {
       const res = await axios.get(`/user/contract-detail/${campaignId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const api = res?.data?.data;
@@ -80,11 +82,10 @@ const ContractTab = ({ campaignId, token }) => {
         return;
       }
 
-  
       // Map + Safe handling
       const mapped = {
         id: safeText(api.contractid),
-        contractStart: safeText(api.contractstartdate),     // already in dd-mm-yyyy
+        contractStart: safeText(api.contractstartdate), // already in dd-mm-yyyy
         contractEnd: safeText(api.contractenddate),
         campaignStart: safeText(api.campaignstartdate),
         campaignEnd: safeText(api.campaignenddate),
@@ -93,33 +94,32 @@ const ContractTab = ({ campaignId, token }) => {
         notes: safeText(api.note),
         productLink: api.productlink,
         vendorAddress: safeText(api.vendoraddress),
-        status: safeText(api.statusname)?.toLowerCase(),   // "Pending" → "pending"
+        status: safeText(api.statusname)?.toLowerCase(), // "Pending" → "pending"
+        canviewfeedback: Boolean(api.feedback),
         cansendfeedback: Boolean(api.cansendfeedback),
+        feedback: api.feedback || null,
       };
 
       setContract(mapped);
       setContractStatus(mapped.status);
-
     } catch (error) {
       console.error(error);
-      setContract(null);         // <— Clear previous data
+      setContract(null); // <— Clear previous data
       setContractStatus(null);
     }
   };
 
-
   useEffect(() => {
     fetchContractDetails();
-  }, [])
+  }, []);
 
   const openConfirm = (action) => {
-    setPendingAction(action);        // "accept" or "reject"
+    setPendingAction(action); // "accept" or "reject"
     setConfirmVisible(true);
   };
 
   const confirmAccept = () => openConfirm("accept");
   const confirmReject = () => openConfirm("reject");
-
 
   const executeAction = async () => {
     if (!pendingAction || !contract?.id) {
@@ -130,20 +130,17 @@ const ContractTab = ({ campaignId, token }) => {
     try {
       setActionLoading(true);
 
-      const mappedStatus =
-        pendingAction === "accept" ? "Accepted" : "Rejected";
+      const mappedStatus = pendingAction === "accept" ? "Accepted" : "Rejected";
 
       const payload = {
         p_influencerid: null,
         p_contractid: contract.id,
-        p_statusname: mappedStatus
+        p_statusname: mappedStatus,
       };
 
-      const res = await axios.post(
-        "/user/contract/approve-reject",
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await axios.post("/user/contract/approve-reject", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       // Extract backend response
       const message = res?.data?.message || "Status updated.";
@@ -151,12 +148,9 @@ const ContractTab = ({ campaignId, token }) => {
       toast.success(message);
 
       // Update UI status
-      setContractStatus(
-        pendingAction === "accept" ? "accepted" : "rejected"
-      );
+      setContractStatus(pendingAction === "accept" ? "accepted" : "rejected");
 
       setConfirmVisible(false);
-
     } catch (error) {
       console.error("Contract action error:", error);
 
@@ -166,7 +160,6 @@ const ContractTab = ({ campaignId, token }) => {
         "Something went wrong. Please try again.";
 
       toast.error(msg);
-
     } finally {
       setActionLoading(false);
     }
@@ -185,53 +178,48 @@ const ContractTab = ({ campaignId, token }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const addFeedback = async () => {
+    if (feedback && feedback.length < 10) {
+      setErrors({ feedback: "Feedback must be at least 10 characters" });
+      return;
+    }
+    try {
+      setClosingLoading(true);
 
-  const addFeedback  = async () => {
+      await axios.post(
+        "/user/add-feedback",
+        {
+          p_contractid: contract.id,
+          p_rating: rating,
+          p_text: feedback || null,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-  if (feedback && feedback.length < 10) {
-    setErrors({ feedback: "Feedback must be at least 10 characters" });
-    return;
-  }
-  try {
-    setClosingLoading(true);
+      toast.success("Feedback submitted successfully");
+      setIsFeedbackOpen(false);
+      setFeedback("");
+      setRating(0);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to submit feedback");
+    } finally {
+      setClosingLoading(false);
+    }
+  };
 
-    await axios.post(
-      "/user/add-feedback",
-      {
-        p_contractid: contract.id,
-        p_rating: rating,
-        p_text: feedback || null,
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+  const handleSubmitClose = () => {
+    if (!validateFeedback()) return;
+    addFeedback();
+  };
 
-    toast.success("Feedback submitted successfully");
+  const handleCloseModal = () => {
     setIsFeedbackOpen(false);
     setFeedback("");
     setRating(0);
-  } catch (error) {
-    toast.error(
-      error.response?.data?.message || "Failed to submit feedback"
-    );
-  } finally {
-    setClosingLoading(false);
-  }
-};
-
-const handleSubmitClose = () => {
-  if (!validateFeedback()) return;
-  addFeedback();
-};
-
-const handleCloseModal = () => {
-  setIsFeedbackOpen(false);
-  setFeedback("");
-  setRating(0);
-  setErrors({});
-};
-
+    setErrors({});
+  };
 
   if (!contractStatus) return <NoContractOffered />;
 
@@ -252,132 +240,151 @@ const handleCloseModal = () => {
           </h2>
 
           {/* Right actions */}
-          <div className="flex items-center gap-3">
-            {/* Feedback button only when closed */}            
-                {contract?.cansendfeedback && (
-                  <button
-                    onClick={() => setIsFeedbackOpen(true)}
-                    className="px-4 py-2 text-sm rounded-full cursor-pointer font-medium text-white bg-[#0f122f] hover:bg-[#1c1f4a] transition"
-                  >
-                    Give Feedback
-                  </button>
-                )}  
-
+          <div className="absolute top-0 right-0 flex ">
             {contractStatus !== "pending" && (
               <span
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold
-                  ${contractStatus === "accepted"
-                    ? "bg-green-100 text-green-700"
-                    : contractStatus === "rejected"
+                className={`px-4 py-1.5 rounded-bl-xl text-sm font-semibold
+                  ${
+                    contractStatus === "accepted"
+                      ? "bg-green-100 text-green-700"
+                      : contractStatus === "rejected"
                       ? "bg-red-100 text-red-700"
                       : "bg-blue-100 text-blue-700"
                   }`}
               >
-                {contractStatus?.charAt(0).toUpperCase() + contractStatus.slice(1)}
+                {contractStatus?.charAt(0).toUpperCase() +
+                  contractStatus.slice(1)}
               </span>
             )}
+          </div>
+          {/* PAYMENT */}
+          <div className="absolute top-10 right-4 text-right">
+            <p className="text-[11px] uppercase tracking-wide text-gray-500 font-medium">
+              Payment
+            </p>
+            <p className="text-lg font-bold text-gray-900 leading-tight">
+              {contract.payment}
+            </p>
+          </div>
         </div>
-      </div>
 
         {/* MAIN GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          {/* COLUMN 1 */}
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 text-sm text-gray-600 mt-10">
+          <div className="sm:col-span-2 w-full bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Contract Duration */}
+              <div>
+                <p className="text-[12px] uppercase tracking-wide text-gray-400 font-medium">
+                  Contract Duration
+                </p>
+                <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 mt-1 whitespace-nowrap">
+                  <RiCalendar2Line className="text-gray-400" size={16} />
+                  {formatToDDMMYYYY(contract?.contractStart)}
+                  <span className="text-gray-400">-</span>
+                  {formatToDDMMYYYY(contract?.contractEnd)}
+                </p>
+              </div>
 
-
-            <div>
-              <p className="text-gray-500 text-sm">Contract Duration</p>
-              <p className="text-gray-900 font-semibold">
-                {formatToDDMMYYYY(contract?.contractStart)}
-                <span className="mx-1 font-medium">{" "}{"-"}{" "}</span>
-                {formatToDDMMYYYY(contract?.contractEnd)}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-gray-500 text-sm">Campaign Window</p>
-              <p className="text-gray-900 font-semibold">
-                {formatToDDMMYYYY(contract?.campaignStart)}{" "}
-                <span className="mx-1 font-medium">{" "}{"-"}{" "}</span>{" "}
-                {formatToDDMMYYYY(contract?.campaignEnd)}
-              </p>
+              {/* Campaign Window */}
+              <div>
+                <p className="text-[12px] uppercase tracking-wide text-gray-400 font-medium">
+                  Campaign Window
+                </p>
+                <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 mt-1 whitespace-nowrap">
+                  <RiCalendar2Line className="text-gray-400" size={16} />
+                  {formatToDDMMYYYY(contract?.campaignStart)}
+                  <span className="text-gray-400">-</span>
+                  {formatToDDMMYYYY(contract?.campaignEnd)}
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* COLUMN 2 */}
-          <div className="space-y-4">
-            {/* PAYMENT */}
+          <div className="sm:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-10 mt-6">
+            {/* LEFT: DELIVERABLES */}
             <div>
-              <p className="text-gray-500 text-sm">Payment</p>
-              <p className="text-gray-900 font-bold text-xl">
-                {contract.payment}
+              <p className="text-sm font-semibold text-gray-900 mb-2">
+                Deliverables
               </p>
-            </div>
 
-            {/* DELIVERABLES */}
-            <div>
-              <p className="text-gray-500 text-sm">Deliverables</p>
+              <div className="flex flex-col gap-2">
+                {contract.deliverables.map((platform, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    <img
+                      src={platform.iconpath}
+                      alt={platform.provider}
+                      className="w-4 h-4 mt-1 rounded-full"
+                      onError={(e) =>
+                        (e.target.src = "/Brocken-Defualt-Img.jpg")
+                      }
+                    />
 
-              <div className="flex flex-col gap-2 mt-1">
-                {contract.deliverables?.map((provider) => {
-                  const types = provider.contenttypes
-                    .map((ct) => ct.contenttypename)
-                    .join(", "); // "Reel, Story"
-
-                  return (
-                    <span
-                      key={provider.providerid}
-                      className="px-3 py-1 bg-blue-50 border border-blue-200 
-                     rounded-lg text-blue-700 text-xs font-medium w-fit"
-                    >
-                      {provider.providername} – {types}
-                    </span>
-                  );
-                })}
+                    <div className="flex flex-wrap gap-2">
+                      {platform.contenttypes.map((ct, ctIdx) => (
+                        <span
+                          key={ctIdx}
+                          className="px-2 py-1 text-[11px]
+                bg-blue-50 text-blue-700
+                border border-blue-200 rounded-md"
+                        >
+                          {ct.contenttypename}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
+            {/* RIGHT: PRODUCT + ADDRESS (FULL WIDTH) */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <p className="text-gray-900 text-sm font-medium">Product:</p>
 
+                {contract?.productLink && contract.productLink.trim() !== "" ? (
+                  <a
+                    href={
+                      contract.productLink.startsWith("http")
+                        ? contract.productLink
+                        : `https://${contract.productLink}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline text-sm whitespace-nowrap"
+                  >
+                    View Link
+                  </a>
+                ) : (
+                  <span className="text-gray-400 text-sm">-</span>
+                )}
+              </div>
 
-            <div>
-              <p className="text-gray-500 text-sm">Vendor Address</p>
-              <p className="text-gray-900 font-medium">{contract.vendorAddress}</p>
-            </div>
-
-            <div>
-              <p className="text-gray-500 text-sm">Product Link</p>
-
-              {contract?.productLink ? (
-                <a
-                  href={contract.productLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline font-medium break-all"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {contract.productLink}
-                </a>
-              ) : (
-                <span className="text-gray-400 text-sm">-</span>
-              )}
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Address:</p>
+                <p className="text-sm text-gray-700 leading-relaxed mt-1">
+                  {contract.vendorAddress}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-
-
 
         {/* NOTES */}
         {contract.notes && (
           <div className="mb-8">
-            <p className="text-gray-500 text-sm">Notes</p>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-1 text-sm text-gray-700 leading-relaxed">
-              {contract.notes}
+            <div className="bg-gray-50 border border-gray-200 rounded-xl px-5 py-4 mt-5">
+              <p className="text-xs text-gray-500 italic leading-relaxed">
+                <span className="font-semibold not-italic text-gray-600">
+                  Note :
+                </span>{" "}
+                “{contract.notes}”
+              </p>
             </div>
           </div>
         )}
 
         {/* ACTION FOOTER */}
-        <div className="border-t border-gray-200 pt-6 flex justify-end gap-4">
+        <div className="flex justify-end gap-4">
           {contractStatus === "pending" && (
             <>
               <button
@@ -410,11 +417,38 @@ const handleCloseModal = () => {
               Rejected
             </div>
           )}
+
+          {/* Feedback button only when closed */}
+          {contract?.cansendfeedback && (
+            <button
+              onClick={() => setIsFeedbackOpen(true)}
+              className="px-4 py-2 text-sm rounded-full cursor-pointer font-medium text-white bg-[#0f122f] hover:bg-[#1c1f4a] transition"
+            >
+              Give Feedback
+            </button>
+          )}
+          {contractStatus === "closed" && contract?.feedback && (
+            <button
+              onClick={() => setIsViewFeedbackOpen(true)}
+              className="
+      px-4 py-2
+      text-xs font-medium
+      bg-emerald-600 text-white
+      rounded-lg
+      hover:bg-emerald-700
+      transition
+    "
+            >
+              View Feedback
+            </button>
+          )}
         </div>
       </div>
 
       <Modal
-        title={pendingAction === "accept" ? "Accept Contract" : "Reject Contract"}
+        title={
+          pendingAction === "accept" ? "Accept Contract" : "Reject Contract"
+        }
         open={confirmVisible}
         onOk={executeAction}
         onCancel={() => setConfirmVisible(false)}
@@ -423,7 +457,7 @@ const handleCloseModal = () => {
         okButtonProps={{
           loading: actionLoading,
           danger: pendingAction === "reject",
-          type: pendingAction === "reject" ? "primary" : "default"
+          type: pendingAction === "reject" ? "primary" : "default",
         }}
       >
         <p className="text-gray-700">
@@ -436,7 +470,7 @@ const handleCloseModal = () => {
       <Modal
         open={isFeedbackOpen}
         title="Add Feedback"
-        footer = {null}
+        footer={null}
         onCancel={() => {
           setIsFeedbackOpen(false);
           setClosingContract(null);
@@ -450,7 +484,9 @@ const handleCloseModal = () => {
         </p>
 
         {/* ⭐ Rating */}
-        <p className="font-medium text-gray-800 mb-2">Overall Rating <span className="text-red-500">*</span></p>
+        <p className="font-medium text-gray-800 mb-2">
+          Overall Rating <span className="text-red-500">*</span>
+        </p>
         <div className="mb-4">
           <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -470,17 +506,14 @@ const handleCloseModal = () => {
                     style={{ stroke: "black", strokeWidth: 0.6 }}
                   />
                 ) : (
-                  <RiStarLine
-                    size={26}
-                    className="text-yellow-400"
-                  />
+                  <RiStarLine size={26} className="text-yellow-400" />
                 )}
               </span>
             ))}
           </div>
-           {errors.rating && (
-              <p className="text-red-500 text-xs mt-1">{errors.rating}</p>
-            )}
+          {errors.rating && (
+            <p className="text-red-500 text-xs mt-1">{errors.rating}</p>
+          )}
         </div>
 
         <p className="font-medium text-gray-800 mb-2">Feedback</p>
@@ -501,23 +534,75 @@ const handleCloseModal = () => {
           style={{ resize: "none" }}
         />
         <div className="flex justify-end gap-3 mt-6">
-    <Button onClick={handleCloseModal}>
-      Close
-    </Button>
+          <Button onClick={handleCloseModal}>Close</Button>
 
-    <Button
-      type="primary"
-      loading={closingLoading}
-      onClick={handleSubmitClose}
-    >
-      Submit
-    </Button>
-  </div>
+          <Button
+            type="primary"
+            loading={closingLoading}
+            onClick={handleSubmitClose}
+          >
+            Submit
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        open={isViewFeedbackOpen}
+        title={<span className="text-lg font-semibold">Contract Feedback</span>}
+        footer={null}
+        centered
+        onCancel={() => {
+          setIsViewFeedbackOpen(false);
+        }}
+      >
+        {contract?.feedback ? (
+          <div className="flex flex-col gap-6">
+            {/* Rating */}
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Rating:</p>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) =>
+                  star <= contract.feedback.rating ? (
+                    <RiStarFill
+                      key={star}
+                      size={22}
+                      className="text-yellow-400"
+                      style={{ stroke: "black", strokeWidth: 1 }}
+                    />
+                  ) : (
+                    <RiStarLine key={star} size={22} />
+                  )
+                )}
+              </div>
+            </div>
+
+            {/* Feedback box */}
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Feedback:
+              </p>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+                <p className="text-sm text-gray-700 italic">
+                  “{contract.feedback.text || "—"}”
+                </p>
+              </div>
+            </div>
+
+            {/* Done button */}
+            <div className="flex justify-end">
+              <Button
+                type="primary"
+                onClick={() => setIsViewFeedbackOpen(false)}
+              >
+                Done
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Empty description="No feedback available" />
+        )}
       </Modal>
     </div>
-
-
-
   );
 
   // UPDATED STATE UI

@@ -5,20 +5,18 @@ import { logout } from "../features/auth/authSlice";
 
 const PrivateRoute = ({ allowedRoles }) => {
   const dispatch = useDispatch();
-  const { token, role } = useSelector((state) => state.auth);
+  const { role } = useSelector((state) => state.auth);
 
-  const cookieToken = Cookies.get("token");
+  const token = Cookies.get("token");
+  const tokenExpiry = Cookies.get("tokenExpiry");
 
-  if (!cookieToken) {
+  // ❌ No token or expired token
+  if (!token || !tokenExpiry || Date.now() > Number(tokenExpiry)) {
     dispatch(logout());
     return <Navigate to="/login" replace />;
   }
 
-  // Extra safety
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
-
+  // ❌ Role not allowed
   if (allowedRoles && !allowedRoles.includes(role)) {
     return <Navigate to="/unauthorized" replace />;
   }

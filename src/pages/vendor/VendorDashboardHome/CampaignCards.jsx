@@ -35,12 +35,12 @@ const CampaignStatsVendor = () => {
             icon: <RiStackLine />,
           },
           {
-            label: "Active",
+            label: "Active Campaigns",
             value: data.totalactivecampaigncount,
             icon: <RiLoopLeftLine />,
           },
           {
-            label: "Completed",
+            label: "Completed Campaigns",
             value: data.totalcompletedcampaigncount,
             icon: <RiCheckLine />,
           },
