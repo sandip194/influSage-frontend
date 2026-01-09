@@ -25,7 +25,6 @@ import "swiper/css";
 import "swiper/css/pagination";
 
 
-
 const { Option } = Select;
 
 const EMPTY_PLATFORMS = [
@@ -33,7 +32,6 @@ const EMPTY_PLATFORMS = [
     { platform: "Facebook", views: 0, percentage: 0, color: "#E5E7EB" },
     { platform: "YouTube", views: 0, percentage: 0, color: "#E5E7EB" },
 ];
-
 
 // -------------------------
 // Brand Dashboard Component
@@ -69,8 +67,6 @@ const BrandAnalyticsDashboard = () => {
         { length: 5 },
         (_, i) => currentYear - 2 + i
     );
-
-
 
     const fetchAnalyticsSummary = async () => {
         const res = await axios.get("vendor/analytics/summary", {
@@ -131,7 +127,6 @@ const BrandAnalyticsDashboard = () => {
         }
     };
 
-
     useEffect(() => {
         fetchPlatformBreakdown();
     }, [selectedMonth, selectedYear]);
@@ -154,11 +149,9 @@ const BrandAnalyticsDashboard = () => {
         }
     };
 
-
     useEffect(() => {
         fetchCampaignOverview();
     }, [campaignFilter]);
-
 
 
     const fetchCampaignList = async () => {
@@ -236,9 +229,6 @@ const BrandAnalyticsDashboard = () => {
                     </div>
                 </div>
 
-
-
-
                 <table className="min-w-full text-left">
                     <thead>
                         <tr className="border-b border-gray-300">
@@ -289,9 +279,38 @@ const BrandAnalyticsDashboard = () => {
                                     className="border-b border-gray-100 hover:bg-gray-50"
                                 >
                                     {/* Campaign Name */}
-                                    <td className="py-2 px-3 font-medium text-[#0D132D]">
-                                        {c.campaignname}
+                                    <td className="py-2 px-3">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            {/* Campaign Image */}
+                                            {c.campaignphoto ? (
+                                                <img
+                                                    src={c.campaignphoto}
+                                                    alt={c.campaignname}
+                                                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border border-gray-200 flex-shrink-0"
+                                                    onError={(e) => {
+                                                        e.target.src = "/Brocken-Defualt-Img.jpg";
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-200 flex items-center justify-center text-xs text-gray-500 flex-shrink-0">
+                                                    N/A
+                                                </div>
+                                            )}
+
+                                            {/* Campaign Name */}
+                                            <span
+                                                className="
+                text-[#0D132D] font-medium
+                truncate sm:whitespace-normal
+                max-w-[140px] sm:max-w-none
+            "
+                                            >
+                                                {c.campaignname}
+                                            </span>
+                                        </div>
                                     </td>
+
+
 
                                     {/* Platforms */}
                                     <td className="py-2 px-3">
@@ -311,19 +330,25 @@ const BrandAnalyticsDashboard = () => {
                                     </td>
 
                                     {/* Status */}
-                                    <td className="py-2 px-3">
+                                    <td className="py-2 px-3 whitespace-nowrap">
                                         <span
-                                            className={`px-2 py-1 rounded-full text-xs font-medium
-                        ${c.statusname === "Published"
+                                            className={`
+            inline-flex items-center justify-center
+            px-2 py-1 rounded-full text-xs font-medium
+            max-w-[90px] sm:max-w-none truncate
+            ${c.statusname === "Published"
                                                     ? "bg-green-100 text-green-700"
-                                                    : c.statusname === "InProgress"
+                                                    : c.statusname === "In Progress"
                                                         ? "bg-yellow-100 text-yellow-700"
                                                         : "bg-gray-100 text-gray-600"
-                                                }`}
+                                                }
+        `}
+                                            title={c.statusname}
                                         >
                                             {c.statusname}
                                         </span>
                                     </td>
+
                                 </tr>
                             ))
                         }
@@ -617,7 +642,6 @@ const BrandAnalyticsDashboard = () => {
 
                 )}
             </div>
-
 
         </div>
     );

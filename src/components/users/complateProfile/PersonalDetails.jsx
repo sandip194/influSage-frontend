@@ -105,13 +105,9 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
     }
   };
 
-
-
   useEffect(() => {
     loadCountries();
   }, []);
-
-
 
   const fileInputRef = useRef();
 
@@ -358,7 +354,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
                 if (!value) return Promise.resolve();
 
                 const digits = value.replace(/\D/g, '');
-                if (digits.length < 10 || digits.length > 15) {
+                if (digits.length < 12 || digits.length > 15) {
                   return Promise.reject(
                     new Error('Enter a valid phone number')
                   );

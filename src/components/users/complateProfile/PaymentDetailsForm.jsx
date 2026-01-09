@@ -190,7 +190,6 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
     await submitToBackend(payload);
   };
 
-
   // Map backend data to form fields on load
   const mapBackendToFormValues = (data) => {
     if (!data) return {};
@@ -250,8 +249,6 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
       form.setFieldsValue(mappedValues);
     }
   }, [data]); // ✅ only run when `data` changes
-
-
 
 
   return (

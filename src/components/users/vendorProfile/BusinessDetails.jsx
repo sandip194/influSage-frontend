@@ -102,7 +102,6 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
     };
 
 
-
     const formatNumberCompact = (num) => {
         if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace('.0', '') + 'M';
         if (num >= 1_000) return (num / 1_000).toFixed(1).replace('.0', '') + 'k';
@@ -330,7 +329,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                                     if (!value) return Promise.resolve();
 
                                     const digits = value.replace(/\D/g, '');
-                                    if (digits.length < 10 || digits.length > 15) {
+                                    if (digits.length < 12 || digits.length > 15) {
                                         return Promise.reject(
                                             new Error('Enter a valid phone number')
                                         );
