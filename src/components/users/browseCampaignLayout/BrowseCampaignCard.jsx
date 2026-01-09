@@ -104,7 +104,7 @@ const CampaignCard = React.memo(
                 {variant === "saved"
                   ? `Created on ${formatDateDDMMYY(campaign.campaigncreatedate)}`
                   : today < start
-                    ? `Application Starts On ${formatDateDDMMYY(campaign.applicationstartdate)}`
+                    ? `Apply From: ${formatDateDDMMYY(campaign.applicationstartdate)}`
                     : `Apply Till: ${formatDateDDMMYY(campaign.applicationenddate)}`}
               </span>
             </div>
