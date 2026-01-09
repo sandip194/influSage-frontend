@@ -19,7 +19,7 @@ import { clearNotifications } from "../../../features/socket/notificationSlice";
 
 const navItems = [
   { name: "Dashboard", icon: <RiHome2Line />, path: "/admin-dashboard" },
-  { name: "User Requests", icon: <RiUser3Line />, path: "/admin-dashboard/influencers" },
+  { name: "Influencer Requests", icon: <RiUser3Line />, path: "/admin-dashboard/influencers" },
   { name: "Campaign Requests", icon: <RiFolderOpenLine />, path: "/admin-dashboard/campaigns" },
   { name: "Analytics", icon: <RiBringForward />, path: "/admin-dashboard/analytics" },
   { name: "Improper Massages", icon: <RiCustomerService2Line />, path: "/admin-dashboard/improper-massages" },

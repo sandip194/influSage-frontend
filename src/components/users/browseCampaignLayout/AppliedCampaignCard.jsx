@@ -21,6 +21,7 @@ const AppliedCampaignCard = ({
   handleCardClick,
   setSelectedApplicationId,
   setSelectedCampaignId,
+  setSelectedCampaignBudget,
   setWithdrawModalOpen,
   openEditModal,
 }) => {
@@ -136,6 +137,7 @@ const AppliedCampaignCard = ({
                       e.stopPropagation();
                       setSelectedApplicationId(campaign.campaignapplicationid);
                       setSelectedCampaignId(campaign.id);
+                      setSelectedCampaignBudget(campaign.estimatedbudget); 
                       openEditModal();
                     }}
                     className="

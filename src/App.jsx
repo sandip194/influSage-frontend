@@ -220,7 +220,6 @@ const App = () => {
                   <Route path='settings' element={<ComingSoon />} />
                 </Route>
               </Route>
-
             </Routes>
           </SocketProvider>
         </MaintenanceGuard>

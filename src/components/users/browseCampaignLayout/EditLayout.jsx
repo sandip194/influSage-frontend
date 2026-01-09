@@ -24,7 +24,7 @@ const EditLayout = () => {
   const [appliedDetails, setAppliedDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showFullBrandDesc, setShowFullBrandDesc] = useState(false);
+  // const [showFullBrandDesc, setShowFullBrandDesc] = useState(false); commented it bcs never used
 
   const [filePreviewOpen, setFilePreviewOpen] = useState(false);
   const [filePreviewUrl, setFilePreviewUrl] = useState("");
@@ -1008,6 +1008,8 @@ const EditLayout = () => {
         onClose={() => setEditModalOpen(false)}
         applicationId={selectedApplicationId}
         campaignId={selectedCampaignId}
+        campaignBudget={campaignDetails.estimatedbudget} 
+        onSuccess ={() => setEditModalOpen(false)}
       />
 
     </div>

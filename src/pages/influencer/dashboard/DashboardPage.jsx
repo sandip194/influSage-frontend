@@ -55,11 +55,6 @@ const DashboardPage = () => {
 
       </div>
 
-      {/* Earnings Summary */}
-      <div className="mb-6">
-        <EarningsSummarySection />
-      </div>
-
       {/* Feedback */}
       <FeedbackCard />
     </div>

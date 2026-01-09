@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Input, Button, Upload,  } from "antd";
+import { Modal, Input, Button, Upload, } from "antd";
 import { RiUpload2Line } from "@remixicon/react";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -10,7 +10,7 @@ import FilePreview from "../../common/FilePreview";
 
 const { TextArea } = Input;
 
-const ApplyNowModal = ({ open, onClose, campaignId, onSuccess }) => {
+const ApplyNowModal = ({ open, onClose, campaignId, onSuccess, campaignBudget }) => {
     const [amount, setAmount] = useState("");
     const [proposal, setProposal] = useState("");
     const [errors, setErrors] = useState({});
@@ -194,11 +194,19 @@ const ApplyNowModal = ({ open, onClose, campaignId, onSuccess }) => {
             />
             {errors.amount && <p className="text-red-500">{errors.amount}</p>}
 
-            <div className="mt-6 flex justify-end">
-                <Button type="primary" className="!bg-[#0f122f]" loading={loading} onClick={handleSubmit}>
-                    {isEdit ? "Save Changes" : "Apply Now"}
-                </Button>
+            <div className="mt-6">
+                {campaignBudget && (
+                    <p className="text-sm text-gray-500 mb-2">
+                         Estimated Campaign Budget: ₹ {campaignBudget.toLocaleString("en-IN")}
+                    </p>
+                )}
+                <div className="flex justify-end">
+                    <Button type="primary" className="!bg-[#0f122f]" loading={loading} onClick={handleSubmit}>
+                        {isEdit ? "Save Changes" : "Apply Now"}
+                    </Button>
+                </div>
             </div>
+
         </Modal>
     );
 };

@@ -44,10 +44,6 @@ const VenderDashboardPage = () => {
                     </div>
 
                 </div>
-
-
-
-                <EarningsSummarySectionVendor />
                 <ActiveCampaign />
 
             </div>

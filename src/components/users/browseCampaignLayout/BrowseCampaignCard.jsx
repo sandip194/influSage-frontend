@@ -315,11 +315,17 @@ const CampaignCardGrid = React.memo(
   ({ campaigns, loading, handleCardClick, handleSave, variant, onCampaignApplied }) => {
     const [openApply, setOpenApply] = useState(false);
     const [selectedCampaignId, setSelectedCampaignId] = useState(null);
-
+    const [campaignBudget, setCampaignBudget] = useState(null)
+    
     const handleApply = (campaignId) => {
-      setSelectedCampaignId(campaignId);
+      const campaign = campaigns.find(c => c.id === campaignId);
+      if (!campaign) return;
+
+      setSelectedCampaignId(campaign.id);
+      setCampaignBudget(campaign.estimatedbudget);
       setOpenApply(true);
     };
+
 
     return (
       <>
@@ -356,6 +362,7 @@ const CampaignCardGrid = React.memo(
           open={openApply}
           onClose={() => setOpenApply(false)}
           campaignId={selectedCampaignId}
+          campaignBudget={campaignBudget}
           onSuccess={() => {
             setOpenApply(false);
             onCampaignApplied(); // 🔥 REFRESH LIST

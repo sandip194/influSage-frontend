@@ -417,15 +417,7 @@ const AnalyticsLayout = () => {
         )}
       </div>
 
-      {/* 👥 Audience */}
-      <div className="my-4">
-        <Audience />
-      </div>
-
-      {/* Table */}
-      <div className="my-6">
-        <Table />
-      </div>
+      
     </div>
   );
 };

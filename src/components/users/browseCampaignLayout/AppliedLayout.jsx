@@ -5,7 +5,7 @@ import {
 } from "@remixicon/react";
 import { Modal } from "antd";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
-import {  Input, Pagination, Select, Tooltip } from "antd";
+import { Input, Pagination, Select, Tooltip } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -30,6 +30,9 @@ const AppliedLayout = () => {
   const [isWithdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState(null);
   const [selectedCampaignId, setSelectedCampaignId] = useState(null)
+
+
+  const [selectedCampaignBudget, setSelectedCampaignBudget] = useState(null);
 
   // EDIT modal (Apply Now)
   const [isEditModalOpen, setEditModalOpen] = useState(false);
@@ -106,7 +109,7 @@ const AppliedLayout = () => {
   const getAllStatus = useCallback(async () => {
     try {
       const res = await axios.get('/user/Campaign-ApplicationStatus', { headers: { Authorization: `Bearer ${token}` } })
-     setAllStatus(Array.isArray(res?.data?.data) ? res.data.data : []);
+      setAllStatus(Array.isArray(res?.data?.data) ? res.data.data : []);
     } catch (error) {
       console.error(error)
       setAllStatus([]);
@@ -147,6 +150,8 @@ const AppliedLayout = () => {
     }
   };
 
+
+
   return (
     <div className="appliedlayout w-full text-sm pb-24 sm:pb-0">
       {/* <h2 className="text-2xl font-bold text-gray-900 mb-2">Browse Campaign</h2>
@@ -173,7 +178,7 @@ const AppliedLayout = () => {
         ))}
       </div>
 
-      {/* Search + Sort */}
+      {/* Search + Sort + Cards*/}
       <div className="bg-white p-4 rounded-lg">
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <Input
@@ -307,6 +312,7 @@ const AppliedLayout = () => {
             handleCardClick={handleCardClick}
             setSelectedApplicationId={setSelectedApplicationId}
             setSelectedCampaignId={setSelectedCampaignId}
+            setSelectedCampaignBudget={setSelectedCampaignBudget}
             setWithdrawModalOpen={setWithdrawModalOpen}
             openEditModal={() => setEditModalOpen(true)}
           />
@@ -366,6 +372,7 @@ const AppliedLayout = () => {
         onClose={() => setEditModalOpen(false)}
         applicationId={selectedApplicationId}
         campaignId={selectedCampaignId}
+        campaignBudget={selectedCampaignBudget}
         onSuccess={() => setEditModalOpen(false)}
       />
     </div>
