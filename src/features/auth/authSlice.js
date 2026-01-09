@@ -24,22 +24,22 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (state, action) => {
       const { token, role, id, name, p_code } = action.payload;
+      const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
 
       state.userId = id;
       state.token = token;
       state.name = name;
       state.role = role;
-      state.p_code = p_code || null; // ✅ Set in state
+      state.p_code = p_code || null;
 
-      const expiryDate = new Date(new Date().getTime() + 60 * 60 * 1000); // 1 hour
+      Cookies.set("userId", id, { expires: new Date(expiresAt) });
+      Cookies.set("token", token, { expires: new Date(expiresAt) });
+      Cookies.set("role", role, { expires: new Date(expiresAt) });
+      Cookies.set("name", name, { expires: new Date(expiresAt) });
+      Cookies.set("tokenExpiry", expiresAt, { expires: new Date(expiresAt) });
 
-      // ✅ Set cookies
-      Cookies.set("userId", id, { expires: expiryDate });
-      Cookies.set("token", token, { expires: expiryDate });
-      Cookies.set("role", role, { expires: expiryDate });
-      Cookies.set("name", name, { expires: expiryDate });
       if (p_code) {
-        Cookies.set("p_code", p_code, { expires: expiryDate });
+        Cookies.set("p_code", p_code, { expires: new Date(expiresAt) });
       }
     },
 

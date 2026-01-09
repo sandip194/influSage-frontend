@@ -768,19 +768,19 @@ const DescriptionLayout = () => {
               <hr className="border-gray-200" />
 
               {/* Company Size + Joining Date */}
-              <div className="flex items-center justify-between gap-6 text-sm text-gray-700">
-                <div>
-                  <span className="font-medium">Company Size:</span>{" "}
-                  {campaignDetails.vendordetails?.companysizename || "N/A"}
+              <div className="space-y-2 text-sm text-gray-700">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Company Size:</span>
+                  <span className="text-gray-900">
+                    {campaignDetails.vendordetails?.companysizename || "N/A"}
+                  </span>
                 </div>
 
-                <div>
-                  <span className="font-medium">Joined:</span>{" "}
-                  {campaignDetails.vendordetails?.joiningdate
-                    ? new Date(
-                        campaignDetails.vendordetails.joiningdate
-                      ).toLocaleDateString("en-GB")
-                    : "N/A"}
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Member Since:</span>
+                  <span className="text-gray-900">
+                    {campaignDetails.vendordetails?.["Member Since"] || "N/A"}
+                  </span>
                 </div>
               </div>
             </div>

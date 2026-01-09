@@ -213,7 +213,7 @@ const InfluencerProfile = () => {
             >
                 <RiArrowLeftLine /> Back
             </button>
-            <h2 className="text-2xl text-gray-900 font-semibold mb-6">Influencer Details</h2>
+            {/* <h2 className="text-2xl text-gray-900 font-semibold mb-6">Influencer Details</h2> */}
 
             {loading ? (
                 <>
@@ -436,10 +436,10 @@ const InfluencerProfile = () => {
 
                                     <button
                                         onClick={handleInvite}
-                                        className="border border-gray-300 cursor-pointer text-gray-900 px-5 py-2 rounded-full 
-             hover:bg-gray-100 transition w-full sm:w-auto 
+                                        className="cursor-pointer text-white bg-[#0f122f] text-gray-900 px-5 py-2 rounded-full 
+             hover:bg-[#1f2357] transition w-full sm:w-auto 
              flex items-center justify-center gap-2"
-                                    >
+                                    >     
                                         <RiUserAddLine size={18} />
                                         <span>Invite</span>
                                     </button>
