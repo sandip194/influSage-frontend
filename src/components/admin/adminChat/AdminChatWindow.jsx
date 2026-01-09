@@ -205,7 +205,7 @@ useEffect(() => {
     setAttachedPreview(URL.createObjectURL(file));
   };
 
-  const handleResolve = async () => {a
+  const handleResolve = async () => {
     if (!activeSubject || isResolved) return;
     try {
   setIsResolved(true);
