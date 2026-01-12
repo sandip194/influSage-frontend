@@ -713,7 +713,7 @@ const DescriptionLayout = () => {
         {/* Right Side */}
         <aside className="w-full md:w-[300px] space-y-6 flex-shrink-0">
           <div className="bg-white rounded-2xl p-4 w-full text-sm">
-            <h3 className="font-semibold text-sm text-gray-700 mb-4">
+            <h3 className="font-semibold text-sm text-gray-500 mb-4">
               About Vendor
             </h3>
             <div className="space-y-4">
@@ -721,29 +721,6 @@ const DescriptionLayout = () => {
                 <p className="text-gray-900 font-semibold text-base whitespace-pre-line">
                   {campaignDetails.vendordetails?.businessname || "N/A"}
                 </p>
-              </div>
-
-              <hr className="border-gray-200" />
-
-              {/* About Brand */}
-              <div>
-                <p
-                  className={`text-gray-800 whitespace-pre-line ${
-                    showFullAboutBrand ? "" : "line-clamp-2"
-                  }`}
-                >
-                  {campaignDetails.vendordetails?.aboutbrand || "N/A"}
-                </p>
-
-                {campaignDetails.vendordetails?.aboutbrand &&
-                  campaignDetails.vendordetails.aboutbrand.length > 100 && (
-                    <button
-                      onClick={() => setShowFullAboutBrand((prev) => !prev)}
-                      className="text-blue-600 text-xs font-semibold mt-1 hover:underline cursor-pointer"
-                    >
-                      {showFullAboutBrand ? "View Less" : "View More"}
-                    </button>
-                  )}
               </div>
 
               <hr className="border-gray-200" />
@@ -782,6 +759,28 @@ const DescriptionLayout = () => {
                     {campaignDetails.vendordetails?.["Member Since"] || "N/A"}
                   </span>
                 </div>
+              </div>
+              
+              {/* About Brand */}
+              <hr className="border-gray-200" />
+              <div>
+                <p
+                  className={`text-gray-800 whitespace-pre-line ${
+                    showFullAboutBrand ? "" : "line-clamp-2"
+                  }`}
+                >
+                  {campaignDetails.vendordetails?.aboutbrand || "N/A"}
+                </p>
+
+                {campaignDetails.vendordetails?.aboutbrand &&
+                  campaignDetails.vendordetails.aboutbrand.length > 100 && (
+                    <button
+                      onClick={() => setShowFullAboutBrand((prev) => !prev)}
+                      className="text-blue-600 text-xs font-semibold mt-1 hover:underline cursor-pointer"
+                    >
+                      {showFullAboutBrand ? "View Less" : "View More"}
+                    </button>
+                  )}
               </div>
             </div>
           </div>

@@ -8,7 +8,7 @@ import {
   RiDeleteBinLine,
   RiAppsLine,
   RiMapPinLine,
-  RiBriefcase3Line
+  RiBriefcase3Line,
 } from "@remixicon/react";
 import axios from "axios";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -17,7 +17,6 @@ import { useParams } from "react-router-dom";
 import { Skeleton, Modal, Tabs, ConfigProvider } from "antd";
 import ApplyNowModal from "./ApplyNowModal";
 import { toast } from "react-toastify";
-
 
 const EditLayout = () => {
   const [campaignDetails, setCampaignDetails] = useState(null);
@@ -30,12 +29,10 @@ const EditLayout = () => {
   const [filePreviewUrl, setFilePreviewUrl] = useState("");
   const [filePreviewType, setFilePreviewType] = useState("");
 
-
   const [isWithdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState(null);
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
-
 
   const { token } = useSelector((state) => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -140,7 +137,6 @@ const EditLayout = () => {
 
   const handleWithdraw = async () => {
     try {
-
       const res = await axios.post(
         `/user/withdraw-application`,
         {
@@ -250,7 +246,6 @@ const EditLayout = () => {
           <div className="bg-white rounded-xl p-6 border border-gray-100">
             {/* Top Section */}
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-b border-gray-200 pb-4">
-
               {/* Left Section - Profile + Basic Info */}
               <div className="flex items-start gap-4">
                 <img
@@ -284,10 +279,8 @@ const EditLayout = () => {
                     <span className="text-gray-800 whitespace-nowrap">
                       {formatDateDDMMYYYY(
                         campaignDetails?.requirements?.applicationstartdate
-                      )}
-                      {" "}
-                      <b>-</b>
-                      {" "}
+                      )}{" "}
+                      <b>-</b>{" "}
                       {formatDateDDMMYYYY(
                         campaignDetails?.requirements?.applicationenddate
                       )}
@@ -296,15 +289,18 @@ const EditLayout = () => {
 
                   {/* Total Application */}
                   <p className="text-xs mt-1">
-                    <span className="font-semibold text-indigo-600">Total Application:</span>{" "}
-                    <span className="text-gray-800">{campaignDetails?.appliedinfluencercount ?? "N/A"}</span>
+                    <span className="font-semibold text-indigo-600">
+                      Total Application:
+                    </span>{" "}
+                    <span className="text-gray-800">
+                      {campaignDetails?.appliedinfluencercount ?? "N/A"}
+                    </span>
                   </p>
                 </div>
               </div>
 
               {/* Right Buttons */}
               <div className="flex gap-2 items-start">
-
                 {/* Edit Button (Conditional) */}
                 {campaignDetails?.iseditable && (
                   <button
@@ -324,22 +320,22 @@ const EditLayout = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedApplicationId(appliedDetails?.campaignapplicationid);
-                      setWithdrawModalOpen(true)
+                      setSelectedApplicationId(
+                        appliedDetails?.campaignapplicationid
+                      );
+                      setWithdrawModalOpen(true);
                     }}
                     className="px-4 py-2 flex items-center gap-1 cursor-pointer  border border-red-300 bg-white text-red-600 rounded-full text-sm hover:bg-red-50 hover:border-red-500"
-                  ><RiDeleteBinLine size={16} className="text-red-500" />
+                  >
+                    <RiDeleteBinLine size={16} className="text-red-500" />
                     Withdraw
                   </button>
                 )}
-
               </div>
-
             </div>
 
             {/* Bottom Grid Section */}
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-2">
-
               {/* Budget */}
               <div>
                 <div className="flex items-center gap-2 text-gray-500 mb-1">
@@ -404,11 +400,15 @@ const EditLayout = () => {
                           src={p.iconpath}
                           className="w-5 h-5 object-contain"
                           alt="platform"
-                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                          onError={(e) =>
+                            (e.target.src = "/Brocken-Defualt-Img.jpg")
+                          }
                         />
                       )}
                       <span className="text-sm text-gray-800 font-medium">
-                        {p.contenttypes?.map((c) => c.contenttypename).join(", ")}
+                        {p.contenttypes
+                          ?.map((c) => c.contenttypename)
+                          .join(", ")}
                       </span>
                     </div>
                   ))
@@ -435,22 +435,21 @@ const EditLayout = () => {
             )}
           </div>
 
-
           <ConfigProvider
             theme={{
               components: {
                 Tabs: {
-                  colorBgContainer: "#0f122f",        // Background for tab container
-                  itemColor: "#0f122f",            // Text color for inactive tab
-                  itemHoverColor: "#0f122f",       // Text color on hover
-                  itemSelectedColor: "#fff",       // Text color when active
-                  itemActiveColor: "#fff",         // Ensures text stays white
-                  itemActiveBg: "#fff",         // ✅ Active tab background
-                  itemHoverBg: "#f4f5ff",          // Hover background
-                  cardBg: "#fff",                  // Card tab background
-                  inkBarColor: "#0f122f",          // Underline indicator (for line type)
+                  colorBgContainer: "#0f122f", // Background for tab container
+                  itemColor: "#0f122f", // Text color for inactive tab
+                  itemHoverColor: "#0f122f", // Text color on hover
+                  itemSelectedColor: "#fff", // Text color when active
+                  itemActiveColor: "#fff", // Ensures text stays white
+                  itemActiveBg: "#fff", // ✅ Active tab background
+                  itemHoverBg: "#f4f5ff", // Hover background
+                  cardBg: "#fff", // Card tab background
+                  inkBarColor: "#0f122f", // Underline indicator (for line type)
                   colorBorderSecondary: "#e5e7eb", // Light border color
-                  colorTextDisabled: "#b0b0b0",    // Disabled tab text
+                  colorTextDisabled: "#b0b0b0", // Disabled tab text
                 },
               },
             }}
@@ -466,10 +465,9 @@ const EditLayout = () => {
                     <p
                       className={`text-gray-700 text-justify leading-relaxed mb-4 `}
                     >
-                      {campaignDetails.description || "No description available."}
+                      {campaignDetails.description ||
+                        "No description available."}
                     </p>
-
-
                   </div>
 
                   <h3 className="text-lg font-semibold my-3">Categories</h3>
@@ -540,7 +538,9 @@ const EditLayout = () => {
                               const isImage = /\.(png|jpe?g|gif|svg)$/i.test(
                                 filepath
                               );
-                              const isVideo = /\.(mp4|webm|ogg)$/i.test(filepath);
+                              const isVideo = /\.(mp4|webm|ogg)$/i.test(
+                                filepath
+                              );
                               const isPdf = extension === "pdf";
                               const isDoc = ["doc", "docx", "txt"].includes(
                                 extension
@@ -563,7 +563,10 @@ const EditLayout = () => {
                                       <img
                                         src={fileUrl}
                                         alt={`Campaign file ${i + 1}`}
-                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                                        onError={(e) =>
+                                          (e.target.src =
+                                            "/Brocken-Defualt-Img.jpg")
+                                        }
                                         className="w-full h-full object-cover"
                                         loading="lazy"
                                       />
@@ -633,7 +636,6 @@ const EditLayout = () => {
                                     </a>
                                   )}
                                 </div>
-
                               );
                             }
                           )}
@@ -643,7 +645,6 @@ const EditLayout = () => {
                             className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
                             onClick={() => setFilePreviewOpen(false)}
                           >
-
                             <button
                               className="absolute top-6 right-6 text-white text-3xl font-bold"
                               onClick={() => setFilePreviewOpen(false)}
@@ -653,58 +654,67 @@ const EditLayout = () => {
 
                             <img
                               src={filePreviewUrl}
-                              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                              onError={(e) =>
+                                (e.target.src = "/Brocken-Defualt-Img.jpg")
+                              }
                               className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
                               onClick={(e) => e.stopPropagation()}
                             />
                           </div>
                         )}
-
                       </div>
                     )}
                   </div>
-
                 </div>
               </Tabs.TabPane>
 
               <Tabs.TabPane tab="Your Proposel" key="proposel">
                 <div className="bg-white p-6 rounded-2xl">
-
                   {/* Budget */}
                   <div className="pb-4 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Your Proposel Amount</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Your Proposel Amount
+                    </h3>
                     <p className="text-[#0D132D]  ">
                       ₹{appliedDetails?.budget || "N/A"}
                     </p>
                   </div>
 
-
                   {/* Description */}
                   {appliedDetails?.description && (
                     <div className=" mt-3 pb-4 border-b border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        Description
+                      </h3>
                       <p className="text-gray-700">
                         {appliedDetails.description}
                       </p>
                     </div>
                   )}
 
-
-
                   {/* Right Column — File Previews */}
                   <div className="flex-1 mt-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Files</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Files
+                    </h3>
 
                     {appliedDetails?.filepaths?.length > 0 ? (
                       <div className="flex gap-3 flex-wrap">
                         {appliedDetails.filepaths.map(({ filepath }, index) => {
                           const fileUrl = filepath;
-                          const extension = filepath.split(".").pop().toLowerCase();
+                          const extension = filepath
+                            .split(".")
+                            .pop()
+                            .toLowerCase();
 
-                          const isImage = /\.(png|jpe?g|gif|svg|webp)$/i.test(filepath);
+                          const isImage = /\.(png|jpe?g|gif|svg|webp)$/i.test(
+                            filepath
+                          );
                           const isVideo = /\.(mp4|webm|ogg)$/i.test(filepath);
                           const isPdf = extension === "pdf";
-                          const isDoc = ["doc", "docx", "txt"].includes(extension);
+                          const isDoc = ["doc", "docx", "txt"].includes(
+                            extension
+                          );
 
                           return (
                             <div
@@ -723,7 +733,10 @@ const EditLayout = () => {
                                 >
                                   <img
                                     src={fileUrl}
-                                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                                    onError={(e) =>
+                                      (e.target.src =
+                                        "/Brocken-Defualt-Img.jpg")
+                                    }
                                     className="w-full h-full object-cover"
                                     alt="file"
                                   />
@@ -737,7 +750,11 @@ const EditLayout = () => {
                                   }}
                                   className="w-full h-full cursor-pointer"
                                 >
-                                  <video src={fileUrl} className="w-full h-full object-cover" muted />
+                                  <video
+                                    src={fileUrl}
+                                    className="w-full h-full object-cover"
+                                    muted
+                                  />
                                 </div>
                               ) : isPdf ? (
                                 <div
@@ -786,7 +803,6 @@ const EditLayout = () => {
                       className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
                       onClick={() => setFilePreviewOpen(false)}
                     >
-
                       <button
                         className="absolute top-6 right-6 text-white text-3xl font-bold"
                         onClick={() => setFilePreviewOpen(false)}
@@ -798,7 +814,9 @@ const EditLayout = () => {
                         {filePreviewType === "image" && (
                           <img
                             src={filePreviewUrl}
-                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                            onError={(e) =>
+                              (e.target.src = "/Brocken-Defualt-Img.jpg")
+                            }
                             className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
                           />
                         )}
@@ -827,21 +845,18 @@ const EditLayout = () => {
                           />
                         )}
                       </div>
-
                     </div>
                   )}
                 </div>
               </Tabs.TabPane>
             </Tabs>
-
           </ConfigProvider>
-
         </div>
 
         {/* Right Side */}
         <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
           <div className="bg-white rounded-2xl p-4 w-full text-sm">
-            <h3 className="font-semibold text-sm text-gray-700 mb-4">
+            <h3 className="font-semibold text-sm text-gray-500 mb-4">
               About Vendor
             </h3>
             <div className="space-y-4">
@@ -849,29 +864,6 @@ const EditLayout = () => {
                 <p className="text-gray-900 font-semibold text-base whitespace-pre-line">
                   {campaignDetails.vendordetails?.businessname || "N/A"}
                 </p>
-              </div>
-
-              <hr className="border-gray-200" />
-
-              {/* About Brand */}
-              <div>
-                <p
-                  className={`text-gray-800 whitespace-pre-line ${
-                    showFullAboutBrand ? "" : "line-clamp-2"
-                  }`}
-                >
-                  {campaignDetails.vendordetails?.aboutbrand || "N/A"}
-                </p>
-
-                {campaignDetails.vendordetails?.aboutbrand &&
-                  campaignDetails.vendordetails.aboutbrand.length > 100 && (
-                    <button
-                      onClick={() => setShowFullAboutBrand((prev) => !prev)}
-                      className="text-blue-600 text-xs font-semibold mt-1 hover:underline cursor-pointer"
-                    >
-                      {showFullAboutBrand ? "View Less" : "View More"}
-                    </button>
-                  )}
               </div>
 
               <hr className="border-gray-200" />
@@ -911,6 +903,28 @@ const EditLayout = () => {
                   </span>
                 </div>
               </div>
+
+              {/* About Brand */}
+              <hr className="border-gray-200" />
+              <div>
+                <p
+                  className={`text-gray-800 whitespace-pre-line ${
+                    showFullAboutBrand ? "" : "line-clamp-2"
+                  }`}
+                >
+                  {campaignDetails.vendordetails?.aboutbrand || "N/A"}
+                </p>
+
+                {campaignDetails.vendordetails?.aboutbrand &&
+                  campaignDetails.vendordetails.aboutbrand.length > 100 && (
+                    <button
+                      onClick={() => setShowFullAboutBrand((prev) => !prev)}
+                      className="text-blue-600 text-xs font-semibold mt-1 hover:underline cursor-pointer"
+                    >
+                      {showFullAboutBrand ? "View Less" : "View More"}
+                    </button>
+                  )}
+              </div>
             </div>
           </div>
 
@@ -934,7 +948,9 @@ const EditLayout = () => {
                           <img
                             src={platform.iconpath}
                             alt={platform.providername}
-                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                            onError={(e) =>
+                              (e.target.src = "/Brocken-Defualt-Img.jpg")
+                            }
                             className="w-5 h-5 object-contain"
                           />
                         )}
@@ -945,10 +961,11 @@ const EditLayout = () => {
 
                       {/* Content Types at end */}
                       <span className="text-gray-500 text-sm text-right">
-                        {platform.contenttypes && platform.contenttypes.length > 0
+                        {platform.contenttypes &&
+                        platform.contenttypes.length > 0
                           ? platform.contenttypes
-                            .map((ct) => ct.contenttypename)
-                            .join(", ")
+                              .map((ct) => ct.contenttypename)
+                              .join(", ")
                           : "No types"}
                       </span>
                     </div>
@@ -962,13 +979,14 @@ const EditLayout = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500">No platform content types available.</p>
+                <p className="text-gray-500">
+                  No platform content types available.
+                </p>
               )}
             </div>
           </div>
         </div>
       </div>
-
 
       {/* Withdraw Modal */}
       <Modal
@@ -1002,16 +1020,14 @@ const EditLayout = () => {
         </div>
       </Modal>
 
-
       <ApplyNowModal
         open={isEditModalOpen}
         onClose={() => setEditModalOpen(false)}
         applicationId={selectedApplicationId}
         campaignId={selectedCampaignId}
-        campaignBudget={campaignDetails.estimatedbudget} 
-        onSuccess ={() => setEditModalOpen(false)}
+        campaignBudget={campaignDetails.estimatedbudget}
+        onSuccess={() => setEditModalOpen(false)}
       />
-
     </div>
   );
 };
