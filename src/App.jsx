@@ -101,6 +101,7 @@ import CampaignDetailsView from './components/admin/pages/CampaignDetailsView';
 import AdminContentLinks from './components/admin/pages/AdminContentLinks';
 import AdminImproperMsg from './components/admin/pages/AdminImproperMsg';
 import AdminMessagePage from './components/admin/adminChat/AdminConversationPage';
+import { AdminShippment } from './components/admin/pages/AdminShippment';
 
 /* =========================================================
    Chat Module
@@ -215,6 +216,7 @@ const App = () => {
                   <Route path='campaigns' element={<CampaignRequests />} />
                   <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView />} />
                   <Route path='analytics' element={<AdminContentLinks />} />
+                  <Route path='shippment' element={<AdminShippment />}/>
                   <Route path='improper-massages' element={<AdminImproperMsg />} />
                   <Route path='support' element={<AdminMessagePage />} />
                   <Route path='settings' element={<ComingSoon />} />

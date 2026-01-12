@@ -10,6 +10,9 @@ import {
   RiShutDownLine,
   RiCustomerService2Line, 
   RiBringForward,
+  RiShip2Line,
+  RiAlertLine,
+  RiTruckLine,
 } from "@remixicon/react";
 import { useDispatch } from "react-redux";
 import { Tooltip } from 'antd';
@@ -22,7 +25,8 @@ const navItems = [
   { name: "Influencer Requests", icon: <RiUser3Line />, path: "/admin-dashboard/influencers" },
   { name: "Campaign Requests", icon: <RiFolderOpenLine />, path: "/admin-dashboard/campaigns" },
   { name: "Analytics", icon: <RiBringForward />, path: "/admin-dashboard/analytics" },
-  { name: "Improper Massages", icon: <RiCustomerService2Line />, path: "/admin-dashboard/improper-massages" },
+  { name: "Shippment", icon:<RiTruckLine />, path: "/admin-dashboard/shippment" },
+  { name: "Improper Massages", icon: <RiAlertLine />, path: "/admin-dashboard/improper-massages" },
   { name: "Settings", icon: <RiSettings3Line />, path: "/admin-dashboard/settings" },
   { name: "Support", icon: <RiCustomerService2Line />, path: "/admin-dashboard/support" },
   

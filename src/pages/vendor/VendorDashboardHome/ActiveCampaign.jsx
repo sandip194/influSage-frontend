@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,6 +10,9 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { Select, Spin } from "antd";
 
 ChartJS.register(
   CategoryScale,
@@ -21,45 +24,85 @@ ChartJS.register(
   Legend
 );
 
-const ActiveCampaign = () => {
-  const [timeRange, setTimeRange] = useState("monthly");
+const { Option } = Select;
 
-  const data = {
-    labels: [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ],
-    datasets: [
-      {
-        label: "Active",
-        data: [60, 85, 75, 40, 30, 95, 65, 70, 50, 80, 75, 60],
-        borderColor: "#2563EB",
-        backgroundColor: "rgba(37,99,235,0.15)",
-        tension: 0.4,
-        borderWidth: 3,
-        pointRadius: 0,
-      },
-      {
-        label: "Completed",
-        data: [20, 60, 40, 20, 10, 50, 70, 65, 80, 50, 65, 30],
-        borderColor: "#1E3A8A",
-        backgroundColor: "rgba(30,58,138,0.15)",
-        tension: 0.4,
-        borderWidth: 3,
-        pointRadius: 0,
-      },
-    ],
-  };
+const ActiveCampaign = () => {
+  const [timeRange, setTimeRange] = useState("month");
+  const [chartData, setChartData] = useState({ labels: [], datasets: [] });
+  const [loading, setLoading] = useState(false);
+
+  const { token } = useSelector((state) => state.auth);
+
+  const fetchChartData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(
+        "vendor/dashboard/CampaignStatusTrend",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { p_filtertype: timeRange },
+        }
+      );
+
+      const apiData = res.data.data || [];
+
+      let labels = [];
+      let activeData = [];
+      let completedData = [];
+
+      if (apiData.length > 0) {
+        if (timeRange === "year") {
+          labels = apiData.map((item) => item.year);
+        } else if (timeRange === "month") {
+          const monthNames = [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+          ];
+          labels = apiData.map((item) => monthNames[item.month - 1] || `Month ${item.month}`);
+        } else if (timeRange === "week") {
+          labels = apiData.map((item) => `Week ${item.week}`);
+        }
+
+        activeData = apiData.map((item) => item.activecampaigncount || 0);
+        completedData = apiData.map((item) => item.completecampaigncount || 0);
+      }
+
+      // Set chart data safely
+      setChartData({
+        labels,
+        datasets: [
+          {
+            label: "Active",
+            data: activeData,
+            borderColor: "#2563EB",
+            backgroundColor: "rgba(37,99,235,0.15)",
+            tension: 0.4,
+            borderWidth: 3,
+            pointRadius: 0,
+          },
+          {
+            label: "Completed",
+            data: completedData,
+            borderColor: "#1E3A8A",
+            backgroundColor: "rgba(30,58,138,0.15)",
+            tension: 0.4,
+            borderWidth: 3,
+            pointRadius: 0,
+          },
+        ],
+      });
+
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, timeRange]);
+
+
+  useEffect(() => {
+    fetchChartData();
+  }, [fetchChartData]);
 
   const options = {
     responsive: true,
@@ -68,16 +111,13 @@ const ActiveCampaign = () => {
     plugins: {
       legend: {
         display: true,
-        position: "top",
-        align: "start",
+        position: "bottom",
+        align: "center",
         labels: {
           usePointStyle: true,
           pointStyle: "circle",
           color: "#111827",
-          font: {
-            size: 10,
-            family: "Inter, sans-serif",
-          },
+          font: { size: 12, family: "Inter, sans-serif" },
         },
       },
       tooltip: {
@@ -96,9 +136,7 @@ const ActiveCampaign = () => {
         grid: { display: false },
         ticks: {
           color: "#6B7280",
-          font: {
-            size: window.innerWidth < 640 ? 10 : 12, // smaller font on mobile
-          },
+          font: { size: window.innerWidth < 640 ? 10 : 12 },
         },
       },
       y: {
@@ -106,35 +144,48 @@ const ActiveCampaign = () => {
         grid: { color: "#E5E7EB" },
         ticks: {
           color: "#6B7280",
-          font: {
-            size: window.innerWidth < 640 ? 10 : 12,
-          },
+          font: { size: window.innerWidth < 640 ? 10 : 12 },
         },
       },
     },
+
   };
 
+
   return (
-        <div className="bg-white p-4 sm:p-6 rounded-2xl w-full mt-3">
+    <div className="bg-white p-4 sm:p-6 rounded-2xl w-full mt-3">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2 sm:gap-0">
-        <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-800">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+        <h2 className="text-lg font-bold text-gray-900">
           Active vs. Completed Campaigns
         </h2>
-        <select
-          value={timeRange}
-          onChange={(e) => setTimeRange(e.target.value)}
-          className="text-xs sm:text-sm text-gray-600 border rounded-full px-3 sm:px-4 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-        >
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </select>
+
+        {/* Select */}
+        <div className="flex justify-end w-full sm:w-auto">
+          <Select
+            value={timeRange}
+            onChange={(value) => setTimeRange(value)}
+            className="w-32 sm:w-40 text-sm"
+          >
+            <Option value="week">Weekly</Option>
+            <Option value="month">Monthly</Option>
+            <Option value="year">Yearly</Option>
+          </Select>
+
+        </div>
+
       </div>
 
+
       {/* Chart */}
-      <div className="h-52 sm:h-64 md:h-80 lg:h-96 transition-all duration-300">
-        <Line data={data} options={options} />
+      <div className="h-52 sm:h-64 md:h-80 lg:h-96 transition-all duration-300 relative">
+        {loading ? (
+          <div className="flex justify-center items-center h-full">
+            <Spin size="large" />
+          </div>
+        ) : (
+          <Line data={chartData} options={options} />
+        )}
       </div>
     </div>
   );
