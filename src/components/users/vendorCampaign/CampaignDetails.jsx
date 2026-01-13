@@ -5,7 +5,7 @@ import {
   RiTranslate,
   RiCheckboxBlankCircleLine,
 } from '@remixicon/react';
-import { Modal,  Tabs, DatePicker, Skeleton, ConfigProvider, Empty } from 'antd';
+import { Modal, Tabs, DatePicker, Skeleton, ConfigProvider, Empty } from 'antd';
 import VendorCampaignOverview from './VendorCampaignOverview';
 import VendorActivity from './VendorActivity';
 import VendorFilesMedia from './VendorFilesMedia';
@@ -361,9 +361,13 @@ const CampaignDetails = () => {
 
       <h1 className="text-2xl font-semibold mb-4">Campaign Details</h1>
 
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4 min-w-0">
+
+
         {/* Left Section */}
-        <div className="flex-1 space-y-4 ">
+        <div className="flex-1 min-w-0 space-y-4">
+
+
           <div className="bg-white rounded-xl p-6 border border-gray-100">
 
             {/* Header Section */}
@@ -579,9 +583,9 @@ const CampaignDetails = () => {
         </div>
 
         {/* Right Section */}
-        <div className=" w-full md:w-[350px] flex-shrink-0 flex flex-col gap-6
-            [@media(min-width:768px)_and_(max-width:1024px)]:w-full
-            [&>*]:w-full">
+        <div className="w-full lg:w-[25%]  flex-shrink-0 flex flex-col gap-6 [&>*]:w-full">
+
+
           {/* Campaign Info Card */}
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="text-xl font-bold">Campaign Details</h3>
@@ -592,23 +596,23 @@ const CampaignDetails = () => {
             </div>
 
 
-           <div className="py-4 border-b border-gray-200">
-            <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
-            <p className="text-gray-700 text-sm">
-              {formatToDDMMYYYY(campaignDetails?.requirements?.campaignstartdate)}
-              {" "}{"-"}{" "}
-              {formatToDDMMYYYY(campaignDetails?.requirements?.campaignenddate)}
-            </p>
-          </div>
+            <div className="py-4 border-b border-gray-200">
+              <p className="text-sm font-bold text-gray-900">Campaign Duration</p>
+              <p className="text-gray-700 text-sm">
+                {formatToDDMMYYYY(campaignDetails?.requirements?.campaignstartdate)}
+                {" "}{"-"}{" "}
+                {formatToDDMMYYYY(campaignDetails?.requirements?.campaignenddate)}
+              </p>
+            </div>
 
-          <div className="py-4">
-            <p className="text-sm font-bold text-gray-900">Application Window</p>
-            <p className="text-gray-700 text-sm">
-              {formatToDDMMYYYY(campaignDetails?.applicationstartdate)}
-              {" "}{"-"}{" "}
-              {formatToDDMMYYYY(campaignDetails?.applicationenddate)}
-            </p>
-          </div>
+            <div className="py-4">
+              <p className="text-sm font-bold text-gray-900">Application Window</p>
+              <p className="text-gray-700 text-sm">
+                {formatToDDMMYYYY(campaignDetails?.applicationstartdate)}
+                {" "}{"-"}{" "}
+                {formatToDDMMYYYY(campaignDetails?.applicationenddate)}
+              </p>
+            </div>
 
           </div>
 
@@ -670,47 +674,64 @@ const CampaignDetails = () => {
                 campaignDetails.influencers.map((influencer) => (
                   <div
                     key={influencer.influencerid}
-                    className="flex border border-gray-200 rounded-2xl items-start p-3 gap-4 mb-4 cursor-pointer hover:bg-gray-100"
+                    className="border border-gray-200 rounded-2xl p-3 mb-4 cursor-pointer hover:bg-gray-100 transition"
                     onClick={() =>
                       navigate(`/vendor-dashboard/browse-influencers/influencer-details/${influencer.influencerid}`)
                     }
                   >
-                    <img
-                      src={influencer.userphoto}
-                      onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                      alt={`${influencer.firstname} ${influencer.lastname}`}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-800">
-                        {influencer.influencername}
-                      </h4>
-                      <p className="text-sm text-gray-500">
-                        {influencer.statename}, {influencer.countryname}
-                      </p>
-                      <div className="flex gap-2 mt-1 flex-wrap">
-                        {influencer.providers.map((provider) => (
-                          <div key={provider.providerid} className="flex items-center gap-1 text-sm text-gray-600">
-                            <img
-                              src={provider.iconpath}
-                              alt={provider.providername}
-                              onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                              className="w-4 h-4"
-                            />
-                            <span>{formatFollowers(provider.nooffollowers)}</span>
+                    {/* Top Section */}
+                    <div className="flex gap-4 items-start">
+                      {/* Image */}
+                      <img
+                        src={influencer.userphoto}
+                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                        alt={influencer.influencername}
+                        className="w-12 h-12 rounded-full object-cover shrink-0"
+                      />
 
-                          </div>
-                        ))}
-                      </div>
-                      <div className="flex gap-2 mt-1 flex-wrap text-xs text-gray-500">
-                        {influencer.categories.slice(0, 3).map((cat) => (
-                          <span key={cat.categoryid} className="bg-gray-100 px-2 py-0.5 rounded-full">
-                            {cat.categoryname}
-                          </span>
-                        ))}
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-800 truncate">
+                          {influencer.influencername}
+                        </h4>
+
+                        <p className="text-sm text-gray-500">
+                          {influencer.statename}, {influencer.countryname}
+                        </p>
+
+                        {/* Platforms */}
+                        <div className="flex gap-3 mt-1 flex-wrap">
+                          {influencer.providers.map((provider) => (
+                            <div
+                              key={provider.providerid}
+                              className="flex items-center gap-1 text-sm text-gray-600"
+                            >
+                              <img
+                                src={provider.iconpath}
+                                alt={provider.providername}
+                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                                className="w-4 h-4"
+                              />
+                              <span>{formatFollowers(provider.nooffollowers)}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
+
+                    {/* Categories */}
+                    <div className="flex gap-2 flex-wrap text-xs text-blue-700 mt-2">
+                      {influencer.categories.slice(0, 3).map((cat) => (
+                        <span
+                          key={cat.categoryid}
+                          className="bg-blue-100 px-2 py-0.5 rounded-full"
+                        >
+                          {cat.categoryname}
+                        </span>
+                      ))}
+                    </div>
                   </div>
+
                 ))
               ) : (
                 <Empty
@@ -726,7 +747,7 @@ const CampaignDetails = () => {
               <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
               <div className="relative">
                 {[
-                   {
+                  {
                     name: "Campaign Created",
                     date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.createddate),
                   },

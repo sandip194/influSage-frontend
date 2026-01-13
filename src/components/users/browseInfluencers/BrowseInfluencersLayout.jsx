@@ -221,18 +221,15 @@ const BrowseInfluencersLayout = () => {
   return (
     <div className="w-full text-sm pb-24 sm:pb-0">
 
-      {/* Header */}
+      {/* Header */}  
       <div className="header mb-4">
         <h3 className="text-2xl text-[#0D132D] font-bold mb-2">
-          Browse Influencers
+           Browse Influencers To Promote Your Brand
         </h3>
-        <p className="text-base text-[#0D132D]">
-          Browse Influencers To Promote Your Brand
-        </p>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white p-4 rounded-lg mb-6 flex flex-row gap-2 flex-wrap sm:flex-nowrap">
+      <div className="bg-white p-4  rounded-lg mb-3 flex flex-row gap-2 flex-wrap sm:flex-nowrap">
         <div className="flex gap-3 flex-nowrap">
           {buttons.map(({ id, label, path }) => (
             <button
@@ -329,7 +326,7 @@ const BrowseInfluencersLayout = () => {
         </div>
 
         {/* Influencers List */}
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
           {loading ? (
             Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="p-4 border border-gray-200 rounded-2xl">

@@ -104,7 +104,7 @@ const AdminImproperMsg = () => {
             {
                 title: "Reason",
                 dataIndex: "reason",
-                ellipsis: true,
+                width: 220,
                 render: (value) => value || "N/A",
             },
             {

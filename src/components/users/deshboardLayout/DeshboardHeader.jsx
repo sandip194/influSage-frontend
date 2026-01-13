@@ -347,7 +347,7 @@ useEffect(() => {
   // UI RETURN
   // ======================================================
   return (
-    <div className="w-full flex justify-between items-center p-4 bg-white shadow-sm border-b border-gray-200">
+    <div className="w-full flex justify-between items-center p-3 bg-white shadow-sm border-b border-gray-200">
       {/* Sidebar + Search */}
       <div className="flex items-center gap-4 w-full max-w-sm">
         <button
@@ -356,10 +356,6 @@ useEffect(() => {
         >
           <MenuOutlined className="text-lg" />
         </button>
-
-        <div className="hidden sm:block flex-1">
-          <Input size="large" prefix={<SearchOutlined />} placeholder="Search" />
-        </div>
       </div>
 
       {/* Right Section */}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {  Dropdown, Menu, Pagination, Input, Select, Empty, Skeleton } from "antd";
+import { Dropdown, Menu, Pagination, Input, Select, Empty, Skeleton } from "antd";
 import {
   RiMore2Fill,
   RiUserLine,
@@ -12,11 +12,28 @@ import OfferDetailsModal from "./OfferDetailsModal";
 
 
 const statusLabels = {
-  "Viewed": { text: "Viewed", style: "bg-blue-50 border border-blue-200 text-blue-700" },
-  "Applied": { text: "New", style: "bg-red-50 border border-red-200 text-red-700" },
-  "Selected": { text: "Selected", style: "bg-green-50 border border-green-200 text-green-700" },
-  "Withdrawn": { text: "Withdrawn", style: "bg-yellow-50 border border-yellow-200 text-yellow-700" },
+  "Viewed": {
+    text: "Viewed",
+    style: "bg-blue-50 border border-blue-200 text-blue-700"
+  },
+  "Applied": {
+    text: "New",
+    style: "bg-red-50 border border-red-200 text-red-700"
+  },
+  "Selected": {
+    text: "Selected",
+    style: "bg-green-50 border border-green-200 text-green-700"
+  },
+  "Accepted": {
+    text: "Accepted",
+    style: "bg-purple-50 border border-purple-200 text-purple-700"
+  },
+  "Withdrawn": {
+    text: "Withdrawn",
+    style: "bg-yellow-50 border border-yellow-200 text-yellow-700"
+  },
 };
+
 
 const ViewAllOffers = ({ campaignData }) => {
 
@@ -241,12 +258,12 @@ const ViewAllOffers = ({ campaignData }) => {
                     <td className="p-4 flex gap-3 items-center">
                       <img
                         src={offer.photopath}
-                        alt={offer.name}
+                        alt={offer.influencername}
                         className="w-10 h-10 rounded-full object-cover"
                         onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                       />
                       <div>
-                        <p className="font-medium">{offer.firstname} {offer.lastname}</p>
+                        <p className="font-medium">{offer.influencername} </p>
                         <p className="text-xs text-gray-500">{offer.statename}-{offer.countryname}</p>
                         {/* <p className="text-xs text-gray-500">
                       ⭐ {offer.rating?.toFixed(1)}
@@ -259,7 +276,7 @@ const ViewAllOffers = ({ campaignData }) => {
                         {offer.categories?.map((cat) => (
                           <span
                             key={cat.categoryid}
-                            className="bg-gray-100 text-gray-700 px-2 py-0.5 text-xs rounded-full"
+                            className="bg-blue-100 text-blue-700 px-2 py-1 text-xs rounded-full"
                           >
                             {cat.categoryname}
                           </span>
@@ -267,13 +284,13 @@ const ViewAllOffers = ({ campaignData }) => {
                       </div>
                     </td>
 
-                    <td className="p-4">₹ {offer.amount}</td>
+                    <td className="p-4 font-medium text-sm">₹ {offer.amount}</td>
 
                     <td className="p-4">
                       {(() => {
                         const { text, style } = statusLabels[offer.status];
                         return (
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${style}`}>
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${style}`}>
                             {text}
                           </span>
                         );

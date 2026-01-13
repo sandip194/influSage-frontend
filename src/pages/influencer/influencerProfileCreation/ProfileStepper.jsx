@@ -154,7 +154,7 @@ export const ProfileStepper = () => {
     }
   ], [profileData, updateProfileSection, markStepComplete, isEditable]);
 
-  const getUserProfileCompationData =  useCallback(async () => {
+  const getUserProfileCompationData = useCallback(async () => {
     try {
       const res = await axios.get(`user/profile/${userId}`, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -235,8 +235,8 @@ export const ProfileStepper = () => {
         return;
       }
 
-      // 🟢 PENDINGPROFILE → resume from last incomplete step
-      if (mappedStatus === "PENDINGPROFILE") {
+      // 🟢 null Or PENDINGPROFILE → resume from last incomplete step
+      if (!mappedStatus || mappedStatus === "PENDINGPROFILE") {
         setCompletedSteps(stepsCompletion);
         const firstIncomplete = stepsCompletion.findIndex(s => !s);
         setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "thankyou");

@@ -92,13 +92,13 @@ const Sidebar = forwardRef((props, ref) => {
                 className={`
                            bg-white text-[#0D132D] flex flex-col transition-all duration-300 shadow-sm z-40
                           ${isMobile
-                        ? `fixed top-0 left-0 h-full ${isOpen ? "w-64 px-4 py-1" : "w-0"}`
-                        : `h-screen ${isOpen ? "w-64 px-3 py-1" : "w-16 px-2 py-1"}`
+                        ? `fixed top-0 left-0 h-full ${isOpen ? "w-58 px-4 py-1" : "w-0"}`
+                        : `h-screen ${isOpen ? "w-58 px-3 py-1" : "w-16 px-2 py-1"}`
                     }
      `}
             >
                 {/* Header */}
-                <div className={`flex items-center ${isOpen ? "justify-between" : "justify-center"} py-3 h-18 border-b border-gray-100`}>
+                <div className={`flex items-center ${isOpen ? "justify-between" : "justify-center"} py-2 h-16  border-b border-gray-100`}>
                     {isOpen && (
                         <NavLink to="/dashboard">
                             <img

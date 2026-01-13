@@ -365,7 +365,7 @@ const UserTableLayout = () => {
                 <div
                     className="
                     flex gap-2
-                    fixed bottom-0 left-0 w-full bg-white shadow-md p-3 justify-center z-30
+                    fixed bottom-0 left-0 w-full bg-white shadow-md p-3 justify-center z-10
                     sm:static sm:bg-transparent sm:shadow-none sm:p-0 sm:w-auto sm:justify-end
                 "
                 >
@@ -483,7 +483,7 @@ const UserTableLayout = () => {
                                                     return (
                                                         <td key="Category" className="p-4">
                                                             {safeArray(user?.categories).map((c) => (
-                                                                <span key={c?.categoryid ?? crypto.randomUUID()} className="inline-block mr-1 mb-1 px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                                                                <span key={c?.categoryid ?? crypto.randomUUID()} className="inline-block mr-1 mb-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
                                                                     {safeText(c?.categoryname)}
                                                                 </span>
                                                             ))}
