@@ -165,6 +165,7 @@ const hasUnreadMessage = (vendor) => {
                     img: campaign.campaignphoto,
                     vendorId: vendor.vendorid || vendor.id,
                     campaignid: campaign.campaignid,
+                    name: vendor.fullname,
                     campaignname: campaign.campaignname,
                     vendorName: `${vendor.firstname }`,
                     canstartchat: vendor.canstartchat, 

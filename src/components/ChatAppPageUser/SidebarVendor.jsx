@@ -373,6 +373,7 @@ export default function SidebarVendor({ onSelectChat }) {
                     onSelectChat({
                       ...inf,
                       campaign: selectedCampaign,
+                      name: inf.fullname, 
                       canstartchat: inf.canstartchat,
                       date: Date.now(),
                     });
