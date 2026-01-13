@@ -6,7 +6,8 @@ import {
   RiUserAddLine,
   RiGlobalLine,
   RiStarFill,
-  RiStarLine
+  RiStarLine,
+  RiMapPin2Line 
 } from "@remixicon/react";
 import { Tooltip } from "antd";
 
@@ -59,9 +60,11 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
             <p className="text-sm font-semibold text-gray-900">
               {influencer?.influencername}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 flex items-center gap-1">
+              <RiMapPin2Line size={14} className="text-gray-400" />
               {influencer?.statename}, {influencer?.countryname}
             </p>
+
             <div className="flex items-center gap-1 text-xs">
               {Number(influencer?.ratingcount) > 0 && (
                 <div className="flex items-center gap-1 text-xs mt-1">

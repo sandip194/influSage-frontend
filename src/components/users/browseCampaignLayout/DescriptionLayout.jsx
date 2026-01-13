@@ -759,6 +759,12 @@ const DescriptionLayout = () => {
                     {campaignDetails.vendordetails?.["Member Since"] || "N/A"}
                   </span>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Hire Rate:</span>
+                  <span className="text-gray-900">
+                    {campaignDetails.vendordetails?.hirerate || "N/A"}%
+                  </span>
+                </div>
               </div>
               
               {/* About Brand */}

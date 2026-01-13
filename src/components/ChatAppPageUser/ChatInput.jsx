@@ -10,14 +10,12 @@ import { toast } from "react-toastify";
 import useSocketRegister from "../../sockets/useSocketRegister";
 
 export default function ChatInput({
-  
-  canstartchat = true, // 👈 new prop (default true)
+  canstartchat = true,
   onSend,
   replyTo,
   onCancelReply,
   editingMessage,
-  onEditComplete,
-}) {
+}){
     useSocketRegister();
   const [text, setText] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -38,34 +36,20 @@ export default function ChatInput({
     }
   };
 
-
   const handleSubmit = () => {
-    if (!canstartchat) {
-      handleBlockedAction();
-      return;
-    }
-
+    if (!canstartchat) return;
     if (!text.trim() && !file) return;
 
-    if (editingMessage) {
-      onEditComplete({
-        ...editingMessage,
-        content: text,
-        file: file || editingMessage.file,
-        replyId: replyTo?.id || null,
-      });
-    } else {
-      onSend({
-        text,
-        file,
-        replyId: replyTo?.id || null,
-      });
-    }
+    onSend({
+      text,
+      file,
+      replyId: replyTo?.id || null,
+    });
 
     setText("");
     setFile(null);
     setPreviewUrl(null);
-    onCancelReply && onCancelReply();
+    onCancelReply?.();
   };
 
   const handleKeyDown = (e) => {
@@ -122,15 +106,20 @@ export default function ChatInput({
 
 
   useEffect(() => {
-    if (editingMessage?.file) {
-      setPreviewUrl({
-        type: "file",
-        url: editingMessage.file,
-        name: editingMessage.file.split("/").pop(),
-      });
-    }
-    setText(editingMessage?.content || "");
-  }, [editingMessage]);
+  // set text safely
+  setText(editingMessage?.content || "");
+
+  // ❗ Only handle file if it's a STRING URL
+  if (typeof editingMessage?.file === "string") {
+    setPreviewUrl({
+      type: "file",
+      url: editingMessage.file,
+      name: editingMessage.file.split("/").pop(),
+    });
+  } else {
+    setPreviewUrl(null); // ⬅️ important
+  }
+}, [editingMessage]);
 
   return (
     <form

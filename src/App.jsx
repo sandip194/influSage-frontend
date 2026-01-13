@@ -105,7 +105,7 @@ import AdminMessagePage from './components/admin/adminChat/AdminConversationPage
 /* =========================================================
    Chat Module
 ========================================================= */
-// import ChatAppPageUser from './components/ChatAppPageUser/ChatAppPageUser';
+import ChatAppPageUser from './components/ChatAppPageUser/ChatAppPageUser';
 
 /* =========================================================
    APP COMPONENT
@@ -165,8 +165,8 @@ const App = () => {
                     <Route path='my-contract/details/:campaignId' element={<Details />} />
                     <Route path='payment' element={<Payment />} />
                     <Route path='analytics' element={<Analytics />} />
-                    <Route path='messages' element={<ChatAppPage />} />
-                    {/* <Route path="messages" element={<ChatAppPageUser />} /> */}
+                    {/* <Route path='messages' element={<ChatAppPage />} /> */}
+                    <Route path="messages" element={<ChatAppPageUser />} />
                     <Route path='messagepage' element={<InfluencerMessagePage />} />
                     <Route path='my-profile' element={<Profile />} />
                     <Route path='editProfile' element={<EditProfile />} />
@@ -193,8 +193,8 @@ const App = () => {
                     <Route path='vendor-campaign/edit-campaign/:campaignId' element={<CampaignWizard />} />
                     <Route path='vendor-campaign' element={<VendorCampaign />} />
                     <Route path='vendor-campaign/campaignDetails/:campaignId' element={<CampaignDetails />} />
-                    <Route path='messages' element={<ChatAppPageVendor />} />
-                     {/* <Route path="messages" element={<ChatAppPageUser />} /> */}
+                    {/* <Route path='messages' element={<ChatAppPageVendor />} /> */}
+                     <Route path="messages" element={<ChatAppPageUser />} />
                     <Route path='vendorMessagepage' element={<VendorConversationPage />} />
                     <Route path='analytics' element={<BrandAnalyticsDashboard />} />
                     <Route path='edit-profile' element={<EditVendorProfile />} />

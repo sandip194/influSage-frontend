@@ -315,13 +315,19 @@ const VendorMyProfile = () => {
                             <hr className="my-4 border-gray-200" />
                             <div>
                                 <p className="font-medium text-gray-900">How large is your company?</p>
+
                                 <p className="text-gray-500">
                                     {profileData?.p_profile?.companysizename}{" "}
+
                                     {profileData?.p_profile?.minemployees && profileData?.p_profile?.maxemployees
-                                        ? `(${profileData.p_profile.minemployees} - ${profileData.p_profile.maxemployees} Employees)`
-                                        : ""}
+                                    ? `(${profileData.p_profile.minemployees} - ${profileData.p_profile.maxemployees} Employees)`
+                                    : profileData?.p_profile?.minemployees && !profileData?.p_profile?.maxemployees
+                                    ? `(${profileData.p_profile.minemployees}+ Employees)`
+                                    : !profileData?.p_profile?.minemployees && profileData?.p_profile?.maxemployees
+                                    ? `(Up to ${profileData.p_profile.maxemployees} Employees)`
+                                    : ""}
                                 </p>
-                            </div>
+                                </div>
 
 
                             <hr className="my-4 border-gray-200" />
