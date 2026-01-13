@@ -302,7 +302,7 @@ const ViewAllOffers = ({ campaignData }) => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-6">
+      <div className="flex justify-end mt-6">
         <Pagination
           current={pagenumber}
           pageSize={pagesize}

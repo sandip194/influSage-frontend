@@ -135,10 +135,11 @@ const CampaignWizard = () => {
   // ---------------------------
   // Fetch Campaign from Backend
   // ---------------------------
-  const getCampaignData = async () => {
+  const getCampaignData = async () => { 
     try {
       const endpoint = campaignId ? campaignId : "01";
-      const res = await axios.get(`/vendor/campaign/${endpoint}`, {
+      const res = await axios.get("/vendor/campaign", {
+        params : {campaignId : endpoint},
         headers: { Authorization: `Bearer ${token}` },
       });
 

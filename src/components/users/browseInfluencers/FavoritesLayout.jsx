@@ -17,11 +17,6 @@ const buttons = [
     label: "Favorites",
     path: "/vendor-dashboard/browse-influencers/favorites",
   },
-  {
-    id: "invited",
-    label: "Invited",
-    path: "/vendor-dashboard/browse-influencers/invited",
-  },
 ];
 
 const FavoritesLayout = () => {

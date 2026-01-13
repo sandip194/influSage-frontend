@@ -10,7 +10,6 @@ import influencer from '../../../assets/influencer.jpg'
 import { Spin } from "antd";
 
 import {
-  RiCheckboxCircleFill,
   RiDeleteBin6Line,
   RiMenLine,
   RiMoneyRupeeCircleLine,
@@ -18,7 +17,6 @@ import {
   RiTranslate,
   RiCloseLine,
   RiCheckLine,
-  RiCalendarLine 
 } from "react-icons/ri";
 
 
@@ -57,12 +55,13 @@ const CampaignReviewStep = ({ onEdit }) => {
 
         const isEdit = !!campaignId;
 
-        const url = isEdit
-          ? `/vendor/campaign/${campaignId}`
-          : `/vendor/campaign/01`;
-
-        const res = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
+        const res = await axios.get(`/vendor/campaign`, {
+          params: {
+            campaignId: isEdit ? campaignId : "01",
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         setCampaignData(res.data?.campaignParts || {});
@@ -77,7 +76,7 @@ const CampaignReviewStep = ({ onEdit }) => {
     };
 
     fetchCampaign();
-  }, [token, userId, campaignId]);
+  }, [token, campaignId]);
 
   const handleDeleteReference = async (fileToDelete) => {
     if (!fileToDelete || !fileToDelete.filepath) {
@@ -123,7 +122,7 @@ const CampaignReviewStep = ({ onEdit }) => {
   const p_campaignfilejson = campaignData?.p_campaignfilejson || [];
   const p_contenttypejson = campaignData?.p_contenttypejson || [];
 
- 
+
 
   const languages =
     p_vendorinfojson.campaignlanguages?.map((l) => l.languagename) || [];

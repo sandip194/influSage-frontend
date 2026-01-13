@@ -178,7 +178,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
               key={platform.field}
               className="flex flex-col gap-3 border border-gray-100 p-3 rounded-xl bg-gray-100"
             >
-              <div className="grid grid-cols-12 gap-4 items-center">
+              <div className="grid grid-cols-12 gap-4 items-start">
                 {/* Platform (small) */}
                 <div className="col-span-12 lg:col-span-2 flex items-center gap-2">
                   {platform.icon}
@@ -238,7 +238,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
                           const url = form.getFieldValue(platform.urlField);
                           if (url && (!value || value < 1000)) {
                             return Promise.reject(
-                              new Error(`At least 1000 followers required for ${platform.name}`)
+                              new Error(`At least 1k followers required `)
                             );
                           }
                           return Promise.resolve();

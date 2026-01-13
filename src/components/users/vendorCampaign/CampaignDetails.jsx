@@ -22,6 +22,7 @@ import dayjs from 'dayjs';
 import VendorContract from './VendorContract';
 import ViewAllOffers from '../../vendor/offers/ViewAllOffers';
 import VendorContentLinksTab from './VendorContentLinksTab';
+import CampaignInvitationTab from './CampaignInvitationTab';
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
@@ -528,6 +529,12 @@ const CampaignDetails = () => {
                 <Tabs.TabPane tab="Overview" key="overview">
                   {campaignDetails && (
                     <VendorCampaignOverview campaignData={campaignDetails} />
+                  )}
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="Invitations" key="invitations">
+                  {campaignDetails && (
+                    <CampaignInvitationTab campaignData={campaignDetails} />
                   )}
                 </Tabs.TabPane>
 

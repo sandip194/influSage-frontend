@@ -153,6 +153,19 @@ const EditLayout = () => {
     }
   };
 
+  const getStatusStyles = (status) => {
+    switch (status?.toLowerCase()) {
+      case "selected":
+        return "bg-green-50 text-green-700 border-green-200";
+      case "viewed":
+        return "bg-blue-50 text-blue-700 border-blue-200";
+      case "applied":
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-300";
+    }
+  };
+
+
   if (loading)
     return (
       <div className="w-full max-w-7xl mx-auto">
@@ -564,8 +577,8 @@ const EditLayout = () => {
                                         src={fileUrl}
                                         alt={`Campaign file ${i + 1}`}
                                         onError={(e) =>
-                                          (e.target.src =
-                                            "/Brocken-Defualt-Img.jpg")
+                                        (e.target.src =
+                                          "/Brocken-Defualt-Img.jpg")
                                         }
                                         className="w-full h-full object-cover"
                                         loading="lazy"
@@ -668,10 +681,21 @@ const EditLayout = () => {
                 </div>
               </Tabs.TabPane>
 
-              <Tabs.TabPane tab="Your Proposel" key="proposel">
-                <div className="bg-white p-6 rounded-2xl">
+              <Tabs.TabPane tab="Your Proposal" key="proposal">
+                <div className="bg-white p-6 rounded-2xl relative">
+
+                  {/* Proposal Status */}
+                  <div className="absolute top-4 right-4 z-10">
+                    <span
+                      className={`px-4 py-1 rounded-full border text-sm font-medium 
+    ${getStatusStyles(appliedDetails?.statusname)}`}
+                    >
+                      {appliedDetails?.statusname || "-"}
+                    </span>
+                  </div>
+
                   {/* Budget */}
-                  <div className="pb-4 border-b border-gray-200">
+                  <div className="pb-4 border-b border-gray-200 mt-5 sm:mt-0">
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
                       Your Proposel Amount
                     </h3>
@@ -734,8 +758,8 @@ const EditLayout = () => {
                                   <img
                                     src={fileUrl}
                                     onError={(e) =>
-                                      (e.target.src =
-                                        "/Brocken-Defualt-Img.jpg")
+                                    (e.target.src =
+                                      "/Brocken-Defualt-Img.jpg")
                                     }
                                     className="w-full h-full object-cover"
                                     alt="file"
@@ -908,9 +932,8 @@ const EditLayout = () => {
               <hr className="border-gray-200" />
               <div>
                 <p
-                  className={`text-gray-800 whitespace-pre-line ${
-                    showFullAboutBrand ? "" : "line-clamp-2"
-                  }`}
+                  className={`text-gray-800 whitespace-pre-line ${showFullAboutBrand ? "" : "line-clamp-2"
+                    }`}
                 >
                   {campaignDetails.vendordetails?.aboutbrand || "N/A"}
                 </p>
@@ -962,10 +985,10 @@ const EditLayout = () => {
                       {/* Content Types at end */}
                       <span className="text-gray-500 text-sm text-right">
                         {platform.contenttypes &&
-                        platform.contenttypes.length > 0
+                          platform.contenttypes.length > 0
                           ? platform.contenttypes
-                              .map((ct) => ct.contenttypename)
-                              .join(", ")
+                            .map((ct) => ct.contenttypename)
+                            .join(", ")
                           : "No types"}
                       </span>
                     </div>

@@ -70,8 +70,7 @@ import VenderDashboardLayout from './pages/vendor/dashboard/VenderDashboardLayou
 import VenderDashboardPage from './pages/vendor/dashboard/VenderDashboardPage';
 
 import BrowseInfluencerPage from './components/users/browseInfluencers/BrowseInfluencersLayout';
-import FavoritesLayout from './components/users/browseInfluencers/FavoritesLayout';
-import Invited from './components/users/browseInfluencers/Invited';
+import FavoritesLayout from './components/users/browseInfluencers/FavoritesLayout'; 
 
 import CreateCampaign from './pages/vendor/dashboard/CreateCampaign';
 import CampaignWizard from './pages/vendor/dashboard/CampaignWizard';
@@ -187,7 +186,7 @@ const App = () => {
                     <Route path='' element={<VenderDashboardPage />} />
                     <Route path='browse-influencers' element={<BrowseInfluencerPage />} />
                     <Route path='browse-influencers/favorites' element={<FavoritesLayout />} />
-                    <Route path='browse-influencers/invited' element={<Invited />} />
+                    {/* <Route path='browse-influencers/invited' element={<Invited />} /> */}
                     <Route path='browse-influencers/influencer-details/:userId' element={<InfluencerProfile />} />
                     <Route path='vendor-campaign/my-campaigns' element={<CreateCampaign />} />
                     <Route path='vendor-campaign/create-campaign' element={<CampaignWizard />} />
