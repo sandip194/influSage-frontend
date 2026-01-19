@@ -31,10 +31,21 @@ export default function ChatAppPageUser() {
   const [selectedReplyMessage, setSelectedReplyMessage] = useState(null);
   const [editingMessage, setEditingMessage] = useState(null);
   const [isRecipientOnline, setIsRecipientOnline] = useState(false);
+  const [shouldRefresh, setShouldRefresh] = useState(false);
   const conversationId = activeChat?.conversationid || activeChat?.id;
 
   // Emit via socket
   const showChatUI = activeChat && socket;
+
+  /* 🧹 Unescape escaped HTML */
+  const unescapeHtml = (str) => {
+    if (!str) return "";
+    str = str.replace(/\\\\/g, "\\");
+    str = str.replace(/\\"/g, '"');
+    str = str.replace(/\\'/g, "'");
+    str = str.replace(/\\n/g, "\n").replace(/\\t/g, "\t");
+    return str;
+  };
 
   useEffect(() => {
     if (!socket || !conversationId) return;
@@ -47,9 +58,58 @@ export default function ChatAppPageUser() {
     };
   }, [socket, conversationId]);
 
+  const fetchMessages = async () => {
+  if (!conversationId || !token) return;
+
+  try {
+    const res = await axios.get("/chat/messages", {
+      params: {
+        p_conversationid: conversationId,
+        p_roleid: roleId,
+        p_limit: 50,
+        p_offset: 0,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const records = res?.data?.data?.records || [];
+
+    const formatted = records
+        .map((msg) => {
+          const raw = (msg.message || "").replace(/^"|"$/g, "");
+          const unescaped = unescapeHtml(raw);
+          const isHtml = /<\/?[a-z][\s\S]*>/i.test(unescaped);
+
+          return {
+            id: Number(msg.messageid),
+            roleId: Number(msg.roleid),
+            content: unescaped,
+            time: msg.createddate,
+            deleted: msg.isdeleted ?? false,
+            ishtml: isHtml,
+            readbyvendor: msg.readbyvendor ?? false,
+            readbyinfluencer: msg.readbyinfluencer ?? false,
+            replyId: msg.replyid ?? null,
+            file: msg.filepath
+              ? Array.isArray(msg.filepath)
+                ? msg.filepath
+                : [msg.filepath]
+              : [],
+          };
+        })
+        .sort((a, b) => new Date(a.time) - new Date(b.time));
+
+      dispatch(setMessages(formatted));
+  } catch (err) {
+    console.error("❌ Failed to fetch messages", err);
+  }
+};
+
   const handleSendMessage = async ({
     text,
-    files = [],
+    file = null,
     replyId = null,
     editingMessageId = null,
   }) => {
@@ -64,7 +124,6 @@ export default function ChatAppPageUser() {
         updateMessage({
           id: editingMessageId,
           content: text,
-          file: files,
           edited: true,
           isPending: true,
         })
@@ -92,71 +151,63 @@ export default function ChatAppPageUser() {
       formData.append("p_replyid", replyId || "");
       formData.append("p_messageid", editingMessageId || ""); // 🔥 edit key
       formData.append("tempId", tempId);
+      if (file) {
+        formData.append("file", file);
+      }
 
-      files.forEach((file) => formData.append("files", file));
 
       await axios.post("/chat/insertmessage", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
         },
       });
-
+      setShouldRefresh(true);
       setEditingMessage(null);
     } catch (err) {
       console.error("❌ Message send/edit failed", err);
     }
   };
 
+ useEffect(() => {
+  if (!socket || !conversationId) return;
+
+  const handleReceiveMessage = (msg) => {
+    if (String(msg.conversationid) !== String(conversationId)) return;
+
+    if (Number(msg.roleid) === Number(roleId)) return;
+
+    dispatch(
+      addMessage({
+        id: msg.messageid,
+        roleId: Number(msg.roleid),
+        content: msg.message,
+        time: msg.createddate,
+        deleted: false,
+        file: msg.filepaths || [],
+        replyId: msg.replyid ?? null,
+        readbyvendor: msg.readbyvendor,
+        readbyinfluencer: msg.readbyinfluencer,
+      })
+    );
+  };
+
+  socket.on("receiveMessage", handleReceiveMessage);
+  return () => socket.off("receiveMessage", handleReceiveMessage);
+}, [socket, conversationId]);
+
   useEffect(() => {
-    if (!socket) return;
+    if (!shouldRefresh) return;
 
-   const handleReceiveMessage = (msg) => {
-      if (msg.tempId) {
-        const existsByTemp = messages.some(
-          (m) => m.tempId === msg.tempId
-        );
+    fetchMessages();
+    setShouldRefresh(false);
+  }, [shouldRefresh]);
 
-        if (existsByTemp) {
-          dispatch(
-            updateMessage({
-              tempId: msg.tempId,
-              newId: msg.messageid,
-              content: msg.message,
-              file: msg.filepaths || [],
-              replyId: msg.replyid ?? null,
-              isPending: false,
-            })
-          );
-          return;
-        }
-      }
+  useEffect(() => {
+    if (!activeChat) return;
 
-      const existsById = messages.some(
-        (m) => String(m.id) === String(msg.messageid)
-      );
-      if (existsById) return;
-
-      dispatch(
-        addMessage({
-          id: msg.messageid,
-          tempId: msg.tempId || null,
-          roleId: Number(msg.roleid),
-          content: msg.message,
-          time: msg.createddate,
-          deleted: msg.is_deleted,
-          file: msg.filepaths || [],
-          replyId: msg.replyid ?? null,
-          readbyvendor: msg.readbyvendor,
-          readbyinfluencer: msg.readbyinfluencer,
-        })
-      );
-    };
-    socket.on("receiveMessage", handleReceiveMessage);
-    return () => {
-      socket.off("receiveMessage", handleReceiveMessage);
-    };
-  }, [socket, dispatch, messages]);
+    dispatch(setMessages([]));
+    fetchMessages();
+  }, [activeChat]);
 
   return (
     <div className="h-[80vh] flex overflow-hidden">
@@ -169,8 +220,9 @@ export default function ChatAppPageUser() {
         >
           <Sidebar
             onSelectChat={(chat) => {
-              dispatch(setActiveChat(chat));
+              dispatch(setActiveChat({ ...chat, _ts: Date.now() }));
             }}
+            activeConversationId={conversationId}
           />
         </div>
       )}
@@ -183,8 +235,9 @@ export default function ChatAppPageUser() {
         >
           <SidebarVendor
             onSelectChat={(chat) => {
-              dispatch(setActiveChat(chat));
+              dispatch(setActiveChat({ ...chat, _ts: Date.now() }));
             }}
+            activeConversationId={conversationId}
           />
         </div>
       )}

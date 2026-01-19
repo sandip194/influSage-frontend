@@ -417,7 +417,9 @@ const InfluencerCampaigns = () => {
                       </div>
 
                     </td>
-                    <td className="p-4 font-medium">₹ {row.paymentamount}</td>
+                    <td className="p-4 font-medium text-sm">
+                      ₹{Number(row.paymentamount || 0).toLocaleString("en-IN")}
+                    </td>
                     <td className="p-4">{row.contractstartdate}</td>
                     <td className="p-4">{row.contractenddate}</td>
                     <td className="p-4">

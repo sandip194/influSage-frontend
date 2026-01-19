@@ -121,40 +121,48 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     return;
   }
 
-  const messageHandler = (payload) => {
-    console.log("📥 SOCKET EVENT → receiveMessage:", payload);
+ const messageHandler = (payload) => {
+  console.log("📥 RECEIVE MESSAGE:", payload);
 
-    if (!payload) {
-      console.log("⚠️ Empty payload received");
-      return;
-    }
+  const isOwnMessage =
+    String(payload.userid) === String(userId) &&
+    String(payload.roleid) === String(role);
 
-    const conversationid =
-      payload.conversationid ?? payload.conversationId;
+  console.log("🔎 FINAL CHECK:", {
+    payloadUserid: payload.userid,
+    payloadRoleid: payload.roleid,
+    myUserId: userId,
+    myRole: role,
+    isOwnMessage,
+  });
 
-    console.log("📥 conversationid:", conversationid);
-    console.log("📥 sender userid:", payload.userid);
-    console.log("📥 my userid:", userId);
+  if (isOwnMessage) {
+    console.log("⏭️ Ignored (own message)");
+    return;
+  }
 
-    if (String(payload.userid) === String(userId)) {
-      console.log("⏭️ Ignored (own message)");
-      return;
-    }
+  console.log("✅ MESSAGE IS FROM OTHER USER");
 
-    setUnreadMessages((prev) => {
-      console.log("📦 unreadMessages BEFORE:", prev);
+  // ✅ ADD THIS PART
+  const conversationid = String(payload.conversationid);
 
-      if (prev.some(m => String(m.conversationid) === String(conversationid))) {
-        console.log("⏭️ Conversation already exists");
-        return prev;
-      }
+  setUnreadMessages((prev) => {
+    const exists = prev.some(
+      (m) => String(m.conversationid) === conversationid
+    );
 
-      const updated = [{ ...payload, conversationid }, ...prev];
-      console.log("📦 unreadMessages AFTER:", updated);
+    if (exists) return prev;
 
-      return updated;
-    });
-  };
+    return [
+      {
+        ...payload,
+        conversationid,
+      },
+      ...prev,
+    ];
+  });
+};
+
 
   socket.on("receiveMessage", messageHandler);
 

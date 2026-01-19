@@ -356,7 +356,7 @@ const EditLayout = () => {
                   <span>Budget</span>
                 </div>
                 <p className="text-[#0D132D] font-semibold text-lg">
-                  ₹{campaignDetails?.estimatedbudget}
+                  ₹{Number(campaignDetails?.estimatedbudget || 0).toLocaleString("en-IN")}
                 </p>
               </div>
 
