@@ -50,8 +50,10 @@ const chatSlice = createSlice({
 
             return {
             ...msg,
-            readbyvendor: readbyvendor === true ? true : msg.readbyvendor,
-            readbyinfluencer: readbyinfluencer === true ? true : msg.readbyinfluencer,
+            readbyvendor:
+                readbyvendor === true ? true : msg.readbyvendor,
+            readbyinfluencer:
+                readbyinfluencer === true ? true : msg.readbyinfluencer,
             };
         });
         },

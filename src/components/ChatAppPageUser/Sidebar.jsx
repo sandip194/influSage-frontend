@@ -20,7 +20,7 @@ const SidebarSkeleton = () => (
       </div>
     </div>  
 );
-export default function Sidebar({ onSelectChat }) {
+export default function Sidebar({ onSelectChat, activeConversationId }) {
   const socket = getSocket();
   const { token, role } = useSelector((state) => state.auth);
   const [campaigns, setCampaigns] = useState([]);
@@ -149,7 +149,9 @@ const hasUnreadMessage = (vendor) => {
 
             const conversationId = vendor.conversationid;
             const isSelected = selectedCampaignId === conversationId;
-            const unread = hasUnreadMessage(vendor);
+            const unread =
+              hasUnreadMessage(vendor) &&
+              String(vendor.conversationid) !== String(activeConversationId);
 
             return (
               <div
@@ -161,7 +163,7 @@ const hasUnreadMessage = (vendor) => {
                   }
                   onSelectChat({
                     id: conversationId,
-                    name: campaign.campaignname,
+                    name_campaignname: campaign.campaignname,
                     img: campaign.campaignphoto,
                     vendorId: vendor.vendorid || vendor.id,
                     campaignid: campaign.campaignid,

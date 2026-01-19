@@ -18,7 +18,7 @@ const SidebarSkeleton = () => (
   </div>
 );
 
-export default function SidebarVendor({ onSelectChat }) {
+export default function SidebarVendor({ onSelectChat, activeConversationId }) {
     useSocketRegister();
   const socket = getSocket();
   const { token, role } = useSelector((state) => state.auth);
@@ -245,7 +245,10 @@ export default function SidebarVendor({ onSelectChat }) {
                 selectedCampaign?.campaignid === campaign.campaignid;
 
               const hasUnread = campaign.influencers?.some(
-                (inf) => inf.lastmessage && inf.readbyvendor === false
+                (inf) =>
+                  inf.lastmessage &&
+                  inf.readbyvendor === false &&
+                  String(inf.conversationid) !== String(activeConversationId)
               );
 
               return (
@@ -340,7 +343,10 @@ export default function SidebarVendor({ onSelectChat }) {
           ) : filteredInfluencers.length > 0 ? (
             filteredInfluencers.map((inf) => {
               const isSelected = selectedInfluencer === inf.influencerid;
-              const unread = inf.lastmessage && inf.readbyvendor === false;
+              const unread =
+                inf.lastmessage && 
+                inf.readbyvendor === false &&
+                String(inf.conversationid) !== String(activeConversationId);
 
               return (
                 <div

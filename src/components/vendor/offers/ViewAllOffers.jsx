@@ -284,7 +284,9 @@ const ViewAllOffers = ({ campaignData }) => {
                       </div>
                     </td>
 
-                    <td className="p-4 font-medium text-sm">₹ {offer.amount}</td>
+                    <td className="p-4 font-medium text-sm">
+                      ₹{Number(offer?.amount || 0).toLocaleString("en-IN")}
+                    </td>
 
                     <td className="p-4">
                       {(() => {

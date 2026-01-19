@@ -17,6 +17,7 @@ import DOMPurify from "dompurify";
 import {
   setMessages,
   addMessage,
+  setMessageRead,
   deleteMessage,
   undoDeleteMessage,
 } from "../../features/socket/chatSlice";
@@ -48,14 +49,14 @@ const formatTime = (timestamp) => {
 };
 
 /* 🧹 Unescape escaped HTML */
-const unescapeHtml = (str) => {
-  if (!str) return "";
-  str = str.replace(/\\\\/g, "\\");
-  str = str.replace(/\\"/g, '"');
-  str = str.replace(/\\'/g, "'");
-  str = str.replace(/\\n/g, "\n").replace(/\\t/g, "\t");
-  return str;
-};
+// const unescapeHtml = (str) => {
+//   if (!str) return "";
+//   str = str.replace(/\\\\/g, "\\");
+//   str = str.replace(/\\"/g, '"');
+//   str = str.replace(/\\'/g, "'");
+//   str = str.replace(/\\n/g, "\n").replace(/\\t/g, "\t");
+//   return str;
+// };
 
 export default function ChatMessages({
   chat,
@@ -71,25 +72,30 @@ export default function ChatMessages({
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const messages = useSelector((state) => state.chat.messages);
   const [deletedMessage, setDeletedMessage] = useState({});
+  const hasMarkedReadRef = useRef(false);
   const [loading, setLoading] = useState(false);
+  const emittedReadRef = useRef(new Set())
   const { token, userId, role } = useSelector((state) => state.auth);
+  
   const getMessageStatusIcon = (msg) => {
-    const isMe = Number(msg.roleId) === Number(role);
-    if (!isMe) return null;
+  const isMe = Number(msg.roleId) === Number(role);
+  if (!isMe) return null;
+  const otherRead =
+    Number(msg.roleId) === 1
+      ? msg.readbyvendor
+      : msg.readbyinfluencer;
 
-    const otherRead =
-      Number(msg.roleId) === 1 ? msg.readbyvendor : msg.readbyinfluencer;
+  if (otherRead) {
+    return <RiCheckDoubleLine className="text-blue-500" size={16} />;
+  }
 
-    if (otherRead) {
-      return <RiCheckDoubleLine className="text-blue-500" size={16} />;
-    }
+  if (isRecipientOnline) {
+    return <RiCheckDoubleLine className="text-gray-400" size={16} />;
+  }
 
-    if (isRecipientOnline) {
-      return <RiCheckDoubleLine className="text-gray-400" size={16} />;
-    }
+  return <RiCheckLine className="text-gray-400" size={16} />;
+};
 
-    return <RiCheckLine className="text-gray-400" size={16} />;
-  };
   const conversationId = chat?.conversationid || chat?.id;
 
   const handleDeleteMessage = async (messageId) => {
@@ -158,69 +164,35 @@ export default function ChatMessages({
     }
   };
 
-  const fetchMessages = async () => {
-    if (!conversationId || !token) return;
 
-    try {
-      setLoading(true);
+useEffect(() => {
+  if (!socket || !chat?.id || !messages.length) return;
 
-      const res = await axios.get("/chat/messages", {
-        params: {
-          p_conversationid: conversationId,
-          p_roleid: role,
-          p_limit: 50,
-          p_offset: 0,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  messages.forEach((msg) => {
+    // ignore own messages
+    if (Number(msg.roleId) === Number(role)) return;
 
-      const records = res?.data?.data?.records;
+    // already emitted read for this message
+    if (emittedReadRef.current.has(msg.id)) return;
 
-      if (!Array.isArray(records)) {
-        dispatch(setMessages([]));
-        return;
-      }
+    const isUnread =
+      (Number(role) === 1 && msg.readbyinfluencer !== true) ||
+      (Number(role) === 2 && msg.readbyvendor !== true);
 
-      const formatted = records
-        .map((msg) => {
-          const raw = (msg.message || "").replace(/^"|"$/g, "");
-          const unescaped = unescapeHtml(raw);
-          const isHtml = /<\/?[a-z][\s\S]*>/i.test(unescaped);
+    if (!isUnread) return;
 
-          return {
-            id: Number(msg.messageid),
-            roleId: Number(msg.roleid),
-            content: unescaped,
-            time: msg.createddate,
-            deleted: msg.isdeleted ?? false,
-            ishtml: isHtml,
-            readbyvendor: msg.readbyvendor ?? false,
-            readbyinfluencer: msg.readbyinfluencer ?? false,
-            replyId: msg.replyid ?? null,
-            file: msg.filepath
-              ? Array.isArray(msg.filepath)
-                ? msg.filepath
-                : [msg.filepath]
-              : [],
-          };
-        })
-        .sort((a, b) => new Date(a.time) - new Date(b.time));
-
-      dispatch(setMessages(formatted));
-    } catch (err) {
-      console.error("❌ Failed to load messages", err);
-      dispatch(setMessages([]));
-    } finally {
-      setLoading(false);
-    }
-  };
+    socket.emit("messageRead", {
+      messageId: Number(msg.id),
+      conversationId: chat.id,
+      role: Number(role),
+    });
+    emittedReadRef.current.add(msg.id);
+  });
+}, [messages, socket, role, chat?.id]);
 
   useEffect(() => {
-    dispatch(setMessages([]));
-    fetchMessages();
-  }, [conversationId, chat]);
+    emittedReadRef.current.clear();
+  }, [chat?.id]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -249,25 +221,11 @@ export default function ChatMessages({
     socket.on("undoDeleteMessage", ({ messageId }) => {
       dispatch(undoDeleteMessage(messageId));
     });
+    socket.on("updateMessageStatus", (payload) => {
 
-    // socket.on("editMessage", (updatedMessage) => {
-    //   dispatch(updateMessage(updatedMessage));
-    // });
-
-    socket.on(
-      "updateMessageStatus",
-      ({ messageId, readbyvendor, readbyinfluencer }) => {
-        // console.log("🟢 SOCKET → updateMessageStatus", {
-        //   messageId,
-        //   readbyvendor,
-        //   readbyinfluencer,
-        // });
-        dispatch({
-          type: "chat/setMessageRead",
-          payload: { messageId, readbyvendor, readbyinfluencer },
-        });
-      }
-    );
+      console.log("🟢 READ UPDATE", payload);
+      dispatch(setMessageRead(payload));
+    });
 
     return () => {
       socket.off("newMessage");

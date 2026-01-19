@@ -265,8 +265,8 @@ const CampaignReviewStep = ({ onEdit }) => {
                     <RiMoneyRupeeCircleLine className="w-4 h-4" />
                     <span>Budget</span>
                   </div>
-                  <p className="text-[#0D132D] font-semibold text-lg">
-                    ₹{p_campaignjson.estimatedbudget || 0}
+                  <p className="text-[#0D132D] font-bold text-xl">
+                    ₹{Number(p_campaignjson.estimatedbudget || 0).toLocaleString("en-IN")}
                   </p>
                 </div>
 
@@ -614,12 +614,6 @@ const CampaignReviewStep = ({ onEdit }) => {
                 </span>
               </div>
 
-            </div>
-
-
-            <div className="pt-4 pb-2">
-              <p className="text-sm font-semibold mb-1 text-gray-600">Total Budget</p>
-              <p className='text-gray-500'>₹{p_campaignjson.estimatedbudget || "0"}</p>
             </div>
           </div>
 

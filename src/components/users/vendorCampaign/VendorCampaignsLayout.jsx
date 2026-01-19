@@ -490,7 +490,9 @@ const VendorCampaignsLayout = () => {
                       />
                       <span>{row.name}</span>
                     </td>
-                    <td className="p-4">₹ {row.estimatedbudget}</td>
+                    <td className="p-4">
+                      ₹{Number(row?.estimatedbudget || 0).toLocaleString("en-IN")}
+                    </td>
                     <td className="p-4">{row.applicationcount}</td>
                     <td className="p-4">{row.campaignstartdate}</td>
                     <td className="p-4">{row.campaignenddate}</td>

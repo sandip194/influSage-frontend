@@ -461,7 +461,7 @@ const CampaignDetails = () => {
                   <span>Budget</span>
                 </div>
                 <p className="text-[#0D132D] font-bold text-xl">
-                  ₹{campaignDetails?.estimatedbudget}
+                  ₹{Number(campaignDetails?.estimatedbudget || 0).toLocaleString("en-IN")}
                 </p>
               </div>
 
