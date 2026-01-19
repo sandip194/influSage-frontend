@@ -107,8 +107,8 @@ const AllContent = ({ onViewHistory }) => {
             contentType: item.contenttypname,
             link: item.link,
 
-            firstAdded: item.oldestcreateddate
-              ? formatDate(item.oldestcreateddate)
+            postdate: item.postdate
+              ? formatDate(item.postdate)
               : "N/A",
 
             lastUpdated: item.latestcreateddate
@@ -225,8 +225,8 @@ const AllContent = ({ onViewHistory }) => {
         ),
     },
     {
-      title: "First Added",
-      dataIndex: "firstAdded",
+      title: "Post Date",
+      dataIndex: "postdate",
       width: 150,
     },
     {

@@ -52,7 +52,11 @@ export default function ContractModal({
     const [loadingInfluencers, setLoadingInfluencers] = useState(false);  // New: Loading for influencers
     const [influencerError, setInfluencerError] = useState(null);  // New: Error for influencers
     const [submitError, setSubmitError] = useState(null);  // New: Error for submit
+    const [submitAttempted, setSubmitAttempted] = useState(false);
 
+
+    const isPlatformInvalid = (platform) =>
+        submitAttempted && (!platform.contenttypes || platform.contenttypes.length === 0);
 
 
     // New: Fetch influencers via API (replace with your real endpoint)
@@ -212,24 +216,42 @@ export default function ContractModal({
 
 
     const handleFinish = async (values) => {
-        // Validate all form fields (including deliverables via Form.Item)
         const isValid = await isFormValid();
-        if (!isValid) {
-            return;  // Errors will show inline on invalid fields
+        if (!isValid) return;
+
+        
+
+        // 🔥 REMOVE platforms with empty contenttypes
+        const filteredPlatforms = selectedPlatforms.filter(
+            (p) => p.contenttypes && p.contenttypes.length > 0
+        );
+
+        if (filteredPlatforms.length !== selectedPlatforms.length) {
+            setSubmitError("Each platform must have at least one content type selected.");
+            return;
         }
 
-        setSubmitLoading(true);
-        setSubmitError(null);
-        values.deliverables = selectedPlatforms;
+        setSubmitAttempted(true);
+
+        values.deliverables = filteredPlatforms;
+
         try {
+            setSubmitLoading(true);
             await onSubmit(values);
             handleModalClose();
         } catch (err) {
             console.error("Submit error:", err);
-            setSubmitError("Failed to create contract. Please check your inputs and try again.");
+            setSubmitError("Failed to create contract. Please try again.");
             setSubmitLoading(false);
         }
     };
+
+
+    const handleFinishFailed = () => {
+        setSubmitAttempted(true);
+    };
+
+
 
     useEffect(() => {
         form.validateFields(["deliverables"]);
@@ -263,9 +285,11 @@ export default function ContractModal({
                     form={form}
                     layout="vertical"
                     onFinish={handleFinish}
+                    onFinishFailed={handleFinishFailed}
                     validateTrigger="onSubmit"
                     requiredMark={false}
                 >
+
                     {/* ---------- GRID START ---------- */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 
@@ -347,9 +371,9 @@ export default function ContractModal({
                                     placeholder="0"
                                     controls={false} // hides the up/down arrows
                                     formatter={(value) => {
-                                         if (!value) return ;
+                                        if (!value) return;
                                         const num = Number(String(value).replace(/[^\d]/g, ""));
-                                       return   num.toLocaleString("en-IN");
+                                        return num.toLocaleString("en-IN");
                                     }}
                                     parser={(value) => {
                                         // Remove anything that is not a digit
@@ -414,6 +438,7 @@ export default function ContractModal({
                                     value={form.getFieldValue("contractStart")}
                                     onChange={(date) => {
                                         form.setFieldsValue({ contractStart: date });
+                                        form.validateFields(["contractStart", "contractEnd"]);
                                         setStartPickerMonth(date || campaignStartLimit);
                                     }}
                                     disabledDate={(current) => {
@@ -480,6 +505,7 @@ export default function ContractModal({
                                     value={form.getFieldValue("contractEnd")}
                                     onChange={(date) => {
                                         form.setFieldsValue({ contractEnd: date });
+                                        form.validateFields(["contractEnd"]);
                                         setEndPickerMonth(date || campaignStartLimit);
                                     }}
                                     disabledDate={(current) => {
@@ -499,7 +525,7 @@ export default function ContractModal({
                             </Form.Item>
                         </div>
 
-                        {/* Platforms & Deliverables Section */}
+                        {/* ROW 3: Platforms & Deliverables Section */}
                         <div className="md:col-span-2">
                             <Form.Item
                                 label={
@@ -511,12 +537,13 @@ export default function ContractModal({
                                 rules={[
                                     {
                                         validator: () =>
-                                            selectedPlatforms.some((p) => p.contenttypes.length > 0)
+                                            selectedPlatforms.length > 0
                                                 ? Promise.resolve()
-                                                : Promise.reject(new Error("Select at least one platform with content type")),
+                                                : Promise.reject("Select at least one platform"),
                                     },
                                 ]}
                             >
+
                                 {/* Custom UI for Platforms & Deliverables */}
                                 {loadingPlatforms ? (
                                     <div className="text-center p-4">
@@ -531,7 +558,7 @@ export default function ContractModal({
                                         )}
 
                                         {selectedPlatforms.map((platform, idx) => (
-                                            <div key={platform.providerid} className="space-y-6">
+                                            <div key={platform.providerid} className="space-y-6 border-b border-gray-200 pb-1">
                                                 <div className="flex items-start justify-between mb-2">
                                                     <h3 className="font-semibold text-text-light dark:text-text-dark">
                                                         {platform.providername}
@@ -549,7 +576,8 @@ export default function ContractModal({
                                                     </button>
                                                 </div>
 
-                                                <div className="flex items-center space-x-6 flex-wrap ps-4">
+
+                                                <div className="flex items-center space-x-6 flex-wrap ps-4 mb-1">
                                                     {(contentTypesByPlatform[String(platform.providerid)] || []).map((ct) => {
                                                         const isChecked = platform.contenttypes?.some(
                                                             (d) => d.providercontenttypeid === ct.id
@@ -558,7 +586,7 @@ export default function ContractModal({
                                                         return (
                                                             <label
                                                                 key={ct.id}
-                                                                className="flex items-center space-x-2 text-sm text-subtext-light dark:text-subtext-dark"
+                                                                className="flex items-center space-x-2 text-sm text-subtext-light dark:text-subtext-dark "
                                                             >
                                                                 <Checkbox
                                                                     checked={isChecked}
@@ -589,6 +617,12 @@ export default function ContractModal({
                                                         );
                                                     })}
                                                 </div>
+                                                {isPlatformInvalid(platform) && (
+                                                    <p className="text-red-500 text-sm">
+                                                        Select at least one content type for {platform.providername}
+                                                    </p>
+                                                )}
+
                                             </div>
                                         ))}
 
@@ -602,6 +636,7 @@ export default function ContractModal({
                                                     if (p)
                                                         setSelectedPlatforms([...selectedPlatforms, { ...p, contenttypes: [] }]);
                                                 }
+                                                setSubmitAttempted(false);
                                             }}
                                             style={{ width: "100%" }}
                                             disabled={loadingPlatforms}
@@ -617,54 +652,52 @@ export default function ContractModal({
                             </Form.Item>
                         </div>
 
-                        {/* ===========================
-    Product Link + Vendor Address (OR)
-   ============================== */}
+                        {/*  Product Link + Vendor Address (OR)  */}
                         <div className="md:col-span-2">
 
-                        {/* One-line layout */}
-                        <Form.Item
-                            label="Product Link / Vendor Address"
-                            name="productOrAddress"
-                            dependencies={["productLink", "vendorAddress"]}
-                            rules={[
-                                () => ({
-                                validator(_, __) {
-                                    const link = form.getFieldValue("productLink");
-                                    const address = form.getFieldValue("vendorAddress");
+                            {/* One-line layout */}
+                            <Form.Item
+                                label="Product Link / Vendor Address"
+                                name="productOrAddress"
+                                dependencies={["productLink", "vendorAddress"]}
+                                rules={[
+                                    () => ({
+                                        validator(_, __) {
+                                            const link = form.getFieldValue("productLink");
+                                            const address = form.getFieldValue("vendorAddress");
 
-                                    if (link || address) {
-                                    return Promise.resolve();
-                                    }
+                                            if (link || address) {
+                                                return Promise.resolve();
+                                            }
 
-                                    return Promise.reject(
-                                    "Please fill Product Link OR Vendor Address"
-                                    );
-                                },
-                                }),
-                            ]}
-                            style={{ marginBottom: 4 }}
+                                            return Promise.reject(
+                                                "Please fill Product Link OR Vendor Address"
+                                            );
+                                        },
+                                    }),
+                                ]}
+                                style={{ marginBottom: 4 }}
                             >
-                            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-end">
+                                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-end">
 
-                                {/* Product Link */}
-                                <Form.Item name="productLink" noStyle>
-                                <Input size="large" placeholder="Enter product link" />
-                                </Form.Item>
+                                    {/* Product Link */}
+                                    <Form.Item name="productLink" noStyle>
+                                        <Input size="large" placeholder="Enter product link" />
+                                    </Form.Item>
 
-                                {/* OR */}
-                                <div className="flex justify-center items-center text-sm font-semibold text-subtext-light">
-                                OR
+                                    {/* OR */}
+                                    <div className="flex justify-center items-center text-sm font-semibold text-subtext-light">
+                                        OR
+                                    </div>
+
+                                    {/* Vendor Address */}
+                                    <Form.Item name="vendorAddress" noStyle>
+                                        <Input size="large" placeholder="Enter vendor address" />
+                                    </Form.Item>
+
                                 </div>
-
-                                {/* Vendor Address */}
-                                <Form.Item name="vendorAddress" noStyle>
-                                <Input size="large" placeholder="Enter vendor address" />
-                                </Form.Item>
-
-                            </div>
                             </Form.Item>
-                            </div>
+                        </div>
 
 
 

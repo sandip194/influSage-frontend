@@ -28,7 +28,7 @@ const AcceptOfferModal = ({ open, onCancel, onConfirm, offer, hasSelectedApplica
         {/* Message */}
         <p className="mt-2 text-gray-700">
           Are you sure you want to accept the application from{" "}
-          <span className="font-medium">{offer?.name}</span>?
+          <span className="font-medium">{offer?.influencername}</span>?
         </p>
 
         {/* Buttons */}

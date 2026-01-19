@@ -23,21 +23,21 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId, campaig
 
   // Fetch campaign objectives from API
   useEffect(() => {
-  const fetchObjectives = async () => {
-    try {
-      const res = await axios.get("/vendor/campaign/objectives", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const fetchedOptions = res.data.objectives || [];
-      setOptions(fetchedOptions);
+    const fetchObjectives = async () => {
+      try {
+        const res = await axios.get("/vendor/campaign/objectives", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const fetchedOptions = res.data.objectives || [];
+        setOptions(fetchedOptions);
 
-    } catch (err) {
-      console.error("Error fetching objectives:", err);
-      message.error("Failed to load campaign objectives.");
-    }
-  };
-  fetchObjectives();
-}, [token, data, selected]);
+      } catch (err) {
+        console.error("Error fetching objectives:", err);
+        message.error("Failed to load campaign objectives.");
+      }
+    };
+    fetchObjectives();
+  }, [token, data, selected]);
 
   useEffect(() => {
     setSelected(data?.objectiveid || "");
@@ -49,13 +49,19 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId, campaig
     );
   }, [data]);
 
+
+
+
   const handleContinue = async () => {
     const newErrors = {
       contentExpectation: !selected,
       durationDays:
-        !durationDays || isNaN(durationDays) || Number(durationDays) <= 0,
+        !Number.isInteger(Number(durationDays)) ||
+        Number(durationDays) < 1 ||
+        Number(durationDays) > 100,
       addLinkToBio: addLinkToBio === null,
     };
+
 
     setErrors(newErrors);
 
@@ -116,8 +122,8 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId, campaig
                 setErrors((prev) => ({ ...prev, contentExpectation: false }));
               }}
               className={`flex justify-between items-center px-3 sm:px-5 py-3 sm:py-4 rounded-xl border cursor-pointer transition-all ${isSelected
-                  ? "bg-[#0D132D26] text-black border-[#0D132D26]"
-                  : "bg-white text-black border-gray-300 hover:border-[#141843]"
+                ? "bg-[#0D132D26] text-black border-[#0D132D26]"
+                : "bg-white text-black border-gray-300 hover:border-[#141843]"
                 }`}
             >
               <span className="text-xs sm:text-sm md:text-base break-words pr-2 text-justify">
@@ -126,11 +132,11 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId, campaig
 
               <div
                 className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full border transition-all shrink-0 ${isSelected
-                    ? "bg-[#141843] border-[#0D132D26] text-white"
-                    : "bg-transparent border-gray-400 text-transparent"
+                  ? "bg-[#141843] border-[#0D132D26] text-white"
+                  : "bg-transparent border-gray-400 text-transparent"
                   }`}
               >
-                {isSelected && <RiCheckLine size={16} className="sm:w-5 sm:h-5" />} 
+                {isSelected && <RiCheckLine size={16} className="sm:w-5 sm:h-5" />}
               </div>
             </div>
           );
@@ -154,10 +160,29 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId, campaig
           type="number"
           size="large"
           min={1}
+          max={100}
           value={durationDays}
+          onKeyDown={(e) => {
+            if (["e", "E", "+", "-", "."].includes(e.key)) {
+              e.preventDefault();
+            }
+          }}
           onChange={(e) => {
-            setDurationDays(e.target.value);
-            setErrors((prev) => ({ ...prev, durationDays: false }));
+            const value = e.target.value;
+
+            // Allow empty while typing
+            if (value === "") {
+              setDurationDays("");
+              return;
+            }
+
+            const numericValue = Number(value);
+
+            // Enforce range 1–100
+            if (numericValue >= 1 && numericValue <= 100) {
+              setDurationDays(numericValue);
+              setErrors((prev) => ({ ...prev, durationDays: false }));
+            }
           }}
           style={{ width: 100 }}
           placeholder="Enter"

@@ -27,7 +27,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
   const [feedback, setFeedback] = useState("");
   const [closingLoading, setClosingLoading] = useState(false);
   const [rating, setRating] = useState(0);
-  const [errors, setErrors] = useState({ rating: "", feedback: ""});
+  const [errors, setErrors] = useState({ rating: "", feedback: "" });
 
   const [isViewFeedbackOpen, setIsViewFeedbackOpen] = useState(false);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
@@ -199,25 +199,16 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSkipClose = () => {
+
+  // Skip & Close: ignore rating/feedback completely
+  const handleSkipClose = async () => {
     setErrors({});
-    handleCloseContract();
-  };
-
-  const handleSubmitClose = () => {
-    if (!validateFeedback()) return;
-    handleCloseContract();
-  };
-
-  const handleCloseContract = async () => {
+    setClosingLoading(true);
     try {
-      setClosingLoading(true);
-
       const payload = {
         p_contractid: closingContract.id,
-        //influencerid: closingContract.influencerId,
-        p_text: feedback || null,
-        p_rating: rating || null,
+        p_text: null,    // NO feedback
+        p_rating: null,  // NO rating
       };
 
       const res = await axios.post("/vendor/feedback", payload, {
@@ -230,8 +221,9 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         setIsFeedbackOpen(false);
         setClosingContract(null);
         setFeedback("");
+        setRating(0);
 
-        fetchAllContracts(); // refresh list
+        fetchAllContracts();
       }
     } catch (err) {
       console.error(err);
@@ -240,6 +232,41 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
       setClosingLoading(false);
     }
   };
+
+  // Submit & Close: must validate rating + feedback
+  const handleSubmitClose = async () => {
+    if (!validateFeedback()) return;
+
+    setClosingLoading(true);
+    try {
+      const payload = {
+        p_contractid: closingContract.id,
+        p_text: feedback.trim(),
+        p_rating: rating,
+      };
+
+      const res = await axios.post("/vendor/feedback", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.status === 200) {
+        toast.success(res.data.message || "Contract closed successfully");
+
+        setIsFeedbackOpen(false);
+        setClosingContract(null);
+        setFeedback("");
+        setRating(0);
+
+        fetchAllContracts();
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to close contract");
+    } finally {
+      setClosingLoading(false);
+    }
+  };
+
 
   const fetchVendorContractFeedback = async (contract) => {
     try {
@@ -269,7 +296,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
       setFeedbackLoading(false);
     }
   };
-const feedbackItem = safeArray(contractFeedback)[0];
+  const feedbackItem = safeArray(contractFeedback)[0];
 
   return (
     <div className="bg-white rounded-2xl p-0">
@@ -325,12 +352,12 @@ const feedbackItem = safeArray(contractFeedback)[0];
                     ${contract.status === "Accepted"
                       ? "bg-green-600"
                       : contract.status === "Completed"
-                      ? "bg-emerald-600"
-                      : contract.status === "Closed"
-                      ? "bg-gray-700"
-                      : contract.status === "Rejected"
-                      ? "bg-red-600"
-                      : "bg-yellow-500"}
+                        ? "bg-emerald-600"
+                        : contract.status === "Closed"
+                          ? "bg-gray-700"
+                          : contract.status === "Rejected"
+                            ? "bg-red-600"
+                            : "bg-yellow-500"}
                   `}
                 >
                   {contract.status}
@@ -452,7 +479,7 @@ const feedbackItem = safeArray(contractFeedback)[0];
                           </p>
 
                           {contract?.productLink &&
-                          contract.productLink.trim() !== "" ? (
+                            contract.productLink.trim() !== "" ? (
                             <a
                               href={
                                 contract.productLink.startsWith("http")
@@ -658,7 +685,7 @@ const feedbackItem = safeArray(contractFeedback)[0];
 
       <Modal
         open={isViewFeedbackOpen}
-          title={
+        title={
           <span className="text-lg font-semibold">
             Contract Feedback
           </span>
@@ -673,7 +700,7 @@ const feedbackItem = safeArray(contractFeedback)[0];
       >
         {feedbackItem ? (
           <div className="flex flex-col gap-6">
-            
+
             {/* Rating */}
             <div>
               <p className="text-sm font-medium text-gray-700 mb-2">

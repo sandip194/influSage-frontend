@@ -26,7 +26,6 @@ const CampaignReviewStep = ({ onEdit }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [lightboxVideo, setLightboxVideo] = useState({ open: false, src: "" });
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { campaignId } = useParams();
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [loadingSend, setLoadingSend] = useState(false);
@@ -381,6 +380,12 @@ const CampaignReviewStep = ({ onEdit }) => {
             <div className="requirements py-4 border-b border-gray-200">
               <h3 className="font-semibold text-lg mb-4">Requirements</h3>
               <ul className="space-y-2 font-semibold">
+                <li className="flex items-center gap-2">
+                  <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
+                  <span>
+                    Objective : <span className="text-gray-500">{p_objectivejson.objectivename || "-"}</span>
+                  </span>
+                </li>
                 <li className="flex items-center gap-2">
                   <RiCheckLine size={20} className="text-gray-900 flex-shrink-0 border rounded" />
                   <span>

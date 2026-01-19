@@ -3,33 +3,33 @@ import { Empty } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { RiCheckLine } from 'react-icons/ri';
 
-const VendorCampaignOverview = ({ campaignData, isEditable = true }) => { // Renamed for neutrality; use VendorCampaignOverview if preferred
+const VendorCampaignOverview = ({ campaignData,  }) => { // Renamed for neutrality; use VendorCampaignOverview if preferred
   const [images, setImages] = useState([]);
 
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewType, setPreviewType] = useState("");
 
-  // Delete reference image (local state only; no API call - works for vendor, but hidden for user)
-  const handleDeleteImage = (index) => {
-    setImages(images.filter((_, i) => i !== index));
-  };
 
   const Requirements = [
+    {
+      label: "Objective:",
+      value: `${campaignData?.requirements?.objectivename || "N/A"} `,
+    },
     {
       label: "Ship Products:",
       value: campaignData?.requirements?.isproductshipping ? "Yes" : "No",
     },
     {
-      label: "Duration:",
-      value: `${campaignData?.requirements?.postdurationdays || "N/A"} Days`,
-    },
-    {
       label: "Vendor Profile Link Included:",
       value: campaignData?.requirements?.isincludevendorprofilelink ? "Yes" : "No",
     },
+    {
+      label: "Duration:",
+      value: `${campaignData?.requirements?.postdurationdays || "N/A"} Days`,
+    },
+    
   ];
 
   // Utility to detect file type

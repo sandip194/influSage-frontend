@@ -7,9 +7,29 @@ import {
   RiGlobalLine,
   RiStarFill,
   RiStarLine,
-  RiMapPin2Line 
+  RiMapPin2Line,
+  RiStarHalfFill
 } from "@remixicon/react";
 import { Tooltip } from "antd";
+
+
+// Function to render star ratings
+const renderStars = (rating) => {
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    if (rating >= i) {
+      // Full star
+      stars.push(<RiStarFill key={i}  className="text-yellow-400" />);
+    } else if (rating >= i - 0.75) {
+      // Half star
+      stars.push(<RiStarHalfFill key={i}  className="text-yellow-400" />);
+    } else {
+      // Empty star
+      stars.push(<RiStarLine key={i}  className="text-gray-300" />);
+    }
+  }
+  return stars;
+};
 
 const InfluencerCard = ({ influencer, onLike, onInvite }) => {
   const navigate = useNavigate();
@@ -65,29 +85,13 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
               {influencer?.statename}, {influencer?.countryname}
             </p>
 
-            <div className="flex items-center gap-1 text-xs">
-              {Number(influencer?.ratingcount) > 0 && (
-                <div className="flex items-center gap-1 text-xs mt-1">
-                  {Array.from({ length: 5 }).map((_, i) => {
-                    const rating = Math.round(Number(influencer.ratingcount));
-
-                    return (
-                      <RiStarFill
-                        key={i}
-                        size={12}
-                        className={i < rating ? "text-yellow-400" : "text-white"}
-                        style={{
-                          stroke: "black",
-                          strokeWidth: 1,
-                          fill: i < rating ? "#facc15" : "white",
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-
+            <div className="flex items-center gap-1 text-xs mt-1">
+              {Number(influencer?.ratingcount) > 0 &&
+                renderStars(Number(influencer.ratingcount)).map((star) =>
+                  React.cloneElement(star, { size: 14 }) // small size for this place
+                )}
             </div>
+
           </div>
         </div>
       </div>
@@ -215,7 +219,7 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
           Invite
         </button>
 
-        {/* Heart */}  
+        {/* Heart */}
         <Tooltip
           title={influencer?.savedinfluencer ? "Unfavourite" : "Favourite"}
           placement="top"

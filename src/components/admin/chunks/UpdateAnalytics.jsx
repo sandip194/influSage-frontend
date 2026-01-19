@@ -207,7 +207,7 @@ const UpdateAnalytics = () => {
             {
                 title: "Influencer",
                 dataIndex: "influencer",
-                 width: 220,
+                 width: 150,
                 ellipsis: true,
                 render: (_, record) => (
                     <div className="flex items-center gap-2">

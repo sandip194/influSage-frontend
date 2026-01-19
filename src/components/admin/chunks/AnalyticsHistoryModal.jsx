@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import { Modal, Table, Spin } from "antd";
 
 const AnalyticsHistoryModal = ({
@@ -9,62 +9,69 @@ const AnalyticsHistoryModal = ({
   loading,
 }) => {
 
-   const handleScroll = (e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
-    if (
-      scrollTop + clientHeight >= scrollHeight - 20 &&
-      !loading
-    ) {
+  const postInfo = history?.[0];
+
+  const analyticsData = useMemo(
+    () => postInfo?.analytics || [],
+    [postInfo]
+  );
+
+  const formatDate = (date) => {
+    if (!date) return "-";
+    return new Date(date).toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+
+  const handleScroll = (e) => {
+    const target = e.target;
+
+    // prevent X-scroll triggering API
+    if (target.scrollHeight <= target.clientHeight) return;
+
+    const reachedBottom =
+      Math.ceil(target.scrollTop + target.clientHeight) >=
+      target.scrollHeight - 10;
+
+    if (reachedBottom && !loading) {
       onLoadMore?.();
     }
   };
-const columns = [
-  {
-    title: "Post Date",
-    dataIndex: "postdate",
-    width: 100,
-    render: (v) => new Date(v).toLocaleDateString() || "-",
-  },
-  {
-    title: "Title",
-    dataIndex: "title",
-    render: (v) => v || "-",
-    ellipsis: true,
-    width: 200,
-  },
-  {
-    title: "Caption",
-    dataIndex: "caption",
-    render: (v) => v || "-",
-    ellipsis: true,
-    width: 150,
-  },
-  {
-    title: "Views",
-    dataIndex: "views",
-    render: (v) => v || "-",
-    width: 120,
-  },
-  {
-    title: "Likes",
-    dataIndex: "likes",
-    render: (v) => v || "-",
-    width: 120,
-  },
-  {
-    title: "Comments",
-    dataIndex: "comments",
-    render: (v) => v || "-",
-    width: 120,
-  },
-  {
-    title: "Shares",
-    dataIndex: "shares",
-    render: (v) => v || "-",
-    width: 100,
-  },
-];
 
+  const columns = [
+    {
+      title: "Date",
+      dataIndex: "createddate",
+      width: 150,
+      render: formatDate,
+    },
+    {
+      title: "Views",
+      dataIndex: "views",
+      width: 120,
+    },
+    {
+      title: "Likes",
+      dataIndex: "likes",
+      width: 120,
+    },
+    {
+      title: "Comments",
+      dataIndex: "comments",
+      width: 120,
+    },
+    {
+      title: "Shares",
+      dataIndex: "shares",
+      width: 120,
+    },
+  ];
 
   return (
     <Modal
@@ -74,20 +81,38 @@ const columns = [
       footer={null}
       width={900}
       centered
-      bodyStyle={{ padding: 0 }}
     >
+      {/* Compact Post Info */}
+      {postInfo && (
+        <div className="mb-3 space-y-1">
+          <div className="text-sm text-gray-700">
+            <span className="font-semibold">Title:</span> {postInfo.title || "N/A"}
+          </div>
+
+          <div className="text-sm text-gray-700">
+            <span className="font-semibold">Caption:</span> {postInfo.caption || "N/A"}
+          </div>
+
+          <div className="text-sm text-gray-700">
+            <span className="font-semibold">Post Date:</span> {formatDate(postInfo.postdate)}
+          </div>
+        </div>
+      )}
+
+
+
+
+      {/* Analytics Table */}
       <div
         style={{ maxHeight: 420, overflowY: "auto" }}
         onScroll={handleScroll}
       >
         <Table
           columns={columns}
-          dataSource={history}
+          dataSource={analyticsData}
           pagination={false}
+          rowKey="userplatformanalyticid"
           scroll={{ x: "max-content" }}
-          rowKey={(r) =>
-            r.userplatformanalyticid || r.contractcontentlinkid
-          }
           sticky
         />
 

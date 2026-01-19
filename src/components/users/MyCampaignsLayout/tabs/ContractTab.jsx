@@ -62,8 +62,8 @@ const ContractTab = ({ campaignId, token }) => {
   const [closingLoading, setClosingLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const [closingContract, setClosingContract] = useState(null);
 
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false)
   const [isViewFeedbackOpen, setIsViewFeedbackOpen] = useState(false);
 
   const fetchContractDetails = async () => {
@@ -171,7 +171,7 @@ const ContractTab = ({ campaignId, token }) => {
     if (!rating || rating < 1) {
       newErrors.rating = "Please select at least one star";
     }
-    if (feedback && feedback.length < 10) {
+    if (feedback && feedback.trim().length < 10) {
       newErrors.feedback = "Feedback must be at least 10 characters";
     }
     setErrors(newErrors);
@@ -179,14 +179,15 @@ const ContractTab = ({ campaignId, token }) => {
   };
 
   const addFeedback = async () => {
-    if (feedback && feedback.length < 10) {
+    if (rating && feedback.trim().length < 10) {
       setErrors({ feedback: "Feedback must be at least 10 characters" });
       return;
     }
+
     try {
       setClosingLoading(true);
 
-      await axios.post(
+      const res = await axios.post(
         "/user/add-feedback",
         {
           p_contractid: contract.id,
@@ -198,16 +199,28 @@ const ContractTab = ({ campaignId, token }) => {
         }
       );
 
-      toast.success("Feedback submitted successfully");
-      setIsFeedbackOpen(false);
-      setFeedback("");
-      setRating(0);
+      // ✅ Only mark as submitted if API returns success
+      if (res.status === 200 && res.data?.success !== false) {
+        toast.success(res.data?.message || "Feedback submitted successfully");
+
+        // Close modal and reset
+        setIsFeedbackOpen(false);
+        setFeedback("");
+        setRating(0);
+        setErrors({});
+
+        // Hide "Give Feedback" button
+        setFeedbackSubmitted(true);
+      } else {
+        toast.error(res.data?.message || "Failed to submit feedback");
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to submit feedback");
     } finally {
       setClosingLoading(false);
     }
   };
+
 
   const handleSubmitClose = () => {
     if (!validateFeedback()) return;
@@ -244,10 +257,9 @@ const ContractTab = ({ campaignId, token }) => {
             {contractStatus !== "pending" && (
               <span
                 className={`px-4 py-1.5 rounded-bl-xl text-sm font-semibold
-                  ${
-                    contractStatus === "accepted"
-                      ? "bg-green-100 text-green-700"
-                      : contractStatus === "rejected"
+                  ${contractStatus === "accepted"
+                    ? "bg-green-100 text-green-700"
+                    : contractStatus === "rejected"
                       ? "bg-red-100 text-red-700"
                       : "bg-blue-100 text-blue-700"
                   }`}
@@ -419,7 +431,7 @@ const ContractTab = ({ campaignId, token }) => {
           )}
 
           {/* Feedback button only when closed */}
-          {contract?.cansendfeedback && (
+          {contract?.cansendfeedback && !feedbackSubmitted && (
             <button
               onClick={() => setIsFeedbackOpen(true)}
               className="px-4 py-2 text-sm rounded-full cursor-pointer font-medium text-white bg-[#0f122f] hover:bg-[#1c1f4a] transition"
@@ -427,6 +439,7 @@ const ContractTab = ({ campaignId, token }) => {
               Give Feedback
             </button>
           )}
+
           {contractStatus === "closed" && contract?.feedback && (
             <button
               onClick={() => setIsViewFeedbackOpen(true)}
@@ -473,7 +486,6 @@ const ContractTab = ({ campaignId, token }) => {
         footer={null}
         onCancel={() => {
           setIsFeedbackOpen(false);
-          setClosingContract(null);
           setFeedback("");
           setRating(0);
           setErrors({});
@@ -528,11 +540,14 @@ const ContractTab = ({ campaignId, token }) => {
             setErrors((prev) => ({ ...prev, feedback: "" }));
           }}
           placeholder="Write something about the influencer (10–100 chars if rating given)"
-          className={`feedback-textarea ${
-            errors.feedback ? "feedback-error" : ""
-          }`}
+          className={`feedback-textarea ${errors.feedback ? "feedback-error" : ""}`}
           style={{ resize: "none" }}
         />
+
+        {errors.feedback && (
+          <p className="text-red-500 text-xs mt-1">{errors.feedback}</p>
+        )}
+
         <div className="flex justify-end gap-3 mt-6">
           <Button onClick={handleCloseModal}>Close</Button>
 

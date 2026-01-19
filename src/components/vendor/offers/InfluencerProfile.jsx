@@ -1,4 +1,4 @@
-import { RiArrowLeftLine, RiFile3Line, RiHeartFill, RiHeart3Line, RiMessage2Line} from "@remixicon/react";
+import { RiArrowLeftLine, RiFile3Line, RiHeartFill, RiHeart3Line, RiMessage2Line } from "@remixicon/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -16,6 +16,25 @@ import { RiUserAddLine, RiStarFill, RiStarHalfFill, RiStarLine, RiArrowDownSLine
 //             day: "numeric",
 //         });
 //     };
+
+// Function to render star ratings
+const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+        if (rating >= i) {
+            // Full star
+            stars.push(<RiStarFill key={i} size={24} className="text-yellow-400" />);
+        } else if (rating >= i - 0.75) {
+            // Half star
+            stars.push(<RiStarHalfFill key={i} size={24} className="text-yellow-400" />);
+        } else {
+            // Empty star
+            stars.push(<RiStarLine key={i} size={24} className="text-gray-300" />);
+        }
+    }
+    return stars;
+};
+
 
 const InfluencerProfile = () => {
     const [loading, setLoading] = useState(false)
@@ -36,8 +55,6 @@ const InfluencerProfile = () => {
     const rawRating = Number(influDetails?.ratingcount || 0);
     const displayRating = rawRating.toFixed(1);
 
-    const fullStars = Math.trunc(rawRating);
-    const hasHalfStar = rawRating % 1 !== 0;
 
     const [feedbacks, setFeedbacks] = useState([]);
     const [page, setPage] = useState(0);
@@ -61,9 +78,9 @@ const InfluencerProfile = () => {
         if (days < 7) return days + " days ago";
 
         return date.toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
+            day: "numeric",
+            month: "short",
+            year: "numeric",
         });
     };
 
@@ -162,12 +179,12 @@ const InfluencerProfile = () => {
             setLoadingMore(true);
 
             const res = await axios.get("/vendor/influencer/feedback-list", {
-            headers: { Authorization: `Bearer ${token}` },
-            params: {
-                p_influencerid: influDetails?.id,
-                p_limit: limit,
-                p_offset: pageToLoad * limit + 1,
-            },
+                headers: { Authorization: `Bearer ${token}` },
+                params: {
+                    p_influencerid: influDetails?.id,
+                    p_limit: limit,
+                    p_offset: pageToLoad + 1,
+                },
             });
 
             const records = res.data?.data?.records || [];
@@ -176,7 +193,7 @@ const InfluencerProfile = () => {
             setTotalCount(total);
 
             setFeedbacks((prev) =>
-            append ? [...prev, ...records] : records
+                append ? [...prev, ...records] : records
             );
 
             setHasMore(total > limit && (pageToLoad + 1) * limit < total);
@@ -199,9 +216,9 @@ const InfluencerProfile = () => {
         const nextPage = page + 1;
         setPage(nextPage);
         fetchInfluencerFeedbacks(nextPage, true);
-        };
+    };
 
-        const handleViewLess = () => {
+    const handleViewLess = () => {
         setPage(0);
         fetchInfluencerFeedbacks(0, false);
     };
@@ -344,55 +361,15 @@ const InfluencerProfile = () => {
 
                                     <p className="text-sm text-gray-900 mt-1">
                                         {influDetails?.statename}, {influDetails?.countryname}
-                                    </p>   
-                                                                                                 
+                                    </p>
+
                                     {rawRating > 0 && (
                                         <div className="flex items-center mt-2">
-                                            {Array.from({ length: 5 }).map((_, i) => {
-                                            if (i < fullStars) {
-                                                return (
-                                                <RiStarFill
-                                                    key={i}
-                                                    size={16}
-                                                    style={{
-                                                    fill: "#facc15",
-                                                    stroke: "black",
-                                                    strokeWidth: 1,
-                                                    }}
-                                                />
-                                                );
-                                            }
-                                            if (i === fullStars && hasHalfStar) {
-                                                return (
-                                                <RiStarHalfFill
-                                                    key={i}
-                                                    size={16}
-                                                    style={{
-                                                    fill: "#facc15",
-                                                    stroke: "black",
-                                                    strokeWidth: 1,
-                                                    }}
-                                                />
-                                                );
-                                            }
-                                            return (
-                                                <RiStarFill
-                                                key={i}
-                                                size={16}
-                                                style={{
-                                                    fill: "white",
-                                                    stroke: "black",
-                                                    strokeWidth: 1,
-                                                }}
-                                                />
-                                            );
-                                            })}
-
-                                            <span className="ml-2 text-sm font-medium text-gray-700">
-                                            {displayRating}
-                                            </span>
+                                            {renderStars(rawRating)}
+                                            <span className="ml-2 text-md font-medium text-gray-700">{displayRating}</span>
                                         </div>
                                     )}
+
                                 </div>
 
                                 {/* Total Campaign (desktop alignment) */}
@@ -439,7 +416,7 @@ const InfluencerProfile = () => {
                                         className="cursor-pointer text-white bg-[#0f122f] text-gray-900 px-5 py-2 rounded-full 
              hover:bg-[#1f2357] transition w-full sm:w-auto 
              flex items-center justify-center gap-2"
-                                    >     
+                                    >
                                         <RiUserAddLine size={18} />
                                         <span>Invite</span>
                                     </button>
@@ -521,6 +498,7 @@ const InfluencerProfile = () => {
                             ))}
                         </div>
                     </div>
+                    {/* Portfolio Files */}
                     <div className="mt-4 bg-white rounded-2xl p-4">
                         <h3 className="text-xl font-semibold mb-5 text-gray-900">Portfolio</h3>
 
@@ -658,90 +636,81 @@ const InfluencerProfile = () => {
 
                     {/* Feedbacks */}
                     {feedbacks?.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 mt-4">
+                        <div className="bg-white rounded-2xl p-6 mt-4">
 
-                    {/* Header */}
-                    <h3 className="text-lg font-semibold text-gray-900 mb-5">
-                    Feedbacks
-                    </h3>
+                            {/* Header */}
+                            <h3 className="text-lg font-semibold text-gray-900 mb-5">
+                                Feedbacks
+                            </h3>
 
-                    {/* Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {feedbacks.map((fb) => (
-                        <div
-                        key={fb.feedbackid}
-                        className="bg-[#335CFF0D] border border-[#335CFF26] rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col h-full"
-                        >
-                        {/* Header */}
-                        <div className="flex items-center gap-3">
-                            <img
-                            src={fb.campaignpohoto}
-                            alt={fb.campaignname}
-                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                            className="w-12 h-12 rounded-full object-cover"
-                            />
+                            {/* Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                                {feedbacks.map((fb) => (
+                                    <div
+                                        key={fb.feedbackid}
+                                        className="bg-[#335CFF0D] border border-[#335CFF26] rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col h-full"
+                                    >
+                                        {/* Header */}
+                                        <div className="flex items-center gap-3">
+                                            <img
+                                                src={fb.campaignpohoto}
+                                                alt={fb.campaignname}
+                                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                                                className="w-12 h-12 rounded-full object-cover"
+                                            />
 
-                            <div className="min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 truncate">
-                                {fb.campaignname}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                                {formatTime(fb.createddate)}
-                            </p>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-gray-900 truncate">
+                                                    {fb.campaignname}
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    {formatTime(fb.createddate)}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Stars */}
+                                        <div className="flex mb-2 gap-1 mt-3">
+                                            {renderStars(fb.rating || 0).map((star, idx) =>
+                                                React.cloneElement(star, { size: 20 }) // Adjust size if needed
+                                            )}
+                                        </div>
+
+
+                                        {/* Text */}
+                                        <p className="text-sm text-gray-700 line-clamp-2">
+                                            {fb.text || "-"}
+                                        </p>
+                                    </div>
+                                ))}
                             </div>
-                        </div>
 
-                        {/* Stars */}
-                        {Number(fb.rating) > 0 && (
-                            <div className="flex items-center gap-1 mt-3">
-                            {[1, 2, 3, 4, 5].map((i) => (
-                                <RiStarFill
-                                key={i}
-                                size={20}
-                                style={{
-                                    stroke: "black",
-                                    strokeWidth: 0.6,
-                                    fill: i <= fb.rating ? "#facc15" : "white",
-                                }}
-                                />
-                            ))}
+                            {/* Pagination Buttons */}
+                            <div className="flex justify-center gap-4 mt-6">
+                                {totalCount > limit && hasMore && (
+                                    <button
+                                        onClick={handleViewMore}
+                                        disabled={loadingMore}
+                                        className="flex items-center cursor-pointer gap-1 text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline"
+                                    >
+                                        View More
+                                        <RiArrowDownSLine />
+                                    </button>
+                                )}
+
+                                {page > 0 && (
+                                    <button
+                                        onClick={handleViewLess}
+                                        className="flex items-center cursor-pointer gap-1 text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline"
+                                    >
+                                        View Less
+                                        <RiArrowUpSLine />
+                                    </button>
+                                )}
                             </div>
-                        )}
 
-                        {/* Text */}
-                        <p className="text-sm text-gray-700 mt-3 line-clamp-2">
-                            {fb.text || "No feedback provided."}
-                        </p>
                         </div>
-                    ))}
-                    </div>
-
-                    {/* Pagination Buttons */}
-                    <div className="flex justify-center gap-4 mt-6">
-                    {totalCount > limit && hasMore && (
-                        <button
-                        onClick={handleViewMore}
-                        disabled={loadingMore}
-                        className="flex items-center cursor-pointer gap-1 text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline"
-                        >
-                        View More
-                        <RiArrowDownSLine />
-                        </button>
                     )}
-
-                    {page > 0 && (
-                        <button
-                        onClick={handleViewLess}
-                        className="flex items-center cursor-pointer gap-1 text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline"
-                        >
-                        View Less
-                        <RiArrowUpSLine />
-                        </button>
-                    )}
-                    </div>
-
-                </div>
-                )}
                 </>
             )}
 

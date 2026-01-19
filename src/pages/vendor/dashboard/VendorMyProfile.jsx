@@ -101,14 +101,14 @@ const VendorMyProfile = () => {
 
     return (
         <div className="w-full text-sm overflow-x-hidden">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Vendor Profile</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">My Profile</h2>
             <p className="mb-6 text-gray-700 text-sm">
                 You can view or edit your profile from here
             </p>
             <div className="flex flex-col lg:flex-row gap-4">
                 {/* Left Side */}
                 <div className="flex-1 space-y-4">
-                    <div className="bg-white object-cover rounded-2xl overflow-hidden shadow-sm">
+                    <div className="bg-white object-cover rounded-2xl overflow-hidden ">
                         {/* Banner */}
                         <div className="relative">
                             <img
@@ -183,7 +183,7 @@ const VendorMyProfile = () => {
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl shadow-sm">
+                    <div className="bg-white p-6 rounded-2xl ">
                         {/* Bio Section */}
                         <div className="mb-6">
                             <h2 className="font-bold text-base mb-3">Bio</h2>
@@ -219,7 +219,7 @@ const VendorMyProfile = () => {
                     </div>
 
                     {/* Objective Section */}
-                    <div className="bg-white p-6 rounded-2xl shadow-sm">
+                    <div className="bg-white p-6 rounded-2xl ">
                         <h2 className="font-bold text-base mb-4">Objective</h2>
                         {Array.isArray(profileData?.p_objectives) && profileData.p_objectives.length > 0 ? (
                             profileData.p_objectives.map(obj => (
@@ -236,7 +236,7 @@ const VendorMyProfile = () => {
 
                     </div>
 
-                    <div className="bg-white p-4 rounded-2xl shadow-sm">
+                    <div className="bg-white p-4 rounded-2xl ">
                         <h2 className="font-bold text-base mb-4">Work History</h2>
                         <div className="space-y-6">
                             {visibleData.map((item) => (
@@ -303,7 +303,7 @@ const VendorMyProfile = () => {
 
                 {/* Right Side */}
                 <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
-                    <div className="bg-white rounded-2xl p-4 shadow-sm w-full text-sm">
+                    <div className="bg-white rounded-2xl p-4  w-full text-sm">
                         <h3 className="font-semibold text-lg mb-4">Business Details</h3>
 
                         <div className="space-y-4">
