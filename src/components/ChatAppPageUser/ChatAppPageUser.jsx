@@ -17,12 +17,13 @@ import {
   updateMessage,
   setActiveChat,
   setMessages,
+  setActiveConversation,
 } from "../../features/socket/chatSlice";
 
 export default function ChatAppPageUser() {
   useSocketRegister();
   const dispatch = useDispatch();
-  const { token, role } = useSelector((state) => state.auth);
+  const { token, role, userId } = useSelector((state) => state.auth);
   const roleId = Number(role);
   const socket = getSocket();
   const messages = useSelector((state) => state.chat.messages);
@@ -156,11 +157,29 @@ export default function ChatAppPageUser() {
       }
 
 
-      await axios.post("/chat/insertmessage", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const res = await axios.post("/chat/insertmessage", formData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const receiverId =
+      Number(roleId) === 1
+        ? Number(activeChat.vendorId || activeChat.vendorid)
+        : Number(activeChat.influencerid);
+
+    console.log("🎯 SOCKET SEND:", { receiverId });
+
+    socket.emit("sendMessage", {
+      conversationid: Number(conversationId),
+      userid: Number(userId),
+      roleid: Number(roleId),
+      receiverId,
+      message: text,
+      messageid: res.data?.message_id, 
+      tempId,
+      replyid: replyId || null,
+      createddate: new Date().toISOString(),
+    });
+
       setShouldRefresh(true);
       setEditingMessage(null);
     } catch (err) {
@@ -172,24 +191,25 @@ export default function ChatAppPageUser() {
   if (!socket || !conversationId) return;
 
   const handleReceiveMessage = (msg) => {
-    if (String(msg.conversationid) !== String(conversationId)) return;
+  if (String(msg.conversationid) !== String(conversationId)) return;
 
-    if (Number(msg.roleid) === Number(roleId)) return;
-
-    dispatch(
-      addMessage({
-        id: msg.messageid,
-        roleId: Number(msg.roleid),
-        content: msg.message,
-        time: msg.createddate,
-        deleted: false,
-        file: msg.filepaths || [],
-        replyId: msg.replyid ?? null,
-        readbyvendor: msg.readbyvendor,
-        readbyinfluencer: msg.readbyinfluencer,
-      })
-    );
-  };
+  if (Number(msg.userid) === Number(userId)) {
+    dispatch(updateMessage({
+      tempId: msg.tempId,
+      newId: msg.messageid,
+    }));
+    return;
+  }
+  dispatch(addMessage({
+    id: msg.messageid,
+    roleId: Number(msg.roleid),
+    content: msg.message,
+    time: msg.createddate,
+    deleted: false,
+    file: msg.filepaths || [],
+    replyId: msg.replyid ?? null,
+  }));
+};
 
   socket.on("receiveMessage", handleReceiveMessage);
   return () => socket.off("receiveMessage", handleReceiveMessage);
@@ -220,7 +240,8 @@ export default function ChatAppPageUser() {
         >
           <Sidebar
             onSelectChat={(chat) => {
-              dispatch(setActiveChat({ ...chat, _ts: Date.now() }));
+              dispatch(setActiveChat(chat));
+              dispatch(setActiveConversation(chat.conversationid || chat.id));
             }}
             activeConversationId={conversationId}
           />
@@ -235,7 +256,8 @@ export default function ChatAppPageUser() {
         >
           <SidebarVendor
             onSelectChat={(chat) => {
-              dispatch(setActiveChat({ ...chat, _ts: Date.now() }));
+              dispatch(setActiveChat(chat));
+              dispatch(setActiveConversation(chat.conversationid || chat.id));
             }}
             activeConversationId={conversationId}
           />
@@ -254,7 +276,10 @@ export default function ChatAppPageUser() {
             <ChatHeader
               chat={activeChat}
               onOnlineStatusChange={setIsRecipientOnline}
-              onBack={() => dispatch(setActiveChat(null))}
+              onBack={() => {
+                dispatch(setActiveChat(null));
+                dispatch(setActiveConversation(null));
+              }}
             />
           </div>
 

@@ -244,42 +244,43 @@ const TodoListCard = () => {
               onChange={(e) => {
                 setFormData({ ...formData, description: e.target.value });
                 setErrors((p) => ({ ...p, description: "" }));
-              }}
-              placeholder="Enter todo description"
-              status={errors.description ? "error" : ""}
-            />
+                }}
+                placeholder="Enter todo description"
+                status={errors.description ? "error" : ""}
+              />
 
-            {errors.description && (
-              <p className="text-xs text-red-500 mt-1">{errors.description}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Due Date</label>
-            <DatePicker
-              value={formData.duedate}
-              onChange={(date) => {
+              {errors.description && (
+                <p className="text-xs text-red-500 mt-1">{errors.description}</p>
+              )}
+              </div>
+              <div>
+              <label className="block text-sm font-medium mb-1">Due Date</label>
+              <DatePicker
+                value={formData.duedate}
+                onChange={(date) => {
                 setFormData({ ...formData, duedate: date });
                 setErrors((p) => ({ ...p, duedate: "" }));
-              }}
-              disabledDate={disabledDate}
-              style={{ width: "100%" }}
-              status={errors.duedate ? "error" : ""}
-            />
+                }}
+                disabledDate={disabledDate}
+                format="DD-MM-YYYY"
+                style={{ width: "100%" }}
+                status={errors.duedate ? "error" : ""}
+              />
 
-            {errors.duedate && (
-              <p className="text-xs text-red-500 mt-1">{errors.duedate}</p>
-            )}
-          </div>
-          <div className="flex justify-end gap-3 pt-3">
-            <Button onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button disabled={loading} type="primary" htmlType="submit">
-              {selectedTodo ? "Update" : "Save"}
-            </Button>
-          </div>
-        </form>
-      </Modal>
+              {errors.duedate && (
+                <p className="text-xs text-red-500 mt-1">{errors.duedate}</p>
+              )}
+              </div>
+              <div className="flex justify-end gap-3 pt-3">
+              <Button onClick={() => setShowModal(false)}>Cancel</Button>
+              <Button disabled={loading} type="primary" htmlType="submit">
+                {selectedTodo ? "Update" : "Save"}
+              </Button>
+              </div>
+            </form>
+            </Modal>
 
-      {/* Confirmation Modal */}
+            {/* Confirmation Modal */}
       <Modal
         open={confirmModal.visible}
         title={confirmModal.title}

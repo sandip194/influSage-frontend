@@ -36,7 +36,9 @@ const { Text } = Typography;
 const DeshboardHeader = ({ toggleSidebar }) => {
   useSocketRegister();
   const deletedConversationsRef = React.useRef(new Set());
-
+  const activeConversationId = useSelector(
+    (state) => state.chat.activeConversationId
+  );
   const socket = getSocket();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -124,46 +126,32 @@ const DeshboardHeader = ({ toggleSidebar }) => {
  const messageHandler = (payload) => {
   console.log("📥 RECEIVE MESSAGE:", payload);
 
+  const senderId = payload.senderId ?? payload.userid;
+  const senderRole = payload.senderRole ?? payload.roleid;
+
   const isOwnMessage =
-    String(payload.userid) === String(userId) &&
-    String(payload.roleid) === String(role);
+    String(senderId) === String(userId) &&
+    String(senderRole) === String(role);
 
-  console.log("🔎 FINAL CHECK:", {
-    payloadUserid: payload.userid,
-    payloadRoleid: payload.roleid,
-    myUserId: userId,
-    myRole: role,
-    isOwnMessage,
-  });
+  if (isOwnMessage) return;
 
-  if (isOwnMessage) {
-    console.log("⏭️ Ignored (own message)");
+  const conversationid = String(payload.conversationid);
+
+  // ✅ Skip only if THIS chat is open
+  if (String(conversationid) === String(activeConversationId)) {
+    console.log("👀 Same conversation open — skip unread");
     return;
   }
 
-  console.log("✅ MESSAGE IS FROM OTHER USER");
+    setUnreadMessages((prev) => {
+      const exists = prev.some(
+        (m) => String(m.conversationid) === conversationid
+      );
+      if (exists) return prev;
 
-  // ✅ ADD THIS PART
-  const conversationid = String(payload.conversationid);
-
-  setUnreadMessages((prev) => {
-    const exists = prev.some(
-      (m) => String(m.conversationid) === conversationid
-    );
-
-    if (exists) return prev;
-
-    return [
-      {
-        ...payload,
-        conversationid,
-      },
-      ...prev,
-    ];
-  });
-};
-
-
+      return [{ ...payload, conversationid }, ...prev];
+    });
+  };
   socket.on("receiveMessage", messageHandler);
 
   return () => {
@@ -189,16 +177,16 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
     if (!shouldRemove) return;
 
-    setUnreadMessages((prev) => {
-      console.log("📦 BEFORE remove:", prev);
+// 🔥 Do NOT remove if chat is currently open
+if (String(conversationId) === String(activeConversationId)) {
+  return;
+}
 
-      const updated = prev.filter(
-        msg => String(msg.conversationid) !== String(conversationId)
-      );
-
-      console.log("📦 AFTER remove:", updated);
-      return updated;
-    });
+setUnreadMessages(prev =>
+  prev.filter(
+    msg => String(msg.conversationid) !== String(conversationId)
+  )
+);
   };
 
   socket.on("updateMessageStatus", statusHandler);

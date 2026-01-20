@@ -22,6 +22,7 @@ export default function ChatInput({
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
+  const emojiPickerRef = useRef(null);
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
@@ -121,6 +122,24 @@ export default function ChatInput({
   }
 }, [editingMessage]);
 
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      showEmojiPicker &&
+      emojiPickerRef.current &&
+      !emojiPickerRef.current.contains(event.target)
+    ) {
+      setShowEmojiPicker(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [showEmojiPicker]);
+
   return (
     <form
       className={`p-4 bg-white flex flex-col space-y-2 border-t border-gray-100 relative ${!canstartchat ? "opacity-70 cursor-not-allowed" : ""
@@ -128,7 +147,10 @@ export default function ChatInput({
     >
       {/* Emoji Picker */}
       {showEmojiPicker && canstartchat && (
-        <div className="absolute bottom-20 left-4 z-10 bg-white shadow-lg rounded-lg">
+        <div
+          ref={emojiPickerRef}
+          className="absolute bottom-20 left-4 z-10 bg-white shadow-lg rounded-lg"
+        >
           <EmojiPicker
             onEmojiClick={handleEmojiClick}
             height={370}

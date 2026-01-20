@@ -6,28 +6,46 @@ const chatSlice = createSlice({
     initialState: {
         messages: [],
         activeChat: null,
+        activeConversationId: null,
     },
     reducers: {
         setActiveChat: (state, action) => {
             state.activeChat = action.payload;
             state.messages = []; // reset on change
         },
-        addMessage: (state, action) => {
-            state.messages.push(action.payload);
+         setActiveConversation: (state, action) => {
+            state.activeConversationId = action.payload;
         },
+        addMessage: (state, action) => {
+      const incoming = action.payload;
+
+      const exists = state.messages.some(
+        (m) =>
+          String(m.id) === String(incoming.id) ||
+          (incoming.tempId && String(m.tempId) === String(incoming.tempId))
+      );
+
+      if (exists) return;
+
+      state.messages.push(incoming);
+    },
+
         updateMessage: (state, action) => {
-            const { tempId, newId, content, fileUrl } = action.payload;
-            const index = state.messages.findIndex((msg) => msg.id === tempId);
-            if (index !== -1) {
-                state.messages[index] = {
-                    ...state.messages[index],
-                    id: newId,
-                    content: content || state.messages[index].content,
-                    file: fileUrl || state.messages[index].file,
-                    status: "sent",
-                    // isLocal: false,
-                };
-            }
+        const { tempId, newId, content, fileUrl } = action.payload;
+
+        const msg = state.messages.find(
+            (m) =>
+            String(m.id) === String(tempId) ||
+            String(m.tempId) === String(tempId)
+        );
+
+        if (!msg) return;
+
+        msg.id = newId ?? msg.id;
+        msg.content = content ?? msg.content;
+        msg.file = fileUrl ?? msg.file;
+        msg.status = "sent";
+        msg.isTemp = false;
         },
 
         deleteMessage: (state, action) => {
@@ -65,5 +83,5 @@ const chatSlice = createSlice({
     },
 });
 
-export const { setActiveChat, addMessage, updateMessage, updateMessageStatus, deleteMessage, undoDeleteMessage, setMessageRead, setMessages } = chatSlice.actions;
+export const { setActiveChat, addMessage, setActiveConversation, updateMessage, updateMessageStatus, deleteMessage, undoDeleteMessage, setMessageRead, setMessages } = chatSlice.actions;
 export default chatSlice.reducer;

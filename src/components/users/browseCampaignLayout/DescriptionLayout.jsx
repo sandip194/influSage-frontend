@@ -135,7 +135,7 @@ const DescriptionLayout = () => {
         params: {
           p_campaignid: campaignId,
           p_limit: limit,
-          p_offset: pageToLoad * limit + 1,
+          p_offset: pageToLoad + 1  
         },
       });
 

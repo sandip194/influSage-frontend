@@ -74,8 +74,13 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId, campaig
       message.error("User not authenticated.");
       return;
     }
+    const selectedObjective = options.find(
+      (opt) => Number(opt.id) === Number(selected)
+    );
+
     const p_objectivejson = {
-      objectiveid: selected,
+      objectiveid: Number(selected),
+      objectivename: selectedObjective?.name || "",
       postdurationdays: Number(durationDays),
       isincludevendorprofilelink: addLinkToBio,
     };

@@ -422,14 +422,15 @@ export default function SidebarVendor({ onSelectChat, activeConversationId }) {
                             : "text-gray-500"
                         }`}
                       >
-                        {
-                          unread
-                            ? "New message"
-                            : inf.ishtml
-                              ? role === 2
-                                ? "Campaign invitation sent"
-                                : "Campaign invitation received"
-                              : inf.lastmessage || "No messages yet"
+                       {inf.isdeleted
+                          ? "This message is deleted"
+                          : unread
+                          ? "New message"
+                          : inf.ishtml
+                            ? role === 2
+                            ? "Campaign invitation sent"
+                            : "Campaign invitation received"
+                            : inf.lastmessage || "No messages yet"
                         }
                       </div>
                     </div>
