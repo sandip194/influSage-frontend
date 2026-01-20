@@ -60,20 +60,20 @@ const chatSlice = createSlice({
                 message.deleted = false;
             }
         },
-      setMessageRead: (state, action) => {
-        const { messageId, readbyvendor, readbyinfluencer } = action.payload;
+        setMessageRead: (state, action) => {
+            const { messageId, readbyvendor, readbyinfluencer } = action.payload;
 
-        state.messages = state.messages.map((msg) => {
-            if (Number(msg.id) !== Number(messageId)) return msg;
+            state.messages = state.messages.map((msg) => {
+                if (Number(msg.id) !== Number(messageId)) return msg;
 
-            return {
-            ...msg,
-            readbyvendor:
-                readbyvendor === true ? true : msg.readbyvendor,
-            readbyinfluencer:
-                readbyinfluencer === true ? true : msg.readbyinfluencer,
-            };
-        });
+                return {
+                    ...msg,
+                    readbyvendor:
+                        readbyvendor === true ? true : msg.readbyvendor,
+                    readbyinfluencer:
+                        readbyinfluencer === true ? true : msg.readbyinfluencer,
+                };
+            });
         },
 
 

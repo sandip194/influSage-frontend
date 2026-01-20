@@ -30,8 +30,7 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
   const [showAnimation, setShowAnimation] = useState(false);
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [previewPortfolioImage, setPreviewPortfolioImage] = useState(null);
-  const [previewPortfolioVideo, setPreviewPortfolioVideo] = useState(null);
+  const [previewPortfolio, setPreviewPortfolio] = useState(null);
 
   const getInfluencerDetails = async () => {
     if (!influencerId) return;
@@ -81,6 +80,18 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
     influDetails?.portfoliofiles?.filter(
       (f) => typeof f?.filepath === "string" && f.filepath.trim() !== ""
     ) || [];
+
+
+  const getFileType = (url) => {
+    const ext = url.split(".").pop().toLowerCase();
+
+    if (/(jpg|jpeg|png|gif|webp)$/.test(ext)) return "image";
+    if (/(mp4|mov|webm|ogg)$/.test(ext)) return "video";
+    if (ext === "pdf") return "pdf";
+    if (/(doc|docx|xls|xlsx)$/.test(ext)) return "doc";
+
+    return "other";
+  };
 
 
 
@@ -319,39 +330,56 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                   {validPortfolioFiles.slice(0, 6).map((file, i) => {
                     const url = file.filepath;
-                    const ext = url.split(".").pop().toLowerCase();
-
-                    const isImage = ["jpg", "jpeg", "png", "gif", "webp"].includes(ext);
-                    const isVideo = ["mp4", "mov", "webm", "ogg"].includes(ext);
+                    const type = getFileType(url);
 
                     return (
                       <div
                         key={i}
                         className="rounded-lg overflow-hidden bg-gray-100 border border-gray-200 hover:shadow-md transition cursor-pointer"
                       >
-                        {isImage ? (
+                        {type === "image" && (
                           <img
                             src={url}
-                            onClick={() => setPreviewPortfolioImage(url)}
                             alt="portfolio"
                             className="w-full h-28 object-cover"
+                            onClick={() => setPreviewPortfolio({ url, type })}
                             onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           />
-                        ) : isVideo ? (
-                          <video
-                            src={url}
-                            onClick={() => setPreviewPortfolioVideo(url)}
-                            className="w-full h-28 object-cover"
-                          />
-                        ) : (
-                          <div className="flex flex-col items-center justify-center h-28 text-xs text-gray-500">
-                            <RiFile3Line className="text-gray-400 text-3xl mb-1" />
-                            Unsupported
+                        )}
+
+                        {type === "video" && (
+                          <div
+                            className="w-full h-28 flex items-center justify-center text-sm text-gray-600"
+                            onClick={() => setPreviewPortfolio({ url, type })}
+                          >
+                            ▶ Play Video
                           </div>
+                        )}
+
+                        {type === "pdf" && (
+                          <div
+                            className="w-full h-28 flex items-center justify-center text-sm text-gray-600"
+                            onClick={() => setPreviewPortfolio({ url, type })}
+                          >
+                            📄 View PDF
+                          </div>
+                        )}
+
+                        {(type === "doc" || type === "other") && (
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex flex-col items-center justify-center h-28 text-xs text-gray-500 hover:text-gray-700"
+                          >
+                            <RiFile3Line className="text-gray-400 text-3xl mb-1" />
+                            Download File
+                          </a>
                         )}
                       </div>
                     );
                   })}
+
                 </div>
               ) : (
                 <Empty
@@ -363,48 +391,48 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
 
             </div>
 
-            {previewPortfolioImage && (
+            {previewPortfolio && (
               <div
                 className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
-                onClick={() => setPreviewPortfolioImage(null)}
+                onClick={() => setPreviewPortfolio(null)}
               >
                 <button
-                  onClick={() => setPreviewPortfolioImage(null)}
+                  onClick={() => setPreviewPortfolio(null)}
                   className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
                 >
                   ×
                 </button>
 
-                <img
-                  src={previewPortfolioImage}
-                  className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                  onClick={(e) => e.stopPropagation()}
-                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                />
+                {previewPortfolio.type === "image" && (
+                  <img
+                    src={previewPortfolio.url}
+                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                  />
+                )}
+
+                {previewPortfolio.type === "video" && (
+                  <video
+                    src={previewPortfolio.url}
+                    controls
+                    autoPlay
+                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                )}
+
+                {previewPortfolio.type === "pdf" && (
+                  <iframe
+                    src={previewPortfolio.url}
+                    title="PDF Preview"
+                    className="w-[90vw] h-[85vh] rounded-xl bg-white"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                )}
               </div>
             )}
 
-            {previewPortfolioVideo && (
-              <div
-                className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
-                onClick={() => setPreviewPortfolioVideo(null)}
-              >
-                <button
-                  onClick={() => setPreviewPortfolioVideo(null)}
-                  className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                >
-                  ×
-                </button>
-
-                <video
-                  src={previewPortfolioVideo}
-                  controls
-                  autoPlay
-                  className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-            )}
           </div>
         </div>
       ) : (
