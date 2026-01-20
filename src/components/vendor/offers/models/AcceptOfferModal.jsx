@@ -2,6 +2,7 @@ import { Modal } from "antd";
 import { RiVerifiedBadgeLine } from "@remixicon/react";
 
 const AcceptOfferModal = ({ open, onCancel, onConfirm, offer, hasSelectedApplication }) => {
+  console.log(offer)
   return (
     <Modal open={open} onCancel={onCancel} footer={null} centered>
       <div className="text-center">
@@ -28,7 +29,7 @@ const AcceptOfferModal = ({ open, onCancel, onConfirm, offer, hasSelectedApplica
         {/* Message */}
         <p className="mt-2 text-gray-700">
           Are you sure you want to accept the application from{" "}
-          <span className="font-medium">{offer?.influencername}</span>?
+          <span className="font-medium">{offer?.name}</span>?
         </p>
 
         {/* Buttons */}

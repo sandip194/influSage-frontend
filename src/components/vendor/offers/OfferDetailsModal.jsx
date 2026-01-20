@@ -90,6 +90,19 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
         followers[p.providername.toLowerCase()] = p.nooffollowers?.toLocaleString("en-IN");
     });
 
+
+    const getFileType = (url) => {
+        const ext = url.split(".").pop().toLowerCase();
+
+        if (/(jpg|jpeg|png|gif|webp)$/.test(ext)) return "image";
+        if (/(mp4|webm|ogg)$/.test(ext)) return "video";
+        if (ext === "pdf") return "pdf";
+        if (/(doc|docx|xls|xlsx)$/.test(ext)) return "doc";
+
+        return "other";
+    };
+
+
     return (
         <Modal
             open={visible}
@@ -251,26 +264,47 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
                                         {offerDetails.filepaths.map((file, i) => {
                                             const url = file.filepath;
-                                            const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+                                            const type = getFileType(url);
+
                                             return (
                                                 <div
                                                     key={i}
                                                     className="rounded-lg overflow-hidden bg-gray-100 border border-gray-200 hover:shadow-md transition"
                                                 >
-                                                    {isImage ? (
+                                                    {type === "image" && (
                                                         <img
                                                             src={url}
                                                             alt="portfolio"
                                                             className="w-full h-28 object-cover cursor-pointer hover:opacity-80 transition"
-                                                            onClick={() => setPreviewImage(url)}
+                                                            onClick={() => setPreviewImage({ url, type })}
                                                             onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                                         />
-                                                    ) : (
+                                                    )}
+
+                                                    {type === "video" && (
+                                                        <div
+                                                            className="w-full h-28 flex items-center justify-center text-sm text-gray-600 cursor-pointer"
+                                                            onClick={() => setPreviewImage({ url, type })}
+                                                        >
+                                                            ▶ Play Video
+                                                        </div>
+                                                    )}
+
+                                                    {type === "pdf" && (
+                                                        <div
+                                                            className="w-full h-28 flex items-center justify-center text-sm text-gray-600 cursor-pointer"
+                                                            onClick={() => setPreviewImage({ url, type })}
+                                                        >
+                                                            📄 View PDF
+                                                        </div>
+                                                    )}
+
+                                                    {(type === "doc" || type === "other") && (
                                                         <a
                                                             href={url}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="flex flex-col items-center justify-center h-28 text-xs text-gray-500 hover:text-gray-700"
+                                                            className="w-full h-28 flex items-center justify-center text-xs text-gray-500 hover:text-gray-700"
                                                         >
                                                             Download File
                                                         </a>
@@ -278,6 +312,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                                 </div>
                                             );
                                         })}
+
                                     </div>
                                 ) : (
                                     <p className="text-sm text-gray-500">No sample work uploaded.</p>
@@ -294,15 +329,36 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                             &times;
                                         </button>
 
-                                        <img
-                                            src={previewImage}
-                                            alt="Preview"
-                                            className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                                            onClick={(e) => e.stopPropagation()}
-                                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                                        />
+                                        {previewImage.type === "image" && (
+                                            <img
+                                                src={previewImage.url}
+                                                alt="Preview"
+                                                className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        )}
+
+                                        {previewImage.type === "video" && (
+                                            <video
+                                                src={previewImage.url}
+                                                controls
+                                                autoPlay
+                                                className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg"
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        )}
+
+                                        {previewImage.type === "pdf" && (
+                                            <iframe
+                                                src={previewImage.url}
+                                                title="PDF Preview"
+                                                className="w-[90vw] h-[85vh] rounded-xl bg-white"
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        )}
                                     </div>
                                 )}
+
                             </div>
 
                             {/* Buttons */}
@@ -335,7 +391,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                 onCancel={() => setIsAcceptModalOpen(false)}
                 onConfirm={handleConfirmAccept}
                 offer={{
-                    name: `${offerDetails?.firstname} ${offerDetails?.lastname}`,
+                    name: offerDetails?.influencername,
                     applicationid: offerDetails?.applicationid,
                 }}
                 hasSelectedApplication={hasSelectedApplication}

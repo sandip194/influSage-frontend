@@ -153,29 +153,50 @@ export default function ContractModal({
     }, [isOpen, token]);
 
     useEffect(() => {
-        if (!editData) return;
-        console.log(editData)
-        const paymentNumber = Number(editData.payment.replace(/[^\d]/g, ""));
+        if (!editData || platforms.length === 0) return;
+
+        const paymentNumber = Number(
+            String(editData.payment || "").replace(/[^\d]/g, "")
+        );
 
         const editInfluencer = {
             id: editData.influencer.id,
             name: editData.influencer?.name || `Influencer ${editData.influencerSelectId}`,
             photo: editData.influencer?.photo || null,
         };
+
         setInfluencers([editInfluencer]);
 
-        // Map deliverables
-        const mappedPlatforms = (editData.deliverables || []).map((p) => ({
-            providerid: platforms.find(pl => pl.providername === p.provider)?.providerid || null,
-            providername: p.provider,
-            contenttypes: p.contenttypes.map((ct) => ({
-                providercontenttypeid: ct.providercontenttypeid,
-                contenttypename: ct.contenttypename
-            }))
-        }));
-        setSelectedPlatforms(mappedPlatforms);
+        // ✅ Map + resolve providerid safely
+        const mappedPlatforms = (editData.deliverables || [])
+            .map((p) => {
+                const platform = platforms.find(
+                    (pl) => pl.providername === p.provider
+                );
 
-        // Set all form values in one place
+                if (!platform) return null;
+
+                return {
+                    providerid: platform.providerid,
+                    providername: platform.providername,
+                    contenttypes: (p.contenttypes || []).map((ct) => ({
+                        providercontenttypeid: ct.providercontenttypeid,
+                        contenttypename: ct.contenttypename,
+                    })),
+                };
+            })
+            .filter(Boolean);
+
+        // ✅ DEDUPLICATE platforms (🔥 fixes double Instagram issue)
+        const uniquePlatforms = Array.from(
+            new Map(
+                mappedPlatforms.map((p) => [p.providerid, p])
+            ).values()
+        );
+
+        setSelectedPlatforms(uniquePlatforms);
+
+        // ✅ Sync AntD form once
         form.setFieldsValue({
             influencers: editInfluencer.id,
             payment: paymentNumber,
@@ -184,10 +205,11 @@ export default function ContractModal({
             notes: editData.notes || "",
             productLink: editData.productLink || "",
             vendorAddress: editData.vendorAddress || "",
-            deliverables: mappedPlatforms,
+            deliverables: uniquePlatforms,
         });
 
-    }, [editData, platforms, form]);
+    }, [editData, platforms]); // ❌ remove `form` from deps
+
 
 
 
@@ -216,10 +238,10 @@ export default function ContractModal({
 
 
     const handleFinish = async (values) => {
+        setSubmitAttempted(true);
         const isValid = await isFormValid();
         if (!isValid) return;
 
-        
 
         // 🔥 REMOVE platforms with empty contenttypes
         const filteredPlatforms = selectedPlatforms.filter(
@@ -230,8 +252,6 @@ export default function ContractModal({
             setSubmitError("Each platform must have at least one content type selected.");
             return;
         }
-
-        setSubmitAttempted(true);
 
         values.deliverables = filteredPlatforms;
 
@@ -277,9 +297,9 @@ export default function ContractModal({
 
             {/* Main Content */}
             <main className="p-2 space-y-0 bg-background-light dark:bg-background-dark">
-                {submitError && (
+                {/* {submitError && (
                     <Alert message={submitError} type="error" showIcon style={{ marginBottom: 16 }} />
-                )}
+                )} */}
 
                 <Form
                     form={form}
@@ -639,7 +659,7 @@ export default function ContractModal({
                                                 setSubmitAttempted(false);
                                             }}
                                             style={{ width: "100%" }}
-                                            disabled={loadingPlatforms}
+                                            disabled={loadingPlatforms || !!editData}
                                         >
                                             {platforms.map((p) => (
                                                 <Select.Option key={p.providerid} value={p.providerid}>
