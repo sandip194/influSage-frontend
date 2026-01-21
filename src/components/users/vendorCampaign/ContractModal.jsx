@@ -659,7 +659,7 @@ export default function ContractModal({
                                                 setSubmitAttempted(false);
                                             }}
                                             style={{ width: "100%" }}
-                                            disabled={loadingPlatforms || !!editData}
+                                            disabled={loadingPlatforms }
                                         >
                                             {platforms.map((p) => (
                                                 <Select.Option key={p.providerid} value={p.providerid}>

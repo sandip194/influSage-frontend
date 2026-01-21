@@ -118,83 +118,83 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
 
   useEffect(() => {
-  if (!socket) {
-    console.log("❌ No socket in receiveMessage listener");
-    return;
-  }
+    if (!socket) {
+     // console.log("❌ No socket in receiveMessage listener");
+      return;
+    }
 
- const messageHandler = (payload) => {
-  console.log("📥 RECEIVE MESSAGE:", payload);
+    const messageHandler = (payload) => {
+     // console.log("📥 RECEIVE MESSAGE:", payload);
 
-  const senderId = payload.senderId ?? payload.userid;
-  const senderRole = payload.senderRole ?? payload.roleid;
+      const senderId = payload.senderId ?? payload.userid;
+      const senderRole = payload.senderRole ?? payload.roleid;
 
-  const isOwnMessage =
-    String(senderId) === String(userId) &&
-    String(senderRole) === String(role);
+      const isOwnMessage =
+        String(senderId) === String(userId) &&
+        String(senderRole) === String(role);
 
-  if (isOwnMessage) return;
+      if (isOwnMessage) return;
 
-  const conversationid = String(payload.conversationid);
+      const conversationid = String(payload.conversationid);
 
-  // ✅ Skip only if THIS chat is open
-  if (String(conversationid) === String(activeConversationId)) {
-    console.log("👀 Same conversation open — skip unread");
-    return;
-  }
+      // ✅ Skip only if THIS chat is open
+      if (String(conversationid) === String(activeConversationId)) {
+        console.log("👀 Same conversation open — skip unread");
+        return;
+      }
 
-    setUnreadMessages((prev) => {
-      const exists = prev.some(
-        (m) => String(m.conversationid) === conversationid
-      );
-      if (exists) return prev;
+      setUnreadMessages((prev) => {
+        const exists = prev.some(
+          (m) => String(m.conversationid) === conversationid
+        );
+        if (exists) return prev;
 
-      return [{ ...payload, conversationid }, ...prev];
-    });
-  };
-  socket.on("receiveMessage", messageHandler);
+        return [{ ...payload, conversationid }, ...prev];
+      });
+    };
+    socket.on("receiveMessage", messageHandler);
 
-  return () => {
-    socket.off("receiveMessage", messageHandler);
-  };
-}, [socket, userId]);
+    return () => {
+      socket.off("receiveMessage", messageHandler);
+    };
+  }, [socket, userId]);
 
 
 
   useEffect(() => {
-  if (!socket) return;
+    if (!socket) return;
 
-  const statusHandler = (payload) => {
-    console.log("📡 SOCKET EVENT → updateMessageStatus:", payload);
+    const statusHandler = (payload) => {
+      console.log("📡 SOCKET EVENT → updateMessageStatus:", payload);
 
-    const { conversationId, readbyvendor, readbyinfluencer } = payload;
+      const { conversationId, readbyvendor, readbyinfluencer } = payload;
 
-    const shouldRemove =
-      (String(role) === "2" && readbyvendor === true) ||
-      (String(role) === "1" && readbyinfluencer === true);
+      const shouldRemove =
+        (String(role) === "2" && readbyvendor === true) ||
+        (String(role) === "1" && readbyinfluencer === true);
 
-    console.log("📡 shouldRemove?", shouldRemove);
+      console.log("📡 shouldRemove?", shouldRemove);
 
-    if (!shouldRemove) return;
+      if (!shouldRemove) return;
 
-// 🔥 Do NOT remove if chat is currently open
-if (String(conversationId) === String(activeConversationId)) {
-  return;
-}
+      // 🔥 Do NOT remove if chat is currently open
+      if (String(conversationId) === String(activeConversationId)) {
+        return;
+      }
 
-setUnreadMessages(prev =>
-  prev.filter(
-    msg => String(msg.conversationid) !== String(conversationId)
-  )
-);
-  };
+      setUnreadMessages(prev =>
+        prev.filter(
+          msg => String(msg.conversationid) !== String(conversationId)
+        )
+      );
+    };
 
-  socket.on("updateMessageStatus", statusHandler);
+    socket.on("updateMessageStatus", statusHandler);
 
-  return () => {
-    socket.off("updateMessageStatus", statusHandler);
-  };
-}, [socket, role]);
+    return () => {
+      socket.off("updateMessageStatus", statusHandler);
+    };
+  }, [socket, role]);
 
   useEffect(() => {
     if (!socket) return;
@@ -242,13 +242,13 @@ setUnreadMessages(prev =>
     };
     fetchProfileData();
   }, [token]);
-useEffect(() => {
-  if (!socket) {
-    console.log("❌ HEADER socket not available");
-  } else {
-    console.log("🧠 HEADER socket connected:", socket.id);
-  }
-}, [socket]);
+  useEffect(() => {
+    if (!socket) {
+      console.log("❌ HEADER socket not available");
+    } else {
+      console.log("🧠 HEADER socket connected:", socket.id);
+    }
+  }, [socket]);
 
   // ======================================================
   // NOTIFICATION MODAL FETCH

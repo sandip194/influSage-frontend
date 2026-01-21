@@ -1,10 +1,9 @@
 import {
-  RiStarLine,
   RiPlayCircleFill,
-  RiArrowDownSLine,
-  RiStarFill,
-  RiArrowUpSLine,
   RiFileTextLine,
+  RiArrowRightUpLine,
+  RiGlobalLine,
+  RiLinksLine,
 } from '@remixicon/react';
 import { Empty, Skeleton } from 'antd';
 import axios from 'axios';
@@ -234,19 +233,38 @@ const Profile = () => {
 
           <div className="bg-white p-4 rounded-2xl">
             {/* Portfolio Heading */}
-            <h2 className="font-semibold text-base mb-4">Portfolio</h2>
+            <h2 className="font-bold text-base mb-4">My Portfolio</h2>
 
             {/* Portfolio Link */}
             {p_portfolios?.portfoliourl && (
-              <p className="text-sm text-blue-600 mb-4 hover:underline">
-                <a
-                  href={p_portfolios.portfoliourl}
-                  target="_blank"
-                >
-                  View Portfolio
-                </a>
-              </p>
+              <a
+                href={p_portfolios.portfoliourl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 hover:border-blue-500 hover:bg-blue-50 transition"
+              >
+                {/* Left section */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                    <RiGlobalLine className="text-4xl text-blue-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm text-gray-900">
+                      Portfolio Link
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      View complete work & projects
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right section (CTA) */}
+                <span className="mt-2 sm:mt-0 text-sm font-medium text-blue-600 flex items-center gap-1 self-start sm:self-auto ">
+                  View <RiLinksLine className="text-xs" />
+                </span>
+              </a>
             )}
+
 
             {/* Portfolio Files */}
             {visiblePortfolios?.length > 0 && (

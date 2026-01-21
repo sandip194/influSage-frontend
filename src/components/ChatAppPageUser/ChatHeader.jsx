@@ -110,7 +110,7 @@ export default function ChatHeaderUnified({ chat, onBack, onOnlineStatusChange }
           {chat?.img ? (
             <img
               src={chat.img}
-              alt={chat?.name || chat?.fullname}
+              alt={chat?.name_campaignname || chat?.fullname}
               onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
               className="w-full h-full object-cover rounded-full"
             />
@@ -125,7 +125,7 @@ export default function ChatHeaderUnified({ chat, onBack, onOnlineStatusChange }
 
       <div>
         <div className="font-semibold">
-          {role === 2 ? chat?.fullname || "Chat" : chat?.name || "Chat"}
+          {role === 2 ? chat?.fullname || "Chat" : chat?.name_campaignname || "Chat"}
         </div>
         <div className="text-sm text-gray-400">
           {isOnline ? "Online" : formatLastSeen(lastSeen)}

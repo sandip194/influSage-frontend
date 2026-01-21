@@ -26,7 +26,6 @@ export default function Sidebar({ onSelectChat, activeConversationId }) {
   const [campaigns, setCampaigns] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
-  const [unreadMessages, setUnreadMessages] = useState([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 

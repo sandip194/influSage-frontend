@@ -26,7 +26,7 @@ export default function ChatAppPageUser() {
   const { token, role, userId } = useSelector((state) => state.auth);
   const roleId = Number(role);
   const socket = getSocket();
-  const messages = useSelector((state) => state.chat.messages);
+
 
   const activeChat = useSelector((state) => state.chat.activeChat);
   const [selectedReplyMessage, setSelectedReplyMessage] = useState(null);
@@ -49,6 +49,7 @@ export default function ChatAppPageUser() {
   };
 
   useEffect(() => {
+    console.log("user refresh")
     if (!socket || !conversationId) return;
 
     console.log("👥 joinRoom:", conversationId);
@@ -60,24 +61,24 @@ export default function ChatAppPageUser() {
   }, [socket, conversationId]);
 
   const fetchMessages = async () => {
-  if (!conversationId || !token) return;
+    if (!conversationId || !token) return;
 
-  try {
-    const res = await axios.get("/chat/messages", {
-      params: {
-        p_conversationid: conversationId,
-        p_roleid: roleId,
-        p_limit: 50,
-        p_offset: 0,
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      const res = await axios.get("/chat/messages", {
+        params: {
+          p_conversationid: conversationId,
+          p_roleid: roleId,
+          p_limit: 50,
+          p_offset: 0,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    const records = res?.data?.data?.records || [];
+      const records = res?.data?.data?.records || [];
 
-    const formatted = records
+      const formatted = records
         .map((msg) => {
           const raw = (msg.message || "").replace(/^"|"$/g, "");
           const unescaped = unescapeHtml(raw);
@@ -103,10 +104,10 @@ export default function ChatAppPageUser() {
         .sort((a, b) => new Date(a.time) - new Date(b.time));
 
       dispatch(setMessages(formatted));
-  } catch (err) {
-    console.error("❌ Failed to fetch messages", err);
-  }
-};
+    } catch (err) {
+      console.error("❌ Failed to fetch messages", err);
+    }
+  };
 
   const handleSendMessage = async ({
     text,
@@ -157,63 +158,68 @@ export default function ChatAppPageUser() {
       }
 
 
-    const res = await axios.post("/chat/insertmessage", formData, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+      const res = await axios.post("/chat/insertmessage", formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    const receiverId =
-      Number(roleId) === 1
-        ? Number(activeChat.vendorId || activeChat.vendorid)
-        : Number(activeChat.influencerid);
+      const receiverId =
+        Number(roleId) === 1
+          ? Number(activeChat.vendorId || activeChat.vendorid)
+          : Number(activeChat.influencerId || activeChat.influencerid);
 
-    console.log("🎯 SOCKET SEND:", { receiverId });
+      console.log("🎯 SOCKET SEND:", { receiverId });
 
-    socket.emit("sendMessage", {
-      conversationid: Number(conversationId),
-      userid: Number(userId),
-      roleid: Number(roleId),
-      receiverId,
-      message: text,
-      messageid: res.data?.message_id, 
-      tempId,
-      replyid: replyId || null,
-      createddate: new Date().toISOString(),
-    });
+      socket.emit("sendMessage", {
+        conversationid: Number(conversationId),
+        userid: Number(userId),
+        roleid: Number(roleId),
+        receiverId,
+        message: text,
+        messageid: res.data?.message_id,
+        tempId,
+        replyid: replyId || null,
+        readbyinfluencer: Number(roleId) === 1,
+        readbyvendor: Number(roleId) === 2,
+        createddate: new Date().toISOString(),
+      });
 
-      setShouldRefresh(true);
+      //setShouldRefresh(true);
       setEditingMessage(null);
     } catch (err) {
       console.error("❌ Message send/edit failed", err);
     }
   };
 
- useEffect(() => {
-  if (!socket || !conversationId) return;
+  useEffect(() => {
+    if (!socket || !conversationId) return;
 
-  const handleReceiveMessage = (msg) => {
-  if (String(msg.conversationid) !== String(conversationId)) return;
+    const handleReceiveMessage = (msg) => {
+      console.log("New MSG Recived", msg)
+      if (String(msg.conversationid) !== String(conversationId)) return;
 
-  if (Number(msg.userid) === Number(userId)) {
-    dispatch(updateMessage({
-      tempId: msg.tempId,
-      newId: msg.messageid,
-    }));
-    return;
-  }
-  dispatch(addMessage({
-    id: msg.messageid,
-    roleId: Number(msg.roleid),
-    content: msg.message,
-    time: msg.createddate,
-    deleted: false,
-    file: msg.filepaths || [],
-    replyId: msg.replyid ?? null,
-  }));
-};
+      if (Number(msg.userid) === Number(userId)) {
+        dispatch(updateMessage({
+          tempId: msg.tempId,
+          newId: msg.messageid,
+        }));
+        return;
+      }
+      dispatch(addMessage({
+        id: msg.messageid || msg.tempId,
+        roleId: Number(msg.roleid),
+        content: msg.message,
+        time: msg.createddate,
+        deleted: false,
+        file: msg.filepaths || [],
+        replyId: msg.replyid ?? null,
+        readbyinfluencer: msg.readbyinfluencer ?? false,
+        readbyvendor: msg.readbyvendor ?? false
+      }));
+    };
 
-  socket.on("receiveMessage", handleReceiveMessage);
-  return () => socket.off("receiveMessage", handleReceiveMessage);
-}, [socket, conversationId]);
+    socket.on("receiveMessage", handleReceiveMessage);
+    return () => socket.off("receiveMessage", handleReceiveMessage);
+  }, [socket, conversationId]);
 
   useEffect(() => {
     if (!shouldRefresh) return;
@@ -234,9 +240,8 @@ export default function ChatAppPageUser() {
       {/* ================= Sidebar ================= */}
       {roleId === 1 && (
         <div
-          className={`md:w-1/4 w-full h-full border-gray-200 flex-shrink-0 me-2 ${
-            activeChat ? "hidden md:block" : "block"
-          }`}
+          className={`md:w-1/4 w-full h-full border-gray-200 flex-shrink-0 me-2 ${activeChat ? "hidden md:block" : "block"
+            }`}
         >
           <Sidebar
             onSelectChat={(chat) => {
@@ -250,9 +255,8 @@ export default function ChatAppPageUser() {
 
       {roleId === 2 && (
         <div
-          className={`md:w-1/2 w-full h-full border-gray-200 flex-shrink-0 me-2 ${
-            activeChat ? "hidden md:block" : "block"
-          }`}
+          className={`md:w-1/2 w-full h-full border-gray-200 flex-shrink-0 me-2 ${activeChat ? "hidden md:block" : "block"
+            }`}
         >
           <SidebarVendor
             onSelectChat={(chat) => {
@@ -267,9 +271,8 @@ export default function ChatAppPageUser() {
       {/* ================= Main Chat Area ================= */}
       {showChatUI && (
         <div
-          className={`flex-1 h-full flex flex-col ${
-            activeChat ? "flex" : "hidden md:flex"
-          }`}
+          className={`flex-1 h-full flex flex-col ${activeChat ? "flex" : "hidden md:flex"
+            }`}
         >
           {/* Header */}
           <div className="sticky top-0 z-10 bg-white rounded-2xl border-b border-gray-200">

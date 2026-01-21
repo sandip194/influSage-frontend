@@ -164,7 +164,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         setIsModalOpen(false);
 
         // REFRESH FROM API ONLY
-        fetchAllContracts();
+        window.location.reload();
       } else {
         toast.error(
           response.data.message || "Failed to create/update contract."

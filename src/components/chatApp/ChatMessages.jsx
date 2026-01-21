@@ -64,12 +64,11 @@ const unescapeHtml = (str) => {
 export default function ChatMessages({
   chat,
   isRecipientOnline,
-  messages,
   setReplyToMessage,
   setEditingMessage,
   editingMessage,
 }) {
-    useSocketRegister();
+  useSocketRegister();
   const dispatch = useDispatch();
   const socket = getSocket();
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
@@ -83,27 +82,28 @@ export default function ChatMessages({
   const [isLoading, setIsLoading] = useState(false);
 
   const { token, userId, role } = useSelector((state) => state.auth) || {};
+  const messages = useSelector((state) => state.chat.messages);
   // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getMessageStatusIcon = (msg) => {
-  const isMe = Number(msg.roleId) === Number(role);
-  if (!isMe) return null;
+    const isMe = Number(msg.roleId) === Number(role);
+    if (!isMe) return null;
 
-  const otherRead =
-    Number(msg.roleId) === 1
-      ? msg.readbyvendor
-      : msg.readbyinfluencer;
+    const otherRead =
+      Number(msg.roleId) === 1
+        ? msg.readbyvendor
+        : msg.readbyinfluencer;
 
-  if (otherRead) {
-    return <RiCheckDoubleLine className="text-blue-500" size={16} />;
-  }
+    if (otherRead) {
+      return <RiCheckDoubleLine className="text-blue-500" size={16} />;
+    }
 
-  if (isRecipientOnline) {
-    return <RiCheckDoubleLine className="text-gray-400" size={16} />;
-  }
+    if (isRecipientOnline) {
+      return <RiCheckDoubleLine className="text-gray-400" size={16} />;
+    }
 
-  return <RiCheckLine className="text-gray-400" size={16} />;
-};
+    return <RiCheckLine className="text-gray-400" size={16} />;
+  };
 
   useEffect(() => {
     if (isLoading || messages.length === 0) return;
@@ -121,14 +121,14 @@ export default function ChatMessages({
     });
     try {
       const res = await axios.put(
-      `/chat/undodeletemessage`,
-      {
-        p_messageid: messageId,
-        p_roleid: role,
-        p_action: "delete",
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+        `/chat/undodeletemessage`,
+        {
+          p_messageid: messageId,
+          p_roleid: role,
+          p_action: "delete",
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       if (res.data?.p_status) {
         toast.success(res.data.message);
@@ -202,8 +202,6 @@ export default function ChatMessages({
   useEffect(() => {
     if (!socket) return;
 
-    
-
     socket.on("deleteMessage", (messageId) => {
       dispatch(deleteMessage(messageId));
     });
@@ -217,11 +215,11 @@ export default function ChatMessages({
     // });
 
     socket.on("updateMessageStatus", ({ messageId, readbyvendor, readbyinfluencer }) => {
-        // console.log("🟢 SOCKET → updateMessageStatus", {
-        //   messageId,
-        //   readbyvendor,
-        //   readbyinfluencer,
-        // });
+      // console.log("🟢 SOCKET → updateMessageStatus", {
+      //   messageId,
+      //   readbyvendor,
+      //   readbyinfluencer,
+      // });
       dispatch({
         type: "chat/setMessageRead",
         payload: { messageId, readbyvendor, readbyinfluencer },
@@ -296,44 +294,47 @@ export default function ChatMessages({
     };
 
     loadMessagesOnce();
- }, [chat?.id, chat?.date, token, role]);
+  }, [chat?.id, chat?.date, token, role]);
 
   useEffect(() => {
-  if (!socket || !messages.length || !chat?.id) return;
+    console.log("new msg recived")
+    if (!socket || !messages.length || !chat?.id) return;
 
-  messages.forEach((msg) => {
-  if (Number(msg.roleId) === Number(role)) return;
+    messages.forEach((msg) => {
+      if (Number(msg.roleId) === Number(role)) return;
 
-  if (msg.tempId || !msg.id) return;
+      // if (msg.tempId || !msg.id) return;
 
-  // const isUnread =
-  //   (Number(role) === 1 && msg.readbyvendor !== true) ||
-  //   (Number(role) === 2 && msg.readbyinfluencer !== true);
+      // const isUnread =
+      //   (Number(role) === 1 && msg.readbyvendor !== true) ||
+      //   (Number(role) === 2 && msg.readbyinfluencer !== true);
 
-    // ✅ Correct unread logic (THIS ROLE)
-    const isUnread =
-      (Number(role) === 1 && msg.readbyinfluencer !== true) ||
-      (Number(role) === 2 && msg.readbyvendor !== true);
+      // ✅ Correct unread logic (THIS ROLE)
+      const isUnread =
+        (Number(role) === 1 && msg.readbyinfluencer !== true) ||
+        (Number(role) === 2 && msg.readbyvendor !== true);
 
-  if (!isUnread) return;
+      if (!isUnread) return;
 
-  if (emittedReadRef.current.has(msg.id)) return;
+      if (emittedReadRef.current.has(msg.id)) return;
 
-  emittedReadRef.current.add(msg.id);
+      emittedReadRef.current.add(msg.id);
 
-  socket.emit("messageRead", {
-    messageId: Number(msg.id),
-    conversationId: chat.id,
-    role: Number(role),
-  });
-});
-}, [messages, socket, role, chat?.id]);
+      console.log("msg Read Emit", msg)
+
+      socket.emit("messageRead", {
+        messageId: Number(msg.id),
+        conversationId: chat.id,
+        role: Number(role),
+      });
+    });
+  }, [messages, socket, role, chat?.id]);
 
 
-// reset when chat changes
-useEffect(() => {
-  emittedReadRef.current.clear();
-}, [chat?.id]);
+  // reset when chat changes
+  useEffect(() => {
+    emittedReadRef.current.clear();
+  }, [chat?.id]);
 
 
   // useEffect(() => {
@@ -399,7 +400,7 @@ useEffect(() => {
       }, 100);
     }
   }, [isLoading, messages]);
-  
+
 
   if (chat && isLoading && messages.length === 0) {
     return (
@@ -416,21 +417,21 @@ useEffect(() => {
       className="flex-1 overflow-y-auto overflow-x-hidden px-0 pt-6 space-y-1"
     >
       {messages.map((msg, index) => {
-       const isMe =
-  Number(msg.senderId) === Number(userId) ||
-  Number(msg.roleId) === Number(role);
+        const isMe =
+          Number(msg.senderId) === Number(userId) ||
+          Number(msg.roleId) === Number(role);
 
 
         const isLast = index === messages.length - 1;
         // console.log("Message:", msg.content, "senderId:", msg.senderId, "userId:", userId, "isMe:", isMe);
         // console.log("RENDER CHECK → msgId:", msg.id, "senderId:", msg.senderId, "myUserId:", userId, "roleId:", msg.roleId, "myRole:", role);
-// console.log("🎨 UI RENDER", {
-//   msgId: msg.id,
-//   roleId: msg.roleId,
-//   myRole: role,
-//   readbyvendor: msg.readbyvendor,
-//   readbyinfluencer: msg.readbyinfluencer,
-// });
+        // console.log("🎨 UI RENDER", {
+        //   msgId: msg.id,
+        //   roleId: msg.roleId,
+        //   myRole: role,
+        //   readbyvendor: msg.readbyvendor,
+        //   readbyinfluencer: msg.readbyinfluencer,
+        // });
 
 
         return (
@@ -648,15 +649,15 @@ useEffect(() => {
                           </span>
 
                           {/* Quoted Text */}
-                            {repliedMsg.ishtml ? (
-                              <span className="italic text-white text-[11px]">
-                                Campaign Invitation
-                              </span>
-                            ) : repliedMsg.content ? (
-                              <span className="truncate max-w-[230px]">
-                                {repliedMsg.content}
-                              </span>
-                            ) : null}
+                          {repliedMsg.ishtml ? (
+                            <span className="italic text-white text-[11px]">
+                              Campaign Invitation
+                            </span>
+                          ) : repliedMsg.content ? (
+                            <span className="truncate max-w-[230px]">
+                              {repliedMsg.content}
+                            </span>
+                          ) : null}
 
                           {/* Quoted File */}
                           {repliedMsg.file && (() => {
@@ -702,16 +703,16 @@ useEffect(() => {
                       </button>
                     )}
                   </div>
-                ) :(
+                ) : (
                   <div
- className={`text-sm break-words ${msg.ishtml ? "bg-white text-gray-900 p-2 rounded-md" : ""}`}
- dangerouslySetInnerHTML={{
-   __html: DOMPurify.sanitize(
-     (msg.content || msg.message || msg.text || "")
-       .replace(/\n/g, "<br>")
-   ),
- }}
-/>
+                    className={`text-sm break-words ${msg.ishtml ? "bg-white text-gray-900 p-2 rounded-md" : ""}`}
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(
+                        (msg.content || msg.message || msg.text || "")
+                          .replace(/\n/g, "<br>")
+                      ),
+                    }}
+                  />
 
                 )}
               </div>

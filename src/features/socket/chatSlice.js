@@ -13,39 +13,40 @@ const chatSlice = createSlice({
             state.activeChat = action.payload;
             state.messages = []; // reset on change
         },
-         setActiveConversation: (state, action) => {
+        setActiveConversation: (state, action) => {
             state.activeConversationId = action.payload;
         },
         addMessage: (state, action) => {
-      const incoming = action.payload;
+            const incoming = action.payload;
 
-      const exists = state.messages.some(
-        (m) =>
-          String(m.id) === String(incoming.id) ||
-          (incoming.tempId && String(m.tempId) === String(incoming.tempId))
-      );
+            const exists = state.messages.some(
+                (m) =>
+                    String(m.id) === String(incoming.id) ||
+                    (incoming.tempId && String(m.tempId) === String(incoming.tempId))
+            );
 
-      if (exists) return;
+            if (exists) return;
 
-      state.messages.push(incoming);
-    },
+            console.log("Redux Message Added",incoming)
+            state.messages.push(incoming);
+        },
 
         updateMessage: (state, action) => {
-        const { tempId, newId, content, fileUrl } = action.payload;
+            const { tempId, newId, content, fileUrl } = action.payload;
 
-        const msg = state.messages.find(
-            (m) =>
-            String(m.id) === String(tempId) ||
-            String(m.tempId) === String(tempId)
-        );
+            const msg = state.messages.find(
+                (m) =>
+                    String(m.id) === String(tempId) ||
+                    String(m.tempId) === String(tempId)
+            );
 
-        if (!msg) return;
+            if (!msg) return;
 
-        msg.id = newId ?? msg.id;
-        msg.content = content ?? msg.content;
-        msg.file = fileUrl ?? msg.file;
-        msg.status = "sent";
-        msg.isTemp = false;
+            msg.id = newId ?? msg.id;
+            msg.content = content ?? msg.content;
+            msg.file = fileUrl ?? msg.file;
+            msg.status = "sent";
+            msg.isTemp = false;
         },
 
         deleteMessage: (state, action) => {
