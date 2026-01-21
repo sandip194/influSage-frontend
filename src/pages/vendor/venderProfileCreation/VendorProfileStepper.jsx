@@ -116,6 +116,7 @@ export const VendorProfileStepper = () => {
                 <CategorySelector
                     data={vendorProfileData.categories}
                     onNext={() => markStepComplete(1)}
+                    onChange={(updated) => updateProfileSection('categories', updated)}
                     onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
                 />
             ),
@@ -126,6 +127,7 @@ export const VendorProfileStepper = () => {
                 <SocialMediaDetails
                     data={vendorProfileData.providers}
                     onNext={() => markStepComplete(2)}
+                    onChange={(updated) => updateProfileSection('providers', updated)}
                     onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
                 />
             ),
@@ -136,6 +138,7 @@ export const VendorProfileStepper = () => {
                 <ObjectiveSelector
                     data={vendorProfileData.objectives}
                     onNext={() => markStepComplete(3)}
+                    onChange={(updated) => updateProfileSection('objectives', updated)}
                     onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
                 />
             ),
@@ -146,6 +149,7 @@ export const VendorProfileStepper = () => {
                 <PaymentDetailsForm
                     data={vendorProfileData.payment}
                     onNext={() => markStepComplete(4)}
+                    onChange={(updated) => updateProfileSection('payment', updated)}
                     onBack={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
                 />
             ),

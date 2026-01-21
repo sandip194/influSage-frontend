@@ -9,6 +9,7 @@ export const CategorySelector = ({
   onBack,
   onNext,
   data,
+  onChange,
   showControls,
   showToast,
   onSave,
@@ -52,7 +53,7 @@ export const CategorySelector = ({
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [data]);
 
   // 👉 NEW CODE — Get selected count per parent
   const getSelectedCount = (parent) => {
@@ -150,10 +151,9 @@ export const CategorySelector = ({
       }
     });
 
-    localStorage.setItem(
-      "selectedFullCategoryData",
-      JSON.stringify(selectedData)
-    );
+    if (onChange) {
+      onChange(selectedData);
+    }
 
     await sendDataToBackend(selectedData);
   };

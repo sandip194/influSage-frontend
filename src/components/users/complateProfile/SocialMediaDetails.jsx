@@ -195,18 +195,31 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
                     rules={[
                       {
                         validator: (_, value) => {
-                          if (!value) return Promise.resolve(); // allow empty
+                          if (!value) return Promise.resolve();
 
-                          // Check valid URL
+                          // Regex check: http(s):// or www.
+                          const urlPrefixRegex = /^(https?:\/\/)?(www\.)/i;
+                          if (!urlPrefixRegex.test(value)) {
+                            return Promise.reject(
+                              new Error("Please enter a valid link starting with http:// or https://")
+                            );
+                          }
+
                           try {
-                            new URL(value);
+                            // Ensure protocol for URL constructor
+                            const normalizedValue = value.startsWith("http")
+                              ? value
+                              : `https://${value}`;
+
+                            new URL(normalizedValue);
                           } catch {
                             return Promise.reject(new Error("Please enter a valid URL"));
                           }
 
-                          // Check if URL contains platform name
+                          // Platform-specific validation
                           const lowerValue = value.toLowerCase();
                           const platformKey = platform.name.toLowerCase().replace(/\s+/g, '');
+
                           if (!lowerValue.includes(platformKey)) {
                             return Promise.reject(
                               new Error(`This link must be for ${platform.name}`)

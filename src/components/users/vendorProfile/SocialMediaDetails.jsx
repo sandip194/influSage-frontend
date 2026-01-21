@@ -6,16 +6,7 @@ import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { toast } from 'react-toastify';
 
-const PLATFORM_URL_RULES = {
-  instagram: /^(https?:\/\/)?(www\.)?instagram\.com\/[A-Za-z0-9._%-]+\/?$/,
-  facebook: /^(https?:\/\/)?(www\.)?facebook\.com\/[A-Za-z0-9._%-]+\/?$/,
-  youtube: /^(https?:\/\/)?(www\.)?youtube\.com\/.+$/,
-  twitter: /^(https?:\/\/)?(www\.)?(twitter\.com|x\.com)\/[A-Za-z0-9._%-]+\/?$/,
-  linkedin: /^(https?:\/\/)?(www\.)?linkedin\.com\/in\/.+$/,
-};
-
-
-export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToast, onSave }) => {
+export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControls, showToast, onSave }) => {
   const [providers, setProviders] = useState([])
   const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -136,7 +127,26 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
         form={form}
         layout="vertical"
         onFinish={onFinish}
-        onValuesChange={handleFormChange}
+        onFinishFailed={({ errorFields }) => {
+          if (errorFields.length > 0) {
+            form.scrollToField(errorFields[0].name, {
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        }}
+        onValuesChange={(_, allValues) => {
+          setIsFormChanged(true);
+
+          const socialData = platforms
+            .filter(p => allValues[p.field])
+            .map(p => ({
+              providerid: p.providerid,
+              handleslink: allValues[p.field],
+            }));
+
+          onChange?.(socialData);
+        }}
       >
         <div className="space-y-4">
           {platforms.map((platform) => (
@@ -152,18 +162,31 @@ export const SocialMediaDetails = ({ onBack, onNext, data, showControls, showToa
                 rules={[
                   {
                     validator(_, value) {
-                      if (!value) return Promise.resolve(); // allow empty links
+                      if (!value) return Promise.resolve();
 
-                      // Check if it's a valid URL
+                      // Regex check: must start with http(s):// or www.
+                      const urlPrefixRegex = /^(https?:\/\/)?(www\.)/i;
+                      if (!urlPrefixRegex.test(value)) {
+                        return Promise.reject(
+                          new Error("Please enter a valid link starting with http:// or https://")
+                        );
+                      }
+
+                      // Normalize before URL validation
                       try {
-                        new URL(value);
+                        const normalizedValue = value.startsWith("http")
+                          ? value
+                          : `https://${value}`;
+
+                        new URL(normalizedValue);
                       } catch {
                         return Promise.reject(new Error("Please enter a valid URL"));
                       }
 
-                      // Check if the URL contains the platform name
+                      // Platform-specific validation
                       const lowerValue = value.toLowerCase();
                       const platformKey = platform.name.toLowerCase().replace(/\s+/g, '');
+
                       if (!lowerValue.includes(platformKey)) {
                         return Promise.reject(
                           new Error(`This link must be for ${platform.name}`)
