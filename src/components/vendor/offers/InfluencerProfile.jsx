@@ -308,7 +308,7 @@ const InfluencerProfile = () => {
                         </div>
 
                         {/* IMAGE */}
-                        <div className="relative">
+                        <div className="relative flex justify-center sm:justify-start">
                             <img
                                 src={influDetails?.photopath}
                                 alt="Profile"
@@ -364,34 +364,59 @@ const InfluencerProfile = () => {
                                     </p>
 
                                     {rawRating > 0 && (
-                                        <div className="flex items-center mt-2">
+                                        <div className="flex items-center justify-center sm:justify-start mt-2">
                                             {renderStars(rawRating)}
-                                            <span className="ml-2 text-md font-medium text-gray-700">{displayRating}</span>
+                                            <span className="ml-2 text-md font-medium text-gray-700">
+                                            {displayRating}
+                                            </span>
                                         </div>
                                     )}
 
                                 </div>
 
-                                {/* Total Campaign (desktop alignment) */}
-                                <div className="flex gap-10 mt-4 sm:mt-0 text-center">
-                                    <div>
-                                        <p className="text-gray-900 font-bold text-xs uppercase tracking-wide">
+                                {/* Total Campaign */}
+                                <div className="
+                                        mt-4 sm:mt-0
+                                        mx-auto max-w-sm
+                                        grid grid-cols-2 gap-3 text-center
+                                        md:max-w-none md:mx-0 md:grid-cols-3
+                                        lg:flex lg:gap-6 lg:items-center
+                                    "
+                                    >
+                                    {/* Completed Campaigns */}
+                                    <div className="w-full rounded-2xl bg-gray-50 border border-gray-200 px-4 py-4">
+                                        <p className="uppercase font-semibold tracking-wide text-gray-500 text-[10px] md:text-[11px] leading-tight">
                                             Completed Campaigns
                                         </p>
-                                        <p className="text-lg font-semibold text-gray-900">
-                                            {typeof influDetails?.completedcampaigncount === "number"
-                                                ? influDetails?.completedcampaigncount
-                                                : 0}
+                                        <p className="mt-1 font-bold text-lg md:text-lg lg:text-lg text-gray-900">
+                                        {typeof influDetails?.completedcampaigncount === "number"
+                                            ? influDetails.completedcampaigncount
+                                            : 0}
                                         </p>
                                     </div>
-                                    <div>
-                                        <p className="text-gray-900 font-bold text-xs uppercase tracking-wide">
-                                            Total Campaign
+
+                                    {/* Total Campaigns */}
+                                    <div className="w-full rounded-2xl bg-gray-50 border border-gray-200 px-4 py-4">
+                                        <p className="uppercase font-semibold tracking-wide text-gray-500 text-[10px] md:text-[11px] leading-tight">
+                                        Total Campaigns
                                         </p>
-                                        <p className="text-lg font-semibold text-gray-900">
-                                            {typeof influDetails?.totalcampaign === "number"
-                                                ? influDetails?.totalcampaign
-                                                : 0}
+                                        <p className="mt-1 font-bold text-lg md:text-lg lg:text-lg text-gray-900">
+                                        {typeof influDetails?.totalcampaigncount === "number"
+                                            ? influDetails.totalcampaigncount
+                                            : 0}
+                                        </p>
+                                    </div>
+
+                                    {/* Completion Rate */}
+                                    <div className="w-full rounded-2xl bg-gray-50 border border-gray-200 px-4 py-4
+                                                    col-span-2 md:col-span-1">
+                                        <p className="uppercase font-semibold tracking-wide text-gray-500 text-[10px] md:text-[11px] leading-tight">
+                                        Completion Rate
+                                        </p>
+                                        <p className="mt-1 font-bold text-lg md:text-lg lg:text-lg text-gray-900">
+                                        {typeof influDetails?.completionrate === "number"
+                                            ? `${influDetails.completionrate}%`
+                                            : "0%"}
                                         </p>
                                     </div>
                                 </div>

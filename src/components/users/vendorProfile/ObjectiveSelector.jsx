@@ -7,7 +7,7 @@ import { Spin } from "antd";
 
 const STORAGE_KEY = 'selected_objective';
 
-const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSave }) => {
+const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSave, onChange }) => {
   const [selected, setSelected] = useState(null);
   const [initialSelected, setInitialSelected] = useState(null); // ✅ Track original value
   const [error, setError] = useState("");
@@ -52,6 +52,7 @@ const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSa
     setSelected(id);
     setError("");
     setIsFormChanged(id !== initialSelected); // ✅ Enable only if changed
+    onChange?.([{ objectiveid: id }]);
   };
 
   // ✅ Save / Continue handler
@@ -77,7 +78,7 @@ const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSa
         if (showToast) toast.success('Profile updated successfully!');
         setIsFormChanged(false);
         setInitialSelected(selected); // ✅ Reset original after save
-        localStorage.setItem(STORAGE_KEY, selected.toString());
+        onChange?.([{ objectiveid: selected }]);
 
         if (onNext) onNext();
         if (onSave) onSave(formData);

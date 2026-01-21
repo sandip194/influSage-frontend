@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 const { TextArea } = Input;
 const { Option } = Select;
 
-export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, onSave }) => {
+export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, onSave, onChange}) => {
 
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -140,46 +140,66 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
         }
 
 
-        if (data.photopath) {
-            const fullUrl = data.photopath.startsWith('http')
+        if (data.photopath && !profileImage) {
+            const fullUrl = data.photopath.startsWith("http")
                 ? data.photopath
-                : `${BASE_URL}/${data.photopath.replace(/^\/+/, '')}`;
+                : `${BASE_URL}/${data.photopath.replace(/^\/+/, "")}`;
 
             setPreview(fullUrl);
-            setExistingPhotoPath(data.photopath)
+            setExistingPhotoPath(data.photopath);
         }
 
-    }, [data, form, countries]);
+    }, [data, form, countries, profileImage]);
 
+    const syncToParent = () => {
+        if (!onChange) return;
+
+        const values = form.getFieldsValue();
+
+        onChange({
+            ...data,
+            businessname: values.businessname,
+            companysizeid: values.companysizeid,
+            phonenumber: values.phone,
+            address1: values.address1,
+            countryname: values.countryname,
+            statename: values.statename,
+            city: values.city,
+            zip: values.zipCode,
+            bio: values.bio,
+            photopath: existingPhotoPath,
+        });
+    };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/webp'];
+        const maxSize = 5 * 1024 * 1024;
 
-        //  File type check
         if (!allowedTypes.includes(file.type)) {
             setProfileError('Only JPG, JPEG, or WEBP files are allowed.');
-            setProfileImage(null);
-            setPreview(null);
             return;
         }
 
-        //  File SIZE check — MAX 5 MB
-        const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
         if (file.size > maxSize) {
             setProfileError('File size must be less than 5 MB.');
-            setProfileImage(null);
-            setPreview(null);
             return;
         }
 
-        // ✔ Passed all validation
+        const previewUrl = URL.createObjectURL(file);
         setProfileError('');
         setProfileImage(file);
-        setPreview(URL.createObjectURL(file));
+        setPreview(previewUrl);
         setIsFormChanged(true);
+
+        onChange?.({
+            ...data,
+            photopath: existingPhotoPath,
+            photoPreview: previewUrl,
+            photoFile: file,
+        });
     };
 
     useEffect(() => {
@@ -222,8 +242,10 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
 
             const formData = new FormData();
-            formData.append('profilejson', JSON.stringify(profilejson));
-            formData.append('photo', profileImage);
+            formData.append('profilejson', JSON.stringify(profilejson));    
+            if (profileImage) {
+                formData.append('photo', profileImage);
+            }
 
             const response = await axios.post("/vendor/complete-vendor-profile", formData, {
                 headers: {
@@ -260,7 +282,10 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Business Details</h2>
             <p className="text-gray-600">Please provide your Business details to complete your profile.</p>
 
-            <Form form={form} layout="vertical" className="mt-6" onValuesChange={() => setIsFormChanged(true)}>
+            <Form form={form} layout="vertical" className="mt-6"  onValuesChange={() => {
+                setIsFormChanged(true);
+                syncToParent();
+            }}>
                 {/* Profile Image Upload */}
                 <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
                     <div className="relative m-auto w-30 h-30 rounded-full overflow-hidden bg-[#0D132D0D] hover:opacity-90 cursor-pointer border border-gray-100 group">

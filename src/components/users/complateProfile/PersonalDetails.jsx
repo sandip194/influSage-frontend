@@ -14,7 +14,7 @@ dayjs.extend(customParseFormat);
 const { TextArea } = Input;
 const { Option } = Select;
 
-export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave }) => {
+export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave, onChange }) => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [form] = Form.useForm();
   const [preview, setPreview] = useState(null);
@@ -165,6 +165,26 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
     }
   }, [form, data, name]);
 
+  const syncToParent = () => {
+    if (!onChange) return;
+
+    const values = form.getFieldsValue();
+
+    onChange({
+      ...data,
+      photopath: existingPhotoPath,
+      genderid: values.gender,
+      dob: values.birthDate ? values.birthDate.format('DD-MM-YYYY') : null,
+      phonenumber: values.phone,
+      address1: values.address,
+      countryname: values.country,
+      statename: values.state,
+      city: values.city,
+      zip: values.zipCode,
+      bio: values.bio || '',
+    });
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -193,6 +213,15 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
     setProfileImage(file);
     setPreview(URL.createObjectURL(file));
     setIsFormChanged(true);
+
+    if (onChange) {
+      onChange({
+        ...data,
+        photopath: null,
+        photoPreview: previewUrl,
+        photoFile: file,
+      });
+    }
   };
 
   useEffect(() => {
@@ -271,7 +300,8 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave 
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Personal Details</h2>
       <p className="text-gray-600">Please provide your personal details to complete your profile.</p>
 
-      <Form form={form} layout="vertical" className="mt-6" onValuesChange={() => setIsFormChanged(true)}>
+      <Form form={form} layout="vertical" className="mt-6" onValuesChange={() => {setIsFormChanged(true); syncToParent();
+      }}>
         {/* Profile Image */}
         <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
           <div className="relative m-auto w-30 h-30 rounded-full overflow-hidden bg-[#0D132D0D] hover:opacity-90 cursor-pointer border border-gray-100 group">

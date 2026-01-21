@@ -114,6 +114,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
     if (!file) return;
 
     const allowedTypes = ["image/jpeg", "image/jpg", "image/webp"];
+    const MAX_SIZE = 5 * 1024 * 1024;
     if (!allowedTypes.includes(file.type)) {
       setProfileError("Only JPG, JPEG, or WEBP files are allowed. PNG is not allowed.");
       setProfileImage(null);
@@ -121,6 +122,12 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       return;
     }
 
+    if (file.size > MAX_SIZE) {
+      setProfileError("Image size must be 5 MB or less.");
+      setProfileImage(null);
+      setPreview(formData.profileImageUrl || null);
+      return;
+    }
     setProfileError("");
     setErrors(prev => ({ ...prev, profileImage: false }));
 
