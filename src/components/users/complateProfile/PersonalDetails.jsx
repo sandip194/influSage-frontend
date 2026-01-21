@@ -137,12 +137,30 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
       loadCities(data.statename);
     }
 
-    if (data.photopath) {
+    console.log("data", data)
+
+    // Fix: Prioritize unsaved photoFile/photoPreview, else use photopath
+    if (data.photoFile && data.photoPreview) {
+      console.log(data.photoPreview)
+      // Unsaved upload: Use the pending file and preview
+      setProfileImage(data.photoFile);
+      setPreview(data.photoPreview);
+      setExistingPhotoPath(null);  // No existing path for unsaved
+    } else if (data.photopath) {
+      // No unsaved changes: Use server-stored image
+      console.log(data.photopath)
       const fullUrl = data.photopath.startsWith('http')
         ? data.photopath
         : `${BASE_URL}${data.photopath.replace(/^\/+/, '')}`;
       setPreview(fullUrl);
       setExistingPhotoPath(data.photopath);
+      setProfileImage(null);  // No pending file
+    } else {
+      // No image at all
+      console.log("no img")
+      setPreview(null);
+      setExistingPhotoPath(null);
+      setProfileImage(null);
     }
   }, [data, form, countries]);
 
@@ -172,7 +190,6 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
 
     onChange({
       ...data,
-      photopath: existingPhotoPath,
       genderid: values.gender,
       dob: values.birthDate ? values.birthDate.format('DD-MM-YYYY') : null,
       phonenumber: values.phone,
@@ -184,6 +201,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
       bio: values.bio || '',
     });
   };
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -211,14 +229,15 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
     // ✔ Passed all validation
     setProfileError('');
     setProfileImage(file);
-    setPreview(URL.createObjectURL(file));
+    const newPreviewUrl = URL.createObjectURL(file);  // Create the URL here
+    setPreview(newPreviewUrl);
     setIsFormChanged(true);
 
     if (onChange) {
       onChange({
         ...data,
-        photopath: null,
-        photoPreview: previewUrl,
+        photopath: null,  // Clear old path for new upload
+        photoPreview: newPreviewUrl,  // Fix: Use the actual URL
         photoFile: file,
       });
     }
@@ -282,8 +301,17 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
         if (showToast) toast.success(successMessage);
 
         setIsFormChanged(false);
+        console.log(response.data)
+        const newPhotoPath = response?.data?.photopath || existingPhotoPath;  // Assume API returns updated photopath
+        setExistingPhotoPath(newPhotoPath);
+        setProfileImage(null);  // Clear pending file
+        setPreview(newPhotoPath);  // Update preview to new image
+        console.log("profile photopath", newPhotoPath)
+
+        
         if (onNext) onNext();
-        if (onSave) onSave(profilePayload);
+        if (onSave) onSave({ ...profilePayload, photopath: newPhotoPath });
+        if (onChange) onChange({ ...profilePayload, photopath: newPhotoPath });
       } else {
         message.error('Failed to submit form, please try again.');
       }
@@ -300,18 +328,19 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Personal Details</h2>
       <p className="text-gray-600">Please provide your personal details to complete your profile.</p>
 
-      <Form form={form} layout="vertical" className="mt-6" onValuesChange={() => {setIsFormChanged(true); syncToParent();
+      <Form form={form} layout="vertical" className="mt-6" onValuesChange={() => {
+        setIsFormChanged(true); syncToParent();
       }}>
         {/* Profile Image */}
         <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
           <div className="relative m-auto w-30 h-30 rounded-full overflow-hidden bg-[#0D132D0D] hover:opacity-90 cursor-pointer border border-gray-100 group">
             {preview ? (
-              <img 
-              src={preview} 
-              alt="Profile preview" 
-              className="object-cover w-full h-full"
-               onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-               />
+              <img
+                src={preview}
+                alt="Profile preview"
+                className="object-cover w-full h-full"
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+              />
             ) : (
               <div className="flex items-center justify-center w-full h-full text-gray-800 opacity-50">
                 <RiImageAddLine className="w-8 h-8" />
@@ -514,7 +543,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
           <Form.Item
             label={<b>City</b>}
             name="city"
-            // rules={[{ required: true, message: "Please select a City" }]}
+          // rules={[{ required: true, message: "Please select a City" }]}
           >
             <Select
               showSearch
@@ -589,3 +618,4 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
     </div>
   );
 };
+
