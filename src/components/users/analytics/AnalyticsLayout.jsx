@@ -5,7 +5,7 @@ import {
   RiEyeLine,
   RiThumbUpLine,
   RiFileList3Line,
-  RiBarChartLine,
+  RiLinkM,
   RiCalendar2Line,
 } from "@remixicon/react";
 
@@ -125,45 +125,44 @@ const AnalyticsLayout = () => {
     return [
       {
         label: "Total Views",
-        value: safeNumber(summary.totalviews),
+        value: safeNumber(summary?.analyticcounts?.totalviews),
         change: "0.0 %",
         isPositive: true,
         icon: <RiEyeLine size={24} />,
       },
       {
         label: "Total Likes",
-        value: safeNumber(summary.totallikes),
+        value: safeNumber(summary?.analyticcounts?.totallikes),
         change: "0.0 %",
         isPositive: true,
         icon: <RiThumbUpLine size={24} />,
       },
       {
         label: "Total Comments",
-        value: safeNumber(summary.totalcomments),
+        value: safeNumber(summary?.analyticcounts?.totalcomments),
         change: "0.0 %",
         isPositive: true,
         icon: <RiChat3Line size={24} />,
       },
       {
         label: "Total Shares",
-        value: safeNumber(summary.totalshares),
+        value: safeNumber(summary?.analyticcounts?.totalshares),
         change: "0.0 %",
         isPositive: true,
         icon: <RiShareForwardLine size={24} />,
       },
       {
         label: "Content Pieces",
-        value: safeNumber(summary.totalcontentpiecescount),
+        value: safeNumber(summary?.analyticcounts?.totalcontentpiecescount),
         change: "0.0 %",
         isPositive: true,
         icon: <RiFileList3Line size={24} />,
       },
       {
-        label: "Avg Engagement Rate",
-        value: `${safeNumber(summary.avgengagementrate)}%`,
-        change: "0.0 %",
+        label: "Active content",
+        value: `${safeNumber(summary?.analyticcounts?.activecontentlinkcount)}`,
         isPositive: true,
-        icon: <RiBarChartLine size={24} />,
+        icon: <RiLinkM size={24} />,
       },
     ];
   }, [summary]);

@@ -749,24 +749,24 @@ const DescriptionLayout = () => {
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Company Size:</span>
                   <span className="text-gray-900">
-                    {campaignDetails.vendordetails?.companysizename || "N/A"}
+                    {campaignDetails.vendordetails?.companysizename || "-"}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Member Since:</span>
                   <span className="text-gray-900">
-                    {campaignDetails.vendordetails?.["Member Since"] || "N/A"}
+                    {campaignDetails.vendordetails?.["Member Since"] || "-"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Hire Rate:</span>
                   <span className="text-gray-900">
-                    {campaignDetails.vendordetails?.hirerate || "N/A"}%
+                    {campaignDetails.vendordetails?.hirerate ? `${campaignDetails.vendordetails.hirerate}%` : "-"}
                   </span>
                 </div>
               </div>
-              
+
               {/* About Brand */}
               <hr className="border-gray-200" />
               <div>

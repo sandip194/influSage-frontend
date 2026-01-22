@@ -677,6 +677,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
             type="primary"
             onClick={handleSubmitClose}
             loading={closingLoading}
+            className="!bg-[#0f122f] hover:!bg-[#1c1f4a] !border-none"
           >
             Submit & Close
           </Button>
@@ -713,13 +714,12 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                       key={star}
                       size={22}
                       className="text-yellow-400"
-                      style={{ stroke: "black", strokeWidth: 1 }}
                     />
                   ) : (
                     <RiStarLine
                       key={star}
                       size={22}
-                      className=""
+                      className="text-yellow-400"
                     />
                   )
                 )}
@@ -746,8 +746,9 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                   setIsViewFeedbackOpen(false);
                   setContractFeedback(null);
                 }}
+                className="!bg-[#0f122f] hover:!bg-[#1c1f4a] !border-none"
               >
-                Done
+                Close
               </Button>
             </div>
 

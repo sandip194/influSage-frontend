@@ -434,7 +434,7 @@ const ContractTab = ({ campaignId, token }) => {
           {contract?.cansendfeedback && !feedbackSubmitted && (
             <button
               onClick={() => setIsFeedbackOpen(true)}
-              className="px-4 py-2 text-sm rounded-full cursor-pointer font-medium text-white bg-[#0f122f] hover:bg-[#1c1f4a] transition"
+              className="px-4 py-2 text-sm rounded-md cursor-pointer font-medium text-white bg-[#0f122f] hover:bg-[#1c1f4a] transition"
             >
               Give Feedback
             </button>
@@ -515,7 +515,6 @@ const ContractTab = ({ campaignId, token }) => {
                   <RiStarFill
                     size={26}
                     className="text-yellow-400"
-                    style={{ stroke: "black", strokeWidth: 0.6 }}
                   />
                 ) : (
                   <RiStarLine size={26} className="text-yellow-400" />
@@ -555,6 +554,7 @@ const ContractTab = ({ campaignId, token }) => {
             type="primary"
             loading={closingLoading}
             onClick={handleSubmitClose}
+            className="!bg-[#0f122f] hover:!bg-[#1c1f4a] !border-none"
           >
             Submit
           </Button>
@@ -582,7 +582,6 @@ const ContractTab = ({ campaignId, token }) => {
                       key={star}
                       size={22}
                       className="text-yellow-400"
-                      style={{ stroke: "black", strokeWidth: 1 }}
                     />
                   ) : (
                     <RiStarLine key={star} size={22} />
@@ -608,14 +607,15 @@ const ContractTab = ({ campaignId, token }) => {
               <Button
                 type="primary"
                 onClick={() => setIsViewFeedbackOpen(false)}
+                className="!bg-[#0f122f] hover:!bg-[#1c1f4a] !border-none"
               >
-                Done
+                Close
               </Button>
             </div>
           </div>
         ) : (
           <Empty description="No feedback available" />
-        )}
+        )}  
       </Modal>
     </div>
   );

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   RiHeartLine,
@@ -8,10 +8,29 @@ import {
   RiStarFill,
   RiStarLine,
   RiMapPin2Line,
-  RiStarHalfFill
+  RiStarHalfFill,
+  RiHeart3Line,
+  RiHeart3Fill,
 } from "@remixicon/react";
 import { Tooltip } from "antd";
+import { motion, AnimatePresence } from "framer-motion";
 
+const HeartParticle = ({ x, y, delay, size = 12 }) => (
+  <motion.div
+    className="absolute"
+    style={{ width: size, height: size, backgroundColor: "transparent" }}
+    initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+    animate={{ scale: [0, 1, 0], x, y, opacity: [1, 1, 0] }}
+    transition={{ duration: 0.6, delay, ease: "easeOut" }}
+  >
+    <svg viewBox="0 0 20 20" fill="#ff3b6b" className="w-6 h-6">
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 
+      4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 
+      14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 
+      6.86-8.55 11.54L12 21.35z"/>
+    </svg>
+  </motion.div>
+);
 
 // Function to render star ratings
 const renderStars = (rating) => {
@@ -46,6 +65,7 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
 
     return num.toString();
   };
+  const [showAnimation, setShowAnimation] = useState(false);
 
   return (
     <div
@@ -221,21 +241,59 @@ const InfluencerCard = ({ influencer, onLike, onInvite }) => {
 
         {/* Heart */}
         <Tooltip
-          title={influencer?.savedinfluencer ? "Unfavourite" : "Favourite"}
-          placement="top"
+          title={
+            influencer?.savedinfluencer
+              ? "Remove from Favorites"
+              : "Add to Favorites"
+          }
         >
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
+            <button
+             onClick={(e) => {
+                e.stopPropagation();
+
+                // Play animation ONLY when adding to favorites
+                if (!influencer?.savedinfluencer) {
+                  setShowAnimation(true);
+                  setTimeout(() => setShowAnimation(false), 600);             }
+
               onLike(influencer?.id);
             }}
-            className="w-10 h-10 bg-white border border-[#0D132D26] rounded-full flex items-center justify-center"
+            className={`relative cursor-pointer flex items-center justify-center sm:justify-start gap-2 px-1 py-1 rounded-full text-sm font-medium border transition ${
+              influencer?.savedinfluencer
+                ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+                : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+            }`}
           >
-            {influencer?.savedinfluencer ? (
-              <RiHeartFill className="text-red-500" size={20} />
-            ) : (
-              <RiHeartLine className="text-gray-600" size={20} />
-            )}
+            <div className="relative flex items-center justify-center w-8 h-8">
+              {/* Heart Icon */}
+              <motion.div
+                key={influencer?.savedinfluencer ? "fill" : "outline"}
+                initial={{ scale: 0.8 }}
+                animate={{ scale: showAnimation ? 1.6 : 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 12 }}
+                className="relative z-10"
+              >
+                {influencer?.savedinfluencer ? (
+                  <RiHeart3Fill size={26} className="text-red-500" />
+                ) : (
+                  <RiHeart3Line size={26} className="text-gray-700" />
+                )}
+              </motion.div>
+
+              {/* Floating heart particles */}
+              <AnimatePresence>
+                {showAnimation &&
+                  [
+                    { x: -20, y: -10, delay: 0 },
+                    { x: 15, y: -20, delay: 0.05 },
+                    { x: -15, y: 15, delay: 0.3 },
+                    { x: 20, y: 10, delay: 0.25 },
+                    { x: 0, y: -25, delay: 0.4 },
+                  ].map((p, idx) => (
+                    <HeartParticle key={idx} {...p} />
+                  ))}
+              </AnimatePresence>
+            </div>
           </button>
         </Tooltip>
       </div>

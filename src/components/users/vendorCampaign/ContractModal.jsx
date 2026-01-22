@@ -698,9 +698,8 @@ export default function ContractModal({
                                 ]}
                                 style={{ marginBottom: 4 }}
                             >
-                                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-end">
-
-                                    {/* Product Link */}
+                               <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center">
+  
                                     <Form.Item name="productLink" noStyle>
                                         <Input size="large" placeholder="Enter product link" />
                                     </Form.Item>
@@ -710,12 +709,11 @@ export default function ContractModal({
                                         OR
                                     </div>
 
-                                    {/* Vendor Address */}
                                     <Form.Item name="vendorAddress" noStyle>
                                         <Input size="large" placeholder="Enter vendor address" />
                                     </Form.Item>
 
-                                </div>
+                                    </div>
                             </Form.Item>
                         </div>
 

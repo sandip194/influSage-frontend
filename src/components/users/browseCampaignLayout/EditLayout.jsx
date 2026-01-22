@@ -929,7 +929,7 @@ const EditLayout = () => {
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Hire Rate:</span>
                   <span className="text-gray-900">
-                    {campaignDetails.vendordetails?.hirerate || "N/A"}%
+                    {campaignDetails.vendordetails?.hirerate ? `${campaignDetails.vendordetails.hirerate}%` : "-"}
                   </span>
                 </div>
               </div>

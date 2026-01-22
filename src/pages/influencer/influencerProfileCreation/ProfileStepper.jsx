@@ -18,10 +18,25 @@ import { setCredentials } from '../../../features/auth/authSlice';
 
 // Validation Functions
 const isProfileComplete = (profile) => {
-  if (!profile || Object.keys(profile).length === 0) return false;
-  const fieldsToCheck = ['photopath', 'genderid', 'dob', 'address1', 'countryname', 'statename', 'bio'];
-  return fieldsToCheck.some(field => profile[field]?.trim?.() || profile[field]);
+  if (!profile) return false;
+
+  const fieldsToCheck = [
+    'photopath',
+    'genderid',
+    'dob',
+    'address1',
+    'countryname',
+    'statename',
+    'bio',
+  ];
+
+  return fieldsToCheck.every(field => {
+    const value = profile[field];
+    if (typeof value === 'string') return value.trim().length > 0;
+    return Boolean(value);
+  });
 };
+
 
 const isSocialComplete = (social) => Array.isArray(social) && social.length > 0;
 const isCategoriesComplete = (categories) => Array.isArray(categories) && categories.length > 0;
@@ -35,12 +50,32 @@ const isPortfolioComplete = (portfolio) => {
 };
 
 const isPaymentComplete = (payment) => {
-  if (!payment || Object.keys(payment).length === 0) return false;
-  const fieldsToCheck = ['bankcountry', 'bankname', 'accountholdername', 'accountnumber', 'bankcode', 'branchaddress', 'contactnumber', 'email', 'preferredcurrency', 'taxidentificationnumber'];
-  const hasValidField = fieldsToCheck.some(field => payment[field]?.trim?.() || payment[field]);
-  const hasValidPaymentMethod = Array.isArray(payment.paymentmethod) &&
-    payment.paymentmethod.some(pm => pm.method && pm.paymentdetails);
-  return hasValidField || hasValidPaymentMethod;
+  if (!payment) return false;
+
+  const fieldsToCheck = [
+    'bankcountry',
+    'bankname',
+    'accountholdername',
+    'accountnumber',
+    'bankcode',
+    'branchaddress',
+    'contactnumber',
+    'email',
+    'preferredcurrency',
+    'taxidentificationnumber',
+  ];
+
+  const basicComplete = fieldsToCheck.every(field => {
+    const value = payment[field];
+    if (typeof value === 'string') return value.trim().length > 0;
+    return Boolean(value);
+  });
+
+  const methodComplete =
+    Array.isArray(payment.paymentmethod) &&
+    payment.paymentmethod.length > 0;
+
+  return basicComplete && methodComplete;
 };
 
 
@@ -84,7 +119,7 @@ export const ProfileStepper = () => {
       }
       return updated;
     });
-    setCurrentStep(index + 1 < steps?.length ? index + 1 : 'thankyou');
+    setCurrentStep(index + 1 < steps?.length ? index + 1 :  steps.length);
   }, []);
 
   // Editable for PENDINGPROFILE or REJECTED
@@ -216,8 +251,7 @@ export const ProfileStepper = () => {
       // -------------------------
       // Handle each status
       // -------------------------
-
-      if (mappedStatus === "APPROVAL PENDING") {
+     if (mappedStatus === "APPROVAL PENDING") {
         const allCompleted = [true, true, true, true, true];
         setCompletedSteps(allCompleted);
         setCurrentStep(steps.length); // Set to steps.length to indicate completion
@@ -235,13 +269,14 @@ export const ProfileStepper = () => {
         return;
       }
 
-      // 🟢 null Or PENDINGPROFILE → resume from last incomplete step
-      if (!mappedStatus || mappedStatus === "PENDINGPROFILE") {
-        setCompletedSteps(stepsCompletion);
-        const firstIncomplete = stepsCompletion.findIndex(s => !s);
-        setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : "thankyou");
-        return;
-      }
+
+      // null Or PENDINGPROFILE → resume from last incomplete step
+      // if (!mappedStatus || mappedStatus === "PENDINGPROFILE") {
+      //   setCompletedSteps(stepsCompletion);
+      //   const firstIncomplete = stepsCompletion.findIndex(s => !s);
+      //   setCurrentStep(firstIncomplete !== -1 ? firstIncomplete :  steps.length);
+      //   return;
+      // }
 
       // ⚪ NEW USER → everything empty
       const isNewUser =
@@ -266,20 +301,14 @@ export const ProfileStepper = () => {
     getUserProfileCompationData();
   }, [getUserProfileCompationData, lastCompletedStep]);
 
-  const handleStepChange = (step) => {
-    // Non-editable users cannot change steps
-    if (!isEditable) return;
+    const handleStepChange = (step) => {
+    // For APPROVAL PENDING, do not allow navigation
+    if (p_code === 'APPROVAL PENDING') return;
 
-    if (p_code === 'PENDINGPROFILE') {
-      if (step <= currentStep + 1) setCurrentStep(step);
-    } else if (p_code === 'REJECTED') {
-      // Same rules as PENDINGPROFILE
-      if (step <= currentStep + 1) {
-        setCurrentStep(step);
-      }
-      return;
+    // Allow navigation only to completed steps
+    if (completedSteps[step]) {
+      setCurrentStep(step);
     }
-
   };
 
   return (

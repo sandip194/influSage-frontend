@@ -1,11 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     RiHeartLine,
     RiHeartFill,
     RiGlobalLine,
+    RiHeart3Line,
+    RiHeart3Fill
 } from "@remixicon/react";
 import { Tooltip } from "antd";
+import { motion, AnimatePresence } from "framer-motion";
+
+const HeartParticle = ({ x, y, delay, size = 12 }) => (
+  <motion.div
+    className="absolute"
+    style={{ width: size, height: size, backgroundColor: "transparent" }}
+    initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+    animate={{ scale: [0, 1, 0], x, y, opacity: [1, 1, 0] }}
+    transition={{ duration: 0.6, delay, ease: "easeOut" }}
+  >
+    <svg viewBox="0 0 20 20" fill="#ff3b6b" className="w-6 h-6">
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 
+      4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 
+      14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 
+      6.86-8.55 11.54L12 21.35z"/>
+    </svg>
+  </motion.div>
+);
+
 
 // Helper function to format numbers
 const formatNumber = (num) => {
@@ -21,6 +42,7 @@ const formatNumber = (num) => {
 
 const InfluencerCardNew = ({ influencer, onLike }) => {
     const navigate = useNavigate();
+    const [showAnimation, setShowAnimation] = useState(false);
 
     return (
         <div
@@ -44,25 +66,57 @@ const InfluencerCardNew = ({ influencer, onLike }) => {
         >
             {/* Like Button */}
             <button
-            onClick={(e) => {
-                e.stopPropagation();
-                onLike(influencer?.id);
-            }}
-            className="
-                absolute top-4 right-4
-                w-9 h-9
-                rounded-full
-                bg-white
-                border border-[#0D132D26]
-                flex items-center justify-center
-            "
-            >
-            {influencer?.savedinfluencer ? (
-                <RiHeartFill className="text-red-500" size={18} />
-            ) : (
-                <RiHeartLine className="text-gray-600" size={18} />
-            )}
-            </button>
+                onClick={(e) => {
+                    e.stopPropagation();
+
+                    // Play animation only when liking
+                    if (!influencer?.savedinfluencer) {
+                    setShowAnimation(true);
+                    setTimeout(() => setShowAnimation(false), 600);
+                    }
+
+                    onLike(influencer?.id);
+                }}
+                className="
+                    absolute top-4 right-4
+                    w-9 h-9
+                    rounded-full
+                    bg-white
+                    border border-[#0D132D26]
+                    flex items-center justify-center
+                    overflow-hidden
+                "
+                >
+                <div className="relative flex items-center justify-center w-5 h-5">
+                    {/* Heart icon */}
+                    <motion.div
+                    key={influencer?.savedinfluencer ? "fill" : "outline"}
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: showAnimation ? 1.6 : 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 12 }}
+                    className="relative z-10"
+                    >
+                    {influencer?.savedinfluencer ? (
+                        <RiHeartFill size={18} className="text-red-500" />
+                    ) : (
+                        <RiHeartLine size={18} className="text-gray-600" />
+                    )}
+                    </motion.div>
+
+                    {/* Floating heart particles */}
+                    <AnimatePresence>
+                    {showAnimation &&
+                        [
+                        { x: -12, y: -10, delay: 0 },
+                        { x: 10, y: -14, delay: 0.05 },
+                        { x: -10, y: 10, delay: 0.2 },
+                        { x: 12, y: 8, delay: 0.15 },
+                        ].map((p, idx) => (
+                        <HeartParticle key={idx} {...p} />
+                        ))}
+                    </AnimatePresence>
+                </div>
+                </button>
 
             {/* ===== Profile Header ===== */}
             <div className="flex items-center gap-3">
