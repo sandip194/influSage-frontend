@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
+const formatToINR = (amount) => {
+  if (isNaN(amount)) return "₹0";
+  return `₹${new Intl.NumberFormat("en-IN").format(amount)}`;
+};
+
 const ApplicationTab = ({ campaignId, token }) => {
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -60,7 +65,7 @@ const ApplicationTab = ({ campaignId, token }) => {
           Your Proposal Amount
         </h3>
         <p className="text-[#0D132D] text-xl font-bold">
-          ₹{budget || "N/A"}
+          {formatToINR(budget)}
         </p>
       </div>
 

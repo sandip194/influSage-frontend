@@ -44,7 +44,6 @@ const isPaymentComplete = (payment) => {
 };
 
 
-
 // Main Component
 export const ProfileStepper = () => {
 
@@ -267,19 +266,13 @@ export const ProfileStepper = () => {
   }, [getUserProfileCompationData, lastCompletedStep]);
 
   const handleStepChange = (step) => {
-    // Non-editable users cannot change steps
-    if (!isEditable) return;
+    // For APPROVAL PENDING, do not allow navigation
+    if (p_code === 'APPROVAL PENDING') return;
 
-    if (p_code === 'PENDINGPROFILE') {
-      if (step <= currentStep + 1) setCurrentStep(step);
-    } else if (p_code === 'REJECTED') {
-      // Same rules as PENDINGPROFILE
-      if (step <= currentStep + 1) {
-        setCurrentStep(step);
-      }
-      return;
+    // Allow navigation only to completed steps
+    if (completedSteps[step]) {
+      setCurrentStep(step);
     }
-
   };
 
   return (

@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 const { TextArea } = Input;
 const { Option } = Select;
 
-export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, onSave, onChange}) => {
+export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, onSave, onChange }) => {
 
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -28,12 +28,12 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isFormChanged, setIsFormChanged] = useState(false);
 
-
     const { token } = useSelector(state => state.auth);
-
-
-
     const fileInputRef = useRef();
+    const isHydratingRef = useRef(true);
+    const hasHydratedRef = useRef(false);
+
+
 
     const getRegexForCountry = (iso) => {
         const entry = postalRegexList.find((e) => e.ISO === iso);
@@ -110,12 +110,22 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
     useEffect(() => {
         loadCountries();
+        fetchCompanySizes();
     }, []);
 
     // Initialize form and load countries
     useEffect(() => {
-        fetchCompanySizes();
-        if (!data || Object.keys(data).length === 0 || countries.length === 0) return;
+        if (
+            hasHydratedRef.current ||
+            !data ||
+            Object.keys(data).length === 0 ||
+            countries.length === 0
+        ) {
+            return;
+        }
+
+        hasHydratedRef.current = true;
+        isHydratingRef.current = true;
 
         const safe = (val) => (val !== null && val !== undefined ? val : undefined);
 
@@ -126,30 +136,54 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
             address1: safe(data.address1),
             countryname: safe(data.countryname),
             statename: safe(data.statename),
-            bio: safe(data.bio),
-            zipCode: safe(data.zip),
             city: safe(data.city),
+            zipCode: safe(data.zip),
+            bio: safe(data.bio),
         });
 
-        if (data.countryname) {
-            loadStates(data.countryname);
+        const hydrate = async () => {
+            if (data.countryname) {
+                await loadStates(data.countryname);
+            }
+            if (data.statename) {
+                await loadCities(data.statename);
+            }
+            isHydratingRef.current = false;
+        };
+
+        hydrate();
+    }, [countries]);
+
+    useEffect(() => {
+        if (!data) return;
+
+        // 1️⃣ Unsaved selected image (highest priority)
+        if (data.photoFile && data.photoPreview) {
+            setProfileImage(data.photoFile);
+            setPreview(data.photoPreview);
+            setExistingPhotoPath(null);
+            return;
         }
 
-        if (data.statename) {
-            loadCities(data.statename);
-        }
-
-
-        if (data.photopath && !profileImage) {
+        // 2️⃣ Existing backend image
+        if (data.photopath) {
             const fullUrl = data.photopath.startsWith("http")
                 ? data.photopath
-                : `${BASE_URL}/${data.photopath.replace(/^\/+/, "")}`;
+                : `${BASE_URL}${data.photopath.replace(/^\/+/, "")}`;
 
             setPreview(fullUrl);
             setExistingPhotoPath(data.photopath);
+            setProfileImage(null);
+            return;
         }
 
-    }, [data, form, countries, profileImage]);
+        // 3️⃣ No image
+        setPreview(null);
+        setExistingPhotoPath(null);
+        setProfileImage(null);
+    }, [data, BASE_URL]);
+
+
 
     const syncToParent = () => {
         if (!onChange) return;
@@ -168,8 +202,11 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
             zip: values.zipCode,
             bio: values.bio,
             photopath: existingPhotoPath,
+            photoFile: profileImage,
+            photoPreview: preview,
         });
     };
+
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -196,7 +233,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
         onChange?.({
             ...data,
-            photopath: existingPhotoPath,
+            photopath: null,
             photoPreview: previewUrl,
             photoFile: file,
         });
@@ -210,11 +247,6 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
         };
     }, [preview]);
 
-    useEffect(() => {
-        if (data?.statename && states.length) {
-            loadCities(data.statename);
-        }
-    }, [states]);
 
     const handleSubmit = async () => {
         await form.validateFields();
@@ -242,7 +274,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
 
             const formData = new FormData();
-            formData.append('profilejson', JSON.stringify(profilejson));    
+            formData.append('profilejson', JSON.stringify(profilejson));
             if (profileImage) {
                 formData.append('photo', profileImage);
             }
@@ -258,11 +290,27 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                 if (showToast) toast.success('Profile updated successfully!');
                 setIsFormChanged(false);
 
+                console.log(response.data)
+                const newPhotoPath = response?.data?.photopath || existingPhotoPath;
+
+                setExistingPhotoPath(newPhotoPath);
+                setProfileImage(null);
+                setPreview(newPhotoPath);
+                console.log("profile photopath", newPhotoPath)
+
+
+                onChange?.({
+                    ...profilejson,
+                    photopath: newPhotoPath,
+                });
+
                 // Stepper: Go to next
                 if (onNext) onNext();
 
                 // Edit Profile: Custom save handler
                 if (onSave) onSave(formData);
+
+
             } else {
                 message.error("Failed to update profile.");
             }
@@ -282,10 +330,12 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Business Details</h2>
             <p className="text-gray-600">Please provide your Business details to complete your profile.</p>
 
-            <Form form={form} layout="vertical" className="mt-6"  onValuesChange={() => {
-                setIsFormChanged(true);
-                syncToParent();
-            }}>
+            <Form form={form} layout="vertical" className="mt-6"
+                onValuesChange={() => {
+                    setIsFormChanged(true);
+                    syncToParent();
+                }}
+            >
                 {/* Profile Image Upload */}
                 <div className="p-[10px] relative rounded-full w-36 h-36 border-2 border-dashed border-[#c8c9cb] my-6">
                     <div className="relative m-auto w-30 h-30 rounded-full overflow-hidden bg-[#0D132D0D] hover:opacity-90 cursor-pointer border border-gray-100 group">
@@ -446,9 +496,16 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                         <Select
                             showSearch
                             size="large"
-                            placeholder="Select Country"
                             onChange={(val) => {
-                                form.setFieldsValue({ statename: undefined, city: undefined });
+                                form.setFieldsValue({
+                                    countryname: val,
+                                    statename: undefined,
+                                    city: undefined,
+                                });
+
+                                setStates([]);
+                                setCities([]);
+
                                 loadStates(val);
                             }}
 
@@ -476,10 +533,15 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                             size="large"
                             placeholder="Select State"
                             onChange={(val) => {
+                                form.setFieldsValue({
+                                    statename: val,
+                                    city: undefined,
+                                });
 
-                                form.setFieldsValue({ city: undefined });
+                                setCities([]);
                                 loadCities(val);
                             }}
+
                             disabled={!states.length}
                             loading={loading.states}
                             filterOption={(input, option) =>
@@ -519,7 +581,6 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                         </Select>
                     </Form.Item>
                 </div>
-
                 {/* ZIP Code */}
                 <Form.Item
                     label={<b>ZIP / PIN Code</b>}

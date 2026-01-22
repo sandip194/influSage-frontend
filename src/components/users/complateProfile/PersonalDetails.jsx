@@ -30,6 +30,9 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
   const [isFormChanged, setIsFormChanged] = useState(false);
 
   const { token, name } = useSelector((state) => state.auth);
+  const isHydratingRef = useRef(true);
+  const hasHydratedRef = useRef(false);
+
 
   const getRegexForCountry = (iso) => {
     const entry = postalRegexList.find((e) => e.ISO === iso);
@@ -111,9 +114,18 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
 
   const fileInputRef = useRef();
 
-  // Load form values from data after countries are loaded
   useEffect(() => {
-    if (!data || Object.keys(data).length === 0 || countries.length === 0) return;
+    if (
+      hasHydratedRef.current ||
+      !data ||
+      Object.keys(data).length === 0 ||
+      countries.length === 0
+    ) {
+      return;
+    }
+
+    hasHydratedRef.current = true;
+    isHydratingRef.current = true;
 
     const safe = (val) => (val !== null && val !== undefined ? val : undefined);
 
@@ -129,40 +141,47 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
       bio: safe(data.bio),
     });
 
-    if (data.countryname) {
-      loadStates(data.countryname);
-    }
+    const hydrate = async () => {
+      if (data.countryname) {
+        await loadStates(data.countryname);
+      }
+      if (data.statename) {
+        await loadCities(data.statename);
+      }
+      isHydratingRef.current = false;
+    };
 
-    if (data.statename) {
-      loadCities(data.statename);
-    }
+    hydrate();
+  }, [countries]);
 
-    console.log("data", data)
+  useEffect(() => {
+    if (!data) return;
 
-    // Fix: Prioritize unsaved photoFile/photoPreview, else use photopath
+    // 1️⃣ Unsaved selected image (highest priority)
     if (data.photoFile && data.photoPreview) {
-      console.log(data.photoPreview)
-      // Unsaved upload: Use the pending file and preview
       setProfileImage(data.photoFile);
       setPreview(data.photoPreview);
-      setExistingPhotoPath(null);  // No existing path for unsaved
-    } else if (data.photopath) {
-      // No unsaved changes: Use server-stored image
-      console.log(data.photopath)
-      const fullUrl = data.photopath.startsWith('http')
+      setExistingPhotoPath(null);
+      return;
+    }
+
+    // 2️⃣ Existing backend image
+    if (data.photopath) {
+      const fullUrl = data.photopath.startsWith("http")
         ? data.photopath
-        : `${BASE_URL}${data.photopath.replace(/^\/+/, '')}`;
+        : `${BASE_URL}${data.photopath.replace(/^\/+/, "")}`;
+
       setPreview(fullUrl);
       setExistingPhotoPath(data.photopath);
-      setProfileImage(null);  // No pending file
-    } else {
-      // No image at all
-      console.log("no img")
-      setPreview(null);
-      setExistingPhotoPath(null);
       setProfileImage(null);
+      return;
     }
-  }, [data, form, countries]);
+
+    // 3️⃣ No image
+    setPreview(null);
+    setExistingPhotoPath(null);
+    setProfileImage(null);
+  }, [data, BASE_URL]);
 
   // Load first and last name
   useEffect(() => {
@@ -308,7 +327,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
         setPreview(newPhotoPath);  // Update preview to new image
         console.log("profile photopath", newPhotoPath)
 
-        
+
         if (onNext) onNext();
         if (onSave) onSave({ ...profilePayload, photopath: newPhotoPath });
         if (onChange) onChange({ ...profilePayload, photopath: newPhotoPath });
@@ -495,9 +514,17 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
               filterOption={(input, option) =>
                 option.children.toLowerCase().includes(input.toLowerCase())
               }
-              onChange={(name) => {
-                form.setFieldsValue({ state: undefined, city: undefined });
-                loadStates(name);
+              onChange={(val) => {
+                form.setFieldsValue({
+                  country: val,
+                  state: undefined,
+                  city: undefined,
+                });
+
+                setStates([]);
+                setCities([]);
+
+                loadStates(val);
               }}
             >
               {countries.map((country) => (
@@ -525,10 +552,16 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
               filterOption={(input, option) =>
                 option.children.toLowerCase().includes(input.toLowerCase())
               }
-              onChange={(name) => {
-                form.setFieldsValue({ city: undefined });
-                loadCities(name);
+              onChange={(val) => {
+                form.setFieldsValue({
+                  state: val,
+                  city: undefined,
+                });
+
+                setCities([]);
+                loadCities(val);
               }}
+
             >
               {states.map((state) => (
                 <Option key={state.id} value={state.name}>

@@ -26,7 +26,8 @@ export const VendorProfileStepper = () => {
         categories: [],
         providers: [],
         objectives: [],
-        payment: {}
+        payment: {},
+        providersSkipped: false
     });
 
     const updateProfileSection = (sectionKey, newData) => {
@@ -53,8 +54,10 @@ export const VendorProfileStepper = () => {
     const isCategoriesComplete = (categories) =>
         Array.isArray(categories) && categories.length > 0;
 
-    const isProvidersComplete = (providers) =>
-        Array.isArray(providers) && providers.length > 0;
+    const isProvidersComplete = (providers, providersSkipped) =>
+        providersSkipped === true ||
+        (Array.isArray(providers) && providers.length > 0);
+
 
     const isObjectivesComplete = (objectives) =>
         Array.isArray(objectives) && objectives.length > 0;
@@ -179,7 +182,8 @@ export const VendorProfileStepper = () => {
                     categories: data.profileParts.p_categories || [],
                     providers: data.profileParts.p_providers || [],
                     objectives: data.profileParts.p_objectives || [],
-                    payment: data.profileParts.p_paymentaccounts || {}
+                    payment: data.profileParts.p_paymentaccounts || {},
+                    providersSkipped: data.profileParts.providersSkipped || false
                 };
 
                 setVendorProfileData(parts);
@@ -187,7 +191,10 @@ export const VendorProfileStepper = () => {
                 // Evaluate completion
                 const profileDone = isProfileComplete(parts.profile);
                 const categoriesDone = isCategoriesComplete(parts.categories);
-                const providersDone = isProvidersComplete(parts.providers);
+                const providersDone = isProvidersComplete(
+                    parts.providers,
+                    parts.providersSkipped
+                );
                 const objectivesDone = isObjectivesComplete(parts.objectives);
                 const paymentDone = isPaymentComplete(parts.payment);
 
@@ -322,4 +329,3 @@ export const VendorProfileStepper = () => {
         </>
     );
 };
-

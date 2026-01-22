@@ -28,6 +28,11 @@ const UserMessage = () => <div>Message content for user (implement as needed)</d
 const UserFilesMedia = () => <div>Files & Media content for user (implement as needed)</div>;
 const UserPayment = () => <div>Payment content for user (implement as needed)</div>;
 
+const formatToINR = (amount) => {
+  if (isNaN(amount)) return "₹0";
+  return `₹${new Intl.NumberFormat("en-IN").format(amount)}`;
+};
+
 const Details = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [proposal, setProposal] = useState("");
@@ -308,7 +313,7 @@ const Details = () => {
                   Budget
                 </div>
                 <p className="text-[#0D132D] font-bold text-xl">
-                  ₹{campaign?.estimatedbudget}
+                  {formatToINR(campaign?.estimatedbudget)}
                 </p>
               </div>
 

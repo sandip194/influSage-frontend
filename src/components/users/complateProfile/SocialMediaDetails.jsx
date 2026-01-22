@@ -13,7 +13,6 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFormChanged, setIsFormChanged] = useState(false);
 
-
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const getAllPlatforms = async () => {
@@ -67,9 +66,11 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
           nooffollowers: values[p.followersField] || 0,
         }));
 
-      const hasValidEntry = socialaccountjson.some(
-        (item) => item.handleslink && item.nooffollowers >= 1000
-      );
+      const hasValidEntry = platforms.some(p => {
+        const url = values[p.urlField];
+        const followers = values[p.followersField] || 0;
+        return url && followers >= 1000;
+      });
 
       if (!hasValidEntry) {
         setCustomValidationError("Please add at least one social media profile with a valid link and 1,000 or more followers.");
@@ -107,17 +108,13 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
         if (onSave) onSave(socialaccountjson);
       }
 
-
     } catch (error) {
       console.error('❌ Failed to submit social links:', error);
       message.error('Failed to submit social links.');
-    }
-    finally {
+    } finally {
       setIsSubmitting(false);
     }
   };
-
-
 
   // Prefill values
   useEffect(() => {
@@ -127,18 +124,18 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
       data.forEach(item => {
         const platform = platforms.find(p => p.providerid === item.providerid);
         if (platform) {
-          initialValues[platform.urlField] = item.handleslink;
-          // if null → undefined (empty input), else keep number
+          initialValues[platform.urlField] = item.handleslink || '';
           initialValues[platform.followersField] =
             typeof item.nooffollowers === 'number' ? item.nooffollowers : undefined;
-
         }
       });
 
       form.setFieldsValue(initialValues);
+
+      // ✅ Trigger validation after setting fields
+      form.validateFields().catch(() => { });
     }
   }, [data, platforms, form]);
-
 
   return (
     <div className="bg-white p-2 rounded-3xl">
@@ -158,7 +155,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
             });
           }
         }}
-        onValuesChange={() => {
+        onValuesChange={(changedValues) => {
           setIsFormChanged(true);
           const values = form.getFieldsValue();
           const socialData = platforms
@@ -169,9 +166,18 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
               nooffollowers: values[p.followersField],
             }));
           onChange?.(socialData);
+
+          // Trigger validation on URL field when followers change
+          const changedFields = Object.keys(changedValues);
+          changedFields.forEach(field => {
+            platforms.forEach(platform => {
+              if (field === platform.followersField) {
+                form.validateFields([platform.urlField]);
+              }
+            });
+          });
         }}
       >
-
         <div className="space-y-4">
           {platforms.map((platform) => (
             <div
@@ -195,40 +201,35 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
                     rules={[
                       {
                         validator: (_, value) => {
-                          if (!value) return Promise.resolve();
-
-                          // Regex check: http(s):// or www.
-                          const urlPrefixRegex = /^(https?:\/\/)?(www\.)/i;
-                          if (!urlPrefixRegex.test(value)) {
-                            return Promise.reject(
-                              new Error("Please enter a valid link starting with http:// or https://")
-                            );
+                          const followers = form.getFieldValue(platform.followersField);
+                          if (followers && !value) {
+                            return Promise.reject(new Error("Link is required if followers are entered"));
                           }
+                          if (!value) return Promise.resolve(); // allow empty URL if no followers
+
+                          // Validate that the link starts with http://, https://, or www.
+                          if (!value.startsWith('http://') && !value.startsWith('https://') && !value.startsWith('www.')) {
+                            return Promise.reject(new Error("Link must start with http://, https://, or www."));
+                          }
+
+                          let normalizedValue = value.startsWith("http") ? value : `https://${value}`;
 
                           try {
-                            // Ensure protocol for URL constructor
-                            const normalizedValue = value.startsWith("http")
-                              ? value
-                              : `https://${value}`;
-
-                            new URL(normalizedValue);
+                            new URL(normalizedValue); // if invalid URL, throws
                           } catch {
-                            return Promise.reject(new Error("Please enter a valid URL"));
+                            return Promise.reject(new Error("Invalid link"));
                           }
 
-                          // Platform-specific validation
                           const lowerValue = value.toLowerCase();
                           const platformKey = platform.name.toLowerCase().replace(/\s+/g, '');
 
                           if (!lowerValue.includes(platformKey)) {
-                            return Promise.reject(
-                              new Error(`This link must be for ${platform.name}`)
-                            );
+                            return Promise.reject(new Error(`This link must be for ${platform.name}`));
                           }
 
                           return Promise.resolve();
-                        },
-                      },
+                        }
+                      }
                     ]}
                   >
                     <Input
@@ -237,7 +238,6 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
                       className="w-full rounded-lg border border-gray-300 px-3 py-2"
                     />
                   </Form.Item>
-
                 </div>
 
                 {/* Followers input (medium) */}
@@ -249,13 +249,12 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
                       {
                         validator: (_, value) => {
                           const url = form.getFieldValue(platform.urlField);
+                          if (!url && !value) return Promise.resolve(); // allow both empty
                           if (url && (!value || value < 1000)) {
-                            return Promise.reject(
-                              new Error(`At least 1k followers required `)
-                            );
+                            return Promise.reject(new Error("At least 1k followers required"));
                           }
                           return Promise.resolve();
-                        },
+                        }
                       },
                     ]}
                   >
@@ -281,10 +280,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
               {customValidationError}
             </div>
           )}
-
-
         </div>
-
 
         {/* Buttons */}
         <div className="flex flex-row items-center gap-4 mt-6">
@@ -321,9 +317,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
               )}
             </button>
           )}
-
         </div>
-
       </Form>
     </div>
   );

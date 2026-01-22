@@ -48,6 +48,12 @@ const formatToDDMMYYYY = (dateStr) => {
   return d.toLocaleDateString("en-GB");
 };
 
+const formatToINR = (amount) => {
+  if (isNaN(amount)) return "₹0";
+  return `₹${new Intl.NumberFormat("en-IN").format(amount)}`;
+};
+
+
 const ContractTab = ({ campaignId, token }) => {
   const [contract, setContract] = useState(null);
   const [contractStatus, setContractStatus] = useState(null);
@@ -89,7 +95,7 @@ const ContractTab = ({ campaignId, token }) => {
         contractEnd: safeText(api.contractenddate),
         campaignStart: safeText(api.campaignstartdate),
         campaignEnd: safeText(api.campaignenddate),
-        payment: `₹${safeNumber(api.paymentamount, 0)}`,
+        payment:  formatToINR(safeNumber(api.paymentamount, 0)),
         deliverables: safeText(api.providercontenttype, "N/A"),
         notes: safeText(api.note),
         productLink: api.productlink,

@@ -41,6 +41,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
   const { token, role } = useSelector(state => state.auth);
 
 
+
   // Validate IFSC code via Razorpay API and autofill bank name
   const validateIFSC = async (value) => {
     if (!value || value.length < 5) {
@@ -97,6 +98,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
       email: values.email || null,
       preferredcurrency: values.currency || null,
       taxidentificationnumber: values.taxId || null,
+      agreedToTerms: !!values.agree,
       paymentmethod: buildPaymentMethod(values),
 
     };
@@ -213,6 +215,8 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
       }
     };
 
+    console.log(payment)
+
     return {
       country: payment.bankcountry || null,
       bank: payment.bankname || null,
@@ -254,6 +258,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
       form.setFieldsValue(mappedValues);
     }
   }, [data]); // ✅ only run when `data` changes
+
 
 
   return (
@@ -546,25 +551,21 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
                 validator: (_, value) =>
                   value
                     ? Promise.resolve()
-                    : Promise.reject(
-                      new Error("You must agree to Payment Terms & Conditions")
-                    ),
+                    : Promise.reject(new Error("You must agree to Payment Terms & Conditions")),
               },
             ]}
           >
-            <div className="flex items-center flex-wrap gap-1 text-sm text-gray-700">
-              <Checkbox />
-              <span>
-                By adding this bank account, I agree to the{" "}
-                <span
-                  onClick={() => setTermsVisible(true)}
-                  className="text-blue-600 cursor-pointer font-semibold hover:underline"
-                >
-                  Payment Terms & Conditions
-                </span>
+            <Checkbox>
+              By adding this bank account, I agree to the{" "}
+              <span
+                onClick={() => setTermsVisible(true)}
+                className="text-blue-600 cursor-pointer font-semibold hover:underline"
+              >
+                Payment Terms & Conditions
               </span>
-            </div>
+            </Checkbox>
           </Form.Item>
+
 
           {/* Buttons */}
           <div className="flex flex-row items-center gap-4 mt-6">
