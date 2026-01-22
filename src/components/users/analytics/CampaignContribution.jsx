@@ -11,10 +11,11 @@ const { Option } = Select;
 
 const COLORS = [
   "#335CFF", // primary blue
-  "#0D132D", // brand base
-  "#1F2A5A", // dark blue-gray
+  "#5853BC", // brand base
+  "#362391", // dark blue-gray
   "#5E7BFF", // lighter blue
-  "#8FA2FF"  // pastel highlight
+  "#8FA2FF",  // pastel highlight
+  "#5457A6", // muted blue
 ];
 
 

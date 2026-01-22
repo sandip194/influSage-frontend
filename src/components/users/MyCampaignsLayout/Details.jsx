@@ -528,10 +528,6 @@ const Details = () => {
               <div className="relative">
                 {[    
                 {
-                  name: "Campaign Created",
-                  date: formatDateDDMMYYYY(campaign?.trackcampaign?.createddate),
-                },
-                {
                   name: "Campaign Started",
                   date: formatDateDDMMYYYY(campaign?.trackcampaign?.campaignstartdate),
                 },

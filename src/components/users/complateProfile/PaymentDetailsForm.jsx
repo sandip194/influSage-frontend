@@ -18,6 +18,7 @@ import axios from 'axios';
 
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import TermsAndCondition from '../../common/TermsAndCondition.jsx';
 
 const { Option } = Select;
 const { Link } = Typography;
@@ -100,7 +101,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
       taxidentificationnumber: values.taxId || null,
       agreedToTerms: !!values.agree,
       paymentmethod: buildPaymentMethod(values),
-
+      istermsaccepted: !!values.agree,
     };
   };
 
@@ -237,7 +238,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
       paypalEmail: paymentMethod === "paypal" ? methodObj.paymentdetails : null,
       upiId: paymentMethod === "upi" ? methodObj.paymentdetails : null,
       otherDetails: paymentMethod === "other" ? methodObj.paymentdetails : null,
-      agree: payment.agreedToTerms || false,
+      agree: !!payment.istermsaccepted,
     };
 
   };
@@ -558,7 +559,10 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
             <Checkbox>
               By adding this bank account, I agree to the{" "}
               <span
-                onClick={() => setTermsVisible(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTermsVisible(true);
+                }}
                 className="text-blue-600 cursor-pointer font-semibold hover:underline"
               >
                 Payment Terms & Conditions
@@ -601,76 +605,14 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
 
       {/* Terms & Conditions Modal */}
       <Modal
-        title="Payment Terms & Conditions"
-        visible={termsVisible}
+        title="Terms and Conditions"
+        open={termsVisible}
         onCancel={() => setTermsVisible(false)}
-        width={1000}
         footer={null}
-        bodyStyle={{ maxHeight: "60vh", overflowY: "auto" }}
         centered
+        width={800}
       >
-        <div className="text-base" style={{ whiteSpace: "pre-line" }}>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-            scelerisque aliquam odio et faucibus. Nulla rhoncus feugiat eros
-            quis consectetur.
-          </p>
-          <p>
-            Morbi neque ex, condimentum dapibus congue et, vulputate ut ligula.
-            Vestibulum sit amet urna turpis. Mauris euismod elit et nisi
-            ultrices, ut faucibus orci tincidunt.
-          </p>
-          <p>
-            Praesent dignissim, tortor nec facilisis sodales, justo erat
-            fermentum diam, sit amet cursus nunc metus nec augue. Curabitur
-            luctus consequat odio, a lobortis lacus tempor et.
-          </p>
-          <p>
-            Donec mattis orci vitae velit bibendum, vel suscipit enim dictum.
-            Aliquam erat volutpat. Nullam a tincidunt arcu, vitae gravida
-            tortor.
-          </p>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-            scelerisque aliquam odio et faucibus. Nulla rhoncus feugiat eros
-            quis consectetur.
-          </p>
-          <p>
-            Morbi neque ex, condimentum dapibus congue et, vulputate ut ligula.
-            Vestibulum sit amet urna turpis. Mauris euismod elit et nisi
-            ultrices, ut faucibus orci tincidunt.
-          </p>
-          <p>
-            Praesent dignissim, tortor nec facilisis sodales, justo erat
-            fermentum diam, sit amet cursus nunc metus nec augue. Curabitur
-            luctus consequat odio, a lobortis lacus tempor et.
-          </p>
-          <p>
-            Donec mattis orci vitae velit bibendum, vel suscipit enim dictum.
-            Aliquam erat volutpat. Nullam a tincidunt arcu, vitae gravida
-            tortor.
-          </p>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-            scelerisque aliquam odio et faucibus. Nulla rhoncus feugiat eros
-            quis consectetur.
-          </p>
-          <p>
-            Morbi neque ex, condimentum dapibus congue et, vulputate ut ligula.
-            Vestibulum sit amet urna turpis. Mauris euismod elit et nisi
-            ultrices, ut faucibus orci tincidunt.
-          </p>
-          <p>
-            Praesent dignissim, tortor nec facilisis sodales, justo erat
-            fermentum diam, sit amet cursus nunc metus nec augue. Curabitur
-            luctus consequat odio, a lobortis lacus tempor et.
-          </p>
-          <p>
-            Donec mattis orci vitae velit bibendum, vel suscipit enim dictum.
-            Aliquam erat volutpat. Nullam a tincidunt arcu, vitae gravida
-            tortor.
-          </p>
-        </div>
+        <TermsAndCondition />
       </Modal>
     </>
   );

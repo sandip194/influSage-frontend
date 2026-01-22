@@ -273,7 +273,7 @@ const TodoListCard = () => {
               </div>
               <div className="flex justify-end gap-3 pt-3">
               <Button onClick={() => setShowModal(false)}>Cancel</Button>
-              <Button disabled={loading} type="primary" htmlType="submit">
+              <Button disabled={loading} type="primary" htmlType="submit" className="!bg-[#0f122f] hover:!bg-[#1c1f4a] !border-none">
                 {selectedTodo ? "Update" : "Save"}
               </Button>
               </div>

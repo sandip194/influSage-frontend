@@ -6,7 +6,25 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Tooltip, Skeleton } from "antd";
 import InviteModal from "../../users/browseInfluencers/InviteModal";
 import { toast } from "react-toastify";
-import { RiUserAddLine, RiStarFill, RiStarHalfFill, RiStarLine, RiArrowDownSLine, RiArrowUpSLine } from "react-icons/ri";
+import { RiUserAddLine, RiStarFill, RiStarHalfFill, RiStarLine, RiArrowDownSLine, RiArrowUpSLine, RiHeart3Fill } from "react-icons/ri";
+import { motion, AnimatePresence } from "framer-motion";
+
+const HeartParticle = ({ x, y, delay, size = 12 }) => (
+  <motion.div
+    className="absolute"
+    style={{ width: size, height: size, backgroundColor: "transparent" }}
+    initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+    animate={{ scale: [0, 1, 0], x, y, opacity: [1, 1, 0] }}
+    transition={{ duration: 0.6, delay, ease: "easeOut" }}
+  >
+    <svg viewBox="0 0 20 20" fill="#ff3b6b" className="w-6 h-6">
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 
+      4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 
+      14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 
+      6.86-8.55 11.54L12 21.35z"/>
+    </svg>
+  </motion.div>
+);
 
 //  const formatDOB = (dob) => {
 //         const date = new Date(dob);
@@ -62,6 +80,7 @@ const InfluencerProfile = () => {
     const [hasMore, setHasMore] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
+    const [showAnimation, setShowAnimation] = useState(false);
 
     const formatTime = (dateString) => {
         if (!dateString) return "";
@@ -290,21 +309,48 @@ const InfluencerProfile = () => {
                     <div className="flex bg-white rounded-2xl p-6 flex-col md:flex-row md:items-start gap-6 pb-6 relative">
                         {/* MOBILE LIKE BUTTON – TOP RIGHT OF CARD */}
                         <div className="absolute top-3 right-3 sm:hidden z-10">
-                            <Tooltip title={influDetails?.savedinfluencer ? "Unfavorite" : "Favorite"}>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleLike();
-                                    }}
-                                    className="w-10 h-10 cursor-pointer flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border border-[#0e102b]"
-                                >
-                                    {influDetails?.savedinfluencer ? (
-                                        <RiHeartFill size={18} className="text-red-500" />
-                                    ) : (
-                                        <RiHeart3Line size={18} />
-                                    )}
-                                </button>
-                            </Tooltip>
+                           <Tooltip
+              title={influDetails?.savedinfluencer ? "Remove from Favorites" : "Add to Favorites"}
+            >
+              <button
+                onClick={handleLike}
+                className={`relative cursor-pointer flex items-center justify-center sm:justify-start gap-2 px-4 py-1 rounded-full text-sm font-medium border transition ${influDetails?.savedinfluencer
+                  ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+                  : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                  }`}
+              >
+                <div className="relative flex items-center justify-center w-8 h-8">
+                  <motion.div
+                    key={influDetails?.savedinfluencer ? "fill" : "outline"}
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: showAnimation ? 1.6 : 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 12 }}
+                    className="relative z-10"
+                  >
+                    {influDetails?.savedinfluencer ? (
+                      <RiHeart3Fill size={26} className="text-red-500" />
+                    ) : (
+                      <RiHeart3Line size={26} className="text-gray-700" />
+                    )}
+                  </motion.div>
+                  <AnimatePresence>
+                    {showAnimation &&
+                      [
+                        { x: -20, y: -10, delay: 0 },
+                        { x: 15, y: -20, delay: 0.05 },
+                        { x: -15, y: 15, delay: 0.3 },
+                        { x: 20, y: 10, delay: 0.25 },
+                        { x: 0, y: -25, delay: 0.4 },
+                      ].map((p, idx) => (
+                        <HeartParticle key={idx} {...p} />
+                      ))}
+                  </AnimatePresence>
+                </div>
+                <span className="inline z-10">
+                  {influDetails?.savedinfluencer ? "Favorited" : "Add to Favorite"}
+                </span>
+              </button>
+            </Tooltip>
                         </div>
 
                         {/* IMAGE */}
@@ -448,20 +494,47 @@ const InfluencerProfile = () => {
 
 
                                     {/* Desktop Like Button (hidden on mobile) */}
-                                    <Tooltip title={influDetails?.savedinfluencer ? "Unfavorite" : "Favorite"}>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleLike();
-                                            }}
-                                            className="hidden sm:flex cursor-pointer w-10 h-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200"
+                                  <Tooltip
+                                    title={influDetails?.savedinfluencer ? "Remove from Favorites" : "Add to Favorites"}
+                                    >
+                                    <button
+                                        onClick={handleLike}
+                                        className={`relative cursor-pointer flex items-center justify-center sm:justify-start gap-2 px-4 py-1 rounded-full text-sm font-medium border transition ${influDetails?.savedinfluencer
+                                        ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+                                        : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                                        }`}
+                                    >
+                                        <div className="relative flex items-center justify-center w-8 h-8">
+                                        <motion.div
+                                            key={influDetails?.savedinfluencer ? "fill" : "outline"}
+                                            initial={{ scale: 0.8 }}
+                                            animate={{ scale: showAnimation ? 1.6 : 1 }}
+                                            transition={{ type: "spring", stiffness: 500, damping: 12 }}
+                                            className="relative z-10"
                                         >
                                             {influDetails?.savedinfluencer ? (
-                                                <RiHeartFill size={24} className="text-red-500" />
+                                            <RiHeart3Fill size={26} className="text-red-500" />
                                             ) : (
-                                                <RiHeart3Line size={24} />
+                                            <RiHeart3Line size={26} className="text-gray-700" />
                                             )}
-                                        </button>
+                                        </motion.div>
+                                        <AnimatePresence>
+                                            {showAnimation &&
+                                            [
+                                                { x: -20, y: -10, delay: 0 },
+                                                { x: 15, y: -20, delay: 0.05 },
+                                                { x: -15, y: 15, delay: 0.3 },
+                                                { x: 20, y: 10, delay: 0.25 },
+                                                { x: 0, y: -25, delay: 0.4 },
+                                            ].map((p, idx) => (
+                                                <HeartParticle key={idx} {...p} />
+                                            ))}
+                                        </AnimatePresence>
+                                        </div>
+                                        <span className="inline z-10">
+                                        {influDetails?.savedinfluencer ? "Favorited" : "Add to Favorite"}
+                                        </span>
+                                    </button>
                                     </Tooltip>
                                 </div>
                             </div>

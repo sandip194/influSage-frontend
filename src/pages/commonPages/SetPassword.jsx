@@ -6,6 +6,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../features/auth/authSlice";
+import TermsAndCondition from "../../components/common/TermsAndCondition";
 
 const SideImageSlider = React.lazy(() =>
   import("../../components/common/SideImageSlider")
@@ -190,30 +191,17 @@ export const SetPassword = () => {
 
       {/* 🔹 Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-start z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-3xl mt-10 overflow-y-auto max-h-[85vh]">
-            <h3 className="text-xl font-semibold mb-3">Terms and Conditions</h3>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              By using this platform, you agree to comply with our policies and
-              guidelines. <br />
-              <br />
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia
-              delectus iure voluptatibus libero quos dolorum obcaecati
-              consequatur laborum, soluta totam saepe ipsam ducimus itaque nemo
-              asperiores exercitationem harum aut officiis error facere amet
-              similique placeat...
-            </p>
-
-            <div className="flex justify-end mt-6">
-              <button
-                onClick={() => setShowModal(false)}
-                className="bg-[#0e1532] text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+        <Modal
+          title="Terms and Conditions"
+          open={showModal}
+          onCancel={() => setShowModal(false)}
+          footer={null}
+          centered
+          width={800}
+          bodyStyle={{ maxHeight: "70vh", }}
+        >
+          <TermsAndCondition/>
+        </Modal>
       )}
     </div>
   );

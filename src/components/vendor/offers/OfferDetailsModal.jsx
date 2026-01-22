@@ -198,12 +198,11 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                         {[1, 2, 3, 4, 5].map((i) => (
                                             <RiStarFill
                                                 key={i}
-                                                size={14}
+                                                size={16}
                                                 className={i <= Math.round(offerDetails.ratingcount)
                                                     ? "text-yellow-400"
                                                     : "text-gray-300"}
-                                                style={{ stroke: "#000", strokeWidth: 0.6 }}
-                                            />
+                                                />
                                         ))}
                                         <span className="ml-1 text-xs font-semibold text-gray-700">
                                             {Number(offerDetails.ratingcount).toFixed(1)}
