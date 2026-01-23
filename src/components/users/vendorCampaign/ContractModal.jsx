@@ -681,19 +681,42 @@ export default function ContractModal({
                                 name="productOrAddress"
                                 dependencies={["productLink", "vendorAddress"]}
                                 rules={[
-                                    () => ({
-                                        validator(_, __) {
-                                            const link = form.getFieldValue("productLink");
-                                            const address = form.getFieldValue("vendorAddress");
+                                    ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        const address = getFieldValue("vendorAddress");
 
-                                            if (link || address) {
-                                                return Promise.resolve();
-                                            }
+                                        if (!value && !address) {
+                                        return Promise.reject(
+                                            new Error("Please enter Product Link or Vendor Address")
+                                        );
+                                        }
 
-                                            return Promise.reject(
-                                                "Please fill Product Link OR Vendor Address"
-                                            );
-                                        },
+                                        if (!value) return Promise.resolve();
+
+                                        const hasProtocol =
+                                        value.startsWith("http://") ||
+                                        value.startsWith("https://") ||
+                                        value.startsWith("www.");
+
+                                        if (!hasProtocol) {
+                                        return Promise.reject(
+                                            new Error("Link must start with http://, https://, or www.")
+                                        );
+                                        }
+
+                                        // ✅ Normalize URL
+                                        const normalized = value.startsWith("http")
+                                        ? value
+                                        : `https://${value}`;
+
+                                        try {
+                                        new URL(normalized);
+                                        } catch {
+                                        return Promise.reject(new Error("Invalid product link"));
+                                        }
+
+                                        return Promise.resolve();
+                                    },
                                     }),
                                 ]}
                                 style={{ marginBottom: 4 }}

@@ -185,7 +185,7 @@ export const PlatformBreakdown = () => {
               <p className="text-sm font-bold text-gray-800 sm:w-24 text-right">
                 {formatNumber(item.totallikes)}
                 <span className="font-normal text-xs text-gray-500 ml-1">
-                  Likes
+                  {item.totallikes === 1 ? "Like" : "Likes"}
                 </span>
               </p>
             </div>

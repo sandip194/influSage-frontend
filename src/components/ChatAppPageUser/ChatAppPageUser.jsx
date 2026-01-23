@@ -183,7 +183,7 @@ export default function ChatAppPageUser() {
         createddate: new Date().toISOString(),
       });
 
-      //setShouldRefresh(true);
+      // setShouldRefresh(true);
       setEditingMessage(null);
     } catch (err) {
       console.error("❌ Message send/edit failed", err);
