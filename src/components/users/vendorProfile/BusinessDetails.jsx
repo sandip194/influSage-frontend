@@ -496,6 +496,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                         <Select
                             showSearch
                             size="large"
+                            placeholder="Select Country"
                             onChange={(val) => {
                                 form.setFieldsValue({
                                     countryname: val,

@@ -11,7 +11,7 @@ import FilePreview from "../../common/FilePreview";
 
 const { Option } = Select;
 
-const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSave }) => {
+const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSave, onRefetch }) => {
   const [form] = Form.useForm();
   const { token, userId } = useSelector(state => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -195,7 +195,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
         if (showToast) toast.success(successMessage);
 
         setIsFormChanged(false);
-
+        onRefetch?.();
         onSave?.(formData);
         onNext?.({
           portfoliourl: portfolioUrl,
@@ -205,6 +205,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
           ],
           languages: selectedLanguages.map(id => ({ languageid: id }))
         });
+
 
       } else {
         message.error("Something went wrong while saving.");

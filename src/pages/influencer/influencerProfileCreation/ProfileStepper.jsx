@@ -118,75 +118,13 @@ export const ProfileStepper = () => {
       }
       return updated;
     });
-    setCurrentStep(index + 1 < steps?.length ? index + 1 :  steps.length);
+    setCurrentStep(index + 1 < steps?.length ? index + 1 : steps.length);
   }, []);
 
   // Editable for PENDINGPROFILE or REJECTED
   const isEditable = ['PENDINGPROFILE', 'REJECTED'].includes(p_code);
 
-  const steps = useMemo(() => [
-    {
-      title: 'Personal Information',
-      component: (
-        <PersonalDetails
-          data={profileData.profile}
-          showControls={isEditable}
-          onChange={(updated) => updateProfileSection('profile', updated)}
-          onNext={() => markStepComplete(0)}
-        />
-      )
-    },
-    {
-      title: 'Social Media Links',
-      component: (
-        <SocialMediaDetails
-          data={profileData.social}
-          showControls={isEditable}
-          onChange={(updated) => updateProfileSection('social', updated)}
-          onNext={() => markStepComplete(1)}
-          onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
-        />
-      )
-    },
-    {
-      title: 'Categories and Interests',
-      component: (
-        <CategorySelector
-          data={profileData.categories}
-          showControls={isEditable}
-          onChange={(updated) => updateProfileSection('categories', updated)}
-          onNext={() => markStepComplete(2)}
-          onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
-        />
-      )
-    },
-    {
-      title: 'Portfolio and Work Samples',
-      component: (
-        <PortfolioUploader
-          data={profileData.portfolio}
-          showControls={isEditable}
-          onNext={(updated) => {
-            updateProfileSection('portfolio', updated);
-            markStepComplete(3);
-          }}
-          onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
-        />
-      )
-    },
-    {
-      title: 'Payment Information',
-      component: (
-        <PaymentDetailsForm
-          data={profileData.payment}
-          showControls={isEditable}
-          onChange={(updated) => updateProfileSection('payment', updated)}
-          onNext={() => markStepComplete(4)}
-          onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
-        />
-      )
-    }
-  ], [profileData, updateProfileSection, markStepComplete, isEditable]);
+
 
   const getUserProfileCompationData = useCallback(async () => {
     try {
@@ -250,7 +188,7 @@ export const ProfileStepper = () => {
       // -------------------------
       // Handle each status
       // -------------------------
-     if (mappedStatus === "APPROVAL PENDING") {
+      if (mappedStatus === "APPROVAL PENDING") {
         const allCompleted = [true, true, true, true, true];
         setCompletedSteps(allCompleted);
         setCurrentStep(steps.length); // Set to steps.length to indicate completion
@@ -296,11 +234,78 @@ export const ProfileStepper = () => {
     }
   }, [token, userId, dispatch, name, role]);
 
+  const steps = useMemo(() => [
+    {
+      title: 'Personal Information',
+      component: (
+        <PersonalDetails
+          data={profileData.profile}
+          showControls={isEditable}
+          onChange={(updated) => updateProfileSection('profile', updated)}
+          onNext={() => markStepComplete(0)}
+        />
+      )
+    },
+    {
+      title: 'Social Media Links',
+      component: (
+        <SocialMediaDetails
+          data={profileData.social}
+          showControls={isEditable}
+          onChange={(updated) => updateProfileSection('social', updated)}
+          onNext={() => markStepComplete(1)}
+          onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
+        />
+      )
+    },
+    {
+      title: 'Categories and Interests',
+      component: (
+        <CategorySelector
+          data={profileData.categories}
+          showControls={isEditable}
+          onChange={(updated) => updateProfileSection('categories', updated)}
+          onNext={() => markStepComplete(2)}
+          onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
+        />
+      )
+    },
+    {
+      title: 'Portfolio and Work Samples',
+      component: (
+        <PortfolioUploader
+          data={profileData.portfolio}
+          showControls={isEditable}
+          onNext={(updated) => {
+            updateProfileSection('portfolio', updated);
+            markStepComplete(3);
+          }}
+          onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
+          onRefetch={getUserProfileCompationData}
+        />
+      )
+    },
+    {
+      title: 'Payment Information',
+      component: (
+        <PaymentDetailsForm
+          data={profileData.payment}
+          showControls={isEditable}
+          onChange={(updated) => updateProfileSection('payment', updated)}
+          onNext={() => markStepComplete(4)}
+          onBack={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
+        />
+      )
+    }
+  ], [profileData, updateProfileSection, markStepComplete, isEditable]);
+
   useEffect(() => {
+
     getUserProfileCompationData();
+    
   }, [getUserProfileCompationData, lastCompletedStep]);
 
-    const handleStepChange = (step) => {
+  const handleStepChange = (step) => {
     // For APPROVAL PENDING, do not allow navigation
     if (p_code === 'APPROVAL PENDING') return;
 

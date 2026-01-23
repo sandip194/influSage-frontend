@@ -231,7 +231,11 @@ export const VendorProfileStepper = () => {
 
 
     useEffect(() => {
-        getUserProfileCompletionData();
+        console.log(lastCompletedStep)
+        if (lastCompletedStep !== 4) {
+            getUserProfileCompletionData();
+        }
+
     }, [lastCompletedStep]);
 
 
