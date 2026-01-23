@@ -244,7 +244,7 @@ const EditLayout = () => {
     );
 
   return (
-    <div className="w-full max-w-7xl mx-auto text-sm overflow-x-hidden">
+    <div className="w-full text-sm overflow-x-hidden">
       <button
         onClick={handleBack}
         className="text-gray-600 cursor-pointer flex items-center gap-2 hover:text-gray-900 transition"

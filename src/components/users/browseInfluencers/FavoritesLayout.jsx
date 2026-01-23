@@ -89,7 +89,7 @@ const FavoritesLayout = () => {
 
       if (response.status === 200) {
         // Show toast for success
-        toast.success(response?.data?.message );
+        toast.success(response?.data?.message);
       } else {
         toast.error(response.data.message || "Failed to update favourite");
       }
@@ -114,18 +114,15 @@ const FavoritesLayout = () => {
     }
   }, [filters.pagenumber, filters.pagesize, searchTerm, activeTab]);
 
-  
+
   return (
-       <div className="w-full text-sm pb-24 sm:pb-0">
+    <div className="w-full text-sm pb-24 sm:pb-0">
 
       {/* Header */}
       <div className="header mb-4">
         <h3 className="text-2xl text-[#0D132D] font-bold mb-2">
-          Browse Influencers
-        </h3>
-        <p className="text-base text-[#0D132D]">
           Browse Influencers To Promote Your Brand
-        </p>
+        </h3>
       </div>
 
       {/* Tabs */}
@@ -189,7 +186,7 @@ const FavoritesLayout = () => {
 
         {/* Influencers List */}
         <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
-         {loading ? (
+          {loading ? (
             Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="p-4 border border-gray-200 rounded-2xl">
                 <Skeleton.Avatar active size={64} shape="circle" />

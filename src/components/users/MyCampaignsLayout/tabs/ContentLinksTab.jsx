@@ -406,6 +406,9 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
 
+    const [globalError, setGlobalError] = useState("");
+
+
     const getDomainFromProvider = (providerName) => {
         if (!providerName) return null;
         const clean = providerName.trim().toLowerCase();
@@ -415,12 +418,16 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
     // ---------------- Link Validation ----------------
     const validateLink = (value, existingLinks = [], index = null, providerName = "") => {
         const trimmed = value.trim();
-        if (!trimmed) return "Link cannot be empty.";
 
-        if (!/^https?:\/\/.+/.test(trimmed))
-            return "Invalid URL. Must start with http or https.";
+        // ✅ Allow empty field
+        if (!trimmed) return "";
 
-        const duplicate = existingLinks.some((l, i) => i !== index && l.trim() === trimmed);
+        if (!/^(https?:\/\/|www\.)\S+/.test(trimmed))
+            return "Invalid URL. Must start with http, https, or www.";
+
+        const duplicate = existingLinks.some(
+            (l, i) => i !== index && l.trim() === trimmed
+        );
         if (duplicate) return "Duplicate link.";
 
         const expectedDomain = getDomainFromProvider(providerName);
@@ -431,6 +438,7 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
         return "";
     };
 
+
     const validateContentType = (pIndex, ctIndex) => {
         const providerName = providers[pIndex].providername;
         const ct = providers[pIndex].contenttypes[ctIndex];
@@ -438,11 +446,11 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
         const ctErrors = {};
         let valid = true;
 
-        const hasNonEmpty = ct.links.some((l) => l.trim() !== "");
-        if (!hasNonEmpty) {
-            ctErrors[0] = "At least one link is required.";
-            valid = false;
-        }
+        // const hasNonEmpty = ct.links.some((l) => l.trim() !== "");
+        // if (!hasNonEmpty) {
+        //     ctErrors[0] = "At least one link is required.";
+        //     valid = false;
+        // }
 
         ct.links.forEach((link, li) => {
             const err = validateLink(link, ct.links, li, providerName);
@@ -519,6 +527,10 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
     // ---------------- Update Link ----------------
     const updateLink = (pIndex, ctIndex, li, value) => {
         const providerName = providers[pIndex].providername;
+
+        if (value.trim()) {
+            setGlobalError("");
+        }
 
         setProviders((prev) => {
             const updated = prev.map((p, i) =>
@@ -598,6 +610,21 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
 
     // ---------------- Save All ----------------
     const saveAll = async () => {
+        // GLOBAL check
+        const hasAtLeastOneLink = providers.some(p =>
+            p.contenttypes.some(ct =>
+                ct.links.some(l => l.trim() !== "")
+            )
+        );
+
+        if (!hasAtLeastOneLink) {
+            const msg = "Please add at least one content link before saving.";
+            setGlobalError(msg);
+            // toast.error(msg);
+            return;
+        }
+
+
         let valid = true;
 
         providers.forEach((p, pIdx) => {
@@ -607,9 +634,11 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
         });
 
         if (!valid) {
-            toast.error("Fix validation errors before saving.");
+            const msg = "Fix validation errors before saving."
+            setGlobalError(msg);
             return;
         }
+
 
         const payload = providers.flatMap((p) =>
             p.contenttypes.map((ct) => ({
@@ -648,7 +677,7 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
     return (
         <div>
             <h2 className="text-lg font-semibold mb-6">Upload Content Links</h2>
-        
+
             {providers.map((provider, pIndex) => (
                 <div
                     key={provider.providerid}
@@ -722,8 +751,17 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
                 </div>
             ))}
 
+            {globalError && (
+                <Alert
+                    type="error"
+                    message={globalError}
+                    showIcon
+                    className="mb-4"
+                />
+            )}
+
             {providers.length > 0 && (
-                <div className="text-right">
+                <div className="text-right mt-2">
                     <Button
                         type="primary"
                         size="large"

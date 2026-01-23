@@ -120,6 +120,26 @@ const Details = () => {
     getCampaignDetail()
   }, [])
 
+  const steps = [
+    {
+      name: "Campaign Started",
+      date: campaign?.trackcampaign?.campaignstartdate,
+    },
+    {
+      name: "Contract Started",
+      date: campaign?.trackcampaign?.contractstart,
+    },
+    {
+      name: "Contract Completed",
+      date: campaign?.trackcampaign?.contractcompleted,
+    },
+    {
+      name: "Campaign Ended",
+      date: campaign?.trackcampaign?.campaignenddate,
+    },
+  ];
+
+
   if (loading) {
     return (
       <div className="w-full text-sm overflow-x-hidden space-y-6">
@@ -247,9 +267,9 @@ const Details = () => {
                   alt="Profile"
                   className="w-16 h-16 rounded-full object-cover cursor-pointer"
                   onClick={() => {
-                      setPreviewUrl(campaign?.photopath);
-                      setPreviewType("image");
-                      setPreviewOpen(true);
+                    setPreviewUrl(campaign?.photopath);
+                    setPreviewType("image");
+                    setPreviewOpen(true);
                   }}
                 />
                 {previewOpen && (
@@ -389,11 +409,11 @@ const Details = () => {
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Contract" key="contract">
-                  <ContractTab campaignId={campaignId} token={token}/>
+                  <ContractTab campaignId={campaignId} token={token} />
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Content Links" key="contentLinks" disabled={!campaign.iscontentlinktab}>
-                  <ContentLinksTab campaignId={campaignId} contractId={campaign?.contractid ? campaign?.contractid : null} token={token}/>
+                  <ContentLinksTab campaignId={campaignId} contractId={campaign?.contractid ? campaign?.contractid : null} token={token} />
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Activity" key="activity" disabled>
@@ -442,43 +462,43 @@ const Details = () => {
 
             <div className="py-4">
               <p className="text-sm font-bold text-gray-900">Application Window</p>
-             <p>
-              {formatDateDDMMYYYY(
-                campaign?.applicationstartdate
-              )}
-              {" "}
-              {"-"}
-              {" "}
-              {formatDateDDMMYYYY(
-                campaign?.applicationenddate
-              )}
-            </p>
+              <p>
+                {formatDateDDMMYYYY(
+                  campaign?.applicationstartdate
+                )}
+                {" "}
+                {"-"}
+                {" "}
+                {formatDateDDMMYYYY(
+                  campaign?.applicationenddate
+                )}
+              </p>
             </div>
           </div>
 
           <div className="space-y-4 w-full max-w-xs">
-           { /* Platform Card */}
-                  <div className="bg-white p-4 rounded-2xl">
-                    <h3 className="font-semibold text-lg py-3">Platform</h3>
-                    <div className="space-y-4">
-                    {campaign?.providercontenttype?.map((platform) => (
-                      <div key={platform.providercontenttypeid}>
-                      
-                      {/* Top Row */}
-                      <div className="flex items-center justify-between pb-1">
-                        <div className="flex items-center gap-2">
+            { /* Platform Card */}
+            <div className="bg-white p-4 rounded-2xl">
+              <h3 className="font-semibold text-lg py-3">Platform</h3>
+              <div className="space-y-4">
+                {campaign?.providercontenttype?.map((platform) => (
+                  <div key={platform.providercontenttypeid}>
+
+                    {/* Top Row */}
+                    <div className="flex items-center justify-between pb-1">
+                      <div className="flex items-center gap-2">
                         {platform.iconpath && (
-                          <img 
-                          src={platform.iconpath} 
-                          alt={platform.providername}
-                          onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                          className="w-5 h-5 object-contain"
+                          <img
+                            src={platform.iconpath}
+                            alt={platform.providername}
+                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                            className="w-5 h-5 object-contain"
                           />
                         )}
                         <span className="text-gray-800 font-medium">
                           {platform.providername}
                         </span>
-                        </div>
+                      </div>
 
                       <span className="text-gray-500 text-sm text-right">
                         {platform.contenttypes && platform.contenttypes.length > 0
@@ -491,13 +511,13 @@ const Details = () => {
                     {platform.caption && (
                       <p className="text-gray-600 italic text-xs border-l-2 border-gray-200 pl-3">
                         {platform.caption}
-                        </p>
-                      )}
+                      </p>
+                    )}
 
-                      </div>
-                    ))}
-                    </div>
                   </div>
+                ))}
+              </div>
+            </div>
 
             {/* Influencers List - REMOVED as per requirement */}
 
@@ -522,31 +542,27 @@ const Details = () => {
               )}
             </div> */}
 
+
+
             <div className="bg-white p-6 rounded-2xl mt-6">
               <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
 
               <div className="relative">
-                {[    
-                {
-                  name: "Campaign Started",
-                  date: formatDateDDMMYYYY(campaign?.trackcampaign?.campaignstartdate),
-                },
-                {
-                  name: "Campaign Ended",
-                  date: formatDateDDMMYYYY(campaign?.trackcampaign?.campaignenddate),
-                },
-                ].map((step, idx, arr) => {
+                {steps.map((step, idx) => {
                   const stepDate = dayjs(step.date, "DD-MM-YYYY HH:mm");
                   const now = dayjs();
+
                   const isCompleted = now.isAfter(stepDate) || now.isSame(stepDate);
-                  const isLast = idx === arr.length - 1;
+                  const isLast = idx === steps.length - 1;
 
                   return (
                     <div key={idx} className="relative pl-10 pb-6 last:pb-0">
+                      {/* Vertical line */}
                       {!isLast && (
                         <div className="absolute left-[8px] top-[22px] h-full border-l-2 border-dashed border-gray-300"></div>
                       )}
 
+                      {/* Checkbox */}
                       <span className="absolute left-0 top-1">
                         {isCompleted ? (
                           <RiCheckboxCircleFill className="text-[#0f122f]" size={20} />
@@ -555,7 +571,7 @@ const Details = () => {
                         )}
                       </span>
 
-                      {/* Step content */}
+                      {/* Content */}
                       <div>
                         <h4
                           className={`font-semibold ${isCompleted ? "text-gray-800" : "text-gray-400"
@@ -567,7 +583,7 @@ const Details = () => {
                           className={`text-sm ${isCompleted ? "text-gray-600" : "text-gray-400"
                             }`}
                         >
-                          {step.date}
+                          {formatDateDDMMYYYY(step.date)}
                         </p>
                       </div>
                     </div>
@@ -575,6 +591,7 @@ const Details = () => {
                 })}
               </div>
             </div>
+
           </div>
         </div>
       </div>
