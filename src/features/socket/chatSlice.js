@@ -38,7 +38,7 @@ const chatSlice = createSlice({
 
 
         updateMessage: (state, action) => {
-            const { tempId, newId, content, fileUrl } = action.payload;
+            const {  tempId, newId, content, file } = action.payload;
 
             const msg = state.messages.find(
                 (m) => String(m.tempId) === String(tempId) || String(m.id) === String(tempId)
@@ -53,7 +53,7 @@ const chatSlice = createSlice({
 
             msg.id = newId ?? msg.id;
             msg.content = content ?? msg.content;
-            msg.file = fileUrl ?? msg.file;
+            msg.file = file ?? msg.file;
             msg.status = "sent";
             msg.isTemp = false;
 
@@ -97,13 +97,7 @@ const chatSlice = createSlice({
             });
 
             console.log("🟢 Updated messages array:", state.messages);
-        }
-
-
-
-        ,
-
-
+        },
 
         setMessages: (state, action) => {
             state.messages = action.payload;

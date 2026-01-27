@@ -32,7 +32,7 @@ export default function ChatAppPageUser() {
   const [selectedReplyMessage, setSelectedReplyMessage] = useState(null);
   const [editingMessage, setEditingMessage] = useState(null);
   const [isRecipientOnline, setIsRecipientOnline] = useState(false);
-  const [shouldRefresh, setShouldRefresh] = useState(false);
+  // const [shouldRefresh, setShouldRefresh] = useState(false);
   const conversationId = activeChat?.conversationid || activeChat?.id;
 
   // Emit via socket
@@ -58,6 +58,23 @@ export default function ChatAppPageUser() {
     return () => {
       socket.emit("leaveRoom", String(conversationId));
     };
+  }, [socket, conversationId]);
+
+  useEffect(() => {
+    if (!socket || !conversationId) return;
+
+    const handleSyncRead = ({ conversationId: cid }) => {
+      console.log("🟢 syncReadStatus received in ChatAppPageUser", cid);
+
+      if (String(cid) === String(conversationId)) {
+        console.log("🔄 Refetching messages after read");
+        fetchMessages(); // 👈 THIS IS THE FIX
+      }
+    };
+
+    socket.on("syncReadStatus", handleSyncRead);
+
+    return () => socket.off("syncReadStatus", handleSyncRead);
   }, [socket, conversationId]);
 
   const fetchMessages = async () => {
@@ -110,15 +127,15 @@ export default function ChatAppPageUser() {
   };
 
   const handleSendMessage = async ({
-    text,
+    text = "",
     file = null,
     replyId = null,
     editingMessageId = null,
   }) => {
-    if (!conversationId) return;
+    if (!conversationId || (!text.trim() && !file)) return;
 
     const isEdit = Boolean(editingMessageId);
-    const tempId = Date.now().toString();
+    const tempId = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
     // 🔵 Optimistic UI update
     if (isEdit) {
@@ -193,16 +210,26 @@ export default function ChatAppPageUser() {
         message: text,
         messageid: Number(realId),
         tempId,
-        replyid: replyId || null,
-        readbyinfluencer: Number(roleId) === 1,
-        readbyvendor: Number(roleId) === 2,
-        createddate: new Date().toISOString(),
-      });
+        roleId,
+        content: text || "",
+        time: new Date().toISOString(),
+        deleted: false,
+        file: file ? [URL.createObjectURL(file)] : [],
+        replyId,
+        status: "sending",
+        isLocalFile: !!file,
+      })
 
-      // setShouldRefresh(true);
-      setEditingMessage(null);
-    } catch (err) {
-      console.error("❌ Message send/edit failed", err);
+    }
+    catch (err) {
+      console.error("❌ Message send failed", err);
+
+      dispatch(
+        updateMessage({
+          tempId,
+          status: "failed",
+        })
+      );
     }
   };
 
@@ -210,18 +237,39 @@ export default function ChatAppPageUser() {
     if (!socket || !conversationId) return;
 
     const handleReceiveMessage = (msg) => {
-      console.log("New MSG Recived", msg)
-      if (String(msg.conversationid) !== String(conversationId)) return;
+      console.log("📩 SOCKET MSG", msg);
 
-      if (Number(msg.userid) === Number(userId)) {
-        // dispatch(updateMessage({
-        //   tempId: msg.tempId,
-        //   newId: msg.messageid,
-        // }));
-        return;
-      }
-      dispatch(addMessage({
-        id: msg.messageid || msg.tempId,
+    if (String(msg.conversationid) !== String(conversationId)) return;
+
+    // if (msg.is_delete === true || msg.is_deleted === true) {
+    //   console.log("🧨 DELETE RECEIVED", msg.messageid);
+    //   dispatch(deleteMessage(msg.messageid));
+    //   return;
+    // }
+
+    if (msg.tempId && Number(msg.userid) === Number(userId)) {
+      // dispatch(
+      //   updateMessage({
+      //     tempId: msg.tempId,
+      //     newId: msg.messageid,
+      //     file: msg.filepaths || [],
+      //     status: "sent",
+      //   })
+      // );
+      return;
+    }
+
+    // dispatch(
+    //   updateMessage({
+    //     id: msg.messageid,
+    //     content: msg.message,
+    //     file: msg.filepaths || [],
+    //   })
+    // );
+
+    dispatch(
+      addMessage({
+        id: msg.messageid,
         roleId: Number(msg.roleid),
         content: msg.message,
         time: msg.createddate,
@@ -235,14 +283,14 @@ export default function ChatAppPageUser() {
 
     socket.on("receiveMessage", handleReceiveMessage);
     return () => socket.off("receiveMessage", handleReceiveMessage);
-  }, [socket, conversationId]);
+  }, [socket, conversationId, userId, dispatch]);
 
-  useEffect(() => {
-    if (!shouldRefresh) return;
+  // useEffect(() => {
+  //   if (!shouldRefresh) return;
 
-    fetchMessages();
-    setShouldRefresh(false);
-  }, [shouldRefresh]);
+  //   fetchMessages();
+  //   setShouldRefresh(false);
+  // }, [shouldRefresh]);
 
   useEffect(() => {
     if (!activeChat) return;

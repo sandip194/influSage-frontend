@@ -233,11 +233,47 @@ export default function ChatMessages({
       msgElement.scrollIntoView({ behavior: "smooth", block: "center" });
       msgElement.classList.add("bg-blue-50");
 
-      setTimeout(() => {
-        msgElement.classList.remove("bg-blue-50");
-      }, 2000);
-    }
-  };
+        setTimeout(() => {
+          msgElement.classList.remove("bg-blue-50");
+        }, 2000);
+      }
+    };
+
+    // Socket event listeners
+    // useEffect(() => {
+    //   if (!socket) return;
+
+    //   socket.on("deleteMessage", ({ messageId }) => {
+    //     dispatch(deleteMessage(messageId));
+    //   });
+
+    //   socket.on("undoDeleteMessage", ({ messageId }) => {
+    //     dispatch(undoDeleteMessage(messageId));
+    //   });
+    //   // socket.on("updateMessageStatus", (payload) => {
+
+    //   //   console.log("SOCKET READ UPDATE", payload);
+    //   //   dispatch(setMessageRead(payload));
+    //   // });
+
+    //   // socket.on("syncReadStatus", ({ conversationId }) => {
+    //   //   if (conversationId === (chat?.conversationid || chat?.id)) {
+    //   //     dispatch(setMessages([])); // optional clear
+    //   //     dispatch(fetchMessages(conversationId)); // your existing API call
+    //   //   }
+    //   // });
+
+
+    //   return () => {
+    //     socket.off("newMessage");
+    //     socket.off("deleteMessage");
+    //     socket.off("undoDeleteMessage");
+    //     socket.off("updateMessageStatus");
+    //     // socket.off("editMessage");
+    //   };
+    // }, [socket, dispatch]);
+
+    
 
   // Socket event listeners
   useEffect(() => {
