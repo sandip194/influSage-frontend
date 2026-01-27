@@ -103,7 +103,7 @@
       dispatch(deleteMessage(messageId));
       socket.emit("deleteMessage", {
         messageId,
-        conversationId: chat.id,
+          conversationId: String(chat.conversationid || chat.id),
       });
       try {
         const res = await axios.put(
@@ -139,7 +139,7 @@
       dispatch(undoDeleteMessage(messageId));
       socket.emit("undoDeleteMessage", {
         messageId,
-        conversationId: chat.id,
+          conversationId: String(chat.conversationid || chat.id),
       });
 
       try {
@@ -166,39 +166,41 @@
     };
 
 
-    useEffect(() => {
+    // useEffect(() => {
+    //   if (!socket || !conversationId || !messages.length) return;
 
-      if (!socket || !conversationId || !messages.length) {
-        console.log("🔍 useEffect skipped - missing deps");
-        return;
-      }
+    //   messages.forEach((msg) => {
+    //     const isMe = Number(msg.roleId) === Number(role);
+    //     if (isMe) return;
 
-      messages.forEach((msg) => {
+    //     const alreadyRead =
+    //       Number(role) === 1
+    //         ? msg.readbyinfluencer
+    //         : msg.readbyvendor;
 
-        if (Number(msg.roleId) !== Number(role)) {
-          const alreadyRead =
-            Number(role) === 1
-              ? msg.readbyvendor
-              : msg.readbyinfluencer;
+    //     // console.log("🔵 CHECK READ", {
+    //     //   msgId: msg.id,
+    //     //   alreadyRead,
+    //     // });
 
-           console.log("emit msg to messageRead (workaround)", msg);
-          if (!alreadyRead && !emittedReadRef.current.has(msg.id)) {
-            socket.emit("messageRead", {
-              messageId: Number(msg.id),
-              conversationId: conversationId,
-              role: Number(role),
-            });
+    //     if (!alreadyRead && !emittedReadRef.current.has(msg.id)) {
+    //       // console.log("🟢 EMIT messageRead", msg.id);
 
-            emittedReadRef.current.add(msg.id);
-          }
-        }
+    //       socket.emit("messageRead", {
+    //         messageId: msg.id,
+    //         conversationId,
+    //         role: Number(role),
+    //       });
 
-      });
-    }, [messages, socket, role, conversationId]);
+    //       emittedReadRef.current.add(msg.id);
+    //     }
+    //   });
+    // }, [messages, socket, role, conversationId]);
 
-    useEffect(() => {
-      emittedReadRef.current.clear();
-    }, [conversationId]);
+    // useEffect(() => {
+    //   emittedReadRef.current.clear();
+    // }, [conversationId]);
+
 
     useEffect(() => {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -227,11 +229,19 @@
       socket.on("undoDeleteMessage", ({ messageId }) => {
         dispatch(undoDeleteMessage(messageId));
       });
-      socket.on("updateMessageStatus", (payload) => {
+      // socket.on("updateMessageStatus", (payload) => {
 
-        console.log("🟢 READ UPDATE", payload);
-        dispatch(setMessageRead(payload));
+      //   console.log("SOCKET READ UPDATE", payload);
+      //   dispatch(setMessageRead(payload));
+      // });
+
+      socket.on("syncReadStatus", ({ conversationId }) => {
+        if (conversationId === (chat?.conversationid || chat?.id)) {
+          dispatch(setMessages([])); // optional clear
+          dispatch(fetchMessages(conversationId)); // your existing API call
+        }
       });
+
 
       return () => {
         socket.off("newMessage");
@@ -468,7 +478,7 @@
                     )}
 
                   {msg.deleted ? (
-                    <div className="text-sm text-red-600">
+                    <div className="italic text-red-500">
                       This message has been deleted
                       {isMe && (
                         <button

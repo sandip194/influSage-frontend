@@ -32,21 +32,27 @@ const chatSlice = createSlice({
         },
 
         updateMessage: (state, action) => {
-            const { tempId, newId, content, fileUrl } = action.payload;
+            const { id, tempId, newId, content, file, status } = action.payload;
 
             const msg = state.messages.find(
                 (m) =>
-                    String(m.id) === String(tempId) ||
-                    String(m.tempId) === String(tempId)
+                (tempId && String(m.tempId) === String(tempId)) ||
+                (id && String(m.id) === String(id))
             );
-
             if (!msg) return;
-
-            msg.id = newId ?? msg.id;
-            msg.content = content ?? msg.content;
-            msg.file = fileUrl ?? msg.file;
-            msg.status = "sent";
-            msg.isTemp = false;
+            if (newId) {
+                msg.id = newId;
+                delete msg.tempId;
+            }
+            if (content !== undefined) {
+                msg.content = content;
+            }
+            if (file !== undefined) {
+                msg.file = file;
+            }
+            if (status) {
+                msg.status = status;
+            }
         },
 
         deleteMessage: (state, action) => {
@@ -62,20 +68,24 @@ const chatSlice = createSlice({
             }
         },
         setMessageRead: (state, action) => {
+            console.log("🔴 REDUX setMessageRead", action.payload);
+
             const { messageId, readbyvendor, readbyinfluencer } = action.payload;
 
             state.messages = state.messages.map((msg) => {
-                if (Number(msg.id) !== Number(messageId)) return msg;
+                if (String(msg.id) !== String(messageId)) return msg;
+
+                console.log("✅ MATCH FOUND FOR READ", msg.id);
 
                 return {
-                    ...msg,
-                    readbyvendor:
-                        readbyvendor === true ? true : msg.readbyvendor,
-                    readbyinfluencer:
-                        readbyinfluencer === true ? true : msg.readbyinfluencer,
+                ...msg,
+                readbyvendor:
+                    readbyvendor === true ? true : msg.readbyvendor,
+                readbyinfluencer:
+                    readbyinfluencer === true ? true : msg.readbyinfluencer,
                 };
             });
-        },
+            },
 
 
         setMessages: (state, action) => {

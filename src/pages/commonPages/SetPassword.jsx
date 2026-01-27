@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../features/auth/authSlice";
 import TermsAndCondition from "../../components/common/TermsAndCondition";
+import { Modal } from "antd";
 
 const SideImageSlider = React.lazy(() =>
   import("../../components/common/SideImageSlider")
