@@ -281,10 +281,15 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
+
+      // ✔ Check profile image FIRST and set error
       if (!profileImage && !existingPhotoPath) {
         setProfileError('Please select profile image! Profile image is required.');
+        setIsSubmitting(false);
         return;
       }
+
+      setProfileError('');
 
 
       const values = await form.validateFields();

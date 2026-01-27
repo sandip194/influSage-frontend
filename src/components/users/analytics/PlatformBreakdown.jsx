@@ -162,8 +162,7 @@ export const PlatformBreakdown = () => {
               {/* Progress Bar */}
               <div className="flex-1">
                 <div
-                  className={`relative h-3 sm:h-2.5 rounded-full ${item.percentage > 0 ? "bg-transparent" : "bg-gray-200"
-                    }`}
+                  className={ "relative h-3 sm:h-2.5 rounded-full bg-transparent" }
                 >
                   <div
                     className="absolute left-0 top-0 h-full rounded-full transition-all"

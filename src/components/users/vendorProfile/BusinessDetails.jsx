@@ -249,13 +249,19 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
 
     const handleSubmit = async () => {
-        await form.validateFields();
+
+        setIsSubmitting(true);
+
+        // ✔ Check profile image FIRST (before form validation)
         if (!profileImage && !existingPhotoPath) {
             setProfileError("Please select profile image! Profile image is required.");
+            setIsSubmitting(false);
             return;
-        } else {
-            setProfileError("");
         }
+
+        setProfileError("");
+        await form.validateFields();
+
         try {
             setIsSubmitting(true);
             const values = form.getFieldsValue();

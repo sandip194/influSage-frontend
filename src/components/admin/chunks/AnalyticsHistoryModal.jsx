@@ -28,6 +28,16 @@ const AnalyticsHistoryModal = ({
     });
   };
 
+  const formatDateOnly = (date) => {
+  if (!date) return "-";
+  return new Date(date).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+
 
   const handleScroll = (e) => {
     const target = e.target;
@@ -94,7 +104,7 @@ const AnalyticsHistoryModal = ({
           </div>
 
           <div className="text-sm text-gray-700">
-            <span className="font-semibold">Post Date:</span> {formatDate(postInfo.postdate)}
+            <span className="font-semibold">Post Date:</span> {formatDateOnly(postInfo.postdate)}
           </div>
         </div>
       )}
