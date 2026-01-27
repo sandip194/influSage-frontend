@@ -141,10 +141,13 @@ export default function ChatAppPageUser() {
           deleted: false,
           file: [],
           replyId,
+          readbyvendor: roleId === 2 ? true : false,
+          readbyinfluencer: roleId === 1 ? true : false,
+          status: "pending",
+          isTemp: true,
         })
       );
     }
-
     try {
       const formData = new FormData();
       formData.append("p_conversationid", conversationId);
@@ -162,6 +165,19 @@ export default function ChatAppPageUser() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+
+
+      const realId = res.data?.messageid;
+      console.log(res.data.messageid)
+
+      // 🔄 Update Redux with real DB ID
+      dispatch(
+        updateMessage({
+          tempId,
+          newId: Number(realId),
+        })
+      );
+
       const receiverId =
         Number(roleId) === 1
           ? Number(activeChat.vendorId || activeChat.vendorid)
@@ -175,7 +191,7 @@ export default function ChatAppPageUser() {
         roleid: Number(roleId),
         receiverId,
         message: text,
-        messageid: res.data?.message_id,
+        messageid: Number(realId),
         tempId,
         replyid: replyId || null,
         readbyinfluencer: Number(roleId) === 1,
@@ -198,10 +214,10 @@ export default function ChatAppPageUser() {
       if (String(msg.conversationid) !== String(conversationId)) return;
 
       if (Number(msg.userid) === Number(userId)) {
-        dispatch(updateMessage({
-          tempId: msg.tempId,
-          newId: msg.messageid,
-        }));
+        // dispatch(updateMessage({
+        //   tempId: msg.tempId,
+        //   newId: msg.messageid,
+        // }));
         return;
       }
       dispatch(addMessage({
@@ -212,8 +228,8 @@ export default function ChatAppPageUser() {
         deleted: false,
         file: msg.filepaths || [],
         replyId: msg.replyid ?? null,
-        readbyinfluencer: msg.readbyinfluencer ?? false,
-        readbyvendor: msg.readbyvendor ?? false
+        readbyinfluencer: msg.readbyinfluencer || false,
+        readbyvendor: msg.readbyvendor || false
       }));
     };
 

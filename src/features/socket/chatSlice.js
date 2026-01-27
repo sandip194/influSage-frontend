@@ -27,27 +27,42 @@ const chatSlice = createSlice({
 
             if (exists) return;
 
-            console.log("Redux Message Added",incoming)
-            state.messages.push(incoming);
+            state.messages.push({
+                ...incoming,
+                readbyvendor: incoming.readbyvendor ?? false,
+                readbyinfluencer: incoming.readbyinfluencer ?? false,
+            });
+
+            console.log("Redux Message Added", incoming);
         },
+
 
         updateMessage: (state, action) => {
             const { tempId, newId, content, fileUrl } = action.payload;
 
             const msg = state.messages.find(
-                (m) =>
-                    String(m.id) === String(tempId) ||
-                    String(m.tempId) === String(tempId)
+                (m) => String(m.tempId) === String(tempId) || String(m.id) === String(tempId)
             );
 
-            if (!msg) return;
+            if (!msg) {
+                console.log(`⚠️ No message found with tempId ${tempId}`);
+                return;
+            }
+
+            console.log("🔄 Before update:", msg);
 
             msg.id = newId ?? msg.id;
             msg.content = content ?? msg.content;
             msg.file = fileUrl ?? msg.file;
             msg.status = "sent";
             msg.isTemp = false;
+
+            console.log(`✅ Message updated with new ID: ${msg.id}`, msg);
+
+            // Optional: show the full messages array to verify
+            console.log("🟢 Updated messages array:", JSON.parse(JSON.stringify(state.messages)));
         },
+
 
         deleteMessage: (state, action) => {
             const message = state.messages.find(msg => msg.id === action.payload);
@@ -62,20 +77,32 @@ const chatSlice = createSlice({
             }
         },
         setMessageRead: (state, action) => {
-            const { messageId, readbyvendor, readbyinfluencer } = action.payload;
+            const { messageId, readerRole } = action.payload;
 
-            state.messages = state.messages.map((msg) => {
-                if (Number(msg.id) !== Number(messageId)) return msg;
+            state.messages = state.messages.map(msg => {
+                if (String(msg.id) !== String(messageId)) return msg;
 
-                return {
+                const updatedMsg = {
                     ...msg,
-                    readbyvendor:
-                        readbyvendor === true ? true : msg.readbyvendor,
-                    readbyinfluencer:
-                        readbyinfluencer === true ? true : msg.readbyinfluencer,
+                    readbyvendor: readerRole === 2 ? true : msg.readbyvendor ?? false,
+                    readbyinfluencer: readerRole === 1 ? true : msg.readbyinfluencer ?? false,
                 };
+
+                console.log(
+                    `✅ Message ${updatedMsg.id} marked as read by role ${readerRole}`,
+                    updatedMsg
+                );
+
+                return updatedMsg;
             });
-        },
+
+            console.log("🟢 Updated messages array:", state.messages);
+        }
+
+
+
+        ,
+
 
 
         setMessages: (state, action) => {
