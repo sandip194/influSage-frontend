@@ -1,71 +1,49 @@
-import { createSlice } from '@reduxjs/toolkit';
-import Cookies from 'js-cookie';
+import { createSlice } from "@reduxjs/toolkit";
+import Cookies from "js-cookie";
+import { decodeToken } from "../../app/decodeToken";
 
-// Get from cookies
-
-const userIdFromCookie = Cookies.get("userId");
 const tokenFromCookie = Cookies.get("token");
-const roleFromCookie = Cookies.get("role");
-const nameFromCookie = Cookies.get("name");
-const pCodeFromCookie = Cookies.get("p_code");
+const decoded = tokenFromCookie ? decodeToken(tokenFromCookie) : null;
 
 const initialState = {
-  userId: userIdFromCookie ? Number(userIdFromCookie) : null,
+  userId: decoded?.id || null,
   token: tokenFromCookie || null,
-  name: nameFromCookie || null,
-  role: roleFromCookie ? Number(roleFromCookie) : null,
-  p_code: pCodeFromCookie || null, // ✅ New
+  name: decoded?.name || null,
+  role: decoded?.role || null,
+  p_code: decoded?.p_code || null,
   user: null
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     setCredentials: (state, action) => {
-      const { token, role, id, name, p_code } = action.payload;
-      const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
+      const { token } = action.payload;
+      const decoded = decodeToken(token);
 
-      state.userId = id;
+      if (!decoded) return;
+
+      state.userId = decoded.id;
+      state.role = decoded.role;
+      state.name = decoded.name;
+      state.p_code = decoded.p_code;
       state.token = token;
-      state.name = name;
-      state.role = role;
-      state.p_code = p_code || null;
 
-      Cookies.set("userId", id, { expires: new Date(expiresAt) });
-      Cookies.set("token", token, { expires: new Date(expiresAt) });
-      Cookies.set("role", role, { expires: new Date(expiresAt) });
-      Cookies.set("name", name, { expires: new Date(expiresAt) });
-      Cookies.set("tokenExpiry", expiresAt, { expires: new Date(expiresAt) });
-
-      if (p_code) {
-        Cookies.set("p_code", p_code, { expires: new Date(expiresAt) });
-      }
-    },
-
-    setUserProfile: (state, action) => {
-      state.user = action.payload;
+      Cookies.set("token", token);
     },
 
     logout: (state) => {
-
       state.userId = null;
       state.token = null;
-      state.user = null;
-      state.name = null;
       state.role = null;
-      state.p_code = null; // ✅ Clear on logout
+      state.name = null;
+      state.p_code = null;
 
-      // Remove cookies
-      Cookies.remove("userId");
       Cookies.remove("token");
-      Cookies.remove("role");
-      Cookies.remove("name");
-      Cookies.remove("p_code"); // ✅ Remove cookie
-    },
-  },
+    }
+  }
 });
 
-export const { setCredentials, setUserProfile, logout } = authSlice.actions;
-
+export const { setCredentials, logout } = authSlice.actions;
 export default authSlice.reducer;

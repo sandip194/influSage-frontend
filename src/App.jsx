@@ -69,7 +69,7 @@ import VenderDashboardLayout from './pages/vendor/dashboard/VenderDashboardLayou
 import VenderDashboardPage from './pages/vendor/dashboard/VenderDashboardPage';
 
 import BrowseInfluencerPage from './components/users/browseInfluencers/BrowseInfluencersLayout';
-import FavoritesLayout from './components/users/browseInfluencers/FavoritesLayout'; 
+import FavoritesLayout from './components/users/browseInfluencers/FavoritesLayout';
 
 import CreateCampaign from './pages/vendor/dashboard/CreateCampaign';
 import CampaignWizard from './pages/vendor/dashboard/CampaignWizard';
@@ -111,6 +111,8 @@ import ChatAppPageUser from './components/ChatAppPageUser/ChatAppPageUser';
 const App = () => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   axios.defaults.baseURL = BASE_URL;
+  axios.defaults.withCredentials = true;
+
 
   return (
     <Router>
@@ -211,7 +213,7 @@ const App = () => {
                   <Route path='campaigns' element={<CampaignRequests />} />
                   <Route path='campaigns/details/:campaignId' element={<CampaignDetailsView />} />
                   <Route path='analytics' element={<AdminContentLinks />} />
-                  <Route path='shippment' element={<AdminShippment />}/>
+                  <Route path='shippment' element={<AdminShippment />} />
                   <Route path='improper-massages' element={<AdminImproperMsg />} />
                   <Route path='support' element={<AdminMessagePage />} />
                   <Route path='settings' element={<ComingSoon />} />

@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.3.7",
     "@lottiefiles/dotlottie-react": "^0.17.7",
     "@progress/kendo-data-query": "^1.7.1",
     "@progress/kendo-licensing": "^1.7.1",
@@ -23,7 +24,7 @@
     "@reduxjs/toolkit": "^2.8.2",
     "@remixicon/react": "^4.6.0",
     "@tailwindcss/vite": "^4.1.11",
-    "antd": "^5.26.6",
+    "antd": "^5.29.3",
     "axios": "^1.10.0",
     "chart.js": "^4.5.0",
     "chartjs-plugin-zoom": "^2.2.0",
@@ -39,6 +40,7 @@
     "js-cookie": "^3.0.5",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
+    "jwt-decode": "^4.0.0",
     "lightgallery": "^2.9.0-beta.1",
     "material-react-table": "^3.2.1",
     "pdfjs-dist": "^5.4.296",
