@@ -21,6 +21,7 @@ import useSocketRegister from "../../sockets/useSocketRegister";
 const ChatWindow = ({ activeSubject, onCloseSuccess, onBack }) => {
   useSocketRegister();
   const dispatch = useDispatch();
+  const emojiPickerRef = useRef(null);
   const socket = getSocket();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [message, setMessage] = useState("");
@@ -70,10 +71,14 @@ const ChatWindow = ({ activeSubject, onCloseSuccess, onBack }) => {
     return () => socket.emit("leaveTicketRoom", activeSubject.id);
   }, [activeSubject?.id]);
 
-  useEffect(() => {
-    if (!socket) return;
+    useEffect(() => {
+      if (!socket) return;
 
-    const handleReceiveMessage = (msg) => {
+      const handleReceiveMessage = (msg) => {  const messageId =
+      msg.usersupportticketmessagesid ||
+      msg.messageId ||
+      msg.id;
+
       const file = msg.filePath || msg.filepath || msg.file || null;
       let filetype = null;
       if (file) {
@@ -83,104 +88,62 @@ const ChatWindow = ({ activeSubject, onCloseSuccess, onBack }) => {
         else filetype = "file";
       }
 
-      const formattedMsg = {
-        id: msg.usersupportticketmessagesid,
-        message: msg.message,
-        filepath: file,
-        filetype,
-        replyId: Number(msg.replyId || msg.replyid) || null,
-        replyData: msg.replyData || null,
-        sender: msg.senderId == userId ? "user" : "admin",
-        time: msg.createddate || new Date().toISOString(),
-      };
+      const replyId =
+        msg.replyId !== undefined && msg.replyId !== null
+          ? Number(msg.replyId)
+          : msg.replyid !== undefined && msg.replyid !== null
+            ? Number(msg.replyid)
+            : null;
 
-      setMessages(prev => [...prev, formattedMsg]);
-      scrollToBottom();
-    };
+          const formattedMsg = {
+            id: messageId,
+            message: msg.message || "",
+            filepath: file,
+            filetype,
+            replyId, 
+            replyData: msg.replyData || null,
+            sender: String(msg.senderId) === String(userId) ? "user" : "admin",
+            time: msg.lastmessagedate || msg.createddate || new Date().toISOString(),
+          };
 
-    socket.off("receiveSupportMessage");
-    socket.on("receiveSupportMessage", handleReceiveMessage);
+          setMessages((prev) => [...prev, formattedMsg]);
+          scrollToBottom();
+        };
+
+        socket.off("receiveSupportMessage");
+        socket.on("receiveSupportMessage", handleReceiveMessage);
   }, []);
 
 
   const handleSend = async () => {
     if (!activeSubject) return;
-    if (isMobile && (!activeSubject || isClosed)) {
-      handleBlockedAction();
-      return;
-    }
+    if (isClosed) return;
+
     if (!message.trim() && !attachedFile) return;
 
     try {
-      // 1️⃣ Send message
       const formData = new FormData();
       formData.append("p_usersupportticketid", activeSubject.id);
       formData.append("p_messages", message || "");
-      formData.append("p_replyid", replyToMessage?.id || "");
+      if (replyToMessage?.id) {
+        formData.append("p_replyid", replyToMessage.id);
+      }
 
       if (attachedFile) formData.append("file", attachedFile);
 
       await axios.post(
         "/chat/support/user-admin/send-message",
         formData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // 2️⃣ Fetch latest messages
-      const resp = await axios.get(
-        `/chat/support/user-admin/open-chat/${activeSubject.id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { p_limit: 200, p_offset: 0 },
-        }
-      );
-
-      const records = resp.data?.data?.records || [];
-
-      // 3️⃣ Sort messages
-      const sorted = records.sort(
-        (a, b) => new Date(a.createddate) - new Date(b.createddate)
-      );
-
-      // 4️⃣ Format messages
-      const formatted = sorted.map((m) => {
-        let filetype = null;
-
-        if (m.filepath) {
-          const ext = m.filepath.split(".").pop().toLowerCase();
-          if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
-          else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
-          else filetype = "file";
-        }
-
-        const isSystemMsg = m.message?.includes(
-          "Your support request has been submitted. Our team will review it shortly."
-        );
-
-        return {
-          id: m.usersupportticketmessagesid,
-          replyId: m.replyid || null,
-          message: m.message,
-          filepath: m.filepath || null,
-          filetype,
-          sender: isSystemMsg ? "admin" : (m.roleid === 4 ? "admin" : "user"),
-          time: m.createddate,
-        };
-      });
-
-      // 5️⃣ Update UI
-      setMessages(formatted);
-
-      // 6️⃣ Reset input
       setMessage("");
       setAttachedFile(null);
       setAttachedPreview(null);
       setReplyToMessage(null);
 
     } catch (err) {
-      console.error("Send message error", err);
+      console.error("❌ Send message error", err);
       toast.error("Message not sent");
     }
   };
@@ -349,6 +312,24 @@ const ChatWindow = ({ activeSubject, onCloseSuccess, onBack }) => {
     loadMessages(0);
   }, [activeSubject]);
 
+   useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showEmojiPicker &&
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+  
+    document.addEventListener("mousedown", handleClickOutside);
+  
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showEmojiPicker]);
+
   return (
     <div className="flex flex-col h-full relative overflow-hidden rounded-md">
       {!activeSubject && (
@@ -428,6 +409,7 @@ const ChatWindow = ({ activeSubject, onCloseSuccess, onBack }) => {
           <div className="flex-1 overflow-y-auto space-y-4 p-4 pb-28"
             ref={chatRef}
             onScroll={handleScroll}
+            onClick={() => setShowEmojiPicker(false)}
           >
             {loadingMore && (
               <div className="flex justify-center py-2">
@@ -522,15 +504,16 @@ const ChatWindow = ({ activeSubject, onCloseSuccess, onBack }) => {
                       {/* reply button */}
                       {hoveredMsgId === msg.id && (
                         <button
-                          onClick={() =>
+                          onClick={() => {
+                            setShowEmojiPicker(false);
                             setReplyToMessage({
                               id: msg.id,
                               message: msg.message,
                               filepath: msg.filepath,
                               filetype: msg.filetype,
                               sender: msg.sender,
-                            })
-                          }
+                            });
+                          }}
                           className={`absolute -top-6 p-1 bg-white shadow hover:bg-gray-100 transition ${msg.sender === "user" ? "right-0" : "left-0"
                             }`}
                         >
@@ -757,6 +740,7 @@ const ChatWindow = ({ activeSubject, onCloseSuccess, onBack }) => {
       {/* emoji picker */}
       {showEmojiPicker && (
         <motion.div
+          ref={emojiPickerRef}
           className="absolute bottom-28 right-2 sm:right-10"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}

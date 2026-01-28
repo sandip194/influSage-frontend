@@ -30,6 +30,11 @@ import NotificationDropdown from "./NotificationDropdown";
 import MessageDropdown from "./MessageDropdown";
 import { clearNotifications } from "../../../features/socket/notificationSlice";
 import useSocketRegister from "../../../sockets/useSocketRegister";
+import {
+  setUnreadMessages,
+  addUnreadMessage,
+  removeUnreadByConversation,
+} from "../../../features/socket/chatSlice";
 
 const { Text } = Typography;
 
@@ -56,20 +61,22 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const [dropdownNotifications, setDropdownNotifications] = useState([]);
   const [dropdownLoading, setDropdownLoading] = useState(false);
 
-  const [unreadMessages, setUnreadMessages] = useState([]);
+  // const [unreadMessages, setUnreadMessages] = useState([]);
+  const unreadMessages = useSelector((state) => state.chat.unreadMessages );
+
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [initialMessagesFetched, setInitialMessagesFetched] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
 
   const basePath = role === 1 ? "/dashboard" : "/vendor-dashboard";
-  const removeFromHeader = (conversationId) => {
-    setUnreadMessages((prev) =>
-      prev.filter(
-        (m) => String(m.conversationid) !== String(conversationId)
-      )
-    );                               
-  };
+  // const removeFromHeader = (conversationId) => {
+  //   setUnreadMessages((prev) =>
+  //     prev.filter(
+  //       (m) => String(m.conversationid) !== String(conversationId)
+  //     )
+  //   );                               
+  // };
 
   // ======================================================
   // LOGOUT
@@ -103,12 +110,11 @@ const DeshboardHeader = ({ toggleSidebar }) => {
           : msg.readbyinfluencer === false
       );
 
-      // ✅ DO NOT re-add deleted conversations
       const cleaned = filtered.filter(
         msg => !deletedConversationsRef.current.has(String(msg.conversationid))
       );
 
-      setUnreadMessages(cleaned);
+      dispatch(setUnreadMessages(cleaned));
       setInitialMessagesFetched(true);
     } catch (err) {
       console.error("❌ refreshUnreadMessages failed", err);
@@ -116,84 +122,84 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   }, [token, role]);
 
 
-  useEffect(() => {
+ useEffect(() => {
   if (!socket) return;
 
   const messageHandler = (payload) => {
+    if (!payload?.conversationid) return;
+
+    const conversationid = String(payload.conversationid);
     const senderId = String(payload.userid);
     const senderRole = String(payload.roleid);
-    const conversationid = String(payload.conversationid);
 
-    if (
-      senderId === String(userId) &&
-      senderRole === String(role)
-    ) {
+    // console.log("📨 receiveMessage", {
+    //   conversationid,
+    //   activeConversationId,
+    //   senderId,
+    // });
+
+    if ( senderId === String(userId) && senderRole === String(role) ) {
       return;
     }
 
-    setUnreadMessages((prev) => {
-      const exists = prev.some(
-        (m) => String(m.conversationid) === conversationid
-      );
-      if (exists) return prev;
+    if ( activeConversationId !== null &&  String(activeConversationId) === conversationid
+    ) {
+      // console.log("🚫 ignored (chat open)");
+      return;
+    }
 
-      return [{ ...payload, conversationid }, ...prev];
-    });
+    dispatch(addUnreadMessage({ ...payload, conversationid }));
   };
 
   socket.on("receiveMessage", messageHandler);
   return () => socket.off("receiveMessage", messageHandler);
-
-}, [socket, userId, role, activeConversationId]); 
-
+}, [socket, userId, role, activeConversationId]);
 
 
 
-  useEffect(() => {
-    if (!socket) return;
 
-    const statusHandler = (payload) => {
-      const conversationId = String(
-        payload.conversationId ?? payload.conversationid
-      );
+useEffect(() => {
+  if (!socket) return;
 
-      const readByMe =
-        (String(role) === "2" && payload.readbyvendor === true) ||
-        (String(role) === "1" && payload.readbyinfluencer === true);
+  const statusHandler = (payload) => {
+    // console.log("📥 updateMessageStatus RECEIVED:", payload);
 
-      if (!readByMe) return;
+    const conversationId = String(payload.conversationId);
 
-      // REALTIME REMOVE FROM HEADER
-      setUnreadMessages((prev) =>
-        prev.filter(
-          (msg) => String(msg.conversationid) !== conversationId
-        )
-      );
-    };
+    dispatch(removeUnreadByConversation(conversationId));
+  };
 
-    socket.on("updateMessage", statusHandler);
-    return () => socket.off("updateMessageStatus", statusHandler);
-  }, [socket, role]);
+  socket.on("updateMessageStatus", statusHandler);
+  return () => socket.off("updateMessageStatus", statusHandler);
+}, [socket]);
 
   useEffect(() => {
     if (!socket) return;
 
     const deleteHandler = ({ messageId, conversationId }) => {
-      console.log("🗑️ deleteMessage payload:", { messageId, conversationId });
+      // console.log("🗑️ deleteMessage payload:", { messageId, conversationId });
 
       if (!conversationId) return;
 
       deletedConversationsRef.current.add(String(conversationId));
 
-      setUnreadMessages(prev =>
-        prev.filter(
-          msg => String(msg.conversationid) !== String(conversationId)
-        )
-      );
+      dispatch(removeUnreadByConversation(activeConversationId));
     };
     socket.on("deleteMessage", deleteHandler);
     return () => socket.off("deleteMessage", deleteHandler);
   }, [socket]);
+    
+  useEffect(() => {
+    if (!activeConversationId) return;
+
+    // console.log("🧹 activeConversationId changed → clearing unread:", activeConversationId);
+
+    setUnreadMessages(prev =>
+      prev.filter(
+        msg => String(msg.conversationid) !== String(activeConversationId)
+      )
+    );
+  }, [activeConversationId]);
 
 
   // Fetch initial unread messages for badge
@@ -350,13 +356,22 @@ const DeshboardHeader = ({ toggleSidebar }) => {
           }}
           placement={isMobile ? "bottom" : "bottomRight"}
           overlay={<MessageDropdown
-            messages={memoizedMessages}
-            loading={!initialMessagesFetched || loadingMessages}
-            onOpenConversation={(id) => {
-              removeFromHeader(id);
-              navigate(`/chat/${id}`);
-            }}
-          />
+          messages={memoizedMessages}
+          loading={!initialMessagesFetched || loadingMessages}
+          onOpenConversation={(id) => {
+
+          dispatch(removeUnreadByConversation(id));
+
+
+            socket?.emit("messageRead", {
+              conversationId: id,
+              role,
+              userId,
+            });
+
+            navigate(`/chat/${id}`);
+          }}
+        />
           }
           trigger={["click"]}
           arrow

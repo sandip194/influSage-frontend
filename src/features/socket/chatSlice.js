@@ -5,6 +5,7 @@ const chatSlice = createSlice({
     name: "chat",
     initialState: {
         messages: [],
+        unreadMessages: [],   
         activeChat: null,
         activeConversationId: null,
     },
@@ -98,8 +99,45 @@ const chatSlice = createSlice({
         setMessages: (state, action) => {
             state.messages = action.payload;
         },
+        setUnreadMessages: (state, action) => {
+            state.unreadMessages = action.payload;
+            },
+
+            addUnreadMessage: (state, action) => {
+            const incoming = action.payload;
+            const exists = state.unreadMessages.some(
+                m => String(m.conversationid) === String(incoming.conversationid)
+            );
+            if (!exists) {
+                state.unreadMessages.unshift(incoming);
+            }
+            },
+
+            removeUnreadByConversation: (state, action) => {
+            state.unreadMessages = state.unreadMessages.filter(
+                m => String(m.conversationid) !== String(action.payload)
+            );
+            },
+
+            clearAllUnread: (state) => {
+            state.unreadMessages = [];
+        },
     },
 });
 
-export const { setActiveChat, addMessage, setActiveConversation, updateMessage, updateMessageStatus, deleteMessage, undoDeleteMessage, setMessageRead, setMessages } = chatSlice.actions;
+export const {
+  setActiveChat,
+  addMessage,
+  setActiveConversation,
+  updateMessage,
+  deleteMessage,
+  undoDeleteMessage,
+  setMessageRead,
+  setMessages,
+  setUnreadMessages,
+  addUnreadMessage,
+  removeUnreadByConversation,
+  clearAllUnread,
+} = chatSlice.actions;
+
 export default chatSlice.reducer;

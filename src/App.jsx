@@ -53,8 +53,7 @@ import Details from './components/users/MyCampaignsLayout/Details';
 import Payment from './components/users/payment/PaymentLayout';
 import Analytics from './components/users/analytics/AnalyticsLayout';
 
-import ChatAppPage from './components/chatApp/ChatAppPage';
-import InfluencerMessagePage from './components/influencerChat/ConversationPage';
+import SupportMessagePage from './components/supportChat/ConversationPage';
 
 import Profile from './components/users/EditProfile/Profile';
 import EditProfile from './components/users/EditProfile/editProfile';
@@ -78,7 +77,6 @@ import CampaignWizard from './pages/vendor/dashboard/CampaignWizard';
 import VendorCampaign from './components/users/vendorCampaign/VendorCampaignsLayout';
 import CampaignDetails from './components/users/vendorCampaign/CampaignDetails';
 
-import ChatAppPageVendor from './components/chatAppVendor/ChatAppPageVendor';
 import VendorConversationPage from './components/vendorChat/VendorConversationPage';
 
 import BrandAnalyticsDashboard from './components/vendor/analytics/BrandAnalyticsDashboard';
@@ -165,9 +163,8 @@ const App = () => {
                     <Route path='my-contract/details/:campaignId' element={<Details />} />
                     <Route path='payment' element={<Payment />} />
                     <Route path='analytics' element={<Analytics />} />
-                    {/* <Route path='messages' element={<ChatAppPage />} /> */}
                     <Route path="messages" element={<ChatAppPageUser />} />
-                    <Route path='messagepage' element={<InfluencerMessagePage />} />
+                    <Route path='messagepage' element={<SupportMessagePage />} />
                     <Route path='my-profile' element={<Profile />} />
                     <Route path='editProfile' element={<EditProfile />} />
                     <Route path='setting' element={<Settings />} />
@@ -193,9 +190,8 @@ const App = () => {
                     <Route path='vendor-campaign/edit-campaign/:campaignId' element={<CampaignWizard />} />
                     <Route path='vendor-campaign' element={<VendorCampaign />} />
                     <Route path='vendor-campaign/campaignDetails/:campaignId' element={<CampaignDetails />} />
-                    {/* <Route path='messages' element={<ChatAppPageVendor />} /> */}
-                     <Route path="messages" element={<ChatAppPageUser />} />
-                    <Route path='vendorMessagepage' element={<VendorConversationPage />} />
+                    <Route path="messages" element={<ChatAppPageUser />} />
+                    <Route path='messagepage' element={<SupportMessagePage />} />
                     <Route path='analytics' element={<BrandAnalyticsDashboard />} />
                     <Route path='edit-profile' element={<EditVendorProfile />} />
                     <Route path='my-profile' element={<VendorMyProfile />} />

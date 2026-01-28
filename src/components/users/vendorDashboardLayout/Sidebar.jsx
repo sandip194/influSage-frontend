@@ -12,15 +12,16 @@ import {
 } from '@remixicon/react';
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../../features/auth/authSlice';
-import { Tooltip } from 'antd';
+import { Tooltip } from 'antd';``
 import { clearNotifications } from '../../../features/socket/notificationSlice';
 import { resetSocket } from '../../../sockets/socket';
 
 
 const Sidebar = forwardRef((props, ref) => {
+    const unreadMessageCount = useSelector( (state) => state.chat.unreadMessages?.length || 0 );
     const [isOpen, setIsOpen] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
 
@@ -76,7 +77,7 @@ const Sidebar = forwardRef((props, ref) => {
     ];
 
     const supportItems = [
-        { icon: <RiCustomerService2Line className="w-5" />, label: "Admin Support", to: "/vendor-dashboard/vendorMessagepage" },
+        { icon: <RiCustomerService2Line className="w-5" />, label: "Admin Support", to: "/vendor-dashboard/messagepage" },
     ];
     return (
         <>
@@ -155,7 +156,12 @@ const Sidebar = forwardRef((props, ref) => {
          ${isActive ? "bg-[#0D132D] text-white" : "text-[#0D132D]"}`
                                 }
                             >
-                                <span className="text-base">{item.icon}</span>
+                                <span className="text-base relative">
+                                    {item.icon}
+                                    {item.label === "Messages" && unreadMessageCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full" />
+                                    )}
+                                </span>
                                 {isOpen && <span className="text-sm">{item.label}</span>}
                             </NavLink>
                         </Tooltip>
