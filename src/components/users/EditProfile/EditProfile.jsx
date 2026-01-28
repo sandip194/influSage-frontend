@@ -126,7 +126,7 @@ const EditProfile = () => {
 
         {/* Content */}
         <div className="md:col-span-3">
-          <div className="bg-white p-6 rounded-2xl shadow-sm min-h-[400px] w-full">
+          <div className="bg-white p-0 rounded-2xl shadow-sm min-h-[400px] w-full">
             {steps[currentStep]?.component}
           </div>
         </div>

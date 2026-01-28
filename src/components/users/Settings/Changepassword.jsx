@@ -6,6 +6,11 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
+
+const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+
 const ChangePassword = () => {
   const [form] = Form.useForm();
   const { token } = useSelector((state) => state.auth);
@@ -57,7 +62,11 @@ const ChangePassword = () => {
           label="Current Password"
           name="currentPassword"
           rules={[
-            { required: true, message: "Please enter your current password" },
+            { required: true, message: "Current password is required" },
+            {
+              min: 8,
+              message: "Current password must be at least 8 characters",
+            },
           ]}
         >
           <Input.Password
@@ -73,9 +82,30 @@ const ChangePassword = () => {
         <Form.Item
           label="New Password"
           name="newPassword"
+          dependencies={["currentPassword"]}
           rules={[
-            { required: true, message: "Please enter a new password" },
-            { min: 6, message: "Password must be at least 6 characters long" },
+            { required: true, message: "New password is required" },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value) return Promise.resolve();
+
+                if (!passwordRegex.test(value)) {
+                  return Promise.reject(
+                    new Error(
+                      "New password must contain uppercase, lowercase, number and special character"
+                    )
+                  );
+                }
+
+                if (value === getFieldValue("currentPassword")) {
+                  return Promise.reject(
+                    new Error("New password cannot be the same as current password")
+                  );
+                }
+
+                return Promise.resolve();
+              },
+            }),
           ]}
         >
           <Input.Password
@@ -87,20 +117,21 @@ const ChangePassword = () => {
           />
         </Form.Item>
 
+
         {/* Confirm New Password */}
         <Form.Item
           label="Confirm New Password"
           name="confirmPassword"
           dependencies={["newPassword"]}
           rules={[
-            { required: true, message: "Please confirm your new password" },
+            { required: true, message: "Confirm password is required" },
             ({ getFieldValue }) => ({
               validator(_, value) {
-                if (!value || getFieldValue("newPassword") === value) {
+                if (!value || value === getFieldValue("newPassword")) {
                   return Promise.resolve();
                 }
                 return Promise.reject(
-                  new Error("Passwords do not match")
+                  new Error("Confirm password does not match new password")
                 );
               },
             }),
@@ -114,6 +145,7 @@ const ChangePassword = () => {
             }
           />
         </Form.Item>
+
 
         {/* Submit Button */}
         <div className="flex items-center justify-between mt-6">

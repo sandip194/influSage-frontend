@@ -556,18 +556,19 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
               },
             ]}
           >
-            <Checkbox>
-              By adding this bank account, I agree to the{" "}
+            <div className="flex flex-wrap items-center gap-1">
+
+              <Checkbox />
+              <span>
+                By adding this bank account, I agree to the
+              </span>
               <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setTermsVisible(true);
-                }}
+                onClick={() => setTermsVisible(true)}
                 className="text-blue-600 cursor-pointer font-semibold hover:underline"
               >
                 Payment Terms & Conditions
               </span>
-            </Checkbox>
+            </div>
           </Form.Item>
 
 

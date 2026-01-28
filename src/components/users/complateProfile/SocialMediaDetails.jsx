@@ -51,6 +51,23 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
   }, [providers, BASE_URL]);
 
   const onFinish = async (values) => {
+    // console.log('🚀 onFinish called with values:', values);
+
+    // Check for invalid followers before proceeding
+    const hasInvalidFollowers = platforms.some(p => {
+      const followers = values[p.followersField];
+      console.log(`🔍 Checking ${p.followersField}: followers = ${followers}, is > 500000000? ${followers > 500000000}`);
+      return followers && followers > 500000000;
+    });
+
+    // console.log('🚫 hasInvalidFollowers:', hasInvalidFollowers);
+
+    if (hasInvalidFollowers) {
+      console.log('❌ Blocking submission due to invalid followers');
+      message.error("Followers cannot exceed 500,000,000. Please correct and try again.");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       if (!token || !userId) {
@@ -60,11 +77,17 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
 
       const socialaccountjson = platforms
         .filter(p => values[p.urlField])
-        .map(p => ({
-          providerid: p.providerid,
-          handleslink: values[p.urlField],
-          nooffollowers: values[p.followersField] || 0,
-        }));
+        .map(p => {
+          const clampedFollowers = Math.min(values[p.followersField] || 0, 500000000);
+          console.log(`📊 Mapping ${p.followersField}: original = ${values[p.followersField]}, clamped = ${clampedFollowers}`);
+          return {
+            providerid: p.providerid,
+            handleslink: values[p.urlField],
+            nooffollowers: clampedFollowers,
+          };
+        });
+
+      // console.log('📤 socialaccountjson:', socialaccountjson);
 
       const hasValidEntry = platforms.some(p => {
         const url = values[p.urlField];
@@ -83,6 +106,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
       const formData = new FormData();
       formData.append('socialaccountjson', JSON.stringify(socialaccountjson));
 
+      console.log('🌐 Making API call...');
       const response = await axios.post(
         'user/complete-profile',
         formData,
@@ -124,9 +148,10 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
       data.forEach(item => {
         const platform = platforms.find(p => p.providerid === item.providerid);
         if (platform) {
+          //const clampedFollowers = Math.min(typeof item.nooffollowers === 'number' ? item.nooffollowers : 0, 500000000);
+          // console.log(`📥 Prefilling ${platform.followersField}: original = ${item.nooffollowers}, clamped = ${clampedFollowers}`);
           initialValues[platform.urlField] = item.handleslink || '';
-          initialValues[platform.followersField] =
-            typeof item.nooffollowers === 'number' ? item.nooffollowers : undefined;
+          initialValues[platform.followersField] = Number(item.nooffollowers);
         }
       });
 
@@ -138,7 +163,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
   }, [data, platforms, form]);
 
   return (
-    <div className="bg-white p-2 rounded-3xl">
+    <div className="bg-white p-6 rounded-3xl">
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Connect Your Social Media</h2>
       <p className="text-gray-500 mb-6">Let’s connect your social media profiles to help us understand your reach better.</p>
 
@@ -147,6 +172,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
         layout="vertical"
         onFinish={onFinish}
         onFinishFailed={({ errorFields }) => {
+          // console.log('❌ onFinishFailed called with errorFields:', errorFields);
           if (errorFields.length > 0) {
             // scroll to the first error field
             form.scrollToField(errorFields[0].name, {
@@ -156,6 +182,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
           }
         }}
         onValuesChange={(changedValues) => {
+          // console.log('🔄 onValuesChange called with changedValues:', changedValues);
           setIsFormChanged(true);
           const values = form.getFieldsValue();
           const socialData = platforms
@@ -172,7 +199,8 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
           changedFields.forEach(field => {
             platforms.forEach(platform => {
               if (field === platform.followersField) {
-                form.validateFields([platform.urlField]);
+                // console.log(`🔍 Triggering validation for ${platform.followersField}`);
+                form.validateFields([platform.urlField, platform.followersField]);
               }
             });
           });
@@ -202,6 +230,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
                       {
                         validator: (_, value) => {
                           const followers = form.getFieldValue(platform.followersField);
+                          // console.log(`🔍 Validating URL for ${platform.urlField}: followers = ${followers}, value = ${value}`);
                           if (followers && !value) {
                             return Promise.reject(new Error("Link is required if followers are entered"));
                           }
@@ -248,10 +277,15 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
                     rules={[
                       {
                         validator: (_, value) => {
+                          // console.log(`🔍 Validating followers for ${platform.followersField}: value = ${value}`);
                           const url = form.getFieldValue(platform.urlField);
                           if (!url && !value) return Promise.resolve(); // allow both empty
                           if (url && (!value || value < 1000)) {
                             return Promise.reject(new Error("At least 1k followers required"));
+                          }
+                          if (value > 500000000) {
+                            console.log(`❌ Followers exceed max: ${value} > 500000000`);
+                            return Promise.reject(new Error("Followers cannot exceed 500,000,000"));
                           }
                           return Promise.resolve();
                         }
@@ -260,14 +294,19 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
                   >
                     <InputNumber
                       size="large"
-                      min={0}
-                      max={500000000}
+                      //min={0}
+                      //max={500000000}
                       controls={false}
                       className="w-full rounded-lg border border-gray-300"
                       placeholder="How Many Followers ?"
                       style={{ width: "100%" }}
                       formatter={(value) => (value ? value.replace(/\D/g, "") : "")}
                       parser={(value) => value.replace(/\D/g, "")}
+                      onChange={(value) => {
+
+                          form.setFieldsValue({ [platform.followersField]: value });
+                        
+                      }}
                     />
                   </Form.Item>
                 </div>

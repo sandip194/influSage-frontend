@@ -386,7 +386,7 @@ export default function ContractModal({
                                     addonBefore="₹"
                                     style={{ width: "100%" }}
                                     min={0}
-                                    maxLength={10}
+                                    maxLength={9}
                                     onChange={() => form.validateFields(["payment"])}
                                     placeholder="0"
                                     controls={false} // hides the up/down arrows
@@ -659,7 +659,7 @@ export default function ContractModal({
                                                 setSubmitAttempted(false);
                                             }}
                                             style={{ width: "100%" }}
-                                            disabled={loadingPlatforms }
+                                            disabled={loadingPlatforms}
                                         >
                                             {platforms.map((p) => (
                                                 <Select.Option key={p.providerid} value={p.providerid}>
@@ -673,73 +673,108 @@ export default function ContractModal({
                         </div>
 
                         {/*  Product Link + Vendor Address (OR)  */}
+                        {/* Product Link / Vendor Address (full width) */}
                         <div className="md:col-span-2">
+                            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-end">
+                                <Form.Item
+                                    name="productLink"
+                                    label={
+                                        <span className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                                            Product Link
+                                        </span>
+                                    }
+                                    rules={[
+                                        ({ getFieldValue }) => ({
+                                            validator(_, value) {
+                                                const vendorAddress = getFieldValue("vendorAddress");
 
-                            {/* One-line layout */}
-                            <Form.Item
-                                label="Product Link / Vendor Address"
-                                name="productOrAddress"
-                                dependencies={["productLink", "vendorAddress"]}
-                                rules={[
-                                    ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                        const address = getFieldValue("vendorAddress");
+                                                // If productLink is not empty, validate it as a URL
+                                                if (value) {
+                                                    const hasProtocol =
+                                                        value.startsWith("http://") ||
+                                                        value.startsWith("https://") ||
+                                                        value.startsWith("www.");
 
-                                        if (!value && !address) {
-                                        return Promise.reject(
-                                            new Error("Please enter Product Link or Vendor Address")
-                                        );
-                                        }
+                                                    if (!hasProtocol) {
+                                                        return Promise.reject(
+                                                            new Error("Link must start with http://, https://, or www.")
+                                                        );
+                                                    }
 
-                                        if (!value) return Promise.resolve();
+                                                    // Normalize URL and check validity
+                                                    const normalized = value.startsWith("http")
+                                                        ? value
+                                                        : `https://${value}`;
 
-                                        const hasProtocol =
-                                        value.startsWith("http://") ||
-                                        value.startsWith("https://") ||
-                                        value.startsWith("www.");
+                                                    try {
+                                                        new URL(normalized);
+                                                    } catch {
+                                                        return Promise.reject(new Error("Invalid product link"));
+                                                    }
+                                                } else {
+                                                    // If productLink is empty, vendorAddress must not be empty
+                                                    if (!vendorAddress) {
+                                                        return Promise.reject(
+                                                            new Error("Please enter Product Link or Vendor Address")
+                                                        );
+                                                    }
+                                                }
 
-                                        if (!hasProtocol) {
-                                        return Promise.reject(
-                                            new Error("Link must start with http://, https://, or www.")
-                                        );
-                                        }
+                                                return Promise.resolve();
+                                            },
+                                        }),
+                                    ]}
+                                    style={{ marginBottom: 0 }}
+                                >
+                                    <Input
+                                        size="large"
+                                        placeholder="Ente a valid product link"
+                                        onChange={() => form.validateFields(["productLink", "vendorAddress"])}
+                                    />
+                                </Form.Item>
 
-                                        // ✅ Normalize URL
-                                        const normalized = value.startsWith("http")
-                                        ? value
-                                        : `https://${value}`;
+                                {/* OR */}
+                                <div className="flex justify-center items-center text-sm font-semibold text-subtext-light">
+                                    OR
+                                </div>
 
-                                        try {
-                                        new URL(normalized);
-                                        } catch {
-                                        return Promise.reject(new Error("Invalid product link"));
-                                        }
+                                <Form.Item
+                                    name="vendorAddress"
+                                    label={
+                                        <span className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                                            Vendor Address
+                                        </span>
+                                    }
+                                    rules={[
+                                        ({ getFieldValue }) => ({
+                                            validator(_, value) {
+                                                const productLink = getFieldValue("productLink");
 
-                                        return Promise.resolve();
-                                    },
-                                    }),
-                                ]}
-                                style={{ marginBottom: 4 }}
-                            >
-                               <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center">
-  
-                                    <Form.Item name="productLink" noStyle>
-                                        <Input size="large" placeholder="Enter product link" />
-                                    </Form.Item>
+                                                // If vendorAddress is empty, productLink must not be empty (and must be valid if provided)
+                                                if (!value) {
+                                                    if (!productLink) {
+                                                        return Promise.reject(
+                                                            new Error("Please enter Product Link or Vendor Address")
+                                                        );
+                                                    }
+                                                    // If productLink is provided, it should already be validated above, but we can add a check here if needed
+                                                    // For now, rely on productLink's validation
+                                                }
 
-                                    {/* OR */}
-                                    <div className="flex justify-center items-center text-sm font-semibold text-subtext-light">
-                                        OR
-                                    </div>
-
-                                    <Form.Item name="vendorAddress" noStyle>
-                                        <Input size="large" placeholder="Enter vendor address" />
-                                    </Form.Item>
-
-                                    </div>
-                            </Form.Item>
+                                                return Promise.resolve();
+                                            },
+                                        }),
+                                    ]}
+                                    style={{ marginBottom: 0 }}
+                                >
+                                    <Input
+                                        size="large"
+                                        placeholder="Enter vendor address"
+                                        onChange={() => form.validateFields(["productLink", "vendorAddress"])}
+                                    />
+                                </Form.Item>
+                            </div>
                         </div>
-
 
 
                         {/* Notes (full width) */}

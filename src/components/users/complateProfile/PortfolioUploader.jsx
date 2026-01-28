@@ -220,7 +220,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
 
 
   return (
-    <div className="bg-white p-2 rounded-3xl">
+    <div className="bg-white p-6 rounded-3xl">
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Portfolio</h2>
       <p className="text-gray-600 mb-6 text-sm sm:text-base">
         Upload your portfolio or recent works
