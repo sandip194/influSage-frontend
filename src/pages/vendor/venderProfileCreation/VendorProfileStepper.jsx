@@ -158,6 +158,7 @@ export const VendorProfileStepper = () => {
             ),
         },
     ];
+    const isThankYouStep = isCompleted && currentStep === steps.length;
 
     const getUserProfileCompletionData = async () => {
         try {
@@ -285,6 +286,7 @@ export const VendorProfileStepper = () => {
                         current={typeof currentStep === "number" ? currentStep : steps.length}
                         items={steps.map((s) => ({ title: s.title }))}
                         onChange={(step) => {
+                            if (isThankYouStep) return;
                             if (completedSteps[step] || step <= currentStep) {
                                 setCurrentStep(step);
                                 setIsMobileSidebarOpen(false);
@@ -312,6 +314,7 @@ export const VendorProfileStepper = () => {
                                         : "wait",
                             }))}
                             onChange={(step) => {
+                                if (isThankYouStep) return;
                                 if (completedSteps[step] || step <= currentStep) {
                                     setCurrentStep(step);
                                 }
