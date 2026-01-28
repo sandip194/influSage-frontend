@@ -77,6 +77,17 @@ export default function ChatAppPageUser() {
     return () => socket.off("syncReadStatus", handleSyncRead);
   }, [socket, conversationId]);
 
+  useEffect(() => {
+    if (!conversationId) return;
+
+    dispatch(setActiveConversation(conversationId));
+
+    return () => {
+      dispatch(setActiveConversation(null));
+      // console.log("🧹 activeConversationId cleared");
+    };
+  }, [conversationId, dispatch]);
+
   const fetchMessages = async () => {
     if (!conversationId || !token) return;
 

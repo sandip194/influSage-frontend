@@ -20,6 +20,7 @@ import useSocketRegister from "../../../sockets/useSocketRegister";
 
 const AdminChatWindow = ({ activeSubject, onBack }) => {
   useSocketRegister();
+  const emojiPickerRef = useRef(null);
   const dispatch = useDispatch();
   const socket = getSocket();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -71,6 +72,11 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
     if (!socket || !activeSubject?.id) return;
 
     const handleReceiveMessage = (msg) => {
+      const messageId =
+        msg.usersupportticketmessagesid ||
+        msg.messageId
+        msg.id;
+
       const file = msg.filePath || msg.filepath || msg.file || null;
 
       let filetype = null;
@@ -81,28 +87,21 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
         else filetype = "file";
       }
 
-      const replyId = msg.replyId ?? null;
-
-      setMessages(prev => {
-        const replyData = replyId
-          ? prev.find(m => String(m.id) === String(replyId))
-          : null;
-
-        return [
-          ...prev,
-          {
-            id: msg.usersupportticketmessagesid,
-            message: msg.message || "",
-            filepath: file,
-            filetype,
-            replyId,
-            replyData,
-            sender:
-              String(msg.senderId) === String(userId) ? "admin" : "user",
-            time: msg.createddate || new Date().toISOString(),
-          },
-        ];
-      });
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: messageId,
+          message: msg.message || "",
+          filepath: file,
+          filetype,
+          replyId: msg.replyId ?? null,
+          sender:
+            String(msg.senderId) === String(userId)
+              ? "admin"
+              : "user",
+          time: msg.lastmessagedate || new Date().toISOString(),
+        },
+      ]);
     };
 
     // socket.off("receiveSupportMessage");
@@ -114,72 +113,36 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
   }, [socket, activeSubject?.id, userId]);
 
   const handleSend = async () => {
+    setShowEmojiPicker(false);
     if (!activeSubject) return;
-    if (isMobile && (!activeSubject || isResolved)) {
-      handleBlockedAction();
-      return;
-    }
+    if (isMobile && (!activeSubject || isResolved)) return;
     if (!message.trim() && !attachedFile) return;
 
     try {
       const formData = new FormData();
       formData.append("p_usersupportticketid", activeSubject.id);
       formData.append("p_messages", message || "");
-      formData.append("p_replyid", replyToMessage?.id || "");
-      if (attachedFile) formData.append("file", attachedFile);
 
-      const res = await axios.post(
+      if (replyToMessage?.id) {
+        formData.append("p_replyid", replyToMessage.id);
+      }
+
+      if (attachedFile) {
+        formData.append("file", attachedFile);
+      }
+
+      await axios.post(
         "/chat/support/user-admin/send-message",
         formData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      const resp = await axios.get(
-        `/chat/support/user-admin/open-chat/${activeSubject.id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { p_limit: 200, p_offset: 0 },
-        }
-      );
-
-      const sorted = (resp.data?.data?.records || []).sort(
-        (a, b) => new Date(a.createddate) - new Date(b.createddate)
-      );
-
-      const formatted = sorted.map((m) => {
-        let filetype = null;
-        if (m.filepath) {
-          const ext = m.filepath.split(".").pop().toLowerCase();
-          if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
-          else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
-          else filetype = "file";
-        }
-        let isSystemMsg = m.message?.includes(
-          "Your support request has been submitted. Our team will review it shortly."
-        );
-
-        return {
-          id: m.usersupportticketmessagesid,
-          replyId: m.replyid || null,
-          message: m.message,
-          filepath: m.filepath || null,
-          filetype,
-          sender: isSystemMsg ? "admin" : (m.roleid === 4 ? "admin" : "user"),
-          time: m.createddate,
-        };
-      });
-
-
-      setMessages(formatted);
 
       setMessage("");
       setAttachedFile(null);
       setAttachedPreview(null);
       setReplyToMessage(null);
     } catch (err) {
-      console.error("Send message error", err);
+      console.error("❌ Send message error", err);
       toast.error("Message not sent");
     }
   };
@@ -334,6 +297,24 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
     loadMessages(0);
   }, [activeSubject?.id]);
 
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      showEmojiPicker &&
+      emojiPickerRef.current &&
+      !emojiPickerRef.current.contains(event.target)
+    ) {
+      setShowEmojiPicker(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [showEmojiPicker]);
+
 
   return (
     <div className="flex flex-col h-full relative overflow-hidden rounded-md">
@@ -407,6 +388,7 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
             className="flex-1 overflow-y-auto space-y-4 p-4 pb-28"
             ref={chatRef}
             onScroll={handleScroll}
+            onClick={() => setShowEmojiPicker(false)}
           >
             {loadingMore && (
               <div className="flex justify-center py-2">
@@ -426,7 +408,7 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className={`relative flex transition-all duration-300 ${msg.sender === "admin" ? "justify-end" : "justify-start"
-                    } ${highlightMsgId === msg.id ? "bg-blue-200 rounded-xl p-1" : ""}`}
+                    } ${highlightMsgId === msg.id ? "bg-blue-100 rounded-xl p-1" : ""}`}
                 >
                   <div className="flex flex-col max-w-[65%]">
                     <div
@@ -516,15 +498,16 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
                       {/* reply button */}
                       {hoveredMsgId === msg.id && (
                         <button
-                          onClick={() =>
+                          onClick={() => {
+                            setShowEmojiPicker(false); 
                             setReplyToMessage({
                               id: msg.id,
                               message: msg.message,
                               filepath: msg.filepath,
                               filetype: msg.filetype,
                               sender: msg.sender,
-                            })
-                          }
+                            });
+                          }}                         
                           className={`absolute -top-6 p-1 bg-white shadow hover:bg-gray-100 transition ${msg.sender === "admin" ? "right-0" : "left-0"
                             }`}
                         >
@@ -657,46 +640,59 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
               onClick={() => {
                 setAttachedPreview(null);
                 setAttachedFile(null);
-              }}
-              className="text-gray-600 hover:text-red-600 text-lg font-bold"
+                }}
+                className="text-gray-600 hover:text-red-600 text-lg font-bold"
+              >
+                ✕
+              </button>
+              </div>
+            )}
+
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className={`flex items-center gap-2 sm:gap-3
+              bg-gray-300 rounded-full
+              px-2 sm:px-4 py-2
+              my-2 sm:my-3
+              shadow-lg relative
+              ${!activeSubject ? "opacity-60" : "opacity-100"}
+            `}
             >
-              ✕
-            </button>
-          </div>
-        )}
-
-        <motion.div
-          initial={{ scale: 0.92, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className={`flex items-center gap-2 sm:gap-3
-            bg-gray-300 rounded-full
-            px-2 sm:px-4 py-2
-            my-2 sm:my-3
-            shadow-lg relative
-          ${!activeSubject ? "opacity-60" : "opacity-100"}
-        `}
-        >
-          <textarea
-            disabled={
-              !activeSubject ||
-              !activeSubject?.isclaimedbyadmin ||
-              activeSubject.status?.toLowerCase() === "open" ||
-              activeSubject.status?.toLowerCase() === "closed"
-            }
-            placeholder={
-              !activeSubject?.isclaimedbyadmin
+              <textarea
+              onClick={() => setShowEmojiPicker(false)} 
+              disabled={
+                !activeSubject ||
+                !activeSubject?.isclaimedbyadmin ||
+                isResolved ||
+                activeSubject.status?.toLowerCase() === "open" ||
+                activeSubject.status?.toLowerCase() === "closed"
+              }
+              placeholder={
+                !activeSubject?.isclaimedbyadmin
                 ? "Claim the ticket to send messages..."
+                : isResolved
+                ? "Ticket is resolved"
                 : "Type your message..."
-            }
-            value={message}
-            onKeyDown={handleKeyPress}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={1}
-            className="flex-1 bg-transparent outline-none resize-none py-2 min-h-[40px] text-gray-600 placeholder-gray-500 text-sm sm:text-base rounded-full px-4 leading-normal max-h-20 overflow-y-auto no-scrollbar"
-          />
+              }
+              value={message}
+              onKeyDown={(e) => {
+                if (!activeSubject || !activeSubject?.isclaimedbyadmin || isResolved) {
+                e.preventDefault();
+                return;
+                }
+                handleKeyPress(e);
+              }}
+              onChange={(e) => {
+                if (!activeSubject || !activeSubject?.isclaimedbyadmin || isResolved) return;
+                setMessage(e.target.value);
+              }}
+              rows={1}
+              className="flex-1 bg-transparent outline-none resize-none py-2 min-h-[40px] text-gray-600 placeholder-gray-500 text-sm sm:text-base rounded-full px-4 leading-normal max-h-20 overflow-y-auto no-scrollbar"
+              />
 
-          {/* Icons */}
+              {/* Icons */}
           <div className="flex items-center gap-2 sm:gap-3 text-gray-600 shrink-0">
             <RiEmojiStickerLine
               className={`text-lg sm:text-xl ${isMobile &&
@@ -748,6 +744,7 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
       {/* emoji picker */}
       {showEmojiPicker && (
         <motion.div
+          ref={emojiPickerRef}
           className="absolute bottom-28 right-2 sm:right-10"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
