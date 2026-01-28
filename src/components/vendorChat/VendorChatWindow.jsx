@@ -567,7 +567,7 @@ useEffect(() => {
                       {/* file */}
                       {msg.filetype === "file" && (
                         <div
-                          className="flex items-center gap-2 text-white px-3 mt-2 cursor-pointer"
+                          className="flex items-center gap-2 text-blue-400 px-3 mt-2 cursor-pointer"
                           onClick={() => window.open(msg.filepath, "_blank")}
                         >
                           <span className="underline font-medium truncate">

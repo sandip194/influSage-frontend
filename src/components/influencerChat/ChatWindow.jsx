@@ -18,8 +18,8 @@ import { toast } from "react-toastify";
 import { Tooltip } from "antd";
 import useSocketRegister from "../../sockets/useSocketRegister";
 
-const ChatWindow = ({ activeSubject, onCloseSuccess, onBack  }) => {
-    useSocketRegister();
+const ChatWindow = ({ activeSubject, onCloseSuccess, onBack }) => {
+  useSocketRegister();
   const dispatch = useDispatch();
   const socket = getSocket();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -31,7 +31,7 @@ const ChatWindow = ({ activeSubject, onCloseSuccess, onBack  }) => {
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const [attachedFile, setAttachedFile] = useState(null);
   const [attachedPreview, setAttachedPreview] = useState(null);
-  const [highlightMsgId , setHighlightMsgId ] = useState(null);
+  const [highlightMsgId, setHighlightMsgId] = useState(null);
   const [showCloseButton, setShowCloseButton] = useState(true);
 
   const [previewImage, setPreviewImage] = useState(null);
@@ -46,144 +46,144 @@ const ChatWindow = ({ activeSubject, onCloseSuccess, onBack  }) => {
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   const formatTime = (timestamp) => {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diffMs = now - date;
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins} min ago`;
-  if (diffMins < 1440) {
-    return date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  }
-  return date.toLocaleDateString();
-};
-
-
-useEffect(() => {
-  if (!activeSubject?.id || !socket) return;
-
-  socket.emit("joinTicketRoom", activeSubject.id);
-  return () => socket.emit("leaveTicketRoom", activeSubject.id);
-}, [activeSubject?.id]);
-
-useEffect(() => {
-  if (!socket) return;
-
-  const handleReceiveMessage = (msg) => {
-    const file = msg.filePath || msg.filepath || msg.file || null;
-    let filetype = null;
-    if (file) {
-      const ext = file.split(".").pop().toLowerCase();
-      if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
-      else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
-      else filetype = "file";
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffMins < 1440) {
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
     }
-
-    const formattedMsg = {
-      id: msg.usersupportticketmessagesid,
-      message: msg.message,
-      filepath: file,
-      filetype,
-      replyId: Number(msg.replyId || msg.replyid) || null,
-      replyData: msg.replyData || null,
-      sender: msg.senderId == userId ? "user" : "admin",
-      time: msg.createddate || new Date().toISOString(),
-    };
-
-    setMessages(prev => [...prev, formattedMsg]);
-    scrollToBottom();
+    return date.toLocaleDateString();
   };
 
-  socket.off("receiveSupportMessage");
-  socket.on("receiveSupportMessage", handleReceiveMessage);
-}, []);
 
+  useEffect(() => {
+    if (!activeSubject?.id || !socket) return;
 
-const handleSend = async () => {
-  if (!activeSubject) return;
-   if (isMobile && (!activeSubject || isClosed)) {
-    handleBlockedAction();
-    return;
-  }
-  if (!message.trim() && !attachedFile) return;
+    socket.emit("joinTicketRoom", activeSubject.id);
+    return () => socket.emit("leaveTicketRoom", activeSubject.id);
+  }, [activeSubject?.id]);
 
-  try {
-    // 1️⃣ Send message
-    const formData = new FormData();
-    formData.append("p_usersupportticketid", activeSubject.id);
-    formData.append("p_messages", message || "");
-    formData.append("p_replyid", replyToMessage?.id || "");
+  useEffect(() => {
+    if (!socket) return;
 
-    if (attachedFile) formData.append("file", attachedFile);
-
-    await axios.post(
-      "/chat/support/user-admin/send-message",
-      formData,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-
-    // 2️⃣ Fetch latest messages
-    const resp = await axios.get(
-      `/chat/support/user-admin/open-chat/${activeSubject.id}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { p_limit: 200, p_offset: 0 },
-      }
-    );
-
-    const records = resp.data?.data?.records || [];
-
-    // 3️⃣ Sort messages
-    const sorted = records.sort(
-      (a, b) => new Date(a.createddate) - new Date(b.createddate)
-    );
-
-    // 4️⃣ Format messages
-    const formatted = sorted.map((m) => {
+    const handleReceiveMessage = (msg) => {
+      const file = msg.filePath || msg.filepath || msg.file || null;
       let filetype = null;
-
-      if (m.filepath) {
-        const ext = m.filepath.split(".").pop().toLowerCase();
+      if (file) {
+        const ext = file.split(".").pop().toLowerCase();
         if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
         else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
         else filetype = "file";
       }
 
-      const isSystemMsg = m.message?.includes(
-        "Your support request has been submitted. Our team will review it shortly."
+      const formattedMsg = {
+        id: msg.usersupportticketmessagesid,
+        message: msg.message,
+        filepath: file,
+        filetype,
+        replyId: Number(msg.replyId || msg.replyid) || null,
+        replyData: msg.replyData || null,
+        sender: msg.senderId == userId ? "user" : "admin",
+        time: msg.createddate || new Date().toISOString(),
+      };
+
+      setMessages(prev => [...prev, formattedMsg]);
+      scrollToBottom();
+    };
+
+    socket.off("receiveSupportMessage");
+    socket.on("receiveSupportMessage", handleReceiveMessage);
+  }, []);
+
+
+  const handleSend = async () => {
+    if (!activeSubject) return;
+    if (isMobile && (!activeSubject || isClosed)) {
+      handleBlockedAction();
+      return;
+    }
+    if (!message.trim() && !attachedFile) return;
+
+    try {
+      // 1️⃣ Send message
+      const formData = new FormData();
+      formData.append("p_usersupportticketid", activeSubject.id);
+      formData.append("p_messages", message || "");
+      formData.append("p_replyid", replyToMessage?.id || "");
+
+      if (attachedFile) formData.append("file", attachedFile);
+
+      await axios.post(
+        "/chat/support/user-admin/send-message",
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
-      return {
-        id: m.usersupportticketmessagesid,
-        replyId: m.replyid || null,
-        message: m.message,
-        filepath: m.filepath || null,
-        filetype,
-        sender: isSystemMsg ? "admin" : (m.roleid === 4 ? "admin" : "user"),
-        time: m.createddate,
-      };
-    });
+      // 2️⃣ Fetch latest messages
+      const resp = await axios.get(
+        `/chat/support/user-admin/open-chat/${activeSubject.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { p_limit: 200, p_offset: 0 },
+        }
+      );
 
-    // 5️⃣ Update UI
-    setMessages(formatted);
+      const records = resp.data?.data?.records || [];
 
-    // 6️⃣ Reset input
-    setMessage("");
-    setAttachedFile(null);
-    setAttachedPreview(null);
-    setReplyToMessage(null);
+      // 3️⃣ Sort messages
+      const sorted = records.sort(
+        (a, b) => new Date(a.createddate) - new Date(b.createddate)
+      );
 
-  } catch (err) {
-    console.error("Send message error", err);
-    toast.error("Message not sent");
-  }
-};
+      // 4️⃣ Format messages
+      const formatted = sorted.map((m) => {
+        let filetype = null;
+
+        if (m.filepath) {
+          const ext = m.filepath.split(".").pop().toLowerCase();
+          if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
+          else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
+          else filetype = "file";
+        }
+
+        const isSystemMsg = m.message?.includes(
+          "Your support request has been submitted. Our team will review it shortly."
+        );
+
+        return {
+          id: m.usersupportticketmessagesid,
+          replyId: m.replyid || null,
+          message: m.message,
+          filepath: m.filepath || null,
+          filetype,
+          sender: isSystemMsg ? "admin" : (m.roleid === 4 ? "admin" : "user"),
+          time: m.createddate,
+        };
+      });
+
+      // 5️⃣ Update UI
+      setMessages(formatted);
+
+      // 6️⃣ Reset input
+      setMessage("");
+      setAttachedFile(null);
+      setAttachedPreview(null);
+      setReplyToMessage(null);
+
+    } catch (err) {
+      console.error("Send message error", err);
+      toast.error("Message not sent");
+    }
+  };
 
   const handleKeyPress = (e) => {
     if (!isMobile && e.key === "Enter" && !e.shiftKey) {
@@ -193,161 +193,161 @@ const handleSend = async () => {
   };
 
   const handleImageUpload = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  setAttachedFile(file);
-  setAttachedPreview(URL.createObjectURL(file));
-};
+    const file = e.target.files[0];
+    if (!file) return;
+    setAttachedFile(file);
+    setAttachedPreview(URL.createObjectURL(file));
+  };
 
-const handleFileUpload = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  setAttachedFile(file);
-  setAttachedPreview(URL.createObjectURL(file));
-};
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setAttachedFile(file);
+    setAttachedPreview(URL.createObjectURL(file));
+  };
 
   const handleClose = async () => {
     if (!activeSubject) return;
     try {
-    const res = await axios.post(
-      "/chat/support/ticket/create-or-update-status",
-      {
-        p_usersupportticketid: activeSubject.id,
-        p_objectiveid: null,
-        p_statusname: "Closed",
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+      const res = await axios.post(
+        "/chat/support/ticket/create-or-update-status",
+        {
+          p_usersupportticketid: activeSubject.id,
+          p_objectiveid: null,
+          p_statusname: "Closed",
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    const successMessage =
-      res?.data?.message ||
-      res?.data?.p_message ||
-      "Ticket closed successfully";
+      const successMessage =
+        res?.data?.message ||
+        res?.data?.p_message ||
+        "Ticket closed successfully";
 
-    toast.success(successMessage);
+      toast.success(successMessage);
 
-    setIsClosed(true);
+      setIsClosed(true);
 
-    if (onCloseSuccess) onCloseSuccess();
+      if (onCloseSuccess) onCloseSuccess();
 
-    setMessages([]);
-    setMessage("");
-  } catch (err) {
-    console.error("Error closing ticket:", err);
+      setMessages([]);
+      setMessage("");
+    } catch (err) {
+      console.error("Error closing ticket:", err);
 
-    const errorMessage =
-      err?.response?.data?.message ||
-      "Failed to close ticket";
+      const errorMessage =
+        err?.response?.data?.message ||
+        "Failed to close ticket";
 
-    toast.error(errorMessage);
-  }
-};
-useEffect(() => {
-  const status = activeSubject?.status?.toLowerCase();
-  setIsClosed(status === "open" || status === "closed");
-  setShowCloseButton(status !== "closed");
-}, [activeSubject]);
+      toast.error(errorMessage);
+    }
+  };
+  useEffect(() => {
+    const status = activeSubject?.status?.toLowerCase();
+    setIsClosed(status === "open" || status === "closed");
+    setShowCloseButton(status !== "closed");
+  }, [activeSubject]);
 
 
   const handleScroll = () => {
-  if (!chatRef.current) return;
-  if (chatRef.current.scrollTop === 0 && hasMore && !loadingMore) {
-    const prevHeight = chatRef.current.scrollHeight;
-    loadMessages().then(() => {
-      setTimeout(() => {
-        chatRef.current.scrollTop = chatRef.current.scrollHeight - prevHeight;
-      }, 50);
-    });
-  }
-};
-
-const loadMessages = async (offsetParam = offset) => {
-  if (!activeSubject?.id) return;
-if (offsetParam !== 0 && (loadingMore || !hasMore)) return;
-  setLoadingMore(true);
-
-  try {
-    const res = await axios.get(
-      `/chat/support/user-admin/open-chat/${activeSubject.id}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        params: {
-          p_limit: 100,
-          p_offset: offsetParam + 1,
-        },
-      }
-    );
-
-    const data = res.data?.data || {};
-    const newRecords = data.records || [];
-
-    if (newRecords.length < 100) {
-      setHasMore(false);
+    if (!chatRef.current) return;
+    if (chatRef.current.scrollTop === 0 && hasMore && !loadingMore) {
+      const prevHeight = chatRef.current.scrollHeight;
+      loadMessages().then(() => {
+        setTimeout(() => {
+          chatRef.current.scrollTop = chatRef.current.scrollHeight - prevHeight;
+        }, 50);
+      });
     }
+  };
 
-    const sorted = newRecords.sort(
-      (a, b) => new Date(a.createddate) - new Date(b.createddate)
-    );
+  const loadMessages = async (offsetParam = offset) => {
+    if (!activeSubject?.id) return;
+    if (offsetParam !== 0 && (loadingMore || !hasMore)) return;
+    setLoadingMore(true);
 
-    const formatted = sorted.map((m) => {
-      let isSystemMsg =
-        m.message?.includes("Your support request has been submitted. Our team will review it shortly.");
+    try {
+      const res = await axios.get(
+        `/chat/support/user-admin/open-chat/${activeSubject.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            p_limit: 100,
+            p_offset: offsetParam + 1,
+          },
+        }
+      );
 
-      let filetype = null;
-      if (m.filepath) {
-        const ext = m.filepath.split(".").pop().toLowerCase();
-        if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
-        else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
-        else filetype = "file";
+      const data = res.data?.data || {};
+      const newRecords = data.records || [];
+
+      if (newRecords.length < 100) {
+        setHasMore(false);
       }
 
-      return {
-        id: m.usersupportticketmessagesid,
-        replyId: m.replyid || null,
-        message: m.message,
-        filepath: m.filepath || null,
-        filetype,
-        sender: isSystemMsg ? "admin" : (m.userid == userId ? "user" : "admin"),
-        time: m.createddate,
-      };
-    });
+      const sorted = newRecords.sort(
+        (a, b) => new Date(a.createddate) - new Date(b.createddate)
+      );
 
-   if (offset === 0) {
-  setMessages(formatted);
-  setTimeout(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+      const formatted = sorted.map((m) => {
+        let isSystemMsg =
+          m.message?.includes("Your support request has been submitted. Our team will review it shortly.");
+
+        let filetype = null;
+        if (m.filepath) {
+          const ext = m.filepath.split(".").pop().toLowerCase();
+          if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) filetype = "image";
+          else if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext)) filetype = "video";
+          else filetype = "file";
+        }
+
+        return {
+          id: m.usersupportticketmessagesid,
+          replyId: m.replyid || null,
+          message: m.message,
+          filepath: m.filepath || null,
+          filetype,
+          sender: isSystemMsg ? "admin" : (m.userid == userId ? "user" : "admin"),
+          time: m.createddate,
+        };
+      });
+
+      if (offset === 0) {
+        setMessages(formatted);
+        setTimeout(() => {
+          if (chatRef.current) {
+            chatRef.current.scrollTop = chatRef.current.scrollHeight;
+          }
+        }, 50);
+      }
+      else {
+        setMessages((prev) => [...formatted, ...prev]);
+      }
+
+      setOffset((prev) => prev + 1);
+    } finally {
+      setLoadingMore(false);
     }
-  }, 50);
-}
- else {
-      setMessages((prev) => [...formatted, ...prev]);
-    }
+  };
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      if (chatRef.current) {
+        chatRef.current.scrollTop = chatRef.current.scrollHeight;
+      }
+    }, 80);
+  };
+  useEffect(() => {
+    if (messages.length > 0) scrollToBottom();
+  }, [messages]);
 
-    setOffset((prev) => prev + 1);
-  } finally {
-    setLoadingMore(false);
-  }
-};
-const scrollToBottom = () => {
-  setTimeout(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }
-  }, 80);
-};
-useEffect(() => {
-  if (messages.length > 0) scrollToBottom();
-}, [messages]);
+  useEffect(() => {
+    if (!activeSubject?.id) return;
 
-useEffect(() => {
-  if (!activeSubject?.id) return;
-
-  setMessages([]);
-  setOffset(0);
-  setHasMore(true);
-  loadMessages(0);
-}, [activeSubject]);
+    setMessages([]);
+    setOffset(0);
+    setHasMore(true);
+    loadMessages(0);
+  }, [activeSubject]);
 
   return (
     <div className="flex flex-col h-full relative overflow-hidden rounded-md">
@@ -429,11 +429,11 @@ useEffect(() => {
             ref={chatRef}
             onScroll={handleScroll}
           >
-           {loadingMore && (
-            <div className="flex justify-center py-2">
-              <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          )}
+            {loadingMore && (
+              <div className="flex justify-center py-2">
+                <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
             {messages.map((msg) => {
               if (!msg.message && !msg.filepath) return null;
               const repliedMsg =
@@ -450,15 +450,13 @@ useEffect(() => {
                   onMouseLeave={() => setHoveredMsgId(null)}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                   className={`relative flex transition-all duration-300 ${
-                              msg.sender === "user" ? "justify-end" : "justify-start"
-                            } ${highlightMsgId === msg.id ? "bg-blue-100 rounded-xl p-1" : ""}`}
-                          >
+                  className={`relative flex transition-all duration-300 ${msg.sender === "user" ? "justify-end" : "justify-start"
+                    } ${highlightMsgId === msg.id ? "bg-blue-100 rounded-xl p-1" : ""}`}
+                >
                   <div className="flex flex-col max-w-[78%] sm:max-w-[65%]">
                     <div
-                      className={`px-4 py-2 rounded-2xl shadow-md text-sm break-words whitespace-pre-wrap ${
-                        msg.sender === "user" ? "bg-[#0D132D] text-white" : "bg-gray-100 text-gray-900"
-                      }`}
+                      className={`px-4 py-2 rounded-2xl shadow-md text-sm break-words whitespace-pre-wrap ${msg.sender === "user" ? "bg-[#0D132D] text-white" : "bg-gray-100 text-gray-900"
+                        }`}
                     >
                       {/* reply preview */}
                       {repliedMsg && (
@@ -487,12 +485,12 @@ useEffect(() => {
                               {repliedMsg.message
                                 ? repliedMsg.message
                                 : repliedMsg.filetype === "image"
-                                ? "📷 Photo"
-                                : repliedMsg.filetype === "video"
-                                ? "🎬 Video"
-                                : repliedMsg.filetype === "file"
-                                ? "📎 File"
-                                : ""}
+                                  ? "📷 Photo"
+                                  : repliedMsg.filetype === "video"
+                                    ? "🎬 Video"
+                                    : repliedMsg.filetype === "file"
+                                      ? "📎 File"
+                                      : ""}
                             </span>
                           </div>
 
@@ -533,9 +531,8 @@ useEffect(() => {
                               sender: msg.sender,
                             })
                           }
-                          className={`absolute -top-6 p-1 bg-white shadow hover:bg-gray-100 transition ${
-                            msg.sender === "user" ? "right-0" : "left-0"
-                          }`}
+                          className={`absolute -top-6 p-1 bg-white shadow hover:bg-gray-100 transition ${msg.sender === "user" ? "right-0" : "left-0"
+                            }`}
                         >
                           <Tooltip title="Reply">
                             <RiReplyLine size={18} className="text-gray-700" />
@@ -567,7 +564,7 @@ useEffect(() => {
                       {/* file */}
                       {msg.filetype === "file" && (
                         <div
-                          className="flex items-center gap-2 text-white px-3 mt-2 cursor-pointer"
+                          className="flex items-center gap-2 text-blue-500 px-3 mt-2 cursor-pointer"
                           onClick={() => window.open(msg.filepath, "_blank")}
                         >
                           <span className="underline font-medium truncate">
@@ -585,9 +582,8 @@ useEffect(() => {
 
                     {/* Message time */}
                     <p
-                      className={`text-[10px] mt-1 ${
-                        msg.sender === "user" ? "text-gray-500 self-end" : "text-gray-500 self-start"
-                      }`}
+                      className={`text-[10px] mt-1 ${msg.sender === "user" ? "text-gray-500 self-end" : "text-gray-500 self-start"
+                        }`}
                     >
                       {formatTime(msg.time)}
                     </p>
@@ -613,7 +609,7 @@ useEffect(() => {
       >
         {replyToMessage && (
           <div className="mb-2 p-2 rounded-md border-l-4 border-blue-600 bg-gray-200 flex items-center justify-between gap-3">
-            
+
             {/* LEFT → TEXT */}
             <div className="flex flex-col flex-1 min-w-0 text-xs text-gray-700">
               <span className="font-semibold">Replying to:</span>
@@ -622,12 +618,12 @@ useEffect(() => {
                 {replyToMessage.message
                   ? replyToMessage.message
                   : replyToMessage.filetype === "image"
-                  ? "📷 Photo"
-                  : replyToMessage.filetype === "video"
-                  ? "🎬 Video"
-                  : replyToMessage.filetype === "file"
-                  ? "📎 " + replyToMessage.filepath?.split("/").pop()
-                  : ""}
+                    ? "📷 Photo"
+                    : replyToMessage.filetype === "video"
+                      ? "🎬 Video"
+                      : replyToMessage.filetype === "file"
+                        ? "📎 " + replyToMessage.filepath?.split("/").pop()
+                        : ""}
               </span>
             </div>
 
@@ -653,7 +649,7 @@ useEffect(() => {
               </div>
             )}
 
-           <button
+            <button
               onClick={() => setReplyToMessage(null)}
               className="text-gray-500 hover:text-gray-700"
             >
@@ -716,9 +712,9 @@ useEffect(() => {
           {/* Icons */}
           <div className="flex items-center gap-2 sm:gap-3 text-gray-600 shrink-0">
             <RiEmojiStickerLine
-              className={`text-lg sm:text-xl ${isMobile && 
+              className={`text-lg sm:text-xl ${isMobile &&
                 !activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
-              }`}
+                }`}
               onClick={() => {
                 if (!activeSubject || isClosed) return;
                 setShowEmojiPicker(!showEmojiPicker);
@@ -726,9 +722,9 @@ useEffect(() => {
             />
 
             <RiImageLine
-              className={`text-lg sm:text-xl ${isMobile && 
+              className={`text-lg sm:text-xl ${isMobile &&
                 !activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
-              }`}
+                }`}
               onClick={() => {
                 if (!activeSubject || isClosed) return;
                 imageInputRef.current.click();
@@ -736,9 +732,9 @@ useEffect(() => {
             />
 
             <RiAttachment2
-              className={`text-lg sm:text-xl ${isMobile && 
+              className={`text-lg sm:text-xl ${isMobile &&
                 !activeSubject || isClosed ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
-              }`}
+                }`}
               onClick={() => {
                 if (!activeSubject || isClosed) return;
                 fileInputRef.current.click();

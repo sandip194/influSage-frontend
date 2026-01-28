@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Skeleton, Select, Empty } from "antd";
+import { Skeleton, Select, Empty, Tooltip } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
@@ -147,7 +147,7 @@ export const PlatformBreakdown = () => {
               className="flex flex-col sm:flex-row sm:items-center gap-3"
             >
               {/* Platform Info */}
-              <div className="flex items-center gap-2 sm:w-40">
+              <div className="flex items-center gap-2 sm:w-30">
                 <img
                   src={item.providericonpath}
                   alt={item.providername}
@@ -162,23 +162,31 @@ export const PlatformBreakdown = () => {
               {/* Progress Bar */}
               <div className="flex-1">
                 <div
-                  className={ "relative h-3 sm:h-2.5 rounded-full bg-transparent" }
+                  className={"relative h-3 sm:h-2.5 rounded-full bg-transparent"}
                 >
-                  <div
-                    className="absolute left-0 top-0 h-full rounded-full transition-all"
-                    style={{
-                      width: `${item.percentage}%`,
-                      backgroundColor: item.percentage > 0 ? "#0D132D" : "transparent",
-                    }}
-                  />
+                  <Tooltip
+                    placement="top"
+                    title={
+                      <div className="text-sm">
+                        <p className="font-semibold">{item.providername}</p>
+                        <p>Likes: {item.totallikes.toLocaleString()}</p>
+                        <p>Percentage: {item.percentage.toFixed(2)}%</p>
+                      </div>
+                    }
+                  >
+                    <div
+                      className="absolute left-0 top-0 h-full rounded-full transition-all cursor-pointer"
+                      style={{
+                        width: `${item.percentage}%`,
+                        backgroundColor: item.percentage > 0 ? "#0D132D" : "transparent",
+                      }}
+                    />
+                  </Tooltip>
+
                 </div>
 
               </div>
 
-              {/* Percentage */}
-              <p className="hidden sm:block w-12 text-xs text-blue-500 font-medium text-right">
-                {item.percentage}%
-              </p>
 
               {/* Likes */}
               <p className="text-sm font-bold text-gray-800 sm:w-24 text-right">
