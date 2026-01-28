@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import api from "../../../api/axios";import {
   RiEqualizerFill,
   RiCloseFill,
-  RiEraserLine, RiFilterLine,
+  RiEraserLine, RiFilterLine, RiStarFill 
 } from "@remixicon/react";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import { Input, Pagination, Empty, Skeleton, Tooltip, Checkbox } from "antd";
@@ -42,6 +42,7 @@ const BrowseInfluencersLayout = () => {
     providers: [],
     languages: [],
     influencertiers: [],
+    ratings: [],
     sortby: "createddate",
     sortorder: "desc",
     pagenumber: 1,
@@ -69,7 +70,7 @@ const BrowseInfluencersLayout = () => {
       p_location: filters?.location || null,
       p_providers: filters?.providers?.length ? JSON.stringify(filters.providers) : null,
       p_influencertiers: filters?.influencertiers?.length ? JSON.stringify(filters.influencertiers) : null,
-      p_ratings: filters?.ratings?.length ? JSON.stringify(filters.ratings) : null,
+      p_ratings: filters.ratings.length ? JSON.stringify(filters.ratings) : null,
       p_genders: filters?.gender?.length ? JSON.stringify(filters.gender) : null,
       p_languages: filters?.languages?.length ? JSON.stringify(filters.languages) : null,
       p_pagenumber: filters?.pagenumber || 1,
@@ -387,6 +388,7 @@ const BrowseInfluencersLayout = () => {
                         providers: [],
                         languages: [],
                         influencertiers: [],
+                        ratings: [],    
                         gender: [],
                         sortby: "createddate",
                         sortorder: "desc",
@@ -512,6 +514,33 @@ const BrowseInfluencersLayout = () => {
 
             </div>
             <hr className="my-4 border-gray-200" />
+            <div className="mt-4">
+              <h4 className="font-semibold mb-2">Rating</h4>
+              <Checkbox.Group
+                  className="flex flex-col gap-3"
+                  value={draftFilters.ratings}
+                  onChange={(values) =>
+                    setDraftFilters((prev) => ({
+                      ...prev,
+                      ratings: values,
+                    }))
+                  }
+                >
+                  {[5, 4, 3, 2, 1].map((rating) => (
+                    <Checkbox key={rating} value={rating}>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: rating }).map((_, i) => (
+                          <RiStarFill
+                            key={i}
+                            size={16}
+                            className="text-yellow-400"
+                          />
+                        ))}
+                      </div>
+                    </Checkbox>
+                  ))}
+                </Checkbox.Group>
+              </div>
           </div>
         </>
       )}

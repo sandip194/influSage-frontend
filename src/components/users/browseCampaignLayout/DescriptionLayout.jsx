@@ -567,7 +567,7 @@ const DescriptionLayout = () => {
               {/* Campaign Files */}
               {campaignDetails.campaignfiles?.length > 0 && (
                 <div className="mb-1">
-                  <div className="flex flex-wrap gap-4">
+                  <div className="flex flex-wrap gap-3">
                     {campaignDetails.campaignfiles.map(({ filepath }, i) => {
                       const fileUrl = filepath;
                       const extension = filepath.split(".").pop().toLowerCase();
@@ -733,12 +733,12 @@ const DescriptionLayout = () => {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1 text-gray-700">
-                  <RiAppsLine className="w-4 h-4" />
-                  <span className="truncate">
-                    {campaignDetails.vendordetails?.parentcategory || "N/A"}
-                  </span>
-                </div>
+                 <div className="flex items-center gap-1 text-gray-700">
+                    <RiAppsLine className="w-4 h-4" />
+                     <span className="truncate" title={campaignDetails.vendordetails?.parentcategory}>
+                        {campaignDetails.vendordetails?.parentcategory || "N/A"}...
+                      </span>
+                  </div>
               </div>
 
               <hr className="border-gray-200" />
