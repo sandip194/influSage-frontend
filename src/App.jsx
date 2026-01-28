@@ -77,8 +77,6 @@ import CampaignWizard from './pages/vendor/dashboard/CampaignWizard';
 import VendorCampaign from './components/users/vendorCampaign/VendorCampaignsLayout';
 import CampaignDetails from './components/users/vendorCampaign/CampaignDetails';
 
-import VendorConversationPage from './components/vendorChat/VendorConversationPage';
-
 import BrandAnalyticsDashboard from './components/vendor/analytics/BrandAnalyticsDashboard';
 import EditVendorProfile from './components/users/EditProfile/EditVendorProfile';
 import VendorMyProfile from './pages/vendor/dashboard/VendorMyProfile';

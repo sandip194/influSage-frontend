@@ -66,8 +66,10 @@ const AppliedCampaignCard = ({
                 className={`absolute top-1 right-1 text-xs px-2 py-1 rounded-full font-semibold 
                   ${campaign.campaignapplicationstatus === "Selected"
                   ? "bg-green-100 text-green-600"
+                  : campaign.campaignapplicationstatus === "Accepted"
+                    ? "bg-blue-100 text-blue-600"
                   : campaign.campaignapplicationstatus === "Viewed"
-                    ? "bg-purple-100 text-purple  -600"
+                    ? "bg-purple-100 text-purple-600"
                     : campaign.campaignapplicationstatus === "Applied"
                       ? "bg-indigo-100 text-indigo-600"
                       : "bg-gray-200 text-gray-800"

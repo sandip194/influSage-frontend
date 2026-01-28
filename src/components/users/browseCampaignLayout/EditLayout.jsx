@@ -681,7 +681,7 @@ const EditLayout = () => {
                 </div>
               </Tabs.TabPane>
 
-              <Tabs.TabPane tab="Your Proposal" key="proposal">
+              <Tabs.TabPane tab="Application" key="proposal">
                 <div className="bg-white p-6 rounded-2xl relative">
 
                   {/* Proposal Status */}
