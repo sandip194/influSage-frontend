@@ -49,10 +49,10 @@ export default function ChatAppPageUser() {
   };
 
   useEffect(() => {
-    console.log("user refresh")
+    // console.log("user refresh")
     if (!socket || !conversationId) return;
 
-    console.log("👥 joinRoom:", conversationId);
+    // console.log("👥 joinRoom:", conversationId);
     socket.emit("joinRoom", String(conversationId));
 
     return () => {
@@ -127,117 +127,108 @@ export default function ChatAppPageUser() {
   };
 
   const handleSendMessage = async ({
-    text = "",
-    file = null,
-    replyId = null,
-    editingMessageId = null,
-  }) => {
-    if (!conversationId || (!text.trim() && !file)) return;
+  text = "",
+  file = null,
+  replyId = null,
+  editingMessageId = null,
+}) => {
+  if (!conversationId || (!text.trim() && !file)) return;
 
-    const isEdit = Boolean(editingMessageId);
-    const tempId = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-
-    // 🔵 Optimistic UI update
-    if (isEdit) {
-      dispatch(
-        updateMessage({
-          id: editingMessageId,
-          content: text,
-          edited: true,
-          isPending: true,
-        })
-      );
-    } else {
-      dispatch(
-        addMessage({
-          id: tempId,
-          tempId,
-          roleId,
-          content: text,
-          time: new Date().toISOString(),
-          deleted: false,
-          file: [],
-          replyId,
-          readbyvendor: roleId === 2 ? true : false,
-          readbyinfluencer: roleId === 1 ? true : false,
-          status: "pending",
-          isTemp: true,
-        })
-      );
-    }
-    try {
-      const formData = new FormData();
-      formData.append("p_conversationid", conversationId);
-      formData.append("p_roleid", roleId);
-      formData.append("p_messages", text);
-      formData.append("p_replyid", replyId || "");
-      formData.append("p_messageid", editingMessageId || ""); // 🔥 edit key
-      formData.append("tempId", tempId);
-      if (file) {
-        formData.append("file", file);
-      }
-
-
-      const res = await axios.post("/chat/insertmessage", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-
-
-      const realId = res.data?.messageid;
-      console.log(res.data.messageid)
-
-      // 🔄 Update Redux with real DB ID
-      dispatch(
-        updateMessage({
-          tempId,
-          newId: Number(realId),
-        })
-      );
-
-      const receiverId =
-        Number(roleId) === 1
-          ? Number(activeChat.vendorId || activeChat.vendorid)
-          : Number(activeChat.influencerId || activeChat.influencerid);
-
-      console.log("🎯 SOCKET SEND:", { receiverId });
-
-      socket.emit("sendMessage", {
-        conversationid: Number(conversationId),
-        userid: Number(userId),
-        roleid: Number(roleId),
-        receiverId,
-        message: text,
-        messageid: Number(realId),
+  const isEdit = Boolean(editingMessageId);
+  const tempId = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  if (isEdit) {
+    dispatch(
+      updateMessage({
+        id: editingMessageId,
+        content: text,
+        edited: true,
+        status: "pending",
+      })
+    );
+  } else {
+    // Add new temp message
+    dispatch(
+      addMessage({
+        id: tempId,
         tempId,
         roleId,
-        content: text || "",
+        content: text,
         time: new Date().toISOString(),
         deleted: false,
-        file: file ? [URL.createObjectURL(file)] : [],
+        file: [],
         replyId,
-        status: "sending",
-        isLocalFile: !!file,
+        readbyvendor: roleId === 2,
+        readbyinfluencer: roleId === 1,
+        status: "pending",
+        isTemp: true,
       })
+    );
+  }
 
-    }
-    catch (err) {
-      console.error("❌ Message send failed", err);
+  try {
+    const formData = new FormData();
+    formData.append("p_conversationid", conversationId);
+    formData.append("p_roleid", roleId);
+    formData.append("p_messages", text);
+    formData.append("p_replyid", replyId || "");
+    formData.append("p_messageid", editingMessageId || ""); // edit key
+    formData.append("tempId", tempId);
 
-      dispatch(
-        updateMessage({
-          tempId,
-          status: "failed",
-        })
-      );
+    if (file) {
+      formData.append("file", file);
     }
-  };
+
+    const res = await axios.post("/chat/insertmessage", formData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const realId = Number(res.data?.messageid);
+
+    dispatch(
+      updateMessage({
+        tempId: isEdit ? undefined : tempId,
+        id: isEdit ? editingMessageId : undefined,
+        newId: realId,
+        status: "sent",
+      })
+    );
+
+    if (isEdit) {
+      setEditingMessage(null);
+    }
+
+    const receiverId =
+      roleId === 1
+        ? Number(activeChat.vendorId || activeChat.vendorid)
+        : Number(activeChat.influencerId || activeChat.influencerid);
+
+    socket.emit("sendMessage", {
+      conversationid: Number(conversationId),
+      userid: Number(userId),
+      roleid: Number(roleId),
+      receiverId,
+      message: text,
+      messageid: realId,
+      tempId,
+      roleId,
+      content: text,
+      time: new Date().toISOString(),
+      deleted: false,
+      file: file ? [URL.createObjectURL(file)] : [],
+      replyId,
+      isEdit,
+    });
+
+  } catch (err) {
+    console.error("❌ Message send failed", err);
+  }
+};
 
   useEffect(() => {
     if (!socket || !conversationId) return;
 
     const handleReceiveMessage = (msg) => {
-      console.log("📩 SOCKET MSG", msg);
+      // console.log("📩 SOCKET MSG", msg);
 
     if (String(msg.conversationid) !== String(conversationId)) return;
 
@@ -248,24 +239,16 @@ export default function ChatAppPageUser() {
     // }
 
     if (msg.tempId && Number(msg.userid) === Number(userId)) {
-      // dispatch(
-      //   updateMessage({
-      //     tempId: msg.tempId,
-      //     newId: msg.messageid,
-      //     file: msg.filepaths || [],
-      //     status: "sent",
-      //   })
-      // );
+      dispatch(
+        updateMessage({
+          tempId: msg.tempId,
+          newId: msg.messageid,
+          file: msg.filepaths || [],
+          status: "sent",
+        })
+      );
       return;
     }
-
-    // dispatch(
-    //   updateMessage({
-    //     id: msg.messageid,
-    //     content: msg.message,
-    //     file: msg.filepaths || [],
-    //   })
-    // );
 
     dispatch(
       addMessage({

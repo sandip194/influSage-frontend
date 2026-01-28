@@ -32,35 +32,31 @@ const chatSlice = createSlice({
                 readbyvendor: incoming.readbyvendor ?? false,
                 readbyinfluencer: incoming.readbyinfluencer ?? false,
             });
-
-            console.log("Redux Message Added", incoming);
+            // console.log("Redux Message Added", incoming);
         },
 
 
         updateMessage: (state, action) => {
-            const {  tempId, newId, content, file } = action.payload;
+            const { id, tempId, newId, content, file, edited, status } = action.payload;
 
             const msg = state.messages.find(
-                (m) => String(m.tempId) === String(tempId) || String(m.id) === String(tempId)
+                (m) =>
+                (id && String(m.id) === String(id)) ||
+                (tempId && String(m.tempId) === String(tempId))
             );
 
             if (!msg) {
-                console.log(`⚠️ No message found with tempId ${tempId}`);
+                console.log("⚠️ No message found to update", action.payload);
                 return;
             }
 
-            console.log("🔄 Before update:", msg);
+            if (newId) msg.id = newId;
+            if (content !== undefined) msg.content = content;
+            if (file) msg.file = file;
+            if (edited) msg.edited = true;
+            if (status) msg.status = status;
 
-            msg.id = newId ?? msg.id;
-            msg.content = content ?? msg.content;
-            msg.file = file ?? msg.file;
-            msg.status = "sent";
             msg.isTemp = false;
-
-            console.log(`✅ Message updated with new ID: ${msg.id}`, msg);
-
-            // Optional: show the full messages array to verify
-            console.log("🟢 Updated messages array:", JSON.parse(JSON.stringify(state.messages)));
         },
 
 
@@ -88,15 +84,15 @@ const chatSlice = createSlice({
                     readbyinfluencer: readerRole === 1 ? true : msg.readbyinfluencer ?? false,
                 };
 
-                console.log(
-                    `✅ Message ${updatedMsg.id} marked as read by role ${readerRole}`,
-                    updatedMsg
-                );
+                // console.log(
+                //     `✅ Message ${updatedMsg.id} marked as read by role ${readerRole}`,
+                //     updatedMsg
+                // );
 
                 return updatedMsg;
             });
 
-            console.log("🟢 Updated messages array:", state.messages);
+            // console.log("🟢 Updated messages array:", state.messages);
         },
 
         setMessages: (state, action) => {

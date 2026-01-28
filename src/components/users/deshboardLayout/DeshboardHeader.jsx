@@ -66,10 +66,9 @@ const DeshboardHeader = ({ toggleSidebar }) => {
   const removeFromHeader = (conversationId) => {
     setUnreadMessages((prev) =>
       prev.filter(
-        (m) =>
-          String(m.conversationid) !== String(conversationId)
+        (m) => String(m.conversationid) !== String(conversationId)
       )
-    );
+    );                               
   };
 
   // ======================================================
@@ -118,46 +117,35 @@ const DeshboardHeader = ({ toggleSidebar }) => {
 
 
   useEffect(() => {
-    if (!socket) {
-     // console.log("❌ No socket in receiveMessage listener");
+  if (!socket) return;
+
+  const messageHandler = (payload) => {
+    const senderId = String(payload.userid);
+    const senderRole = String(payload.roleid);
+    const conversationid = String(payload.conversationid);
+
+    if (
+      senderId === String(userId) &&
+      senderRole === String(role)
+    ) {
       return;
     }
 
-    const messageHandler = (payload) => {
-     // console.log("📥 RECEIVE MESSAGE:", payload);
+    setUnreadMessages((prev) => {
+      const exists = prev.some(
+        (m) => String(m.conversationid) === conversationid
+      );
+      if (exists) return prev;
 
-      const senderId = payload.senderId ?? payload.userid;
-      const senderRole = payload.senderRole ?? payload.roleid;
+      return [{ ...payload, conversationid }, ...prev];
+    });
+  };
 
-      const isOwnMessage =
-        String(senderId) === String(userId) &&
-        String(senderRole) === String(role);
+  socket.on("receiveMessage", messageHandler);
+  return () => socket.off("receiveMessage", messageHandler);
 
-      if (isOwnMessage) return;
+}, [socket, userId, role, activeConversationId]); 
 
-      const conversationid = String(payload.conversationid);
-
-      // ✅ Skip only if THIS chat is open
-      if (String(conversationid) === String(activeConversationId)) {
-        console.log("👀 Same conversation open — skip unread");
-        return;
-      }
-
-      setUnreadMessages((prev) => {
-        const exists = prev.some(
-          (m) => String(m.conversationid) === conversationid
-        );
-        if (exists) return prev;
-
-        return [{ ...payload, conversationid }, ...prev];
-      });
-    };
-    socket.on("receiveMessage", messageHandler);
-
-    return () => {
-      socket.off("receiveMessage", messageHandler);
-    };
-  }, [socket, userId]);
 
 
 
@@ -165,35 +153,26 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     if (!socket) return;
 
     const statusHandler = (payload) => {
-      console.log("📡 SOCKET EVENT → updateMessageStatus:", payload);
+      const conversationId = String(
+        payload.conversationId ?? payload.conversationid
+      );
 
-      const { conversationId, readbyvendor, readbyinfluencer } = payload;
+      const readByMe =
+        (String(role) === "2" && payload.readbyvendor === true) ||
+        (String(role) === "1" && payload.readbyinfluencer === true);
 
-      const shouldRemove =
-        (String(role) === "2" && readbyvendor === true) ||
-        (String(role) === "1" && readbyinfluencer === true);
+      if (!readByMe) return;
 
-      console.log("📡 shouldRemove?", shouldRemove);
-
-      if (!shouldRemove) return;
-
-      // 🔥 Do NOT remove if chat is currently open
-      if (String(conversationId) === String(activeConversationId)) {
-        return;
-      }
-
-      setUnreadMessages(prev =>
+      // REALTIME REMOVE FROM HEADER
+      setUnreadMessages((prev) =>
         prev.filter(
-          msg => String(msg.conversationid) !== String(conversationId)
+          (msg) => String(msg.conversationid) !== conversationId
         )
       );
     };
 
-    socket.on("updateMessageStatus", statusHandler);
-
-    return () => {
-      socket.off("updateMessageStatus", statusHandler);
-    };
+    socket.on("updateMessage", statusHandler);
+    return () => socket.off("updateMessageStatus", statusHandler);
   }, [socket, role]);
 
   useEffect(() => {
