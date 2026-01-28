@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 
+const TOTAL_STEPS = 5;
+
+/* =======================
+   Validation logic (UNCHANGED)
+======================= */
 
 const isProfileComplete = (profile) => {
     if (!profile || Object.keys(profile).length === 0) return false;
@@ -41,22 +46,24 @@ const isPaymentComplete = (payment) => {
     });
 
     const hasValidPaymentMethod = Array.isArray(payment.paymentmethod) &&
-        payment.paymentmethod.some(pm =>
-            pm.method && pm.paymentdetails
-        );
+        payment.paymentmethod.some(pm => pm.method && pm.paymentdetails);
 
     return hasValidField || hasValidPaymentMethod;
 };
 
-export const useVendorProfileCompletionSteps = () => {
-    const [currentStep, setCurrentStep] = useState(0);
-    const [completedSteps, setCompletedSteps] = useState([false, false, false, false, false]);
-    const [isHydrated, setIsHydrated] = useState(false);
-    const [isCompleted, setIsCompleted] = useState(false);
-    const [lastCompletedStep, setLastCompletedStep] = useState(null);
+/* =======================
+   Hook
+======================= */
 
+export const useVendorProfileCompletionSteps = () => {
     const { token, userId } = useSelector(state => state.auth);
 
+    const [currentStep, setCurrentStep] = useState(0);
+    const [completedSteps, setCompletedSteps] = useState(
+        Array(TOTAL_STEPS).fill(false)
+    );
+    const [isCompleted, setIsCompleted] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const [vendorProfileData, setVendorProfileData] = useState({
         profile: {},
@@ -66,34 +73,25 @@ export const useVendorProfileCompletionSteps = () => {
         payment: {}
     });
 
-
-    const updateProfileSection = (sectionKey, newData) => {
+    const updateProfileSection = useCallback((sectionKey, newData) => {
         setVendorProfileData(prev => ({
             ...prev,
             [sectionKey]: newData
         }));
-    };
+    }, []);
 
-    const markStepComplete = (index) => {
-        const updated = [...completedSteps];
-        if (!updated[index]) {
+    const markStepComplete = useCallback((index) => {
+        setCompletedSteps(prev => {
+            const updated = [...prev];
             updated[index] = true;
-            setCompletedSteps(updated);
-            setLastCompletedStep(index);  // <-- trigger useEffect to refetch
-        }
+            return updated;
+        });
+    }, []);
 
-        if (index + 1 < steps.length) {
-            setCurrentStep(index + 1);
-        } else {
-            // Mark profile as complete, but let currentStep go one beyond steps
-            setIsCompleted(true);
-            setCurrentStep(steps.length); // This triggers ThankYouScreen
-        }
-    };
-
-
-    const getUserProfileCompletionData = async () => {
+    const getUserProfileCompletionData = useCallback(async () => {
         try {
+            setLoading(true);
+
             const res = await axios.get(`vendor/profile/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -101,85 +99,60 @@ export const useVendorProfileCompletionSteps = () => {
                 },
             });
 
-            if (res.status === 200) {
-                const data = res?.data;
-                if (!data) {
-                    console.error("❌ No profile data found in response:", res);
-                    return;
-                }
+            const data = res?.data;
+            if (!data) return;
 
-                const source = data?.source;
+            const source = data.source;
 
-                const parts = {
-                    profile: data.profileParts.p_profile || {},
-                    categories: data.profileParts.p_categories || [],
-                    providers: data.profileParts.p_providers || [],
-                    objectives: data.profileParts.p_objectives || [],
-                    payment: data.profileParts.p_paymentaccounts || {}
-                };
+            const parts = {
+                profile: data.profileParts?.p_profile || {},
+                categories: data.profileParts?.p_categories || [],
+                providers: data.profileParts?.p_providers || [],
+                objectives: data.profileParts?.p_objectives || [],
+                payment: data.profileParts?.p_paymentaccounts || {}
+            };
 
-                setVendorProfileData(parts);
+            setVendorProfileData(parts);
 
-                // Evaluate completion
-                const profileDone = isProfileComplete(parts.profile);
-                const categoriesDone = isCategoriesComplete(parts.categories);
-                const providersDone = isProvidersComplete(parts.providers);
-                const objectivesDone = isObjectivesComplete(parts.objectives);
-                const paymentDone = isPaymentComplete(parts.payment);
+            const profileDone = isProfileComplete(parts.profile);
+            const categoriesDone = isCategoriesComplete(parts.categories);
+            const providersDone = isProvidersComplete(parts.providers);
+            const objectivesDone = isObjectivesComplete(parts.objectives);
+            const paymentDone = isPaymentComplete(parts.payment);
 
-                // Build step completion array
-                let stepsCompletion = [
-                    profileDone,
-                    categoriesDone,
-                    providersDone,
-                    objectivesDone,
-                    paymentDone // This may stay false
-                ];
+            let stepsCompletion = [
+                profileDone,
+                categoriesDone,
+                providersDone,
+                objectivesDone,
+                paymentDone
+            ];
 
-                // ✅ Special logic if data comes from DB and all other steps are complete
-                const nonPaymentStepsComplete = profileDone && categoriesDone && providersDone && objectivesDone;
+            const nonPaymentStepsComplete =
+                profileDone && categoriesDone && providersDone && objectivesDone;
 
-                if (source === "db" && nonPaymentStepsComplete) {
-                    // Leave payment as false, mark others as true
-                    stepsCompletion = [true, true, true, true, true];
-                    setCompletedSteps(stepsCompletion);
-                    setIsCompleted(true);
-                    setCurrentStep(steps.length); // Show thank you
-                } else {
-                    setCompletedSteps(stepsCompletion);
-
-                    // Go to first incomplete step
-                    const firstIncomplete = stepsCompletion.findIndex(done => !done);
-                    setCurrentStep(firstIncomplete !== -1 ? firstIncomplete : steps.length);
-                }
+            if (source === "db" && nonPaymentStepsComplete) {
+                stepsCompletion = Array(TOTAL_STEPS).fill(true);
+                setIsCompleted(true);
             }
+
+            setCompletedSteps(stepsCompletion);
+
+            const firstIncomplete = stepsCompletion.findIndex(done => !done);
+            setCurrentStep(
+                firstIncomplete !== -1 ? firstIncomplete : 0
+            );
         } catch (error) {
             console.error("❌ Error fetching profile data:", error);
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [token, userId]);
 
-
+    /* 🔑 Fetch ONCE (same as working hook) */
     useEffect(() => {
         getUserProfileCompletionData();
-    }, [lastCompletedStep]);
-
-
-    useEffect(() => {
-        setIsHydrated(true);
-    }, []);
-
-    useEffect(() => {
-        if (isHydrated) {
-            localStorage.setItem("completedSteps", JSON.stringify(completedSteps));
-        }
-    }, [completedSteps, isHydrated]);
-
-    useEffect(() => {
-        if (isHydrated && typeof currentStep === "number") {
-            localStorage.setItem("currentStep", currentStep.toString());
-        }
-    }, [currentStep, isHydrated]);
-
+    }, [getUserProfileCompletionData]);
 
     return {
         vendorProfileData,
@@ -189,6 +162,7 @@ export const useVendorProfileCompletionSteps = () => {
         setCurrentStep,
         markStepComplete,
         isCompleted,
-        getUserProfileCompletionData
+        getUserProfileCompletionData,
+        loading
     };
-}
+};
