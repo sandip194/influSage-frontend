@@ -14,7 +14,7 @@ import {
 } from 'antd';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import axios from 'axios';
+import api from '../../../api/axios.js';
 
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -53,7 +53,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
     }
 
     try {
-      const response = await axios.get(`https://ifsc.razorpay.com/${value}`);
+      const response = await api.get(`https://ifsc.razorpay.com/${value}`);
       setIfscValid(true);
       setBankDetails(response.data);
       form.setFieldsValue({
@@ -115,7 +115,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
     try {
       // for Influencer 
       if (role === 1) {
-        const res = await axios.post(
+        const res = await api.post(
           "/user/complete-profile",
           formData,
           {
@@ -141,7 +141,7 @@ const PaymentDetailsForm = ({ onBack, onNext, data, onChange, showControls, show
 
       // for Vendor
       if (role === 2) {
-        const res = await axios.post(
+        const res = await api.post(
           "/vendor/complete-vendor-profile",
           formData,
           {

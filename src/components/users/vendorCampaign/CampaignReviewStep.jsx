@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -54,7 +54,7 @@ const CampaignReviewStep = ({ onEdit }) => {
 
         const isEdit = !!campaignId;
 
-        const res = await axios.get(`/vendor/campaign`, {
+        const res = await api.get(`/vendor/campaign`, {
           params: {
             campaignId: isEdit ? campaignId : "01",
           },
@@ -90,7 +90,7 @@ const CampaignReviewStep = ({ onEdit }) => {
         return;
       }
 
-      const res = await axios.post(
+      const res = await api.post(
         "/vendor/campaign/delete-file",
         { campaignId, filepath: fileToDelete.filepath },
         { headers: { Authorization: `Bearer ${authToken}` } }
@@ -166,7 +166,7 @@ const CampaignReviewStep = ({ onEdit }) => {
         p_statusname: status,
       };
 
-      const res = await axios.post("/vendor/finalize-campaign", payload, {
+      const res = await api.post("/vendor/finalize-campaign", payload, {
         headers: {
           Authorization: `Bearer ${authToken}`,
           "Content-Type": "application/json",

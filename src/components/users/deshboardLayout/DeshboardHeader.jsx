@@ -21,8 +21,7 @@ import {
   Empty,
 } from "antd";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
+import api from "../../../api/axios";import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../features/auth/authSlice";
 import { getSocket, resetSocket } from "../../../sockets/socket";
 
@@ -95,7 +94,7 @@ const DeshboardHeader = ({ toggleSidebar }) => {
     if (!token) return;
 
     try {
-      const res = await axios.get(`/chat/unread-messages`, {
+      const res = await api.get(`/chat/unread-messages`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -217,7 +216,7 @@ useEffect(() => {
     const fetchProfileData = async () => {
       if (!token) return;
       try {
-        const res = await axios.get("/user-profile-info", {
+        const res = await api.get("/user-profile-info", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data?.userData) setProfileData(res.data.userData);
@@ -241,7 +240,7 @@ useEffect(() => {
   const fetchNotifications = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await axios.get("/new/getallnotification", {
+      const res = await api.get("/new/getallnotification", {
         params: { limitedData: false },
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -394,7 +393,7 @@ useEffect(() => {
 
             try {
               setDropdownLoading(true);
-              const res = await axios.get("/new/getallnotification", {
+              const res = await api.get("/new/getallnotification", {
                 params: { limitedData: true },
                 headers: { Authorization: `Bearer ${token}` },
               });

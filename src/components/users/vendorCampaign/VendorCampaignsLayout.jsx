@@ -4,8 +4,7 @@ import {
   RiEyeLine, RiAddFill, RiEqualizerFill, RiCloseFill, RiArrowDownSLine, RiEraserLine, RiFilterLine
 } from "@remixicon/react";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import {
   Pagination, Skeleton, Empty, Select, Input, DatePicker, Checkbox, Tooltip
 } from "antd";
@@ -131,7 +130,7 @@ const VendorCampaignsLayout = () => {
         Object.entries(params).filter(([_, v]) => v !== undefined && v !== null)
       );
 
-      const res = await axios.get("vendor/allcampaign", {
+      const res = await api.get("vendor/allcampaign", {
         params: cleanParams,
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -148,7 +147,7 @@ const VendorCampaignsLayout = () => {
 
   const fetchStatuses = async () => {
     try {
-      const res = await axios.get("vendor/campaignstatus", {
+      const res = await api.get("vendor/campaignstatus", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const statusData = res?.data?.data || [];
@@ -160,7 +159,7 @@ const VendorCampaignsLayout = () => {
 
   const getAllPlatforms = async () => {
     try {
-      const res = await axios.get("providers", {
+      const res = await api.get("providers", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPlatforms(res.data.data || []);

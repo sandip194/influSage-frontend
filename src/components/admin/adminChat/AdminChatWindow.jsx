@@ -12,7 +12,7 @@ import { getSocket } from "../../../sockets/socket";
 import { addMessage } from "../../../features/socket/chatSlice";
 import EmojiPicker from "emoji-picker-react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import api from "../../../api/axios";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Tooltip } from "antd";
@@ -131,7 +131,7 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
         formData.append("file", attachedFile);
       }
 
-      await axios.post(
+      await api.post(
         "/chat/support/user-admin/send-message",
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -173,7 +173,7 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
     try {
       setIsResolved(true);
 
-      const res = await axios.post(
+      const res = await api.post(
         "/chat/support/ticket/create-or-update-status",
         {
           p_usersupportticketid: activeSubject.id,
@@ -235,7 +235,7 @@ const AdminChatWindow = ({ activeSubject, onBack }) => {
     if (offsetParam !== 0 && (loadingMore || !hasMore)) return;
 
     try {
-      const res = await axios.get(
+      const res = await api.get(
         `/chat/support/user-admin/open-chat/${activeSubject.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },

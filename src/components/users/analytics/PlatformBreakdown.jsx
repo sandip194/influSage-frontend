@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Skeleton, Select, Empty, Tooltip } from "antd";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 
 const { Option } = Select;
 
@@ -81,7 +80,7 @@ export const PlatformBreakdown = () => {
   const fetchPlatformData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/user/analytics/platform-breakdown", {
+      const res = await api.get("/user/analytics/platform-breakdown", {
         params: { p_year: year, p_month: month },
         headers: { Authorization: `Bearer ${token}` },
       });

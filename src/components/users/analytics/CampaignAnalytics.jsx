@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useCallback, useState } from "react";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { Empty, Skeleton } from "antd";
 
 import PerformanceChart from "./PerformanceChart";
@@ -88,7 +87,7 @@ const CampaignAnalytics = ({ selectedCampaignId }) => {
       const endpoint = getEndpoint();
       if (!endpoint) return;
 
-      const res = await axios.get(endpoint, {
+      const res = await api.get(endpoint, {
         params: { p_campaignid: selectedCampaignId },
         headers: { Authorization: `Bearer ${token}` },
         signal: controller.signal,

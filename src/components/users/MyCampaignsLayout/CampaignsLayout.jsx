@@ -13,8 +13,7 @@ import {
   DatePicker,
 } from "antd";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import {
   RiArrowDownSLine,
   RiCloseFill,
@@ -128,7 +127,7 @@ const InfluencerCampaigns = () => {
           Object.entries(params).filter(([, v]) => v != null && v !== "")
         );
 
-        const res = await axios.get("/user/influencer-contract", {
+        const res = await api.get("/user/influencer-contract", {
           params: cleanParams,
           signal,
           headers: { Authorization: `Bearer ${token}` },
@@ -157,14 +156,13 @@ const InfluencerCampaigns = () => {
   useEffect(() => {
     const headers = { Authorization: `Bearer ${token}` };
 
-    axios.get("providers", { headers }).then((r) =>
+    api.get("providers", { headers }).then((r) =>
       setPlatforms(r?.data?.data ?? [])
     );
-    axios.get("user/client-list", { headers }).then((r) =>
+    api.get("user/client-list", { headers }).then((r) =>
       setClients(r?.data?.data ?? [])
     );
-    axios
-      .get("user/contract/status", { headers })
+    api      .get("user/contract/status", { headers })
       .then((r) => setStatuses(r?.data?.data ?? []));
   }, [token]);
 

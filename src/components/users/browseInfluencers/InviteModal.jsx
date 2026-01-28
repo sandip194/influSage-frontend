@@ -1,8 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Modal, Spin, Tooltip } from "antd";
-import axios from "axios";
-import { toast } from "react-toastify";
+import api from "../../../api/axios";import { toast } from "react-toastify";
 
 const InviteModal = ({
   visible,
@@ -23,7 +22,7 @@ const InviteModal = ({
 
       setLoading(true);
       try {
-        const res = await axios.get("/vendor/inviteinfluencer/Campaigns", {
+        const res = await api.get("/vendor/inviteinfluencer/Campaigns", {
           params: { p_influencerid: influencerId },
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -48,7 +47,7 @@ const InviteModal = ({
       setSubmitting(true);
       const formatted = selected.map((id) => ({ campaignid: id }));
 
-      const res = await axios.post(
+      const res = await api.post(
         "/vendor/campaign/invite",
         {
           p_influencerid: influencerId,

@@ -9,7 +9,7 @@ import {
   RiStarLine,
 } from '@remixicon/react';
 import { Modal, Input, Tabs, Skeleton, ConfigProvider } from 'antd';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RiArrowLeftLine, RiCheckboxCircleFill } from "react-icons/ri";
@@ -101,7 +101,7 @@ const Details = () => {
   const getCampaignDetail = async () => {
     try {
       setLoading(true)
-      const res = await axios.get(`user/influencer-campaign/${campaignId}`, {
+      const res = await api.get(`user/influencer-campaign/${campaignId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

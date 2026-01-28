@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
-
+import api from "../../api/axios";
 import Sidebar from "./Sidebar";
 import SidebarVendor from "./SidebarVendor";
 
@@ -92,7 +91,7 @@ export default function ChatAppPageUser() {
     if (!conversationId || !token) return;
 
     try {
-      const res = await axios.get("/chat/messages", {
+      const res = await api.get("/chat/messages", {
         params: {
           p_conversationid: conversationId,
           p_roleid: roleId,
@@ -189,7 +188,7 @@ export default function ChatAppPageUser() {
       formData.append("file", file);
     }
 
-    const res = await axios.post("/chat/insertmessage", formData, {
+    const res = await api.post("/chat/insertmessage", formData, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

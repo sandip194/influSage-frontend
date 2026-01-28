@@ -11,8 +11,7 @@ import {
 } from "chart.js";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { Select, Spin } from "antd";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 
 ChartJS.register(
   LineElement,
@@ -78,7 +77,7 @@ const PerformanceChart = ({ campaignId }) => {
         ? { p_campaignid: campaignId, p_filtertype: filter }
         : { p_filtertype: filter };
 
-      const res = await axios.get(endpoint, {
+      const res = await api.get(endpoint, {
         params,
         headers: { Authorization: `Bearer ${token}` },
         signal: controller.signal,

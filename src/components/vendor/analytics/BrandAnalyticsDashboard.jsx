@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import PerformanceChart from "../../users/analytics/PerformanceChart";
 import TopContentChart from "../../users/analytics/TopContentChart";
 import CampaignAnalytics from "../../users/analytics/CampaignAnalytics";
@@ -69,7 +68,7 @@ const BrandAnalyticsDashboard = () => {
     );
 
     const fetchAnalyticsSummary = async () => {
-        const res = await axios.get("vendor/analytics/summary", {
+        const res = await api.get("vendor/analytics/summary", {
             params: {
                 p_year: year,
                 p_month: summaryFilter === "month" ? month : null,
@@ -100,7 +99,7 @@ const BrandAnalyticsDashboard = () => {
         setPlatformLoading(true);
 
         try {
-            const res = await axios.get("vendor/analytics/platform-breakdown", {
+            const res = await api.get("vendor/analytics/platform-breakdown", {
                 params: {
                     p_year: selectedYear,
                     p_month: selectedMonth,
@@ -135,7 +134,7 @@ const BrandAnalyticsDashboard = () => {
         setCampaignLoading(true);
 
         try {
-            const res = await axios.get("vendor/analytics/campaign-overview", {
+            const res = await api.get("vendor/analytics/campaign-overview", {
                 params: { p_filtertype: campaignFilter },
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -156,7 +155,7 @@ const BrandAnalyticsDashboard = () => {
 
     const fetchCampaignList = async () => {
         try {
-            const res = await axios.get("/vendor/analytics/campaign-list", {
+            const res = await api.get("/vendor/analytics/campaign-list", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const campaigns = res?.data?.data || [];

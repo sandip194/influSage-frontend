@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { toast } from 'react-toastify';
 import { useParams } from 'react-router-dom';
 
@@ -138,7 +138,7 @@ const CampaignWizard = () => {
   const getCampaignData = async () => { 
     try {
       const endpoint = campaignId ? campaignId : "01";
-      const res = await axios.get("/vendor/campaign", {
+      const res = await api.get("/vendor/campaign", {
         params : {campaignId : endpoint},
         headers: { Authorization: `Bearer ${token}` },
       });

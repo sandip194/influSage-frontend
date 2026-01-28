@@ -10,8 +10,7 @@ import {
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import { Input, Pagination, Select, Tooltip } from "antd";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import CampaignCardGrid from "./BrowseCampaignCard";
 
 const buttons = [
@@ -79,7 +78,7 @@ const Browse = () => {
       };
       const cleanParams = Object.fromEntries(Object.entries(params).filter(([_, v]) => v !== undefined));
 
-      const res = await axios.get("user/browse-all-campaigns/fiterWithSort", {
+      const res = await api.get("user/browse-all-campaigns/fiterWithSort", {
         params: cleanParams,
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -136,7 +135,7 @@ const Browse = () => {
   const handleSave = useCallback(
     async (id) => {
       try {
-        const res = await axios.post(`user/save-campaign/${id}`, {}, {
+        const res = await api.post(`user/save-campaign/${id}`, {}, {
           headers: { Authorization: `Bearer ${token}` },
         });
         toast.success(res.data?.message);
@@ -157,9 +156,9 @@ const Browse = () => {
     (async () => {
       try {
         const [p, l, c] = await Promise.all([
-          axios.get("providers"),
-          axios.get("languages", { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get("content-type"),
+          api.get("providers"),
+          api.get("languages", { headers: { Authorization: `Bearer ${token}` } }),
+          api.get("content-type"),
         ]);
         setPlatforms(p.data.data || []);
         setLanguages(l.data.languages || []);

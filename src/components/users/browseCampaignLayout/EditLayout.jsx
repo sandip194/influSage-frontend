@@ -10,8 +10,7 @@ import {
   RiMapPinLine,
   RiBriefcase3Line,
 } from "@remixicon/react";
-import axios from "axios";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import api from "../../../api/axios";import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Skeleton, Modal, Tabs, ConfigProvider } from "antd";
@@ -105,7 +104,7 @@ const EditLayout = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.get(
+      const res = await api.get(
         `user/applied-campaign-details/${campaignId}`,
         {
           headers: {
@@ -137,7 +136,7 @@ const EditLayout = () => {
 
   const handleWithdraw = async () => {
     try {
-      const res = await axios.post(
+      const res = await api.post(
         `/user/withdraw-application`,
         {
           p_applicationid: Number(selectedApplicationId),

@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Skeleton, Select } from "antd";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 
 const { Option } = Select;
 
@@ -47,7 +46,7 @@ const EngagementCard = ({ campaignId }) => {
         ? { p_campaignid: campaignId, p_filtertype: sortBy }
         : { p_filtertype: sortBy };
 
-      const res = await axios.get(endpoint, {
+      const res = await api.get(endpoint, {
         params,
         headers: { Authorization: `Bearer ${token}` },
       });

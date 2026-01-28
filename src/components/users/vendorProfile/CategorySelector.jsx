@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { RiCheckLine, RiArrowLeftSLine } from "@remixicon/react";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Spin } from "antd";
 
@@ -27,7 +26,7 @@ export const CategorySelector = ({
 
   const fetchAllCategories = async () => {
     try {
-      const response = await axios.get("categories");
+      const response = await api.get("categories");
       if (response.status === 200) {
         const data = response.data.categories;
         setCategoryTree(data);
@@ -105,7 +104,7 @@ export const CategorySelector = ({
           ? "user/complete-profile"
           : "vendor/complete-vendor-profile";
 
-      const res = await axios.post(endpoint, formData, {
+      const res = await api.post(endpoint, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 200) {

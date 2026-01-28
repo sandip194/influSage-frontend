@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { RiLoopLeftLine, RiGroupLine, RiUserFollowLine, RiCheckboxCircleLine } from "@remixicon/react";
+import api from "../../../api/axios";import { RiLoopLeftLine, RiGroupLine, RiUserFollowLine, RiCheckboxCircleLine } from "@remixicon/react";
 import { useSelector } from "react-redux";
 import { Skeleton } from "antd";
 
@@ -13,7 +12,7 @@ const CampaignStats = () => {
     const fetchStats = async () => {
       try {
         const authToken = token || localStorage.getItem("token");
-        const response = await axios.get(`/user/dashboard/counts`, {
+        const response = await api.get(`/user/dashboard/counts`, {
           headers: { Authorization: `Bearer ${authToken}` },
         });
 

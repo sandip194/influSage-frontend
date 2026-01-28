@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Input, DatePicker, Row, Col } from "antd";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux";
-import axios from "axios";
+import api from "../../../api/axios";
 import { toast } from "react-toastify";
 
 const fieldRules = {
@@ -77,7 +77,7 @@ const AnalyticsFormModal = ({ visible, onClose, onSuccess, contentData }) => {
             }
 
             try {
-                const res = await axios.get("/admin/user-Platform-Analytics", {
+                const res = await api.get("/admin/user-Platform-Analytics", {
                     params: {
                         p_userplatformanalyticid: contentData.userplatformanalyticid
                     },
@@ -174,7 +174,7 @@ const AnalyticsFormModal = ({ visible, onClose, onSuccess, contentData }) => {
         };
 
         try {
-            const res = await axios.post("/admin/analytics/data/insert-edit", payload, {
+            const res = await api.post("/admin/analytics/data/insert-edit", payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 

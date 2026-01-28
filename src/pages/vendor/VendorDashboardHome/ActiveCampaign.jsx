@@ -10,8 +10,7 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { Select, Spin } from "antd";
 
 ChartJS.register(
@@ -36,7 +35,7 @@ const ActiveCampaign = () => {
   const fetchChartData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(
+      const res = await api.get(
         "vendor/dashboard/CampaignStatusTrend",
         {
           headers: { Authorization: `Bearer ${token}` },

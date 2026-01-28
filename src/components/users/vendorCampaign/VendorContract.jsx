@@ -8,8 +8,7 @@ import {
   RiCalendar2Line,
 } from "@remixicon/react";
 import ContractModal from "./ContractModal";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { safeNumber, safeText, safeArray } from "../../../App/safeAccess";
 import { toast } from "react-toastify";
 
@@ -55,7 +54,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
   const fetchAllContracts = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`/vendor/contract/list/${campaignId}`, {
+      const res = await api.get(`/vendor/contract/list/${campaignId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -150,7 +149,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         p_contenttypejson: values.deliverables,
       };
 
-      const response = await axios.post(
+      const response = await api.post(
         "/vendor/create-or-edit/contract",
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -211,7 +210,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         p_rating: null,  // NO rating
       };
 
-      const res = await axios.post("/vendor/feedback", payload, {
+      const res = await api.post("/vendor/feedback", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -245,7 +244,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
         p_rating: rating,
       };
 
-      const res = await axios.post("/vendor/feedback", payload, {
+      const res = await api.post("/vendor/feedback", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -273,7 +272,7 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
       setFeedbackLoading(true);
       setContractFeedback(null);
 
-      const res = await axios.get(
+      const res = await api.get(
         "/vendor/contract-feedback",
         {
           params: {

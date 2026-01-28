@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../../../api/axios';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -22,7 +22,7 @@ const CampaignOverview = () => {
     const getCampaignList = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await axios.get(
+            const res = await api.get(
                 '/vendor/dashboard/campaign-status-overview',
                 {
                     headers: { Authorization: `Bearer ${token}` },

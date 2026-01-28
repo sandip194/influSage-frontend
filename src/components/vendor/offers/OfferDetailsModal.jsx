@@ -4,8 +4,7 @@ import { RiMessage2Line, RiEyeLine, RiStarFill } from "@remixicon/react";
 import { FaInstagram, FaYoutube, FaFacebook, FaTiktok } from "react-icons/fa";
 import { useNavigate, } from "react-router-dom";
 import { useSelector } from "react-redux";
-import axios from "axios";
-import { toast } from "react-toastify";
+import api from "../../../api/axios";import { toast } from "react-toastify";
 import AcceptOfferModal from "./models/AcceptOfferModal";
 
 const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedApplication }) => {
@@ -21,7 +20,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
     const fetchOffer = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`vendor/offer-detail/${id}`, {
+            const res = await api.get(`vendor/offer-detail/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setOfferDetails(res.data.data);
@@ -60,7 +59,7 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
         try {
             setLoading(true);
 
-            const res = await axios.post(
+            const res = await api.post(
                 "/chat/startconversation",
                 { p_campaignapplicationid: Number(offerDetails.applicationid) },
                 { headers: { Authorization: `Bearer ${token}` } }

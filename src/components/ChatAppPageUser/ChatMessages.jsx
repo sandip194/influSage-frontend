@@ -9,7 +9,7 @@ import {
 } from "react-icons/ri";
 import { Tooltip } from "antd";
 import { Image } from "primereact/image";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { getSocket } from "../../sockets/socket";
@@ -105,7 +105,7 @@ export default function ChatMessages({
       conversationId: chat.id,
     });
     try {
-      const res = await axios.put(
+      const res = await api.put(
         `/chat/undodeletemessage`,
         {
           p_messageid: messageId,
@@ -142,7 +142,7 @@ export default function ChatMessages({
     });
 
     try {
-      const res = await axios.put(
+      const res = await api.put(
         `/chat/undodeletemessage`,
         { p_messageid: messageId, p_roleid: role, p_action: "undo" },
         { headers: { Authorization: `Bearer ${token}` } }

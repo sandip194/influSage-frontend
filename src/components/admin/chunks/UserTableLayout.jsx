@@ -21,7 +21,7 @@ import {
 } from "react-icons/ri";
 import { SearchOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
-import axios from "axios";
+import api from "../../../api/axios";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -83,7 +83,7 @@ const UserTableLayout = () => {
 
     const fetchStatusList = async () => {
         try {
-            const res = await axios.get("/admin/dashboard/user-status", {
+            const res = await api.get("/admin/dashboard/user-status", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (res.status === 200 && Array.isArray(res.data?.data)) {
@@ -112,7 +112,7 @@ const UserTableLayout = () => {
                 p_search: search || null,
             };
 
-            const res = await axios.get("/admin/dashboard/user-requests", {
+            const res = await api.get("/admin/dashboard/user-requests", {
                 headers: { Authorization: `Bearer ${token}` },
                 params,
             });
@@ -130,7 +130,7 @@ const UserTableLayout = () => {
 
     const fetchBlockResons = async () => {
         try {
-            const res = await axios.get("/admin/dashboard/user-block-reason", {
+            const res = await api.get("/admin/dashboard/user-block-reason", {
                 headers: { Authorization: `Bearer ${token}` },
             })
 
@@ -142,7 +142,7 @@ const UserTableLayout = () => {
 
     const fetchPlatforms = async () => {
         try {
-            const res = await axios.get('providers', {
+            const res = await api.get('providers', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPlatforms(res.data.data || []);
@@ -153,7 +153,7 @@ const UserTableLayout = () => {
 
     const fetchGenders = async () => {
         try {
-            const res = await axios.get('genders', {
+            const res = await api.get('genders', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setGenders(res.data.genders || []);
@@ -164,7 +164,7 @@ const UserTableLayout = () => {
 
     const fetchInfluFollowers = async () => {
         try {
-            const res = await axios.get('influencer-type', {
+            const res = await api.get('influencer-type', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setInfluencerTiers(res.data.influencerType || []);
@@ -175,7 +175,7 @@ const UserTableLayout = () => {
 
     const handleSubmit = async (userID, statusName) => {
         try {
-            const res = await axios.post('/admin/dashboard/approved-or-rejected', { p_userid: userID, p_statusname: statusName }, {
+            const res = await api.post('/admin/dashboard/approved-or-rejected', { p_userid: userID, p_statusname: statusName }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.status === 200) {
@@ -245,7 +245,7 @@ const UserTableLayout = () => {
         }
 
         try {
-            const res = await axios.post('/admin/dashboard/profile-campaign-block', {
+            const res = await api.post('/admin/dashboard/profile-campaign-block', {
                 p_userid: currentUserId,
                 p_objective: selectedReason,
             }, {
@@ -273,7 +273,7 @@ const UserTableLayout = () => {
 
         try {
             setRejectLoading(true)
-            const res = await axios.post('/admin/dashboard/reject/profile-or-campaign', {
+            const res = await api.post('/admin/dashboard/reject/profile-or-campaign', {
                 p_userid: currentUserId,
                 p_text: rejectReason
             }, {

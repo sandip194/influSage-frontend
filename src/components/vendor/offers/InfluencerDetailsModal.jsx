@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Tooltip, Skeleton, Empty } from "antd";
 import { RiHeart3Line, RiHeart3Fill, RiFile3Line } from "@remixicon/react";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -36,7 +35,7 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
     if (!influencerId) return;
     try {
       setLoading(true);
-      const res = await axios.get(`/vendor/influencer-detail/${influencerId}`, {
+      const res = await api.get(`/vendor/influencer-detail/${influencerId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setInfluDetails(res.data?.result);
@@ -53,7 +52,7 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
 
   const handleLike = async () => {
     try {
-      const response = await axios.post(
+      const response = await api.post(
         "/vendor/addfavourite/influencer",
         { p_influencerId: Number(influencerId) },
         { headers: { Authorization: `Bearer ${token}` } }

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import api from "../../../api/axios";import { Link, useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Navigation, Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -172,7 +171,7 @@ const CampaignCarousel = () => {
   const getLimitedCampaigns = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get("user/browse-all-campaigns/fiterWithSort", {
+      const res = await api.get("user/browse-all-campaigns/fiterWithSort", {
         params: { pagenumber: 1, pagesize: 10 },
         headers: { Authorization: `Bearer ${token}` },
       });

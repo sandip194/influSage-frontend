@@ -4,8 +4,7 @@ import { UploadOutlined } from "@ant-design/icons";
 import { Upload } from "antd";
 const { Dragger } = Upload;
 import { useSelector } from "react-redux";
-import axios from "axios";
-import { toast } from "react-toastify";
+import api from "../../../api/axios";import { toast } from "react-toastify";
 import useFileUpload from "../../../hooks/useFileUpload";
 import FilePreview from "../../common/FilePreview";
 
@@ -44,7 +43,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
     const fetchLanguages = async () => {
       try {
         setLoadingLanguages(true);
-        const res = await axios.get("languages", {
+        const res = await api.get("languages", {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (mounted) setLanguages(res.data.languages || []);
@@ -146,7 +145,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
 
 
       for (const filepath of deletedFilePaths) {
-        await axios.post(
+        await api.post(
           "/user/profile/delete-portfolio-file",
           { userId, filepath },
           { headers: { Authorization: `Bearer ${token}` } }
@@ -181,7 +180,7 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
 
       fileList.forEach(f => formData.append("portfolioFiles", f));
 
-      const res = await axios.post("user/complete-profile", formData, {
+      const res = await api.post("user/complete-profile", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,

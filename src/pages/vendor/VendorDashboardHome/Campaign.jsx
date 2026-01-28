@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
-import { RiCalendar2Line } from "@remixicon/react";
+import api from "../../../api/axios";import { RiCalendar2Line } from "@remixicon/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, FreeMode, Autoplay, Pagination } from "swiper/modules";
 
@@ -58,7 +57,7 @@ const Campaign = () => {
     try {
       setLoading(true);
 
-      const res = await axios.get("vendor/allcampaign", {
+      const res = await api.get("vendor/allcampaign", {
         params: {
           p_pagenumber: 1,
           p_pagesize: 10, // fetch 10
@@ -89,7 +88,7 @@ const Campaign = () => {
     try {
       setInfLoading(true);
 
-      const res = await axios.get("/vendor/allinfluencer/browse", {
+      const res = await api.get("/vendor/allinfluencer/browse", {
         params: {
           p_pagenumber: 1,
           p_pagesize: 10, // fetch 10, show 6
@@ -129,7 +128,7 @@ const Campaign = () => {
   const handleLike = async (influencerId) => {
 
     try {
-      const response = await axios.post(
+      const response = await api.post(
         "/vendor/addfavourite/influencer",
         {
           p_influencerId: influencerId,

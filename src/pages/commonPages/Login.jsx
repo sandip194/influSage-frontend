@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, Suspense } from "react
 import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios"
 import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
 import { toast } from "react-toastify";
 import googleIcon from "../../assets/icons/google-logo.png";
@@ -72,7 +72,7 @@ export const LoginForm = () => {
   useEffect(() => {
     const storedToken = localStorage.getItem("auth_token");
     if (storedToken) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
     }
 
     const params = new URLSearchParams(window.location.search);
@@ -91,7 +91,7 @@ export const LoginForm = () => {
       localStorage.setItem("email", email || "");
       localStorage.setItem("p_code", p_code || "");
 
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       dispatch(setCredentials({  id: userId, role: Number(roleId), name, email, p_code, token }));
       window.history.replaceState({}, document.title, window.location.pathname);
 
@@ -127,7 +127,7 @@ export const LoginForm = () => {
         email: data.email.toLowerCase(),
       };
 
-      const res = await axios.post("/user/login", payload);
+      const res = await api.post("/user/login", payload);
       if (res.status === 200) {
 
         // Handle blocked or rejected status

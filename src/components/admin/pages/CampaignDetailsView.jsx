@@ -1,6 +1,5 @@
 
-import axios from "axios";
-import { useEffect, useState } from "react";
+import api from "../../../api/axios";import { useEffect, useState } from "react";
 import {
     RiMoneyRupeeCircleLine,
     RiTranslate,
@@ -55,7 +54,7 @@ const CampaignDetailsView = () => {
     const getCamapignDetails = async () => {
         try {
             setLoading(true)
-            const res = await axios.get("/admin/dashboard/campaign-detail", {
+            const res = await api.get("/admin/dashboard/campaign-detail", {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { p_campaignid: campaignId },
             });
@@ -89,7 +88,7 @@ const CampaignDetailsView = () => {
     const handleSubmit = async (statusName) => {
         try {
             setActionLoading(true);
-            const res = await axios.post(
+            const res = await api.post(
                 "/admin/dashboard/approved-or-rejected",
                 { p_campaignid: campaignId, p_statusname: statusName },
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -117,7 +116,7 @@ const CampaignDetailsView = () => {
 
         try {
             setRejectLoading(true);
-            const res = await axios.post('/admin/dashboard/reject/profile-or-campaign', {
+            const res = await api.post('/admin/dashboard/reject/profile-or-campaign', {
                 p_campaignid: campaignId,
                 p_text: rejectReason
             }, {
@@ -140,7 +139,7 @@ const CampaignDetailsView = () => {
     const fetchBlockReasons = async () => {
         try {
             setBlockLoading(true);
-            const res = await axios.get(
+            const res = await api.get(
                 "/admin/dashboard/campaign-block-reason",
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -165,7 +164,7 @@ const CampaignDetailsView = () => {
         try {
             setActionLoading(true);
 
-            const res = await axios.post(
+            const res = await api.post(
                 "admin/dashboard/profile-campaign-block",
                 {
                     p_campaignid: campaignId,

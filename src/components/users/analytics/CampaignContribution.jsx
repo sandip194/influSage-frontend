@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Select, Spin } from "antd";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -59,7 +58,7 @@ const CampaignContribution = () => {
       const endpoint = ENDPOINT_BY_ROLE[role];
       if (!endpoint) return;
 
-      const res = await axios.get(endpoint, {
+      const res = await api.get(endpoint, {
         params: { p_filtertype: filter },
         headers: { Authorization: `Bearer ${token}` },
       });

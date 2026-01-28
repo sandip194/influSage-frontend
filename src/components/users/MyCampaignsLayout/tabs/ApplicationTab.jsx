@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-
+import api from "../../../../api/axios";
 const formatToINR = (amount) => {
   if (isNaN(amount)) return "₹0";
   return `₹${new Intl.NumberFormat("en-IN").format(amount)}`;
@@ -20,7 +19,7 @@ const ApplicationTab = ({ campaignId, token }) => {
 
     try {
       setLoading(true);
-      const res = await axios.get(`user/signle-applied/${campaignId}`, {
+      const res = await api.get(`user/signle-applied/${campaignId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 const ProfileComplation = () => {
@@ -12,7 +11,7 @@ const ProfileComplation = () => {
     const fetchCompletion = async () => {
       try {
         const authToken = token || localStorage.getItem("token");
-        const response = await axios.get(`user/dashboard/profile-completion`, {
+        const response = await api.get(`user/dashboard/profile-completion`, {
           headers: { Authorization: `Bearer ${authToken}` },
         });
 

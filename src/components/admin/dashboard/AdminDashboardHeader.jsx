@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { logout } from "../../../features/auth/authSlice";
 import React, { useState, useEffect } from "react";
 import {DownOutlined } from "@ant-design/icons";
-import axios from "axios";
+import api from "../../../api/axios";
 import { clearNotifications } from "../../../features/socket/notificationSlice";
 
 const AdminDashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
@@ -24,7 +24,7 @@ const AdminDashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
     const fetchProfileData = async () => {
       if (!token) return;
       try {
-        const res = await axios.get("/user-profile-info", {
+        const res = await api.get("/user-profile-info", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data?.userData) {

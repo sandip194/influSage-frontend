@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from 'api';
 import React, { useState, useEffect } from 'react';
 import { FaInstagram, FaYoutube, FaFacebook, FaTiktok } from 'react-icons/fa';
 
@@ -54,7 +54,7 @@ const PlatformSelector = ({ onBack, onNext }) => {
 
     const fatchInfluencerTire = async() => {
         try {
-            const response = await axios.get("vendor/influencer-tiers")
+            const response = await api.get("vendor/influencer-tiers")
             if(response.status === 200){
                 setInfluencerTiers(response.data.influencerTiers)
             }
@@ -67,7 +67,7 @@ const PlatformSelector = ({ onBack, onNext }) => {
     useEffect(() => {
 fatchInfluencerTire();
         // TODO: Replace mock influencer tiers with API call
-        // axios.get("https://your-api.com/influencer-tiers")
+        // api.get("https://your-api.com/influencer-tiers")
         //     .then(res => {
         //         if (Array.isArray(res.data.influencerTiers)) {
         //             setInfluencerTiers(res.data.influencerTiers);

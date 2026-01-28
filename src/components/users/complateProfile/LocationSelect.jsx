@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from 'api';
 import { Select, Input } from 'antd';
 import postalRegexList from './postalRegex.json'
 
@@ -42,7 +42,7 @@ export default function LocationSelect({ onChange,  showErrors = false }) {
 
   useEffect(() => {
     setLoading(prev => ({ ...prev, countries: true }));
-    axios.get(countryAPI)
+    api.get(countryAPI)
       .then(res => {
         setCountries(res.data.data);
         setError(prev => ({ ...prev, countries: "" }));
@@ -59,7 +59,7 @@ export default function LocationSelect({ onChange,  showErrors = false }) {
     }
 
     setLoading(prev => ({ ...prev, states: true }));
-    axios.post(stateAPI, { country: selectedCountry })
+    api.post(stateAPI, { country: selectedCountry })
       .then(res => {
         setStates(res.data.data.states || []);
         setError(prev => ({ ...prev, states: "" }));
@@ -75,7 +75,7 @@ export default function LocationSelect({ onChange,  showErrors = false }) {
     }
 
     setLoading(prev => ({ ...prev, cities: true }));
-    axios.post(cityAPI, {
+    api.post(cityAPI, {
       country: selectedCountry,
       state: selectedState,
     })

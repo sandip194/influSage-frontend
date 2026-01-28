@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Form, Input } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
-import axios from "axios";
-import { toast } from "react-toastify";
+import api from "../../../api/axios";import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -26,7 +25,7 @@ const ChangePassword = () => {
     try {
       setLoading(true);
 
-      const res = await axios.post(
+      const res = await api.post(
         "/setting/change-password",
         payload,
         {

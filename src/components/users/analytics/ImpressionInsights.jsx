@@ -8,8 +8,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { Select, Spin } from "antd";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
@@ -25,7 +24,7 @@ const ImpressionInsights = () => {
     if (!token) return;
     setLoading(true);
     try {
-      const res = await axios.get("/user/analytics/impression", {
+      const res = await api.get("/user/analytics/impression", {
         params: { p_filtertype: sortBy },
         headers: { Authorization: `Bearer ${token}` },
       });

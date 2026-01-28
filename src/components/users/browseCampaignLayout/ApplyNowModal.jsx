@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Input, Button, Upload, } from "antd";
 import { RiUpload2Line } from "@remixicon/react";
 import { useSelector } from "react-redux";
-import axios from "axios";
-import { toast } from "react-toastify";
+import api from "../../../api/axios";import { toast } from "react-toastify";
 
 import useFileUpload from "../../../hooks/useFileUpload";
 import FilePreview from "../../common/FilePreview";
@@ -70,7 +69,7 @@ const ApplyNowModal = ({ open, onClose, campaignId, onSuccess, campaignBudget })
         // Delete removed files
         for (const path of deletedFilePaths) {
             try {
-                await axios.post("/user/apply-now/portfoliofile-delete", { filePath: path }, { headers: { Authorization: `Bearer ${token}` } });
+                await api.post("/user/apply-now/portfoliofile-delete", { filePath: path }, { headers: { Authorization: `Bearer ${token}` } });
             } catch (err) {
                 toast.error(err);
                 console.error("Delete failed:", path);
@@ -79,7 +78,7 @@ const ApplyNowModal = ({ open, onClose, campaignId, onSuccess, campaignBudget })
 
         try {
             setLoading(true);
-            const res = await axios.post(`user/apply-for-campaign/${campaignId}`, formData, { headers: { Authorization: `Bearer ${token}` } });
+            const res = await api.post(`user/apply-for-campaign/${campaignId}`, formData, { headers: { Authorization: `Bearer ${token}` } });
             toast.success(res.data.message);
             resetForm();
             onSuccess();
@@ -94,7 +93,7 @@ const ApplyNowModal = ({ open, onClose, campaignId, onSuccess, campaignBudget })
     const loadData = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`user/signle-applied/${campaignId}`, { headers: { Authorization: `Bearer ${token}` } });
+            const res = await api.get(`user/signle-applied/${campaignId}`, { headers: { Authorization: `Bearer ${token}` } });
             const data = res.data?.data;
             if (!data) return;
 

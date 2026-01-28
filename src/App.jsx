@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import './index.css';
@@ -108,8 +108,8 @@ import ChatAppPageUser from './components/ChatAppPageUser/ChatAppPageUser';
 ========================================================= */
 const App = () => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  axios.defaults.baseURL = BASE_URL;
-  axios.defaults.withCredentials = true;
+  // api.defaults.baseURL = BASE_URL;
+  // api.defaults.withCredentials = true;
 
 
   return (

@@ -18,8 +18,7 @@ import Audience from "./Audience";
 import Table from "./Table";
 import { PlatformBreakdown } from "./PlatformBreakdown";
 import CampaignContribution from "./CampaignContribution";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Empty, Select, Skeleton } from "antd";
 import { safeNumber } from "../../../App/safeAccess";
@@ -81,7 +80,7 @@ const AnalyticsLayout = () => {
     if (!token) return;
 
     try {
-      const res = await axios.get("/user/analytics/summary", {
+      const res = await api.get("/user/analytics/summary", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -101,7 +100,7 @@ const AnalyticsLayout = () => {
 
     setContentLoading(true);
     try {
-      const res = await axios.get("/user/analytics/campaign-recents", {
+      const res = await api.get("/user/analytics/campaign-recents", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -171,7 +170,7 @@ const AnalyticsLayout = () => {
 
   const fetchCampaignList = async () => {
     try {
-      const res = await axios.get("/user/analytics/campaign-list", {
+      const res = await api.get("/user/analytics/campaign-list", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const campaigns = res?.data?.data || [];

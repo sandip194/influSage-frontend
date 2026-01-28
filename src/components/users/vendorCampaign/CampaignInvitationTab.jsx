@@ -1,5 +1,5 @@
 import { Empty, Pagination, Skeleton, Input } from 'antd';
-import axios from 'axios';
+import api from '../../../api/axios';
 import React, { useCallback, useEffect, useState } from 'react'
 import { SearchOutlined } from "@ant-design/icons";
 import { useSelector } from 'react-redux';
@@ -27,7 +27,7 @@ const CampaignInvitationTab = ({ campaignData }) => {
         try {
             setLoading(true)
 
-            const res = await axios.get(`/vendor/mycampaign/invitationlist`, {
+            const res = await api.get(`/vendor/mycampaign/invitationlist`, {
                 params: {
                     p_campaignid: campaignData?.id,
                     p_offset: pagenumber,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import axios from "axios";
+import api from "../../api/axios";
 import { RiAddLine } from "react-icons/ri";
 import { CloseCircleFilled } from "@ant-design/icons";
 import { Tooltip, Skeleton  } from "antd";
@@ -39,7 +39,7 @@ export default function Sidebar({ onSelectChat, activeConversationId }) {
     try {
       setLoading(true);
 
-      const response = await axios.get(`/chat/conversationsdetails`, {
+      const response = await api.get(`/chat/conversationsdetails`, {
         params: { p_search: search.trim() || "" },
         headers: { Authorization: `Bearer ${token}` },
       });

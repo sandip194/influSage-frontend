@@ -1,6 +1,6 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Modal, Skeleton } from "antd";
-import axios from "axios";
+import api from "../../../api/axios";
 import { RiBook2Line, RiTicket2Line } from "@remixicon/react";
 import { useSelector } from "react-redux";
 import { getSocket } from "../../../sockets/socket";
@@ -81,7 +81,7 @@ const AdminSidebar = forwardRef (({ setActiveSubject }, ref) => {
   useEffect(() => {
     const fetchTicketStatus = async () => {
       try {
-        const res = await axios.get("/chat/support/ticket-status");
+        const res = await api.get("/chat/support/ticket-status");
         const list = res.data?.status || [];
 
         setStatusList(list.map((x) => ({ id: x.id, name: x.name })));
@@ -111,7 +111,7 @@ const AdminSidebar = forwardRef (({ setActiveSubject }, ref) => {
     setSubjectsByTab((prev) => ({ ...prev, [tab.name]: [] }));
 
     try {
-      const res = await axios.get("/chat/support/user-admin/all-tickets", {
+      const res = await api.get("/chat/support/user-admin/all-tickets", {
         headers: { Authorization: `Bearer ${token}` },
         params: { p_statuslabelid: tab.id },
       });
@@ -155,7 +155,7 @@ const AdminSidebar = forwardRef (({ setActiveSubject }, ref) => {
       setActiveSubject(ticket);
       setActiveSubjectId(ticket.id);
 
-      await axios.post(
+      await api.post(
         "/chat/support/ticket/create-or-update-status",
         {
           p_usersupportticketid: ticket.id,

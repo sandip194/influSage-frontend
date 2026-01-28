@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-
+import api from "../../api/axios";
 const SideImageSlider = React.lazy(() =>
   import("../../components/common/SideImageSlider")
 );
@@ -16,7 +15,7 @@ export const Role = () => {
     let isMounted = true;
     const fetchRoles = async () => {
       try {
-        const res = await axios.get("/roles");
+        const res = await api.get("/roles");
         if (isMounted) setRoles(res.data?.roles || []);
       } catch (error) {
         console.error("Failed to fetch roles", error);

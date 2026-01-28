@@ -1,5 +1,5 @@
 import { RiCheckLine } from '@remixicon/react';
-import axios from 'axios';
+import api from '../../../api/axios';
 import React, { useEffect, useState } from "react";
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -20,7 +20,7 @@ const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSa
   // ✅ Fetch all objectives
   const fetchAllObjectives = async () => {
     try {
-      const response = await axios.get("vendor/objectives");
+      const response = await api.get("vendor/objectives");
       if (response.status === 200) {
         setObjectives(response.data.objectives || []);
       }
@@ -68,7 +68,7 @@ const ObjectiveSelector = ({ onBack, onNext, data, showControls, showToast, onSa
     formData.append('objectivesjson', JSON.stringify([{ objectiveid: selected }]));
 
     try {
-      const response = await axios.post("vendor/complete-vendor-profile", formData, {
+      const response = await api.post("vendor/complete-vendor-profile", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

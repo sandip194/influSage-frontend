@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { RiCheckLine, RiFileCopyLine } from "@remixicon/react";
 import { message, Spin, Empty } from "antd";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { safeArray, safeText } from "../../../App/safeAccess";
 
 export default function VendorContentLinksTab({ campaignId }) {
@@ -55,7 +54,7 @@ export default function VendorContentLinksTab({ campaignId }) {
   const fetchAllLinks = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`/vendor/content-links/${campaignId}`, {
+      const res = await api.get(`/vendor/content-links/${campaignId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

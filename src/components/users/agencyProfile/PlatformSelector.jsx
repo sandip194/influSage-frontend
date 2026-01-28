@@ -86,7 +86,7 @@ const PlatformSelector = ({ onBack, onNext }) => {
 
     useEffect(() => {
         // TODO: Replace mock influencer tiers with API call
-        // axios.get("https://your-api.com/influencer-tiers")
+        // api.get("https://your-api.com/influencer-tiers")
         //     .then(res => {
         //         if (Array.isArray(res.data.influencerTiers)) {
         //             setInfluencerTiers(res.data.influencerTiers);

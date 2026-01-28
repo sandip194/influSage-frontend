@@ -11,8 +11,7 @@ import {
   RiArrowDownSLine,
   RiLoader4Line
 } from "@remixicon/react";
-import axios from "axios";
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import api from "../../../api/axios";import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import { Skeleton, Spin } from "antd";
@@ -64,7 +63,7 @@ const DescriptionLayout = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.get(`/user/campaign-details/${campaignId}`, {
+      const res = await api.get(`/user/campaign-details/${campaignId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -130,7 +129,7 @@ const DescriptionLayout = () => {
     try {
       setLoadingFeedbacks(true);
 
-      const res = await axios.get("/user/vendor-feedback-list", {
+      const res = await api.get("/user/vendor-feedback-list", {
         headers: { Authorization: `Bearer ${token}` },
         params: {
           p_campaignid: campaignId,

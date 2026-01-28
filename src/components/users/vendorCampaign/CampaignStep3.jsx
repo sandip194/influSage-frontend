@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Input, Select, DatePicker } from "antd";
 import dayjs from "dayjs";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import {
   RiImageAddLine,
   RiInformationLine,
@@ -218,7 +217,7 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
       const fd = buildFormData(payload, profileImage);
       if (campaignId) fd.append("campaignId", campaignId);
 
-      const res = await axios.post("/vendor/update-campaign", fd, {
+      const res = await api.post("/vendor/update-campaign", fd, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

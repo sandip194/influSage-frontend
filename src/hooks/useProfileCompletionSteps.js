@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { useSelector } from 'react-redux';
 
 // Validation Function ==> bcs we dont need to re create it for every render 
@@ -58,7 +58,7 @@ export const useProfileCompletionSteps = () => {
 
     const getUserProfileCompletionData = useCallback(async () => {
         try {
-            const res = await axios.get(`user/profile/${userId}`, {
+            const res = await api.get(`user/profile/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { RiAddLine, RiMore2Fill, RiCheckLine } from "@remixicon/react";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { Dropdown, Menu, Modal, message, Input, DatePicker, Button, Skeleton, Empty } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -22,7 +21,7 @@ const TodoListCard = () => {
   const getTodoList = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("user/dashboard/todo-list", {
+      const res = await api.get("user/dashboard/todo-list", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTodos(res.data.data || []);
@@ -49,7 +48,7 @@ const TodoListCard = () => {
         p_iscompleted: isCompleted,
         p_isdeleted: isDeleted,
       };
-      await axios.post("user/dashboard/todo/insert-edit-delete", body, {
+      await api.post("user/dashboard/todo/insert-edit-delete", body, {
         headers: { Authorization: `Bearer ${token}` },
       });
       await getTodoList();

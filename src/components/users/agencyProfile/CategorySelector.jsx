@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CheckOutlined } from '@ant-design/icons';
-import axios from 'axios';
+import api from 'api';
 
 
 export const CategorySelector = ({ onBack, onNext }) => {
@@ -21,7 +21,7 @@ export const CategorySelector = ({ onBack, onNext }) => {
 
     const fatchAllCategories = async () => {
     try {
-        const response = await axios.get("vendor/categories");
+        const response = await api.get("vendor/categories");
         if (response.status === 200) {
             const data = response.data;
             setCategoryTree(data);

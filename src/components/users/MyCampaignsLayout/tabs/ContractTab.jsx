@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../../../../api/axios";
 import React, { useEffect, useState } from "react";
 import {
   RiFileList3Line,
@@ -74,7 +74,7 @@ const ContractTab = ({ campaignId, token }) => {
 
   const fetchContractDetails = async () => {
     try {
-      const res = await axios.get(`/user/contract-detail/${campaignId}`, {
+      const res = await api.get(`/user/contract-detail/${campaignId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -144,7 +144,7 @@ const ContractTab = ({ campaignId, token }) => {
         p_statusname: mappedStatus,
       };
 
-      const res = await axios.post("/user/contract/approve-reject", payload, {
+      const res = await api.post("/user/contract/approve-reject", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -193,7 +193,7 @@ const ContractTab = ({ campaignId, token }) => {
     try {
       setClosingLoading(true);
 
-      const res = await axios.post(
+      const res = await api.post(
         "/user/add-feedback",
         {
           p_contractid: contract.id,

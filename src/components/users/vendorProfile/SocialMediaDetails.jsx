@@ -1,6 +1,6 @@
 // import React, { useEffect, useState } from 'react';
 // import { Form, Input, Spin } from 'antd';
-// import axios from 'axios';
+// import api from 'api';
 // import { message } from 'antd';
 // import { useSelector } from 'react-redux';
 // import { useMemo } from 'react';
@@ -18,7 +18,7 @@
 
 //   const getAllPlatforms = async () => {
 //     try {
-//       const res = await axios.get("providers")
+//       const res = await api.get("providers")
 //       setProviders(res.data.data)
 //     } catch (error) {
 //       console.error(error)
@@ -68,7 +68,7 @@
 //         links, // assuming you want the links array inside
 //       };
 
-//       const response = await axios.post(
+//       const response = await api.post(
 //         'vendor/complete-vendor-profile', // replace with actual URL
 //         { providersjson },
 //         {
@@ -274,7 +274,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Spin } from 'antd';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { message } from 'antd';
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
@@ -291,7 +291,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
 
   const getAllPlatforms = async () => {
     try {
-      const res = await axios.get("providers")
+      const res = await api.get("providers")
       setProviders(res.data.data)
     } catch (error) {
       console.error(error)
@@ -341,7 +341,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
         formData.append('providersjsonskipped', true);
       }
 
-      const response = await axios.post(
+      const response = await api.post(
         'vendor/complete-vendor-profile', // replace with actual URL
         formData,
         {

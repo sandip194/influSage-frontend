@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { useSelector } from 'react-redux';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -33,7 +33,7 @@ const PerformanceCard = () => {
   const getCountData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/user/dashboard/counts', {
+      const res = await api.get('/user/dashboard/counts', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCounts(res?.data?.data ?? null);

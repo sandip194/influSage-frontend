@@ -13,8 +13,7 @@ import {
     Avatar,
 } from "antd";
 import dayjs from "dayjs";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 
 const { TextArea } = Input;
 const { Panel } = Collapse;
@@ -66,7 +65,7 @@ export default function ContractModal({
             setInfluencerError(null);
 
             try {
-                const res = await axios.get("/vendor/selected/influencer", {
+                const res = await api.get("/vendor/selected/influencer", {
                     params: { campaign_id: campaignId },
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -106,7 +105,7 @@ export default function ContractModal({
         const fetchPlatforms = async () => {
             setLoadingPlatforms(true);
             try {
-                const res = await axios.get("/vendor/provider-content-type", {
+                const res = await api.get("/vendor/provider-content-type", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 

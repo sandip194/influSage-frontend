@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Upload, message } from "antd";
 import { RiCloseLine, RiUpload2Line, RiDeleteBin6Line } from "react-icons/ri";
-import axios from "axios";
-import { toast } from "react-toastify";
+import api from "../../../api/axios";import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import "react-photo-view/dist/react-photo-view.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
@@ -123,7 +122,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
         }
       });
 
-      await axios.post(`/vendor/update-campaign`, formData, {
+      await api.post(`/vendor/update-campaign`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -181,7 +180,7 @@ const CampaignStep4 = ({ onBack, onNext, data, campaignId }) => {
           return;
         }
 
-        const res = await axios.post(
+        const res = await api.post(
           "/vendor/campaign/delete-file",
           { campaignId, filepath: fileToDelete.filepath },
           { headers: { Authorization: `Bearer ${authToken}` } }

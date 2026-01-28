@@ -1,7 +1,7 @@
 import React, { useEffect, useState,  useCallback } from "react";
 import { Table, Button, Tooltip, Select, Empty } from "antd";
 import { RiEyeLine } from "react-icons/ri";
-import axios from "axios";
+import api from "../../../api/axios";
 import { useSelector } from "react-redux";
 const { Option } = Select;
 
@@ -90,7 +90,7 @@ const AllContent = ({ onViewHistory }) => {
           p_search: (params.search ?? search) || null,
         };
 
-        const res = await axios.get("/admin/analytics/contents-histories", {
+        const res = await api.get("/admin/analytics/contents-histories", {
           params: query,
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -146,13 +146,13 @@ const AllContent = ({ onViewHistory }) => {
     const loadFilters = async () => {
       try {
         const [pRes, cRes, sRes] = await Promise.all([
-          axios.get("/providers", {
+          api.get("/providers", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("/content-type", {
+          api.get("/content-type", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("/admin/analytics/status-filters", {
+          api.get("/admin/analytics/status-filters", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

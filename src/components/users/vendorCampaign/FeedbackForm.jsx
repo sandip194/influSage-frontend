@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Select } from "antd";
 import { RiStarFill, RiStarLine } from "@remixicon/react";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 
 const VendorFeedbackModal = ({ campaignId, onClose }) => {
@@ -24,7 +23,7 @@ const VendorFeedbackModal = ({ campaignId, onClose }) => {
     const fetchInfluencers = async () => {
       setLoadingInfluencers(true);
       try {
-        const res = await axios.get("/vendor/feedback/influencer-list", {
+        const res = await api.get("/vendor/feedback/influencer-list", {
           params: { campaign_id: campaignId },
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -74,7 +73,7 @@ const VendorFeedbackModal = ({ campaignId, onClose }) => {
   if (!validate()) return;
 
   try {
-    const res = await axios.post(
+    const res = await api.post(
       "/vendor/feedback",
       {
         p_campaignid: campaignId,

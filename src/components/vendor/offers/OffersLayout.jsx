@@ -1,7 +1,6 @@
 import { RiArrowDownSLine, RiEyeLine } from "@remixicon/react";
 import { Pagination, Select, Empty, Input, Skeleton, Tooltip } from "antd";
-import axios from "axios";
-import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
+import api from "../../../api/axios";import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import React, { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -36,7 +35,7 @@ const OffersLayout = () => {
     const getAllOffers = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await axios.get("vendor/all-offers", {
+            const res = await api.get("vendor/all-offers", {
                 params: {
                     sortby,
                     sortorder,

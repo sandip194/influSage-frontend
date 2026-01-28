@@ -6,8 +6,7 @@ import {
 } from "@remixicon/react";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import {  Input, Pagination, Select, Tooltip } from "antd";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import CampaignCardGrid from './BrowseCampaignCard';
 
@@ -57,7 +56,7 @@ const SavedLayout = () => {
   const getAllSavedCampaigns = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`user/saved-campaign`, {
+      const res = await api.get(`user/saved-campaign`, {
         params: {
           sortby,
           sortorder,
@@ -84,7 +83,7 @@ const SavedLayout = () => {
 
   const handleSave = async (id) => {
     try {
-      const res = await axios.post(
+      const res = await api.post(
         `user/save-campaign/${id}`,
         {},
         {

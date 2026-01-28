@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Table, Modal, Input, Checkbox, Button, Radio, Tooltip } from "antd";
 import InfluencerTable from "./InfluencerTable";
-import axios from "axios";
+import api from "../../../api/axios";
 import { useSelector } from "react-redux";
 import UpdateAddressModal from "./UpdateAddressModal";
 
@@ -38,7 +38,7 @@ export default function CampaignVendorTable() {
         try {
             setLoading(true);
 
-            const res = await axios.get(
+            const res = await api.get(
                 "/admin/dashboard/shippingcampaignlist",
                 {
                     headers: {

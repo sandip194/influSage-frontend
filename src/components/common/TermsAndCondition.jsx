@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import axios from 'axios';
+import api from '../../api/axios';
 import { RiZoomInLine, RiZoomOutLine, RiRefreshLine } from '@remixicon/react';
 
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
@@ -46,7 +46,7 @@ const TermsAndCondition = () => {
 
     const loadPdf = async () => {
       try {
-        const { data } = await axios.get('/terms-conditions');
+        const { data } = await api.get('/terms-conditions');
         const response = await fetch(data.data);
         const blob = await response.blob();
         if (!cancelled) setPdfFile(blob);

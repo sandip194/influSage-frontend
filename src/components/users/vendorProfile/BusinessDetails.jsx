@@ -3,8 +3,7 @@ import { Form, Input, Select, message, Spin } from 'antd';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { RiImageAddLine } from 'react-icons/ri';
-import axios from "axios";
-import postalRegexList from '../complateProfile/postalRegex.json';
+import api from "../../../api/axios";import postalRegexList from '../complateProfile/postalRegex.json';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
@@ -42,7 +41,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
     const fetchCompanySizes = async () => {
         try {
-            const response = await axios.get("vendor/company-sizes");
+            const response = await api.get("vendor/company-sizes");
             if (response.status === 200) {
                 setCompanySizes(response.data.companySizes || []);
             }
@@ -54,7 +53,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
     const loadCountries = async () => {
         try {
             setLoading(p => ({ ...p, countries: true }));
-            const res = await axios.get("/countries");
+            const res = await api.get("/countries");
             setCountries(Array.isArray(res?.data?.countries) ? res.data.countries : []);
         } catch (err) {
             console.error(err);
@@ -71,7 +70,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
             const countryObj = countries.find(c => c.name === countryName);
             if (!countryObj) return setStates([]);
 
-            const res = await axios.get(`/states/${countryObj.id}`);
+            const res = await api.get(`/states/${countryObj.id}`);
             setStates(Array.isArray(res?.data?.states) ? res.data.states : []);
         } catch (err) {
             console.error(err);
@@ -91,7 +90,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                 return;
             }
 
-            const res = await axios.get(`/cities/${stateObj.id}`);
+            const res = await api.get(`/cities/${stateObj.id}`);
             setCities(Array.isArray(res?.data?.cities) ? res.data.cities : []);
         } catch (err) {
             console.error(err);
@@ -285,7 +284,7 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                 formData.append('photo', profileImage);
             }
 
-            const response = await axios.post("/vendor/complete-vendor-profile", formData, {
+            const response = await api.post("/vendor/complete-vendor-profile", formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data',

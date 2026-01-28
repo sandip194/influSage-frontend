@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Form, Input, InputNumber } from 'antd';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { message, Spin } from 'antd';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -17,7 +17,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
 
   const getAllPlatforms = async () => {
     try {
-      const res = await axios.get("providers");
+      const res = await api.get("providers");
       setProviders(res.data.data);
     } catch (error) {
       console.error(error);
@@ -107,7 +107,7 @@ export const SocialMediaDetails = ({ onBack, onNext, data, onChange, showControl
       formData.append('socialaccountjson', JSON.stringify(socialaccountjson));
 
       console.log('🌐 Making API call...');
-      const response = await axios.post(
+      const response = await api.post(
         'user/complete-profile',
         formData,
         {

@@ -8,7 +8,7 @@ import { SocialMediaDetails } from '../../../components/users/vendorProfile/Soci
 import ObjectiveSelector from '../../../components/users/vendorProfile/ObjectiveSelector';
 import PaymentDetailsForm from '../../../components/users/complateProfile/PaymentDetailsForm';
 import ThankYouScreen from '../../../components/users/complateProfile/ThankYouScreen';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { useSelector } from 'react-redux';
 
 export const VendorProfileStepper = () => {
@@ -162,7 +162,7 @@ export const VendorProfileStepper = () => {
 
     const getUserProfileCompletionData = async () => {
         try {
-            const res = await axios.get(`vendor/profile/${userId}`, {
+            const res = await api.get(`vendor/profile/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',

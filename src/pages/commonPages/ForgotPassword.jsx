@@ -1,7 +1,7 @@
 import React, { useState, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 
 const SideImageSlider = React.lazy(() =>
@@ -20,7 +20,7 @@ export const ForgotPassword = () => {
     if (loading) return;
     setLoading(true);
     try {
-      const response = await axios.post("/user/forgot-password", {
+      const response = await api.post("/user/forgot-password", {
         email: data.email.toLowerCase(),
       });
       if (response.status === 200) toast.success(response.data.message);

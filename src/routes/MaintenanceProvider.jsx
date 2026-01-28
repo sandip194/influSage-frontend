@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import MaintenanceContext from "./MaintenanceContext";
 
 const MaintenanceProvider = ({ children }) => {
@@ -9,7 +9,7 @@ const MaintenanceProvider = ({ children }) => {
     useEffect(() => {
         const fetchStatus = async () => {
             try {
-                const res = await axios.get("/api/app-status"); // your backend
+                const res = await api.get("/api/app-status"); // your backend
                 console.log(res)
                 setMaintenance(!res.data.status);
             } catch (err) {

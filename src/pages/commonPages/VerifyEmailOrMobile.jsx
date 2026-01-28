@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 
 const SideImageSlider = React.lazy(() =>
@@ -62,7 +62,7 @@ export const VerifyEmailOrMobile = () => {
     try {
       const email = localStorage.getItem("signupEmail");
       const otpValue = otp.join("");
-      const res = await axios.post("/user/verify-otp", { email, otp: otpValue });
+      const res = await api.post("/user/verify-otp", { email, otp: otpValue });
 
       if (res.status === 200) {
         toast.success(res.data.message || "OTP verified successfully!");
@@ -86,7 +86,7 @@ export const VerifyEmailOrMobile = () => {
     setIsResending(true);
     try {
       const email = localStorage.getItem("signupEmail");
-      const res = await axios.post("/user/resend-otp", { email });
+      const res = await api.post("/user/resend-otp", { email });
       if (res.status === 200) {
         setOtp(["", "", "", ""]);
         setTimer(60);

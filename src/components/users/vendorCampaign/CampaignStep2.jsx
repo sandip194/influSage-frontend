@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Select } from 'antd';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { useSelector } from 'react-redux';
 import { RiCheckLine } from '@remixicon/react';
 
@@ -77,7 +77,7 @@ const CampaignStep2 = ({ data, onNext, onBack, campaignId }) => {
     const fetchLanguages = async () => {
       try {
         setLoadingLanguages(true);
-        const res = await axios.get("languages", {
+        const res = await api.get("languages", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setLanguages(res.data.languages || []);
@@ -95,7 +95,7 @@ const CampaignStep2 = ({ data, onNext, onBack, campaignId }) => {
     const fetchGenders = async () => {
       try {
         setLoadingGenders(true);
-        const res = await axios.get("genders", {
+        const res = await api.get("genders", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setGenders(res.data.genders || []);
@@ -113,7 +113,7 @@ const CampaignStep2 = ({ data, onNext, onBack, campaignId }) => {
     const fetchTiers = async () => {
       try {
         setLoadingTiers(true);
-        const res = await axios.get("/influencer-type", {
+        const res = await api.get("/influencer-type", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setInfluencerTiers(res.data.influencerType || []);
@@ -206,7 +206,7 @@ const CampaignStep2 = ({ data, onNext, onBack, campaignId }) => {
       fd.append("p_vendorinfojson", JSON.stringify(p_vendorinfojson));
       if (campaignId) fd.append("campaignId", campaignId);
 
-      const res = await axios.post("/vendor/update-campaign", fd, {
+      const res = await api.post("/vendor/update-campaign", fd, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

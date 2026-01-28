@@ -2,7 +2,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../features/auth/authSlice";
@@ -51,7 +51,7 @@ export const SetPassword = () => {
         password: data.password,
       };
 
-      const response = await axios.post("/auth/set-password", payload);
+      const response = await api.post("/auth/set-password", payload);
 
       if (response.status === 201) {
         const { token, user } = response.data;
@@ -63,7 +63,7 @@ export const SetPassword = () => {
         localStorage.setItem("lastName", user.lastName);
         localStorage.setItem("email", user.email);
 
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         dispatch(
           setCredentials({
             token,

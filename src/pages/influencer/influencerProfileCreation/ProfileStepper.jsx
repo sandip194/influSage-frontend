@@ -11,7 +11,7 @@ import PaymentDetailsForm from '../../../components/users/complateProfile/Paymen
 import ThankYouScreen from '../../../components/users/complateProfile/ThankYouScreen';
 
 import '../../../components/users/complateProfile/profile.css';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { useDispatch, useSelector } from 'react-redux';
 import ErrorBoundary from '../../../components/common/ErrorBoundary';
 import { setCredentials } from '../../../features/auth/authSlice';
@@ -128,7 +128,7 @@ export const ProfileStepper = () => {
 
   const getUserProfileCompationData = useCallback(async () => {
     try {
-      const res = await axios.get(`user/profile/${userId}`, {
+      const res = await api.get(`user/profile/${userId}`, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
 

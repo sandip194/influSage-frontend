@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Modal, Radio, Input, Checkbox, message, Button } from "antd";
-import axios from "axios";
+import api from "../../../api/axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
@@ -75,7 +75,7 @@ export default function UpdateAddressModal({
         p_isreusable: tempSaveFuture
       };
 
-      const res = await axios.post("/admin/dashboard/insertShippingAddress", payload, {
+      const res = await api.post("/admin/dashboard/insertShippingAddress", payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

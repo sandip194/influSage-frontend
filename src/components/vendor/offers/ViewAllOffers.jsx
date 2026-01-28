@@ -5,8 +5,7 @@ import {
   RiUserLine,
 } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import InfluencerDetailsModal from "./InfluencerDetailsModal";
 import OfferDetailsModal from "./OfferDetailsModal";
 
@@ -59,7 +58,7 @@ const ViewAllOffers = ({ campaignData }) => {
   const handleViewOffer = async (offer) => {
     if (offer.status === "Applied" && offer.status !== "Viewed") {
       try {
-        await axios.post(
+        await api.post(
           `/vendor/application-status`,
           {
             p_applicationid: Number(offer.applicationid),
@@ -123,7 +122,7 @@ const ViewAllOffers = ({ campaignData }) => {
     try {
       setLoading(true)
 
-      const res = await axios.get(`/vendor/view-all-offers/${campaignData?.id}`, {
+      const res = await api.get(`/vendor/view-all-offers/${campaignData?.id}`, {
         params: {
           pagenumber,
           pagesize,

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { Table, Skeleton, Empty, Image, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ const PendingUploadContent = () => {
     const getPendingContentList = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await axios.get('/user/dashboard/pending-content-list', {
+            const res = await api.get('/user/dashboard/pending-content-list', {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setPendingList(res?.data?.data || []);

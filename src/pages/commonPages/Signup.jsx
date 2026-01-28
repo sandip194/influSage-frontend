@@ -2,7 +2,7 @@ import React, { useState, useCallback, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 import { Modal } from "antd";
 import googleIcon from "../../assets/icons/google-logo.png";
@@ -44,7 +44,7 @@ const Signup = () => {
 
       try {
         setLoading(true);
-        const response = await axios.post("/user/register", userData);
+        const response = await api.post("/user/register", userData);
         if (response.status === 200) {
           localStorage.setItem("isCreatedNew", response.data.message);
           toast.success("Signup successful! Please verify your email or mobile.");

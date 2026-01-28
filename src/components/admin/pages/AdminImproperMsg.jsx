@@ -1,5 +1,5 @@
 import { Empty, Table } from 'antd';
-import axios from 'axios';
+import api from '../../../api/axios';
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux';
 
@@ -40,22 +40,22 @@ const AdminImproperMsg = () => {
                     p_pagesize: params.pageSize || pagination.pageSize,
                 };
 
-                const res = await axios.get("/admin/dashboard/message/management", {
+                const res = await api.get("/admin/dashboard/message/management", {
                     headers: { Authorization: `Bearer ${token}` },
                     params: query,
                 });
 
-                const api = res?.data?.data ?? {};
+                const apidata = res?.data?.data ?? {};
 
-                const records = Array.isArray(api.records)
-                    ? api.records
+                const records = Array.isArray(apidata.records)
+                    ? apidata.records
                     : [];
 
 
                 setTableData(records);
                 setPagination((prev) => ({
                     ...prev,
-                    total: api.totalcount || 0,
+                    total: apidata.totalcount || 0,
                 }));
             } catch (error) {
                 console.error(error);

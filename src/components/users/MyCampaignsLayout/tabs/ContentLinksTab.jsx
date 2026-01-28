@@ -2,8 +2,7 @@
 // import { Button, Input, Modal, Select, message, Form, Alert } from "antd";
 // import { RiAddLine } from "@remixicon/react";
 // import { toast } from "react-toastify";
-// import axios from "axios";
-
+// import api from "../../../api/axios";
 // export default function ContentLinksTab({ token, contractId, campaignId }) {
 //     const [platforms, setPlatforms] = useState([]);
 //     const [availablePlatforms, setAvailablePlatforms] = useState([]);
@@ -118,7 +117,7 @@
 //                 }))
 //             }));
 
-//             await axios.post(
+//             await api.post(
 //                 "/user/upload/content-link",
 //                 { p_contractid: contractId, p_contentlinkjson: payload },
 //                 { headers: { Authorization: `Bearer ${token}` } }
@@ -136,7 +135,7 @@
 //         const fetchInitialData = async () => {
 //             try {
 //                 // 1. Load all available platforms
-//                 const platformRes = await axios.get(`/user/contracts/${contractId}/content-types`, {
+//                 const platformRes = await api.get(`/user/contracts/${contractId}/content-types`, {
 //                     headers: { Authorization: `Bearer ${token}` }
 //                 });
 
@@ -144,7 +143,7 @@
 //                 setAvailablePlatforms(aps);
 
 //                 // 2. Load influencer's previously uploaded content links
-//                 const linkRes = await axios.get(`/user/content-links/${campaignId}`, {
+//                 const linkRes = await api.get(`/user/content-links/${campaignId}`, {
 //                     headers: { Authorization: `Bearer ${token}` }
 //                 });
 
@@ -362,7 +361,7 @@
 //                                 contentlinks: p.links.map((link) => ({ links: link }))
 //                             }));
 
-//                             await axios.post(
+//                             await api.post(
 //                                 "/user/upload/content-link",
 //                                 { p_contractid: contractId, p_contentlinkjson: payload },
 //                                 { headers: { Authorization: `Bearer ${token}` } }
@@ -399,8 +398,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Input, message, Form, Alert } from "antd";
 import { toast } from "react-toastify";
-import axios from "axios";
-
+import api from "../../../../api/axios";
 export default function ContentLinksTab({ token, contractId, campaignId }) {
     const [providers, setProviders] = useState([]);
     const [errors, setErrors] = useState({});
@@ -471,7 +469,7 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
         const load = async () => {
             try {
                 // 1. Load providers + content types
-                const res = await axios.get(
+                const res = await api.get(
                     `/user/contracts/${contractId}/content-types`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
@@ -479,7 +477,7 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
                 const providerList = res.data?.providercontenttype || [];
 
                 // 2. Load previously uploaded links
-                const linkRes = await axios.get(
+                const linkRes = await api.get(
                     `/user/content-links/${campaignId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
@@ -650,7 +648,7 @@ export default function ContentLinksTab({ token, contractId, campaignId }) {
         setSaving(true);
 
         try {
-            const res = await axios.post(
+            const res = await api.post(
                 "/user/upload/content-link",
                 {
                     p_contractid: contractId,

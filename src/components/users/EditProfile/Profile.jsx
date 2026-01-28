@@ -6,7 +6,7 @@ import {
   RiLinksLine,
 } from '@remixicon/react';
 import { Empty, Skeleton } from 'antd';
-import axios from 'axios';
+import api from '../../../api/axios';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -92,7 +92,7 @@ const Profile = () => {
   const getMyProfileDetails = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`user/profile/${userId}`, {
+      const res = await api.get(`user/profile/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProfileData(res.data.profileParts);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Input, message } from 'antd';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { useSelector } from 'react-redux';
 import { RiCheckLine } from '@remixicon/react';
 
@@ -25,7 +25,7 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId, campaig
   useEffect(() => {
     const fetchObjectives = async () => {
       try {
-        const res = await axios.get("/vendor/campaign/objectives", {
+        const res = await api.get("/vendor/campaign/objectives", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const fetchedOptions = res.data.objectives || [];
@@ -93,7 +93,7 @@ const CampaignExpectationSelector = ({ data, onNext, userId: propUserId, campaig
       if (campaignId) formData.append("campaignId", campaignId);
       formData.append("p_objectivejson", JSON.stringify(p_objectivejson));
 
-      const res = await axios.post("/vendor/update-campaign", formData, {
+      const res = await api.post("/vendor/update-campaign", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

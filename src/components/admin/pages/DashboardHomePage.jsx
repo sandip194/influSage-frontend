@@ -6,7 +6,7 @@ import {
     RiTimeLine,
     RiBarChartLine,
 } from "react-icons/ri";
-import axios from 'axios';
+import api from '../../../api/axios';
 import { useSelector } from 'react-redux';
 import { Skeleton } from 'antd';
 import { useNavigate } from "react-router-dom";
@@ -23,7 +23,7 @@ const DashboardHomePage = () => {
         try {
             setLoading(true);
 
-            const res = await axios.get('/admin/dashboard', {
+            const res = await api.get('/admin/dashboard', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

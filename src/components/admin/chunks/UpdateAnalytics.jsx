@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Table, Tooltip, Select, Empty } from "antd";
 import { RiEditLine } from "react-icons/ri";
-import axios from "axios";
+import api from "../../../api/axios";
 import { useSelector } from "react-redux";
 import AnalyticsFormModal from "./AnalyticsFormModal";
 
@@ -73,7 +73,7 @@ const UpdateAnalytics = () => {
                     p_pagesize: params.pageSize || pagination.pageSize,
                 };
 
-                const res = await axios.get("/admin/getAnalyticList", {
+                const res = await api.get("/admin/getAnalyticList", {
                     headers: { Authorization: `Bearer ${token}` },
                     params: query,
                 });
@@ -151,10 +151,10 @@ const UpdateAnalytics = () => {
         const loadFilters = async () => {
             try {
                 const [pRes, cRes] = await Promise.all([
-                    axios.get("/providers", {
+                    api.get("/providers", {
                         headers: { Authorization: `Bearer ${token}` },
                     }),
-                    axios.get("/content-type", {
+                    api.get("/content-type", {
                         headers: { Authorization: `Bearer ${token}` },
                     }),
                 ]);

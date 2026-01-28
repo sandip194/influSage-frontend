@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Input, message } from 'antd';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { useSelector } from 'react-redux';
 import { RiCheckLine } from '@remixicon/react';
 
@@ -51,7 +51,7 @@ const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
   useEffect(() => {
     const fetchPlatforms = async () => {
       try {
-        const res = await axios.get("/vendor/provider-content-type", {
+        const res = await api.get("/vendor/provider-content-type", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -213,7 +213,7 @@ const CampaignStep5 = ({ onNext, onBack, data, campaignId }) => {
     try {
       setLoading(true);
 
-      await axios.post(
+      await api.post(
         "/vendor/update-campaign",
         { p_contenttypejson: contenttypejson, campaignId: campaignId ? campaignId : null },
         { headers: { Authorization: `Bearer ${token}` } }

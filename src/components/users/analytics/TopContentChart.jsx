@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import axios from "axios";
-import { Bar } from "react-chartjs-2";
+import api from "../../../api/axios";import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -63,7 +62,7 @@ const TopContentChart = ({ campaignId }) => {
         ? { p_campaignid: campaignId, p_filtertype: filterType }
         : { p_filtertype: filterType };
 
-      const res = await axios.get(endpoint, {
+      const res = await api.get(endpoint, {
         params,
         headers: { Authorization: `Bearer ${token}` },
         signal: controller.signal,

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Skeleton } from "antd";
 
@@ -15,7 +14,7 @@ const ProfileComplation = () => {
         setLoading(true)
         const authToken = token || localStorage.getItem("token");
 
-        const response = await axios.get(
+        const response = await api.get(
           `vendor/dashboard/profile-completion-perctange`,
           {
             headers: {

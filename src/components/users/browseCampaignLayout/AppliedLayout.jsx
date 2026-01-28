@@ -6,8 +6,7 @@ import {
 import { Modal } from "antd";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 import { Input, Pagination, Select, Tooltip } from "antd";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
 // IMPORT Apply Now Modal
@@ -71,7 +70,7 @@ const AppliedLayout = () => {
   const getAllAppliedCampaigns = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`user/applied-campaigns`, {
+      const res = await api.get(`user/applied-campaigns`, {
         params: {
           p_sortby: sortby,
           p_sortorder: sortorder,
@@ -108,7 +107,7 @@ const AppliedLayout = () => {
 
   const getAllStatus = useCallback(async () => {
     try {
-      const res = await axios.get('/user/Campaign-ApplicationStatus', { headers: { Authorization: `Bearer ${token}` } })
+      const res = await api.get('/user/Campaign-ApplicationStatus', { headers: { Authorization: `Bearer ${token}` } })
       setAllStatus(Array.isArray(res?.data?.data) ? res.data.data : []);
     } catch (error) {
       console.error(error)
@@ -123,7 +122,7 @@ const AppliedLayout = () => {
   const handleWithdraw = async (campaignapplicationid) => {
     if (!campaignapplicationid) return;
     try {
-      const res = await axios.post(
+      const res = await api.post(
         "/user/withdraw-application",
         {
           p_applicationid: campaignapplicationid,

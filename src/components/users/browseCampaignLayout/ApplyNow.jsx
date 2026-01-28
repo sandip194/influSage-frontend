@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Input, Button, Upload, Modal, } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import axios from "axios";
-import { toast } from "react-toastify";
+import api from "../../../api/axios";import { toast } from "react-toastify";
 import { RiArrowLeftSLine, RiVerifiedBadgeLine, RiUpload2Line } from "@remixicon/react";
 
 // Import the reusable hook and component
@@ -79,7 +78,7 @@ const ApplyNow = () => {
     // Delete removed files using hook's deletedFilePaths
     for (const path of deletedFilePaths) {
       try {
-        await axios.post(
+        await api.post(
           "/user/apply-now/portfoliofile-delete",
           {
             filePath: path,
@@ -95,7 +94,7 @@ const ApplyNow = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post(
+      const response = await api.post(
         `user/apply-for-campaign/${campaignId}`,
         formData,
         {
@@ -123,7 +122,7 @@ const ApplyNow = () => {
   const getAppliedCampiagnDetails = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`user/signle-applied/${campaignId}`, {
+      const res = await api.get(`user/signle-applied/${campaignId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -1,5 +1,5 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import { useSelector } from "react-redux";
 import { Modal, Button, Select, Skeleton } from "antd";
 import { getSocket } from "../../sockets/socket";
@@ -76,7 +76,7 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
   useEffect(() => {
     const fetchTicketStatus = async () => {
       try {
-        const res = await axios.get("/chat/support/ticket-status");
+        const res = await api.get("/chat/support/ticket-status");
         const list = res.data?.status || [];
         setStatusList(list);
         setSubjectsByTab(
@@ -94,7 +94,7 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
 
     const fetchSubjects = async () => {
       try {
-        const res = await axios.get("/chat/support/user/get-subject", {
+        const res = await api.get("/chat/support/user/get-subject", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -126,7 +126,7 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
   setActiveTab(tab.name);
   setLoadingTickets(true);
   try {
-    const res = await axios.get("/chat/support/user-admin/all-tickets", {
+    const res = await api.get("/chat/support/user-admin/all-tickets", {
       headers: { Authorization: `Bearer ${token}` },
       params: { p_statuslabelid: tab.id },
     });
@@ -170,7 +170,7 @@ const Sidebar = forwardRef(({ setActiveSubject }, ref) => {
     setLoadingAdd(true);
 
     try {
-      const res = await axios.post(
+      const res = await api.post(
         "/chat/support/ticket/create-or-update-status",
         {
           p_objectiveid: newSubject,

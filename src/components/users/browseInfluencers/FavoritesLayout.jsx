@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import axios from "axios";
-import { RiHeartLine, RiHeartFill, RiUserAddLine } from "@remixicon/react";
+import api from "../../../api/axios";import { RiHeartLine, RiHeartFill, RiUserAddLine } from "@remixicon/react";
 import { SearchOutlined } from "@ant-design/icons";
 import { Input, Pagination, Modal, Spin, Empty, Tooltip, Skeleton } from "antd";
 import { toast } from "react-toastify";
@@ -44,7 +43,7 @@ const FavoritesLayout = () => {
     setLoading(true);
 
     try {
-      const res = await axios.get("/vendor/getfavourite/influencer", {
+      const res = await api.get("/vendor/getfavourite/influencer", {
         params: {
           userId,
           p_pagenumber: filters.pagenumber,
@@ -76,7 +75,7 @@ const FavoritesLayout = () => {
     }
 
     try {
-      const response = await axios.post(
+      const response = await api.post(
         "/vendor/addfavourite/influencer",
         {
           p_userId: userId,

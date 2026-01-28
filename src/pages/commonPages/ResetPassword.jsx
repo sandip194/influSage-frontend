@@ -2,7 +2,7 @@ import React, { useState, Suspense } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 
 const SideImageSlider = React.lazy(() =>
@@ -27,7 +27,7 @@ export const ResetPassword = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post("/user/reset-password", {
+      const response = await api.post("/user/reset-password", {
         password: data.password,
         token,
       });

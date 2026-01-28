@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import {
+import api from "../../../api/axios";import {
   RiStackLine,
   RiGiftLine,
   RiWalletLine,
@@ -20,7 +19,7 @@ const CampaignStatsVendor = () => {
       try {
         const authToken = token || localStorage.getItem("token");
 
-        const response = await axios.get(
+        const response = await api.get(
           `vendor/dashboard/performancesummary`,
           {
             headers: { Authorization: `Bearer ${authToken}` },

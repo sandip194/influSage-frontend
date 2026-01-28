@@ -4,7 +4,7 @@ import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { RiImageAddLine } from 'react-icons/ri';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import api from '../../../api/axios';
 import postalRegexList from './postalRegex.json';
 import { useSelector } from 'react-redux';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -41,7 +41,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
 
   const getGender = async () => {
     try {
-      const res = await axios.get('genders');
+      const res = await api.get('genders');
       if (res) setGender(res.data.genders);
     } catch (error) {
       console.error(error);
@@ -56,7 +56,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
     try {
       setLoading((p) => ({ ...p, countries: true }));
 
-      const res = await axios.get("/countries");
+      const res = await api.get("/countries");
 
       setCountries(Array.isArray(res?.data?.countries) ? res.data.countries : []);
     } catch (err) {
@@ -77,7 +77,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
         return;
       }
 
-      const res = await axios.get(`/states/${countryObj.id}`);
+      const res = await api.get(`/states/${countryObj.id}`);
       setStates(Array.isArray(res?.data?.states) ? res.data.states : []);
     } catch (err) {
       console.error(err);
@@ -98,7 +98,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
         return;
       }
 
-      const res = await axios.get(`/cities/${stateObj.id}`);
+      const res = await api.get(`/cities/${stateObj.id}`);
       setCities(Array.isArray(res?.data?.cities) ? res.data.cities : []);
     } catch (err) {
       console.error(err);
@@ -311,7 +311,7 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
       formData.append('profilejson', JSON.stringify(profilePayload));
       formData.append('photo', profileImage);
 
-      const response = await axios.post('user/complete-profile', formData, {
+      const response = await api.post('user/complete-profile', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',

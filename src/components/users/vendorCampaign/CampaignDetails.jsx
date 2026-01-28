@@ -10,7 +10,7 @@ import VendorCampaignOverview from './VendorCampaignOverview';
 import VendorActivity from './VendorActivity';
 import VendorFilesMedia from './VendorFilesMedia';
 import VendorPayment from './VendorPayment';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RiArrowLeftLine, RiCheckboxCircleFill } from "react-icons/ri";
@@ -87,7 +87,7 @@ const CampaignDetails = () => {
   const getCampaignDetails = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`/vendor/singlecampaign/${campaignId}`, {
+      const res = await api.get(`/vendor/singlecampaign/${campaignId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -132,7 +132,7 @@ const CampaignDetails = () => {
   useEffect(() => {
     const fetchCancelReasons = async () => {
       try {
-        const res = await axios.get(`/vendor/reason-list`);
+        const res = await api.get(`/vendor/reason-list`);
         setCancelReasons(res?.data?.data);
       } catch (error) {
         console.error("Error fetching cancel reasons:", error);
@@ -164,7 +164,7 @@ const CampaignDetails = () => {
 
       console.log("Cancel payload:", payload);
 
-      const res = await axios.post(
+      const res = await api.post(
         `/vendor/cancle-campaign`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -232,7 +232,7 @@ const CampaignDetails = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post(`/vendor/update-campaign`, payload, {
+      const res = await api.post(`/vendor/update-campaign`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

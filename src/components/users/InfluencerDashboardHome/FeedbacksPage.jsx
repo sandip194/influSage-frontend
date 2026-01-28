@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { Skeleton, Empty } from "antd";
+import api from "../../../api/axios";import { Skeleton, Empty } from "antd";
 import { useSelector } from "react-redux";
 import { RiStarFill, RiArrowLeftLine } from "@remixicon/react";
 import { useNavigate } from 'react-router-dom';
@@ -36,7 +35,7 @@ const FeedbacksPage = () => {
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
-        const res = await axios.get("user/dashboard/getfeedback", {
+        const res = await api.get("user/dashboard/getfeedback", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setFeedbacks(res.data?.Data || []);

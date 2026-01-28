@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { Table, Skeleton, Empty, Image } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
@@ -32,7 +32,7 @@ const ActiveCampaignList = () => {
     const getActiveCampaignList = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await axios.get('/user/dashboard/active-campaign-list', {
+            const res = await api.get('/user/dashboard/active-campaign-list', {
                 headers: { Authorization: `Bearer ${token}` },
             });
 

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import axios from "axios";
-import {
+import api from "../../../api/axios";import {
   RiEqualizerFill,
   RiCloseFill,
   RiEraserLine, RiFilterLine,
@@ -85,7 +84,7 @@ const BrowseInfluencersLayout = () => {
     try {
       setLoading(true);
 
-      const influencerRes = await axios.get("/vendor/allinfluencer/browse", {
+      const influencerRes = await api.get("/vendor/allinfluencer/browse", {
         params: cleanParams,
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -106,7 +105,7 @@ const BrowseInfluencersLayout = () => {
   const handleLike = async (influencerId) => {
 
     try {
-      const response = await axios.post(
+      const response = await api.post(
         "/vendor/addfavourite/influencer",
         {
           p_influencerId: influencerId,
@@ -135,7 +134,7 @@ const BrowseInfluencersLayout = () => {
   // Fetch platforms
   const getAllPlatforms = async () => {
     try {
-      const res = await axios.get("providers");
+      const res = await api.get("providers");
       if (res.status === 200) setPlatforms(res.data.data);
     } catch (error) {
       console.error(error);
@@ -145,7 +144,7 @@ const BrowseInfluencersLayout = () => {
   // Fetch languages
   const getAllLanguages = async () => {
     try {
-      const res = await axios.get("languages", {
+      const res = await api.get("languages", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setLanguages(res.data.languages || []);
@@ -157,7 +156,7 @@ const BrowseInfluencersLayout = () => {
   // Fetch Gender
   const getAllGender = async () => {
     try {
-      const res = await axios.get("genders", {
+      const res = await api.get("genders", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGenderOptions(res.data.genders || []);
@@ -169,7 +168,7 @@ const BrowseInfluencersLayout = () => {
   // Fetch ContentTypes
   const getAllContentTypes = async () => {
     try {
-      const res = await axios.get("/influencer-type", {
+      const res = await api.get("/influencer-type", {
         headers: { Authorization: `Bearer ${token}` },
       });
 

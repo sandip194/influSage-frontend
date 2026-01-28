@@ -1,6 +1,5 @@
 import { RiArrowLeftLine, RiFile3Line, RiHeartFill, RiHeart3Line, RiMessage2Line } from "@remixicon/react";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import api from "../../../api/axios";import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tooltip, Skeleton } from "antd";
@@ -107,7 +106,7 @@ const InfluencerProfile = () => {
     const getInfluencerDetails = async () => {
         try {
             setLoading(true)
-            const res = await axios.get(`vendor/influencer-detail/${userId}`, {
+            const res = await api.get(`vendor/influencer-detail/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -162,7 +161,7 @@ const InfluencerProfile = () => {
         }
 
         try {
-            const response = await axios.post(
+            const response = await api.post(
                 "/vendor/addfavourite/influencer",
                 {
                     p_userId: userId,
@@ -197,7 +196,7 @@ const InfluencerProfile = () => {
         try {
             setLoadingMore(true);
 
-            const res = await axios.get("/vendor/influencer/feedback-list", {
+            const res = await api.get("/vendor/influencer/feedback-list", {
                 headers: { Authorization: `Bearer ${token}` },
                 params: {
                     p_influencerid: influDetails?.id,

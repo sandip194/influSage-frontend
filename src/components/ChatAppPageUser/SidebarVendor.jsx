@@ -1,7 +1,7 @@
 import { RiAddLine, RiArrowLeftLine } from "react-icons/ri";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
-import axios from "axios";
+import api from "../../api/axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CloseCircleFilled } from "@ant-design/icons";
 import { Tooltip, Skeleton } from "antd";
@@ -44,7 +44,7 @@ export default function SidebarVendor({ onSelectChat, activeConversationId }) {
     try {
     setLoadingCampaigns(true);
 
-      const response = await axios.get(`/chat/conversationsdetails`, {
+      const response = await api.get(`/chat/conversationsdetails`, {
         params: { p_search: search.trim() || "" },
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -95,7 +95,7 @@ export default function SidebarVendor({ onSelectChat, activeConversationId }) {
   const fetchUnreadMessages = useCallback(async () => {
     try {
       setLoadingUnread(true);
-      const res = await axios.get(`/chat/unread-messages`, {
+      const res = await api.get(`/chat/unread-messages`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data?.data) {

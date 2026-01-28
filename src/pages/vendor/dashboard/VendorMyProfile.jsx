@@ -5,7 +5,7 @@ import {
     RiStarFill,
     RiArrowUpSLine,
 } from '@remixicon/react';
-import axios from 'axios';
+import api from '../../../api/axios';
 
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -73,7 +73,7 @@ const VendorMyProfile = () => {
     const getMyProfileData = async () => {
         try {
             setLoading(true)
-            const res = await axios.get(`vendor/profile/${userId}`, {
+            const res = await api.get(`vendor/profile/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',

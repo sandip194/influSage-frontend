@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Form, Input, Select, message } from 'antd';
 import { RiImageAddLine } from 'react-icons/ri';
-import axios from 'axios';
+import api from 'api';
 import postalRegexList from '../complateProfile/postalRegex.json'
 
 const { TextArea } = Input;
@@ -66,21 +66,21 @@ export const BusinessDetails = ({ onNext }) => {
 
     useEffect(() => {
         setLoading(prev => ({ ...prev, countries: true }));
-        axios.get(countryAPI)
+        api.get(countryAPI)
             .then(res => setCountries(res.data.data))
             .finally(() => setLoading(prev => ({ ...prev, countries: false })));
     }, []);
 
     const fetchStates = (country) => {
         setLoading(prev => ({ ...prev, states: true }));
-        axios.post(stateAPI, { country })
+        api.post(stateAPI, { country })
             .then(res => setStates(res.data.data.states || []))
             .finally(() => setLoading(prev => ({ ...prev, states: false })));
     };
 
     const fetchCities = (country, state) => {
         setLoading(prev => ({ ...prev, cities: true }));
-        axios.post(cityAPI, { country, state })
+        api.post(cityAPI, { country, state })
             .then(res => setCities(res.data.data || []))
             .finally(() => setLoading(prev => ({ ...prev, cities: false })));
     };
@@ -171,7 +171,7 @@ export const BusinessDetails = ({ onNext }) => {
 
     useEffect(() => {
         // TODO: Replace this mock data with actual API call
-        // axios.get("https://your-api.com/company-sizes")
+        // api.get("https://your-api.com/company-sizes")
         //     .then(res => {
         //         if (Array.isArray(res.data.companySizes)) {
         //             setCompanySizes(res.data.companySizes);

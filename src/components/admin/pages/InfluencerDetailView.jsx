@@ -1,5 +1,4 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import api from "../../../api/axios";import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RiArrowDownSLine, RiArrowLeftLine, RiArrowUpSLine, RiCheckLine, RiCloseLine, RiForbidLine } from "@remixicon/react";
@@ -42,7 +41,7 @@ const InfluencerDetailView = () => {
     const getInfluencerDetails = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`/admin/dashboard/user-detail`, {
+            const res = await api.get(`/admin/dashboard/user-detail`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { p_userid: userId },
             });
@@ -56,7 +55,7 @@ const InfluencerDetailView = () => {
 
     const fetchBlockReasons = async () => {
         try {
-            const res = await axios.get("/admin/dashboard/user-block-reason", {
+            const res = await api.get("/admin/dashboard/user-block-reason", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setBlockReasonList(safeArray(res?.data?.data));
@@ -69,7 +68,7 @@ const InfluencerDetailView = () => {
     const handleSubmit = async (statusName) => {
         try {
             setActionLoading(true);
-            const res = await axios.post(
+            const res = await api.post(
                 "/admin/dashboard/approved-or-rejected",
                 { p_userid: userId },
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -90,7 +89,7 @@ const InfluencerDetailView = () => {
 
         try {
             setActionLoading(true);
-            const res = await axios.post(
+            const res = await api.post(
                 "/admin/dashboard/profile-campaign-block",
                 { p_userid: userId, p_objective: selectedReason },
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -114,7 +113,7 @@ const InfluencerDetailView = () => {
 
         try {
             setRejectLoading(true);
-            const res = await axios.post(
+            const res = await api.post(
                 "/admin/dashboard/reject/profile-or-campaign",
                 { p_userid: userId, p_text: rejectReason },
                 { headers: { Authorization: `Bearer ${token}` } }

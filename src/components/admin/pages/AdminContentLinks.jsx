@@ -5,8 +5,7 @@ import UpdateAnalytics from "../chunks/UpdateAnalytics";
 import AllContent from "../chunks/AllContent";
 import AnalyticsFormModal from "../chunks/AnalyticsFormModal";
 import AnalyticsHistoryModal from "../chunks/AnalyticsHistoryModal";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 
 
 const AdminContentLinks = () => {
@@ -34,7 +33,7 @@ const AdminContentLinks = () => {
         try {
             setHistoryModal(prev => ({ ...prev, loading: true }));
 
-            const res = await axios.get(
+            const res = await api.get(
                 `/admin/analytics/content-history/${item.contractcontentlinkid}`,
                 {
                     params: { p_pagenumber: page, p_pagesize: 10 },

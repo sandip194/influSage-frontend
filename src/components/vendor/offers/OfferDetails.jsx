@@ -14,8 +14,7 @@ import {
     FaTiktok,
     FaYoutube,
 } from "react-icons/fa";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
 const OfferDetails = () => {
@@ -53,7 +52,7 @@ const OfferDetails = () => {
         const getApplicationDetails = async () => {
             try {
                 setLoading(true);
-                const res = await axios.get(`vendor/offer-detail/${id}`, {
+                const res = await api.get(`vendor/offer-detail/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -123,7 +122,7 @@ const OfferDetails = () => {
 
   try {
     setLoading(true);
-    const res = await axios.post(
+    const res = await api.post(
       `/chat/startconversation`,
       {
         p_campaignapplicationid: Number(offerDetails.applicationid),

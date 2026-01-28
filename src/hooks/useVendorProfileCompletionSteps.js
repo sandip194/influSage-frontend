@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { useSelector } from 'react-redux';
 
 const TOTAL_STEPS = 5;
@@ -92,7 +92,7 @@ export const useVendorProfileCompletionSteps = () => {
         try {
             setLoading(true);
 
-            const res = await axios.get(`vendor/profile/${userId}`, {
+            const res = await api.get(`vendor/profile/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',

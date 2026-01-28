@@ -30,7 +30,7 @@ import {
   RiEraserLine,
   RiEqualizerFill
 } from "react-icons/ri";
-import axios from "axios";
+import api from "../../../api/axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -155,7 +155,7 @@ const CampaignTableLayout = () => {
   // 📍 Fetch Status Tabs
   const fetchStatusList = async () => {
     try {
-      const res = await axios.get("/admin/dashboard/campaign-status", {
+      const res = await api.get("/admin/dashboard/campaign-status", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 200 && Array.isArray(res.data?.data)) {
@@ -169,7 +169,7 @@ const CampaignTableLayout = () => {
   // 📍 Fetch Providers
   const fetchPlatforms = async () => {
     try {
-      const res = await axios.get("/providers", {
+      const res = await api.get("/providers", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPlatforms(res.data?.data || []);
@@ -199,7 +199,7 @@ const CampaignTableLayout = () => {
         p_search: search || null,
       };
 
-      const res = await axios.get("/admin/dashboard/campaign-requests", {
+      const res = await api.get("/admin/dashboard/campaign-requests", {
         headers: { Authorization: `Bearer ${token}` },
         params,
       });
@@ -218,7 +218,7 @@ const CampaignTableLayout = () => {
   const fetchBlockReasons = async () => {
     try {
       setBlockLoading(true);
-      const res = await axios.get(
+      const res = await api.get(
         "/admin/dashboard/campaign-block-reason",
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -237,7 +237,7 @@ const CampaignTableLayout = () => {
 
   const handleSubmit = async (id, statusName) => {
     try {
-      const res = await axios.post('/admin/dashboard/approved-or-rejected', { p_campaignid: id, p_statusname: statusName }, {
+      const res = await api.post('/admin/dashboard/approved-or-rejected', { p_campaignid: id, p_statusname: statusName }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.status === 200) {
@@ -338,7 +338,7 @@ const CampaignTableLayout = () => {
 
     try {
       setRejectLoading(true)
-      const res = await axios.post('/admin/dashboard/reject/profile-or-campaign', {
+      const res = await api.post('/admin/dashboard/reject/profile-or-campaign', {
         p_campaignid: currentCampaignId,
         p_text: rejectReason
       }, {
@@ -368,7 +368,7 @@ const CampaignTableLayout = () => {
     try {
       setActionLoading(true);
 
-      const res = await axios.post(
+      const res = await api.post(
         "admin/dashboard/profile-campaign-block",
         {
           p_campaignid: currentCampaignId,

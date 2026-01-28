@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../../../api/axios';
 import React, { useEffect, useState } from 'react';
 import { Select } from 'antd';
 import { useSelector } from 'react-redux';
@@ -17,7 +17,7 @@ const CampaignCategorySection = ({ data, onNext, onBack, campaignId }) => {
 
     const fetchAllCategories = async () => {
         try {
-            const response = await axios.get("categories");
+            const response = await api.get("categories");
             if (response.status === 200) {
                 const data = response.data.categories;
                 setCategoryTree(data);
@@ -71,7 +71,7 @@ const CampaignCategorySection = ({ data, onNext, onBack, campaignId }) => {
         try {
             setLoading(true);
 
-            const res = await axios.post(
+            const res = await api.post(
                 "/vendor/update-campaign",
                 { p_campaigncategoyjson: formattedData, campaignId : campaignId ? campaignId : null },
                 { headers: { Authorization: `Bearer ${token}` } }
