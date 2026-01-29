@@ -377,6 +377,8 @@ const Browse = () => {
               ))}
             </div>
 
+            <hr className="my-4 border-gray-200" />
+
             {/* Content Types */}
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Content Type</h4>
@@ -392,7 +394,7 @@ const Browse = () => {
                 </label>
               ))}
             </div>
-
+            <hr className="my-4 border-gray-200" />
             {/* Languages */}
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Languages</h4>
@@ -408,7 +410,7 @@ const Browse = () => {
                 </label>
               ))}
             </div>
-
+            <hr className="my-4 border-gray-200" />
             {/* Budget */}
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Budget</h4>

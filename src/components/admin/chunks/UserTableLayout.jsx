@@ -66,6 +66,7 @@ const UserTableLayout = () => {
         followers: [],  // Changed to array for multiple selections
         gender: [],     // Changed to array for multiple selections
     });
+  const [appliedFilters, setAppliedFilters] = useState(filters);
 
     const [currentUser, setCurrentUser] = useState(null); // store full user object
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -103,10 +104,19 @@ const UserTableLayout = () => {
             setLoading(true);
             const params = {
                 p_statuslabelid: activeStatusId,
-                p_location: filters.location || null,
-                p_providers: filters.platforms.length > 0 ? JSON.stringify(filters.platforms) : null,
-                p_influencertiers: filters.followers.length > 0 ? JSON.stringify(filters.followers) : null,
-                p_genders: filters.gender.length > 0 ? JSON.stringify(filters.gender) : null,
+                p_location: appliedFilters.location || null,
+                p_providers:
+                    appliedFilters.platforms.length > 0
+                        ? JSON.stringify(appliedFilters.platforms)
+                        : null,
+                p_influencertiers:
+                    appliedFilters.followers.length > 0
+                        ? JSON.stringify(appliedFilters.followers)
+                        : null,
+                p_genders:
+                    appliedFilters.gender.length > 0
+                        ? JSON.stringify(appliedFilters.gender)
+                        : null,
                 p_pagenumber: page,
                 p_pagesize: pageSize,
                 p_search: search || null,
@@ -216,16 +226,17 @@ const UserTableLayout = () => {
 
     // Fetch user requests when activeStatusId, page, pageSize, or search changes
     useEffect(() => {
-        if (activeStatusId) {
-            fetchUserRequests();
-        }
-    }, [activeStatusId, page, pageSize, search]);
-
-    const handleFilterApply = () => {
-        setShowFilters(false);
-        setPage(1);
+    if (activeStatusId) {
         fetchUserRequests();
-    };
+    }
+}, [activeStatusId, page, pageSize, search, appliedFilters]);
+
+const handleFilterApply = () => {
+    setAppliedFilters(filters); 
+    setShowFilters(false);
+    setPage(1);
+};
+
 
     const handleProviderChange = useCallback((checkedValues) => {
         setFilters((prev) => ({ ...prev, platforms: checkedValues }));
@@ -742,14 +753,16 @@ const UserTableLayout = () => {
                         <div className="flex items-center gap-2">
                             <Tooltip title="Clear Filters">
                                 <button
-                                    onClick={() =>
-                                        setFilters({
+                                    onClick={() => {
+                                        const cleared = {
                                             location: "",
                                             platforms: [],
                                             followers: [],
                                             gender: [],
-                                        })
-                                    }
+                                        };
+                                        setFilters(cleared);
+                                        setAppliedFilters(cleared);
+                                    }}
                                     className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
                                 >
                                     <RiEraserLine size={18} />

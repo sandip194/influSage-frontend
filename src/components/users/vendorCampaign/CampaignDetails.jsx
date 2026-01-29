@@ -745,21 +745,33 @@ const CampaignDetails = () => {
             {/* Track Campaign */}
             <div className="bg-white p-6 rounded-2xl mt-6">
               <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
-              <div className="relative">
-                {[
-                  {
-                    name: "Campaign Created",
-                    date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.createddate),
-                  },
-                  {
-                    name: "Campaign Started",
-                    date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.campaignstartdate),
-                  },
-                  {
-                    name: "Campaign Ended",
-                    date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.campaignenddate),
-                  },
-                ].map((step, idx, arr) => {
+                <div className="relative">
+                    {[
+                      {
+                      name: "Campaign Created",
+                      date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.createddate),
+                      },
+                      {
+                      name: "Campaign Published",
+                      date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.campaignpublished),
+                      },
+                      {
+                      name: "First Contract Created",
+                      date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.firstcontractcreated),
+                      },
+                      {
+                      name: "Campaign Started",
+                      date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.campaignstartdate),
+                      },
+                      {
+                      name: "Last Contract Completed",
+                      date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.lastcontractcompleted),
+                      },
+                      {
+                      name: "Campaign Ended",
+                      date: formatToDDMMYYYY(campaignDetails?.trackcampaign?.campaignenddate),
+                      },
+                  ].map((step, idx, arr) => {
                   const stepDate = dayjs(step.date, "DD-MM-YYYY HH:mm");
                   const now = dayjs();
                   const isCompleted = now.isAfter(stepDate) || now.isSame(stepDate);
@@ -870,7 +882,6 @@ const CampaignDetails = () => {
               disabledDate={(current) => {
                 if (!current) return false;
 
-                // Convert current to dayjs to be safe
                 const currentDate = dayjs(current);
 
                 const today = dayjs().startOf("day");
@@ -879,12 +890,41 @@ const CampaignDetails = () => {
                   : today;
 
                 const minDate = today.isAfter(appEndDate) ? today : appEndDate;
-
-                // Disable all dates on or before minDate
-                return currentDate.isSame(minDate, "day") || currentDate.isBefore(minDate, "day");
+                return (
+                  currentDate.isSame(minDate, "day") ||
+                  currentDate.isBefore(minDate, "day")
+                );
               }}
-
               onChange={(date) => handleChange("startDate", date)}
+              dateRender={(current) => {
+                const isDisabled =
+                  current &&
+                  (() => {
+                    const currentDate = dayjs(current);
+                    const today = dayjs().startOf("day");
+                    const appEndDate = campaignDetails?.applicationenddate
+                      ? dayjs(campaignDetails.applicationenddate, "DD-MM-YYYY")
+                      : today;
+                    const minDate = today.isAfter(appEndDate) ? today : appEndDate;
+
+                    return (
+                      currentDate.isSame(minDate, "day") ||
+                      currentDate.isBefore(minDate, "day")
+                    );
+                  })();
+
+                return (
+                  <div
+                    className={`ant-picker-cell-inner ${
+                      !isDisabled
+                        ? "text-gray-700"
+                        : ""
+                    }`}
+                  >
+                    {current.date()}
+                  </div>
+                );
+              }}
             />
             {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>}
           </div>
@@ -901,10 +941,26 @@ const CampaignDetails = () => {
                 if (!current) return false;
 
                 const currentDate = dayjs(current);
-                // Disable dates before campaign start date
                 return formData.startDate && currentDate.isBefore(formData.startDate, "day");
               }}
               onChange={(date) => handleChange("endDate", date)}
+              dateRender={(current) => {
+                const isDisabled =
+                  formData.startDate &&
+                  dayjs(current).isBefore(formData.startDate, "day");
+
+                return (
+                  <div
+                    className={`ant-picker-cell-inner ${
+                      !isDisabled
+                        ? "text-gray-700"
+                        : ""
+                    }`}
+                  >
+                    {current.date()}
+                  </div>
+                );
+              }}
             />
             {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>}
           </div>

@@ -17,7 +17,7 @@ const PrivateRoute = ({ allowedRoles }) => {
 
   const decoded = decodeToken(token);
 
-  console.log(decoded)
+  // console.log(decoded)
   // ❌ Invalid or expired token
   if (!decoded || decoded.exp * 1000 < Date.now()) {
     dispatch(logout());

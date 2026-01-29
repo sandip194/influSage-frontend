@@ -2,7 +2,7 @@ import { Modal } from "antd";
 import { RiVerifiedBadgeLine } from "@remixicon/react";
 
 const AcceptOfferModal = ({ open, onCancel, onConfirm, offer, hasSelectedApplication }) => {
-  console.log(offer)
+  // console.log(offer)
   return (
     <Modal open={open} onCancel={onCancel} footer={null} centered>
       <div className="text-center">

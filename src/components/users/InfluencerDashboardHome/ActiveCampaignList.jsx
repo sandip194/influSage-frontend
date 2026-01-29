@@ -36,7 +36,6 @@ const ActiveCampaignList = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            console.log(res.data.data)
             // Safe check in case API returns null
             setCampaignList(res?.data?.data || []);
         } catch (error) {

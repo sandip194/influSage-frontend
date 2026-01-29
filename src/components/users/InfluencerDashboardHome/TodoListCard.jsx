@@ -257,13 +257,27 @@ const TodoListCard = () => {
               <DatePicker
                 value={formData.duedate}
                 onChange={(date) => {
-                setFormData({ ...formData, duedate: date });
-                setErrors((p) => ({ ...p, duedate: "" }));
+                  setFormData({ ...formData, duedate: date });
+                  setErrors((p) => ({ ...p, duedate: "" }));
                 }}
                 disabledDate={disabledDate}
                 format="DD-MM-YYYY"
                 style={{ width: "100%" }}
                 status={errors.duedate ? "error" : ""}
+                dateRender={(current) => {
+                  const isDisabled = disabledDate?.(current);
+                  return (
+                    <div
+                      className={`ant-picker-cell-inner ${
+                        !isDisabled
+                          ? "text-gray-700"
+                          : ""
+                      }`}
+                    >
+                      {current.date()}
+                    </div>
+                  );
+                }}
               />
 
               {errors.duedate && (

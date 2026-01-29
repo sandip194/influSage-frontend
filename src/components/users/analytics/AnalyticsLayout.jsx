@@ -76,6 +76,27 @@ const AnalyticsLayout = () => {
 
   const { token } = useSelector((state) => state.auth);
 
+  const formatShort = (value) => {
+    if (value === null || value === undefined) return "0";
+
+    const num = Number(value);
+    if (Number.isNaN(num)) return "0";
+
+    const abs = Math.abs(num);
+
+    if (abs >= 1_000_000_000) {
+      return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
+    }
+    if (abs >= 1_000_000) {
+      return (num / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+    }
+    if (abs >= 1_000) {
+      return (num / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+    }
+
+    return num.toLocaleString();
+  };
+
   const fetchAllCardsData = useCallback(async () => {
     if (!token) return;
 
@@ -218,7 +239,7 @@ const AnalyticsLayout = () => {
                 <p className="text-gray-500 font-semibold">{label}</p>
 
                 <div className="flex items-center space-x-2">
-                  <p className="text-xl font-bold text-[#0D132D]">{value}</p>
+                  <p className="text-xl font-bold text-[#0D132D]">{formatShort(value)}</p>
                   <span
                     className={`flex items-center text-xs font-medium ${isPositive ? "text-green-500" : "text-red-500"
                       }`}
@@ -386,7 +407,7 @@ const AnalyticsLayout = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <RiEyeLine className="text-gray-700" size={18} />
                       <span className="text-lg font-bold text-gray-900">
-                        {(c.views ?? 0).toLocaleString()}
+                          {formatShort(c.views)}
                       </span>
                       <span className="text-sm text-gray-500">views</span>
                     </div>
@@ -395,15 +416,15 @@ const AnalyticsLayout = () => {
                     <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
                       <div className="flex items-center gap-1">
                         <RiHeart3Line className="text-red-500" size={14} />
-                        {(c.likes ?? 0).toLocaleString()}
+                        {formatShort(c.likes)}
                       </div>
                       <div className="flex items-center gap-1">
                         <RiChat3Line className="text-blue-500" size={14} />
-                        {(c.comments ?? 0).toLocaleString()}
+                        {formatShort(c.comments)}
                       </div>
                       <div className="flex items-center gap-1">
                         <RiShareForwardLine className="text-green-500" size={14} />
-                        {(c.shares ?? 0).toLocaleString()}
+                        {formatShort(c.shares)}
                       </div>
                     </div>
                   </div>

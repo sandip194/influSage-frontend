@@ -57,6 +57,28 @@ export default function ContractModal({
     const isPlatformInvalid = (platform) =>
         submitAttempted && (!platform.contenttypes || platform.contenttypes.length === 0);
 
+    const validateProductLink = async (_, value) => {
+        if (!value) return Promise.resolve();
+
+        const hasProtocol =
+            value.startsWith("http://") ||
+            value.startsWith("https://") ||
+            value.startsWith("www.");
+
+        if (!hasProtocol) {
+            return Promise.reject(
+            new Error("Link must start with http://, https://, or www.")
+            );
+        }
+
+        try {
+            new URL(value.startsWith("http") ? value : `https://${value}`);
+        } catch {
+            return Promise.reject(new Error("Invalid product link"));
+        }
+
+        return Promise.resolve();
+    };
 
     // New: Fetch influencers via API (replace with your real endpoint)
     useEffect(() => {
@@ -241,7 +263,12 @@ export default function ContractModal({
         const isValid = await isFormValid();
         if (!isValid) return;
 
+        const productLink = values.productLink;
+        const vendorAddress = values.vendorAddress;
 
+        if (!productLink && !vendorAddress) {
+            return;
+        }
         // 🔥 REMOVE platforms with empty contenttypes
         const filteredPlatforms = selectedPlatforms.filter(
             (p) => p.contenttypes && p.contenttypes.length > 0
@@ -463,14 +490,35 @@ export default function ContractModal({
                                     disabledDate={(current) => {
                                         if (!current) return false;
                                         return (
-                                            (campaignStartLimit && current.isBefore(campaignStartLimit, "day")) ||
-                                            (campaignEndLimit && current.isAfter(campaignEndLimit, "day"))
+                                        (campaignStartLimit &&
+                                            current.isBefore(campaignStartLimit, "day")) ||
+                                        (campaignEndLimit &&
+                                            current.isAfter(campaignEndLimit, "day"))
                                         );
                                     }}
-                                    pickerValue={startPickerMonth} // <-- controls which month opens
-                                    onPanelChange={(date) => setStartPickerMonth(date)} // update if user changes month manually
+                                    pickerValue={startPickerMonth}
+                                    onPanelChange={(date) => setStartPickerMonth(date)}
                                     style={{ width: "100%" }}
-                                />
+                                    dateRender={(current) => {
+                                        const isDisabled =
+                                        (campaignStartLimit &&
+                                            dayjs(current).isBefore(campaignStartLimit, "day")) ||
+                                        (campaignEndLimit &&
+                                            dayjs(current).isAfter(campaignEndLimit, "day"));
+
+                                        return (
+                                        <div
+                                            className={`ant-picker-cell-inner ${
+                                            !isDisabled
+                                                ? "text-gray-700"
+                                                : ""
+                                            }`}
+                                        >
+                                            {current.date()}
+                                        </div>
+                                        );
+                                    }}
+                                    />
                             </Form.Item>
                         </div>
 
@@ -529,17 +577,43 @@ export default function ContractModal({
                                     }}
                                     disabledDate={(current) => {
                                         if (!current) return false;
+
                                         const start = form.getFieldValue("contractStart");
+
                                         return (
-                                            (start && current.isBefore(start.startOf("day"))) ||
-                                            (campaignStartLimit && current.isBefore(campaignStartLimit.startOf("day"))) ||
-                                            (campaignEndLimit && current.isAfter(campaignEndLimit.endOf("day")))
+                                        (start && current.isBefore(start.startOf("day"))) ||
+                                        (campaignStartLimit &&
+                                            current.isBefore(campaignStartLimit.startOf("day"))) ||
+                                        (campaignEndLimit &&
+                                            current.isAfter(campaignEndLimit.endOf("day")))
                                         );
                                     }}
-                                    pickerValue={endPickerMonth} // <-- controls which month opens
+                                    pickerValue={endPickerMonth}
                                     onPanelChange={(date) => setEndPickerMonth(date)}
                                     style={{ width: "100%" }}
-                                />
+                                    dateRender={(current) => {
+                                        const start = form.getFieldValue("contractStart");
+
+                                        const isDisabled =
+                                        (start && dayjs(current).isBefore(start.startOf("day"))) ||
+                                        (campaignStartLimit &&
+                                            dayjs(current).isBefore(campaignStartLimit.startOf("day"))) ||
+                                        (campaignEndLimit &&
+                                            dayjs(current).isAfter(campaignEndLimit.endOf("day")));
+
+                                        return (
+                                        <div
+                                            className={`ant-picker-cell-inner ${
+                                            !isDisabled
+                                                ? "text-gray-700"
+                                                : ""
+                                            }`}
+                                        >
+                                            {current.date()}
+                                        </div>
+                                        );
+                                    }}
+                                    />
 
                             </Form.Item>
                         </div>
@@ -670,109 +744,61 @@ export default function ContractModal({
                                 )}
                             </Form.Item>
                         </div>
-
-                        {/*  Product Link + Vendor Address (OR)  */}
-                        {/* Product Link / Vendor Address (full width) */}
                         <div className="md:col-span-2">
-                            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-end">
-                                <Form.Item
-                                    name="productLink"
-                                    label={
-                                        <span className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                                            Product Link
-                                        </span>
-                                    }
-                                    rules={[
-                                        ({ getFieldValue }) => ({
-                                            validator(_, value) {
-                                                const vendorAddress = getFieldValue("vendorAddress");
-
-                                                // If productLink is not empty, validate it as a URL
-                                                if (value) {
-                                                    const hasProtocol =
-                                                        value.startsWith("http://") ||
-                                                        value.startsWith("https://") ||
-                                                        value.startsWith("www.");
-
-                                                    if (!hasProtocol) {
-                                                        return Promise.reject(
-                                                            new Error("Link must start with http://, https://, or www.")
-                                                        );
-                                                    }
-
-                                                    // Normalize URL and check validity
-                                                    const normalized = value.startsWith("http")
-                                                        ? value
-                                                        : `https://${value}`;
-
-                                                    try {
-                                                        new URL(normalized);
-                                                    } catch {
-                                                        return Promise.reject(new Error("Invalid product link"));
-                                                    }
-                                                } else {
-                                                    // If productLink is empty, vendorAddress must not be empty
-                                                    if (!vendorAddress) {
-                                                        return Promise.reject(
-                                                            new Error("Please enter Product Link or Vendor Address")
-                                                        );
-                                                    }
-                                                }
-
-                                                return Promise.resolve();
-                                            },
-                                        }),
-                                    ]}
-                                    style={{ marginBottom: 0 }}
-                                >
-                                    <Input
-                                        size="large"
-                                        placeholder="Ente a valid product link"
-                                        onChange={() => form.validateFields(["productLink", "vendorAddress"])}
-                                    />
-                                </Form.Item>
-
-                                {/* OR */}
-                                <div className="flex justify-center items-center text-sm font-semibold text-subtext-light">
-                                    OR
-                                </div>
-
-                                <Form.Item
-                                    name="vendorAddress"
-                                    label={
-                                        <span className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                                            Vendor Address
-                                        </span>
-                                    }
-                                    rules={[
-                                        ({ getFieldValue }) => ({
-                                            validator(_, value) {
-                                                const productLink = getFieldValue("productLink");
-
-                                                // If vendorAddress is empty, productLink must not be empty (and must be valid if provided)
-                                                if (!value) {
-                                                    if (!productLink) {
-                                                        return Promise.reject(
-                                                            new Error("Please enter Product Link or Vendor Address")
-                                                        );
-                                                    }
-                                                    // If productLink is provided, it should already be validated above, but we can add a check here if needed
-                                                    // For now, rely on productLink's validation
-                                                }
-
-                                                return Promise.resolve();
-                                            },
-                                        }),
-                                    ]}
-                                    style={{ marginBottom: 0 }}
-                                >
-                                    <Input
-                                        size="large"
-                                        placeholder="Enter vendor address"
-                                        onChange={() => form.validateFields(["productLink", "vendorAddress"])}
-                                    />
-                                </Form.Item>
+                        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4">
+                            {/* Product Link */}
+                            <div className="flex flex-col">
+                            <Form.Item
+                                name="productLink"
+                                label="Product Link"
+                                rules={[{ validator: validateProductLink }]}
+                                style={{ marginBottom: 0 }}
+                            >
+                                <Input
+                                size="large"
+                                placeholder="Enter product URL (https://...)"
+                                onChange={() => setSubmitAttempted(false)}
+                                />
+                            </Form.Item>
                             </div>
+
+                            <div className="flex items-center justify-center pt-[30px] text-sm font-semibold">
+                               OR
+                            </div>
+
+                            {/* Vendor Address */}
+                            <div className="flex flex-col">
+                            <Form.Item
+                                name="vendorAddress"
+                                label="Vendor Address"
+                                style={{ marginBottom: 0 }}
+                            >
+                                <Input
+                                size="large"
+                                placeholder="Enter vendor address"
+                                onChange={() => setSubmitAttempted(false)}
+                                />
+                            </Form.Item>
+                            </div>
+                        </div>    
+                        <Form.Item shouldUpdate noStyle>
+                            {() => {
+                            if (!submitAttempted) return null;
+
+                            const productLink = form.getFieldValue("productLink");
+                            const vendorAddress = form.getFieldValue("vendorAddress");
+
+                            if (!productLink && !vendorAddress) {
+                                return (
+                                <div className="text-red-500 text-sm text-center mt-2">
+                                    Please enter either Product Link or Vendor Address
+                                </div>
+                                );
+                            }
+
+                            return null;
+                            }}
+                        </Form.Item>
                         </div>
 
 

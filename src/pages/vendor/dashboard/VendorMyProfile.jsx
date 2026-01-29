@@ -236,7 +236,7 @@ const VendorMyProfile = () => {
 
                     </div>
 
-                    <div className="bg-white p-4 rounded-2xl ">
+                    {/* <div className="bg-white p-4 rounded-2xl ">
                         <h2 className="font-bold text-base mb-4">Work History</h2>
                         <div className="space-y-6">
                             {visibleData.map((item) => (
@@ -250,7 +250,6 @@ const VendorMyProfile = () => {
                                     </p>
 
                                     <div className="items-center justify-between mt-2">
-                                        {/* Left: User Info */}
                                         <div className="flex items-center gap-2">
                                             <img
                                                 src={item.avatar}
@@ -263,7 +262,7 @@ const VendorMyProfile = () => {
                                             </span>
                                         </div>
 
-                                        {/* Rating + Date */}
+
                                         <div className="flex items-center gap-3">
                                             <div className="flex">
                                                 {[...Array(5)].map((_, i) =>
@@ -298,7 +297,7 @@ const VendorMyProfile = () => {
                                 </button>
                             </div>
                         )}
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Right Side */}

@@ -285,6 +285,16 @@ const AnalyticsFormModal = ({ visible, onClose, onSuccess, contentData }) => {
                     <Col xs={24} sm={12}>
                         <label>
                             Date
+                            {/* <DatePicker
+                                value={formData.date}
+                                onChange={(date) => handleChange("date", date)}
+                                className="w-full"
+                                format="DD-MM-YYYY"
+                                disabled={isUpdate}
+                                disabledDate={(current) =>
+                                    current && current > dayjs().endOf("day")
+                                }
+                            /> */}
                             <DatePicker
                                 value={formData.date}
                                 onChange={(date) => handleChange("date", date)}
@@ -294,7 +304,22 @@ const AnalyticsFormModal = ({ visible, onClose, onSuccess, contentData }) => {
                                 disabledDate={(current) =>
                                     current && current > dayjs().endOf("day")
                                 }
-                            />
+                                dateRender={(current) => {
+                                    const isDisabled = current && current > dayjs().endOf("day");
+
+                                    return (
+                                    <div
+                                        className={`ant-picker-cell-inner ${
+                                        !isDisabled
+                                            ? "text-gray-700"
+                                            : ""
+                                        }`}
+                                    >
+                                        {current.date()}
+                                    </div>
+                                    );
+                                }}
+                                />
                             {errors.date && <p className="text-red-500">{errors.date}</p>}
                         </label>
                     </Col>

@@ -422,6 +422,25 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
                 const fiveYearsAgo = today.subtract(5, 'year').endOf('year');
                 return current > today.endOf('day') || current >= fiveYearsAgo;
               }}
+              dateRender={(current) => {
+                const today = dayjs();
+                const fiveYearsAgo = today.subtract(5, 'year').endOf('year');
+
+                const isDisabled =
+                  current > today.endOf('day') || current >= fiveYearsAgo;
+
+                return (
+                  <div
+                    className={`ant-picker-cell-inner ${
+                      !isDisabled
+                        ? "text-gray-700"
+                        : ""
+                    }`}
+                  >
+                    {current.date()}
+                  </div>
+                );
+              }}
             />
           </Form.Item>
         </div>

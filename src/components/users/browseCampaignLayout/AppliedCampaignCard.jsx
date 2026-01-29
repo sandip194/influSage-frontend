@@ -79,7 +79,7 @@ const AppliedCampaignCard = ({
               </div>
             )}
             {/* Content */}
-            <div className="p-4 flex flex-col gap-3 flex-1 mt-3">
+            <div className="p-4 flex flex-col gap-2 flex-1 mt-3">
               {/* Header */}
               <div className="flex items-center gap-3">
                 <img
@@ -131,7 +131,7 @@ const AppliedCampaignCard = ({
               </div>
 
               {/* Footer */}
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex items-center gap-2">
                 {/* Edit Application */}
                 {campaign.iseditable ? (
                   <button

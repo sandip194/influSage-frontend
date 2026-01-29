@@ -116,6 +116,7 @@ const InfluencerProfile = () => {
     }, [])
 
     const handleMessageClick = () => {
+    const campaignId = influDetails?.invitedcampaigns?.[0]?.campaignid;
         navigate("/vendor-dashboard/messages", {
             state: {
                 influencerId: influDetails.id,
@@ -124,15 +125,13 @@ const InfluencerProfile = () => {
                     ? influDetails.photopath
                     : null,
                 conversationId: influDetails.conversationid || null,
-
-
                 selectChatFromOutside: {
                     influencerid: influDetails.id,
                     influencerName: `${influDetails.firstname} ${influDetails.lastname}`,
                     influencerPhoto: influDetails.photopath
                         ? influDetails.photopath
                         : null,
-                    conversationId: influDetails.conversationid || null,
+                    campaignid: campaignId,
                 },
             },
         });

@@ -57,7 +57,7 @@ const CreateCampaign = () => {
                   <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1">
                     {title}
                   </h3>
-                  <p className="text-gray-700 text-sm sm:text-base leading-relaxed text-justify">
+                  <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
                     {description}
                   </p>
                 </div>
