@@ -27,14 +27,27 @@ export const RoleDefault = () => {
     };
   }, []);
 
-  const handleContinue = useCallback(() => {
-    if (selectedRole) {
-      localStorage.setItem("selectedRole", selectedRole);
-      navigate("/signup");
-    } else {
+  const handleContinue = () => {
+    if (!selectedRole) {
       setShowError(true);
+      return;
     }
-  }, [selectedRole, navigate]);
+
+    const params = new URLSearchParams(location.search);
+    const email = params.get("email");
+    const firstName = params.get("firstName");
+    const lastName = params.get("lastName");
+
+    navigate(
+      `/setPassword?email=${encodeURIComponent(
+        email
+      )}&firstName=${encodeURIComponent(
+        firstName
+      )}&lastName=${encodeURIComponent(
+        lastName
+      )}&roleId=${selectedRole}`
+    );
+  };
 
   return (
     <div className="relative flex justify-center items-center min-h-screen bg-gray-100 p-5 font-[Segoe_UI,Tahoma,Geneva,Verdana,sans-serif] overflow-hidden">
@@ -55,7 +68,7 @@ export const RoleDefault = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Select Your Role</h2>
             <p className="text-sm text-gray-700 mt-1">
-               Choose the role that best matches your needs so we can personalize your experience.
+              Choose the role that best matches your needs so we can personalize your experience.
             </p>
           </div>
 
@@ -69,11 +82,10 @@ export const RoleDefault = () => {
                     setSelectedRole(role.id);
                     setShowError(false);
                   }}
-                  className={`w-full sm:w-48 md:w-56 flex flex-col items-center justify-center border rounded-xl p-6 cursor-pointer transition duration-300 hover:shadow-md ${
-                    (selectedRole) === role.id
+                  className={`w-full sm:w-48 md:w-56 flex flex-col items-center justify-center border rounded-xl p-6 cursor-pointer transition duration-300 hover:shadow-md ${(selectedRole) === role.id
                       ? "border-indigo-600 bg-indigo-50 shadow-lg scale-105 ring-2 ring-indigo-300"
                       : "border-gray-300 bg-white/70"
-                  }`}
+                    }`}
                 >
                   <img
                     src={role.iconpath}

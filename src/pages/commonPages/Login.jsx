@@ -92,7 +92,9 @@ export const LoginForm = () => {
       localStorage.setItem("p_code", p_code || "");
 
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      dispatch(setCredentials({  id: userId, role: Number(roleId), name, email, p_code, token }));
+      // dispatch(setCredentials({  id: userId, role: Number(roleId), name, email, p_code, token }));
+      dispatch(setCredentials({ token }));
+
       window.history.replaceState({}, document.title, window.location.pathname);
 
       if (Number(roleId) === 2 && p_code === "SUCCESS") navigate("/vendor-dashboard");

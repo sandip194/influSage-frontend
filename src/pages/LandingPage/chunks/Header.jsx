@@ -2,60 +2,72 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 export function Header() {
-    const navigate = useNavigate();
-    const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
 
-    // Detect scroll to adjust background and button visibility
-    useEffect(() => {
-        const onScroll = () => {
-            setScrolled(window.scrollY > 30);
-        };
-        window.addEventListener("scroll", onScroll);
-        return () => window.removeEventListener("scroll", onScroll);
-    }, []);
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 30);
+    };
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-    return (
-        <header
-            className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled
-                    ? "bg-white/10 backdrop-blur-md shadow-sm"
-                    : "bg-white/10 backdrop-blur-md"
-                }`}
+  return (
+    <header
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-white/30 backdrop-blur-md shadow-sm"
+          : "bg-white"
+      }`}
+    >
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 h-18 flex items-center justify-between">
+        
+        {/* Logo */}
+        <div
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => navigate("/")}
         >
-            <div className="px-2 sm:px-4 md:px-6 py-4 flex justify-between items-center">
-                {/* Logo */}
-                <div
-                    className="flex items-center gap-3 cursor-pointer"
-                    onClick={() => navigate("/")}
-                >
-                    <img
-                        src="/influSage-logo.png"
-                        alt="InfluSage Logo"
-                        className={`h-9 w-auto object-contain transition-all duration-300 ${scrolled ? "" : "filter brightness-0 invert"
-                            }`}
-                    />
+          <img
+            src="/influSage-logo.png"
+            alt="InfluSage Logo"
+            className="h-9 w-auto object-contain"
+          />
+        </div>
 
-                </div>
+        {/* Navigation (optional – easy to add later) */}
+        <nav className="hidden lg:flex items-center gap-10">
+          <span className="text-sm font-semibold text-[#0D132D] hover:text-[#335CFF] cursor-pointer">
+            Solutions
+          </span>
+          <span className="text-sm font-semibold text-[#0D132D] hover:text-[#335CFF] cursor-pointer">
+            Features
+          </span>
+          <span className="text-sm font-semibold text-[#0D132D] hover:text-[#335CFF] cursor-pointer">
+            Pricing
+          </span>
+          <span className="text-sm font-semibold text-[#0D132D] hover:text-[#335CFF] cursor-pointer">
+            Resources
+          </span>
+        </nav>
 
-                {/* Buttons */}
-                <div className="space-x-3">
-                    <button
-                        onClick={() => navigate("/login")}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${scrolled
-                                ? "text-gray-800 border border-gray-300 hover:bg-gray-100"
-                                : "text-white border border-white/40 hover:bg-white/20"
-                            }`}
-                    >
-                        Login
-                    </button>
+        {/* Auth Actions */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate("/login")}
+            className="text-sm font-semibold cursor-pointer px-5 py-2.5 rounded-xl text-[#0D132D] hover:bg-[#0D132D]/5 transition-colors"
+          >
+            Login
+          </button>
 
-                    <button
-                        onClick={() => navigate("/role")}
-                        className="px-4 py-2 rounded-lg bg-yellow-400 text-gray-900 text-sm font-semibold hover:bg-yellow-300 transition-all"
-                    >
-                        Sign Up
-                    </button>
-                </div>
-            </div>
-        </header>
-    );
+          <button
+            onClick={() => navigate("/role")}
+            className="bg-[#335CFF] text-white cursor-pointer text-sm font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-[#335CFF]/25 hover:-translate-y-0.5 transition-all"
+          >
+            Sign Up
+          </button>
+        </div>
+      </div>
+    </header>
+  );
 }
