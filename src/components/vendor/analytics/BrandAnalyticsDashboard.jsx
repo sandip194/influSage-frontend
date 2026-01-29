@@ -15,7 +15,8 @@ import {
     RiHeart3Line,
     RiChat3Line,
     RiShareForwardLine,
-    RiCalendar2Line
+    RiCalendar2Line,
+    RiInformationLine
 } from "@remixicon/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
@@ -67,6 +68,43 @@ const BrandAnalyticsDashboard = () => {
         (_, i) => currentYear - 2 + i
     );
 
+    const formatNumberShort = (value) => {
+        if (value === null || value === undefined) return "0";
+
+        const abs = Math.abs(value);
+
+        if (abs >= 1_000_000_000) {
+            return (value / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
+        }
+        if (abs >= 1_000_000) {
+            return (value / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+        }
+        if (abs >= 1_000) {
+            return (value / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+        }
+
+        return value.toLocaleString();
+    };
+    const InfoTooltip = ({ text, width = "w-64" }) => (
+        <span className="relative group inline-flex items-center ml-1">
+            <RiInformationLine
+            size={18}
+            className="text-blue-600 cursor-pointer"
+            />
+            <span
+            className={`
+                absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+                hidden group-hover:block
+                ${width}
+                bg-gray-900 text-white text-xs
+                rounded px-2 py-1 z-20 text-center
+            `}
+            >
+            {text}
+            </span>
+        </span>
+    );
+
     const fetchAnalyticsSummary = async () => {
         const res = await api.get("vendor/analytics/summary", {
             params: {
@@ -82,10 +120,25 @@ const BrandAnalyticsDashboard = () => {
         setKpis([
             { label: "Total Campaigns", value: data.totalcampaigncount, icon: <RiBriefcaseLine size={24} /> },
             { label: "Active Influencers", value: data.totalactiveinfluencercount, icon: <RiGroupLine size={24} /> },
-            { label: "Estimated Impressions", value: data.estimatedimpression, icon: <RiEyeLine size={24} /> },
-            { label: "Estimated Engagement Score", value: data.engagementscore, icon: <RiHeartLine size={24} /> },
+            {
+    label: "Estimated Impressions",
+    value: data.estimatedimpression,
+    icon: <RiEyeLine size={24} />,
+    tooltip: "Estimated using a 3% engagement-rate model on interactions",
+  },
+              {
+    label: "Weighted Engagement Points",
+    value: data.engagementscore,
+    icon: <RiHeartLine size={24} />,
+    tooltip: "Likes ×1, Comments ×2, Shares ×3 (latest post per content)",
+  },
             { label: "Total Content Pieces", value: data.totalcontentpieces, icon: <RiImage2Line size={24} /> },
-            { label: "Avg Engagement / Influencer", value: Math.round(data.averageengagementperinfluencer), icon: <RiStarLine size={24} /> },
+              {
+    label: "Avg Engagement / Influencer",
+    value: Math.round(data.averageengagementperinfluencer),
+    icon: <RiStarLine size={24} />,
+    tooltip: "Average total likes, comments, and shares per influencer",
+  },
         ].filter(kpi => Number(kpi.value) > 0));
 
         setRecentContent(data.recentcontents || []);
@@ -199,11 +252,12 @@ const BrandAnalyticsDashboard = () => {
                         </div>
 
                         <div>
-                            <p className="text-gray-500 font-semibold">{kpi.label}</p>
+                            <p className="text-gray-500 font-semibold flex items-center">
+                                {kpi.label}
+                                {kpi.tooltip && <InfoTooltip text={kpi.tooltip} />}
+                            </p>
                             <p className="text-[#0D132D] font-bold text-xl">
-                                {typeof kpi.value === "number"
-                                    ? kpi.value.toLocaleString()
-                                    : kpi.value}
+                                {formatNumberShort(kpi.value)}
                             </p>
                         </div>
                     </div>

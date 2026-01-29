@@ -78,7 +78,7 @@ export const CategorySelector = ({
       const alreadySelected = prev.includes(id);
 
       if (!alreadySelected && prev.length >= 10) {
-        toast.error("You can select a maximum of 10 categories.");
+        toast.error("Select up to 10 categories.");
         return prev;
       }
 

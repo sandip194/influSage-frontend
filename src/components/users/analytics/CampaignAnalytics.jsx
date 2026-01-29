@@ -222,7 +222,24 @@ export default CampaignAnalytics;
 const StatCard = ({ label, value, iconKey }) => {
   const config = KPI_CONFIG[iconKey];
   const Icon = config?.icon;
+  const formatShort = (value) => {
+    if (value === null || value === undefined) return "0";
+    const num = Number(value);
+      if (Number.isNaN(num)) return "0";
 
+      const abs = Math.abs(num);
+
+      if (abs >= 1_000_000_000) {
+        return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
+      }
+      if (abs >= 1_000_000) {
+        return (num / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+      }
+      if (abs >= 1_000) {
+        return (num / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+      }
+    return num.toLocaleString();
+  };
   return (
     <div className="bg-white px-4 py-3 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-3">
       <div
@@ -240,7 +257,7 @@ const StatCard = ({ label, value, iconKey }) => {
       <div>
         <p className="text-gray-500 font-semibold">{label}</p>
         <p className="text-xl font-bold text-[#0D132D]">
-          {value.toLocaleString()}
+          {formatShort(value)}
         </p>
       </div>
     </div>

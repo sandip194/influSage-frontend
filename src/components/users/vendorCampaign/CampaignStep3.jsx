@@ -406,14 +406,40 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
               if (!current) return false;
               const currentDay = dayjs(current);
               if (campaignStart) {
-                return currentDay.isBefore(today) || currentDay.isAfter(campaignStart, "day");
+                return (
+                  currentDay.isBefore(today) ||
+                  currentDay.isAfter(campaignStart, "day")
+                );
               }
               return currentDay.isBefore(today);
             }}
+            dateRender={(current) => {
+              const today = dayjs().startOf("day");
+              const campaignStart = formData.startDate;
+
+                const isDisabled =
+                  current.isBefore(today) ||
+                  (campaignStart && current.isAfter(campaignStart, "day"));
+
+              const isToday = current.isSame(today, "day");
+
+              if (isDisabled) {
+                return <div className="ant-picker-cell-inner">{current.date()}</div>;
+              }
+              return (
+                <div
+                  className={`ant-picker-cell-inner ${
+                    isToday
+                      ? "bg-blue-600 text-white rounded-full"
+                      : "text-gray-700"
+                  }`}
+                >
+                  {current.date()}
+                </div>
+              );
+            }}
             onChange={(date) => {
               handleChange("applicationstartdate", date);
-
-              // ✅ NEW (does not affect disable logic)
               if (date) {
                 setAppEndPickerMonth(date);
               }
@@ -447,11 +473,17 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
               const currentDay = dayjs(current);
 
               if (campaignStart && appStart) {
-                return currentDay.isBefore(appStart, "day") || currentDay.isAfter(campaignStart, "day");
+                return (
+                  currentDay.isBefore(appStart, "day") ||
+                  currentDay.isAfter(campaignStart, "day")
+                );
               }
 
               if (campaignStart) {
-                return currentDay.isBefore(today) || currentDay.isAfter(campaignStart, "day");
+                return (
+                  currentDay.isBefore(today) ||
+                  currentDay.isAfter(campaignStart, "day")
+                );
               }
 
               if (appStart) {
@@ -460,10 +492,34 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
 
               return currentDay.isBefore(today);
             }}
+            dateRender={(current) => {
+              const today = dayjs().startOf("day");
+              const appStart = formData.applicationstartdate;
+              const campaignStart = formData.startDate;
+
+              const isDisabled =
+                current.isBefore(today) ||
+                (appStart && current.isBefore(appStart, "day")) ||
+                (campaignStart && current.isAfter(campaignStart, "day"));
+
+              const isToday = current.isSame(today, "day");
+              if (isDisabled) {
+                return <div className="ant-picker-cell-inner">{current.date()}</div>;
+              }
+              return (
+                <div
+                  className={`ant-picker-cell-inner ${
+                    isToday
+                      ? "bg-blue-600 text-white rounded-full"
+                      : "text-gray-700"
+                  }`}
+                >
+                  {current.date()}
+                </div>
+              );
+            }}
             onChange={(date) => {
               handleChange("applicationenddate", date);
-
-              // ✅ NEW
               if (date) {
                 setCampStartPickerMonth(date);
               }
@@ -508,14 +564,38 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
               if (!current) return false;
               const today = dayjs().startOf("day");
               const appEnd = formData.applicationenddate;
+
               if (current.isBefore(today)) return true;
               if (appEnd && !current.isAfter(appEnd, "day")) return true;
+
               return false;
+            }}
+            dateRender={(current) => {
+              const today = dayjs().startOf("day");
+              const appEnd = formData.applicationenddate;
+
+              const isDisabled =
+                current.isBefore(today) ||
+                (appEnd && !current.isAfter(appEnd, "day"));
+
+              const isToday = current.isSame(today, "day");
+              if (isDisabled) {
+                return <div className="ant-picker-cell-inner">{current.date()}</div>;
+              }
+              return (
+                <div
+                  className={`ant-picker-cell-inner ${
+                    isToday
+                      ? "bg-blue-600 text-white rounded-full"
+                      : "text-gray-700"
+                  }`}
+                >
+                  {current.date()}
+                </div>
+              );
             }}
             onChange={(date) => {
               handleChange("startDate", date);
-
-              // ✅ NEW
               if (date) {
                 setCampEndPickerMonth(date);
               }
@@ -547,8 +627,35 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
                 (formData.startDate &&
                   current < dayjs(formData.startDate).startOf("day")))
             }
+            dateRender={(current) => {
+              const today = dayjs().startOf("day");
+              const startDate = formData.startDate
+                ? dayjs(formData.startDate).startOf("day")
+                : null;
+
+              const isDisabled =
+                current.isBefore(today) ||
+                (startDate && current.isBefore(startDate));
+
+              const isToday = current.isSame(today, "day");
+              if (isDisabled) {
+                return <div className="ant-picker-cell-inner">{current.date()}</div>;
+              }
+              return (
+                <div
+                  className={`ant-picker-cell-inner ${
+                    isToday
+                      ? "bg-blue-600 text-white rounded-full"
+                      : "text-gray-700"
+                  }`}
+                >
+                  {current.date()}
+                </div>
+              );
+            }}
             onChange={(date) => handleChange("endDate", date)}
           />
+
           {errors.endDate && (
             <p className="text-red-500 text-sm mt-1">Please select a valid campaign end date</p>
           )}
