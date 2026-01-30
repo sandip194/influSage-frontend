@@ -37,7 +37,7 @@ export function Header() {
 
         {/* Navigation (optional – easy to add later) */}
         <nav className="hidden lg:flex items-center gap-10">
-          <span className="text-sm font-semibold text-[#0D132D] hover:text-[#335CFF] cursor-pointer">
+          {/* <span className="text-sm font-semibold text-[#0D132D] hover:text-[#335CFF] cursor-pointer">
             Solutions
           </span>
           <span className="text-sm font-semibold text-[#0D132D] hover:text-[#335CFF] cursor-pointer">
@@ -48,7 +48,7 @@ export function Header() {
           </span>
           <span className="text-sm font-semibold text-[#0D132D] hover:text-[#335CFF] cursor-pointer">
             Resources
-          </span>
+          </span> */}
         </nav>
 
         {/* Auth Actions */}

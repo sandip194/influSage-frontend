@@ -1,11 +1,11 @@
-import { RiBrainLine, RiCloseCircleLine, RiEmotionUnhappyLine, RiGroupLine, RiLineChartLine, RiSearchEyeLine, RiShieldCheckLine } from "@remixicon/react";
+import { RiBrainLine, RiChat3Line, RiCloseCircleLine, RiEmotionUnhappyLine, RiGroupLine, RiLineChartLine, RiSearchEyeLine, RiShieldCheckLine } from "@remixicon/react";
 
 const features = [
-    {
-        icon: <RiBrainLine className="text-5xl text-[#335CFF] mb-6" />,
-        title: "Smart Matching",
-        desc: "AI finds creators whose audience perfectly aligns with your brand values through deep semantic analysis.",
-    },
+    // {
+    //     icon: <RiBrainLine className="text-5xl text-[#335CFF] mb-6" />,
+    //     title: "Smart Matching",
+    //     desc: "Easily discover creators whose audience aligns perfectly with your brand values, ensuring the right match every time.",
+    // },
     {
         icon: <RiShieldCheckLine className="text-5xl text-[#335CFF] mb-6" />,
         title: "Verified Profiles",
@@ -18,46 +18,57 @@ const features = [
     },
     {
         icon: <RiGroupLine className="text-5xl text-[#335CFF] mb-6" />,
-        title: "Collaboration Tools",
+        title: "Workflow Manager",
         desc: "Manage contracts, briefs, and approvals in one central hub designed for creative synergy.",
     },
+    {
+        icon: <RiChat3Line className="text-5xl text-[#335CFF] mb-6" />,
+        title: "Direct Chat",
+        desc: "Communicate seamlessly with influencers directly within the platform. Ensure transparency, build trust, and speed up collaboration.",
+    }
+
 ];
 
 export default function FrictionAndFeaturesSection() {
     return (
         <>
-            <section className="py-32 bg-white/50">
+            <section className="py-24 bg-white/50">
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-                    <div className="mb-20 text-center max-w-3xl mx-auto">
+                    <div className="mb-16 text-center max-w-3xl mx-auto">
                         <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight text-[#0D132D]">
-                            Eliminating Friction in Influencer Marketing
+                            Simplifying Influencer Marketing for Everyone
                         </h2>
                         <p className="text-lg text-[#0D132D80] leading-relaxed">
-                            We tackle the biggest bottlenecks for both sides of the creative economy, turning chaos into curated growth.
+                            From finding the right creators to tracking results, our platform removes friction and makes every campaign smooth, transparent, and impactful.
                         </p>
+
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-10">
                         <div className="relative group rounded-3xl overflow-hidden bg-[#0D132D1A]/50 p-12 transition-all hover:shadow-2xl">
                             <div className="relative z-10">
-                                <div className="size-16 bg-[#335CFF]/10 text-[#335CFF] rounded-2xl flex items-center justify-center mb-8">
-                                    <RiSearchEyeLine className="text-3xl" />
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="size-12 bg-[#335CFF]/10 text-[#335CFF] rounded-2xl flex items-center justify-center ">
+                                        <RiSearchEyeLine className="text-3xl" size={30} />
+                                    </div>
+                                    <h3 className="text-3xl font-bold  text-[#0D132D]">For Brands</h3>
                                 </div>
-                                <h3 className="text-3xl font-bold mb-6 text-[#0D132D]">For Brands</h3>
-                                <ul className="space-y-6">
-                                    <li className="flex items-start gap-4">
+
+
+                                <ul className="space-y-2">
+                                    <li className="flex items-center gap-4">
                                         <RiCloseCircleLine className="text-[#335CFF] mt-1 text-xl" />
                                         <p className="text-[#0D132DBF] font-medium">
                                             Finding the right fit amidst millions of profiles without data.
                                         </p>
                                     </li>
-                                    <li className="flex items-start gap-4">
+                                    <li className="flex items-center gap-4">
                                         <RiCloseCircleLine className="text-[#335CFF] mt-1 text-xl" />
                                         <p className="text-[#0D132DBF] font-medium">
                                             Dealing with opaque pricing and unpredictable ROI.
                                         </p>
                                     </li>
-                                    <li className="flex items-start gap-4">
+                                    <li className="flex items-center gap-4">
                                         <RiCloseCircleLine className="text-[#335CFF] mt-1 text-xl" />
                                         <p className="text-[#0D132DBF] font-medium">
                                             Manual tracking of content and reporting hurdles.
@@ -69,24 +80,27 @@ export default function FrictionAndFeaturesSection() {
 
                         <div className="relative group rounded-3xl overflow-hidden bg-[#335CFF]/5 border border-[#335CFF]/10 p-12 transition-all hover:shadow-2xl">
                             <div className="relative z-10">
-                                <div className="size-16 bg-[#335CFF]/20 text-[#335CFF] rounded-2xl flex items-center justify-center mb-8">
-                                    <RiEmotionUnhappyLine className="text-3xl" />
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="size-12 bg-[#335CFF]/20 text-[#335CFF] rounded-2xl flex items-center justify-center">
+                                        <RiEmotionUnhappyLine className="text-3xl" size={30} />
+                                    </div>
+                                    <h3 className="text-3xl font-bold text-[#0D132D]">For Influencers</h3>
                                 </div>
-                                <h3 className="text-3xl font-bold mb-6 text-[#0D132D]">For Influencers</h3>
-                                <ul className="space-y-6">
-                                    <li className="flex items-start gap-4">
+
+                                <ul className="space-y-2">
+                                    <li className="flex items-center gap-4">
                                         <RiCloseCircleLine className="text-[#335CFF] mt-1 text-xl" />
                                         <p className="text-[#0D132DBF] font-medium">
                                             Dealing with manual contracts and unfair compensation.
                                         </p>
                                     </li>
-                                    <li className="flex items-start gap-4">
+                                    <li className="flex items-center gap-4">
                                         <RiCloseCircleLine className="text-[#335CFF] mt-1 text-xl" />
                                         <p className="text-[#0D132DBF] font-medium">
                                             Endless back-and-forth emails for simple updates.
                                         </p>
                                     </li>
-                                    <li className="flex items-start gap-4">
+                                    <li className="flex items-center gap-4">
                                         <RiCloseCircleLine className="text-[#335CFF] mt-1 text-xl" />
                                         <p className="text-[#0D132DBF] font-medium">
                                             Delayed payments and lack of partnership security.
@@ -100,6 +114,15 @@ export default function FrictionAndFeaturesSection() {
             </section>
 
             <section className="py-24 bg-white overflow-hidden">
+                <div className="mb-16 text-center max-w-3xl mx-auto">
+                    <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight text-[#0D132D]">
+                        Powerful Features for Brands & Influencers
+                    </h2>
+                    <p className="text-lg text-[#0D132D80] leading-relaxed">
+                        Everything you need to discover creators, manage campaigns, and collaborate seamlessly in one platform.
+                    </p>
+                </div>
+
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 

@@ -17,7 +17,7 @@ const HomePage = () => {
                 <FrictionAndFeaturesSection/>
                 {/* <SuccessSection /> */}
                 <HowItWorksSection />
-                <TrustedSection />
+                {/* <TrustedSection /> */}
                 <CTASection />
 
             </main>

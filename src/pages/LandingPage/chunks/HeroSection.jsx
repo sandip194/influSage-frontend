@@ -65,40 +65,37 @@
 //             <div className="absolute inset-0 bg-gradient-to-t from-indigo-950/60 to-transparent"></div>
 //           </div>
 
-          
+
 //         </div>
 //       </div>
 //     </section>
 //   );
 // }
+
+
+
 export function HeroSection() {
   return (
-    <section className="pt-40 pb-24 bg-[#0D132D] text-white relative overflow-hidden">
+    <section className="py-32 lg:py-50 bg-[#0D132D] text-white relative overflow-hidden">
       {/* Background Gradient */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#335CFF]/10 to-transparent" />
 
       <div className="max-w-[1400px] mx-auto px-6 lg:px-10 relative">
         <div className="grid lg:grid-cols-12 gap-16 items-start">
 
-          {/* Left Content */}
+          {/* ================= LEFT CONTENT ================= */}
           <div className="lg:col-span-7 space-y-12 relative z-10">
 
-            {/* Headline */}
-            <h1 className="text-4xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight">
-              Where <span className="text-[#335CFF] italic">Brands</span> & <span className="text-[#335CFF]">Influencers</span> Build Winning Partnerships
+            <h1 className="text-4xl lg:text-5xl font-extrabold leading-[1.1] tracking-tight">
+              Where <span className="text-[#335CFF] italic">Brands</span> &{" "}
+              <span className="text-[#335CFF]">Influencers</span> Build Winning Partnerships
             </h1>
 
-            {/* OR alternative headline */}
-            {/* <h1 className="text-4xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight">
-              The Smart Way for <span className="text-[#335CFF]">Brands</span> and <span className="text-[#335CFF]">Influencers</span> to Collaborate
-            </h1> */}
-
-            {/* Sub-headline */}
-            <p className="text-lg text-white/60 max-w-xl leading-relaxed font-light">
-              We connect brands with the right Influencers and help influencers collaborate with brands that actually fit — powered by data, trust, and performance.
+            <p className="text-lg text-white/60 leading-relaxed font-light">
+              We connect brands with the right Influencers and help influencers collaborate
+              with brands that actually fit — powered by data, trust, and performance.
             </p>
 
-            {/* CTA Buttons */}
             <div className="flex flex-wrap gap-5">
               <button className="bg-[#335CFF] text-white px-6 py-3 rounded-full font-bold text-lg hover:bg-white hover:text-[#0D132D] transition-all transform hover:scale-105 active:scale-95">
                 Get Started as a Brand
@@ -109,58 +106,107 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right Video Card */}
-          <div className="lg:col-span-5 relative">
-            <div className="relative rounded-3xl overflow-hidden bg-black border border-white/10 shadow-2xl group">
+          {/* ================= RIGHT VIDEO SECTION ================= */}
+          <div className="lg:col-span-5 relative flex flex-col items-center gap-8 pt-10">
+
+            {/* Video Card */}
+            <div className="relative w-full max-w-[620px] rounded-3xl overflow-hidden bg-black border border-white/10 shadow-2xl shadow-blue-500/50 group">
               
-              {/* Video */}
+              {/* Subtle Glow */}
+              <div className="absolute -inset-6 bg-[#335CFF]/10 blur-3xl -z-10 hidden lg:block" />
+
               <video
-                className="w-full aspect-[3/2] object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
-                src="/hero.mp4" // your local video path
+                className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
+                src="/campaign overview.mp4"
                 autoPlay
                 muted
                 loop
+                playsInline
               />
 
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0D132D] via-transparent to-transparent" />
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0D132D]/10 via-[#0D132D]/30 to-transparent" />
+            </div>
 
-              {/* Card Content */}
-              <div className="absolute bottom-0 left-0 p-8 w-full">
-                <p className="text-[#335CFF] text-sm font-bold uppercase tracking-widest mb-2">
-                  Campaign Example
+            {/* ===== MOBILE / TABLET STACKED BADGES ===== */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center lg:hidden">
+
+              {/* Estimated Payout */}
+              <div className="w-full sm:w-64 p-5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20">
+                <p className="text-[10px] font-bold uppercase text-white/60 tracking-widest mb-1">
+                  Estimated Payout
                 </p>
-                <h3 className="text-3xl font-bold mb-4">Summer Product Launch</h3>
+                <p className="text-3xl font-black text-white">₹25,400</p>
+                <p className="text-xs text-[#335CFF] mt-1">
+                  Across selected creators
+                </p>
+              </div>
 
-                <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
+              {/* Campaign Info */}
+              <div className="w-full sm:w-72 p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
+                <p className="text-[#335CFF] text-xs font-bold uppercase tracking-widest mb-2">
+                  LIVE CAMPAIGN
+                </p>
+                <h3 className="text-xl font-bold">
+                  Lifestyle Brand Collaboration
+                </h3>
+
+                <div className="grid grid-cols-2 gap-2 border-t border-white/10 ">
                   <div>
-                    <p className="text-xs text-white/40 uppercase tracking-tighter">
-                      Engagement
+                    <p className="text-[11px] text-white/50 uppercase tracking-wider">
+                      Avg Engagement
                     </p>
-                    <p className="text-xl font-bold text-[#335CFF]">4.8%</p>
+                    <p className="text-lg font-bold text-[#335CFF]">4.8%</p>
                   </div>
                   <div>
-                    <p className="text-xs text-white/40 uppercase tracking-tighter">
-                      Reach
+                    <p className="text-[11px] text-white/50 uppercase tracking-wider">
+                      Potential Reach
                     </p>
-                    <p className="text-xl font-bold">1.2M+</p>
+                    <p className="text-lg font-bold">1.2M+</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Floating Stat Card */}
-            <div className="absolute -bottom-10 -left-20 w-64 p-6 bg-white rounded-2xl shadow-2xl hidden xl:block">
-              <p className="text-[10px] font-bold uppercase text-[#0D132D]/50 mb-2 tracking-widest">
-                Campaign Budget
+            {/* ===== DESKTOP FLOATING BADGES ===== */}
+
+            {/* Top Right */}
+            <div className="absolute -top-5 -right-20 w-48 p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-[0_30px_80px_rgba(51,92,255,0.25)] hidden lg:block">
+              <p className="text-[10px] font-bold uppercase text-white/60 tracking-widest mb-1">
+                Estimated Payout
               </p>
-              <p className="text-4xl font-black text-[#0D132D]">25,400</p>
-              <div className="flex items-center gap-2 text-[#335CFF] text-sm mt-2">
-                <span>+12.4% vs last month</span>
+              <p className="text-2xl font-black text-white">₹25,400</p>
+              <p className="text-xs text-[#335CFF] mt-1">
+                Across selected creators
+              </p>
+            </div>
+
+            {/* Bottom Left */}
+            <div className="absolute -bottom-36 -left-40 w-64 p-5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 hidden xl:block">
+              <p className="text-[#335CFF] text-xs font-bold uppercase tracking-widest mb-2">
+                LIVE CAMPAIGN
+              </p>
+              <h3 className="text-2xl font-bold mb-4">
+                Lifestyle Brand Collaboration
+              </h3>
+
+              <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
+                <div>
+                  <p className="text-[11px] text-white/50 uppercase tracking-wider">
+                    Avg Engagement
+                  </p>
+                  <p className="text-lg font-bold text-[#335CFF]">4.8%</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-white/50 uppercase tracking-wider">
+                    Potential Reach
+                  </p>
+                  <p className="text-lg font-bold">1.2M+</p>
+                </div>
               </div>
             </div>
-          </div>
 
+          </div>
         </div>
       </div>
     </section>
