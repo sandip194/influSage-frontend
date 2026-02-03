@@ -289,7 +289,7 @@ export default function SidebarVendor({ onSelectChat, activeConversationId }) {
                           ? "New message"
                           : campaigns.ishtml
                             ? "New campaign invitation"
-                            : campaigns.lastmessage || "No messages yet"
+                            : campaigns.lastmessage || "No new messages"
                       }
                     </div>
                   </div>

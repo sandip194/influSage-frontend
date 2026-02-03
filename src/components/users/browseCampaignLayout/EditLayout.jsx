@@ -902,9 +902,9 @@ const EditLayout = () => {
 
                 <div className="flex items-center gap-1 text-gray-700">
                   <RiAppsLine className="w-4 h-4" />
-                  <span className="truncate" title={campaignDetails.vendordetails?.parentcategory}>
-                    {campaignDetails.vendordetails?.parentcategory || "N/A"}...
-                  </span>
+                    <span className="truncate" title={campaignDetails.vendordetails?.parentcategory}>
+                      {campaignDetails.vendordetails?.parentcategory?.split(',').slice(0, 3).join(', ') || "N/A"}
+                    </span>
                 </div>
               </div>
 

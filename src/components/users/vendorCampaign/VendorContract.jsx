@@ -296,9 +296,10 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
     }
   };
   const feedbackItem = safeArray(contractFeedback)[0];
+  const MAX_VISIBLE = 2;
 
   return (
-    <div className="bg-white rounded-2xl p-0">
+    <div className="bg-white rounded-2xl p-0 h-full flex flex-col min-h-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className=" text-xl font-bold">Contracts</h2>
         <Button
@@ -332,14 +333,19 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
           />
         </div>
       ) : (
-        <div className="space-y-4 mb-4">
-          {contracts.map((contract) => (
-            <div
-              key={contract.id}
-              className="relative bg-white/80 backdrop-blur-xl border border-gray-200 
-      rounded-xl p-4 sm:p-5 shadow-md hover:shadow-xl 
-      transition-all duration-300"
-            >
+        <div
+        className="space-y-4 overflow-y-auto pr-2"
+        style={{
+          maxHeight: "570px",
+        }}
+      >
+        {contracts.map((contract) => (
+          <div
+            key={contract.id}
+            className="relative bg-white/80 backdrop-blur-xl border border-gray-200 
+            rounded-xl p-4 sm:p-5 shadow-md hover:shadow-xl 
+            transition-all duration-300"
+          >
               {/* STATUS + ACTION RIBBON */}
               <div className="absolute top-0 right-0">
                 <span
@@ -376,39 +382,83 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
               <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
                 {/* LEFT CONTENT */}
                 <div className="flex flex-col gap-3 w-full">
-                  {/* Influencer (desktop only) */}
-                  <h3 className="hidden sm:flex text-lg font-semibold text-gray-900 items-center gap-2">
-                    {contract.influencer.display}
-                  </h3>
+                  
+                  {/* Influencer + Dates (DESKTOP) */}
+                  <div className="hidden sm:flex items-center gap-6 w-full px-4 py-3 whitespace-nowrap overflow-x-auto">
 
-                  {/* Influencer */}
-                  <div className="flex sm:hidden items-center gap-3 mb-3">
-                    <img
-                      src={contract?.influencer?.value?.photo || "/Brocken-Defualt-Img.jpg"}
-                      alt={contract?.influencer?.value?.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                      onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                    />
-                    <p className="text-base font-semibold text-gray-900">
-                      {contract?.influencer?.value?.name}
-                    </p>
+                    {/* Influencer */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <img
+                        src={contract?.influencer?.value?.photo || "/Brocken-Defualt-Img.jpg"}
+                        alt={contract?.influencer?.value?.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                      />
+                      <span className="text-sm font-semibold text-gray-900 max-w-[180px] truncate">
+                        {contract?.influencer?.value?.name}
+                      </span>
+                    </div>
+
+                    <div className="flex items-start gap-8 shrink-0
+                      bg-gray-50 border border-gray-200 rounded-md px-4 py-3">
+
+                      {/* Contract Duration */}
+                      <div className="flex flex-col">
+                        <p className="text-[11px] uppercase tracking-wide text-gray-400 font-medium leading-none">
+                          Contract Duration
+                        </p>
+                        <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 mt-1">
+                          <RiCalendar2Line size={14} className="text-gray-400" />
+                          {formatToDDMMYYYY(contract?.contractStart)}
+                          <span className="text-gray-400">-</span>
+                          {formatToDDMMYYYY(contract?.contractEnd)}
+                        </p>
+                      </div>
+
+                      {/* Divider */}
+                      <span className="h-8 w-px bg-gray-300" />
+
+                      {/* Campaign Window */}
+                      <div className="flex flex-col">
+                        <p className="text-[11px] uppercase tracking-wide text-gray-400 font-medium leading-none">
+                          Campaign Window
+                        </p>
+                        <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 mt-1">
+                          <RiCalendar2Line size={14} className="text-gray-400" />
+                          {formatToDDMMYYYY(contract?.campaignStart)}
+                          <span className="text-gray-400">-</span>
+                          {formatToDDMMYYYY(contract?.campaignEnd)}
+                        </p>
+                      </div>
+
+                    </div>
                   </div>
 
-                  {/* DETAILS GRID */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600 mt-3">
-                    {/* Contract Dates */}
-                    <div className="sm:col-span-2 w-full bg-gray-50 border border-gray-200 rounded-lg p-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {/* Influencer (MOBILE) */}
+                  <div className="sm:hidden mb-4 space-y-3">
+                    {/* Row 1: Avatar + Name */}
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={contract?.influencer?.value?.photo || "/Brocken-Defualt-Img.jpg"}
+                        alt={contract?.influencer?.value?.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                      />
+                      <p className="text-base font-semibold text-gray-900 truncate">
+                        {contract?.influencer?.value?.name}
+                      </p>
+                    </div>
+
+                    {/* Contract Dates (MOBILE) */}
+                    <div className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <div className="grid grid-cols-1 gap-4">
                         {/* Contract Duration */}
                         <div>
                           <p className="text-[12px] uppercase tracking-wide text-gray-400 font-medium">
                             Contract Duration
                           </p>
-                          <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 mt-1 whitespace-nowrap">
-                            <RiCalendar2Line
-                              className="text-gray-400"
-                              size={16}
-                            />
+                          <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 mt-1">
+                            <RiCalendar2Line className="text-gray-400" size={16} />
                             {formatToDDMMYYYY(contract?.contractStart)}
                             <span className="text-gray-400">-</span>
                             {formatToDDMMYYYY(contract?.contractEnd)}
@@ -420,11 +470,8 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                           <p className="text-[12px] uppercase tracking-wide text-gray-400 font-medium">
                             Campaign Window
                           </p>
-                          <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 mt-1 whitespace-nowrap">
-                            <RiCalendar2Line
-                              className="text-gray-400"
-                              size={16}
-                            />
+                          <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 mt-1">
+                            <RiCalendar2Line className="text-gray-400" size={16} />
                             {formatToDDMMYYYY(contract?.campaignStart)}
                             <span className="text-gray-400">-</span>
                             {formatToDDMMYYYY(contract?.campaignEnd)}
@@ -432,6 +479,11 @@ const VendorContract = ({ campaignId, campaignStart, campaignEnd }) => {
                         </div>
                       </div>
                     </div>
+                  </div>
+
+                  {/* DETAILS GRID */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600 mt-3">
+                    
                     {/* Deliverables + Product/Address */}
                     <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
                       {/* LEFT: Deliverables */}

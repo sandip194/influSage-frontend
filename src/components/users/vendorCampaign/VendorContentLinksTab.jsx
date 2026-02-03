@@ -181,16 +181,23 @@ export default function VendorContentLinksTab({ campaignId }) {
                       ?.contenttypes.map((ct) => (
                         <div key={ct.contractcontenttypeid} className="w-full">
                           <p className="font-semibold text-sm mb-1">{ct.contentypename}</p>
-                          <div className="flex flex-wrap gap-2">
+                          <div
+                            className="flex flex-wrap gap-2 overflow-y-auto pr-1"
+                            style={{
+                              maxHeight: "190px",
+                            }}
+                          >
                             {safeArray(ct.links).map((item) => (
                               <div
                                 key={item.contractcontentlinkid}
                                 onClick={() =>
                                   copyToClipboard(item.contractcontentlinkid, item.link)
                                 }
-                                className={`w-52 px-3 py-0 rounded-xl border  cursor-pointer transition flex items-center justify-between shadow-sm ${copiedId === item.contractcontentlinkid
-                                  ? "bg-green-100 border-green-400"
-                                  : "bg-white border-[#335CFF26] hover:bg-gray-50"
+                                className={`w-52 px-3 py-2 rounded-xl border cursor-pointer transition
+                                  flex items-center justify-between shadow-sm ${
+                                    copiedId === item.contractcontentlinkid
+                                      ? "bg-green-100 border-green-400"
+                                      : "bg-white border-[#335CFF26] hover:bg-gray-50"
                                   }`}
                               >
                                 <span className="text-gray-700 text-sm truncate">

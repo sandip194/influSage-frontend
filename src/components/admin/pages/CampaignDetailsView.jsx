@@ -798,7 +798,7 @@ const CampaignDetailsView = () => {
                                                 {platform.contenttypes?.map((type) => (
                                                     <span
                                                         key={type.providercontenttypeid}
-                                                        className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full border border-gray-200"
+                                                        className="text-gray-500 text-sm text-right"
                                                     >
                                                         {type.contenttypename}
                                                     </span>

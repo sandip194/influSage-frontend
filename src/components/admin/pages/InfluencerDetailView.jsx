@@ -384,7 +384,7 @@ const InfluencerDetailView = () => {
                                 safeArray(cat.categories).map((sub, i) => (
                                     <span
                                         key={i}
-                                        className="px-4 py-1 bg-gray-100 rounded-full text-gray-700 text-sm"
+                                        className="px-3 py-1 bg-gray-100 rounded-full text-xs"
                                     >
                                         {safeText(sub.categoryname)}
                                     </span>

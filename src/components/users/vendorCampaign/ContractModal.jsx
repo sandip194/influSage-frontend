@@ -224,11 +224,17 @@ export default function ContractModal({
             contractStart: dayjs(editData.contractStart, "DD-MM-YYYY"),
             contractEnd: dayjs(editData.contractEnd, "DD-MM-YYYY"),
             notes: editData.notes || "",
-            productLink: editData.productLink || "",
-            vendorAddress: editData.vendorAddress || "",
+            // productLink: editData.productLink || "",
+            // vendorAddress: editData.vendorAddress || "",
             deliverables: uniquePlatforms,
         });
+        if (editData.productLink) {
+            fieldValues.productLink = editData.productLink;
+        }
 
+        if (editData.vendorAddress) {
+            fieldValues.vendorAddress = editData.vendorAddress;
+        }
     }, [editData, platforms]); // ❌ remove `form` from deps
 
 

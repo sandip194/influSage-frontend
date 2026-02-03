@@ -404,6 +404,54 @@ const InfluencerProfile = () => {
                                         </div>
                                     )}
 
+                                    {influDetails?.providers?.length > 0 && (
+                                    <div className="mt-2">
+                                        <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
+                                        {influDetails.providers.map((provider, idx) => {
+                                            const followers = provider.nooffollowers || 0;
+
+                                            const formatFollowers = (num) => {
+                                            if (num >= 1_000_000)
+                                                return (num / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+                                            if (num >= 1_000)
+                                                return (num / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+                                            return num;
+                                            };
+
+                                            return (
+                                            <Tooltip key={idx} title={provider.providername}>
+                                                <a
+                                                href={provider.handleslink}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="
+                                                    flex items-center gap-2
+                                                    px-3 py-1.5
+                                                    bg-white
+                                                    border border-gray-200
+                                                    rounded-full
+                                                    hover:border-gray-300
+                                                    hover:shadow-sm
+                                                    transition-all
+                                                "
+                                                >
+                                                <img
+                                                    src={provider.iconpath}
+                                                    alt={provider.providername}
+                                                    className="w-6 h-6 rounded-full object-contain"
+                                                    onError={(e) => (e.target.src = '/Brocken-Defualt-Img.jpg')}
+                                                />
+
+                                                <span className="text-xs font-medium text-gray-700">
+                                                    {formatFollowers(followers)}
+                                                </span>
+                                                </a>
+                                            </Tooltip>
+                                            );
+                                        })}
+                                        </div>
+                                    </div>
+                                    )}
                                 </div>
 
                                 {/* Total Campaign */}
@@ -455,7 +503,7 @@ const InfluencerProfile = () => {
                             </div>
 
                             {/* Buttons Section */}
-                            <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-3">
+                            <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-3">
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
                                     {influDetails?.ismessaged === true && (
                                         <Tooltip title="Message">
@@ -470,7 +518,7 @@ const InfluencerProfile = () => {
 
                                     <button
                                         onClick={handleInvite}
-                                        className="cursor-pointer text-white bg-[#0f122f] text-gray-900 px-5 py-2 rounded-full 
+                                        className="cursor-pointer text-white bg-[#0f122f] text-gray-900 px-5 py-2 rounded-full
              hover:bg-[#1f2357] transition w-full sm:w-auto 
              flex items-center justify-center gap-2"
                                     >
@@ -522,8 +570,9 @@ const InfluencerProfile = () => {
                             <p className="text-gray-600 text-sm leading-relaxed">
                                 {influDetails?.bio || "No bio available."}
                             </p>
+                    <hr className="my-4 border-gray-200" />
 
-                            <h4 className="text-lg font-semibold mt-8 mb-3 text-gray-900">Categories</h4>
+                            <h4 className="text-lg font-semibold mt-4 mb-3 text-gray-900">Categories</h4>
                             <div className="flex flex-wrap gap-3">
                                 {influDetails?.categories?.map((cat) => (
                                     <span
@@ -536,38 +585,6 @@ const InfluencerProfile = () => {
                             </div>
                         </div>
 
-                    </div>
-
-                    {/* Social Media */}
-                    <div className="mt-4 bg-white rounded-2xl p-4">
-                        <h3 className="text-xl font-semibold mb-5 text-gray-900">Social Media</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-                            {influDetails?.providers?.map((provider, index) => (
-                                <a
-                                    key={index}
-                                    href={provider.handleslink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-4 border border-gray-200 p-4 rounded-lg hover:shadow-md transition"
-                                >
-                                    {/* Show icon if iconpath exists */}
-                                    {provider.iconpath && (
-                                        <img
-                                            src={provider.iconpath}
-                                            alt={provider.providername}
-                                            className="w-10 h-10 object-contain rounded-full"
-                                            onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                                        />
-                                    )}
-                                    <div>
-                                        <p className="font-medium text-base">{provider.providername}</p>
-                                        <p className="text-sm text-gray-500">
-                                            {provider.nooffollowers?.toLocaleString()} followers
-                                        </p>
-                                    </div>
-                                </a>
-                            ))}
-                        </div>
                     </div>
                     {/* Portfolio Files */}
                     <div className="mt-4 bg-white rounded-2xl p-4">

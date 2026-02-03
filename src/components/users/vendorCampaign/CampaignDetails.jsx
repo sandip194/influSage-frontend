@@ -361,11 +361,11 @@ const CampaignDetails = () => {
 
       <h1 className="text-2xl font-semibold mb-4">Campaign Details</h1>
 
-      <div className="flex flex-col lg:flex-row gap-4 min-w-0">
+      <div className="flex flex-col lg:flex-row gap-4 min-w-0 items-stretch">
 
 
         {/* Left Section */}
-        <div className="flex-1 min-w-0 space-y-4">
+        <div className="flex-1 min-w-0 flex flex-col gap-4">
 
 
           <div className="bg-white rounded-xl p-6 border border-gray-100">
@@ -508,7 +508,7 @@ const CampaignDetails = () => {
 
 
           {/* Tabs + Content */}
-          <div className="bg-white p-5 rounded-2xl">
+          <div className="bg-white p-5 rounded-2xl flex-1 min-h-0 flex flex-col">
 
             <ConfigProvider
               theme={{
@@ -583,7 +583,7 @@ const CampaignDetails = () => {
         </div>
 
         {/* Right Section */}
-        <div className="w-full lg:w-[25%]  flex-shrink-0 flex flex-col gap-6 [&>*]:w-full">
+        <div className="w-full lg:w-[25%] flex-shrink-0 flex flex-col gap-6 h-full">
 
 
           {/* Campaign Info Card */}
@@ -667,81 +667,6 @@ const CampaignDetails = () => {
             </div>
 
 
-            {/* Influencers List */}
-            <div className="bg-white p-4 rounded-2xl mt-6">
-              <h3 className="font-semibold text-lg mb-4">Influencers</h3>
-              {campaignDetails?.influencers?.length > 0 ? (
-                campaignDetails.influencers.map((influencer) => (
-                  <div
-                    key={influencer.influencerid}
-                    className="border border-gray-200 rounded-2xl p-3 mb-4 cursor-pointer hover:bg-gray-100 transition"
-                    onClick={() =>
-                      navigate(`/vendor-dashboard/browse-influencers/influencer-details/${influencer.influencerid}`)
-                    }
-                  >
-                    {/* Top Section */}
-                    <div className="flex gap-4 items-start">
-                      {/* Image */}
-                      <img
-                        src={influencer.userphoto}
-                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                        alt={influencer.influencername}
-                        className="w-12 h-12 rounded-full object-cover shrink-0"
-                      />
-
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-gray-800 truncate">
-                          {influencer.influencername}
-                        </h4>
-
-                        <p className="text-sm text-gray-500">
-                          {influencer.statename}, {influencer.countryname}
-                        </p>
-
-                        {/* Platforms */}
-                        <div className="flex gap-3 mt-1 flex-wrap">
-                          {influencer.providers.map((provider) => (
-                            <div
-                              key={provider.providerid}
-                              className="flex items-center gap-1 text-sm text-gray-600"
-                            >
-                              <img
-                                src={provider.iconpath}
-                                alt={provider.providername}
-                                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                                className="w-4 h-4"
-                              />
-                              <span>{formatFollowers(provider.nooffollowers)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Categories */}
-                    <div className="flex gap-2 flex-wrap text-xs text-blue-700 mt-2">
-                      {influencer.categories.slice(0, 3).map((cat) => (
-                        <span
-                          key={cat.categoryid}
-                          className="bg-blue-100 px-2 py-0.5 rounded-full"
-                        >
-                          {cat.categoryname}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                ))
-              ) : (
-                <Empty
-                  description="No influencers found"
-                  className="py-0"
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                />
-              )}
-            </div>
-
             {/* Track Campaign */}
             <div className="bg-white p-6 rounded-2xl mt-6">
               <h3 className="font-semibold text-lg mb-4">Track Campaign</h3>
@@ -805,6 +730,154 @@ const CampaignDetails = () => {
           </div>
         </div>
       </div>
+       {/* Influencers List */}
+    <div className="bg-white p-3 rounded-2xl mt-6">
+      <h3 className="font-semibold text-base mb-2">Influencers</h3>
+
+      {campaignDetails?.influencers?.length > 0 ? (
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {campaignDetails.influencers.map((influencer) => (
+            <div
+              key={influencer.influencerid}
+              onClick={() =>
+                navigate(
+                  `/vendor-dashboard/browse-influencers/influencer-details/${influencer.influencerid}`
+                )
+              }
+              className="min-w-[200px] max-w-[200px] border border-gray-200 rounded-lg p-2 cursor-pointer hover:bg-gray-100 transition shrink-0"
+            >
+              {/* Image */}
+              <div className="flex justify-center mb-1">
+                <img
+                  src={influencer.userphoto}
+                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                  alt={influencer.influencername}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              </div>
+
+              {/* Name */}
+              <h4 className="font-medium text-xs text-gray-800 text-center truncate">
+                {influencer.influencername}
+              </h4>
+
+              {/* Location */}
+              <p className="text-[10px] text-gray-500 text-center leading-tight">
+                {influencer.statename}, {influencer.countryname}
+              </p>
+
+              {/* Platforms */}
+            <div className="flex gap-1 flex-nowrap overflow-hidden justify-center min-w-0 mt-1.5">
+              {influencer?.providers?.slice(0, 2).map((provider) => (
+                <span
+                  key={provider.providerid}
+                  className="
+                    px-1 py-0.5
+                    text-[9px] font-medium
+                    whitespace-nowrap
+                    flex items-center gap-1
+                    overflow-hidden
+                    text-ellipsis
+                    min-w-0
+                    max-w-[110px]
+                  "
+                  title={`${provider.providername} - ${formatFollowers(
+                    provider.nooffollowers
+                  )}`}
+                >
+                  <img
+                    src={provider.iconpath}
+                    onError={(e) =>
+                      (e.target.src = "/Brocken-Defualt-Img.jpg")
+                    }
+                    className="w-3 h-3 shrink-0"
+                    alt={provider.providername}
+                  />
+                  <span className="truncate">
+                    {formatFollowers(provider.nooffollowers)}
+                  </span>
+                </span>
+              ))}
+
+              {/* + more platforms */}
+              {influencer?.providers?.length > 2 && (
+                <span
+                  className="
+                    px-2 py-0.5
+                    rounded-full
+                    text-[9px] font-medium
+                    border border-[#0D132D26]
+                    bg-gray-200
+                    whitespace-nowrap
+                    flex-shrink-0
+                  "
+                  title={influencer.providers
+                    .slice(2)
+                    .map(
+                      (p) =>
+                        `${p.providername} (${formatFollowers(p.nooffollowers)})`
+                    )
+                    .join(", ")}
+                >
+                  +{influencer.providers.length - 2}
+                </span>
+              )}
+            </div>
+            
+              {/* Categories */}
+              <div className="flex gap-1 flex-nowrap overflow-hidden justify-center min-w-0 mt-1.5">
+                {influencer?.categories?.slice(0, 2).map((cat) => (
+                  <span
+                    key={cat.categoryid}
+                    className="
+                      bg-blue-100 text-blue-700
+                      px-2 py-0.5
+                      rounded-full
+                      text-[9px] font-medium
+                      border border-blue-200
+                      whitespace-nowrap
+                      overflow-hidden
+                      text-ellipsis
+                      min-w-0
+                      max-w-[100px]
+                    "
+                    title={cat.categoryname}
+                  >
+                    {cat.categoryname}
+                  </span>
+                ))}
+
+                {influencer?.categories?.length > 2 && (
+                  <span
+                  className="
+                      px-2 py-0.5
+                      rounded-full
+                      text-[9px] font-medium
+                      border border-[#0D132D26]
+                      bg-gray-200
+                      whitespace-nowrap
+                      flex-shrink-0
+                    "
+                    title={influencer.categories
+                      .slice(2)
+                      .map((c) => c.categoryname)
+                      .join(", ")}
+                  >
+                    +{influencer.categories.length - 2}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Empty
+          description="No influencers found"
+          className="py-0"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      )}
+    </div>
 
       {/* Cancel Campaign Modal */}
       <Modal

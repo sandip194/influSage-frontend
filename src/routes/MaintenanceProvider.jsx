@@ -9,7 +9,7 @@ const MaintenanceProvider = ({ children }) => {
     useEffect(() => {
         const fetchStatus = async () => {
             try {
-                const res = await api.get("/api/app-status"); // your backend
+                const res = await api.get("/service/app-status"); // your backend
                 console.log(res)
                 setMaintenance(!res.data.status);
             } catch (err) {

@@ -252,9 +252,9 @@ const Details = () => {
 
       <h1 className="text-2xl font-semibold mb-4">Campaign Details</h1>
 
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4 min-w-0 items-stretch">
         {/* Left Section */}
-        <div className="flex-1 space-y-4">
+         <div className="flex-1 min-w-0 flex flex-col gap-4">
           {/* Header / Overview Card */}
           <div className="bg-white rounded-xl p-6 border border-gray-100">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-4">
@@ -377,7 +377,7 @@ const Details = () => {
 
 
           {/* Tabs + Content */}
-          <div className="bg-white p-5 rounded-2xl">
+          <div className="bg-white p-5 rounded-2xl flex-1 min-h-0 flex flex-col">
 
             <ConfigProvider
               theme={{
@@ -439,7 +439,7 @@ const Details = () => {
         </div>
 
         {/* Right Section */}
-        <div className="w-full md:w-[300px] space-y-4 flex-shrink-0">
+        <div className="w-full lg:w-[25%] flex-shrink-0 flex flex-col gap-6 h-full">
           {/* Campaign Info Card */}
           <div className="bg-white p-4 rounded-2xl">
             <h3 className="font-semibold text-lg">Campaign Details</h3>

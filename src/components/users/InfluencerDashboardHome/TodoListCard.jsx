@@ -115,7 +115,10 @@ const TodoListCard = () => {
     () =>
       todos.map((todo) => {
         const isCompleted = todo.iscompleted;
-        const dueInDays = todo.duedate ? dayjs(todo.duedate).diff(dayjs(), "day") : null;
+        const dueInDays = todo.duedate
+          ? dayjs(todo.duedate).startOf("day")
+              .diff(dayjs().startOf("day"), "day")
+          : null;
 
         const menu = (
           <Menu>

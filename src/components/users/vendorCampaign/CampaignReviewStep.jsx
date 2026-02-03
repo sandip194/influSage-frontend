@@ -114,6 +114,15 @@ const CampaignReviewStep = ({ onEdit }) => {
       );
     }
   };
+  const validateReferences = () => {
+    const refs = campaignData?.p_campaignfilejson;
+
+    if (!Array.isArray(refs) || refs.length === 0) {
+      toast.error("Please upload at least one reference file");
+      return false;
+    }
+    return true;
+  };
 
   const p_objectivejson = campaignData?.p_objectivejson || {};
   const p_vendorinfojson = campaignData?.p_vendorinfojson || {};
@@ -145,6 +154,7 @@ const CampaignReviewStep = ({ onEdit }) => {
   const tags = p_campaignjson.hashtags?.map((t) => t.hashtag) || [];
 
   const handleCreateCampaign = async (status) => {
+      if (!validateReferences()) return;
     try {
       if (status === "Draft") setLoadingDraft(true);
       if (status === "ApprovalPending") setLoadingSend(true);
