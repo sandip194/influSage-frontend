@@ -912,7 +912,7 @@ const DescriptionLayout = () => {
                                     <RiStarFill
                                       key={i}
                                       size={16}
-                                      style={{ fill: "#facc15", stroke: "black", strokeWidth: 1 }}
+                                      style={{ fill: "#facc15"}}
                                     />
                                   );
                                 }
@@ -922,7 +922,7 @@ const DescriptionLayout = () => {
                                     <RiStarHalfFill
                                       key={i}
                                       size={16}
-                                      style={{ fill: "#facc15", stroke: "black", strokeWidth: 1 }}
+                                      style={{ fill: "#facc15"}}
                                     />
                                   );
                                 }
@@ -931,7 +931,7 @@ const DescriptionLayout = () => {
                                   <RiStarFill
                                     key={i}
                                     size={16}
-                                    style={{ fill: "white", stroke: "black", strokeWidth: 1 }}
+                                    style={{ fill: "#e6e3e3d5" }}
                                   />
                                 );
                               })}
