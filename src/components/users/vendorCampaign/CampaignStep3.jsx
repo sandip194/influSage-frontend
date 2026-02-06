@@ -672,32 +672,27 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
         <div className="flex gap-4 mb-1">
           <Input
             size="large"
-            type="number"
-            min={1}
+            type="text"
             placeholder="0.00"
             value={formData.budgetAmount}
             prefix={formData.currency}
             onChange={(e) => {
               const value = e.target.value;
 
-              // Allow only digits
-              if (!/^\d*$/.test(value)) return;
+              // Allow digits with optional decimal (max 2 decimal places)
+              const decimalRegex = /^\d{0,7}(\.\d{0,2})?$/;
 
-              // Max 7 digits
-              if (value.length > 7) {
-                setErrors((prev) => ({
-                  ...prev,
-                  budgetAmount: "Budget cannot exceed 7 digits."
-                }));
-                return;
-              }
+              if (!decimalRegex.test(value)) return;
 
               handleChange("budgetAmount", value);
 
-              if (!value || Number(value) <= 0) {
+              const numericValue = Number(value);
+
+              if (!value || isNaN(numericValue) || numericValue <= 0) {
                 setErrors((prev) => ({
                   ...prev,
-                  budgetAmount: "Budget is required and must be greater than 0 and cannot exceed 7 digits.",
+                  budgetAmount:
+                    "Budget is required and must be greater than 0 and cannot exceed 7 digits.",
                 }));
               } else {
                 setErrors((prev) => ({
@@ -706,7 +701,6 @@ const CampaignStep3 = ({ data = {}, onNext, onBack, campaignId }) => {
                 }));
               }
             }}
-
           />
 
         </div>

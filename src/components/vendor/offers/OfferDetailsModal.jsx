@@ -6,6 +6,7 @@ import { useNavigate, } from "react-router-dom";
 import { useSelector } from "react-redux";
 import api from "../../../api/axios";import { toast } from "react-toastify";
 import AcceptOfferModal from "./models/AcceptOfferModal";
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 
 const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedApplication }) => {
     const { token } = useSelector((state) => state.auth);
@@ -13,8 +14,9 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
     const [offerDetails, setOfferDetails] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-    const [previewImage, setPreviewImage] = useState(null);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState("");
+    const [previewType, setPreviewType] = useState("image");
 
 
     const fetchOffer = async () => {
@@ -161,30 +163,13 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                 src={offerDetails.photopath}
                                 alt="influencer"
                                 className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 mx-auto sm:mx-0 cursor-pointer hover:opacity-80 transition"
-                                onClick={() => setIsPreviewOpen(true)}
+                                onClick={() => {
+                                    setPreviewUrl(offerDetails.photopath);
+                                    setPreviewType("image");
+                                    setPreviewOpen(true);
+                                }}
                                 onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                            />
-                            {isPreviewOpen && (
-                                <div
-                                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
-                                    onClick={() => setIsPreviewOpen(false)}
-                                >
-                                    <button
-                                        onClick={() => setIsPreviewOpen(false)}
-                                        className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                                    >
-                                        &times;
-                                    </button>
-
-                                    <img
-                                        src={offerDetails.photopath}
-                                        alt="Preview"
-                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                                        onClick={(e) => e.stopPropagation()}
-                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                                    />
-                                </div>
-                            )}
+                                />
                             <div>
                                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 capitalize">
                                     {offerDetails.influencername}
@@ -274,7 +259,11 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                                             src={url}
                                                             alt="portfolio"
                                                             className="w-full h-28 object-cover cursor-pointer hover:opacity-80 transition"
-                                                            onClick={() => setPreviewImage({ url, type })}
+                                                            onClick={() => {
+                                                                setPreviewUrl(url);
+                                                                setPreviewType(type);
+                                                                setPreviewOpen(true);
+                                                            }}
                                                             onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                                         />
                                                     )}
@@ -282,7 +271,11 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                                     {type === "video" && (
                                                         <div
                                                             className="w-full h-28 flex items-center justify-center text-sm text-gray-600 cursor-pointer"
-                                                            onClick={() => setPreviewImage({ url, type })}
+                                                            onClick={() => {
+                                                                setPreviewUrl(url);
+                                                                setPreviewType(type);
+                                                                setPreviewOpen(true);
+                                                            }}
                                                         >
                                                             ▶ Play Video
                                                         </div>
@@ -291,7 +284,11 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                                     {type === "pdf" && (
                                                         <div
                                                             className="w-full h-28 flex items-center justify-center text-sm text-gray-600 cursor-pointer"
-                                                            onClick={() => setPreviewImage({ url, type })}
+                                                            onClick={() => {
+                                                                setPreviewUrl(url);
+                                                                setPreviewType(type);
+                                                                setPreviewOpen(true);
+                                                            }}
                                                         >
                                                             📄 View PDF
                                                         </div>
@@ -314,47 +311,6 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
                                     </div>
                                 ) : (
                                     <p className="text-sm text-gray-500">No sample work uploaded.</p>
-                                )}
-                                {previewImage && (
-                                    <div
-                                        className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
-                                        onClick={() => setPreviewImage(null)}
-                                    >
-                                        <button
-                                            onClick={() => setPreviewImage(null)}
-                                            className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                                        >
-                                            &times;
-                                        </button>
-
-                                        {previewImage.type === "image" && (
-                                            <img
-                                                src={previewImage.url}
-                                                alt="Preview"
-                                                className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                                                onClick={(e) => e.stopPropagation()}
-                                            />
-                                        )}
-
-                                        {previewImage.type === "video" && (
-                                            <video
-                                                src={previewImage.url}
-                                                controls
-                                                autoPlay
-                                                className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg"
-                                                onClick={(e) => e.stopPropagation()}
-                                            />
-                                        )}
-
-                                        {previewImage.type === "pdf" && (
-                                            <iframe
-                                                src={previewImage.url}
-                                                title="PDF Preview"
-                                                className="w-[90vw] h-[85vh] rounded-xl bg-white"
-                                                onClick={(e) => e.stopPropagation()}
-                                            />
-                                        )}
-                                    </div>
                                 )}
 
                             </div>
@@ -382,6 +338,12 @@ const OfferDetailsModal = ({ visible, onClose, id, onStatusChange, hasSelectedAp
             )
             }
 
+            <MediaPreviewModal
+                open={previewOpen}
+                onClose={() => setPreviewOpen(false)}
+                src={previewUrl}
+                type={previewType}
+            />
 
             {/* Accept Offer Modal */}
             <AcceptOfferModal

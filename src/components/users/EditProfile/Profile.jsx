@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
-
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 
 
 const ProfileSkeleton = () => {
@@ -147,27 +147,17 @@ const Profile = () => {
                 onClick={() => setIsPreviewOpen(true)}
                 className="absolute left-6 -bottom-10 w-20 h-20  object-cover rounded-full border-4 border-white shadow cursor-pointer"
               />
-              {isPreviewOpen && (
-                <div
-                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                  onClick={() => setIsPreviewOpen(false)}
-                >
-                  <button
-                    onClick={() => setIsPreviewOpen(false)}
-                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                  >
-                    &times;
-                  </button>
-
-                  <img
-                    src={p_profile?.photopath}
-                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                    alt="Preview"
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              )}
+              <img
+                src={p_profile?.photopath}
+                alt="Profile"
+                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
+                onClick={() => {
+                  setPortfolioPreviewUrl(p_profile?.photopath);
+                  setPortfolioPreviewType("image");
+                  setPortfolioPreviewOpen(true);
+                }}
+                className="absolute left-6 -bottom-10 w-20 h-20 object-cover rounded-full border-4 border-white shadow cursor-pointer"
+              />
             </div>
 
             <div className="p-6 pt-14 flex flex-col md:flex-row justify-between items-start">
@@ -327,52 +317,13 @@ const Profile = () => {
               </div>
             )}
           </div>
-          {portfolioPreviewOpen && (
-            <div
-              className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-              onClick={() => setPortfolioPreviewOpen(false)}
-            >
+          <MediaPreviewModal
+            open={portfolioPreviewOpen}
+            onClose={() => setPortfolioPreviewOpen(false)}
+            src={portfolioPreviewUrl}
+            type={portfolioPreviewType}
+          />
 
-              <button
-                className="absolute top-6 right-6 text-white text-3xl font-bold"
-                onClick={() => setPortfolioPreviewOpen(false)}
-              >
-                &times;
-              </button>
-
-              {/* IMAGE */}
-              {portfolioPreviewType === "image" && (
-                <img
-                  src={portfolioPreviewUrl}
-                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                  className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              )}
-
-              {/* VIDEO */}
-              {portfolioPreviewType === "video" && (
-                <video
-                  controls
-                  autoPlay
-                  className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <source src={portfolioPreviewUrl} />
-                </video>
-              )}
-
-              {/* DOC/PDF */}
-              {portfolioPreviewType === "doc" && (
-                <iframe
-                  src={`https://docs.google.com/viewer?url=${portfolioPreviewUrl}&embedded=true`}
-                  className="w-[90vw] h-[90vh] rounded-xl bg-white"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              )}
-
-            </div>
-          )}
         </div>
 
         {/* Right Side */}

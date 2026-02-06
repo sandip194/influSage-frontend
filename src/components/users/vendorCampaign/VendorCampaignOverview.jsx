@@ -2,6 +2,7 @@ import { RiCheckboxCircleFill, RiDeleteBin6Line } from '@remixicon/react';
 import { Empty } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { RiCheckLine } from 'react-icons/ri';
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 
 const VendorCampaignOverview = ({ campaignData,  }) => { // Renamed for neutrality; use VendorCampaignOverview if preferred
   const [images, setImages] = useState([]);
@@ -9,7 +10,7 @@ const VendorCampaignOverview = ({ campaignData,  }) => { // Renamed for neutrali
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
-  const [previewType, setPreviewType] = useState("");
+  const [previewType, setPreviewType] = useState("image");
 
 
   const Requirements = [
@@ -196,55 +197,13 @@ const VendorCampaignOverview = ({ campaignData,  }) => { // Renamed for neutrali
             />
           )}
         </div>
-        {previewOpen && (
-          <div
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center"
-            onClick={() => setPreviewOpen(false)}
-          >
-            <button
-              onClick={() => setPreviewOpen(false)}
-              className="absolute top-5 right-6 text-white text-3xl font-bold"
-            >
-              ×
-            </button>
-
-            {previewType === "image" && (
-              <img
-                src={previewUrl}
-                onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                onClick={(e) => e.stopPropagation()}
-              />
-            )}
-
-            {previewType === "video" && (
-              <video
-                controls
-                className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <source src={previewUrl} />
-              </video>
-            )}
-
-            {previewType === "pdf" && (
-              <iframe
-                src={previewUrl}
-                className="max-w-[90vw] max-h-[85vh] bg-white rounded-xl"
-                onClick={(e) => e.stopPropagation()}
-              ></iframe>
-            )}
-
-            {previewType === "doc" && (
-              <iframe
-                src={`https://docs.google.com/viewer?url=${previewUrl}&embedded=true`}
-                className="max-w-[90vw] max-h-[85vh] bg-white rounded-xl"
-                onClick={(e) => e.stopPropagation()}
-              ></iframe>
-            )}
-          </div>
-        )}
       </div>
+      <MediaPreviewModal
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        src={previewUrl}
+        type={previewType}
+      />
     </div>
   );
 };

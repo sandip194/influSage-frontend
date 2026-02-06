@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { toast } from 'react-toastify';
 dayjs.extend(customParseFormat);
+import MediaPreviewModal from '../../../pages/commonPages/MediaPreviewModal';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -28,6 +29,8 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
   const [existingPhotoPath, setExistingPhotoPath] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFormChanged, setIsFormChanged] = useState(false);
+  const [mediaPreviewOpen, setMediaPreviewOpen] = useState(false);
+  const [mediaPreviewSrc, setMediaPreviewSrc] = useState(null);
 
   const { token, name } = useSelector((state) => state.auth);
   const isHydratingRef = useRef(true);
@@ -362,7 +365,11 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
               <img
                 src={preview}
                 alt="Profile preview"
-                className="object-cover w-full h-full"
+                className="object-cover w-full h-full cursor-pointer"
+                onClick={() => {
+                  setMediaPreviewSrc(preview);
+                  setMediaPreviewOpen(true);
+                }}
                 onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
               />
             ) : (
@@ -672,6 +679,12 @@ export const PersonalDetails = ({ onNext, data, showControls, showToast, onSave,
           </div>
         )}
       </Form>
+      <MediaPreviewModal
+        open={mediaPreviewOpen}
+        onClose={() => setMediaPreviewOpen(false)}
+        src={mediaPreviewSrc}
+        type="image"
+      />
     </div>
   );
 };

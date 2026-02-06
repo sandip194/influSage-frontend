@@ -627,7 +627,7 @@ const VendorCampaignsLayout = () => {
                 />
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Filter campaigns by estimated budget range.
+                Filter contracts by estimated budget range.
               </p>
             </div>
 
@@ -643,7 +643,7 @@ const VendorCampaignsLayout = () => {
                 style={{ padding: "8px 12px" }}
               />
               <p className="text-xs text-gray-500 mt-1">
-                Filter by campaign start and end dates.
+                Filter by contracts start and end dates.
               </p>
             </div>
           </div>

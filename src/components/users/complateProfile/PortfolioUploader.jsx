@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import api from "../../../api/axios";import { toast } from "react-toastify";
 import useFileUpload from "../../../hooks/useFileUpload";
 import FilePreview from "../../common/FilePreview";
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 
 const { Option } = Select;
 
@@ -25,6 +26,9 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
   const [languageError, setLanguageError] = useState("");
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewType, setPreviewType] = useState("image")
 
   // Custom hook for file handling
   const {
@@ -279,6 +283,21 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
             handleRemove(file.uid);
             setIsFormChanged(true);
           }}
+          onPreview={(file) => {
+            const url = file.url || file.preview;
+            const ext = url?.split(".").pop()?.toLowerCase();
+
+            if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
+              setPreviewType("image");
+            } else if (["mp4", "mov", "webm"].includes(ext)) {
+              setPreviewType("video");
+            } else {
+              setPreviewType("doc");
+            }
+
+            setPreviewUrl(url);
+            setPreviewOpen(true);
+          }}
         />
 
         {/* Portfolio URL */}
@@ -364,6 +383,12 @@ const PortfolioUploader = ({ onBack, onNext, data, showControls, showToast, onSa
           )}
         </div>
       </Form>
+      <MediaPreviewModal
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        src={previewUrl}
+        type={previewType}
+      />
     </div>
   );
 };

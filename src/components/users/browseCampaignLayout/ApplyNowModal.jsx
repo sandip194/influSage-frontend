@@ -6,6 +6,7 @@ import api from "../../../api/axios";import { toast } from "react-toastify";
 
 import useFileUpload from "../../../hooks/useFileUpload";
 import FilePreview from "../../common/FilePreview";
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 
 const { TextArea } = Input;
 
@@ -15,6 +16,9 @@ const ApplyNowModal = ({ open, onClose, campaignId, onSuccess, campaignBudget })
     const [errors, setErrors] = useState({});
     const [isEdit, setIsEdit] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState("");
+    const [previewType, setPreviewType] = useState("image");
 
     const {
         fileList,
@@ -174,7 +178,24 @@ const ApplyNowModal = ({ open, onClose, campaignId, onSuccess, campaignBudget })
             {fileError && <p className="text-red-500">{fileError}</p>}
             {errors.portfolioFile && <p className="text-red-500">{errors.portfolioFile}</p>}
 
-            <FilePreview files={[...existingFiles, ...fileList]} onRemove={(file) => handleRemove(file.uid)} />
+            <FilePreview
+                files={[...existingFiles, ...fileList]}
+                onRemove={(file) => handleRemove(file.uid)}
+                onPreview={(file) => {
+                    const ext = file.url?.split(".").pop()?.toLowerCase();
+
+                    setPreviewUrl(file.url || URL.createObjectURL(file));
+                    if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
+                    setPreviewType("image");
+                    } else if (["mp4", "webm", "ogg"].includes(ext)) {
+                    setPreviewType("video");
+                    } else {
+                    setPreviewType("doc");
+                    }
+
+                    setPreviewOpen(true);
+                }}
+                />
 
             <label className="block mt-4 mb-2 font-medium">Proposal Amount <span className="text-red-500">*</span></label>
             <Input
@@ -204,6 +225,13 @@ const ApplyNowModal = ({ open, onClose, campaignId, onSuccess, campaignBudget })
                         {isEdit ? "Save Changes" : "Apply Now"}
                     </Button>
                 </div>
+                <MediaPreviewModal
+                    open={previewOpen}
+                    onClose={() => setPreviewOpen(false)}
+                    src={previewUrl}
+                    type={previewType}
+                />
+
             </div>
 
         </Modal>

@@ -23,6 +23,7 @@ import VendorContract from './VendorContract';
 import ViewAllOffers from '../../vendor/offers/ViewAllOffers';
 import VendorContentLinksTab from './VendorContentLinksTab';
 import CampaignInvitationTab from './CampaignInvitationTab';
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter); // ✅ Extend dayjs with the plugin
 
@@ -82,7 +83,9 @@ const CampaignDetails = () => {
   // const [isModalVisible, setIsModalVisible] = useState(false);
   // const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
   // const [selectedInfluencer, setSelectedInfluencer] = useState(null);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewType, setPreviewType] = useState("image");
 
   const getCampaignDetails = async () => {
     try {
@@ -378,30 +381,14 @@ const CampaignDetails = () => {
                 <img
                   src={campaignDetails?.photopath}
                   onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                  alt="Profile"
-                  onClick={() => setIsPreviewOpen(true)}
+                  alt="Campaign"
+                  onClick={() => {
+                    setPreviewUrl(campaignDetails?.photopath);
+                    setPreviewType("image");
+                    setPreviewOpen(true);
+                  }}
                   className="w-16 h-16 rounded-full object-cover cursor-pointer hover:opacity-90 transition"
                 />
-                {isPreviewOpen && (
-                  <div
-                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                    onClick={() => setIsPreviewOpen(false)}
-                  >
-                    <button
-                      onClick={() => setIsPreviewOpen(false)}
-                      className="absolute cursor-pointer top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                    >
-                      ×
-                    </button>
-                    <img
-                      src={campaignDetails?.photopath}
-                      alt="Preview"
-                      onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                      className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                )}
 
                 <div>
                   <h2 className="font-semibold text-lg text-gray-900">
@@ -877,6 +864,12 @@ const CampaignDetails = () => {
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         />
       )}
+      <MediaPreviewModal
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        src={previewUrl}
+        type={previewType}
+      />
     </div>
 
       {/* Cancel Campaign Modal */}

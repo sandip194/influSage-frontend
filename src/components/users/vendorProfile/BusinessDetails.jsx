@@ -6,6 +6,7 @@ import { RiImageAddLine } from 'react-icons/ri';
 import api from "../../../api/axios";import postalRegexList from '../complateProfile/postalRegex.json';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -16,6 +17,9 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
 
     const [form] = Form.useForm();
     const [preview, setPreview] = useState(null);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState("");
+    const [previewType, setPreviewType] = useState("image");
     const [profileImage, setProfileImage] = useState(null);
     const [profileError, setProfileError] = useState('');
     const [countries, setCountries] = useState([]);
@@ -348,7 +352,12 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                             <img
                                 src={preview}
                                 alt="Profile preview"
-                                className="object-cover w-full h-full"
+                                onClick={() => {
+                                setPreviewUrl(preview);
+                                setPreviewType("image");
+                                setPreviewOpen(true);
+                                }}
+                                className="object-cover w-full h-full cursor-pointer"
                                 onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                             />
                         ) : (
@@ -651,6 +660,12 @@ export const BusinessDetails = ({ onNext, data = {}, showControls, showToast, on
                     </div>
                 )}
             </Form>
+            <MediaPreviewModal
+                open={previewOpen}
+                onClose={() => setPreviewOpen(false)}
+                src={previewUrl}
+                type={previewType}
+            />
         </div>
     );
 };

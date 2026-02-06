@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const workHistoryData = [
@@ -58,7 +59,9 @@ const formatPhoneNumber = (phone) => {
 };
 const VendorMyProfile = () => {
     const [showAllHistory, setShowAllHistory] = useState(false);
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState("");
+    const [previewType, setPreviewType] = useState("image");
     const [profileData, setProfileData] = useState(null);
 
     const [loading, setLoading] = useState(false)
@@ -120,31 +123,15 @@ const VendorMyProfile = () => {
                             <img
                                 src={profileData?.p_profile?.photopath}
                                 alt="Profile"
-                                onClick={() => setIsPreviewOpen(true)}
+                                onClick={() => {
+                                    setPreviewUrl(profileData?.p_profile?.photopath);
+                                    setPreviewType("image");
+                                    setPreviewOpen(true);
+                                }}
                                 onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                                 className="absolute left-6 -bottom-10 w-20 h-20 object-cover rounded-full border-4 border-white shadow cursor-pointer"
                             />
 
-                            {isPreviewOpen && (
-                                <div
-                                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                                    onClick={() => setIsPreviewOpen(false)}
-                                >
-                                    <button
-                                        onClick={() => setIsPreviewOpen(false)}
-                                        className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                                    >
-                                        &times;
-                                    </button>
-                                    <img
-                                        src={profileData?.p_profile?.photopath}
-                                        alt="Profile Preview"
-                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                                        onClick={(e) => e.stopPropagation()}
-                                    />
-                                </div>
-                            )}
                         </div>
                         <div className="p-6 pt-14 flex flex-col md:flex-row justify-between items-start">
                             <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
@@ -423,6 +410,12 @@ const VendorMyProfile = () => {
                     </div> */}
                 </div>
             </div>
+            <MediaPreviewModal
+                open={previewOpen}
+                onClose={() => setPreviewOpen(false)}
+                src={previewUrl}
+                type={previewType}
+            />
         </div>
     );
 };

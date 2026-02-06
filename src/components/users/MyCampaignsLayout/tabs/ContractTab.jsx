@@ -78,39 +78,37 @@ const ContractTab = ({ campaignId, token }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const api = res?.data?.data;
+      const contractApi = res?.data?.data;
 
-      // If API returns nothing → Show No Contract Component
-      if (!api) {
+      // No contract
+      if (!contractApi) {
         setContract(null);
         setContractStatus(null);
-
         return;
       }
 
-      // Map + Safe handling
       const mapped = {
-        id: safeText(api.contractid),
-        contractStart: safeText(api.contractstartdate), // already in dd-mm-yyyy
-        contractEnd: safeText(api.contractenddate),
-        campaignStart: safeText(api.campaignstartdate),
-        campaignEnd: safeText(api.campaignenddate),
-        payment:  formatToINR(safeNumber(api.paymentamount, 0)),
-        deliverables: safeText(api.providercontenttype, "N/A"),
-        notes: safeText(api.note),
-        productLink: api.productlink,
-        vendorAddress: safeText(api.vendoraddress),
-        status: safeText(api.statusname)?.toLowerCase(), // "Pending" → "pending"
-        canviewfeedback: Boolean(api.feedback),
-        cansendfeedback: Boolean(api.cansendfeedback),
-        feedback: api.feedback || null,
+        id: safeText(contractApi.contractid),
+        contractStart: safeText(contractApi.contractstartdate),
+        contractEnd: safeText(contractApi.contractenddate),
+        campaignStart: safeText(contractApi.campaignstartdate),
+        campaignEnd: safeText(contractApi.campaignenddate),
+        payment: formatToINR(safeNumber(contractApi.paymentamount, 0)),
+        deliverables: contractApi.providercontenttype || [],
+        notes: safeText(contractApi.note),
+        productLink: contractApi.productlink,
+        vendorAddress: safeText(contractApi.vendoraddress),
+        status: safeText(contractApi.statusname)?.toLowerCase(),
+        canviewfeedback: Boolean(contractApi.feedback),
+        cansendfeedback: Boolean(contractApi.cansendfeedback),
+        feedback: contractApi.feedback || null,
       };
 
       setContract(mapped);
       setContractStatus(mapped.status);
     } catch (error) {
       console.error(error);
-      setContract(null); // <— Clear previous data
+      setContract(null);
       setContractStatus(null);
     }
   };

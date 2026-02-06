@@ -4,6 +4,7 @@ import { RiHeart3Line, RiHeart3Fill, RiFile3Line } from "@remixicon/react";
 import api from "../../../api/axios";import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 
 const HeartParticle = ({ x, y, delay, size = 12 }) => (
   <motion.div
@@ -28,8 +29,9 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
   const [influDetails, setInfluDetails] = useState(null);
   const [showAnimation, setShowAnimation] = useState(false);
 
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [previewPortfolio, setPreviewPortfolio] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewType, setPreviewType] = useState("image");
 
   const getInfluencerDetails = async () => {
     if (!influencerId) return;
@@ -117,31 +119,14 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
               <img
                 src={influDetails?.photopath}
                 alt="Profile"
-                onClick={() => setIsPreviewOpen(true)}
+                onClick={() => {
+                  setPreviewUrl(influDetails?.photopath);
+                  setPreviewType("image");
+                  setPreviewOpen(true);
+                }}
                 onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                 className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-gray-100 shadow-sm cursor-pointer hover:opacity-90"
               />
-              {isPreviewOpen && (
-                <div
-                  className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
-                  onClick={() => setIsPreviewOpen(false)}
-                >
-                  <button
-                    onClick={() => setIsPreviewOpen(false)}
-                    className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                  >
-                    &times;
-                  </button>
-
-                  <img
-                    src={influDetails?.photopath}
-                    alt="Preview"
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                  />
-                </div>
-              )}
               <div>
                 <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 capitalize">
                   {influDetails?.influencername}
@@ -341,7 +326,11 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                             src={url}
                             alt="portfolio"
                             className="w-full h-28 object-cover"
-                            onClick={() => setPreviewPortfolio({ url, type })}
+                            onClick={() => {
+                              setPreviewUrl(url);
+                              setPreviewType(type);
+                              setPreviewOpen(true);
+                            }}
                             onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                           />
                         )}
@@ -349,7 +338,11 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                         {type === "video" && (
                           <div
                             className="w-full h-28 flex items-center justify-center text-sm text-gray-600"
-                            onClick={() => setPreviewPortfolio({ url, type })}
+                            onClick={() => {
+                              setPreviewUrl(url);
+                              setPreviewType(type);
+                              setPreviewOpen(true);
+                            }}
                           >
                             ▶ Play Video
                           </div>
@@ -358,7 +351,11 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
                         {type === "pdf" && (
                           <div
                             className="w-full h-28 flex items-center justify-center text-sm text-gray-600"
-                            onClick={() => setPreviewPortfolio({ url, type })}
+                            onClick={() => {
+                              setPreviewUrl(url);
+                              setPreviewType(type);
+                              setPreviewOpen(true);
+                            }}
                           >
                             📄 View PDF
                           </div>
@@ -389,54 +386,17 @@ const InfluencerDetailsModal = ({ visible, influencerId, onClose }) => {
               )}
 
             </div>
-
-            {previewPortfolio && (
-              <div
-                className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]"
-                onClick={() => setPreviewPortfolio(null)}
-              >
-                <button
-                  onClick={() => setPreviewPortfolio(null)}
-                  className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                >
-                  ×
-                </button>
-
-                {previewPortfolio.type === "image" && (
-                  <img
-                    src={previewPortfolio.url}
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                  />
-                )}
-
-                {previewPortfolio.type === "video" && (
-                  <video
-                    src={previewPortfolio.url}
-                    controls
-                    autoPlay
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                )}
-
-                {previewPortfolio.type === "pdf" && (
-                  <iframe
-                    src={previewPortfolio.url}
-                    title="PDF Preview"
-                    className="w-[90vw] h-[85vh] rounded-xl bg-white"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                )}
-              </div>
-            )}
-
           </div>
         </div>
       ) : (
         <div className="p-6 text-center text-gray-500">No details found.</div>
       )}
+      <MediaPreviewModal
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        src={previewUrl}
+        type={previewType}
+      />
     </Modal>
   );
 };

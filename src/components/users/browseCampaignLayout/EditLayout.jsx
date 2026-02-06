@@ -16,6 +16,7 @@ import { useParams } from "react-router-dom";
 import { Skeleton, Modal, Tabs, ConfigProvider } from "antd";
 import ApplyNowModal from "./ApplyNowModal";
 import { toast } from "react-toastify";
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 
 const EditLayout = () => {
   const [campaignDetails, setCampaignDetails] = useState(null);
@@ -24,9 +25,9 @@ const EditLayout = () => {
   const [error, setError] = useState(null);
   // const [showFullBrandDesc, setShowFullBrandDesc] = useState(false); commented it bcs never used
 
-  const [filePreviewOpen, setFilePreviewOpen] = useState(false);
-  const [filePreviewUrl, setFilePreviewUrl] = useState("");
-  const [filePreviewType, setFilePreviewType] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewType, setPreviewType] = useState("image");
 
   const [isWithdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
@@ -35,7 +36,6 @@ const EditLayout = () => {
 
   const { token } = useSelector((state) => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
   const { campaignId } = useParams();
 
   const [showFullAboutBrand, setShowFullAboutBrand] = useState(false);
@@ -265,7 +265,11 @@ const EditLayout = () => {
                   onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   alt="Campaign"
                   className="w-16 h-16 rounded-full object-cover cursor-pointer shadow"
-                  onClick={() => setIsCampaignPreviewOpen(true)}
+                  onClick={() => {
+                    setPreviewUrl(campaignDetails?.photopath);
+                    setPreviewType("image");
+                    setPreviewOpen(true);
+                  }}
                 />
 
                 <div className="w-full">
@@ -429,22 +433,6 @@ const EditLayout = () => {
                 )}
               </div>
             </div>
-
-            {/* Image Modal */}
-            {isCampaignPreviewOpen && (
-              <div
-                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                onClick={() => setIsCampaignPreviewOpen(false)}
-              >
-                <img
-                  src={campaignDetails?.photopath}
-                  alt="Campaign Preview"
-                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                  className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-            )}
           </div>
 
           <ConfigProvider
@@ -567,8 +555,9 @@ const EditLayout = () => {
                                   {isImage ? (
                                     <div
                                       onClick={() => {
-                                        setFilePreviewUrl(fileUrl);
-                                        setFilePreviewOpen(true);
+                                        setPreviewUrl(fileUrl);
+                                          setPreviewType("image");
+                                          setPreviewOpen(true);
                                       }}
                                       className="w-full h-full block cursor-pointer"
                                     >
@@ -652,28 +641,6 @@ const EditLayout = () => {
                             }
                           )}
                         </div>
-                        {filePreviewOpen && (
-                          <div
-                            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                            onClick={() => setFilePreviewOpen(false)}
-                          >
-                            <button
-                              className="absolute top-6 right-6 text-white text-3xl font-bold"
-                              onClick={() => setFilePreviewOpen(false)}
-                            >
-                              &times;
-                            </button>
-
-                            <img
-                              src={filePreviewUrl}
-                              onError={(e) =>
-                                (e.target.src = "/Brocken-Defualt-Img.jpg")
-                              }
-                              className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
@@ -748,9 +715,9 @@ const EditLayout = () => {
                               {isImage ? (
                                 <div
                                   onClick={() => {
-                                    setFilePreviewUrl(fileUrl);
-                                    setFilePreviewType("image");
-                                    setFilePreviewOpen(true);
+                                    setPreviewUrl(fileUrl);
+                                    setPreviewType("image");
+                                    setPreviewOpen(true);
                                   }}
                                   className="w-full h-full cursor-pointer"
                                 >
@@ -767,9 +734,9 @@ const EditLayout = () => {
                               ) : isVideo ? (
                                 <div
                                   onClick={() => {
-                                    setFilePreviewUrl(fileUrl);
-                                    setFilePreviewType("video");
-                                    setFilePreviewOpen(true);
+                                    setPreviewUrl(fileUrl);
+                                    setPreviewType("video");
+                                    setPreviewOpen(true);
                                   }}
                                   className="w-full h-full cursor-pointer"
                                 >
@@ -782,9 +749,9 @@ const EditLayout = () => {
                               ) : isPdf ? (
                                 <div
                                   onClick={() => {
-                                    setFilePreviewUrl(fileUrl);
-                                    setFilePreviewType("pdf");
-                                    setFilePreviewOpen(true);
+                                    setPreviewUrl(fileUrl);
+                                    setPreviewType("pdf");
+                                    setPreviewOpen(true);
                                   }}
                                   className="flex flex-col items-center justify-center text-red-600 text-xs font-semibold w-full h-full cursor-pointer"
                                 >
@@ -793,9 +760,9 @@ const EditLayout = () => {
                               ) : isDoc ? (
                                 <div
                                   onClick={() => {
-                                    setFilePreviewUrl(fileUrl);
-                                    setFilePreviewType("doc");
-                                    setFilePreviewOpen(true);
+                                    setPreviewUrl(fileUrl);
+                                    setPreviewType("doc");
+                                    setPreviewOpen(true);
                                   }}
                                   className="flex flex-col items-center justify-center text-blue-600 text-xs font-semibold w-full h-full cursor-pointer"
                                 >
@@ -804,9 +771,9 @@ const EditLayout = () => {
                               ) : (
                                 <div
                                   onClick={() => {
-                                    setFilePreviewUrl(fileUrl);
-                                    setFilePreviewType("file");
-                                    setFilePreviewOpen(true);
+                                    setPreviewUrl(fileUrl);
+                                    setPreviewType("file");
+                                    setPreviewOpen(true);
                                   }}
                                   className="text-gray-500 text-xs text-center px-2 cursor-pointer"
                                 >
@@ -821,55 +788,6 @@ const EditLayout = () => {
                       <p className="text-gray-700">No files uploaded.</p>
                     )}
                   </div>
-                  {filePreviewOpen && (
-                    <div
-                      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                      onClick={() => setFilePreviewOpen(false)}
-                    >
-                      <button
-                        className="absolute top-6 right-6 text-white text-3xl font-bold"
-                        onClick={() => setFilePreviewOpen(false)}
-                      >
-                        &times;
-                      </button>
-
-                      <div onClick={(e) => e.stopPropagation()}>
-                        {filePreviewType === "image" && (
-                          <img
-                            src={filePreviewUrl}
-                            onError={(e) =>
-                              (e.target.src = "/Brocken-Defualt-Img.jpg")
-                            }
-                            className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
-                          />
-                        )}
-
-                        {filePreviewType === "video" && (
-                          <video
-                            autoPlay
-                            controls
-                            className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-xl object-contain"
-                          >
-                            <source src={filePreviewUrl} />
-                          </video>
-                        )}
-
-                        {filePreviewType === "pdf" && (
-                          <iframe
-                            src={filePreviewUrl}
-                            className="w-[90vw] h-[90vh] rounded-xl bg-white"
-                          />
-                        )}
-
-                        {filePreviewType === "doc" && (
-                          <iframe
-                            src={`https://docs.google.com/viewer?url=${filePreviewUrl}&embedded=true`}
-                            className="w-[90vw] h-[90vh] rounded-xl bg-white"
-                          />
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </Tabs.TabPane>
             </Tabs>
@@ -1014,6 +932,12 @@ const EditLayout = () => {
             </div>
           </div>
         </div>
+        <MediaPreviewModal
+            open={previewOpen}
+            onClose={() => setPreviewOpen(false)}
+            src={previewUrl}
+            type={previewType}
+          />
       </div>
 
       {/* Withdraw Modal */}

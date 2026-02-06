@@ -17,6 +17,7 @@ import { Link, useParams } from "react-router-dom";
 import { Skeleton, Spin } from "antd";
 import ApplyNowModal from "./ApplyNowModal";
 import { RiStarFill } from "react-icons/ri";
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 
 const DescriptionLayout = () => {
  // const [showFullBrandDesc, setShowFullBrandDesc] = useState(false);   i commented it bcs never used
@@ -32,16 +33,17 @@ const DescriptionLayout = () => {
   const { token } = useSelector((state) => state.auth);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { campaignId } = useParams();
-  const [isCampaignPreviewOpen, setIsCampaignPreviewOpen] = useState(false);
 
   const [feedbacks, setFeedbacks] = useState([]);
   const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
   const limit = 2;
   const [page, setPage] = useState(0);
+  
   const [hasMore, setHasMore] = useState(true);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewType, setPreviewType] = useState("image");
 
-
-  const [previewFile, setPreviewFile] = useState(null);
 
   const formatDateDDMMYYYY = (dateStr) => {
     if (!dateStr) return "N/A";
@@ -333,7 +335,12 @@ const DescriptionLayout = () => {
                   alt="Campaign"
                   onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                   className="w-16 h-16 rounded-full object-cover cursor-pointer shadow"
-                  onClick={() => setIsCampaignPreviewOpen(true)}
+                  onClick={() => {
+                    setPreviewUrl(campaignDetails?.photopath);
+                    setPreviewType("image");
+                    setPreviewOpen(true);
+                  }}
+
                 />
 
                 <div className="w-full">
@@ -484,21 +491,6 @@ const DescriptionLayout = () => {
                 )}
               </div>
             </div>
-
-            {/* Image Modal */}
-            {isCampaignPreviewOpen && (
-              <div
-                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                onClick={() => setIsCampaignPreviewOpen(false)}
-              >
-                <img
-                  src={campaignDetails?.photopath}
-                  onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                  className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-            )}
           </div>
 
           {/* Description & Requirements */}
@@ -585,7 +577,15 @@ const DescriptionLayout = () => {
                         >
                           {isImage ? (
                             <div
-                              onClick={() => setPreviewFile(fileUrl)}
+                              onClick={() => {
+                                setPreviewUrl(fileUrl);
+
+                                if (isImage) setPreviewType("image");
+                                else if (isVideo) setPreviewType("video");
+                                else setPreviewType("doc");
+
+                                setPreviewOpen(true);
+                              }}
                               className="cursor-pointer w-full h-full"
                             >
                               <img
@@ -668,44 +668,6 @@ const DescriptionLayout = () => {
                 </div>
               )}
             </div>
-            {previewFile && (
-              <div
-                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                onClick={() => setPreviewFile(null)}
-              >
-                <button
-                  onClick={() => setPreviewFile(null)}
-                  className="absolute top-5 right-6 text-white text-3xl font-bold hover:text-gray-300"
-                >
-                  &times;
-                </button>
-                {/\.(png|jpe?g|gif|svg)$/i.test(previewFile) && (
-                  <img
-                    src={previewFile}
-                    onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                )}
-
-                {/\.(mp4|webm|ogg)$/i.test(previewFile) && (
-                  <video
-                    src={previewFile}
-                    controls
-                    autoPlay
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                )}
-                {previewFile.endsWith(".pdf") && (
-                  <iframe
-                    src={previewFile}
-                    className="max-w-[90vw] max-h-[85vh] rounded-xl bg-white shadow-lg"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                )}
-              </div>
-            )}
           </div>
         </div>
 
@@ -970,6 +932,13 @@ const DescriptionLayout = () => {
             )}
           </div>
         </aside>
+        <MediaPreviewModal  
+          open={previewOpen}
+          onClose={() => setPreviewOpen(false)}
+          src={previewUrl}
+          type={previewType}
+        />
+
       </div>
 
       <ApplyNowModal

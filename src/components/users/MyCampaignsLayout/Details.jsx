@@ -19,6 +19,7 @@ import VendorCampaignOverview from '../vendorCampaign/VendorCampaignOverview';
 import ContractTab from './tabs/ContractTab';
 import ApplicationTab from './tabs/ApplicationTab';
 import ContentLinksTab from './tabs/ContentLinksTab';
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 
 const { TextArea } = Input;
 
@@ -44,7 +45,7 @@ const Details = () => {
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
-  const [previewType, setPreviewType] = useState("");
+  const [previewType, setPreviewType] = useState("image");
 
   const navigate = useNavigate();
   const { campaignId } = useParams()
@@ -272,28 +273,6 @@ const Details = () => {
                     setPreviewOpen(true);
                   }}
                 />
-                {previewOpen && (
-                  <div
-                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                    onClick={() => setPreviewOpen(false)}
-                  >
-                    <button
-                      onClick={() => setPreviewOpen(false)}
-                      className="absolute top-5 right-6 text-white text-3xl font-bold"
-                    >
-                      ×
-                    </button>
-
-                    {previewType === "image" && (
-                      <img
-                        src={previewUrl}
-                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    )}
-                  </div>
-                )}
                 <div>
                   <h2 className="font-semibold text-lg text-gray-900">
                     {campaign?.name || "Campaign Name"}
@@ -594,6 +573,12 @@ const Details = () => {
 
           </div>
         </div>
+        <MediaPreviewModal
+          open={previewOpen}
+          onClose={() => setPreviewOpen(false)}
+          src={previewUrl}
+          type={previewType}
+        />
       </div>
 
       {/* Modal - Adapted from vendor (Complete with stars and review) */}

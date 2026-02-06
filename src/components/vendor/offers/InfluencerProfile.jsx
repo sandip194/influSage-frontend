@@ -7,6 +7,7 @@ import InviteModal from "../../users/browseInfluencers/InviteModal";
 import { toast } from "react-toastify";
 import { RiUserAddLine, RiStarFill, RiStarHalfFill, RiStarLine, RiArrowDownSLine, RiArrowUpSLine, RiHeart3Fill } from "react-icons/ri";
 import { motion, AnimatePresence } from "framer-motion";
+import MediaPreviewModal from "../../../pages/commonPages/MediaPreviewModal";
 
 const HeartParticle = ({ x, y, delay, size = 12 }) => (
   <motion.div
@@ -58,7 +59,6 @@ const InfluencerProfile = () => {
     const { userId } = useParams()
     const { token } = useSelector((state) => state.auth);
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     const rawRating = Number(influDetails?.ratingcount || 0);
     const displayRating = rawRating.toFixed(1);
@@ -344,31 +344,14 @@ const InfluencerProfile = () => {
                             <img
                                 src={influDetails?.photopath}
                                 alt="Profile"
-                                onClick={() => setIsPreviewOpen(true)}
                                 className="w-28 h-28 rounded-full object-cover border-4 border-gray-200 cursor-pointer"
+                                onClick={() => {
+                                    setPreviewUrl(influDetails?.photopath);
+                                    setPreviewType("image");
+                                    setPreviewOpen(true);
+                                }}
                                 onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
                             />
-
-                            {isPreviewOpen && (
-                                <div
-                                    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                                    onClick={() => setIsPreviewOpen(false)}
-                                >
-                                    <button
-                                        onClick={() => setIsPreviewOpen(false)}
-                                        className="absolute top-5 right-6 text-white text-3xl font-bold"
-                                    >
-                                        &times;
-                                    </button>
-                                    <img
-                                        src={influDetails?.photopath}
-                                        alt="Profile Preview"
-                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                                        onClick={(e) => e.stopPropagation()}
-                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                                    />
-                                </div>
-                            )}
                         </div>
 
                         <div className="flex-1 w-full">
@@ -667,60 +650,6 @@ const InfluencerProfile = () => {
                             <p className="text-sm text-gray-500">No portfolio file uploaded.</p>
                         )}
                     </div>
-                    {previewOpen && (
-                        <div
-                            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-                        >
-
-                            <button
-                                className="absolute top-5 right-6 text-white text-3xl font-bold"
-                                onClick={() => setPreviewOpen(false)}
-                            >
-                                &times;
-                            </button>
-
-                            <div
-                                className="relative"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-
-                                {previewType === "video" && (
-                                    <video
-                                        controls
-                                        autoPlay
-                                        playsInline
-                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain bg-black"
-                                    >
-                                        <source src={previewUrl} type="video/mp4" />
-                                    </video>
-                                )}
-
-                                {previewType === "image" && (
-                                    <img
-                                        src={previewUrl}
-                                        className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-lg object-contain"
-                                        onError={(e) => (e.target.src = "/Brocken-Defualt-Img.jpg")}
-                                    />
-                                )}
-
-                                {previewType === "pdf" && (
-                                    <iframe
-                                        src={previewUrl}
-                                        className="w-[90vw] h-[90vh] rounded-xl bg-white"
-                                    />
-                                )}
-
-                                {previewType === "doc" && (
-                                    <iframe
-                                        src={`https://docs.google.com/viewer?url=${previewUrl}&embedded=true`}
-                                        className="w-[90vw] h-[90vh] rounded-xl bg-white"
-                                    />
-                                )}
-
-                            </div>
-
-                        </div>
-                    )}
 
                     {/* Feedbacks */}
                     {feedbacks?.length > 0 && (
@@ -795,13 +724,17 @@ const InfluencerProfile = () => {
                                         <RiArrowUpSLine />
                                     </button>
                                 )}
-                            </div>
-
+                            </div>                          
                         </div>
                     )}
                 </>
             )}
-
+            <MediaPreviewModal
+                open={previewOpen}
+                onClose={() => setPreviewOpen(false)}
+                src={previewUrl}
+                type={previewType}
+            />   
             <InviteModal
                 visible={isInviteModalVisible}
                 influencerId={selectedInfluencer}
