@@ -86,10 +86,10 @@ const NewContent = () => {
                     params: query,
                 });
 
-                const api = res?.data?.data ?? {};
+                const responseData = res?.data?.data ?? {};
 
-                const records = Array.isArray(api.records)
-                    ? api.records
+                const records = Array.isArray(responseData.records)
+                    ? responseData.records
                     : [];
 
                 const formatted = records.map((item = {}) => {
@@ -116,7 +116,7 @@ const NewContent = () => {
                 setTableData(formatted);
                 setPagination((prev) => ({
                     ...prev,
-                    total: api.totalcount || 0,
+                    total: responseData.totalcount || 0,
                 }));
             } catch (error) {
                 console.error(error);
